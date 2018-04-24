@@ -48,9 +48,6 @@
     <ClCompile Include="hdr\hdr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Water.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\math.h">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -232,6 +229,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\makegen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gromacs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -446,10 +446,10 @@
     <ClInclude Include="src\asset\compute.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Water.h">
+    <ClInclude Include="src\makegen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\makegen.h">
+    <ClInclude Include="src\Gromacs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

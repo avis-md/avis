@@ -91,7 +91,7 @@
       <AdditionalIncludeDirectories>./src;./glew;./glfw;./glm;./jpeg;./hdr;./png;./freetype;./ffmpeg</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>_MBCS;IS_EDITOR;PLATFORM_WIN;CHOKO_LAIT_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;CHOKO_LAIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -260,6 +260,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\Editor.cpp" />
     <ClCompile Include="src\EditorShortcuts.cpp" />
     <ClCompile Include="src\Engine.cpp" />
+    <ClCompile Include="src\Gromacs.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\makegen.cpp" />
     <ClCompile Include="src\scene\comp\animator.cpp" />
@@ -298,7 +299,6 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\utils\stream.cpp" />
     <ClCompile Include="src\utils\strext.cpp" />
     <ClCompile Include="src\utils\xml.cpp" />
-    <ClCompile Include="src\Water.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="hdr\hdr.h" />
@@ -330,6 +330,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClInclude Include="src\core\input.h" />
     <ClInclude Include="src\core\io.h" />
     <ClInclude Include="src\core\mvp.h" />
+    <ClInclude Include="src\Gromacs.h" />
     <ClInclude Include="src\makegen.h" />
     <ClInclude Include="src\scene\comp\animator.h" />
     <ClInclude Include="src\scene\comp\armature.h" />
@@ -372,7 +373,6 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClInclude Include="src\utils\stream.h" />
     <ClInclude Include="src\utils\strext.h" />
     <ClInclude Include="src\utils\xml.h" />
-    <ClInclude Include="src\Water.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
