@@ -16,25 +16,6 @@ Font* font;
 
 bool drawMesh;
 
-Mesh* MakeCube() {
-	std::vector<Vec3> verts({
-		Vec3(-1, -1, -1), Vec3(1, -1, -1),
-		Vec3(-1, 1, -1), Vec3(1, 1, -1),
-		Vec3(-1, -1, 1), Vec3(1, -1, 1),
-		Vec3(-1, 1, 1), Vec3(1, 1, 1),
-	}), norms(8);
-	std::vector<Vec2> uvs = std::vector<Vec2>(8);
-	std::vector<int> tris = std::vector<int>({
-		0, 2, 1, 2, 3, 1,
-		1, 3, 5, 3, 7, 5,
-		5, 7, 4, 7, 6, 4,
-		4, 6, 0, 6, 2, 0,
-		4, 0, 5, 0, 1, 5,
-		6, 7, 2, 7, 3, 2
-	});
-	return new Mesh(verts, norms, tris, uvs);
-}
-
 Mesh* MakeConnMesh(int res) {
 	std::vector<Vec3> verts(res * 2), norms(res * 2);
 	std::vector<int> tris(res * 6);
@@ -91,9 +72,11 @@ void rendFunc() {
 	auto _mv = MVP::modelview();
 	auto _p = MVP::projection();
 	auto _cpos = ChokoLait::mainCamera->object->transform.position();
+	auto _cfwd = ChokoLait::mainCamera->object->transform.forward();
 	GLint mv = glGetUniformLocation(shad->pointer, "_MV");
 	GLint p = glGetUniformLocation(shad->pointer, "_P");
 	GLint cpos = glGetUniformLocation(shad->pointer, "camPos");
+	GLint cfwd = glGetUniformLocation(shad->pointer, "camFwd");
 	GLint scr = glGetUniformLocation(shad->pointer, "screenSize");
 
 	int rpx = (int)round(repx);
@@ -106,6 +89,7 @@ void rendFunc() {
 				glUniformMatrix4fv(mv, 1, GL_FALSE, glm::value_ptr(_mv));
 				glUniformMatrix4fv(p, 1, GL_FALSE, glm::value_ptr(_p));
 				glUniform3f(cpos, _cpos.x, _cpos.y, _cpos.z);
+				glUniform3f(cfwd, _cfwd.x, _cfwd.y, _cfwd.z);
 				glUniform2f(scr, Display::width, Display::height);
 				glBindVertexArray(gro->_vao);
 				glDrawArrays(GL_POINTS, 0, 10000000);

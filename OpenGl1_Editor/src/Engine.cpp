@@ -124,14 +124,14 @@ void Engine::Init(string path) {
 	Input::RegisterCallbacks();
 	MVP::Reset();
 	UI::Init();
-	ffmpeg_init finit = ffmpeg_init();
+	//ffmpeg_init finit = ffmpeg_init();
 	Material::LoadOris();
 	Light::InitShadow();
 	Camera::InitShaders();
 	Font::Init();
-	SkinnedMeshRenderer::InitSkinning();
-	VoxelRenderer::Init();
-	if (!AudioEngine::Init()) Debug::Warning("AudioEngine", "Failed to initialize audio output!");
+	//SkinnedMeshRenderer::InitSkinning();
+	//VoxelRenderer::Init();
+	//if (!AudioEngine::Init()) Debug::Warning("AudioEngine", "Failed to initialize audio output!");
 #ifdef IS_EDITOR
 	Editor::InitShaders();
 	Editor::instance->InitMaterialPreviewer();
