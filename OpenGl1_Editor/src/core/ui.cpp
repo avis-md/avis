@@ -82,7 +82,7 @@ bool UI::IsSameId(uintptr_t* left, uintptr_t* right) {
 void UI::GetEditTextId() {
 	//#ifdef PLATFORM_WIN
 	memset(_activeEditText, 0, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
-	Debug::StackTrace(10, (void**)_activeEditText);
+	Debug::StackTrace(UI_MAX_EDIT_TEXT_FRAMES, (void**)_activeEditText);
 	//UI_Trace(drawFuncLoc, 2, _activeEditText);
 	if (IsSameId(_activeEditText, _lastEditText)) _activeEditTextId++;
 	else _activeEditTextId = 0;

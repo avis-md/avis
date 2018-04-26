@@ -29,6 +29,8 @@ void Camera::DrawSceneObjectsOpaque(std::vector<pSceneObject> oo, GLuint shader)
 }
 
 void Camera::DrawSceneObjectsOverlay(std::vector<pSceneObject> oo, GLuint shader) {
+	return;
+	/*
 	for (auto& sc : oo)
 	{
 		MVP::Push();
@@ -40,26 +42,32 @@ void Camera::DrawSceneObjectsOverlay(std::vector<pSceneObject> oo, GLuint shader
 		DrawSceneObjectsOverlay(sc->children, shader);
 		MVP::Pop();
 	}
+	*/
 }
 
-void _InitGBuffer(GLuint* d_fbo, GLuint* d_texs, GLuint* d_depthTex, float w = Display::width, float h = Display::height) {
+void _InitGBuffer(GLuint* d_fbo, GLuint* d_texs, GLuint* d_depthTex, GLuint* d_idTex, GLuint* d_colTex, float w = Display::width, float h = Display::height) {
 	glGenFramebuffers(1, d_fbo);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, *d_fbo);
 
 	// Create the gbuffer textures
 	glGenTextures(4, d_texs);
+	glGenTextures(1, d_idTex);
+	glGenTextures(1, d_colTex);
 	glGenTextures(1, d_depthTex);
 
-	for (uint i = 0; i < 4; i++) {
+	//*
+	glBindTexture(GL_TEXTURE_2D, *d_idTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int)w, (int)h, 0, GL_RGBA, GL_FLOAT, NULL);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *d_idTex, 0);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//*/
+	for (uint i = 1; i < 4; i++) {
 		glBindTexture(GL_TEXTURE_2D, d_texs[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, (int)w, (int)h, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int)w, (int)h, 0, GL_RGBA, GL_FLOAT, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, d_texs[i], 0);
-#ifdef SHOW_GBUFFERS
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-#else
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-#endif
 	}
 	// depth
 	glBindTexture(GL_TEXTURE_2D, *d_depthTex);
@@ -201,7 +209,7 @@ bool RenderTexture::Parse(string path) {
 
 
 void Camera::InitGBuffer() {
-	_InitGBuffer(&d_fbo, d_texs, &d_depthTex);
+	_InitGBuffer(&d_fbo, d_texs, &d_depthTex, &d_idTex, &d_colTex);
 	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (Status != GL_FRAMEBUFFER_COMPLETE) {
 		Debug::Error("Camera (" + name + ")", "FB error:" + std::to_string(Status));
@@ -601,6 +609,8 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 	if (target? (d_w != target->width || d_h != target->height) : (d_w != Display::width || d_h != Display::height)) {
 		glDeleteFramebuffers(1, &d_fbo);
 		glDeleteTextures(4, d_texs);
+		glDeleteTextures(1, &d_idTex);
+		glDeleteTextures(1, &d_colTex);
 		glDeleteTextures(1, &d_depthTex);
 		InitGBuffer();
 	}

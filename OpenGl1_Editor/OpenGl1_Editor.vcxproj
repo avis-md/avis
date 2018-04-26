@@ -170,7 +170,7 @@ copy "C:\Users\Pua Kai\Documents\GitHub\ChokoEngine\Lait\OpenGL1_Editor.lib" "C:
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>./src;./glew;./glfw;./glm;./jpeg;./hdr;./png;./freetype;./ffmpeg</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./src;C:\Anaconda\include;./glew;./glfw;./glm;./jpeg;./hdr;./png;./freetype;./ffmpeg</AdditionalIncludeDirectories>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <PreprocessorDefinitions>_MBCS;TEST_LAIT;PLATFORM_WIN;CHOKO_LAIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ShowIncludes>false</ShowIncludes>
@@ -181,7 +181,7 @@ copy "C:\Users\Pua Kai\Documents\GitHub\ChokoEngine\Lait\OpenGL1_Editor.lib" "C:
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>..\packages\gl\;..\packages\jpg\;..\packages\freetype\;..\packages\ffmpeg\;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\packages\gl\;..\packages\jpg\;..\packages\freetype\;..\packages\ffmpeg\;C:/Anaconda/libs</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <SubSystem>Console</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
@@ -263,6 +263,8 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\Gromacs.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\makegen.cpp" />
+    <ClCompile Include="src\py\pynode.cpp" />
+    <ClCompile Include="src\py\pyreader.cpp" />
     <ClCompile Include="src\scene\comp\animator.cpp" />
     <ClCompile Include="src\scene\comp\armature.cpp" />
     <ClCompile Include="src\scene\comp\arrayrenderer.cpp" />
@@ -279,8 +281,6 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\scene\comp\reflquad.cpp" />
     <ClCompile Include="src\scene\comp\scenescript.cpp" />
     <ClCompile Include="src\scene\comp\skinnedmeshrenderer.cpp" />
-    <ClCompile Include="src\scene\comp\texturerenderer.cpp" />
-    <ClCompile Include="src\scene\comp\voxelrenderer.cpp" />
     <ClCompile Include="src\scene\object.cpp" />
     <ClCompile Include="src\scene\scene.cpp" />
     <ClCompile Include="src\scene\sceneobject.cpp" />
@@ -332,6 +332,8 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClInclude Include="src\core\mvp.h" />
     <ClInclude Include="src\Gromacs.h" />
     <ClInclude Include="src\makegen.h" />
+    <ClInclude Include="src\py\pynode.h" />
+    <ClInclude Include="src\py\pyreader.h" />
     <ClInclude Include="src\scene\comp\animator.h" />
     <ClInclude Include="src\scene\comp\armature.h" />
     <ClInclude Include="src\scene\comp\arrayrenderer.h" />
@@ -348,7 +350,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClInclude Include="src\scene\comp\reflquad.h" />
     <ClInclude Include="src\scene\comp\scenescript.h" />
     <ClInclude Include="src\scene\comp\skinnedmeshrenderer.h" />
-    <ClInclude Include="src\scene\comp\texturerenderer.h" />
+    <ClInclude Include="src\scene\texturerenderer.h" />
     <ClInclude Include="src\scene\comp\voxelrenderer.h" />
     <ClInclude Include="src\scene\scene.h" />
     <ClInclude Include="src\scene\sceneobject.h" />

@@ -12,8 +12,8 @@ typedef void (*renderFunc)(void);
 #include "scene/comp/audiolistener.h"
 #include "scene/comp/meshfilter.h"
 #include "scene/comp/meshrenderer.h"
-#include "scene/comp/texturerenderer.h"
-#include "scene/comp/voxelrenderer.h"
+//#include "scene/comp/texturerenderer.h"
+//#include "scene/comp/voxelrenderer.h"
 #include "scene/comp/particlesystem.h"
 
 class Armature;

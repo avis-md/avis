@@ -132,12 +132,36 @@ void paintfunc() {
 	repz = Engine::DrawSliderFill(80, 240, 100, 14, 0, 5, repz, white(1, 0.3f), white());
 }
 
+#include "py/pyreader.h"
+#include "py/pynode.h"
+
+PyScript* scr;
+PyNode* node;
+void paintfunc2() {
+	Engine::DrawQuad(0, 0, Display::width, Display::height, black());
+
+	node->Draw(Vec2(100, 100));
+}
+
 int main(int argc, char **argv)
 {
 	ChokoLait::Init(800, 800);
 	bg = new Background(IO::path + "/refl.hdr");
 	font = new Font(IO::path + "/arimo.ttf", ALIGN_TOPLEFT);
+	PyReader::Init();
+	PyNode::Init();
+	PyNode::font = font;
+	if (!PyReader::Read(IO::path + "/py/foo.py", &scr))
+		abort();
+		//scr->Exec();
+	node = new PyNode(scr);
 
+	while (ChokoLait::alive()) {
+		ChokoLait::Update();
+		ChokoLait::Paint(nullptr, paintfunc2);
+	}
+
+	/*
 	auto& set = Scene::active->settings;
 	set.sky = bg;
 	set.skyStrength = 1.5f;
@@ -154,4 +178,5 @@ int main(int argc, char **argv)
 
 		ChokoLait::Paint(rendFunc, paintfunc);
 	}
+	*/
 }

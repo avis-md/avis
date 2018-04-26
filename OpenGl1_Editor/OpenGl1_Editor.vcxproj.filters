@@ -141,12 +141,6 @@
     <ClCompile Include="src\scene\comp\skinnedmeshrenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\comp\texturerenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scene\comp\voxelrenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\scene\comp\light.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -232,6 +226,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Gromacs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\py\pyreader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\py\pynode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -407,9 +407,6 @@
     <ClInclude Include="src\scene\comp\reflquad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\comp\texturerenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\scene\comp\voxelrenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -450,6 +447,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Gromacs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\texturerenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\py\pyreader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\py\pynode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
