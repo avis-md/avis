@@ -1,7 +1,44 @@
 #include "pyreader.h"
 
-void PyScript::Exec() {
+string PyScript::Exec() {
+	for (uint i = 0; i < invarCnt; ++i) {
+		auto& val = invars[i].value;
+		Py_INCREF(val);
+		PyTuple_SetItem(pArgs, i, val);
+	}
+	auto res = PyObject_CallObject(pFunc, pArgs);
+	if (res) Py_DECREF(res);
+	for (uint i = 0; i < outvarCnt; i++) {
+		Py_DECREF(pRets[i]);
+		pRets[i] = PyObject_GetAttrString(pModule, outvars[i].name.c_str());
+	}
+}
 
+void PyScript::SetVal(uint i, int v) {
+	if (invars.size() <= i) return;
+	auto& vl = invars[i].value;
+	if (vl) Py_DECREF(vl);
+	vl = PyLong_FromLong(v);
+}
+
+void PyScript::SetVal(uint i, float v) {
+	if (invars.size() <= i) return;
+	auto& vl = invars[i].value;
+	if (vl) Py_DECREF(vl);
+	vl = PyFloat_FromDouble(v);
+}
+
+void* PyScript::Get(uint i) {
+	if (outvars.size() <= i) return nullptr;
+	switch (outvars[i].type) {
+	case PY_VARTYPE::INT:
+		return new int(_PyLong_AsInt(pRets[i]));
+		break;
+	case PY_VARTYPE::FLOAT:
+		return new float(PyFloat_AsDouble(pRets[i]));
+		break;
+	}
+	return nullptr;
 }
 
 bool PyReader::Read(string path, PyScript** _scr) {
@@ -24,6 +61,7 @@ bool PyReader::Read(string path, PyScript** _scr) {
 		return false;
 	}
 	scr->pFunc = PyObject_GetAttrString(scr->pModule, "Execute");
+	Py_INCREF(scr->pFunc);
 	if (!scr->pFunc || !PyCallable_Check(scr->pFunc)) {
 		Debug::Warning("PyReader", "Failed to find \"Execute\" function!");
 		Py_XDECREF(scr->pFunc);
@@ -47,6 +85,7 @@ bool PyReader::Read(string path, PyScript** _scr) {
 			scr->outvarCnt++;
 			std::getline(strm, ln);
 			bk.name = ln.substr(0, ln.find_first_of(' '));
+			scr->pRets.push_back(PyObject_GetAttrString(scr->pModule, bk.name.c_str()));
 		}
 		else if (ln2 == "#in ") {
 			auto ss = string_split(ln, ' ');
@@ -73,6 +112,7 @@ bool PyReader::Read(string path, PyScript** _scr) {
 				auto ss2 = (ns == string::npos) ? ss[i] : ss[i].substr(ns);
 				scr->invars[i].name = ss2;
 			}
+			scr->pArgs = PyTuple_New(scr->invarCnt);
 		}
 	}
 

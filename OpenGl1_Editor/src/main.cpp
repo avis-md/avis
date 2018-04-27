@@ -153,9 +153,11 @@ int main(int argc, char **argv)
 	PyNode::font = font;
 	if (!PyReader::Read(IO::path + "/py/foo.py", &scr))
 		abort();
-		//scr->Exec();
 	node = new PyNode(scr);
-
+	scr->SetVal(0, 1.0f);
+	scr->SetVal(1, 1);
+	string op = scr->Exec();
+	
 	while (ChokoLait::alive()) {
 		ChokoLait::Update();
 		ChokoLait::Paint(nullptr, paintfunc2);

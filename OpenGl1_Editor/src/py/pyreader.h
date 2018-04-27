@@ -14,12 +14,10 @@ public:
 	string name, typeName;
 	PY_VARTYPE type;
 	PyVar *child1, *child2; //1 for list, (1,2) for pair
-	//union {
-		int ival;
-		float fval;
-		std::vector<void*> lval;
-		std::pair<void*, void*> pval;
-	//};
+	int ival;
+	float fval;
+
+	PyObject* value;
 };
 
 class PyScript {
@@ -28,7 +26,9 @@ public:
 	std::vector<PyVar> invars, outvars;
 	uint invarCnt, outvarCnt;
 
-	void Exec();
+	string Exec();
+	void SetVal(uint i, int v), SetVal(uint i, float v);
+	void* Get(uint i);
 
 	PyObject *pModule, *pFunc, *pArgs;
 	std::vector<PyObject*> pRets;
