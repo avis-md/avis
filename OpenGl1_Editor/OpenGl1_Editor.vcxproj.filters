@@ -452,10 +452,10 @@
     <ClInclude Include="src\scene\texturerenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\py\pyreader.h">
+    <ClInclude Include="src\py\pynode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\py\pynode.h">
+    <ClInclude Include="src\py\pyreader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

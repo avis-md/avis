@@ -12,6 +12,7 @@ string PyScript::Exec() {
 		Py_DECREF(pRets[i]);
 		pRets[i] = PyObject_GetAttrString(pModule, outvars[i].name.c_str());
 	}
+	return "";
 }
 
 void PyScript::SetVal(uint i, int v) {
@@ -41,6 +42,15 @@ void* PyScript::Get(uint i) {
 	return nullptr;
 }
 
+void PyReader::Init() {
+	_putenv_s("PYTHONPATH", "./py/");
+	Py_Initialize();
+	PyObject *sys_path = PySys_GetObject("path");
+	auto path = IO::path + "/py/";
+	std::replace(path.begin(), path.end(), '\\', '/');
+	PyList_Append(sys_path, PyUnicode_FromString(path.c_str()));
+}
+
 bool PyReader::Read(string path, PyScript** _scr) {
 	auto scr = *_scr = new PyScript();
 	auto ls = path.find_last_of("/");
@@ -50,8 +60,6 @@ bool PyReader::Read(string path, PyScript** _scr) {
 	nm = nm.substr(0, nm.size() - 3);
 	//auto pName = PyUnicode_FromString(path.c_str());
 	//scr->pModule = PyImport_Import(pName);
-	PyObject *sys_path = PySys_GetObject("path");
-	PyList_Append(sys_path, PyUnicode_FromString(ph.c_str()));
 	scr->pModule = PyImport_ImportModule(nm.c_str());
 	//Py_DECREF(pName);
 	if (!scr->pModule) {

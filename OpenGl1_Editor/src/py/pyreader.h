@@ -36,10 +36,8 @@ public:
 
 class PyReader {
 public:
-	static void Init() {
-		Py_Initialize();
-	}
-
+	static void Init();
+	
 	static bool Read(string path, PyScript** scr);
 
 protected:
