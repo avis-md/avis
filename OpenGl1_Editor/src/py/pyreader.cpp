@@ -8,6 +8,10 @@ string PyScript::Exec() {
 	}
 	auto res = PyObject_CallObject(pFunc, pArgs);
 	if (res) Py_DECREF(res);
+	else {
+		PyErr_Print();
+		__debugbreak();
+	}
 	for (uint i = 0; i < outvarCnt; i++) {
 		Py_DECREF(pRets[i]);
 		pRets[i] = PyObject_GetAttrString(pModule, outvars[i].name.c_str());
@@ -39,6 +43,27 @@ void* PyScript::Get(uint i) {
 		return new float(PyFloat_AsDouble(pRets[i]));
 		break;
 	}
+	if (outvars[i].typeName == "list(float)") {
+		auto sz = PyList_Size(pRets[i]);
+		std::vector<float>* v = new std::vector<float>(sz);
+		for (uint a = 0; a < sz; a++) {
+			auto obj = PyList_GetItem(pRets[i], (Py_ssize_t)a);
+			(*v)[a] = (float)PyFloat_AsDouble(obj);
+		}
+		return v;
+	}
+	/*
+	else if (outvars[i].typeName == "list(float)") {
+		auto sz = PyList_Size(pRets[i]);
+		std::vector<float>* v = new std::vector<float>(sz);
+		for (uint a = 0; a < sz; a++) {
+			auto obj = PyList_GetItem(pRets[i], a);
+			(*v)[a] = (float)PyFloat_AsDouble(obj);
+			return v;
+		}
+	}
+	*/
+	Debug::Warning("PyScript", "Cannot convert type \"" + outvars[i].typeName + "\" to C++ type!");
 	return nullptr;
 }
 
@@ -64,6 +89,7 @@ bool PyReader::Read(string path, PyScript** _scr) {
 	//Py_DECREF(pName);
 	if (!scr->pModule) {
 		Debug::Warning("PyReader", "Failed to read python file!");
+		PyErr_Print();
 		delete(scr);
 		*_scr = nullptr;
 		return false;

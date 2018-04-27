@@ -292,6 +292,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\RenderEngine.cpp" />
     <ClCompile Include="src\SceneObjects.cpp" />
     <ClCompile Include="src\Types.cpp" />
+    <ClCompile Include="src\utils\plot.cpp" />
     <ClCompile Include="src\utils\precedurals.cpp" />
     <ClCompile Include="src\utils\random.cpp" />
     <ClCompile Include="src\utils\rect.cpp" />
@@ -355,6 +356,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClInclude Include="src\scene\scene.h" />
     <ClInclude Include="src\scene\sceneobject.h" />
     <ClInclude Include="src\scene\transform.h" />
+    <ClInclude Include="src\utils\plot.h" />
     <ClInclude Include="src\utils\ptrext.h" />
     <ClInclude Include="src\core\time.h" />
     <ClInclude Include="src\core\ui.h" />
