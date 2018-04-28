@@ -134,6 +134,7 @@ void paintfunc() {
 
 #include "py/pyreader.h"
 #include "py/pynode.h"
+#include "py/PyWeb.h"
 #include "utils/plot.h"
 
 PyScript *scr, *scr2;
@@ -141,9 +142,10 @@ PyNode *node, *node2;
 std::vector<float>* vecc;
 
 void paintfunc2() {
-	Engine::DrawQuad(0, 0, Display::width, Display::height, black());
+	Engine::DrawQuad(0, 0, Display::width, Display::height, white(1, 0.15f));
 
-	node->Draw(Vec2(100, 100));
+	PyWeb::Update();
+	PyWeb::Draw();
 
 	float x[4] = { 1, 2, 3, 4 };
 	plt::plot(500, 100, 200, 200, x, &(*vecc)[0], 4);
@@ -159,19 +161,20 @@ int main(int argc, char **argv)
 	PyNode::font = font;
 	if (!PyReader::Read(IO::path + "/py/foo.py", &scr))
 		abort();
-	node = new PyNode(scr);
-	scr->SetVal(0, 1.0f);
-	scr->SetVal(1, 1);
-
-	string op = scr->Exec();
-	
 	if (!PyReader::Read(IO::path + "/py/boo.py", &scr2))
 		abort();
-	node2 = new PyNode(scr2);
+
+	PyWeb::Insert(scr, Vec2(50, 50));
+	scr->SetVal(0, 1.0f);
+	scr->SetVal(1, 1);
+	string op = scr->Exec();
+	PyWeb::Insert(scr2, Vec2(200, 200));
 	scr2->invars[0].value = scr->pRets[0];
 	op = scr2->Exec();
 	auto f = (float*)scr2->Get(0);
 	vecc = (std::vector<float>*)scr2->Get(1);
+
+	PyWeb::nodes[1]->inputR[0] = PyWeb::nodes[0];
 
 	while (ChokoLait::alive()) {
 		ChokoLait::Update();

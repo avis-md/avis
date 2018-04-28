@@ -20,15 +20,32 @@ void PyNode::Init() {
 	tex_circle_open = new Texture(IO::path + "/res/node_open.png");
 }
 
-void PyNode::Draw(Vec2 pos) {
+bool PyNode::Select() {
+	bool in = Rect(pos.x, pos.y, 250, 16).Inside(Input::mousePos);
+	if (in) selected = true;
+	return in;
+}
+
+void PyNode::DrawConn() {
 	uint w = 250;
-	Engine::DrawQuad(pos.x, pos.y, w, 16, white(0.7f, 0.3f));
-	Engine::DrawQuad(pos.x, pos.y + 16, w, 3 + 17 * (script->invarCnt + script->outvarCnt), white(0.5f, 0.3f));
-	UI::Label(pos.x + 2, pos.y + 2, 12, script->name, font, white());
+	auto cnt = (script->invarCnt + script->outvarCnt);
 	float y = pos.y + 18;
 	for (uint i = 0; i < script->invarCnt; i++, y += 17) {
 		UI::Texture(pos.x - 5, y + 3, 10, 10, tex_circle_open);
-		UI::Label(pos.x + 5, y, 12, script->invars[i].name, font, white());
+		if (inputR[i]) Engine::DrawLine(Vec2(pos.x, y + 8), Vec2(inputR[i]->pos.x + 250, inputR[i]->pos.y + 20 + 8 + (inputV[i].second + inputR[i]->script->invarCnt) * 17), white(), 2);
+	}
+}
+
+void PyNode::Draw() {
+	uint w = 250;
+	auto cnt = (script->invarCnt + script->outvarCnt);
+	Engine::DrawQuad(pos.x, pos.y, w, 16, white(selected? 1.0f : 0.7f, 0.35f));
+	Engine::DrawQuad(pos.x, pos.y + 16, w, 3 + 17 * cnt, white(0.7f, 0.25f));
+	UI::Label(pos.x + 2, pos.y + 2, 12, script->name, font, white());
+	float y = pos.y + 18;
+	for (uint i = 0; i < script->invarCnt; i++, y += 17) {
+		//UI::Texture(pos.x - 5, y + 3, 10, 10, tex_circle_open);
+		UI::Label(pos.x + 10, y, 12, script->invars[i].name, font, white());
 		if (!inputR[i]) {
 			auto& vr = inputV[i].first;
 			if (vr.type == PY_VARTYPE::INT || vr.type == PY_VARTYPE::FLOAT) {
@@ -41,9 +58,12 @@ void PyNode::Draw(Vec2 pos) {
 	}
 	y += 2;
 
+	font->Align(ALIGN_TOPRIGHT);
 	for (uint i = 0; i < script->outvarCnt; i++, y += 17) {
 		UI::Texture(pos.x + w - 5, y + 3, 10, 10, tex_circle_open);
-		UI::Label(pos.x + 5, y, 12, script->outvars[i].name, font, white());
+		UI::Label(pos.x + w - 10, y, 12, script->outvars[i].name, font, white());
+		UI::Label(pos.x + w * 0.66f, y, 12, script->outvars[i].typeName, font, white(0.3f), w * 0.67f - 6);
+		/*
 		if (!outputR[i]) {
 			auto& vr = outputV[i].first;
 			if (vr.type == PY_VARTYPE::INT || vr.type == PY_VARTYPE::FLOAT) {
@@ -55,6 +75,7 @@ void PyNode::Draw(Vec2 pos) {
 			else {
 				UI::Label(pos.x + w * 0.33f + 2, y, 12, script->outvars[i].typeName, font, white(0.3f), w * 0.67f - 6);
 			}
-		}
+		}*/
 	}
+	font->Align(ALIGN_TOPLEFT);
 }

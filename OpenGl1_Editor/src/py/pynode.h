@@ -6,6 +6,8 @@ public:
 	PyNode(PyScript* scr);
 	
 	PyScript* script;
+	bool selected;
+	Vec2 pos;
 
 	static Font* font;
 
@@ -13,7 +15,9 @@ public:
 	std::vector<std::pair<PyVar, uint>> inputV, outputV;
 
 	static void Init();
-	void Draw(Vec2 pos);
+
+	bool Select();
+	void Draw(), DrawConn();
 
 protected:
 	static Texture* tex_circle_open, *tex_circle_conn;

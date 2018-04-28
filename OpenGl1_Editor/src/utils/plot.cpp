@@ -1,6 +1,11 @@
 #include "plot.h"
 
 void plt::plot(float x, float y, float w, float h, float* dx, float* dy, uint cnt) {
+	Engine::DrawQuad(x, y, w, h, black());
+	x += 2;
+	y += 2;
+	w -= 4;
+	h -= 4;
 	Engine::DrawQuad(x, y, w, h, white());
 	
 	Vec3* poss = new Vec3[cnt];

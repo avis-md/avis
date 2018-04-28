@@ -265,6 +265,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\makegen.cpp" />
     <ClCompile Include="src\py\pynode.cpp" />
     <ClCompile Include="src\py\pyreader.cpp" />
+    <ClCompile Include="src\py\PyWeb.cpp" />
     <ClCompile Include="src\scene\comp\animator.cpp" />
     <ClCompile Include="src\scene\comp\armature.cpp" />
     <ClCompile Include="src\scene\comp\arrayrenderer.cpp" />
@@ -335,6 +336,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClInclude Include="src\makegen.h" />
     <ClInclude Include="src\py\pynode.h" />
     <ClInclude Include="src\py\pyreader.h" />
+    <ClInclude Include="src\py\PyWeb.h" />
     <ClInclude Include="src\scene\comp\animator.h" />
     <ClInclude Include="src\scene\comp\armature.h" />
     <ClInclude Include="src\scene\comp\arrayrenderer.h" />

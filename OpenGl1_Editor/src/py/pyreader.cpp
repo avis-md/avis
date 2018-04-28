@@ -68,7 +68,8 @@ void* PyScript::Get(uint i) {
 }
 
 void PyReader::Init() {
-	_putenv_s("PYTHONPATH", "./py/");
+	auto pth = IO::GetText(IO::path + "/env.txt");
+	_putenv_s("PYTHONPATH", pth.c_str());
 	Py_Initialize();
 	PyObject *sys_path = PySys_GetObject("path");
 	auto path = IO::path + "/py/";
