@@ -263,6 +263,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\Gromacs.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\makegen.cpp" />
+    <ClCompile Include="src\py\nodes\pynode_plot.cpp" />
     <ClCompile Include="src\py\pynode.cpp" />
     <ClCompile Include="src\py\pyreader.cpp" />
     <ClCompile Include="src\py\PyWeb.cpp" />
@@ -334,6 +335,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClInclude Include="src\core\mvp.h" />
     <ClInclude Include="src\Gromacs.h" />
     <ClInclude Include="src\makegen.h" />
+    <ClInclude Include="src\py\nodes\pynode_plot.h" />
     <ClInclude Include="src\py\pynode.h" />
     <ClInclude Include="src\py\pyreader.h" />
     <ClInclude Include="src\py\PyWeb.h" />

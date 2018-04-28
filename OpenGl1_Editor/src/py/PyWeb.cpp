@@ -3,7 +3,11 @@
 std::vector<PyNode*> PyWeb::nodes;
 
 void PyWeb::Insert(PyScript* scr, Vec2 pos) {
-	nodes.push_back(new PyNode(scr));
+	Insert(new PyNode(scr), pos);
+}
+
+void PyWeb::Insert(PyNode* node, Vec2 pos) {
+	nodes.push_back(node);
 	nodes.back()->pos = pos;
 }
 
@@ -31,5 +35,5 @@ void PyWeb::Draw() {
 }
 
 void PyWeb::Execute() {
-	for (auto n : nodes) 
+	for (auto n : nodes) n->Execute();
 }

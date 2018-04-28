@@ -4,7 +4,7 @@
 class PyNode {
 public:
 	PyNode(PyScript* scr);
-	
+
 	PyScript* script;
 	bool selected;
 	Vec2 pos;
@@ -17,13 +17,11 @@ public:
 	static void Init();
 
 	bool Select();
-	void Draw(), DrawConn();
+	virtual void Draw(), DrawConn();
+	virtual void Execute();
 
 protected:
 	static Texture* tex_circle_open, *tex_circle_conn;
 };
 
-class PyGraph {
-public:
-	std::vector<PyNode*> nodes;
-};
+#include "nodes/pynode_plot.h"

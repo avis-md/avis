@@ -139,7 +139,6 @@ void paintfunc() {
 
 PyScript *scr, *scr2;
 PyNode *node, *node2;
-std::vector<float>* vecc;
 
 void paintfunc2() {
 	Engine::DrawQuad(0, 0, Display::width, Display::height, white(1, 0.15f));
@@ -147,8 +146,9 @@ void paintfunc2() {
 	PyWeb::Update();
 	PyWeb::Draw();
 
-	float x[4] = { 1, 2, 3, 4 };
-	plt::plot(500, 100, 200, 200, x, &(*vecc)[0], 4);
+	if (Input::KeyDown(Key_Space)) {
+		PyWeb::Execute();
+	}
 }
 
 int main(int argc, char **argv)
@@ -165,16 +165,13 @@ int main(int argc, char **argv)
 		abort();
 
 	PyWeb::Insert(scr, Vec2(50, 50));
-	scr->SetVal(0, 1.0f);
-	scr->SetVal(1, 1);
-	string op = scr->Exec();
 	PyWeb::Insert(scr2, Vec2(200, 200));
-	scr2->invars[0].value = scr->pRets[0];
-	op = scr2->Exec();
-	auto f = (float*)scr2->Get(0);
-	vecc = (std::vector<float>*)scr2->Get(1);
-
+	PyWeb::Insert(new PyNode_Plot(), Vec2(500, 100));
+	PyWeb::nodes[0]->outputR[0] = PyWeb::nodes[1];
 	PyWeb::nodes[1]->inputR[0] = PyWeb::nodes[0];
+	PyWeb::nodes[1]->outputR[1] = PyWeb::nodes[2];
+	PyWeb::nodes[2]->inputR[0] = PyWeb::nodes[1];
+	PyWeb::nodes[2]->inputV[0].second = 1;
 
 	while (ChokoLait::alive()) {
 		ChokoLait::Update();
