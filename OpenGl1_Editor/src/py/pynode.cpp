@@ -1,4 +1,4 @@
-#include "pynode.h"
+#include "PyWeb.h"
 #include "ui/icons.h"
 
 Font* PyNode::font = nullptr;
@@ -60,6 +60,16 @@ void PyNode::Execute() {
 	}
 }
 
+void PyNode::ConnectTo(uint id, PyNode* tar, uint tarId) {
+	if (outputV[id].first.typeName == tar->inputV[tarId].first.typeName) {
+		if (tar->inputR[tarId]) tar->inputR[tarId]->outputR[tar->inputV[tarId].second] = nullptr;
+		tar->inputR[tarId] = this;
+		tar->inputV[tarId].second = id;
+		outputR[id] = tar;
+		outputV[id].second = tarId;
+	}
+}
+
 void PyNode::Draw() {
 	auto cnt = (script->invarCnt + script->outvarCnt);
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected? 1.0f : 0.7f, 0.35f));
@@ -69,7 +79,27 @@ void PyNode::Draw() {
 		Engine::DrawQuad(pos.x, pos.y + 16, width, 3 + 17 * cnt, white(0.7f, 0.25f));
 		float y = pos.y + 18;
 		for (uint i = 0; i < script->invarCnt; i++, y += 17) {
-			UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[i] ? tex_circle_conn : tex_circle_open);
+			if (!PyWeb::selConnNode || (PyWeb::selConnIdIsOut && PyWeb::selConnNode != this)) {
+				if (Engine::Button(pos.x - 5, y + 3, 10, 10, inputR[i] ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
+					if (!PyWeb::selConnNode) {
+						PyWeb::selConnNode = this;
+						PyWeb::selConnId = i;
+						PyWeb::selConnIdIsOut = false;
+						PyWeb::selPreClear = false;
+					}
+					else {
+						PyWeb::selConnNode->ConnectTo(PyWeb::selConnId, this, i);
+						PyWeb::selConnNode = nullptr;
+					}
+				}
+			}
+			else if (PyWeb::selConnNode == this && PyWeb::selConnId == i && !PyWeb::selConnIdIsOut) {
+				Engine::DrawLine(Vec2(pos.x, y + 8), Input::mousePos, white(), 1);
+				UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[i] ? tex_circle_conn : tex_circle_open);
+			}
+			else {
+				UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[i] ? tex_circle_conn : tex_circle_open, red(0.3f));
+			}
 			UI::Label(pos.x + 10, y, 12, script->invars[i].name, font, white());
 			if (!inputR[i]) {
 				auto& vr = inputV[i].first;
@@ -84,7 +114,29 @@ void PyNode::Draw() {
 		y += 2;
 
 		for (uint i = 0; i < script->outvarCnt; i++, y += 17) {
-			UI::Texture(pos.x + width - 5, y + 3, 10, 10, outputR[i] ? tex_circle_conn : tex_circle_open);
+			if (!PyWeb::selConnNode || ((!PyWeb::selConnIdIsOut) && (PyWeb::selConnNode != this))) {
+				if (Engine::Button(pos.x + width - 5, y + 3, 10, 10, outputR[i] ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
+					if (!PyWeb::selConnNode) {
+						PyWeb::selConnNode = this;
+						PyWeb::selConnId = i;
+						PyWeb::selConnIdIsOut = true;
+						PyWeb::selPreClear = false;
+					}
+					else {
+						ConnectTo(i, PyWeb::selConnNode, PyWeb::selConnId);
+						PyWeb::selConnNode = nullptr;
+					}
+				}
+			}
+			else if (PyWeb::selConnNode == this && PyWeb::selConnId == i && PyWeb::selConnIdIsOut) {
+				Engine::DrawLine(Vec2(pos.x + width, y + 8), Input::mousePos, white(), 1);
+				UI::Texture(pos.x + width - 5, y + 3, 10, 10, outputR[i] ? tex_circle_conn : tex_circle_open);
+			}
+			else {
+				UI::Texture(pos.x + width - 5, y + 3, 10, 10, outputR[i] ? tex_circle_conn : tex_circle_open, red(0.3f));
+			}
+
+
 			font->Align(ALIGN_TOPRIGHT);
 			UI::Label(pos.x + width - 10, y, 12, script->outvars[i].name, font, white());
 			font->Align(ALIGN_TOPLEFT);

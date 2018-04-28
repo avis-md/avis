@@ -22,7 +22,8 @@ public:
 	bool Select();
 	virtual void Draw(), DrawConn();
 	virtual void Execute();
-
+	void ConnectTo(uint id, PyNode* tar, uint tarId); //out -> in
+	
 protected:
 	static Texture* tex_circle_open, *tex_circle_conn;
 };

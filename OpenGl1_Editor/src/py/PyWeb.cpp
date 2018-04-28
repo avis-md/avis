@@ -1,5 +1,9 @@
 #include "PyWeb.h"
 
+PyNode* PyWeb::selConnNode = nullptr;
+uint PyWeb::selConnId = 0;
+bool PyWeb::selConnIdIsOut = false, PyWeb::selPreClear = false;
+
 std::vector<PyNode*> PyWeb::nodes;
 
 void PyWeb::Insert(PyScript* scr, Vec2 pos) {
@@ -28,10 +32,12 @@ void PyWeb::Update() {
 }
 
 void PyWeb::Draw() {
+	PyWeb::selPreClear = true;
 	for (auto n : nodes)
 		n->DrawConn();
 	for (auto n : nodes)
 		n->Draw();
+	if (Input::mouse0State == MOUSE_UP && selPreClear) selConnNode = nullptr;
 }
 
 void PyWeb::Execute() {
