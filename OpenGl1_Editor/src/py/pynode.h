@@ -8,6 +8,9 @@ public:
 	PyScript* script;
 	bool selected;
 	Vec2 pos;
+	float width = 220;
+
+	bool expanded = true;
 
 	static Font* font;
 
@@ -25,3 +28,4 @@ protected:
 };
 
 #include "nodes/pynode_plot.h"
+#include "nodes/pynode_inputs.h"

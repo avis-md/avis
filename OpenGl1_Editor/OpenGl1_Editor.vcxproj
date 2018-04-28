@@ -170,7 +170,7 @@ copy "C:\Users\Pua Kai\Documents\GitHub\ChokoEngine\Lait\OpenGL1_Editor.lib" "C:
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>./src;C:\Anaconda\include;./glew;./glfw;./glm;./jpeg;./hdr;./png;./freetype;./ffmpeg</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./src;C:\Anaconda\include;C:\Anaconda\Lib\site-packages\numpy\core\include;./glew;./glfw;./glm;./jpeg;./hdr;./png;./freetype;./ffmpeg</AdditionalIncludeDirectories>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <PreprocessorDefinitions>_MBCS;TEST_LAIT;PLATFORM_WIN;CHOKO_LAIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ShowIncludes>false</ShowIncludes>
@@ -179,9 +179,9 @@ copy "C:\Users\Pua Kai\Documents\GitHub\ChokoEngine\Lait\OpenGL1_Editor.lib" "C:
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;opengl32.lib;glu32.lib;npymath.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>..\packages\gl\;..\packages\jpg\;..\packages\freetype\;..\packages\ffmpeg\;C:/Anaconda/libs</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\packages\gl\;..\packages\jpg\;..\packages\freetype\;..\packages\ffmpeg\;C:/Anaconda/libs;C:\Anaconda\Lib\site-packages\numpy\core\lib</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <SubSystem>Console</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
@@ -263,6 +263,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\Gromacs.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\makegen.cpp" />
+    <ClCompile Include="src\py\nodes\pynode_inputs.cpp" />
     <ClCompile Include="src\py\nodes\pynode_plot.cpp" />
     <ClCompile Include="src\py\pynode.cpp" />
     <ClCompile Include="src\py\pyreader.cpp" />
@@ -287,6 +288,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\scene\scene.cpp" />
     <ClCompile Include="src\scene\sceneobject.cpp" />
     <ClCompile Include="src\scene\transform.cpp" />
+    <ClCompile Include="src\ui\icons.cpp" />
     <ClCompile Include="src\utils\color.cpp" />
     <ClCompile Include="src\asset\compute.cpp" />
     <ClCompile Include="src\utils\fft.cpp" />
@@ -335,6 +337,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClInclude Include="src\core\mvp.h" />
     <ClInclude Include="src\Gromacs.h" />
     <ClInclude Include="src\makegen.h" />
+    <ClInclude Include="src\py\nodes\pynode_inputs.h" />
     <ClInclude Include="src\py\nodes\pynode_plot.h" />
     <ClInclude Include="src\py\pynode.h" />
     <ClInclude Include="src\py\pyreader.h" />
@@ -360,6 +363,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClInclude Include="src\scene\scene.h" />
     <ClInclude Include="src\scene\sceneobject.h" />
     <ClInclude Include="src\scene\transform.h" />
+    <ClInclude Include="src\ui\icons.h" />
     <ClInclude Include="src\utils\plot.h" />
     <ClInclude Include="src\utils\ptrext.h" />
     <ClInclude Include="src\core\time.h" />

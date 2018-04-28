@@ -1,12 +1,12 @@
 #pragma once
 #include "../pynode.h"
 
-class PyNode_Plot : public PyNode {
+class PyNode_Inputs : public PyNode {
 public:
-	PyNode_Plot();
+	PyNode_Inputs();
 
 	void Draw() override;
-	void DrawConn() override;
+	void DrawConn() override {};
 	void Execute() override;
 	std::vector<PyNode*> nodes;
 

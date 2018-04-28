@@ -1,6 +1,8 @@
 #define PLATFORM_WIN
 #include "ChokoLait.h"
 #include "Gromacs.h"
+//#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+//#include <numpy/arrayobject.h>
 
 float camz = 10;
 Vec3 center;
@@ -132,6 +134,7 @@ void paintfunc() {
 	repz = Engine::DrawSliderFill(80, 240, 100, 14, 0, 5, repz, white(1, 0.3f), white());
 }
 
+#include "ui/icons.h"
 #include "py/pyreader.h"
 #include "py/pynode.h"
 #include "py/PyWeb.h"
@@ -156,6 +159,7 @@ int main(int argc, char **argv)
 	ChokoLait::Init(800, 800);
 	bg = new Background(IO::path + "/refl.hdr");
 	font = new Font(IO::path + "/arimo.ttf", ALIGN_TOPLEFT);
+	Icons::Init();
 	PyReader::Init();
 	PyNode::Init();
 	PyNode::font = font;
@@ -167,6 +171,7 @@ int main(int argc, char **argv)
 	PyWeb::Insert(scr, Vec2(50, 50));
 	PyWeb::Insert(scr2, Vec2(200, 200));
 	PyWeb::Insert(new PyNode_Plot(), Vec2(500, 100));
+	PyWeb::Insert(new PyNode_Inputs(), Vec2(10, 400));
 	PyWeb::nodes[0]->outputR[0] = PyWeb::nodes[1];
 	PyWeb::nodes[1]->inputR[0] = PyWeb::nodes[0];
 	PyWeb::nodes[1]->outputR[1] = PyWeb::nodes[2];

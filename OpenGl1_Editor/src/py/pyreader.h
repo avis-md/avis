@@ -6,7 +6,7 @@ enum class PY_VARTYPE {
 	INT,
 	FLOAT,
 	LIST,
-	PAIR
+	PAIR,
 };
 
 struct PyVar {
