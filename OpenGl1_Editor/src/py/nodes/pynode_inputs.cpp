@@ -51,6 +51,12 @@ void PyNode_Inputs::Draw() {
 	}
 }
 
+float PyNode_Inputs::DrawSide() {
+	//Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
+	//UI::Label(pos.x + 2, pos.y + 2, 12, "System", font, white());
+	return 0;
+}
+
 Vec2 PyNode_Inputs::DrawConn() {
 	return Vec2(width, 19 + 17 * 2);
 }

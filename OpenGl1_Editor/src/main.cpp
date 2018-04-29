@@ -145,14 +145,11 @@ PyScript *scr, *scr2, *scr3;
 PyNode *node, *node2;
 
 void paintfunc2() {
-	Engine::DrawQuad(0, 0, Display::width, Display::height, white(1, 0.15f));
+	//Engine::DrawQuad(0, 0, Display::width, Display::height, white(1, 0.15f));
 
 	PyWeb::Update();
-	PyWeb::Draw();
-
-	if (Input::KeyDown(Key_Space)) {
-		PyWeb::Execute();
-	}
+	//PyWeb::Draw();
+	PyWeb::DrawSide();
 }
 
 int main(int argc, char **argv)
@@ -180,12 +177,13 @@ int main(int argc, char **argv)
 	PyWeb::nodes[3]->inputR[0] = PyWeb::nodes[2];
 	PyWeb::nodes[3]->inputV[0].second = 1;
 
+	/*
 	while (ChokoLait::alive()) {
 		ChokoLait::Update();
 		ChokoLait::Paint(nullptr, paintfunc2);
 	}
-
-	/*
+	*/
+	//*
 	auto& set = Scene::active->settings;
 	set.sky = bg;
 	set.skyStrength = 1.5f;
@@ -200,7 +198,7 @@ int main(int argc, char **argv)
 		ChokoLait::Update(updateFunc);
 		//ChokoLait::mainCamera->object->transform.localPosition(Vec3(0, 0, -camz));
 
-		ChokoLait::Paint(rendFunc, paintfunc);
+		ChokoLait::Paint(rendFunc, paintfunc2);
 	}
-	*/
+	//*/
 }

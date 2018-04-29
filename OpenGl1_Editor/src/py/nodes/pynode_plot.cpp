@@ -30,6 +30,20 @@ void PyNode_Plot::Draw() {
 	}
 }
 
+float PyNode_Plot::DrawSide() {
+	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
+	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
+	UI::Label(pos.x + 20, pos.y + 2, 12, "Plot list(float)", font, white());
+	if (expanded) {
+		Engine::DrawQuad(pos.x, pos.y + 16, width, 4 + width, white(0.7f, 0.25f));
+		if (valXs.size()) {
+			plt::plot(pos.x + 2, pos.y + 18, width - 4, width - 4, &valXs[0], &valYs[0], valXs.size());
+		}
+		return width + 21;
+	}
+	else return 17;
+}
+
 Vec2 PyNode_Plot::DrawConn() {
 	auto cnt = 1;
 	float y = pos.y + 18;

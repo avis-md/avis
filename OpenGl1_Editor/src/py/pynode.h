@@ -8,7 +8,7 @@ public:
 	PyScript* script;
 	bool selected;
 	Vec2 pos;
-	const float width = 220;
+	static float width;
 
 	bool expanded = true;
 	bool canTile = false;
@@ -23,6 +23,7 @@ public:
 	bool Select();
 	virtual Vec2 DrawConn();
 	virtual void Draw();
+	virtual float DrawSide();
 	virtual void Execute();
 	void ConnectTo(uint id, PyNode* tar, uint tarId); //out -> in
 	

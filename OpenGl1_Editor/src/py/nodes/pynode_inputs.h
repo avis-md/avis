@@ -7,6 +7,7 @@ public:
 
 	Vec2 DrawConn() override;
 	void Draw() override;
+	float DrawSide() override;
 	void Execute() override;
 	std::vector<PyNode*> nodes;
 

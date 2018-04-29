@@ -3,6 +3,7 @@
 
 Font* PyNode::font = nullptr;
 Texture* PyNode::tex_circle_open = nullptr, *PyNode::tex_circle_conn = nullptr;
+float PyNode::width = 220;
 
 PyNode::PyNode(PyScript* scr) : script(scr) {
 	if (!scr) return;
@@ -146,4 +147,33 @@ void PyNode::Draw() {
 		}
 		if (PyWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3 + 17 * cnt, white(0.5f, 0.25f));
 	}
+}
+
+float PyNode::DrawSide() {
+	auto cnt = (script->invarCnt);
+	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
+	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
+	UI::Label(pos.x + 20, pos.y + 2, 12, script->name, font, white());
+	if (expanded) {
+		Engine::DrawQuad(pos.x, pos.y + 16, width, 2 + 17 * cnt, white(0.7f, 0.25f));
+		float y = pos.y + 18;
+		for (uint i = 0; i < script->invarCnt; i++, y += 17) {
+			UI::Label(pos.x + 2, y, 12, script->invars[i].name, font, white());
+			if (!inputR[i]) {
+				auto& vr = inputV[i].first;
+				if (vr.type == PY_VARTYPE::INT || vr.type == PY_VARTYPE::FLOAT) {
+					string s = std::to_string((vr.type == PY_VARTYPE::INT) ? vr.ival : vr.fval);
+					s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, font, true, nullptr, white());
+					if ((vr.type == PY_VARTYPE::INT)) vr.ival = TryParse(s, 0);
+					else vr.fval = TryParse(s, 0.0f);
+				}
+			}
+			else {
+				UI::Label(pos.x + width * 0.33f, y, 12, "<connected>", font, yellow());
+			}
+		}
+		if (PyWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3 + 17 * cnt, white(0.5f, 0.25f));
+		return 19 + 17 * cnt;
+	}
+	else return 17;
 }
