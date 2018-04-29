@@ -87,22 +87,22 @@ bool PyReader::Read(string path, PyScript** _scr) { //"path/to/script[no .py]"
 	scr->pModule = PyImport_ImportModule(mdn.c_str());
 	//Py_DECREF(pName);
 	if (!scr->pModule) {
-		Debug::Warning("PyReader", "Failed to read python file!");
+		Debug::Warning("PyReader", "Failed to read python file " + path + "!");
 		PyErr_Print();
 		delete(scr);
 		*_scr = nullptr;
 		return false;
 	}
 	scr->pFunc = PyObject_GetAttrString(scr->pModule, "Execute");
-	Py_INCREF(scr->pFunc);
 	if (!scr->pFunc || !PyCallable_Check(scr->pFunc)) {
-		Debug::Warning("PyReader", "Failed to find \"Execute\" function!");
+		Debug::Warning("PyReader", "Failed to find \"Execute\" function in " + path + "!");
 		Py_XDECREF(scr->pFunc);
 		Py_DECREF(scr->pModule);
 		delete(scr);
 		*_scr = nullptr;
 		return false;
 	}
+	Py_INCREF(scr->pFunc);
 
 	//extract io variables
 	std::ifstream strm(IO::path + "/py/" + path + ".py");

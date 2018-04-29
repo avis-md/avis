@@ -164,14 +164,11 @@ int main(int argc, char **argv)
 	PyReader::Init();
 	PyNode::Init();
 	PyNode::font = font;
-	if (!PyReader::Read("foo", &scr))
-		abort();
-	if (!PyReader::Read("boo", &scr2))
-		abort();
-	if (!PyReader::Read("sub/sub", &scr3))
-		abort();
 
 	PyBrowse::Scan();
+
+	scr = PyBrowse::folder.scripts[1];
+	scr2 = PyBrowse::folder.scripts[0];
 
 	PyWeb::Insert(new PyNode_Inputs(), Vec2(10, 400));
 	PyWeb::Insert(scr, Vec2(50, 50));

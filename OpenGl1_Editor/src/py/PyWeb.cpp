@@ -1,8 +1,11 @@
 #include "PyWeb.h"
+#include "pybrowse.h"
+#include "ui/icons.h"
 
 PyNode* PyWeb::selConnNode = nullptr;
 uint PyWeb::selConnId = 0;
 bool PyWeb::selConnIdIsOut = false, PyWeb::selPreClear = false;
+PyScript* PyWeb::selScript = nullptr;
 
 std::vector<PyNode*> PyWeb::nodes;
 
@@ -38,13 +41,14 @@ void PyWeb::Update() {
 }
 
 void PyWeb::Draw() {
+	Engine::BeginStencil(PyBrowse::expanded ? 151 : 3, 0, Display::width, Display::height);
 	byte ms = Input::mouse0State;
 	if (executing) {
 		Input::mouse0 = false;
 		Input::mouse0State = 0;
 	}
 	PyWeb::selPreClear = true;
-	Vec2 poss(50, 100);
+	Vec2 poss(PyBrowse::expanded ? 160 : 12, 100);
 	float maxoff = 0, offy = -5;
 	for (auto n : nodes) {
 		if (!n->canTile) {
@@ -66,6 +70,12 @@ void PyWeb::Draw() {
 
 	Input::mouse0State = ms;
 	Input::mouse0 = (Input::mouse0State == 1) || (Input::mouse0State == 2);
+	Engine::EndStencil();
+
+	PyBrowse::Draw();
+
+	if (Input::KeyDown(Key_Escape)) selScript = nullptr;
+	if (selScript) UI::Texture(Input::mousePos.x - 16, Input::mousePos.y - 16, 32, 32, Icons::python, white(0.3f));
 }
 
 void PyWeb::Execute() {

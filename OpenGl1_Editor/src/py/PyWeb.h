@@ -11,6 +11,7 @@ public:
 	static PyNode* selConnNode;
 	static uint selConnId;
 	static bool selConnIdIsOut, selPreClear;
+	static PyScript* selScript;
 
 	static std::vector<PyNode*> nodes;
 

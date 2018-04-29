@@ -5,5 +5,5 @@ class Icons {
 public:
 	static void Init();
 
-	static Texture* expand, *collapse;
+	static Texture* expand, *collapse, *python;
 };
