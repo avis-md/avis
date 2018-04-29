@@ -8,9 +8,10 @@ public:
 	PyScript* script;
 	bool selected;
 	Vec2 pos;
-	float width = 220;
+	const float width = 220;
 
 	bool expanded = true;
+	bool canTile = false;
 
 	static Font* font;
 
@@ -20,7 +21,8 @@ public:
 	static void Init();
 
 	bool Select();
-	virtual void Draw(), DrawConn();
+	virtual Vec2 DrawConn();
+	virtual void Draw();
 	virtual void Execute();
 	void ConnectTo(uint id, PyNode* tar, uint tarId); //out -> in
 	

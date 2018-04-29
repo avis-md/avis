@@ -138,9 +138,10 @@ void paintfunc() {
 #include "py/pyreader.h"
 #include "py/pynode.h"
 #include "py/PyWeb.h"
+#include "py/pybrowse.h"
 #include "utils/plot.h"
 
-PyScript *scr, *scr2;
+PyScript *scr, *scr2, *scr3;
 PyNode *node, *node2;
 
 void paintfunc2() {
@@ -163,20 +164,24 @@ int main(int argc, char **argv)
 	PyReader::Init();
 	PyNode::Init();
 	PyNode::font = font;
-	if (!PyReader::Read(IO::path + "/py/foo.py", &scr))
+	if (!PyReader::Read("foo", &scr))
 		abort();
-	if (!PyReader::Read(IO::path + "/py/boo.py", &scr2))
+	if (!PyReader::Read("boo", &scr2))
+		abort();
+	if (!PyReader::Read("sub/sub", &scr3))
 		abort();
 
+	PyBrowse::Scan();
+
+	PyWeb::Insert(new PyNode_Inputs(), Vec2(10, 400));
 	PyWeb::Insert(scr, Vec2(50, 50));
 	PyWeb::Insert(scr2, Vec2(200, 200));
 	PyWeb::Insert(new PyNode_Plot(), Vec2(500, 100));
-	PyWeb::Insert(new PyNode_Inputs(), Vec2(10, 400));
-	PyWeb::nodes[0]->outputR[0] = PyWeb::nodes[1];
-	PyWeb::nodes[1]->inputR[0] = PyWeb::nodes[0];
-	PyWeb::nodes[1]->outputR[1] = PyWeb::nodes[2];
+	PyWeb::nodes[1]->outputR[0] = PyWeb::nodes[2];
 	PyWeb::nodes[2]->inputR[0] = PyWeb::nodes[1];
-	PyWeb::nodes[2]->inputV[0].second = 1;
+	PyWeb::nodes[2]->outputR[1] = PyWeb::nodes[3];
+	PyWeb::nodes[3]->inputR[0] = PyWeb::nodes[2];
+	PyWeb::nodes[3]->inputV[0].second = 1;
 
 	while (ChokoLait::alive()) {
 		ChokoLait::Update();

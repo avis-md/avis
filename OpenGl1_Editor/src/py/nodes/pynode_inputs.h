@@ -5,8 +5,8 @@ class PyNode_Inputs : public PyNode {
 public:
 	PyNode_Inputs();
 
+	Vec2 DrawConn() override;
 	void Draw() override;
-	void DrawConn() override {};
 	void Execute() override;
 	std::vector<PyNode*> nodes;
 

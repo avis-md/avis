@@ -77,16 +77,14 @@ void PyReader::Init() {
 	PyList_Append(sys_path, PyUnicode_FromString(path.c_str()));
 }
 
-bool PyReader::Read(string path, PyScript** _scr) {
+bool PyReader::Read(string path, PyScript** _scr) { //"path/to/script[no .py]"
 	auto scr = *_scr = new PyScript();
-	auto ls = path.find_last_of("/");
-	std::replace(path.begin(), path.end(), '\\', '/');
-	string ph = path.substr(0, ls);
-	string& nm = scr->name = path.substr(ls + 1);
-	nm = nm.substr(0, nm.size() - 3);
+	scr->name = path;
+	string mdn = path;
+	std::replace(mdn.begin(), mdn.end(), '/', '.');
 	//auto pName = PyUnicode_FromString(path.c_str());
 	//scr->pModule = PyImport_Import(pName);
-	scr->pModule = PyImport_ImportModule(nm.c_str());
+	scr->pModule = PyImport_ImportModule(mdn.c_str());
 	//Py_DECREF(pName);
 	if (!scr->pModule) {
 		Debug::Warning("PyReader", "Failed to read python file!");
@@ -107,7 +105,7 @@ bool PyReader::Read(string path, PyScript** _scr) {
 	}
 
 	//extract io variables
-	std::ifstream strm(path);
+	std::ifstream strm(IO::path + "/py/" + path + ".py");
 	string ln;
 	while (!strm.eof()) {
 		std::getline(strm, ln);

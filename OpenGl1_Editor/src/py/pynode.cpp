@@ -24,17 +24,19 @@ void PyNode::Init() {
 }
 
 bool PyNode::Select() {
-	bool in = Rect(pos.x + 16, pos.y, 204, 16).Inside(Input::mousePos);
+	bool in = Rect(pos.x + 16, pos.y, width - 16, 16).Inside(Input::mousePos);
 	if (in) selected = true;
 	return in;
 }
 
-void PyNode::DrawConn() {
+Vec2 PyNode::DrawConn() {
 	auto cnt = (script->invarCnt + script->outvarCnt);
 	float y = pos.y + 18;
 	for (uint i = 0; i < script->invarCnt; i++, y += 17) {
-		if (inputR[i]) Engine::DrawLine(Vec2(pos.x, expanded ? y + 8 : pos.y + 8), Vec2(inputR[i]->pos.x + inputR[i]->width, inputR[i]->expanded ? inputR[i]->pos.y + 20 + 8 + (inputV[i].second + inputR[i]->script->invarCnt) * 17 : inputR[i]->pos.y + 8), white(), 2);
+		if (inputR[i]) Engine::DrawLine(Vec2(pos.x, expanded ? y + 8 : pos.y + 8), Vec2(inputR[i]->pos.x + inputR[i]->width, inputR[i]->expanded ? inputR[i]->pos.y + 20 + 8 + (inputV[i].second + inputR[i]->inputV.size()) * 17 : inputR[i]->pos.y + 8), white(), 2);
 	}
+	if (expanded) return Vec2(width, 19 + 17 * cnt);
+	else return Vec2(width, 16);
 }
 
 void PyNode::Execute() {
@@ -142,5 +144,6 @@ void PyNode::Draw() {
 			font->Align(ALIGN_TOPLEFT);
 			UI::Label(pos.x + 2, y, 12, script->outvars[i].typeName, font, white(0.3f), width * 0.67f - 6);
 		}
+		if (PyWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3 + 17 * cnt, white(0.5f, 0.25f));
 	}
 }

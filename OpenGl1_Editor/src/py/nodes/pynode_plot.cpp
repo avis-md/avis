@@ -3,7 +3,8 @@
 #include "ui/icons.h"
 
 PyNode_Plot::PyNode_Plot() : PyNode(nullptr) {
-	width = 200;
+	//width = 200;
+	canTile = true;
 	inputR.resize(1, nullptr);
 	inputV.resize(1);
 	inputV[0].first.type = PY_VARTYPE::LIST;
@@ -12,6 +13,7 @@ PyNode_Plot::PyNode_Plot() : PyNode(nullptr) {
 
 void PyNode_Plot::Draw() {
 	auto cnt = 1;
+	this->pos = pos;
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 20, pos.y + 2, 12, "Plot list(float)", font, white());
@@ -28,12 +30,14 @@ void PyNode_Plot::Draw() {
 	}
 }
 
-void PyNode_Plot::DrawConn() {
+Vec2 PyNode_Plot::DrawConn() {
 	auto cnt = 1;
 	float y = pos.y + 18;
 	//for (uint i = 0; i < script->invarCnt; i++, y += 17) {
 		if (inputR[0]) Engine::DrawLine(Vec2(pos.x, expanded ? y + 8 : pos.y + 8), Vec2(inputR[0]->pos.x + inputR[0]->width, inputR[0]->expanded ? inputR[0]->pos.y + 20 + 8 + (inputV[0].second + inputR[0]->script->invarCnt) * 17 : inputR[0]->pos.y + 8), white(), 2);
 	//}
+	if (expanded) return Vec2(width, 19 + 17 * cnt + width);
+	else return Vec2(width, 16);
 }
 
 void PyNode_Plot::Execute() {

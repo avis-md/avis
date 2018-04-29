@@ -265,6 +265,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\makegen.cpp" />
     <ClCompile Include="src\py\nodes\pynode_inputs.cpp" />
     <ClCompile Include="src\py\nodes\pynode_plot.cpp" />
+    <ClCompile Include="src\py\pybrowse.cpp" />
     <ClCompile Include="src\py\pynode.cpp" />
     <ClCompile Include="src\py\pyreader.cpp" />
     <ClCompile Include="src\py\PyWeb.cpp" />
@@ -339,6 +340,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClInclude Include="src\makegen.h" />
     <ClInclude Include="src\py\nodes\pynode_inputs.h" />
     <ClInclude Include="src\py\nodes\pynode_plot.h" />
+    <ClInclude Include="src\py\pybrowse.h" />
     <ClInclude Include="src\py\pynode.h" />
     <ClInclude Include="src\py\pyreader.h" />
     <ClInclude Include="src\py\PyWeb.h" />

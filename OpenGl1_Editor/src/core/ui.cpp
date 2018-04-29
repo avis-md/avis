@@ -290,21 +290,37 @@ void UI::Label(float x, float y, float s, string st, Font* font, Vec4 col, float
 	float w = 0;
 	Vec3 ds = Vec3(1.0f / Display::width, 1.0f / Display::height, 0.5f);
 	x = round(x);
+	float defx = x;
 	for (uint i = 0; i < sz * 4; i += 4) {
 		char c = st[i / 4];
-		Vec3 off = -Vec3(font->off[c].x, font->off[c].y, 0)*s*ds;
-		w = font->w2h[c] * s;
-		font->poss[i] = Vec3(x, y - s, 1)*ds + off;
-		font->poss[i + 1] = Vec3(x + s, y - s, 1)*ds + off;
-		font->poss[i + 2] = Vec3(x, y, 1)*ds + off;
-		font->poss[i + 3] = Vec3(x + s, y, 1)*ds + off;
-		font->cs[i] = c;
-		font->cs[i + 1] = c;
-		font->cs[i + 2] = c;
-		font->cs[i + 3] = c;
-		x = ceil(x + font->w2s[c] * s + s*0.1f);
-
-		//Debug::Message("", std::to_string(Vec3(x, y - s, 1)*ds) + " " + std::to_string(-Vec3(font->off[c].x, font->off[c].y, 0)*s*ds));
+		if (c == '\n') {
+			c = ' ';
+			Vec3 off = -Vec3(font->off[c].x, font->off[c].y, 0)*s*ds;
+			w = font->w2h[c] * s;
+			font->poss[i] = Vec3(x, y - s, 1)*ds + off;
+			font->poss[i + 1] = Vec3(x + s, y - s, 1)*ds + off;
+			font->poss[i + 2] = Vec3(x, y, 1)*ds + off;
+			font->poss[i + 3] = Vec3(x + s, y, 1)*ds + off;
+			font->cs[i] = c;
+			font->cs[i + 1] = c;
+			font->cs[i + 2] = c;
+			font->cs[i + 3] = c;
+			x = defx; //ceil(x + font->w2s[c] * s + s*0.1f);
+			y -= s * 1.3f;
+		}
+		else {
+			Vec3 off = -Vec3(font->off[c].x, font->off[c].y, 0)*s*ds;
+			w = font->w2h[c] * s;
+			font->poss[i] = Vec3(x, y - s, 1)*ds + off;
+			font->poss[i + 1] = Vec3(x + s, y - s, 1)*ds + off;
+			font->poss[i + 2] = Vec3(x, y, 1)*ds + off;
+			font->poss[i + 3] = Vec3(x + s, y, 1)*ds + off;
+			font->cs[i] = c;
+			font->cs[i + 1] = c;
+			font->cs[i + 2] = c;
+			font->cs[i + 3] = c;
+			x = ceil(x + font->w2s[c] * s + s*0.1f);
+		}
 	}
 	font->poss[sz * 4] = Vec3(x, 0, 0)*ds;
 
