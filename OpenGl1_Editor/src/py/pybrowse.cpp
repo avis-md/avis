@@ -5,6 +5,7 @@
 
 PyBrowse::Folder PyBrowse::folder = Folder("py");
 bool PyBrowse::expanded = true;
+float PyBrowse::expandPos = 150;
 
 void PyBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 	auto ff = IO::GetFiles(path, ".py");
@@ -55,21 +56,23 @@ void PyBrowse::DoDraw(Folder* f, float& off, uint layer) {
 
 void PyBrowse::Draw() {
 	if (expanded) {
-		Engine::DrawQuad(0, 0, 150, Display::height, white(1, 0.2f));
-		UI::Label(5, 3, 12, "Python Files", PyNode::font, white());
+		Engine::DrawQuad(0, 0, expandPos, Display::height, white(1, 0.2f));
 		float f = 20;
-		Engine::BeginStencil(0, 0, 150, Display::height);
+		Engine::BeginStencil(0, 0, expandPos, Display::height);
+		UI::Label(5, 3, 12, "Python Files", PyNode::font, white());
 		DoDraw(&folder, f, 0);
 		Engine::EndStencil();
-		Engine::DrawQuad(150, Display::height - 16, 16, 16, white(1, 0.2f));
-		if (Engine::Button(150, Display::height - 16, 16, 16, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		Engine::DrawQuad(expandPos, Display::height - 16, 16, 16, white(1, 0.2f));
+		if (Engine::Button(expandPos, Display::height - 16, 16, 16, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
+		expandPos = min(expandPos + 1000 * Time::delta, 150.0f);
 	}
 	else {
-		Engine::DrawQuad(0, 0, 2, Display::height, white(1, 0.2f));
-		if (Engine::Button(2, Display::height - 16, 110, 16, white(1, 0.2f), white(1, 0.2f), white(1, 0.2f)) == MOUSE_RELEASE)
+		Engine::DrawQuad(0, 0, expandPos, Display::height, white(1, 0.2f));
+		if (Engine::Button(expandPos, Display::height - 16, 110, 16, white(1, 0.2f), white(1, 0.2f), white(1, 0.2f)) == MOUSE_RELEASE)
 			expanded = true;
-		UI::Texture(2, Display::height - 16, 16, 16, Icons::expand);
-		UI::Label(20, Display::height - 15, 12, "Python Files", PyNode::font, white());
+		UI::Texture(expandPos, Display::height - 16, 16, 16, Icons::expand);
+		UI::Label(expandPos + 18, Display::height - 15, 12, "Python Files", PyNode::font, white());
+		expandPos = max(expandPos - 1000 * Time::delta, 0.0f);
 	}
 }

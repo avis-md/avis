@@ -7,14 +7,16 @@ public:
 	static void Insert(PyScript* scr, Vec2 pos = Vec2(100, 100));
 	static void Insert(PyNode* node, Vec2 pos = Vec2(100, 100));
 	static void Update(), Draw(), DrawSide(), Execute(), DoExecute();
-
+	
 	static PyNode* selConnNode;
 	static uint selConnId;
 	static bool selConnIdIsOut, selPreClear;
 	static PyScript* selScript;
-
+	
 	static std::vector<PyNode*> nodes;
-
-	static bool expanded, executing;
+	
+	static bool drawFull, expanded, executing;
+	static float maxScroll, scrollPos;
+	
 	static std::thread* execThread;
 };

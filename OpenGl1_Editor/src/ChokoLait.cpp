@@ -140,7 +140,7 @@ void ChokoLait::MouseGL(GLFWwindow* window, int button, int state, int mods) {
 }
 
 void ChokoLait::MouseScrGL(GLFWwindow* window, double xoff, double yoff) {
-	
+	Input::_mouseScroll = yoff;
 }
 
 void ChokoLait::MotionGL(GLFWwindow* window, double x, double y) {

@@ -4,6 +4,7 @@
 bool Input::mouse0 = false;
 bool Input::mouse1 = false;
 bool Input::mouse2 = false;
+float Input::mouseScroll = 0;
 byte Input::mouse0State = 0;
 byte Input::mouse1State = 0;
 byte Input::mouse2State = 0;
@@ -25,6 +26,7 @@ std::array<Vec2, 10> Input::touchPoss = std::array<Vec2, 10>();
 std::array<byte, 10> Input::touchStates = std::array<byte, 10>();
 
 string Input::_inputString = "";
+float Input::_mouseScroll = 0;
 
 void Input::RegisterCallbacks() {
 	glfwSetInputMode(Display::window, GLFW_STICKY_KEYS, 1);
@@ -163,4 +165,6 @@ void Input::UpdateAdr(AInputEvent* e) {
 void Input::PreLoop() {
 	inputString = _inputString;
 	_inputString.clear();
+	mouseScroll = _mouseScroll;
+	_mouseScroll = 0;
 }

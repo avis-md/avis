@@ -14,6 +14,7 @@ public:
 	} folder;
 	
 	static bool expanded;
+	static float expandPos;
 
 	static void Scan(), DoScan(Folder* f, const string& path, const string& incPath);
 	static void Draw(), DoDraw(Folder* f, float& off, uint layer);

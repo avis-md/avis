@@ -7,6 +7,7 @@ class Input {
 public:
 	static Vec2 mousePos, mousePosRelative, mouseDelta, mouseDownPos;
 	static bool mouse0, mouse1, mouse2;
+	static float mouseScroll;
 	static byte mouse0State, mouse1State, mouse2State;
 	static string inputString;
 	static void UpdateMouseNKeyboard(bool* src = nullptr);
@@ -34,6 +35,7 @@ public:
 
 	static void PreLoop();
 
+	friend class ChokoLait;
 	friend class Engine;
 	friend struct Editor_PlaySyncer;
 #ifdef IS_EDITOR
@@ -45,6 +47,7 @@ protected:
 private:
 	static Vec2 mousePosOld;
 	static string _inputString;
+	static float _mouseScroll;
 	//Input(Input const &); //deliberately not defined
 	//Input& operator= (Input const &);
 };

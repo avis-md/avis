@@ -9,7 +9,9 @@ PyScript* PyWeb::selScript = nullptr;
 
 std::vector<PyNode*> PyWeb::nodes;
 
-bool PyWeb::expanded = true, PyWeb::executing = false;
+bool PyWeb::drawFull = false, PyWeb::expanded = true, PyWeb::executing = false;
+float PyWeb::maxScroll, PyWeb::scrollPos = 0;
+
 std::thread* PyWeb::execThread = nullptr;
 
 void PyWeb::Insert(PyScript* scr, Vec2 pos) {
@@ -42,41 +44,97 @@ void PyWeb::Update() {
 
 void PyWeb::Draw() {
 	PyNode::width = 220;
-	Engine::BeginStencil(PyBrowse::expanded ? 151 : 3, 0, Display::width, Display::height);
+	Engine::DrawQuad(PyBrowse::expandPos, 0, Display::width, Display::height, white(0.8f, 0.15f));
+	Engine::BeginStencil(PyBrowse::expandPos, 0, Display::width, Display::height);
 	byte ms = Input::mouse0State;
 	if (executing) {
 		Input::mouse0 = false;
 		Input::mouse0State = 0;
 	}
 	PyWeb::selPreClear = true;
-	Vec2 poss(PyBrowse::expanded ? 160 : 12, 100);
-	float maxoff = 0, offy = -5;
+	Vec2 poss(PyBrowse::expandPos + 10 - scrollPos, 100);
+	float maxoff = 220, offy = -5;
+	maxScroll = 10;
+	int ns = nodes.size(), i = 0, iter = -1;
+	bool iterTile = false, iterTileTop = false;
 	for (auto n : nodes) {
 		if (!n->canTile) {
 			poss.x += maxoff + 20;
-			maxoff = 0;
+			maxScroll += maxoff + 20;
+			poss.y = 100;
+			maxoff = 220;
+			if (selScript) {
+				if (Engine::Button(poss.x, 100, maxoff, 30, white(0.3f, 0.05f)) == MOUSE_RELEASE) {
+					iter = i-1;
+					iterTile = true;
+					iterTileTop = true;
+				}
+				poss.y = 133;
+			}
 		}
 		else {
 			poss.y += offy + 5;
 		}
 		n->pos = poss;
 		auto o = n->DrawConn();
-		maxoff = max(maxoff, o.x);
+		//maxoff = max(maxoff, o.x);
 		offy = o.y;
+		if (selScript) {
+			if (Engine::Button(poss.x, poss.y + offy + 3, maxoff, 30, white(0.3f, 0.05f)) == MOUSE_RELEASE) {
+				iter = i;
+				iterTile = true;
+				iterTileTop = false;
+			}
+			UI::Texture(poss.x - 15 + maxoff/2, poss.y + offy + 3, 30, 30, Icons::expand, white(0.2f));
+			offy += 31;
+			if ((ns == i + 1) || !nodes[i+1]->canTile) {
+				if (Engine::Button(poss.x + maxoff + 10, 100, 30, 200, white(0.3f, 0.05f)) == MOUSE_RELEASE) {
+					iter = i;
+					iterTile = false;
+				}
+				UI::Texture(poss.x + maxoff + 10, 100 + 85, 30, 30, Icons::expand, white(0.2f));
+				maxoff += 30;
+			}
+		}
+		i++;
 	}
+	maxScroll += maxoff + (selScript ? 20 : 10);
 	for (auto n : nodes) {
 		n->Draw();
 	}
 	if (Input::mouse0State == MOUSE_UP && selPreClear) selConnNode = nullptr;
 
+	float canScroll = max(maxScroll - (Display::width - PyBrowse::expandPos), 0.0f);
+	//if (Input::KeyHold(Key_RightArrow)) scrollPos += 1000 * Time::delta;
+	//if (Input::KeyHold(Key_LeftArrow)) scrollPos -= 1000 * Time::delta;
+	scrollPos = Clamp(scrollPos - Input::mouseScroll * 1000 * Time::delta, 0.0f, canScroll);
+
 	Input::mouse0State = ms;
 	Input::mouse0 = (Input::mouse0State == 1) || (Input::mouse0State == 2);
 	Engine::EndStencil();
+	
+	if (Input::mouse0State == MOUSE_UP) {
+		if (iter >= 0) {
+			auto pn = new PyNode(selScript);
+			if (iterTile) {
+				if (iterTileTop) nodes[iter + 1]->canTile = true;
+				else pn->canTile = true;
+			}
+			nodes.insert(nodes.begin() + iter + 1, pn);
+		}
+		selScript = nullptr;
+	}
 
 	PyBrowse::Draw();
 
-	if (Input::KeyDown(Key_Escape)) selScript = nullptr;
+	if (Input::KeyDown(Key_Escape)) {
+		if (selScript) selScript = nullptr;
+		else drawFull = false;
+	}
 	if (selScript) UI::Texture(Input::mousePos.x - 16, Input::mousePos.y - 16, 32, 32, Icons::python, white(0.3f));
+	
+	if (Engine::Button(Display::width - 71, 1, 70, 16, white(1, 0.4f), "Done", 12, PyNode::font, white(), true) == MOUSE_RELEASE)
+		drawFull = false;
 }
 
 void PyWeb::DrawSide() {
@@ -84,25 +142,34 @@ void PyWeb::DrawSide() {
 		float w = 180;
 		PyNode::width = w - 2;
 		Engine::DrawQuad(Display::width - w, 0, w, Display::height, white(0.8f, 0.2f));
-		UI::Label(Display::width - w + 5, 3, 12, "Analysis", PyNode::font, white());
+		UI::Label(Display::width - w + 5, 1, 12, "Analysis", PyNode::font, white());
 
-		if (Engine::Button(Display::width - 61, 1, 60, 16, white(1, 0.4f), "Run", 12, PyNode::font, white(), true) == MOUSE_RELEASE)
-			Execute();
+		if (Engine::Button(Display::width - 71, 1, 70, 16, white(1, 0.4f), "Edit", 12, PyNode::font, white(), true) == MOUSE_RELEASE)
+			drawFull = true;
+
+		if (Engine::Button(Display::width - w + 1, 18, 70, 16, white(1, executing ? 0.2f : 0.4f), "Run", 12, PyNode::font, white(), true) == MOUSE_RELEASE) {
+
+		}
+		if (Engine::Button(Display::width - w + 72, 18, 107, 16, white(1, executing ? 0.2f : 0.4f), "Run All", 12, PyNode::font, white(), true) == MOUSE_RELEASE) {
+			PyWeb::Execute();
+		}
+		UI::Texture(Display::width - w + 1, 18, 16, 16, Icons::play);
+		UI::Texture(Display::width - w + 72, 18, 16, 16, Icons::playall);
 
 		//Engine::BeginStencil(Display::width - w, 0, 150, Display::height);
-		Vec2 poss(Display::width - w + 1, 22);
+		Vec2 poss(Display::width - w + 1, 35);
 		for (auto n : nodes) {
 			n->pos = poss;
 			poss.y += n->DrawSide();
 		}
 		//Engine::EndStencil();
-		Engine::DrawQuad(Display::width - w - 16, Display::height - 16, 16, 16, white(1, 0.2f));
+		Engine::DrawQuad(Display::width - w - 16, Display::height - 16, 16, 16, white(0.8f, 0.2f));
 		if (Engine::Button(Display::width - w - 16, Display::height - 16, 16, 16, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
 	}
 	else {
-		Engine::DrawQuad(Display::width - 2, 0, 2, Display::height, white(1, 0.2f));
-		if (Engine::Button(Display::width - 112, Display::height - 16, 110, 16, white(1, 0.2f), white(1, 0.2f), white(1, 0.2f)) == MOUSE_RELEASE)
+		Engine::DrawQuad(Display::width - 2, 0, 2, Display::height, white(0.8f, 0.2f));
+		if (Engine::Button(Display::width - 112, Display::height - 16, 110, 16, white(0.8f, 0.2f), white(0.8f, 0.2f), white(0.8f, 0.2f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(Display::width - 102, Display::height - 16, 16, 16, Icons::expand);
 		UI::Label(Display::width - 86, Display::height - 15, 12, "Analysis", PyNode::font, white());

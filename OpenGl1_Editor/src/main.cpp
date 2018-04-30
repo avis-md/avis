@@ -148,8 +148,11 @@ void paintfunc2() {
 	//Engine::DrawQuad(0, 0, Display::width, Display::height, white(1, 0.15f));
 
 	PyWeb::Update();
-	//PyWeb::Draw();
-	PyWeb::DrawSide();
+	if (PyWeb::drawFull)
+		PyWeb::Draw();
+	else {
+		PyWeb::DrawSide();
+	}
 }
 
 int main(int argc, char **argv)
