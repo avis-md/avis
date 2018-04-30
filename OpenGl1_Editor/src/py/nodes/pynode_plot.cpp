@@ -1,3 +1,4 @@
+#include "../PyWeb.h"
 #include "pynode_plot.h"
 #include "utils/plot.h"
 #include "ui/icons.h"
@@ -16,12 +17,35 @@ void PyNode_Plot::Draw() {
 	this->pos = pos;
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
-	UI::Label(pos.x + 20, pos.y + 2, 12, "Plot list(float)", font, white());
+	UI::Label(pos.x + 20, pos.y + 1, 12, "Plot list(float)", font, white());
+	DrawToolbar();
 	if (expanded) {
 		Engine::DrawQuad(pos.x, pos.y + 16, width, 3 + 17 * cnt + width, white(0.7f, 0.25f));
 		float y = pos.y + 18;
 		//for (uint i = 0; i < 1; i++, y += 17) {
-		UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[0] ? tex_circle_conn : tex_circle_open);
+		uint i = 0;
+		if (!PyWeb::selConnNode || (PyWeb::selConnIdIsOut && PyWeb::selConnNode != this)) {
+			if (Engine::Button(pos.x - 5, y + 3, 10, 10, inputR[i] ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
+				if (!PyWeb::selConnNode) {
+					PyWeb::selConnNode = this;
+					PyWeb::selConnId = i;
+					PyWeb::selConnIdIsOut = false;
+					PyWeb::selPreClear = false;
+				}
+				else {
+					PyWeb::selConnNode->ConnectTo(PyWeb::selConnId, this, i);
+					PyWeb::selConnNode = nullptr;
+				}
+			}
+		}
+		else if (PyWeb::selConnNode == this && PyWeb::selConnId == i && !PyWeb::selConnIdIsOut) {
+			Engine::DrawLine(Vec2(pos.x, y + 8), Input::mousePos, white(), 1);
+			UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[i] ? tex_circle_conn : tex_circle_open);
+		}
+		else {
+			UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[i] ? tex_circle_conn : tex_circle_open, red(0.3f));
+		}
+		//UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[0] ? tex_circle_conn : tex_circle_open);
 		UI::Label(pos.x + 10, y, 12, "value 1", font, white());
 		//}
 		if (valXs.size()) {

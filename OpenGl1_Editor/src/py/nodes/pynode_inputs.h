@@ -7,10 +7,12 @@ public:
 
 	Vec2 DrawConn() override;
 	void Draw() override;
-	float DrawSide() override;
+	float DrawSide() override { return 0; }
 	void Execute() override;
 	std::vector<PyNode*> nodes;
+};
 
-protected:
-	std::vector<float> valXs, valYs;
+class PyNode_Inputs_ActPar : public PyNode_Inputs {
+public:
+	PyNode_Inputs_ActPar();
 };

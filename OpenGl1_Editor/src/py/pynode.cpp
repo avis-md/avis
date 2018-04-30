@@ -5,8 +5,9 @@ Font* PyNode::font = nullptr;
 Texture* PyNode::tex_circle_open = nullptr, *PyNode::tex_circle_conn = nullptr;
 float PyNode::width = 220;
 
-PyNode::PyNode(PyScript* scr) : script(scr) {
+PyNode::PyNode(PyScript* scr) : script(scr), canTile(false) {
 	if (!scr) return;
+	title = scr->name;
 	inputR.resize(scr->invarCnt, nullptr);
 	outputR.resize(scr->outvarCnt, nullptr);
 	inputV.resize(scr->invarCnt);
@@ -75,9 +76,10 @@ void PyNode::ConnectTo(uint id, PyNode* tar, uint tarId) {
 
 void PyNode::Draw() {
 	auto cnt = (script->invarCnt + script->outvarCnt);
-	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected? 1.0f : 0.7f, 0.35f));
+	Engine::DrawQuad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
-	UI::Label(pos.x + 20, pos.y + 2, 12, script->name, font, white());
+	UI::Label(pos.x + 18, pos.y + 1, 12, title, font, white());
+	DrawToolbar();
 	if (expanded) {
 		Engine::DrawQuad(pos.x, pos.y + 16, width, 3 + 17 * cnt, white(0.7f, 0.25f));
 		float y = pos.y + 18;
@@ -153,7 +155,7 @@ float PyNode::DrawSide() {
 	auto cnt = (script->invarCnt);
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
-	UI::Label(pos.x + 20, pos.y + 2, 12, script->name, font, white());
+	UI::Label(pos.x + 20, pos.y + 1, 12, script->name, font, white());
 	if (expanded) {
 		Engine::DrawQuad(pos.x, pos.y + 16, width, 2 + 17 * cnt, white(0.7f, 0.25f));
 		float y = pos.y + 18;
@@ -176,4 +178,16 @@ float PyNode::DrawSide() {
 		return 19 + 17 * cnt;
 	}
 	else return 17;
+}
+
+void PyNode::DrawToolbar() {
+	if (Engine::Button(pos.x + width - 50, pos.y, 16, 16, Icons::left, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
+
+	}
+	if (Engine::Button(pos.x + width - 33, pos.y, 16, 16, Icons::right, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
+
+	}
+	if (Engine::Button(pos.x + width - 16, pos.y, 16, 16, Icons::cross, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
+
+	}
 }

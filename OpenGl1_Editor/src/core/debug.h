@@ -16,7 +16,6 @@ public:
 	//static std::vector<string> StackTraceNames();
 	//static void DumpStackTrace();
 	//*/
-
 	friend int main(int argc, char **argv);
 	friend class ChokoLait;
 protected:

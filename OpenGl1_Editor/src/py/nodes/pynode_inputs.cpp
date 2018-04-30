@@ -3,6 +3,8 @@
 
 PyNode_Inputs::PyNode_Inputs() : PyNode(nullptr) {
 	//width = 150;
+	title = "All Particles";
+	titleCol = Vec3(0.225f, 0.5f, 0.25f);
 	canTile = true;
 	auto v = std::pair<PyVar, uint>();
 	v.first.type = PY_VARTYPE::LIST;
@@ -16,8 +18,8 @@ PyNode_Inputs::PyNode_Inputs() : PyNode(nullptr) {
 void PyNode_Inputs::Draw() {
 	auto cnt = 2;
 	this->pos = pos;
-	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
-	UI::Label(pos.x + 2, pos.y + 2, 12, "System", font, white());
+	Engine::DrawQuad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
+	UI::Label(pos.x + 2, pos.y + 1, 12, title, font, white());
 	Engine::DrawQuad(pos.x, pos.y + 16, width, 3 + 17 * cnt, white(0.7f, 0.25f));
 	float y = pos.y + 20;
 	for (uint i = 0; i < 2; i++, y += 17) {
@@ -51,16 +53,16 @@ void PyNode_Inputs::Draw() {
 	}
 }
 
-float PyNode_Inputs::DrawSide() {
-	//Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
-	//UI::Label(pos.x + 2, pos.y + 2, 12, "System", font, white());
-	return 0;
-}
-
 Vec2 PyNode_Inputs::DrawConn() {
 	return Vec2(width, 19 + 17 * 2);
 }
 
 void PyNode_Inputs::Execute() {
 	
+}
+
+
+PyNode_Inputs_ActPar::PyNode_Inputs_ActPar() : PyNode_Inputs() {
+	title = "Selected Particles";
+	titleCol = Vec3(0.3f, 0.3f, 0.5f);
 }

@@ -9,10 +9,12 @@ public:
 	bool selected;
 	Vec2 pos;
 	static float width;
+	string title;
+	Vec3 titleCol = Vec3(0.35f, 0.35f, 0.35f);
 
 	bool expanded = true;
 	bool canTile = false;
-
+	
 	static Font* font;
 
 	std::vector<PyNode*> inputR, outputR;
@@ -24,6 +26,7 @@ public:
 	virtual Vec2 DrawConn();
 	virtual void Draw();
 	virtual float DrawSide();
+	void DrawToolbar();
 	virtual void Execute();
 	void ConnectTo(uint id, PyNode* tar, uint tarId); //out -> in
 	

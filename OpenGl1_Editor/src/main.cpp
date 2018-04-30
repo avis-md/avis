@@ -170,15 +170,16 @@ int main(int argc, char **argv)
 	scr = PyBrowse::folder.scripts[1];
 	scr2 = PyBrowse::folder.scripts[0];
 
-	PyWeb::Insert(new PyNode_Inputs(), Vec2(10, 400));
-	PyWeb::Insert(scr, Vec2(50, 50));
-	PyWeb::Insert(scr2, Vec2(200, 200));
-	PyWeb::Insert(new PyNode_Plot(), Vec2(500, 100));
-	PyWeb::nodes[1]->outputR[0] = PyWeb::nodes[2];
-	PyWeb::nodes[2]->inputR[0] = PyWeb::nodes[1];
-	PyWeb::nodes[2]->outputR[1] = PyWeb::nodes[3];
+	PyWeb::Insert(new PyNode_Inputs());
+	PyWeb::Insert(new PyNode_Inputs_ActPar());
+	PyWeb::Insert(scr);
+	PyWeb::Insert(scr2);
+	PyWeb::Insert(new PyNode_Plot());
+	PyWeb::nodes[2]->outputR[0] = PyWeb::nodes[3];
 	PyWeb::nodes[3]->inputR[0] = PyWeb::nodes[2];
-	PyWeb::nodes[3]->inputV[0].second = 1;
+	PyWeb::nodes[3]->outputR[1] = PyWeb::nodes[4];
+	PyWeb::nodes[4]->inputR[0] = PyWeb::nodes[3];
+	PyWeb::nodes[4]->inputV[0].second = 1;
 
 	/*
 	while (ChokoLait::alive()) {
