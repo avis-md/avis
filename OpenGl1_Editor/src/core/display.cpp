@@ -4,6 +4,7 @@ int Display::width = 512;
 int Display::height = 512;
 glm::mat3 Display::uiMatrix = glm::mat3();
 NativeWindow* Display::window = nullptr;
+CURSORTYPE Display::cursorType;
 
 void Display::Resize(int x, int y, bool maximize) {
 #ifdef PLATFORM_WIN
@@ -12,4 +13,8 @@ void Display::Resize(int x, int y, bool maximize) {
 #elif defined(PLATFORM_ADR)
 	ANativeWindow_setBuffersGeometry(window, x, y, 0);
 #endif
+}
+
+void Display::SetCursor(CURSORTYPE type) {
+	cursorType = type;
 }

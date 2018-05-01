@@ -43,7 +43,7 @@ void PyWeb::Update() {
 
 void PyWeb::Draw() {
 	PyNode::width = 220;
-	Engine::DrawQuad(PyBrowse::expandPos, 0, Display::width, Display::height, white(0.8f, 0.15f));
+	Engine::DrawQuad(PyBrowse::expandPos, 0, Display::width, Display::height, white(0.8f, 0.05f));
 	Engine::BeginStencil(PyBrowse::expandPos, 0, Display::width, Display::height);
 	byte ms = Input::mouse0State;
 	if (executing) {

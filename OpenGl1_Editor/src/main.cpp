@@ -64,6 +64,8 @@ void updateFunc() {
 	else if (Input::KeyHold(Key_O)) center.z += 1 * Time::delta;
 
 	if (camz0 != camz || rz0 != rz || rw0 != rw || center0 != center) Scene::dirty = true;
+
+	//std::cout << ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y) << std::endl;
 }
 
 void rendFunc() {
@@ -108,38 +110,6 @@ void rendFunc() {
 	}
 }
 
-uint fpsc, fps;
-float told;
-void paintfunc() {
-	if (++fpsc == 100) {
-		fps = (uint)roundf(100.0f / (Time::time - told));
-		told = Time::time;
-		fpsc = 0;
-	}
-	UI::Label(10, Display::height - 20, 12, "fps: " + std::to_string(fps), font, white());
-	if (Engine::Button(10, 10, 120, 18, white(1, 0.5f), drawMesh? "Spheres" : "Lines", 12, font, white(), true) == MOUSE_RELEASE) {
-		drawMesh = !drawMesh;
-	}
-	if (Engine::Button(10, 30, 120, 18, white(1, 0.5f), "Reload colors", 12, font, white(), true) == MOUSE_RELEASE) {
-		Gromacs::LoadFiles();
-		gro->ReloadCols();
-	}
-	if (Engine::Button(10, 50, 120, 18, white(1, 0.5f), "Reset view", 12, font, white(), true) == MOUSE_RELEASE) {
-		rw = rz = 0;
-		center = Vec3();
-	}
-
-	UI::Label(10, 80, 12, "sky str", font, white());
-	auto& set = Scene::active->settings;
-	set.skyStrength = Engine::DrawSliderFill(80, 80, 100, 14, 0, 2, set.skyStrength, white(1, 0.3f), white());
-	UI::Label(10, 200, 12, "rep x", font, white());
-	repx = Engine::DrawSliderFill(80, 200, 100, 14, 0, 5, repx, white(1, 0.3f), white());
-	UI::Label(10, 220, 12, "rep y", font, white());
-	repy = Engine::DrawSliderFill(80, 220, 100, 14, 0, 5, repy, white(1, 0.3f), white());
-	UI::Label(10, 240, 12, "rep z", font, white());
-	repz = Engine::DrawSliderFill(80, 240, 100, 14, 0, 5, repz, white(1, 0.3f), white());
-}
-
 #include "ui/icons.h"
 #include "py/PyWeb.h"
 
@@ -154,6 +124,15 @@ void paintfunc2() {
 		PyWeb::Draw();
 	else {
 		PyWeb::DrawSide();
+	}
+
+	if (!PyWeb::drawFull && (Input::mousePos.x < Display::width - PyWeb::expandPos)) {
+		auto id = ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y);
+		if (id) {
+			auto str = "ID: " + std::to_string(id);
+			Engine::DrawQuad(Input::mousePos.x + 12, Input::mousePos.y + 2, 5 + 8 * str.size(), 16, white(0.8f, 0.1f));
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, str, font, white());
+		}
 	}
 }
 
