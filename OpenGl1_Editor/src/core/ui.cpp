@@ -269,6 +269,15 @@ string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, cons
 	//#endif
 }
 
+Vec3 AU(Vec3 vec) {
+	if (!Display::uiMatrixIsI) {
+		vec.y = Display::height - vec.y;
+		vec = Display::uiMatrix * vec;
+		vec.y = Display::height - vec.y;
+	}
+	return vec;
+}
+
 void UI::Label(float x, float y, float s, string st, Font* font, Vec4 col, float maxw) {
 	if (s <= 0) return;
 	uint sz = st.size();
@@ -295,12 +304,12 @@ void UI::Label(float x, float y, float s, string st, Font* font, Vec4 col, float
 		char c = st[i / 4];
 		if (c == '\n') {
 			c = ' ';
-			Vec3 off = -Vec3(font->off[c].x, font->off[c].y, 0)*s*ds;
+			Vec3 off = -Vec3(font->off[c].x, font->off[c].y, 0)*s;
 			w = font->w2h[c] * s;
-			font->poss[i] = Vec3(x, y - s, 1)*ds + off;
-			font->poss[i + 1] = Vec3(x + s, y - s, 1)*ds + off;
-			font->poss[i + 2] = Vec3(x, y, 1)*ds + off;
-			font->poss[i + 3] = Vec3(x + s, y, 1)*ds + off;
+			font->poss[i] = AU(Vec3(x, y - s, 1) + off)*ds;
+			font->poss[i + 1] = AU(Vec3(x + s, y - s, 1) + off)*ds;
+			font->poss[i + 2] = AU(Vec3(x, y, 1) + off)*ds;
+			font->poss[i + 3] = AU(Vec3(x + s, y, 1) + off)*ds;
 			font->cs[i] = c;
 			font->cs[i + 1] = c;
 			font->cs[i + 2] = c;
@@ -309,12 +318,12 @@ void UI::Label(float x, float y, float s, string st, Font* font, Vec4 col, float
 			y -= s * 1.3f;
 		}
 		else {
-			Vec3 off = -Vec3(font->off[c].x, font->off[c].y, 0)*s*ds;
+			Vec3 off = -Vec3(font->off[c].x, font->off[c].y, 0)*s;
 			w = font->w2h[c] * s;
-			font->poss[i] = Vec3(x, y - s, 1)*ds + off;
-			font->poss[i + 1] = Vec3(x + s, y - s, 1)*ds + off;
-			font->poss[i + 2] = Vec3(x, y, 1)*ds + off;
-			font->poss[i + 3] = Vec3(x + s, y, 1)*ds + off;
+			font->poss[i] = AU(Vec3(x, y - s, 1) + off)*ds;
+			font->poss[i + 1] = AU(Vec3(x + s, y - s, 1) + off)*ds;
+			font->poss[i + 2] = AU(Vec3(x, y, 1) + off)*ds;
+			font->poss[i + 3] = AU(Vec3(x + s, y, 1) + off)*ds;
 			font->cs[i] = c;
 			font->cs[i + 1] = c;
 			font->cs[i + 2] = c;

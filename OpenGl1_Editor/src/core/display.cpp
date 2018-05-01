@@ -3,6 +3,7 @@
 int Display::width = 512;
 int Display::height = 512;
 glm::mat3 Display::uiMatrix = glm::mat3();
+bool Display::uiMatrixIsI = true;
 NativeWindow* Display::window = nullptr;
 CURSORTYPE Display::cursorType;
 

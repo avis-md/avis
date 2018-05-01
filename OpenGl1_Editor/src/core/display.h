@@ -14,6 +14,7 @@ public:
 	static int width, height;
 	const static uint dpi = 96;
 	static glm::mat3 uiMatrix;
+	static bool uiMatrixIsI;
 
 	static void Resize(int x, int y, bool maximize = false);
 

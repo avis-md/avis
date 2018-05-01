@@ -233,10 +233,10 @@ void PyWeb::Draw() {
 }
 
 void PyWeb::DrawSide() {
+	Engine::DrawQuad(Display::width - expandPos, 0, 180, Display::height, white(0.9f, 0.15f));
 	if (expanded) {
 		float w = 180;
 		PyNode::width = w - 2;
-		Engine::DrawQuad(Display::width - expandPos, 0, w, Display::height, white(0.8f, 0.15f));
 		UI::Label(Display::width - expandPos + 5, 1, 12, "Analysis", PyNode::font, white());
 
 		if (Engine::Button(Display::width - expandPos + 109, 1, 70, 16, white(1, 0.4f), "Edit", 12, PyNode::font, white(), true) == MOUSE_RELEASE)
@@ -258,14 +258,14 @@ void PyWeb::DrawSide() {
 			poss.y += n->DrawSide();
 		}
 		//Engine::EndStencil();
-		Engine::DrawQuad(Display::width - expandPos - 16, Display::height - 16, 16, 16, white(0.8f, 0.2f));
+		Engine::DrawQuad(Display::width - expandPos - 16, Display::height - 16, 16, 16, white(0.9f, 0.15f));
 		if (Engine::Button(Display::width - expandPos - 16, Display::height - 16, 16, 16, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = min(expandPos + 1500 * Time::delta, 180.0f);
 	}
 	else {
-		Engine::DrawQuad(Display::width - expandPos, 0, expandPos, Display::height, white(0.8f, 0.2f));
-		if (Engine::Button(Display::width - expandPos - 110, Display::height - 16, 110, 16, white(0.8f, 0.2f), white(0.8f, 0.2f), white(0.8f, 0.2f)) == MOUSE_RELEASE)
+		Engine::DrawQuad(Display::width - expandPos, 0, expandPos, Display::height, white(0.9f, 0.15f));
+		if (Engine::Button(Display::width - expandPos - 110, Display::height - 16, 110, 16, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(Display::width - expandPos - 110, Display::height - 16, 16, 16, Icons::expand);
 		UI::Label(Display::width - expandPos - 92, Display::height - 15, 12, "Analysis", PyNode::font, white());

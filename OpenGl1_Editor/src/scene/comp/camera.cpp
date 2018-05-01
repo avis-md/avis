@@ -138,7 +138,6 @@ void Camera::InitShaders() {
 	glBindVertexArray(0);
 
 	Light::ScanParams();
-	ReflectiveQuad::ScanParams();
 }
 
 void Camera::UpdateCamVerts() {}

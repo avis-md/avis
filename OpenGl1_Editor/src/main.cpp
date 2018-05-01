@@ -42,31 +42,6 @@ Mesh* MakeConnMesh(int res) {
 	return new Mesh(verts, norms, tris);
 }
 
-void updateFunc() {
-	float camz0 = camz;
-	float rz0 = rz;
-	float rw0 = rw;
-	Vec3 center0 = center;
-	if (Input::KeyHold(Key_UpArrow)) camz -= 10 * Time::delta;
-	else if (Input::KeyHold(Key_DownArrow)) camz += 10 * Time::delta;
-	camz = max(camz, 0.0f);
-	if (Input::KeyHold(Key_W)) rw -= 100 * Time::delta;
-	else if (Input::KeyHold(Key_S)) rw += 100 * Time::delta;
-	//camz = Clamp<float>(camz, 0.5f, 10);
-	if (Input::KeyHold(Key_A)) rz -= 100 * Time::delta;
-	else if (Input::KeyHold(Key_D)) rz += 100 * Time::delta;
-	//camz = Clamp<float>(camz, 0.5f, 10);
-	if (Input::KeyHold(Key_J)) center.x -= 1 * Time::delta;
-	else if (Input::KeyHold(Key_L)) center.x += 1 * Time::delta;
-	if (Input::KeyHold(Key_I)) center.y -= 1 * Time::delta;
-	else if (Input::KeyHold(Key_K)) center.y += 1 * Time::delta;
-	if (Input::KeyHold(Key_U)) center.z -= 1 * Time::delta;
-	else if (Input::KeyHold(Key_O)) center.z += 1 * Time::delta;
-
-	if (camz0 != camz || rz0 != rz || rw0 != rw || center0 != center) Scene::dirty = true;
-
-}
-
 void rendFunc() {
 	MVP::Switch(false);
 	MVP::Clear();
@@ -109,24 +84,47 @@ void rendFunc() {
 	}
 }
 
+void updateFunc() {
+	float camz0 = camz;
+	float rz0 = rz;
+	float rw0 = rw;
+	Vec3 center0 = center;
+	if (Input::KeyHold(Key_UpArrow)) camz -= 10 * Time::delta;
+	else if (Input::KeyHold(Key_DownArrow)) camz += 10 * Time::delta;
+	camz = max(camz, 0.0f);
+	if (Input::KeyHold(Key_W)) rw -= 100 * Time::delta;
+	else if (Input::KeyHold(Key_S)) rw += 100 * Time::delta;
+	//camz = Clamp<float>(camz, 0.5f, 10);
+	if (Input::KeyHold(Key_A)) rz -= 100 * Time::delta;
+	else if (Input::KeyHold(Key_D)) rz += 100 * Time::delta;
+	//camz = Clamp<float>(camz, 0.5f, 10);
+	if (Input::KeyHold(Key_J)) center.x -= 1 * Time::delta;
+	else if (Input::KeyHold(Key_L)) center.x += 1 * Time::delta;
+	if (Input::KeyHold(Key_I)) center.y -= 1 * Time::delta;
+	else if (Input::KeyHold(Key_K)) center.y += 1 * Time::delta;
+	if (Input::KeyHold(Key_U)) center.z -= 1 * Time::delta;
+	else if (Input::KeyHold(Key_O)) center.z += 1 * Time::delta;
+
+	if (camz0 != camz || rz0 != rz || rw0 != rw || center0 != center) Scene::dirty = true;
+
+}
+
 #include "ui/icons.h"
 #include "py/PyWeb.h"
-
-PyNode *node, *node2;
+#include "md/ParMenu.h"
 
 void paintfunc2() {
-	//Engine::DrawQuad(0, 0, Display::width, Display::height, white(1, 0.15f));
-
 	PyWeb::Update();
 	if (PyWeb::drawFull)
 		PyWeb::Draw();
 	else {
+		ParMenu::Draw();
 		PyWeb::DrawSide();
 	}
 
 	PyWeb::hlId1 = 0;
 	PyWeb::hlId2 = 0;
-	if (!PyWeb::drawFull && (Input::mousePos.x < Display::width - PyWeb::expandPos)) {
+	if (!PyWeb::drawFull && (Input::mousePos.x > ParMenu::expandPos + 16) && (Input::mousePos.x < Display::width - PyWeb::expandPos)) {
 		auto id = ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y);
 		if (id) {
 			PyWeb::hlId1 = id;
@@ -136,6 +134,7 @@ void paintfunc2() {
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, str, font, white());
 		}
 	}
+
 }
 
 int main(int argc, char **argv)
@@ -151,6 +150,7 @@ int main(int argc, char **argv)
 	PyBrowse::Scan();
 	
 	PyWeb::Init();
+	ParMenu::font = font;
 
 	/*
 	while (ChokoLait::alive()) {
@@ -175,6 +175,7 @@ int main(int argc, char **argv)
 		ChokoLait::Update(updateFunc);
 		//ChokoLait::mainCamera->object->transform.localPosition(Vec3(0, 0, -camz));
 
+		//ChokoLait::Paint(nullptr, paintfunc2);
 		ChokoLait::Paint(rendFunc, paintfunc2);
 	}
 	//*/

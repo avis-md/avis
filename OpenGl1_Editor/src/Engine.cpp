@@ -418,9 +418,11 @@ void Engine::RotateUI(float aa, Vec2 point) {
 	float a = -3.1415926535f*aa / 180.0f;
 	//Display::uiMatrix = glm::mat3(1, 0, 0, 0, 1, 0, point2.x * 2 - 1, point2.y * 2 - 1, 1)*glm::mat3(cos(a), -sin(a), 0, sin(a), cos(a), 0, 0, 0, 1)*glm::mat3(1, 0, 0, 0, 1, 0, -point2.x * 2 + 1, -point2.y * 2 + 1, 1)*Display::uiMatrix;
 	Display::uiMatrix = glm::mat3(1, 0, 0, 0, 1, 0, point.x, point.y, 1)*glm::mat3(cos(a), -sin(a), 0, sin(a), cos(a), 0, 0, 0, 1)*glm::mat3(1, 0, 0, 0, 1, 0, -point.x, -point.y, 1)*Display::uiMatrix;
+	Display::uiMatrixIsI = false;
 }
 void Engine::ResetUIMatrix() {
 	Display::uiMatrix = glm::mat3();
+	Display::uiMatrixIsI = true;
 }
 
 GLint Engine::drawQuadLocs[] = { 0, 0, 0 };

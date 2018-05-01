@@ -14,17 +14,17 @@ typedef void (*renderFunc)(void);
 #include "scene/comp/meshrenderer.h"
 //#include "scene/comp/texturerenderer.h"
 //#include "scene/comp/voxelrenderer.h"
-#include "scene/comp/particlesystem.h"
+//#include "scene/comp/particlesystem.h"
 
 class Armature;
 class ArmatureBone;
 
 #include "scene/comp/skinnedmeshrenderer.h"
-#include "scene/comp/arrayrenderer.h"
+//#include "scene/comp/arrayrenderer.h"
 #include "scene/comp/light.h"
-#include "scene/comp/reflquad.h"
-#include "scene/comp/reflprobe.h"
-#include "scene/comp/ik.h"
+//#include "scene/comp/reflquad.h"
+//#include "scene/comp/reflprobe.h"
+//#include "scene/comp/ik.h"
 #include "scene/comp/animator.h"
 #include "scene/comp/armature.h"
 #include "scene/comp/scenescript.h"
