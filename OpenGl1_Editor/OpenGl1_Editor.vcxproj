@@ -265,6 +265,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\makegen.cpp" />
     <ClCompile Include="src\md\ParMenu.cpp" />
+    <ClCompile Include="src\md\Particles.cpp" />
     <ClCompile Include="src\py\nodes\pynode_inputs.cpp" />
     <ClCompile Include="src\py\nodes\pynode_plot.cpp" />
     <ClCompile Include="src\py\pybrowse.cpp" />

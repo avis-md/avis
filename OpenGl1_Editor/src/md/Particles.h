@@ -24,8 +24,12 @@ struct ResidueList { //residues with the same name
 
 class Particles {
 public:
-	ResidueList* residueLists;
-	uint residueListSz;
-	Particle* particles;
-	uint particleSz;
+	static ResidueList* residueLists;
+	static uint residueListSz;
+	static Particle* particles;
+	static uint particleSz;
+	
+	static GLuint colorPalleteTex, colorIndexTex;
+
+	static void Init();
 };

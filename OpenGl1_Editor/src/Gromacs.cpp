@@ -135,9 +135,6 @@ Gromacs::Gromacs(const string& file) : frames(), boundingBox() {
 
 	glGenVertexArrays(1, &_vao);
 	glGenBuffers(1, &_vboV);
-	glGenBuffers(1, &_vboC);
-	glBindBuffer(GL_ARRAY_BUFFER, _vboC);
-	glBufferData(GL_ARRAY_BUFFER, 10000000 * sizeof(Vec3), buf, GL_STATIC_DRAW);
 
 	for (uint i = 0; i < 10000000; i++)
 		((Vec3*)buf)[i] = Vec3((i % 100), ((i % 10000) / 100), (i / 10000)) * 0.1f;
@@ -150,8 +147,6 @@ Gromacs::Gromacs(const string& file) : frames(), boundingBox() {
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, _vboV);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, _vboC);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
