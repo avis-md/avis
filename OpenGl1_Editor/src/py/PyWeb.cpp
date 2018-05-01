@@ -1,5 +1,4 @@
 #include "PyWeb.h"
-#include "pybrowse.h"
 #include "ui/icons.h"
 
 PyNode* PyWeb::selConnNode = nullptr;
@@ -10,7 +9,7 @@ PyScript* PyWeb::selScript = nullptr;
 std::vector<PyNode*> PyWeb::nodes;
 
 bool PyWeb::drawFull = false, PyWeb::expanded = true, PyWeb::executing = false;
-float PyWeb::maxScroll, PyWeb::scrollPos = 0;
+float PyWeb::maxScroll, PyWeb::scrollPos = 0, PyWeb::expandPos = 150.0f;
 
 std::thread* PyWeb::execThread = nullptr;
 
@@ -35,7 +34,7 @@ void PyWeb::Update() {
 		//	for (auto n : nodes) {
 		//		if (n->selected) n->pos += Input::mouseDelta;
 		//	}
-		//}
+//}
 	}
 	if (!executing && execThread) {
 		if (execThread->joinable()) execThread->join();
@@ -65,10 +64,11 @@ void PyWeb::Draw() {
 			maxoff = 220;
 			if (selScript) {
 				if (Engine::Button(poss.x, 100, maxoff, 30, white(0.3f, 0.05f)) == MOUSE_RELEASE) {
-					iter = i-1;
+					iter = i - 1;
 					iterTile = true;
 					iterTileTop = true;
 				}
+				UI::Texture(poss.x + 95, 100, 30, 30, Icons::expand, white(0.2f));
 				poss.y = 133;
 			}
 		}
@@ -85,9 +85,9 @@ void PyWeb::Draw() {
 				iterTile = true;
 				iterTileTop = false;
 			}
-			UI::Texture(poss.x - 15 + maxoff/2, poss.y + offy + 3, 30, 30, Icons::expand, white(0.2f));
+			UI::Texture(poss.x - 15 + maxoff / 2, poss.y + offy + 3, 30, 30, Icons::expand, white(0.2f));
 			offy += 31;
-			if ((ns == i + 1) || !nodes[i+1]->canTile) {
+			if ((ns == i + 1) || !nodes[i + 1]->canTile) {
 				if (Engine::Button(poss.x + maxoff + 10, 100, 30, 200, white(0.3f, 0.05f)) == MOUSE_RELEASE) {
 					iter = i;
 					iterTile = false;
@@ -112,17 +112,39 @@ void PyWeb::Draw() {
 	Input::mouse0State = ms;
 	Input::mouse0 = (Input::mouse0State == 1) || (Input::mouse0State == 2);
 	Engine::EndStencil();
-	
+
 	if (Input::mouse0State == MOUSE_UP) {
-		if (iter >= 0) {
-			auto pn = new PyNode(selScript);
-			if (iterTile) {
-				if (iterTileTop) nodes[iter + 1]->canTile = true;
-				else pn->canTile = true;
+		if (selScript) {
+			if (iter >= 0) {
+				auto pn = new PyNode(selScript);
+				if (iterTile) {
+					if (iterTileTop) nodes[iter + 1]->canTile = true;
+					else pn->canTile = true;
+				}
+				nodes.insert(nodes.begin() + iter + 1, pn);
 			}
-			nodes.insert(nodes.begin() + iter + 1, pn);
+			selScript = nullptr;
 		}
-		selScript = nullptr;
+		else {
+			for (auto nn = nodes.begin(); nn != nodes.end(); nn++) {
+				auto& n = *nn;
+				if (n->op == PYNODE_OP::REMOVE) {
+					if ((nn + 1) != nodes.end()) {
+						if (!n->canTile && (*(nn + 1))->canTile)
+							(*(nn + 1))->canTile = false;
+					}
+					for (uint i = 0; i < n->inputR.size(); i++) {
+						if (n->inputR[i]) n->inputR[i]->outputR[n->inputV[i].second] = nullptr;
+					}
+					for (uint i = 0; i < n->outputR.size(); i++) {
+						if (n->outputR[i]) n->outputR[i]->inputR[n->outputV[i].second] = nullptr;
+					}
+					delete(n);
+					nodes.erase(nn);
+					break;
+				}
+			}
+		}
 	}
 
 	PyBrowse::Draw();
@@ -141,38 +163,40 @@ void PyWeb::DrawSide() {
 	if (expanded) {
 		float w = 180;
 		PyNode::width = w - 2;
-		Engine::DrawQuad(Display::width - w, 0, w, Display::height, white(0.8f, 0.2f));
-		UI::Label(Display::width - w + 5, 1, 12, "Analysis", PyNode::font, white());
+		Engine::DrawQuad(Display::width - expandPos, 0, w, Display::height, white(0.8f, 0.15f));
+		UI::Label(Display::width - expandPos + 5, 1, 12, "Analysis", PyNode::font, white());
 
-		if (Engine::Button(Display::width - 71, 1, 70, 16, white(1, 0.4f), "Edit", 12, PyNode::font, white(), true) == MOUSE_RELEASE)
+		if (Engine::Button(Display::width - expandPos + 109, 1, 70, 16, white(1, 0.4f), "Edit", 12, PyNode::font, white(), true) == MOUSE_RELEASE)
 			drawFull = true;
 
-		if (Engine::Button(Display::width - w + 1, 18, 70, 16, white(1, executing ? 0.2f : 0.4f), "Run", 12, PyNode::font, white(), true) == MOUSE_RELEASE) {
+		if (Engine::Button(Display::width - expandPos + 1, 18, 70, 16, white(1, executing ? 0.2f : 0.4f), "Run", 12, PyNode::font, white(), true) == MOUSE_RELEASE) {
 
 		}
-		if (Engine::Button(Display::width - w + 72, 18, 107, 16, white(1, executing ? 0.2f : 0.4f), "Run All", 12, PyNode::font, white(), true) == MOUSE_RELEASE) {
+		if (Engine::Button(Display::width - expandPos + 72, 18, 107, 16, white(1, executing ? 0.2f : 0.4f), "Run All", 12, PyNode::font, white(), true) == MOUSE_RELEASE) {
 			PyWeb::Execute();
 		}
-		UI::Texture(Display::width - w + 1, 18, 16, 16, Icons::play);
-		UI::Texture(Display::width - w + 72, 18, 16, 16, Icons::playall);
+		UI::Texture(Display::width - expandPos + 1, 18, 16, 16, Icons::play);
+		UI::Texture(Display::width - expandPos + 72, 18, 16, 16, Icons::playall);
 
 		//Engine::BeginStencil(Display::width - w, 0, 150, Display::height);
-		Vec2 poss(Display::width - w + 1, 35);
+		Vec2 poss(Display::width - expandPos + 1, 35);
 		for (auto n : nodes) {
 			n->pos = poss;
 			poss.y += n->DrawSide();
 		}
 		//Engine::EndStencil();
-		Engine::DrawQuad(Display::width - w - 16, Display::height - 16, 16, 16, white(0.8f, 0.2f));
-		if (Engine::Button(Display::width - w - 16, Display::height - 16, 16, 16, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		Engine::DrawQuad(Display::width - expandPos - 16, Display::height - 16, 16, 16, white(0.8f, 0.2f));
+		if (Engine::Button(Display::width - expandPos - 16, Display::height - 16, 16, 16, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
+		expandPos = min(expandPos + 1500 * Time::delta, 180.0f);
 	}
 	else {
-		Engine::DrawQuad(Display::width - 2, 0, 2, Display::height, white(0.8f, 0.2f));
-		if (Engine::Button(Display::width - 112, Display::height - 16, 110, 16, white(0.8f, 0.2f), white(0.8f, 0.2f), white(0.8f, 0.2f)) == MOUSE_RELEASE)
+		Engine::DrawQuad(Display::width - expandPos, 0, expandPos, Display::height, white(0.8f, 0.2f));
+		if (Engine::Button(Display::width - expandPos - 110, Display::height - 16, 110, 16, white(0.8f, 0.2f), white(0.8f, 0.2f), white(0.8f, 0.2f)) == MOUSE_RELEASE)
 			expanded = true;
-		UI::Texture(Display::width - 102, Display::height - 16, 16, 16, Icons::expand);
-		UI::Label(Display::width - 86, Display::height - 15, 12, "Analysis", PyNode::font, white());
+		UI::Texture(Display::width - expandPos - 110, Display::height - 16, 16, 16, Icons::expand);
+		UI::Label(Display::width - expandPos - 92, Display::height - 15, 12, "Analysis", PyNode::font, white());
+		expandPos = max(expandPos - 1500*Time::delta, 2.0f);
 	}
 }
 

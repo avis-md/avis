@@ -7,8 +7,8 @@ NativeWindow* Display::window = nullptr;
 
 void Display::Resize(int x, int y, bool maximize) {
 #ifdef PLATFORM_WIN
-	ShowWindow(GetActiveWindow(), maximize ? SW_MAXIMIZE : SW_NORMAL);
 	glfwSetWindowSize(window, x, y);
+	ShowWindow(GetActiveWindow(), maximize ? SW_MAXIMIZE : SW_NORMAL);
 #elif defined(PLATFORM_ADR)
 	ANativeWindow_setBuffersGeometry(window, x, y, 0);
 #endif

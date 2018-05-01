@@ -16,7 +16,12 @@ public:
 	static std::vector<PyNode*> nodes;
 	
 	static bool drawFull, expanded, executing;
-	static float maxScroll, scrollPos;
+	static float maxScroll, scrollPos, expandPos;
 	
 	static std::thread* execThread;
 };
+
+#include "pyreader.h"
+#include "pybrowse.h"
+#include "nodes/pynode_inputs.h"
+#include "nodes/pynode_plot.h"

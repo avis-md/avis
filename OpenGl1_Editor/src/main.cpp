@@ -43,6 +43,10 @@ Mesh* MakeConnMesh(int res) {
 }
 
 void updateFunc() {
+	float camz0 = camz;
+	float rz0 = rz;
+	float rw0 = rw;
+	Vec3 center0 = center;
 	if (Input::KeyHold(Key_UpArrow)) camz -= 10 * Time::delta;
 	else if (Input::KeyHold(Key_DownArrow)) camz += 10 * Time::delta;
 	camz = max(camz, 0.0f);
@@ -58,6 +62,8 @@ void updateFunc() {
 	else if (Input::KeyHold(Key_K)) center.y += 1 * Time::delta;
 	if (Input::KeyHold(Key_U)) center.z -= 1 * Time::delta;
 	else if (Input::KeyHold(Key_O)) center.z += 1 * Time::delta;
+
+	if (camz0 != camz || rz0 != rz || rw0 != rw || center0 != center) Scene::dirty = true;
 }
 
 void rendFunc() {
@@ -135,11 +141,7 @@ void paintfunc() {
 }
 
 #include "ui/icons.h"
-#include "py/pyreader.h"
-#include "py/pynode.h"
 #include "py/PyWeb.h"
-#include "py/pybrowse.h"
-#include "utils/plot.h"
 
 PyScript *scr, *scr2, *scr3;
 PyNode *node, *node2;
@@ -169,7 +171,7 @@ int main(int argc, char **argv)
 
 	scr = PyBrowse::folder.scripts[1];
 	scr2 = PyBrowse::folder.scripts[0];
-
+	
 	PyWeb::Insert(new PyNode_Inputs());
 	PyWeb::Insert(new PyNode_Inputs_ActPar());
 	PyWeb::Insert(scr);
@@ -197,6 +199,8 @@ int main(int argc, char **argv)
 	gro = new Gromacs(IO::path + "/md.gro");
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	//glPointSize(20);
+
+	Display::Resize(800, 600, false);
 
 	while (ChokoLait::alive()) {
 		ChokoLait::Update(updateFunc);

@@ -186,6 +186,7 @@ copy "C:\Users\Pua Kai\Documents\GitHub\ChokoEngine\Lait\OpenGL1_Editor.lib" "C:
       <SubSystem>Console</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <GenerateMapFile>false</GenerateMapFile>
+      <AdditionalOptions>/IGNORE:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>

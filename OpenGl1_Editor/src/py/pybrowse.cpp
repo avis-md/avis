@@ -1,7 +1,5 @@
-#include "pybrowse.h"
-#include "ui/icons.h"
-#include "pynode.h"
 #include "PyWeb.h"
+#include "ui/icons.h"
 
 PyBrowse::Folder PyBrowse::folder = Folder("py");
 bool PyBrowse::expanded = true;
@@ -65,7 +63,7 @@ void PyBrowse::Draw() {
 		Engine::DrawQuad(expandPos, Display::height - 16, 16, 16, white(1, 0.2f));
 		if (Engine::Button(expandPos, Display::height - 16, 16, 16, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
-		expandPos = min(expandPos + 1000 * Time::delta, 150.0f);
+		expandPos = min(expandPos + 1500 * Time::delta, 150.0f);
 	}
 	else {
 		Engine::DrawQuad(0, 0, expandPos, Display::height, white(0.8f, 0.15f));
@@ -73,6 +71,6 @@ void PyBrowse::Draw() {
 			expanded = true;
 		UI::Texture(expandPos, Display::height - 16, 16, 16, Icons::expand);
 		UI::Label(expandPos + 18, Display::height - 15, 12, "Python Files", PyNode::font, white());
-		expandPos = max(expandPos - 1000 * Time::delta, 0.0f);
+		expandPos = max(expandPos - 1500 * Time::delta, 0.0f);
 	}
 }

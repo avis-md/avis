@@ -613,29 +613,34 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 		glDeleteTextures(1, &d_colTex);
 		glDeleteTextures(1, &d_depthTex);
 		InitGBuffer();
+		d_w = target ? target->width : Display::width;
+		d_h = target ? target->height : Display::height;
+		Scene::dirty = true;
 	}
-	float zero[] = { 0,0,0,0 };
-	float one = 1;
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_fbo);
-	glClearBufferfv(GL_COLOR, 0, zero);
-	glClearBufferfv(GL_DEPTH, 0, &one);
-	glClearBufferfv(GL_COLOR, 1, zero);
-	glClearBufferfv(GL_COLOR, 2, zero);
-	glClearBufferfv(GL_COLOR, 3, zero);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glDepthMask(true);
-	glDisable(GL_BLEND);
-	ApplyGL();
-	MVP::Switch(false);
-	MVP::Clear();
+	if (Scene::dirty) {
+		float zero[] = { 0,0,0,0 };
+		float one = 1;
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_fbo);
+		glClearBufferfv(GL_COLOR, 0, zero);
+		glClearBufferfv(GL_DEPTH, 0, &one);
+		glClearBufferfv(GL_COLOR, 1, zero);
+		glClearBufferfv(GL_COLOR, 2, zero);
+		glClearBufferfv(GL_COLOR, 3, zero);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
+		glDepthMask(true);
+		glDisable(GL_BLEND);
+		ApplyGL();
+		MVP::Switch(false);
+		MVP::Clear();
 
-	DrawSceneObjectsOpaque(Scene::active->objects);
-	if (func) func();
-	//MVP::Switch(false);
-	//MVP::Clear();
-
+		DrawSceneObjectsOpaque(Scene::active->objects);
+		if (func) func();
+		//MVP::Switch(false);
+		//MVP::Clear();
+		Scene::dirty = false;
+	}
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(false);
 

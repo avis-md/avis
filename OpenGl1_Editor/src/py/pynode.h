@@ -1,6 +1,13 @@
 #pragma once
 #include "pyreader.h"
 
+enum class PYNODE_OP {
+	NONE,
+	LEFT,
+	RIGHT,
+	REMOVE
+};
+
 class PyNode {
 public:
 	PyNode(PyScript* scr);
@@ -14,6 +21,7 @@ public:
 
 	bool expanded = true;
 	bool canTile = false;
+	PYNODE_OP op;
 	
 	static Font* font;
 

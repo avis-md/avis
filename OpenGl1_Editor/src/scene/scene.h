@@ -12,7 +12,7 @@ public:
 	bool useFog, sunFog;
 	float fogDensity, fogSunSpread;
 	Vec4 fogColor, fogSunColor;
-
+	
 	friend class Editor;
 	friend class EB_Inspector;
 	friend class Scene;
@@ -58,6 +58,9 @@ public:
 	std::vector<Component*> _preUpdateComps;
 	std::vector<Component*> _preLUpdateComps;
 	std::vector<Component*> _preRenderComps;
+
+	static bool dirty;
+
 	static void AddObject(pSceneObject object, pSceneObject parent = nullptr);
 	static void DeleteObject(pSceneObject object);
 

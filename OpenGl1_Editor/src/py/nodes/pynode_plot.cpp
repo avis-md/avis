@@ -1,5 +1,4 @@
 #include "../PyWeb.h"
-#include "pynode_plot.h"
 #include "utils/plot.h"
 #include "ui/icons.h"
 

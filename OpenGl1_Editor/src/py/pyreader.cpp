@@ -1,4 +1,4 @@
-#include "pyreader.h"
+#include "PyWeb.h"
 
 string PyScript::Exec() {
 	for (uint i = 0; i < invarCnt; ++i) {

@@ -6,8 +6,7 @@ rCamera ChokoLait::mainCamera = rCamera();
 
 void _dieded(int i) {
 #ifdef PLATFORM_WIN
-	MessageBox(glfwGetWin32Window(Display::window), "Beep Boop, I Crashed.\
-		See Log.txt for details.", "fuck", MB_OK);
+	MessageBox(glfwGetWin32Window(Display::window), "Beep Boop, I Crashed.\nSee Log.txt for details.", "!", MB_OK);
 #endif
 }
 
@@ -69,8 +68,8 @@ void ChokoLait::Init(int scrW, int scrH) {
 		Time::startMillis = milliseconds();
 
 		glfwSetWindowSize(window, scrW, scrH);
-		ReshapeGL(window, scrW, scrH);
 		glfwShowWindow(window);
+		ReshapeGL(window, scrW, scrH);
 
 		glfwSetFramebufferSizeCallback(window, ReshapeGL);
 		glfwSetCursorPosCallback(window, MotionGL);

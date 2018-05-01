@@ -182,12 +182,12 @@ float PyNode::DrawSide() {
 
 void PyNode::DrawToolbar() {
 	if (Engine::Button(pos.x + width - 50, pos.y, 16, 16, Icons::left, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
-
+		op = PYNODE_OP::LEFT;
 	}
 	if (Engine::Button(pos.x + width - 33, pos.y, 16, 16, Icons::right, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
-
+		op = PYNODE_OP::RIGHT;
 	}
 	if (Engine::Button(pos.x + width - 16, pos.y, 16, 16, Icons::cross, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
-
+		op = PYNODE_OP::REMOVE;
 	}
 }
