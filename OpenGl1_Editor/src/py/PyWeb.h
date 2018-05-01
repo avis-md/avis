@@ -1,12 +1,13 @@
 #pragma once
-#include "Engine.h"
+#include "ChokoLait.h"
 #include "pynode.h"
 
 class PyWeb {
 public:
 	static void Insert(PyScript* scr, Vec2 pos = Vec2(100, 100));
 	static void Insert(PyNode* node, Vec2 pos = Vec2(100, 100));
-	static void Update(), Draw(), DrawSide(), Execute(), DoExecute();
+	static void Init(), Update(), Draw(), DrawSide(), Execute(), DoExecute();
+	static void blitfunc();
 	
 	static PyNode* selConnNode;
 	static uint selConnId;
@@ -18,6 +19,10 @@ public:
 	static bool drawFull, expanded, executing;
 	static float maxScroll, scrollPos, expandPos;
 	
+	static uint hlId1, hlId2;
+	static GLuint selHlProgram, selHlRProgram;
+	static GLint selHlLocs[4], selHlRLocs[5];
+
 	static std::thread* execThread;
 };
 

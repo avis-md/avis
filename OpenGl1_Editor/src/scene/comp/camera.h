@@ -1,6 +1,8 @@
 #pragma once
 #include "Engine.h"
 
+typedef void(*onBlitFunc)();
+
 class Camera : public Component {
 public:
 	Camera();
@@ -18,6 +20,10 @@ public:
 	void Render(RenderTexture* target = nullptr, renderFunc func = nullptr);
 
 	uint GetIdAt(uint x, uint y);
+	
+	onBlitFunc onBlit;
+	GLuint d_fbo, d_colfbo, d_texs[4], d_idTex, d_depthTex, d_colFbo, d_colTex;
+	uint d_w, d_h;
 
 	friend int main(int argc, char **argv);
 	friend void Serialize(Editor* e, SceneObject* o, std::ofstream* stream);
@@ -37,6 +43,7 @@ public:
 	friend class ReflectionProbe;
 	friend class CubeMap;
 	friend class Color;
+	friend class PyWeb;
 	_allowshared(Camera);
 protected:
 	Camera(std::ifstream& stream, SceneObject* o, long pos = -1);
@@ -63,8 +70,6 @@ protected:
 
 	Vec3 camVerts[6];
 	static const int camVertsIds[19];
-	GLuint d_fbo, d_colfbo, d_texs[4], d_idTex, d_depthTex, d_colFbo, d_colTex;
-	uint d_w, d_h;
 	static GLuint d_probeMaskProgram, d_probeProgram, d_blurProgram, d_blurSBProgram, d_skyProgram, d_pLightProgram, d_sLightProgram, d_sLightCSProgram, d_sLightRSMProgram, d_sLightRSMFluxProgram;
 	static GLuint d_reflQuadProgram;
 	static GLint d_skyProgramLocs[];

@@ -65,7 +65,6 @@ void updateFunc() {
 
 	if (camz0 != camz || rz0 != rz || rw0 != rw || center0 != center) Scene::dirty = true;
 
-	//std::cout << ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y) << std::endl;
 }
 
 void rendFunc() {
@@ -113,7 +112,6 @@ void rendFunc() {
 #include "ui/icons.h"
 #include "py/PyWeb.h"
 
-PyScript *scr, *scr2, *scr3;
 PyNode *node, *node2;
 
 void paintfunc2() {
@@ -126,9 +124,13 @@ void paintfunc2() {
 		PyWeb::DrawSide();
 	}
 
+	PyWeb::hlId1 = 0;
+	PyWeb::hlId2 = 0;
 	if (!PyWeb::drawFull && (Input::mousePos.x < Display::width - PyWeb::expandPos)) {
 		auto id = ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y);
 		if (id) {
+			PyWeb::hlId1 = id;
+			//PyWeb::hlId2 = id;
 			auto str = "ID: " + std::to_string(id);
 			Engine::DrawQuad(Input::mousePos.x + 12, Input::mousePos.y + 2, 5 + 8 * str.size(), 16, white(0.8f, 0.1f));
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, str, font, white());
@@ -147,20 +149,8 @@ int main(int argc, char **argv)
 	PyNode::font = font;
 
 	PyBrowse::Scan();
-
-	scr = PyBrowse::folder.scripts[1];
-	scr2 = PyBrowse::folder.scripts[0];
 	
-	PyWeb::Insert(new PyNode_Inputs());
-	PyWeb::Insert(new PyNode_Inputs_ActPar());
-	PyWeb::Insert(scr);
-	PyWeb::Insert(scr2);
-	PyWeb::Insert(new PyNode_Plot());
-	PyWeb::nodes[2]->outputR[0] = PyWeb::nodes[3];
-	PyWeb::nodes[3]->inputR[0] = PyWeb::nodes[2];
-	PyWeb::nodes[3]->outputR[1] = PyWeb::nodes[4];
-	PyWeb::nodes[4]->inputR[0] = PyWeb::nodes[3];
-	PyWeb::nodes[4]->inputV[0].second = 1;
+	PyWeb::Init();
 
 	/*
 	while (ChokoLait::alive()) {

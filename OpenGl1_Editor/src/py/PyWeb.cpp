@@ -1,6 +1,47 @@
 #include "PyWeb.h"
 #include "ui/icons.h"
 
+uint PyWeb::hlId1, PyWeb::hlId2;
+GLuint PyWeb::selHlProgram, PyWeb::selHlRProgram;
+GLint PyWeb::selHlLocs[] = {}, PyWeb::selHlRLocs[] = {};
+
+void PyWeb::blitfunc() {
+	if (!!hlId1) {
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		if (Scene::active->settings.sky == nullptr || !Scene::active->settings.sky->loaded) return;
+
+		glBindVertexArray(Camera::fullscreenVao);
+
+		if (!hlId2) {
+			glUseProgram(selHlProgram);
+
+			glUniform2f(selHlLocs[0], Display::width, Display::height);
+			glUniform1i(selHlLocs[1], (int)hlId1);
+			glUniform1i(selHlLocs[2], 0);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_idTex);
+			glUniform3f(selHlLocs[3], 1.0f, 1.0f, 0.0f);
+		}
+		else {
+			glUseProgram(selHlRProgram);
+
+			glUniform2f(selHlRLocs[0], Display::width, Display::height);
+			glUniform1i(selHlRLocs[1], (int)hlId1);
+			glUniform1i(selHlRLocs[2], (int)hlId2);
+			glUniform1i(selHlRLocs[3], 0);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_idTex);
+			glUniform3f(selHlRLocs[4], 1.0f, 1.0f, 0.0f);
+		}
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, Camera::fullscreenIndices);
+
+		glUseProgram(0);
+		glBindVertexArray(0);
+	}
+}
+
 PyNode* PyWeb::selConnNode = nullptr;
 uint PyWeb::selConnId = 0;
 bool PyWeb::selConnIdIsOut = false, PyWeb::selPreClear = false;
@@ -20,6 +61,38 @@ void PyWeb::Insert(PyScript* scr, Vec2 pos) {
 void PyWeb::Insert(PyNode* node, Vec2 pos) {
 	nodes.push_back(node);
 	nodes.back()->pos = pos;
+}
+
+void PyWeb::Init() {
+	ChokoLait::mainCamera->onBlit = blitfunc;
+
+	auto shd = new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText("D:\\selectorFrag.txt"));
+	selHlProgram = shd->pointer;
+	selHlLocs[0] = glGetUniformLocation(selHlProgram, "screenSize");
+	selHlLocs[1] = glGetUniformLocation(selHlProgram, "myId");
+	selHlLocs[2] = glGetUniformLocation(selHlProgram, "idTex");
+	selHlLocs[3] = glGetUniformLocation(selHlProgram, "hlCol");
+	shd = new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText("D:\\selectorRangeFrag.txt"));
+	selHlRProgram = shd->pointer;
+	selHlRLocs[0] = glGetUniformLocation(selHlRProgram, "screenSize");
+	selHlRLocs[1] = glGetUniformLocation(selHlRProgram, "myId1");
+	selHlRLocs[2] = glGetUniformLocation(selHlRProgram, "myId2");
+	selHlRLocs[3] = glGetUniformLocation(selHlRProgram, "idTex");
+	selHlRLocs[4] = glGetUniformLocation(selHlRProgram, "hlCol");
+
+	auto scr = PyBrowse::folder.scripts[1];
+	auto scr2 = PyBrowse::folder.scripts[0];
+	
+	Insert(new PyNode_Inputs());
+	Insert(new PyNode_Inputs_ActPar());
+	Insert(scr);
+	Insert(scr2);
+	Insert(new PyNode_Plot());
+	nodes[2]->outputR[0] = nodes[3];
+	nodes[3]->inputR[0] = nodes[2];
+	nodes[3]->outputR[1] = nodes[4];
+	nodes[4]->inputR[0] = nodes[3];
+	nodes[4]->inputV[0].second = 1;
 }
 
 void PyWeb::Update() {

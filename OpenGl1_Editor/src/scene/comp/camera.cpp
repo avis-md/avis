@@ -67,15 +67,6 @@ void Camera::GenShaderFromPath(const string& pathv, const string& pathf, GLuint*
 void Camera::GenShaderFromPath(GLuint vertex_shader, const string& path, GLuint* program) {
 	GLuint fragment_shader;
 	std::string err;
-	/*
-	std::ifstream strm(path);
-	if (strm.fail()) {
-	Debug::Error("Cam Shader Compiler", "fs frag not found!");
-	abort();
-	}
-	std::stringstream ss;
-	ss << strm.rdbuf();
-	*/
 	if (!Shader::LoadShader(GL_FRAGMENT_SHADER, DefaultResources::GetStr(path), fragment_shader, &err)) {
 		Debug::Error("Cam Shader Compiler", path + "! " + err);
 		abort();
@@ -150,100 +141,4 @@ void Camera::InitShaders() {
 	ReflectiveQuad::ScanParams();
 }
 
-void Camera::UpdateCamVerts() {
-#ifdef IS_EDITOR
-	Vec3 cst = Vec3(cos(fov*0.5f * 3.14159265f / 180), sin(fov*0.5f * 3.14159265f / 180), tan(fov*0.5f * 3.14159265f / 180))*cos(fov*0.618f * 3.14159265f / 180);
-	camVerts[1] = Vec3(cst.x, cst.y, 1 - cst.z) * 2.0f;
-	camVerts[2] = Vec3(-cst.x, cst.y, 1 - cst.z) * 2.0f;
-	camVerts[3] = Vec3(cst.x, -cst.y, 1 - cst.z) * 2.0f;
-	camVerts[4] = Vec3(-cst.x, -cst.y, 1 - cst.z) * 2.0f;
-	camVerts[5] = Vec3(0, cst.y * 1.5f, 1 - cst.z) * 2.0f;
-#endif
-}
-
-#ifdef IS_EDITOR
-void Camera::DrawEditor(EB_Viewer* ebv, GLuint shader) {
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, &camVerts[0]);
-	glLineWidth(1);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glColor4f(0, 0, 0, 1);
-	glDrawElements(GL_LINES, 16, GL_UNSIGNED_INT, &camVertsIds[0]);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, &camVertsIds[16]);
-	glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-void Camera::DrawInspector(Editor* e, Component* c, Vec4 v, uint& pos) {
-	Camera* cam = (Camera*)c;
-	if (DrawComponentHeader(e, v, pos, this)) {
-		UI::Label(v.r + 2, v.g + pos + 17, 12, "Field of view", e->font, white());
-		cam->fov = TryParse(UI::EditText(v.r + v.b * 0.3f, v.g + pos + 17, v.b * 0.3f - 1, 16, 12, grey1(), std::to_string(cam->fov), e->font, true, nullptr, white()), cam->fov);
-		cam->fov = Engine::DrawSliderFill(v.r + v.b*0.6f, v.g + pos + 17, v.b * 0.4f - 1, 16, 0.1f, 179.9f, cam->fov, grey1(), white());
-		UI::Label(v.r + 2, v.g + pos + 35, 12, "Frustrum", e->font, white());
-		UI::Label(v.r + 4, v.g + pos + 47, 12, "X", e->font, white());
-		Engine::DrawQuad(v.r + 20, v.g + pos + 47, v.b*0.3f - 20, 16, grey1());
-		UI::Label(v.r + v.b*0.3f + 4, v.g + pos + 47, 12, "Y", e->font, white());
-		Engine::DrawQuad(v.r + v.b*0.3f + 20, v.g + pos + 47, v.b*0.3f - 20, 16, grey1());
-		UI::Label(v.r + 4, v.g + pos + 64, 12, "W", e->font, white());
-		Engine::DrawQuad(v.r + 20, v.g + pos + 64, v.b*0.3f - 20, 16, grey1());
-		UI::Label(v.r + v.b*0.3f + 4, v.g + pos + 64, 12, "H", e->font, white());
-		Engine::DrawQuad(v.r + v.b*0.3f + 20, v.g + pos + 64, v.b*0.3f - 20, 16, grey1());
-		float dh = ((v.b*0.35f - 1)*Display::height / Display::width) - 1;
-		Engine::DrawQuad(v.r + v.b*0.65f, v.g + pos + 35, v.b*0.35f - 1, dh, grey1());
-		Engine::DrawQuad(v.r + v.b*0.65f + ((v.b*0.35f - 1)*screenPos.x), v.g + pos + 35 + dh*screenPos.y, (v.b*0.35f - 1)*screenPos.w, dh*screenPos.h, grey2());
-		pos += (uint)max(37 + dh, 87.0f);
-		UI::Label(v.r + 2, v.g + pos + 1, 12, "Filtering", e->font, white());
-		std::vector<string> clearNames = { "None", "Color and Depth", "Depth only", "Skybox" };
-		if (Engine::EButton(e->editorLayer == 0, v.r + v.b * 0.3f, v.g + pos + 1, v.b * 0.7f - 1, 14, grey2(), clearNames[clearType], 12, e->font, white()) == MOUSE_PRESS) {
-			e->RegisterMenu(nullptr, "", clearNames, { &_SetClear0, &_SetClear1, &_SetClear2, &_SetClear3 }, 0, Vec2(v.r + v.b * 0.3f, v.g + pos));
-		}
-		UI::Label(v.r + 2, v.g + pos + 17, 12, "Target", e->font, white());
-		e->DrawAssetSelector(v.r + v.b * 0.3f, v.g + pos + 17, v.b*0.7f, 16, grey1(), ASSETTYPE_TEXTURE_REND, 12, e->font, &_tarRT, nullptr, this);
-		pos += 34;
-		uint ess = effects.size();
-		UI::Label(v.r + 2, v.g + pos, 12, "Effects: " + std::to_string(ess), e->font, white());
-		pos += 17;
-		Engine::DrawQuad(v.r + 2, v.g + pos, v.b - 4, 17 * ess + 2.0f, grey1()*0.5f);
-		int pendingDel = -1;
-		for (uint es = 0; es < ess; es++) {
-			if (Engine::EButton(e->editorLayer == 0, v.r + 4, v.g + pos + 1, 16, 16, e->tex_buttonX, white()) == MOUSE_RELEASE) {
-				pendingDel = es;
-			}
-			e->DrawAssetSelector(v.r + 21, v.g + pos + 1, v.b - 24, 16, grey1(), ASSETTYPE_CAMEFFECT, 12, e->font, &_effects[es], nullptr, this);
-			pos += 17;
-		}
-		pos += 3;
-		if (Engine::EButton(e->editorLayer == 0, v.r + 2, v.g + pos, 14, 14, e->tex_buttonPlus, white()) == MOUSE_RELEASE) {
-			effects.push_back(nullptr);
-			_effects.push_back(-1);
-		}
-		if (pendingDel > -1) {
-			effects.erase(effects.begin() + pendingDel);
-			_effects.erase(_effects.begin() + pendingDel);
-		}
-	}
-	else pos += 17;
-}
-
-void Camera::Serialize(Editor* e, std::ofstream* stream) {
-	_StreamWrite(&fov, stream, 4);
-	_StreamWrite(&screenPos.x, stream, 4);
-	_StreamWrite(&screenPos.y, stream, 4);
-	_StreamWrite(&screenPos.w, stream, 4);
-	_StreamWrite(&screenPos.h, stream, 4);
-}
-
-void Camera::_SetClear0(EditorBlock* b) {
-	Editor::instance->selected->GetComponent<Camera>()->clearType = CAM_CLEAR_NONE;
-}
-void Camera::_SetClear1(EditorBlock* b) {
-	Editor::instance->selected->GetComponent<Camera>()->clearType = CAM_CLEAR_COLOR;
-}
-void Camera::_SetClear2(EditorBlock* b) {
-	Editor::instance->selected->GetComponent<Camera>()->clearType = CAM_CLEAR_DEPTH;
-}
-void Camera::_SetClear3(EditorBlock* b) {
-	Editor::instance->selected->GetComponent<Camera>()->clearType = CAM_CLEAR_SKY;
-}
-#endif
+void Camera::UpdateCamVerts() {}
