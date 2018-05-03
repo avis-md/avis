@@ -1,5 +1,18 @@
 #include "Particles.h"
 
+ResidueList* Particles::residueLists;
+uint Particles::residueListSz;
+Particle* Particles::particles;
+uint Particles::particleSz;
+uint Particles::connSz;
+
+GLuint Particles::colorPalleteTex;
+
+GLuint Particles::posVao;
+GLuint Particles::posBuffer;
+GLuint Particles::connBuffer;
+GLuint Particles::colIdBuffer;
+GLuint Particles::posTexBuffer, Particles::connTexBuffer, Particles::colorIdTexBuffer;
 
 void Particles::Init() {
 
@@ -14,20 +27,32 @@ void Particles::Init() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
 
-	uint* i = new uint[5000 * 1250];
-	for (uint a = 0; a < 5000 * 1250; a++) {
-		i[a] = 1 << 16 + 2 << 8 + 1;
+void Particles::Clear() {
+	if (particles) {
+		delete[](residueLists);
+		delete[](particles);
+		glDeleteBuffers(1, &posBuffer);
+		glDeleteBuffers(1, &connBuffer);
+		glDeleteVertexArrays(1, &posVao);
+		glDeleteTextures(1, &posTexBuffer);
+		glDeleteTextures(1, &connTexBuffer);
 	}
+}
 
-	glGenTextures(1, &colorIndexTex);
-	glBindTexture(GL_TEXTURE_2D, colorIndexTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 5000, 5000, 0, GL_RGBA, GL_UNSIGNED_BYTE, i);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glBindTexture(GL_TEXTURE_2D, 0);
+void Particles::GenTexBufs() {
+	glGenTextures(1, &posTexBuffer);
+	glBindTexture(GL_TEXTURE_BUFFER, posTexBuffer);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, posBuffer);
+	
+	glGenTextures(1, &connTexBuffer);
+	glBindTexture(GL_TEXTURE_BUFFER, connTexBuffer);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32UI, connBuffer);
 
-	delete[](i);
+	glGenTextures(1, &colorIdTexBuffer);
+	glBindTexture(GL_TEXTURE_BUFFER, colorIdTexBuffer);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_R8, colIdBuffer);
+	
+	glBindTexture(GL_TEXTURE_BUFFER, 0);
 }

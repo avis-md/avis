@@ -261,7 +261,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\Editor.cpp" />
     <ClCompile Include="src\EditorShortcuts.cpp" />
     <ClCompile Include="src\Engine.cpp" />
-    <ClCompile Include="src\Gromacs.cpp" />
+    <ClCompile Include="src\md\Gromacs.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\makegen.cpp" />
     <ClCompile Include="src\md\ParMenu.cpp" />
@@ -334,7 +334,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClInclude Include="src\core\input.h" />
     <ClInclude Include="src\core\io.h" />
     <ClInclude Include="src\core\mvp.h" />
-    <ClInclude Include="src\Gromacs.h" />
+    <ClInclude Include="src\md\Gromacs.h" />
     <ClInclude Include="src\makegen.h" />
     <ClInclude Include="src\md\ParMenu.h" />
     <ClInclude Include="src\md\Particles.h" />

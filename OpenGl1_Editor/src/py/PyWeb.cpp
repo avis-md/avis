@@ -1,14 +1,44 @@
 #include "PyWeb.h"
 #include "ui/icons.h"
+#include "md/Particles.h"
 
 uint PyWeb::hlId1, PyWeb::hlId2;
-GLuint PyWeb::selHlProgram, PyWeb::selHlRProgram;
-GLint PyWeb::selHlLocs[] = {}, PyWeb::selHlRLocs[] = {};
+GLuint PyWeb::selHlProgram, PyWeb::selHlRProgram, PyWeb::colorerProgram;
+GLint PyWeb::selHlLocs[] = {}, PyWeb::selHlRLocs[] = {}, PyWeb::colorerLocs[] = {};
 
 void PyWeb::blitfunc() {
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	/*
+	float zero[] = { 0,0,0,0 };
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ChokoLait::mainCamera->d_colfbo);
+	glClearBufferfv(GL_COLOR, 0, zero);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	glBindVertexArray(Camera::fullscreenVao);
+
+	glUseProgram(colorerProgram);
+	glUniform1i(colorerLocs[0], 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_idTex);
+	glUniform2f(colorerLocs[1], Display::width, Display::height);
+	glUniform1i(colorerLocs[2], 1);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
+	glUniform1i(colorerLocs[3], 2);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, Camera::fullscreenIndices);
+
+	glUseProgram(0);
+	glBindVertexArray(0);
+
+	*/
 	if (!!hlId1) {
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		if (Scene::active->settings.sky == nullptr || !Scene::active->settings.sky->loaded) return;
+		//return;
+		//if (Scene::active->settings.sky == nullptr || !Scene::active->settings.sky->loaded) return;
 
 		glBindVertexArray(Camera::fullscreenVao);
 
@@ -79,6 +109,12 @@ void PyWeb::Init() {
 	selHlRLocs[2] = glGetUniformLocation(selHlRProgram, "myId2");
 	selHlRLocs[3] = glGetUniformLocation(selHlRProgram, "idTex");
 	selHlRLocs[4] = glGetUniformLocation(selHlRProgram, "hlCol");
+	shd = new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText("D:\\colorerFrag.txt"));
+	colorerProgram = shd->pointer;
+	colorerLocs[0] = glGetUniformLocation(colorerProgram, "idTex");
+	colorerLocs[1] = glGetUniformLocation(colorerProgram, "screenSize");
+	colorerLocs[2] = glGetUniformLocation(colorerProgram, "id2col");
+	colorerLocs[3] = glGetUniformLocation(colorerProgram, "colList");
 
 	auto scr = PyBrowse::folder.scripts[1];
 	auto scr2 = PyBrowse::folder.scripts[0];

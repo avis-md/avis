@@ -1,10 +1,7 @@
 #pragma once
 #include "Gromacs.h"
 
-std::unordered_map<ushort, Vec3> Gromacs::_type2color = std::unordered_map<ushort, Vec3>();
-std::unordered_map<uint, float> Gromacs::_bondLengths = std::unordered_map<uint, float>();
-
-Gromacs::Gromacs(const string& file) : frames(), boundingBox() {
+void Gromacs::Read(const string& file) {
 	/*
 	std::ifstream strm(file, std::ios::binary);
 	if (!strm.is_open()) {
@@ -129,39 +126,53 @@ Gromacs::Gromacs(const string& file) : frames(), boundingBox() {
 		}
 	}
 	*/
-	frames.push_back(Frame());
-	frames[0].count = 10000000;
-	byte* buf = new byte[10000000 * sizeof(Vec3)]{};
+	Particles::Clear();
+	
+	Particles::particleSz = 10000000;
+	Particles::connSz = 5000000;
+	Particles::particles = new Particle[10000000];
 
-	glGenVertexArrays(1, &_vao);
-	glGenBuffers(1, &_vboV);
+	glGenVertexArrays(1, &Particles::posVao);
+	glGenBuffers(1, &Particles::posBuffer);
+	glGenBuffers(1, &Particles::connBuffer);
+	glGenBuffers(1, &Particles::colIdBuffer);
 
-	for (uint i = 0; i < 10000000; i++)
-		((Vec3*)buf)[i] = Vec3((i % 100), ((i % 10000) / 100), (i / 10000)) * 0.1f;
+	Vec3* buf = new Vec3[10000000];
+	uint* con = new uint[10000000];
+	byte* col = new byte[10000000];
+	for (uint i = 0; i < 10000000; i++) {
+		buf[i] = Particles::particles[i].position = Vec3((i % 100), ((i % 10000) / 100), (i / 10000)) * 0.1f;
+		con[i] = i;
+		col[i] = i % 3;
+	}
 
-	glBindBuffer(GL_ARRAY_BUFFER, _vboV);
+	glBindBuffer(GL_ARRAY_BUFFER, Particles::posBuffer);
 	glBufferData(GL_ARRAY_BUFFER, 10000000 * sizeof(Vec3), buf, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, Particles::connBuffer);
+	glBufferData(GL_ARRAY_BUFFER, 10000000 * sizeof(uint), con, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, Particles::colIdBuffer);
+	glBufferData(GL_ARRAY_BUFFER, 10000000 * sizeof(byte), con, GL_STATIC_DRAW);
+	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(_vao);
+	
+	glBindVertexArray(Particles::posVao);
 	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, _vboV);
+	glBindBuffer(GL_ARRAY_BUFFER, Particles::posBuffer);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	delete[](buf);
-}
+	Particles::GenTexBufs();
 
-void Gromacs::ReloadCols() {
-	Vec4* cols = new Vec4[frames[0].count]{};
-	for (uint i = 0; i < frames[0].count; i++) {
-		*(Vec3*)&cols[i] = _type2color[frames[0].particles[i].atomId];
-	}
-	delete[](cols);
+	delete[](buf);
+	delete[](con);
+	delete[](col);
 }
 
 void Gromacs::LoadFiles() {
+	/*
 	std::ifstream strm(IO::path + "/colors.txt", std::ios::binary);
 	_type2color.clear();
 	if (strm.is_open()) {
@@ -192,4 +203,5 @@ void Gromacs::LoadFiles() {
 		}
 		strm.close();
 	}
+	*/
 }

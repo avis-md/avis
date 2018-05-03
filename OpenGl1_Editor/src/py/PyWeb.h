@@ -21,8 +21,8 @@ public:
 	static float maxScroll, scrollPos, expandPos;
 	
 	static uint hlId1, hlId2;
-	static GLuint selHlProgram, selHlRProgram;
-	static GLint selHlLocs[4], selHlRLocs[5];
+	static GLuint selHlProgram, selHlRProgram, colorerProgram;
+	static GLint selHlLocs[4], selHlRLocs[5], colorerLocs[4];
 
 	static std::thread* execThread;
 };

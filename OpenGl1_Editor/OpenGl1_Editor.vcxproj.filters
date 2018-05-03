@@ -210,9 +210,6 @@
     <ClCompile Include="src\makegen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gromacs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\py\pyreader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -241,6 +238,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\md\Particles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\md\Gromacs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -440,9 +440,6 @@
     <ClInclude Include="src\makegen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Gromacs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\scene\texturerenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -474,6 +471,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\md\Particles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\md\Gromacs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
