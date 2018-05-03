@@ -153,7 +153,7 @@ void Gromacs::Read(const string& file) {
 	glBufferData(GL_ARRAY_BUFFER, 10000000 * sizeof(uint), con, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::colIdBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 10000000 * sizeof(byte), con, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 10000000 * sizeof(byte), col, GL_STATIC_DRAW);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	

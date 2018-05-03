@@ -1,0 +1,42 @@
+#version 330 core
+
+uniform mat4 _MV, _P;
+uniform vec3 camPos;
+uniform vec3 camFwd;
+
+uniform vec2 screenSize;
+
+uniform samplerBuffer posTex;
+uniform samplerBuffer connTex;
+
+out float v2f_id1;
+out float v2f_id2;
+out vec3 v2f_pos;
+out vec3 v2f_wpos1;
+out vec3 v2f_wpos2;
+
+void main(){
+	vec3 pos1 = texelFetch(posTex, gl_VertexID * 2).rgb;
+	vec3 pos2 = texelFetch(posTex, gl_VertexID * 2 + 1).rgb;
+	vec3 pos = (pos1 + pos2) * 0.5;
+	
+	vec4 wpos = _MV*vec4(pos1, 1);
+	v2f_wpos1 = (wpos / wpos.w).xyz;
+	wpos = _MV*vec4(pos2, 1);
+	v2f_wpos2 = (wpos / wpos.w).xyz;
+	
+    wpos = _MV*vec4(pos, 1);
+    wpos /= wpos.w;
+    v2f_pos = wpos.xyz;
+    gl_Position = _P*wpos;
+    v2f_id1 = float(gl_VertexID * 2 + 1.1);
+    v2f_id2 = float(gl_VertexID * 2 + 2.1);
+    
+    vec3 wdir = wpos.xyz - camPos;
+    float z = length(wdir);
+    float ca = dot(normalize(wpos.xyz - camPos), camFwd);
+	float z2 = z * ca;
+	//gl_PointSize = (length(v2f_wpos2 - v2f_wpos1) + 0.004) * screenSize.x / z2;
+	gl_PointSize = 0*(length(v2f_wpos2 - v2f_wpos1)/2 + 0.002) * screenSize.x / z2;
+	if (z < 0.1) gl_PointSize = 0;
+}

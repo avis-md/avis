@@ -1,0 +1,28 @@
+#version 330 core
+
+layout(location=0) in vec3 pos;
+layout(location=1) in vec3 col;
+
+uniform mat4 _MV, _P;
+uniform vec3 camPos;
+uniform vec3 camFwd;
+
+uniform vec2 screenSize;
+
+out float v2f_id;
+out vec3 v2f_pos;
+
+void main(){
+    vec4 wpos = _MV*vec4(pos, 1);
+    wpos /= wpos.w;
+    gl_Position = _P*wpos;
+    v2f_pos = wpos.xyz;
+    v2f_id = float(gl_VertexID + 1.1);
+    
+    vec3 wdir = wpos.xyz - camPos;
+    float z = length(wdir);
+    float ca = dot(normalize(wpos.xyz - camPos), camFwd);
+	float z2 = z * ca;
+	gl_PointSize = 0.02 * screenSize.x / z2;
+	if (z < 0.1) gl_PointSize = 0;
+}

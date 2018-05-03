@@ -133,7 +133,6 @@ void paintfunc2() {
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, str, font, white());
 		}
 	}
-
 }
 
 int main(int argc, char **argv)
@@ -141,7 +140,10 @@ int main(int argc, char **argv)
 	ChokoLait::Init(800, 800);
 	bg = new Background(IO::path + "/refl.hdr");
 	font = new Font(IO::path + "/arimo.ttf", ALIGN_TOPLEFT);
+	
 	Icons::Init();
+	Particles::Init();
+	
 	PyReader::Init();
 	PyNode::Init();
 	PyNode::font = font;

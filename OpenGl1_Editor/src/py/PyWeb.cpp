@@ -8,10 +8,10 @@ GLint PyWeb::selHlLocs[] = {}, PyWeb::selHlRLocs[] = {}, PyWeb::colorerLocs[] = 
 
 void PyWeb::blitfunc() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	/*
-	float zero[] = { 0,0,0,0 };
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ChokoLait::mainCamera->d_colfbo);
-	glClearBufferfv(GL_COLOR, 0, zero);
+
+	//float zero[] = { 0,0,0,0 };
+	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ChokoLait::mainCamera->d_colfbo);
+	//glClearBufferfv(GL_COLOR, 0, zero);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
@@ -34,8 +34,7 @@ void PyWeb::blitfunc() {
 
 	glUseProgram(0);
 	glBindVertexArray(0);
-
-	*/
+	return;
 	if (!!hlId1) {
 		//return;
 		//if (Scene::active->settings.sky == nullptr || !Scene::active->settings.sky->loaded) return;

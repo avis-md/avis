@@ -15,15 +15,16 @@ GLuint Particles::colIdBuffer;
 GLuint Particles::posTexBuffer, Particles::connTexBuffer, Particles::colorIdTexBuffer;
 
 void Particles::Init() {
-
-	byte data[256] = {};
+	byte data[768] = {};
 	data[0] = data[4] = data[8] = 255;
 	data[1] = data[2] = data[3] = data[5] = data[6] = data[7] = 85;
+
 	glGenTextures(1, &colorPalleteTex);
 	glBindTexture(GL_TEXTURE_2D, colorPalleteTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 16, 16, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 0);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_2D, 0);
