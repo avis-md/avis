@@ -1,6 +1,7 @@
 #include "PyWeb.h"
 #include "ui/icons.h"
 #include "md/Particles.h"
+#include "vis/pargraphics.h"
 
 uint PyWeb::hlId1, PyWeb::hlId2;
 GLuint PyWeb::selHlProgram, PyWeb::selHlRProgram, PyWeb::colorerProgram;
@@ -12,8 +13,7 @@ void PyWeb::blitfunc() {
 	//float zero[] = { 0,0,0,0 };
 	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ChokoLait::mainCamera->d_colfbo);
 	//glClearBufferfv(GL_COLOR, 0, zero);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, ChokoLait::mainCamera->d_colfbo);
 
 	glBindVertexArray(Camera::fullscreenVao);
 
@@ -34,7 +34,10 @@ void PyWeb::blitfunc() {
 
 	glUseProgram(0);
 	glBindVertexArray(0);
-	return;
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	ParGraphics::Reblit();
+
 	if (!!hlId1) {
 		//return;
 		//if (Scene::active->settings.sky == nullptr || !Scene::active->settings.sky->loaded) return;

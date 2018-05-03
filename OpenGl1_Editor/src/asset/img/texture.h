@@ -3,8 +3,8 @@
 
 class Texture : public AssetObject {
 public:
-	Texture(const string& path, bool mipmap = true, TEX_FILTERING filter = TEX_FILTER_BILINEAR, byte aniso = 5, TEX_WARPING warp = TEX_WARP_REPEAT);
-	//Texture(std::ifstream& stream, long pos);
+	Texture(const string& path, bool mipmap = true, TEX_FILTERING filter = TEX_FILTER_BILINEAR, byte aniso = 5, TEX_WRAPING wrap = TEX_WRAP_REPEAT);
+	Texture(const string& path, bool mipmap, TEX_FILTERING filter, byte aniso, GLenum wrapx, GLenum wrapy);
 	~Texture() { glDeleteTextures(1, &pointer); }
 	bool loaded;
 	uint width, height;

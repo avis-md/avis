@@ -66,7 +66,7 @@ void _InitGBuffer(GLuint* d_fbo, GLuint* d_colfbo, GLuint* d_texs, GLuint* d_dep
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	for (uint i = 1; i < 4; i++) {
 		glBindTexture(GL_TEXTURE_2D, d_texs[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int)w, (int)h, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, (int)w, (int)h, 0, GL_RGBA, GL_FLOAT, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, d_texs[i], 0);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -330,7 +330,13 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 //#else
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-	RenderLights();
+	glDisable(GL_DEPTH_TEST);
+	glDepthMask(false);
+	glEnable(GL_BLEND);
+	glBlendEquation(GL_FUNC_ADD);
+	glBlendFunc(GL_ONE, GL_ONE);
+
+	//RenderLights();
 
 	if (onBlit) onBlit();
 //#endif

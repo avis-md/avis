@@ -160,7 +160,10 @@ byte* Texture::LoadPixels(const string& path, byte& chn, uint& w, uint& h) {
 	return data;
 }
 
-Texture::Texture(const string& path, bool mipmap, TEX_FILTERING filter, byte aniso, TEX_WARPING warp) : AssetObject(ASSETTYPE_TEXTURE), _mipmap(mipmap), _filter(filter), _aniso(aniso) {
+Texture::Texture(const string& path, bool mipmap, TEX_FILTERING filter, byte aniso, TEX_WRAPING warp) :
+	Texture(path, mipmap, filter, aniso, (warp == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT, (warp == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT) {}
+
+Texture::Texture(const string& path, bool mipmap, TEX_FILTERING filter, byte aniso, GLenum wrapx, GLenum wrapy) : AssetObject(ASSETTYPE_TEXTURE), _mipmap(mipmap), _filter(filter), _aniso(aniso) {
 	string sss = path.substr(path.find_last_of('.') + 1, string::npos);
 	byte *data;
 	std::vector<byte> dataV;
@@ -201,12 +204,11 @@ Texture::Texture(const string& path, bool mipmap, TEX_FILTERING filter, byte ani
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (mipmap && (filter == TEX_FILTER_TRILINEAR)) ? GL_LINEAR_MIPMAP_LINEAR : (filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (warp == TEX_WARP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (warp == TEX_WARP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapx);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapy);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	if (dataV.size() == 0) delete[](data);
 	loaded = true;
-	//std::cout << "image loaded: " << width << "x" << height << std::endl;
 }
 
 Texture::Texture(int i, Editor* e) : AssetObject(ASSETTYPE_TEXTURE) {

@@ -1,0 +1,42 @@
+#version 330
+
+uniform mat4 _IP;
+uniform vec2 screenSize;
+uniform sampler2D inColor;
+uniform sampler2D inNormal;
+uniform sampler2D inSpec;
+uniform sampler2D inDepth;
+
+uniform sampler2D inSky;
+uniform float skyStrength;
+
+out vec4 fragCol;
+
+vec4 skyColAt(vec3 dir) {
+	vec2 refla = normalize(-vec2(dir.x, dir.z));
+	float cx = acos(refla.x)/(3.14159);
+	cx = mix(1-cx, cx, sign(refla.y) * 0.5 + 0.5);
+	float sy = asin(dir.y)/(3.14159);
+	
+	return texture(inSky, vec2(cx, sy + 0.5));
+}
+
+void main () {
+	vec2 uv = gl_FragCoord.xy / screenSize; //screen position xy 0~1
+	vec4 dCol = texture(inColor, uv);
+	vec4 nCol = texture(inNormal, uv);
+	vec4 sCol = texture(inSpec, uv);
+	float z = texture(inDepth, uv).x;
+	float nClip = 0.01;
+	float fClip = 500.0;
+	
+    if (z >= 1) {
+        fragCol = vec4(0, 0, 0, 0);
+        return;
+    }
+    
+    vec3 skycol = skyColAt(nCol.xyz).rgb;
+    float skystr = skycol.r*0.3 + skycol.g*0.6 + skycol.b*0.1;
+    fragCol.rgb = mix(skycol * dCol.rgb, vec3(1, 1, 1), pow(skystr, 3));
+    fragCol.a = 1;
+}

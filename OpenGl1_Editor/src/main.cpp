@@ -5,6 +5,11 @@
 //#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 //#include <numpy/arrayobject.h>
 
+#include "ui/icons.h"
+#include "py/PyWeb.h"
+#include "md/ParMenu.h"
+#include "vis/pargraphics.h"
+
 float camz = 10;
 Vec3 center;
 float rw = 0, rz = 0;
@@ -29,58 +34,8 @@ void rendFunc() {
 	MVP::Mul(mMatrix);
 	//MVP::Translate(-gro->boundingBox.x / 2, -gro->boundingBox.y / 2, -gro->boundingBox.z / 2);
 	MVP::Translate(center);
-	auto _mv = MVP::modelview();
-	auto _p = MVP::projection();
-	auto _cpos = ChokoLait::mainCamera->object->transform.position();
-	auto _cfwd = ChokoLait::mainCamera->object->transform.forward();
-
-	GLint mv = glGetUniformLocation(shad->pointer, "_MV");
-	GLint p = glGetUniformLocation(shad->pointer, "_P");
-	GLint cpos = glGetUniformLocation(shad->pointer, "camPos");
-	GLint cfwd = glGetUniformLocation(shad->pointer, "camFwd");
-	GLint scr = glGetUniformLocation(shad->pointer, "screenSize");
-
-	GLint mv2 = glGetUniformLocation(shad2->pointer, "_MV");
-	GLint p2 = glGetUniformLocation(shad2->pointer, "_P");
-	GLint cpos2 = glGetUniformLocation(shad2->pointer, "camPos");
-	GLint cfwd2 = glGetUniformLocation(shad2->pointer, "camFwd");
-	GLint scr2 = glGetUniformLocation(shad2->pointer, "screenSize");
-	GLint postx2 = glGetUniformLocation(shad2->pointer, "posTex");
-
-	int rpx = (int)round(repx);
-	int rpy = (int)round(repy);
-	int rpz = (int)round(repz);
-	for (int x = -rpx; x <= rpx; x++) {
-		for (int y = -rpy; y <= rpy; y++) {
-			for (int z = -rpz; z <= rpz; z++) {
-				glUseProgram(shad->pointer);
-				glUniformMatrix4fv(mv, 1, GL_FALSE, glm::value_ptr(_mv));
-				glUniformMatrix4fv(p, 1, GL_FALSE, glm::value_ptr(_p));
-				glUniform3f(cpos, _cpos.x, _cpos.y, _cpos.z);
-				glUniform3f(cfwd, _cfwd.x, _cfwd.y, _cfwd.z);
-				glUniform2f(scr, Display::width, Display::height);
-
-				glBindVertexArray(Particles::posVao);
-				glDrawArrays(GL_POINTS, 0, 10000000);
-		
-				glUseProgram(shad2->pointer);
-				glUniformMatrix4fv(mv2, 1, GL_FALSE, glm::value_ptr(_mv));
-				glUniformMatrix4fv(p2, 1, GL_FALSE, glm::value_ptr(_p));
-				glUniform3f(cpos2, _cpos.x, _cpos.y, _cpos.z);
-				glUniform3f(cfwd2, _cfwd.x, _cfwd.y, _cfwd.z);
-				glUniform2f(scr2, Display::width, Display::height);
-				glUniform1i(postx2, 1);
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
-
-				glBindVertexArray(emptyVao);
-				glDrawArrays(GL_POINTS, 0, 5000000);
-
-				glBindVertexArray(0);
-				glUseProgram(0);
-			}
-		}
-	}
+	
+	ParGraphics::Rerender();
 }
 
 void updateFunc() {
@@ -107,10 +62,6 @@ void updateFunc() {
 	if (camz0 != camz || rz0 != rz || rw0 != rw || center0 != center) Scene::dirty = true;
 
 }
-
-#include "ui/icons.h"
-#include "py/PyWeb.h"
-#include "md/ParMenu.h"
 
 void paintfunc2() {
 	PyWeb::Update();
@@ -143,6 +94,7 @@ int main(int argc, char **argv)
 	
 	Icons::Init();
 	Particles::Init();
+	ParGraphics::Init();
 	
 	PyReader::Init();
 	PyNode::Init();
@@ -153,7 +105,6 @@ int main(int argc, char **argv)
 	PyWeb::Init();
 	ParMenu::font = font;
 
-	glGenVertexArrays(1, &emptyVao);
 	/*
 	while (ChokoLait::alive()) {
 		ChokoLait::Update();
@@ -165,12 +116,9 @@ int main(int argc, char **argv)
 	set.sky = bg;
 	set.skyStrength = 1.5f;
 	set.skyBrightness = 0;
-	shad = new Shader(IO::GetText(IO::path + "/parV.txt"), IO::GetText(IO::path + "/parF.txt"));
-	shad2 = new Shader(IO::GetText(IO::path + "/parConV.txt"), IO::GetText(IO::path + "/parConF.txt"));
 	//Gromacs::LoadFiles();
 	Gromacs::Read(IO::path + "/md.gro");
 	glEnable(GL_PROGRAM_POINT_SIZE);
-	//glPointSize(20);
 
 	Display::Resize(800, 600, false);
 

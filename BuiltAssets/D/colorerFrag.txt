@@ -5,7 +5,7 @@ uniform vec2 screenSize;
 uniform samplerBuffer id2col;
 uniform sampler2D colList;
 
-out vec4 fragCol;
+layout (location = 0) out vec4 fragCol;
 
 void main () {
 	float idf = floor(texture(idTex, gl_FragCoord.xy / screenSize).x);

@@ -7,6 +7,26 @@ bool ParMenu::expanded = true;
 float ParMenu::expandPos = 150;
 Font* ParMenu::font = nullptr;
 
+uint ParMenu::listMaxItems = 1000;
+std::vector<ParMenu::ListList> ParMenu::listList;
+
+void ParMenu::InitList() {
+	listList.clear();
+	listList.push_back(ListList(0, 0, 0));
+	ushort num = 0;
+	for (uint i = 0; i < Particles::residueListSz; i++) {
+		auto& r = Particles::residueLists[i];
+		for (uint j = 0; j < r.residueSz; j++) {
+			auto& rr = r.residues[j];
+			num += rr.cnt;
+			if (num > listMaxItems) {
+				num -= listMaxItems;
+				listList.push_back(ListList(i, j, rr.cnt - num));
+			}
+		}
+	}
+}
+
 void ParMenu::Draw() {
 	Engine::DrawQuad(0, 0, expandPos, Display::height, white(0.9f, 0.15f));
 	if (expanded) {
@@ -23,6 +43,12 @@ void ParMenu::Draw() {
 				if (Engine::Button(expandPos, 81 * i, 16, 80, white(0.7f, 0.1f), white(1, 0.2f), white(1, 0.05f)) == MOUSE_RELEASE) {
 					activeMenu = i;
 				}
+		}
+
+		switch (activeMenu) {
+		case 0:
+			Draw_List();
+			break;
 		}
 
 		Engine::RotateUI(90, Vec2(expandPos + 16, 0));
@@ -46,4 +72,8 @@ void ParMenu::Draw() {
 		UI::Label(expandPos + 18, Display::height - 15, 12, "Particle View", font, white());
 		expandPos = max(expandPos - 1500 * Time::delta, 0.0f);
 	}
+}
+
+void ParMenu::Draw_List() {
+
 }

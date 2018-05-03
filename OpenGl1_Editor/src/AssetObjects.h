@@ -28,9 +28,9 @@ enum TEX_FILTERING : byte {
 	TEX_FILTER_TRILINEAR
 };
 
-enum TEX_WARPING : byte {
-	TEX_WARP_CLAMP,
-	TEX_WARP_REPEAT
+enum TEX_WRAPING : byte {
+	TEX_WRAP_CLAMP,
+	TEX_WRAP_REPEAT
 };
 
 enum TEX_TYPE : byte {
