@@ -1,4 +1,3 @@
-#define PLATFORM_WIN
 #include "ChokoLait.h"
 #include "md/Particles.h"
 #include "md/Gromacs.h"
@@ -72,13 +71,11 @@ void paintfunc2() {
 		PyWeb::DrawSide();
 	}
 
-	PyWeb::hlId1 = 0;
-	PyWeb::hlId2 = 0;
+	ParGraphics::hlIds.clear();
 	if (!PyWeb::drawFull && (Input::mousePos.x > ParMenu::expandPos + 16) && (Input::mousePos.x < Display::width - PyWeb::expandPos)) {
 		auto id = ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y);
 		if (id) {
-			PyWeb::hlId1 = id;
-			//PyWeb::hlId2 = id;
+			ParGraphics::hlIds.push_back(id);
 			auto str = "Particle " + std::to_string(id-1) + "\n" + "Residue Name" + "\n" + Particles::particles[id-1].name;
 			Engine::DrawQuad(Input::mousePos.x + 14, Input::mousePos.y + 2, 120, 60, white(0.8f, 0.1f));
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, str, font, white());

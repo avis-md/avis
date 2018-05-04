@@ -32,44 +32,44 @@ void PyBrowse::Scan() {
 }
 
 void PyBrowse::DoDraw(Folder* f, float& off, uint layer) {
-	Engine::DrawQuad(2 + 5 * layer, off, 150, 16, white(1, 0.3f));
-	if (Engine::Button(2 + 5 * layer, off, 16, 16, f->expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+	Engine::DrawQuad(2.0f + 5 * layer, off, 150.0f, 16.0f, white(1, 0.3f));
+	if (Engine::Button(2.0f + 5 * layer, off, 16.0f, 16.0f, f->expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 		f->expanded = !f->expanded;
-	UI::Label(22 + 5 * layer, off + 1, 12, f->name, PyNode::font, white());
+	UI::Label(22.0f + 5 * layer, off + 1, 12.0f, f->name, PyNode::font, white());
 	off += 17;
 	if (f->expanded) {
 		layer++;
 		for (auto& fd : f->subfolders)
 			DoDraw(&fd, off, layer);
 		for (auto& fs : f->scripts) {
-			if (Engine::Button(2 + 5 * layer, off, 150, 16, white(1, 0.35f)) == MOUSE_RELEASE) {
+			if (Engine::Button(2.0f + 5 * layer, off, 150.0f, 16.0f, white(1, 0.35f)) == MOUSE_RELEASE) {
 				PyWeb::selScript = fs;
 			}
-			UI::Texture(2 + 5 * layer, off, 16, 16, Icons::python);
-			UI::Label(22 + 5 * layer, off + 1, 12, fs->name, PyNode::font, white());
+			UI::Texture(2.0f + 5 * layer, off, 16.0f, 16.0f, Icons::python);
+			UI::Label(22.0f + 5 * layer, off + 1, 12.0f, fs->name, PyNode::font, white());
 			off += 17;
 		}
 	}
 }
 
 void PyBrowse::Draw() {
-	Engine::DrawQuad(0, 0, expandPos, Display::height, white(0.9f, 0.15f));
+	Engine::DrawQuad(0.0f, 0.0f, expandPos, (float)Display::height, white(0.9f, 0.15f));
 	if (expanded) {
 		float f = 20;
-		Engine::BeginStencil(0, 0, expandPos, Display::height);
-		UI::Label(5, 3, 12, "Python Files", PyNode::font, white());
+		Engine::BeginStencil(0.0f, 0.0f, expandPos, (float)Display::height);
+		UI::Label(5.0f, 3.0f, 12.0f, "Python Files", PyNode::font, white());
 		DoDraw(&folder, f, 0);
 		Engine::EndStencil();
-		Engine::DrawQuad(expandPos, Display::height - 16, 16, 16, white(1, 0.2f));
-		if (Engine::Button(expandPos, Display::height - 16, 16, 16, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		Engine::DrawQuad(expandPos, Display::height - 16.0f, 16.0f, 16.0f, white(1, 0.2f));
+		if (Engine::Button(expandPos, Display::height - 16.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = min(expandPos + 1500 * Time::delta, 150.0f);
 	}
 	else {
-		if (Engine::Button(expandPos, Display::height - 16, 110, 16, white(1, 0.2f), white(1, 0.2f), white(1, 0.2f)) == MOUSE_RELEASE)
+		if (Engine::Button(expandPos, Display::height - 16.0f, 110.0f, 16.0f, white(1, 0.2f), white(1, 0.2f), white(1, 0.2f)) == MOUSE_RELEASE)
 			expanded = true;
-		UI::Texture(expandPos, Display::height - 16, 16, 16, Icons::expand);
-		UI::Label(expandPos + 18, Display::height - 15, 12, "Python Files", PyNode::font, white());
+		UI::Texture(expandPos, Display::height - 16.0f, 16.0f, 16.0f, Icons::expand);
+		UI::Label(expandPos + 18, Display::height - 15.0f, 12.0f, "Python Files", PyNode::font, white());
 		expandPos = max(expandPos - 1500 * Time::delta, 0.0f);
 	}
 }

@@ -40,14 +40,14 @@ void* PyScript::Get(uint i) {
 		return new int(_PyLong_AsInt(pRets[i]));
 		break;
 	case PY_VARTYPE::FLOAT:
-		return new float(PyFloat_AsDouble(pRets[i]));
+		return new float((float)PyFloat_AsDouble(pRets[i]));
 		break;
 	}
 	if (outvars[i].typeName == "list(float)") {
 		auto sz = PyList_Size(pRets[i]);
 		std::vector<float>* v = new std::vector<float>(sz);
-		for (uint a = 0; a < sz; a++) {
-			auto obj = PyList_GetItem(pRets[i], (Py_ssize_t)a);
+		for (Py_ssize_t a = 0; a < sz; a++) {
+			auto obj = PyList_GetItem(pRets[i], a);
 			(*v)[a] = (float)PyFloat_AsDouble(obj);
 		}
 		return v;

@@ -5,9 +5,15 @@
 class ParGraphics {
 public:
 	static Texture* refl;
+	static float reflStr, reflStrDecay;
 
 	static GLuint reflProg, parProg, parConProg;
-	static GLint reflProgLocs[8], parProgLocs[5], parConProgLocs[6];
+	static GLint reflProgLocs[9], parProgLocs[5], parConProgLocs[6];
+
+	static GLuint selHlProg, colProg;
+	static GLint selHlProgLocs[4], colProgLocs[4];
+
+	static std::vector<uint> hlIds;
 
 	static GLuint emptyVao;
 
@@ -23,4 +29,5 @@ public:
 
 protected:
 	static void BlitSky();
+	static void BlitHl();
 };

@@ -42,7 +42,7 @@ Vec2 PyNode::DrawConn() {
 }
 
 void PyNode::Execute() {
-	for (int i = 0; i < script->invarCnt; i++) {
+	for (uint i = 0; i < script->invarCnt; i++) {
 		if (inputR[i]) {
 			script->invars[i].value = inputR[i]->outputV[inputV[i].second].first.value;
 		}
@@ -58,7 +58,7 @@ void PyNode::Execute() {
 		}
 	}
 	script->Exec();
-	for (int i = 0; i < script->outvarCnt; i++) {
+	for (uint i = 0; i < script->outvarCnt; i++) {
 		outputV[i].first.value = script->pRets[i];
 		Py_INCREF(outputV[i].first.value);
 	}
@@ -81,7 +81,7 @@ void PyNode::Draw() {
 	UI::Label(pos.x + 18, pos.y + 1, 12, title, font, white());
 	DrawToolbar();
 	if (expanded) {
-		Engine::DrawQuad(pos.x, pos.y + 16, width, 3 + 17 * cnt, white(0.7f, 0.25f));
+		Engine::DrawQuad(pos.x, pos.y + 16.0f, width, 3.0f + 17 * cnt, white(0.7f, 0.25f));
 		float y = pos.y + 18;
 		for (uint i = 0; i < script->invarCnt; i++, y += 17) {
 			if (!PyWeb::selConnNode || (PyWeb::selConnIdIsOut && PyWeb::selConnNode != this)) {
@@ -147,7 +147,7 @@ void PyNode::Draw() {
 			font->Align(ALIGN_TOPLEFT);
 			UI::Label(pos.x + 2, y, 12, script->outvars[i].typeName, font, white(0.3f), width * 0.67f - 6);
 		}
-		if (PyWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3 + 17 * cnt, white(0.5f, 0.25f));
+		if (PyWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));
 	}
 }
 
@@ -157,7 +157,7 @@ float PyNode::DrawSide() {
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 20, pos.y + 1, 12, script->name, font, white());
 	if (expanded) {
-		Engine::DrawQuad(pos.x, pos.y + 16, width, 2 + 17 * cnt, white(0.7f, 0.25f));
+		Engine::DrawQuad(pos.x, pos.y + 16, width, 2.0f + 17 * cnt, white(0.7f, 0.25f));
 		float y = pos.y + 18;
 		for (uint i = 0; i < script->invarCnt; i++, y += 17) {
 			UI::Label(pos.x + 2, y, 12, script->invars[i].name, font, white());
@@ -174,10 +174,10 @@ float PyNode::DrawSide() {
 				UI::Label(pos.x + width * 0.33f, y, 12, "<connected>", font, yellow());
 			}
 		}
-		if (PyWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3 + 17 * cnt, white(0.5f, 0.25f));
-		return 19 + 17 * cnt;
+		if (PyWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));
+		return 19.0f + 17 * cnt;
 	}
-	else return 17;
+	else return 17.0f;
 }
 
 void PyNode::DrawToolbar() {

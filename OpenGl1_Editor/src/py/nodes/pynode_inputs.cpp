@@ -19,7 +19,7 @@ void PyNode_Inputs::Draw() {
 	this->pos = pos;
 	Engine::DrawQuad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
 	UI::Label(pos.x + 2, pos.y + 1, 12, title, font, white());
-	Engine::DrawQuad(pos.x, pos.y + 16, width, 3 + 17 * cnt, white(0.7f, 0.25f));
+	Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.7f, 0.25f));
 	float y = pos.y + 20;
 	for (uint i = 0; i < 2; i++, y += 17) {
 		if (!PyWeb::selConnNode || ((!PyWeb::selConnIdIsOut) && (PyWeb::selConnNode != this))) {

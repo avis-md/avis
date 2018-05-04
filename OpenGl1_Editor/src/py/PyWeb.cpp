@@ -3,77 +3,6 @@
 #include "md/Particles.h"
 #include "vis/pargraphics.h"
 
-uint PyWeb::hlId1, PyWeb::hlId2;
-GLuint PyWeb::selHlProgram, PyWeb::selHlRProgram, PyWeb::colorerProgram;
-GLint PyWeb::selHlLocs[] = {}, PyWeb::selHlRLocs[] = {}, PyWeb::colorerLocs[] = {};
-
-void PyWeb::blitfunc() {
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	//float zero[] = { 0,0,0,0 };
-	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ChokoLait::mainCamera->d_colfbo);
-	//glClearBufferfv(GL_COLOR, 0, zero);
-	glBindFramebuffer(GL_FRAMEBUFFER, ChokoLait::mainCamera->d_colfbo);
-
-	glBindVertexArray(Camera::fullscreenVao);
-
-	glUseProgram(colorerProgram);
-	glUniform1i(colorerLocs[0], 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_idTex);
-	glUniform2f(colorerLocs[1], Display::width, Display::height);
-	glUniform1i(colorerLocs[2], 1);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
-	glUniform1i(colorerLocs[3], 2);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, Camera::fullscreenIndices);
-
-	glUseProgram(0);
-	glBindVertexArray(0);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
-	ParGraphics::Reblit();
-
-	if (!!hlId1) {
-		//return;
-		//if (Scene::active->settings.sky == nullptr || !Scene::active->settings.sky->loaded) return;
-
-		glBindVertexArray(Camera::fullscreenVao);
-
-		if (!hlId2) {
-			glUseProgram(selHlProgram);
-
-			glUniform2f(selHlLocs[0], Display::width, Display::height);
-			glUniform1i(selHlLocs[1], (int)hlId1);
-			glUniform1i(selHlLocs[2], 0);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_idTex);
-			glUniform3f(selHlLocs[3], 1.0f, 1.0f, 0.0f);
-		}
-		else {
-			glUseProgram(selHlRProgram);
-
-			glUniform2f(selHlRLocs[0], Display::width, Display::height);
-			glUniform1i(selHlRLocs[1], (int)hlId1);
-			glUniform1i(selHlRLocs[2], (int)hlId2);
-			glUniform1i(selHlRLocs[3], 0);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_idTex);
-			glUniform3f(selHlRLocs[4], 1.0f, 1.0f, 0.0f);
-		}
-
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, Camera::fullscreenIndices);
-
-		glUseProgram(0);
-		glBindVertexArray(0);
-	}
-}
-
 PyNode* PyWeb::selConnNode = nullptr;
 uint PyWeb::selConnId = 0;
 bool PyWeb::selConnIdIsOut = false, PyWeb::selPreClear = false;
@@ -96,28 +25,6 @@ void PyWeb::Insert(PyNode* node, Vec2 pos) {
 }
 
 void PyWeb::Init() {
-	ChokoLait::mainCamera->onBlit = blitfunc;
-
-	auto shd = new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText("D:\\selectorFrag.txt"));
-	selHlProgram = shd->pointer;
-	selHlLocs[0] = glGetUniformLocation(selHlProgram, "screenSize");
-	selHlLocs[1] = glGetUniformLocation(selHlProgram, "myId");
-	selHlLocs[2] = glGetUniformLocation(selHlProgram, "idTex");
-	selHlLocs[3] = glGetUniformLocation(selHlProgram, "hlCol");
-	shd = new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText("D:\\selectorRangeFrag.txt"));
-	selHlRProgram = shd->pointer;
-	selHlRLocs[0] = glGetUniformLocation(selHlRProgram, "screenSize");
-	selHlRLocs[1] = glGetUniformLocation(selHlRProgram, "myId1");
-	selHlRLocs[2] = glGetUniformLocation(selHlRProgram, "myId2");
-	selHlRLocs[3] = glGetUniformLocation(selHlRProgram, "idTex");
-	selHlRLocs[4] = glGetUniformLocation(selHlRProgram, "hlCol");
-	shd = new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText("D:\\colorerFrag.txt"));
-	colorerProgram = shd->pointer;
-	colorerLocs[0] = glGetUniformLocation(colorerProgram, "idTex");
-	colorerLocs[1] = glGetUniformLocation(colorerProgram, "screenSize");
-	colorerLocs[2] = glGetUniformLocation(colorerProgram, "id2col");
-	colorerLocs[3] = glGetUniformLocation(colorerProgram, "colList");
-
 	auto scr = PyBrowse::folder.scripts[1];
 	auto scr2 = PyBrowse::folder.scripts[0];
 	
@@ -154,8 +61,8 @@ void PyWeb::Update() {
 
 void PyWeb::Draw() {
 	PyNode::width = 220;
-	Engine::DrawQuad(PyBrowse::expandPos, 0, Display::width, Display::height, white(0.8f, 0.05f));
-	Engine::BeginStencil(PyBrowse::expandPos, 0, Display::width, Display::height);
+	Engine::DrawQuad(PyBrowse::expandPos, 0.0f, (float)Display::width, (float)Display::height, white(0.8f, 0.05f));
+	Engine::BeginStencil(PyBrowse::expandPos, 0.0f, (float)Display::width, (float)Display::height);
 	byte ms = Input::mouse0State;
 	if (executing) {
 		Input::mouse0 = false;
@@ -266,12 +173,12 @@ void PyWeb::Draw() {
 	}
 	if (selScript) UI::Texture(Input::mousePos.x - 16, Input::mousePos.y - 16, 32, 32, Icons::python, white(0.3f));
 	
-	if (Engine::Button(Display::width - 71, 1, 70, 16, white(1, 0.4f), "Done", 12, PyNode::font, white(), true) == MOUSE_RELEASE)
+	if (Engine::Button(Display::width - 71.0f, 1.0f, 70.0f, 16.0f, white(1, 0.4f), "Done", 12.0f, PyNode::font, white(), true) == MOUSE_RELEASE)
 		drawFull = false;
 }
 
 void PyWeb::DrawSide() {
-	Engine::DrawQuad(Display::width - expandPos, 0, 180, Display::height, white(0.9f, 0.15f));
+	Engine::DrawQuad(Display::width - expandPos, 0.0f, 180.0f, (float)Display::height, white(0.9f, 0.15f));
 	if (expanded) {
 		float w = 180;
 		PyNode::width = w - 2;
@@ -296,17 +203,17 @@ void PyWeb::DrawSide() {
 			poss.y += n->DrawSide();
 		}
 		//Engine::EndStencil();
-		Engine::DrawQuad(Display::width - expandPos - 16, Display::height - 16, 16, 16, white(0.9f, 0.15f));
-		if (Engine::Button(Display::width - expandPos - 16, Display::height - 16, 16, 16, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		Engine::DrawQuad(Display::width - expandPos - 16.0f, Display::height - 16.0f, 16.0f, 16.0f, white(0.9f, 0.15f));
+		if (Engine::Button(Display::width - expandPos - 16.0f, Display::height - 16.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = min(expandPos + 1500 * Time::delta, 180.0f);
 	}
 	else {
-		Engine::DrawQuad(Display::width - expandPos, 0, expandPos, Display::height, white(0.9f, 0.15f));
-		if (Engine::Button(Display::width - expandPos - 110, Display::height - 16, 110, 16, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
+		Engine::DrawQuad(Display::width - expandPos, 0.0f, expandPos, (float)Display::height, white(0.9f, 0.15f));
+		if (Engine::Button(Display::width - expandPos - 110.0f, Display::height - 16.0f, 110.0f, 16.0f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
-		UI::Texture(Display::width - expandPos - 110, Display::height - 16, 16, 16, Icons::expand);
-		UI::Label(Display::width - expandPos - 92, Display::height - 15, 12, "Analysis", PyNode::font, white());
+		UI::Texture(Display::width - expandPos - 110.0f, Display::height - 16.0f, 16.0f, 16.0f, Icons::expand);
+		UI::Label(Display::width - expandPos - 92.0f, Display::height - 15.0f, 12.0f, "Analysis", PyNode::font, white());
 		expandPos = max(expandPos - 1500*Time::delta, 2.0f);
 	}
 }

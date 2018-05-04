@@ -83,9 +83,9 @@ void PyNode_Plot::Execute() {
 	auto sz = PyList_Size(ref);
 	valXs.resize(sz);
 	valYs.resize(sz);
-	for (uint a = 0; a < sz; a++) {
+	for (Py_ssize_t a = 0; a < sz; a++) {
 		valXs[a] = (float)a;
-		auto obj = PyList_GetItem(ref, (Py_ssize_t)a);
+		auto obj = PyList_GetItem(ref, a);
 		valYs[a] = (float)PyFloat_AsDouble(obj);
 	}
 }

@@ -1,9 +1,15 @@
 #include "pargraphics.h"
 
 Texture* ParGraphics::refl = nullptr;
+float ParGraphics::reflStr = 1, ParGraphics::reflStrDecay = 0;
 
 GLuint ParGraphics::reflProg, ParGraphics::parProg, ParGraphics::parConProg;
 GLint ParGraphics::reflProgLocs[] = {}, ParGraphics::parProgLocs[] = {}, ParGraphics::parConProgLocs[] = {};
+
+GLuint ParGraphics::selHlProg, ParGraphics::colProg;
+GLint ParGraphics::selHlProgLocs[] = {}, ParGraphics::colProgLocs[] = {};
+
+std::vector<uint> ParGraphics::hlIds;
 
 GLuint ParGraphics::emptyVao;
 
@@ -18,6 +24,7 @@ void ParGraphics::Init() {
 	reflProgLocs[5] = glGetUniformLocation(reflProg, "inDepth");
 	reflProgLocs[6] = glGetUniformLocation(reflProg, "inSky");
 	reflProgLocs[7] = glGetUniformLocation(reflProg, "skyStrength");
+	reflProgLocs[8] = glGetUniformLocation(reflProg, "skyStrDecay");
 	
 	parProg = (new Shader(IO::GetText(IO::path + "/parV.txt"), IO::GetText(IO::path + "/parF.txt")))->pointer;
 	parProgLocs[0] = glGetUniformLocation(parProg, "_MV");
@@ -34,7 +41,22 @@ void ParGraphics::Init() {
 	parConProgLocs[4] = glGetUniformLocation(parConProg, "screenSize");
 	parConProgLocs[5] = glGetUniformLocation(parConProg, "posTex");
 
+	selHlProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText("D:\\selectorFrag.txt")))->pointer;
+	selHlProgLocs[0] = glGetUniformLocation(selHlProg, "screenSize");
+	selHlProgLocs[1] = glGetUniformLocation(selHlProg, "myId");
+	selHlProgLocs[2] = glGetUniformLocation(selHlProg, "idTex");
+	selHlProgLocs[3] = glGetUniformLocation(selHlProg, "hlCol");
+
+	colProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText("D:\\colorerFrag.txt")))->pointer;
+	colProgLocs[0] = glGetUniformLocation(colProg, "idTex");
+	colProgLocs[1] = glGetUniformLocation(colProg, "screenSize");
+	colProgLocs[2] = glGetUniformLocation(colProg, "id2col");
+	colProgLocs[3] = glGetUniformLocation(colProg, "colList");
+
 	glGenVertexArrays(1, &emptyVao);
+
+	hlIds.resize(1);
+	ChokoLait::mainCamera->onBlit = Reblit;
 }
 
 void ParGraphics::Rerender() {
@@ -48,7 +70,7 @@ void ParGraphics::Rerender() {
 	glUniformMatrix4fv(parProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
 	glUniform3f(parProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
 	glUniform3f(parProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-	glUniform2f(parProgLocs[4], Display::width, Display::height);
+	glUniform2f(parProgLocs[4], (float)Display::width, (float)Display::height);
 
 	glBindVertexArray(Particles::posVao);
 	glDrawArrays(GL_POINTS, 0, 10000000);
@@ -72,28 +94,48 @@ void ParGraphics::Rerender() {
 }
 
 void ParGraphics::Recolor() {
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	glBindFramebuffer(GL_FRAMEBUFFER, ChokoLait::mainCamera->d_colfbo);
+
+	glBindVertexArray(Camera::fullscreenVao);
+
+	glUseProgram(colProg);
+	glUniform1i(colProgLocs[0], 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_idTex);
+	glUniform2f(colProgLocs[1], (float)Display::width, (float)Display::height);
+	glUniform1i(colProgLocs[2], 1);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
+	glUniform1i(colProgLocs[3], 2);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, Camera::fullscreenIndices);
+
+	glUseProgram(0);
+	glBindVertexArray(0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
 void ParGraphics::Reblit() {
+	Recolor();
+	BlitSky();
+	if (hlIds.size())
+		BlitHl();
+}
+
+void ParGraphics::BlitSky() {
 	auto _p = MVP::projection();
 	auto cam = ChokoLait::mainCamera().get();
-	
-	glBindVertexArray(Camera::fullscreenVao);
-	/*
-	uniform mat4 _IP;
-	uniform vec2 screenSize;
-	uniform sampler2D inColor;
-	uniform sampler2D inNormal;
-	uniform sampler2D inSpec;
-	uniform sampler2D inDepth;
 
-	uniform sampler2D inSky;
-	uniform float skyStrength;
-	*/
+	glBindVertexArray(Camera::fullscreenVao);
+
 	glUseProgram(reflProg);
 	glUniformMatrix4fv(reflProgLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
-	glUniform2f(reflProgLocs[1], Display::width, Display::height);
+	glUniform2f(reflProgLocs[1], (float)Display::width, (float)Display::height);
 	glUniform1i(reflProgLocs[2], 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, cam->d_colTex);
@@ -109,6 +151,8 @@ void ParGraphics::Reblit() {
 	glUniform1i(reflProgLocs[6], 4);
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, refl->pointer);
+	glUniform1f(reflProgLocs[7], reflStr);
+	glUniform1f(reflProgLocs[8], reflStrDecay);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, Camera::fullscreenIndices);
@@ -117,6 +161,21 @@ void ParGraphics::Reblit() {
 	glBindVertexArray(0);
 }
 
-void ParGraphics::BlitSky() {
+void ParGraphics::BlitHl() {
+	glBindVertexArray(Camera::fullscreenVao);
 
+	glUseProgram(selHlProg);
+
+	glUniform2f(selHlProgLocs[0], (float)Display::width, (float)Display::height);
+	glUniform1i(selHlProgLocs[1], hlIds[0]);
+	glUniform1i(selHlProgLocs[2], 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_idTex);
+	glUniform3f(selHlProgLocs[3], 1.0f, 1.0f, 0.0f);
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, Camera::fullscreenIndices);
+
+	glUseProgram(0);
+	glBindVertexArray(0);
 }
