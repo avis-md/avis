@@ -76,7 +76,7 @@ void paintfunc2() {
 		auto id = ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y);
 		if (id) {
 			ParGraphics::hlIds.push_back(id);
-			auto str = "Particle " + std::to_string(id-1) + "\n" + "Residue Name" + "\n" + Particles::particles[id-1].name;
+			auto str = "Particle " + std::to_string(id-1) + "\n" + "Residue Name" + "\n" + Particles::particles_Name[id];
 			Engine::DrawQuad(Input::mousePos.x + 14, Input::mousePos.y + 2, 120, 60, white(0.8f, 0.1f));
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, str, font, white());
 		}
@@ -115,6 +115,8 @@ int main(int argc, char **argv)
 	set.skyBrightness = 0;
 	//Gromacs::LoadFiles();
 	Gromacs::Read(IO::path + "/md.gro");
+	ParMenu::InitList();
+
 	glEnable(GL_PROGRAM_POINT_SIZE);
 
 	Display::Resize(800, 600, false);

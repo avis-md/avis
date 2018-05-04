@@ -130,30 +130,34 @@ void Gromacs::Read(const string& file) {
 	
 	Particles::particleSz = 10000000;
 	Particles::connSz = 5000000;
-	Particles::particles = new Particle[10000000];
+	Particles::particles_Name = new string[10000000];
+	Particles::particles_ResName = new string[10000000];
+	Particles::particles_Pos = new Vec3[10000000];
+	//Particles::particles_Vel = new Vec3[10000000];
+	Particles::particles_Col = new byte[10000000];
 
 	glGenVertexArrays(1, &Particles::posVao);
 	glGenBuffers(1, &Particles::posBuffer);
 	glGenBuffers(1, &Particles::connBuffer);
 	glGenBuffers(1, &Particles::colIdBuffer);
 
-	Vec3* buf = new Vec3[10000000];
 	uint* con = new uint[10000000];
-	byte* col = new byte[10000000];
 	for (uint i = 0; i < 10000000; i++) {
-		buf[i] = Particles::particles[i].position = Vec3((i % 100), ((i % 10000) / 100), (i / 10000)) * 0.1f;
+		Particles::particles_Pos[i] = Vec3((i % 100), ((i % 10000) / 100), (i / 10000)) * 0.1f;
 		con[i] = i;
-		col[i] = i % 3;
+		Particles::particles_Col[i] = i % 3;
+		Particles::particles_Name[i] = "OW" + std::to_string(i % 3);
+		Particles::particles_ResName[i] = "WATER";
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::posBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 10000000 * sizeof(Vec3), buf, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 10000000 * sizeof(Vec3), Particles::particles_Pos, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::connBuffer);
 	glBufferData(GL_ARRAY_BUFFER, 10000000 * sizeof(uint), con, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::colIdBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 10000000 * sizeof(byte), col, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 10000000 * sizeof(byte), Particles::particles_Col, GL_STATIC_DRAW);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	
@@ -166,9 +170,21 @@ void Gromacs::Read(const string& file) {
 
 	Particles::GenTexBufs();
 
-	delete[](buf);
+	Particles::residueLists = new ResidueList[1000];
+	Particles::residueListSz = 1000;
+
+	for (uint i = 0; i < 1000; i++) {
+		Particles::residueLists[i].name = "WATER" + std::to_string(i);
+		Particles::residueLists[i].residues = new Residue[100];
+		Particles::residueLists[i].residueSz = 100;
+		for (uint j = 0; j < 100; j++) {
+			Particles::residueLists[i].residues[j].name = "W" + std::to_string(j);
+			Particles::residueLists[i].residues[j].offset = i * 10000 + j * 100;
+			Particles::residueLists[i].residues[j].cnt = 100;
+		}
+	}
+
 	delete[](con);
-	delete[](col);
 }
 
 void Gromacs::LoadFiles() {

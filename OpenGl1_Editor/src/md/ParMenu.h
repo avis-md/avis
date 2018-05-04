@@ -14,8 +14,10 @@ public:
 	static bool expanded;
 	static float expandPos;
 
-	static uint listMaxItems;
+	static const uint listMaxItems;
 	static std::vector<ListList> listList;
+
+	static uint listListSz, listActive;
 
 	static Font* font;
 

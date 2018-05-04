@@ -2,10 +2,14 @@
 
 ResidueList* Particles::residueLists;
 uint Particles::residueListSz;
-Particle* Particles::particles;
 uint Particles::particleSz;
 uint Particles::connSz;
 
+string* Particles::particles_Name, *Particles::particles_ResName;
+Vec3* Particles::particles_Pos, *Particles::particles_Vel;
+byte* Particles::particles_Col;
+
+Vec3 Particles::colorPallete[] = {};
 GLuint Particles::colorPalleteTex;
 
 GLuint Particles::posVao;
@@ -15,13 +19,12 @@ GLuint Particles::colIdBuffer;
 GLuint Particles::posTexBuffer, Particles::connTexBuffer, Particles::colorIdTexBuffer;
 
 void Particles::Init() {
-	byte data[768] = {};
-	data[0] = data[4] = data[8] = 255;
-	data[1] = data[2] = data[3] = data[5] = data[6] = data[7] = 85;
+	colorPallete[0].r = colorPallete[1].g = colorPallete[2].b = 1;
+	colorPallete[0].g = colorPallete[0].b = colorPallete[1].r = colorPallete[1].b = colorPallete[2].r = colorPallete[2].g = 0;
 
 	glGenTextures(1, &colorPalleteTex);
 	glBindTexture(GL_TEXTURE_2D, colorPalleteTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 16, 16, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 16, 16, 0, GL_RGB, GL_FLOAT, colorPallete);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -29,10 +32,20 @@ void Particles::Init() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void Particles::UpdateColorTex() {
+	glBindTexture(GL_TEXTURE_2D, colorPalleteTex);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 16, 16, GL_RGB, GL_FLOAT, colorPallete);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 void Particles::Clear() {
-	if (particles) {
+	if (particles_Pos) {
 		delete[](residueLists);
-		delete[](particles);
+		delete[](particles_Name);
+		delete[](particles_ResName);
+		delete[](particles_Pos);
+		delete[](particles_Vel);
+		delete[](particles_Col);
 		glDeleteBuffers(1, &posBuffer);
 		glDeleteBuffers(1, &connBuffer);
 		glDeleteVertexArrays(1, &posVao);

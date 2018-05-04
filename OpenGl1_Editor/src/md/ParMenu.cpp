@@ -7,16 +7,19 @@ bool ParMenu::expanded = true;
 float ParMenu::expandPos = 150;
 Font* ParMenu::font = nullptr;
 
-uint ParMenu::listMaxItems = 1000;
+const uint ParMenu::listMaxItems = 1000;
 std::vector<ParMenu::ListList> ParMenu::listList;
+
+uint ParMenu::listListSz = 0, ParMenu::listActive = 0;
 
 void ParMenu::InitList() {
 	listList.clear();
 	listList.push_back(ListList(0, 0, 0));
 	ushort num = 0;
-	for (uint i = 0; i < Particles::residueListSz; i++) {
+	uint i, j;
+	for (i = 0; i < Particles::residueListSz; i++) {
 		auto& r = Particles::residueLists[i];
-		for (uint j = 0; j < r.residueSz; j++) {
+		for (j = 0; j < r.residueSz; j++) {
 			auto& rr = r.residues[j];
 			num += rr.cnt;
 			if (num > listMaxItems) {
@@ -25,16 +28,19 @@ void ParMenu::InitList() {
 			}
 		}
 	}
+	listListSz = listList.size();
+	listList.push_back(ListList(i, j, Particles::residueLists[i-1].residues[j-1].cnt + 1));
 }
 
 void ParMenu::Draw() {
 	Engine::DrawQuad(0, 0, expandPos, (float)Display::height, white(0.9f, 0.15f));
 	if (expanded) {
 		float f = 20;
-		Engine::BeginStencil(0, 0, expandPos, (float)Display::height);
-
-
-		Engine::EndStencil();
+		switch (activeMenu) {
+		case 0:
+			Draw_List();
+			break;
+		}
 
 		for (uint i = 0; i < 4; i++) {
 			if (i == activeMenu)
@@ -43,12 +49,6 @@ void ParMenu::Draw() {
 				if (Engine::Button(expandPos, 81.0f * i, 16, 80, white(0.7f, 0.1f), white(1, 0.2f), white(1, 0.05f)) == MOUSE_RELEASE) {
 					activeMenu = i;
 				}
-		}
-
-		switch (activeMenu) {
-		case 0:
-			Draw_List();
-			break;
 		}
 
 		Engine::RotateUI(90, Vec2(expandPos + 16, 0));
@@ -75,5 +75,81 @@ void ParMenu::Draw() {
 }
 
 void ParMenu::Draw_List() {
-
+	UI::Label(expandPos - 148, 3, 12, "1", font, white());
+	if (!!listActive && Engine::Button(expandPos - 136, 2, 16, 16, Icons::left, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+		listActive--;
+	}
+	listActive = TryParse(UI::EditText(expandPos - 120, 2, 50, 16, 12, white(1, 0.4f), std::to_string(listActive + 1), font, true, nullptr, white()), 1U) - 1;
+	if ((listActive < listMaxItems - 1) && Engine::Button(expandPos - 70, 2, 16, 16, Icons::right, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+		listActive++;
+	}
+	listActive = Clamp(listActive, 0U, listMaxItems - 1);
+	font->Align(ALIGN_TOPRIGHT);
+	UI::Label(expandPos - 2, 3, 12, std::to_string(listListSz), font, white());
+	font->Align(ALIGN_TOPLEFT);
+	Engine::DrawQuad(1, 18, expandPos - 2, Display::height - 19.0f, white(0.9f, 0.1f));
+	Engine::BeginStencil(0, 0, expandPos, (float)Display::height);
+	uint mi = listList[listActive + 1].ResLId;
+	uint mj = listList[listActive + 1].ResId;
+	uint mk = listList[listActive + 1].ParId;
+	uint i = listList[listActive].ResLId;
+	uint j = listList[listActive].ResId;
+	uint k = listList[listActive].ParId;
+	if (mj != 0) {
+		mi++;
+	}
+	if (mk != 0) {
+		mj++;
+	}
+	float off = 19;
+	for (; i < mi; i++) {
+		auto& rli = Particles::residueLists[i];
+		if (off > 0) {
+			Engine::DrawQuad(expandPos - 148, off, 146, 16, white(1, 0.3f));
+			if (Engine::Button(expandPos - 148, off, 16, 16, rli.expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+				rli.expanded = !rli.expanded;
+			}
+			UI::Label(expandPos - 132, off, 12, rli.name, font, white(rli.visible ? 1 : 0.5f));
+			if (Engine::Button(expandPos - 18, off, 16, 16, rli.visible ? Icons::visible : Icons::hidden, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+				rli.visible = !rli.visible;
+			}
+		}
+		off += 17;
+		if (off >= Display::height)
+			goto loopout;
+		if (rli.expanded) {
+			for (; j < (((i == mi - 1) && !!mj) ? mj : Particles::residueLists[i].residueSz); j++) {
+				auto& rj = rli.residues[j];
+				if (off > 0) {
+					Engine::DrawQuad(expandPos - 143, off, 141, 16, white(1, 0.35f));
+					if (Engine::Button(expandPos - 143, off, 16, 16, rj.expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+						rj.expanded = !rj.expanded;
+					}
+					UI::Label(expandPos - 128, off, 12, rj.name, font, white((rli.visible && rj.visible) ? 1 : 0.5f));
+					if (Engine::Button(expandPos - 18, off, 16, 16, rj.visible ? Icons::visible : Icons::hidden, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+						rj.visible = !rj.visible;
+					}
+				}
+				off += 17;
+				if (off >= Display::height)
+					goto loopout;
+				if (rj.expanded) {
+					for (; k < (((j == mj - 1) && !!mk) ? mk : rli.residues[j].cnt); k++) {
+						Engine::DrawQuad(expandPos - 138, off, 136, 16, white(1, 0.4f));
+						UI::Label(expandPos - 136, off, 12, Particles::particles_Name[rj.offset + k], font, white());
+						if (Engine::Button(expandPos - 18, off, 16, 16, Icons::visible, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+							//rj.visible = !rj.visible;
+						}
+						off += 17;
+						if (off >= Display::height)
+							goto loopout;
+					}
+				}
+				k = 0;
+			}
+		}
+		j = 0;
+	}
+loopout:
+	Engine::EndStencil();
 }
