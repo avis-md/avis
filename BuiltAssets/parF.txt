@@ -2,7 +2,7 @@
 
 uniform mat4 _P;
 
-in float v2f_id;
+flat in int v2f_id;
 in vec3 v2f_pos;
 
 uniform vec2 screenSize;

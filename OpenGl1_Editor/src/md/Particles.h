@@ -11,7 +11,7 @@ struct Particle {
 };
 */
 struct Residue {
-	Residue() : visible(true), expanded(true) {}
+	Residue() : visible(true), expanded(false) {}
 
 	uint maxOff;
 	bool visible, expanded;
@@ -21,7 +21,7 @@ struct Residue {
 };
 
 struct ResidueList { //residues with the same name
-	ResidueList() : visible(true), expanded(true) {}
+	ResidueList() : visible(true), expanded(false) {}
 
 	~ResidueList() {
 		delete[](residues);

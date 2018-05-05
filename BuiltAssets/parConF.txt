@@ -2,8 +2,8 @@
 
 uniform mat4 _P;
 
-in float v2f_id1;
-in float v2f_id2;
+flat in int v2f_id1;
+flat in int v2f_id2;
 in vec3 v2f_pos;
 in vec3 v2f_wpos1;
 in vec3 v2f_wpos2;
@@ -42,8 +42,9 @@ vec2 lli(vec3 p1, vec3 p2, vec3 d1, vec3 d2) {
 void main()
 {
 	vec3 td = normalize(v2f_wpos2 - v2f_wpos1);
+    float lm = length(v2f_wpos2 - v2f_wpos1);
     float L = length(v2f_wpos2 - v2f_wpos1);
-	float r = 0.005;
+	float r = 0.004;
     //*
     vec4 ndc = vec4(
         (gl_FragCoord.x / screenSize.x - 0.5) * 2.0,
@@ -68,19 +69,31 @@ void main()
         discard;
     }
     else {
-		Output(vec4(0, 0, 0, 0), vec3(0, 0, -1), vec3(0.3, 0.3, 0.3), 0.5, vec4(1, 0, 0, 0));
-		
-		
-		/*
-		
+        float p232 = r*r - pow(length(p1 - p2), 2);
+		float p23 = sqrt(p232);
+        vec3 d1 = cross(td, normalize(p2-p1));
+        float phi = dot(fwd, d1);
+        if (phi < 0) phi = dot(fwd, -d1);
+        float lf = p23 / phi;
+        
+        vec3 pf = p2 - fwd * lf;
+        
+        float l3f = sqrt(lf * lf - p232);
+        
+        vec3 td2 = td;
+        if (dot(td2, fwd) > 0) td2 = -td2;
+        vec3 cf = p1 + td2 * l3f;
+        
+        float lc = length(cf - v2f_wpos1);
+        if ((dot(cf - v2f_wpos1, td) < 0) || (lc > lm))
+            discard;
+        int id = ((lc - lm/2) > 0) ? v2f_id2 : v2f_id1;
+        
         vec4 ndc2 = _P * vec4(pf, 1);
         ndc2 /= ndc2.w;
         gl_FragDepth = ndc2.z * 0.5 + 0.5;
-		
-		
-		float isId2 = sign(length(c3 - v2f_wpos1) - L / 2) * 0.5 + 0.5;
-		
-        Output(vec4(mix(v2f_id1, v2f_id2, isId2), 0, 0, 0), nml, vec3(0.3, 0.3, 0.3), 0.5, vec4(nml, 0));
-		*/
+        
+        Output(vec4(id, 0, 0, 0), pf - cf, vec3(0.3, 0.3, 0.3), 0.5, vec4(normalize(pf - cf), 0));
+        //Output(vec4(v2f_id1, 0, 0, 0), pf - cf, vec3(0.3, 0.3, 0.3), 0.5, vec4(p23 * 100, 0, 0, 0));
 	}
 }

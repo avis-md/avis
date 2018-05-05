@@ -146,7 +146,7 @@ void Gromacs::Read(const string& file) {
 		Particles::particles_Pos[i] = Vec3((i % 100), ((i % 10000) / 100), (i / 10000)) * 0.1f;
 		con[i] = i;
 		Particles::particles_Col[i] = i % 3;
-		Particles::particles_Name[i] = "OW" + std::to_string(i % 3);
+		Particles::particles_Name[i] = "OW";// +std::to_string(i % 3);
 		Particles::particles_ResName[i] = "WATER";
 	}
 
@@ -174,7 +174,7 @@ void Gromacs::Read(const string& file) {
 	Particles::residueListSz = 1000;
 
 	for (uint i = 0; i < 1000; i++) {
-		Particles::residueLists[i].name = "WATER" + std::to_string(i);
+		Particles::residueLists[i].name = "WATER";// +std::to_string(i);
 		Particles::residueLists[i].residues = new Residue[100];
 		Particles::residueLists[i].residueSz = 100;
 		for (uint j = 0; j < 100; j++) {

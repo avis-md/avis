@@ -6,5 +6,6 @@ public:
 	static void Init();
 
 	static Texture* expand, *collapse, *python, *play, *playall,
-		*left, *right, *cross, *visible, *hidden;
+		*left, *right, *cross, *visible, *hidden, *circle,
+		*select, *deselect, *flipselect;
 };

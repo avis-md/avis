@@ -339,6 +339,7 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 	//RenderLights();
 
 	if (onBlit) onBlit();
+	//_ApplyEmission(d_fbo, d_texs, (float)Display::width, (float)Display::height, 0);
 //#endif
 }
 

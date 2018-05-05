@@ -115,7 +115,6 @@ int main(int argc, char **argv)
 	set.skyBrightness = 0;
 	//Gromacs::LoadFiles();
 	Gromacs::Read(IO::path + "/md.gro");
-	ParMenu::InitList();
 	ParGraphics::UpdateDrawLists();
 
 	glEnable(GL_PROGRAM_POINT_SIZE);

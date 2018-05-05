@@ -9,7 +9,7 @@ uniform vec3 camFwd;
 
 uniform vec2 screenSize;
 
-out float v2f_id;
+flat out int v2f_id;
 out vec3 v2f_pos;
 
 void main(){
@@ -17,7 +17,7 @@ void main(){
     wpos /= wpos.w;
     gl_Position = _P*wpos;
     v2f_pos = wpos.xyz;
-    v2f_id = float(gl_VertexID + 1.1);
+    v2f_id = gl_VertexID + 1;
     
     vec3 wdir = wpos.xyz - camPos;
     float z = length(wdir);

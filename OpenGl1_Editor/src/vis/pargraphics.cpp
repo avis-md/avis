@@ -70,6 +70,7 @@ void ParGraphics::UpdateDrawLists() {
 			auto& rs = Particles::residueLists[di].residues[0];
 			auto& rs2 = Particles::residueLists[i - 1].residues[Particles::residueLists[i - 1].residueSz-1];
 			drawLists.push_back(std::pair<uint, uint>(rs.offset, rs2.offset - rs.offset + rs2.cnt));
+			di = -1;
 		}
 	}
 	if (di > -1) {
@@ -77,6 +78,7 @@ void ParGraphics::UpdateDrawLists() {
 		auto& rs2 = Particles::residueLists[Particles::residueListSz-1].residues[Particles::residueLists[Particles::residueListSz - 1].residueSz - 1];
 		drawLists.push_back(std::pair<uint, uint>(rs.offset, rs2.offset - rs.offset + rs2.cnt));
 	}
+	Scene::dirty = true;
 }
 
 void ParGraphics::Rerender() {
@@ -96,7 +98,7 @@ void ParGraphics::Rerender() {
 	for (auto& p : drawLists)
 		glDrawArrays(GL_POINTS, p.first, p.second);
 
-	/*
+	//*
 	glUseProgram(parConProg);
 	glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
 	glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
@@ -109,7 +111,7 @@ void ParGraphics::Rerender() {
 
 	glBindVertexArray(emptyVao);
 	glDrawArrays(GL_POINTS, 0, 5000000);
-	*/
+	//*/
 	glBindVertexArray(0);
 	glUseProgram(0);
 }
