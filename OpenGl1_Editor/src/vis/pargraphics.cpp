@@ -10,6 +10,7 @@ GLuint ParGraphics::selHlProg, ParGraphics::colProg;
 GLint ParGraphics::selHlProgLocs[] = {}, ParGraphics::colProgLocs[] = {};
 
 std::vector<uint> ParGraphics::hlIds;
+std::vector<std::pair<uint, uint>> ParGraphics::drawLists;
 
 GLuint ParGraphics::emptyVao;
 
@@ -59,6 +60,25 @@ void ParGraphics::Init() {
 	ChokoLait::mainCamera->onBlit = Reblit;
 }
 
+void ParGraphics::UpdateDrawLists() {
+	drawLists.clear();
+	int di = -1;
+	for (uint i = 0; i < Particles::residueListSz; i++) {
+		auto& r = Particles::residueLists[i];
+		if ((di == -1) && r.visible) di = i;
+		else if ((di > -1) && !r.visible) {
+			auto& rs = Particles::residueLists[di].residues[0];
+			auto& rs2 = Particles::residueLists[i - 1].residues[Particles::residueLists[i - 1].residueSz-1];
+			drawLists.push_back(std::pair<uint, uint>(rs.offset, rs2.offset - rs.offset + rs2.cnt));
+		}
+	}
+	if (di > -1) {
+		auto& rs = Particles::residueLists[di].residues[0];
+		auto& rs2 = Particles::residueLists[Particles::residueListSz-1].residues[Particles::residueLists[Particles::residueListSz - 1].residueSz - 1];
+		drawLists.push_back(std::pair<uint, uint>(rs.offset, rs2.offset - rs.offset + rs2.cnt));
+	}
+}
+
 void ParGraphics::Rerender() {
 	auto _mv = MVP::modelview();
 	auto _p = MVP::projection();
@@ -73,7 +93,8 @@ void ParGraphics::Rerender() {
 	glUniform2f(parProgLocs[4], (float)Display::width, (float)Display::height);
 
 	glBindVertexArray(Particles::posVao);
-	glDrawArrays(GL_POINTS, 0, 10000000);
+	for (auto& p : drawLists)
+		glDrawArrays(GL_POINTS, p.first, p.second);
 
 	/*
 	glUseProgram(parConProg);

@@ -14,10 +14,11 @@ public:
 	static GLint selHlProgLocs[4], colProgLocs[4];
 
 	static std::vector<uint> hlIds;
+	static std::vector<std::pair<uint, uint>> drawLists;
 
 	static GLuint emptyVao;
 
-	static void Init();
+	static void Init(), UpdateDrawLists();
 
 	static void Rerender();
 

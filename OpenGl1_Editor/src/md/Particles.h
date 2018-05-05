@@ -13,6 +13,7 @@ struct Particle {
 struct Residue {
 	Residue() : visible(true), expanded(true) {}
 
+	uint maxOff;
 	bool visible, expanded;
 	string name;
 	uint offset;
@@ -26,6 +27,7 @@ struct ResidueList { //residues with the same name
 		delete[](residues);
 	}
 	
+	uint maxOff;
 	bool visible, expanded;
 	string name;
 	Residue* residues;

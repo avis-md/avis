@@ -137,9 +137,6 @@ void ParMenu::Draw_List() {
 					for (; k < (((j == mj - 1) && !!mk) ? mk : rli.residues[j].cnt); k++) {
 						Engine::DrawQuad(expandPos - 138, off, 136, 16, white(1, 0.4f));
 						UI::Label(expandPos - 136, off, 12, Particles::particles_Name[rj.offset + k], font, white());
-						if (Engine::Button(expandPos - 18, off, 16, 16, Icons::visible, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
-							//rj.visible = !rj.visible;
-						}
 						off += 17;
 						if (off >= Display::height)
 							goto loopout;
