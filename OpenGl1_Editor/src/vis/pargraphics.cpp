@@ -1,7 +1,7 @@
 #include "pargraphics.h"
 
 Texture* ParGraphics::refl = nullptr;
-float ParGraphics::reflStr = 1, ParGraphics::reflStrDecay = 0;
+float ParGraphics::reflStr = 1, ParGraphics::reflStrDecay = 2, ParGraphics::rimOff = 0.5f, ParGraphics::rimStr = 1;
 
 GLuint ParGraphics::reflProg, ParGraphics::parProg, ParGraphics::parConProg;
 GLint ParGraphics::reflProgLocs[] = {}, ParGraphics::parProgLocs[] = {}, ParGraphics::parConProgLocs[] = {};
@@ -26,6 +26,8 @@ void ParGraphics::Init() {
 	reflProgLocs[6] = glGetUniformLocation(reflProg, "inSky");
 	reflProgLocs[7] = glGetUniformLocation(reflProg, "skyStrength");
 	reflProgLocs[8] = glGetUniformLocation(reflProg, "skyStrDecay");
+	reflProgLocs[9] = glGetUniformLocation(reflProg, "rimOffset");
+	reflProgLocs[10] = glGetUniformLocation(reflProg, "rimStrength");
 	
 	parProg = (new Shader(IO::GetText(IO::path + "/parV.txt"), IO::GetText(IO::path + "/parF.txt")))->pointer;
 	parProgLocs[0] = glGetUniformLocation(parProg, "_MV");
@@ -41,6 +43,7 @@ void ParGraphics::Init() {
 	parConProgLocs[3] = glGetUniformLocation(parConProg, "camFwd");
 	parConProgLocs[4] = glGetUniformLocation(parConProg, "screenSize");
 	parConProgLocs[5] = glGetUniformLocation(parConProg, "posTex");
+	parConProgLocs[6] = glGetUniformLocation(parConProg, "connTex");
 
 	selHlProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText("D:\\selectorFrag.txt")))->pointer;
 	selHlProgLocs[0] = glGetUniformLocation(selHlProg, "screenSize");
@@ -98,20 +101,22 @@ void ParGraphics::Rerender() {
 	for (auto& p : drawLists)
 		glDrawArrays(GL_POINTS, p.first, p.second);
 
-	//*
 	glUseProgram(parConProg);
 	glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
 	glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
 	glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
 	glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-	glUniform2f(parConProgLocs[4], Display::width, Display::height);
+	glUniform2f(parConProgLocs[4], (float)Display::width, (float)Display::height);
 	glUniform1i(parConProgLocs[5], 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+	glUniform1i(parConProgLocs[6], 2);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
 
 	glBindVertexArray(emptyVao);
 	glDrawArrays(GL_POINTS, 0, 5000000);
-	//*/
+
 	glBindVertexArray(0);
 	glUseProgram(0);
 }
@@ -176,6 +181,8 @@ void ParGraphics::BlitSky() {
 	glBindTexture(GL_TEXTURE_2D, refl->pointer);
 	glUniform1f(reflProgLocs[7], reflStr);
 	glUniform1f(reflProgLocs[8], reflStrDecay);
+	glUniform1f(reflProgLocs[9], rimOff);
+	glUniform1f(reflProgLocs[10], rimStr);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, Camera::fullscreenIndices);

@@ -7,15 +7,19 @@ uniform vec3 camFwd;
 uniform vec2 screenSize;
 
 uniform samplerBuffer posTex;
-uniform samplerBuffer connTex;
+uniform usamplerBuffer connTex;
 
-flat out int v2f_id1;
-flat out int v2f_id2;
+flat out uint v2f_id1;
+flat out uint v2f_id2;
 out vec3 v2f_pos;
 out vec3 v2f_wpos1;
 out vec3 v2f_wpos2;
 
 void main(){
+    uint id1 = texelFetch(connTex, gl_VertexID * 2).r;
+    uint id2 = texelFetch(connTex, gl_VertexID * 2 + 1).r;
+    v2f_id1 = id1 + 1U;//gl_VertexID * 2 + 1;
+    v2f_id2 = id2 + 1U;//gl_VertexID * 2 + 2;
 	vec3 pos1 = texelFetch(posTex, gl_VertexID * 2).rgb;
 	vec3 pos2 = texelFetch(posTex, gl_VertexID * 2 + 1).rgb;
 	vec3 pos = (pos1 + pos2) * 0.5;
@@ -29,13 +33,11 @@ void main(){
     wpos /= wpos.w;
     v2f_pos = wpos.xyz;
     gl_Position = _P*wpos;
-    v2f_id1 = gl_VertexID * 2 + 1;
-    v2f_id2 = gl_VertexID * 2 + 2;
     
     vec3 wdir = wpos.xyz - camPos;
     float z = length(wdir);
     float ca = dot(normalize(wpos.xyz - camPos), camFwd);
 	float z2 = z * ca;
-	gl_PointSize = (length(v2f_wpos2 - v2f_wpos1)/2 + 0.008) * screenSize.x / z2;
+	gl_PointSize = (length(v2f_wpos2 - v2f_wpos1)/2 + 0.016) * screenSize.x / z2;
 	if (z < 0.1) gl_PointSize = 0;
 }

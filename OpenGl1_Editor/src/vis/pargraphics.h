@@ -5,10 +5,10 @@
 class ParGraphics {
 public:
 	static Texture* refl;
-	static float reflStr, reflStrDecay;
+	static float reflStr, reflStrDecay, rimOff, rimStr;
 
 	static GLuint reflProg, parProg, parConProg;
-	static GLint reflProgLocs[9], parProgLocs[5], parConProgLocs[6];
+	static GLint reflProgLocs[11], parProgLocs[5], parConProgLocs[7];
 
 	static GLuint selHlProg, colProg;
 	static GLint selHlProgLocs[4], colProgLocs[4];

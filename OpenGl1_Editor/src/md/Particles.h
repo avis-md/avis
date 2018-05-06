@@ -44,6 +44,7 @@ public:
 	static string* particles_Name, *particles_ResName;
 	static Vec3* particles_Pos, *particles_Vel;
 	static byte* particles_Col;
+	static Int2* particles_Conn;
 
 	static Vec3 colorPallete[256];
 	static GLuint colorPalleteTex;

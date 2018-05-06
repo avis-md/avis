@@ -2,8 +2,8 @@
 
 uniform mat4 _P;
 
-flat in int v2f_id1;
-flat in int v2f_id2;
+flat in uint v2f_id1;
+flat in uint v2f_id2;
 in vec3 v2f_pos;
 in vec3 v2f_wpos1;
 in vec3 v2f_wpos2;
@@ -65,13 +65,20 @@ void main()
 	vec3 p1 = v2f_wpos1 + lts.y * td;
 	vec3 p2 = wPos2.xyz + lts.x * fwd;
     
-	if (length(p1 - p2) > r) {
+    float lp12 = length(p1 - p2);
+	if (lp12 > r) {
         discard;
     }
     else {
-        float p232 = r*r - pow(length(p1 - p2), 2);
+        float p232 = r*r - pow(lp12, 2);
 		float p23 = sqrt(p232);
-        vec3 d1 = cross(td, normalize(p2-p1));
+        vec3 d1 = cross(td, normalize(p2 - p1));
+        
+        if (lp12 < 0.0001) {
+            vec3 td1 = cross(fwd, td);
+            d1 = normalize(cross(td, td1));
+        }
+        
         float phi = dot(fwd, d1);
         if (phi < 0) phi = dot(fwd, -d1);
         float lf = p23 / phi;
@@ -87,7 +94,7 @@ void main()
         float lc = length(cf - v2f_wpos1);
         if ((dot(cf - v2f_wpos1, td) < 0) || (lc > lm))
             discard;
-        int id = ((lc - lm/2) > 0) ? v2f_id2 : v2f_id1;
+        uint id = ((lc - lm/2) > 0) ? v2f_id2 : v2f_id1;
         
         vec4 ndc2 = _P * vec4(pf, 1);
         ndc2 /= ndc2.w;

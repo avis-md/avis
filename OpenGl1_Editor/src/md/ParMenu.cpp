@@ -124,4 +124,10 @@ void ParMenu::Draw_Vis() {
 	ParGraphics::reflStr = Engine::DrawSliderFill(expandPos - 80, 19, 78, 16, 0, 2, ParGraphics::reflStr, white(1, 0.5f), white());
 	UI::Label(expandPos - 147, 37, 12, "Falloff", font, white());
 	ParGraphics::reflStrDecay = Engine::DrawSliderFill(expandPos - 80, 36, 78, 16, 0, 50, ParGraphics::reflStrDecay, white(1, 0.5f), white());
+	UI::Label(expandPos - 148, 54, 12, "Rim Light", font, white());
+	Engine::DrawQuad(expandPos - 149, 69, 148, 35, white(0.9f, 0.1f));
+	UI::Label(expandPos - 147, 71, 12, "Offset", font, white());
+	ParGraphics::rimOff = Engine::DrawSliderFill(expandPos - 80, 69, 78, 16, 0, 1, ParGraphics::rimOff, white(1, 0.5f), white());
+	UI::Label(expandPos - 147, 88, 12, "Strength", font, white());
+	ParGraphics::rimStr = Engine::DrawSliderFill(expandPos - 80, 88, 78, 16, 0, 5, ParGraphics::rimStr, white(1, 0.5f), white());
 }

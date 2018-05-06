@@ -8,6 +8,7 @@ uint Particles::connSz;
 string* Particles::particles_Name, *Particles::particles_ResName;
 Vec3* Particles::particles_Pos, *Particles::particles_Vel;
 byte* Particles::particles_Col;
+Int2* Particles::particles_Conn;
 
 Vec3 Particles::colorPallete[] = {};
 GLuint Particles::colorPalleteTex;
@@ -46,6 +47,7 @@ void Particles::Clear() {
 		delete[](particles_Pos);
 		delete[](particles_Vel);
 		delete[](particles_Col);
+		delete[](particles_Conn);
 		glDeleteBuffers(1, &posBuffer);
 		glDeleteBuffers(1, &connBuffer);
 		glDeleteVertexArrays(1, &posVao);
@@ -66,6 +68,6 @@ void Particles::GenTexBufs() {
 	glGenTextures(1, &colorIdTexBuffer);
 	glBindTexture(GL_TEXTURE_BUFFER, colorIdTexBuffer);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R8, colIdBuffer);
-	
+
 	glBindTexture(GL_TEXTURE_BUFFER, 0);
 }
