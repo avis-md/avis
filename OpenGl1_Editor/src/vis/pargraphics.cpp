@@ -10,7 +10,7 @@ GLuint ParGraphics::selHlProg, ParGraphics::colProg;
 GLint ParGraphics::selHlProgLocs[] = {}, ParGraphics::colProgLocs[] = {};
 
 std::vector<uint> ParGraphics::hlIds;
-std::vector<std::pair<uint, uint>> ParGraphics::drawLists;
+std::vector<std::pair<uint, uint>> ParGraphics::drawLists, ParGraphics::drawListsB;
 
 GLuint ParGraphics::emptyVao;
 
@@ -65,6 +65,7 @@ void ParGraphics::Init() {
 
 void ParGraphics::UpdateDrawLists() {
 	drawLists.clear();
+	drawListsB.clear();
 	int di = -1;
 	for (uint i = 0; i < Particles::residueListSz; i++) {
 		auto& r = Particles::residueLists[i];
@@ -73,6 +74,7 @@ void ParGraphics::UpdateDrawLists() {
 			auto& rs = Particles::residueLists[di].residues[0];
 			auto& rs2 = Particles::residueLists[i - 1].residues[Particles::residueLists[i - 1].residueSz-1];
 			drawLists.push_back(std::pair<uint, uint>(rs.offset, rs2.offset - rs.offset + rs2.cnt));
+			drawListsB.push_back(std::pair<uint, uint>(rs.offset_b, rs2.offset_b - rs.offset_b + rs2.cnt_b));
 			di = -1;
 		}
 	}
@@ -80,6 +82,7 @@ void ParGraphics::UpdateDrawLists() {
 		auto& rs = Particles::residueLists[di].residues[0];
 		auto& rs2 = Particles::residueLists[Particles::residueListSz-1].residues[Particles::residueLists[Particles::residueListSz - 1].residueSz - 1];
 		drawLists.push_back(std::pair<uint, uint>(rs.offset, rs2.offset - rs.offset + rs2.cnt));
+		drawListsB.push_back(std::pair<uint, uint>(rs.offset_b, rs2.offset_b - rs.offset_b + rs2.cnt_b));
 	}
 	Scene::dirty = true;
 }
@@ -115,7 +118,8 @@ void ParGraphics::Rerender() {
 	glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
 
 	glBindVertexArray(emptyVao);
-	glDrawArrays(GL_POINTS, 0, 5000000);
+	for (auto& p : drawListsB)
+		glDrawArrays(GL_POINTS, p.first, p.second);
 
 	glBindVertexArray(0);
 	glUseProgram(0);

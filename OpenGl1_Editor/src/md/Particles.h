@@ -18,8 +18,8 @@ struct Residue {
 	uint maxOff;
 	bool visible, expanded;
 	string name;
-	uint offset;
-	ushort cnt;
+	uint offset, offset_b;
+	ushort cnt, cnt_b;
 };
 
 struct ResidueList { //residues with the same name

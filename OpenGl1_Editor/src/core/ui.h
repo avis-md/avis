@@ -39,13 +39,7 @@ public:
 		int fontSize;
 	};
 
-	friend class Engine;
-	friend void FocusGL(GLFWwindow* window, int focus);
-	friend class PopupSelector;
-	friend class RenderTexture;
-	//protected:
-
-	static bool focused;
+	static bool focused, editingText;
 	static uint _editTextCursorPos, _editTextCursorPos2;
 	static string _editTextString;
 	static float _editTextBlinkTime;

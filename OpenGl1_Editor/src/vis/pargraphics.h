@@ -14,7 +14,7 @@ public:
 	static GLint selHlProgLocs[4], colProgLocs[4];
 
 	static std::vector<uint> hlIds;
-	static std::vector<std::pair<uint, uint>> drawLists;
+	static std::vector<std::pair<uint, uint>> drawLists, drawListsB;
 
 	static GLuint emptyVao;
 

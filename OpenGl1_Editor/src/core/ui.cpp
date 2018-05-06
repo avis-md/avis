@@ -7,7 +7,7 @@ uintptr_t UI::_lastEditText[UI_MAX_EDIT_TEXT_FRAMES] = {};
 uintptr_t UI::_editingEditText[UI_MAX_EDIT_TEXT_FRAMES] = {};
 ushort UI::_activeEditTextId = 0;
 ushort UI::_editingEditTextId = 0;
-bool UI::focused = true;
+bool UI::focused = true, UI::editingText = false;
 uint UI::_editTextCursorPos = 0;
 uint UI::_editTextCursorPos2 = 0;
 string UI::_editTextString = "";
@@ -96,10 +96,10 @@ bool UI::IsActiveEditText() {
 }
 
 void UI::PreLoop() {
-	//#ifdef PLATFORM_WIN
 	memset(_lastEditText, 0, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
 	_activeEditTextId = 0;
-	//#endif
+
+	editingText = !!_editingEditText[0];
 }
 
 #define _checkdraw assert(UI::CanDraw() && "UI functions can only be called from the Overlay function!");

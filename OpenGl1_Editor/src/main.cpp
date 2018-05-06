@@ -38,28 +38,29 @@ void rendFunc() {
 }
 
 void updateFunc() {
-	float camz0 = camz;
-	float rz0 = rz;
-	float rw0 = rw;
-	Vec3 center0 = center;
-	if (Input::KeyHold(Key_UpArrow)) camz -= 10 * Time::delta;
-	else if (Input::KeyHold(Key_DownArrow)) camz += 10 * Time::delta;
-	camz = max(camz, 0.0f);
-	if (Input::KeyHold(Key_W)) rw -= 100 * Time::delta;
-	else if (Input::KeyHold(Key_S)) rw += 100 * Time::delta;
-	//camz = Clamp<float>(camz, 0.5f, 10);
-	if (Input::KeyHold(Key_A)) rz -= 100 * Time::delta;
-	else if (Input::KeyHold(Key_D)) rz += 100 * Time::delta;
-	//camz = Clamp<float>(camz, 0.5f, 10);
-	if (Input::KeyHold(Key_J)) center.x -= 1 * Time::delta;
-	else if (Input::KeyHold(Key_L)) center.x += 1 * Time::delta;
-	if (Input::KeyHold(Key_I)) center.y -= 1 * Time::delta;
-	else if (Input::KeyHold(Key_K)) center.y += 1 * Time::delta;
-	if (Input::KeyHold(Key_U)) center.z -= 1 * Time::delta;
-	else if (Input::KeyHold(Key_O)) center.z += 1 * Time::delta;
+	if (!UI::editingText) {
+		float camz0 = camz;
+		float rz0 = rz;
+		float rw0 = rw;
+		Vec3 center0 = center;
+		if (Input::KeyHold(Key_UpArrow)) camz -= 10 * Time::delta;
+		else if (Input::KeyHold(Key_DownArrow)) camz += 10 * Time::delta;
+		camz = max(camz, 0.0f);
+		if (Input::KeyHold(Key_W)) rw -= 100 * Time::delta;
+		else if (Input::KeyHold(Key_S)) rw += 100 * Time::delta;
+		//camz = Clamp<float>(camz, 0.5f, 10);
+		if (Input::KeyHold(Key_A)) rz -= 100 * Time::delta;
+		else if (Input::KeyHold(Key_D)) rz += 100 * Time::delta;
+		//camz = Clamp<float>(camz, 0.5f, 10);
+		if (Input::KeyHold(Key_J)) center.x -= 1 * Time::delta;
+		else if (Input::KeyHold(Key_L)) center.x += 1 * Time::delta;
+		if (Input::KeyHold(Key_I)) center.y -= 1 * Time::delta;
+		else if (Input::KeyHold(Key_K)) center.y += 1 * Time::delta;
+		if (Input::KeyHold(Key_U)) center.z -= 1 * Time::delta;
+		else if (Input::KeyHold(Key_O)) center.z += 1 * Time::delta;
 
-	if (camz0 != camz || rz0 != rz || rw0 != rw || center0 != center) Scene::dirty = true;
-
+		if (camz0 != camz || rz0 != rz || rw0 != rw || center0 != center) Scene::dirty = true;
+	}
 }
 
 void paintfunc2() {

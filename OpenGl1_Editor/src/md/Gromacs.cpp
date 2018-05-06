@@ -181,6 +181,8 @@ void Gromacs::Read(const string& file) {
 			Particles::residueLists[i].residues[j].name = "W" + std::to_string(j);
 			Particles::residueLists[i].residues[j].offset = i * 10000 + j * 100;
 			Particles::residueLists[i].residues[j].cnt = 100;
+			Particles::residueLists[i].residues[j].offset_b = i * 5000 + j * 50;
+			Particles::residueLists[i].residues[j].cnt_b = 50;
 		}
 	}
 }
