@@ -279,15 +279,18 @@ Vec3 AU(Vec3 vec) {
 }
 
 void UI::Label(float x, float y, float s, string st, Font* font, Vec4 col, float maxw) {
+	Label(x, y, s, &st[0], st.size(), font, col, maxw);
+}
+
+void UI::Label(float x, float y, float s, char* str, uint sz, Font* font, Vec4 col, float maxw) {
 	if (s <= 0) return;
-	uint sz = st.size();
 	GLuint tex = font->glyph((uint)round(s));
 	font->SizeVec(sz);
 	byte align = (byte)font->alignment;
 	if ((align & 15) > 0) {
 		float totalW = 0;
 		for (uint i = 0; i < sz * 4; i += 4) {
-			char c = st[i / 4];
+			char& c = str[i / 4];
 			totalW = ceil(totalW + font->w2s[c] * s + s*0.1f);
 		}
 		x -= totalW * (align & 15) * 0.5f;
@@ -301,8 +304,11 @@ void UI::Label(float x, float y, float s, string st, Font* font, Vec4 col, float
 	x = round(x);
 	float defx = x;
 	for (uint i = 0; i < sz * 4; i += 4) {
-		char c = st[i / 4];
-		if (c == '\n') {
+		char& c = str[i / 4];
+		if (!c) {
+			sz = i * 4;
+			break;
+		} else if (c == '\n') {
 			c = ' ';
 			Vec3 off = -Vec3(font->off[c].x, font->off[c].y, 0)*s;
 			w = font->w2h[c] * s;

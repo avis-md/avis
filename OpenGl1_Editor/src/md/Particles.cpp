@@ -5,7 +5,7 @@ uint Particles::residueListSz;
 uint Particles::particleSz;
 uint Particles::connSz;
 
-string* Particles::particles_Name, *Particles::particles_ResName;
+char* Particles::particles_Name, *Particles::particles_ResName;
 Vec3* Particles::particles_Pos, *Particles::particles_Vel;
 byte* Particles::particles_Col;
 Int2* Particles::particles_Conn;

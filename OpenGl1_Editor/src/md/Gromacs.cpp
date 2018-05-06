@@ -131,8 +131,8 @@ void Gromacs::Read(const string& file) {
 	Particles::particleSz = 10000000;
 	Particles::connSz = 5000000;
 	Particles::particles_Conn = new Int2[5000000];
-	Particles::particles_Name = new string[10000000];
-	Particles::particles_ResName = new string[10000000];
+	Particles::particles_Name = new char[10000000 * PAR_MAX_NAME_LEN];
+	Particles::particles_ResName = new char[10000000 * PAR_MAX_NAME_LEN];
 	Particles::particles_Pos = new Vec3[10000000];
 	//Particles::particles_Vel = new Vec3[10000000];
 	Particles::particles_Col = new byte[10000000];
@@ -146,8 +146,8 @@ void Gromacs::Read(const string& file) {
 		Particles::particles_Pos[i] = Vec3((i % 100), ((i % 10000) / 100), (i / 10000)) * 0.1f;
 		((int*)Particles::particles_Conn)[i] = i;
 		Particles::particles_Col[i] = i % 3;
-		Particles::particles_Name[i] = "OW";// +std::to_string(i % 3);
-		Particles::particles_ResName[i] = "WATER";
+		memcpy(Particles::particles_Name + i * PAR_MAX_NAME_LEN, "OW", 3);// +std::to_string(i % 3);
+		memcpy(Particles::particles_ResName + i * PAR_MAX_NAME_LEN, "WATER", 6);
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::posBuffer);

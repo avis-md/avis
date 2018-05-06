@@ -1,6 +1,8 @@
 #pragma once
 #include "Engine.h"
 
+const uint PAR_MAX_NAME_LEN = 10;
+
 /*
 struct Particle {
 	bool visible;
@@ -41,7 +43,7 @@ public:
 	static uint particleSz;
 	static uint connSz;
 	
-	static string* particles_Name, *particles_ResName;
+	static char* particles_Name, *particles_ResName; //10 chars per name
 	static Vec3* particles_Pos, *particles_Vel;
 	static byte* particles_Col;
 	static Int2* particles_Conn;
