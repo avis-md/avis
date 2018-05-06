@@ -67,11 +67,11 @@ void Font::InitVao(uint sz) {
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(3, vbos);
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[0]);
-	glBufferStorage(GL_ARRAY_BUFFER, vaoSz * sizeof(Vec3), nullptr, GL_DYNAMIC_STORAGE_BIT);
+	glBufferData(GL_ARRAY_BUFFER, vaoSz * sizeof(Vec3), nullptr, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[1]);
-	glBufferStorage(GL_ARRAY_BUFFER, vaoSz * sizeof(Vec2), nullptr, GL_DYNAMIC_STORAGE_BIT);
+	glBufferData(GL_ARRAY_BUFFER, vaoSz * sizeof(Vec2), nullptr, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[2]);
-	glBufferStorage(GL_ARRAY_BUFFER, vaoSz * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
+	glBufferData(GL_ARRAY_BUFFER, vaoSz * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(vao);
 	glEnableVertexAttribArray(0);
@@ -140,7 +140,7 @@ GLuint Font::CreateGlyph(uint sz, bool recalc) {
 	for (ushort a = 0; a < 256; a++) {
 		if (recalc) {
 			w2h[a] = 0;
-			w2s[a] = 0;
+			o2s[a] = 0;
 		}
 		if (FT_Load_Char(_face, a, FT_LOAD_RENDER) != FT_Err_Ok) continue;
 		byte x = a % 16, y = a / 16;
@@ -149,16 +149,20 @@ GLuint Font::CreateGlyph(uint sz, bool recalc) {
 		if (recalc) {
 			if (bmp.width == 0) {
 				w2h[a] = 0;
-				w2s[a] = 0.5f / sz;
+				o2s[a] = 0;
 			}
 			else {
 				w2h[a] = (float)(bmp.width) / bmp.rows;
-				w2s[a] = (float)(bmp.width) / sz;
+				o2s[a] = _face->glyph->metrics.horiAdvance / sz / 64.0f;
 			}
 			off[a] = Vec2((float)(_face->glyph->bitmap_left) / sz, 1 - ((float)(_face->glyph->bitmap_top) / sz));
 		}
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
+	if (recalc) {
+		o2s[' '] = 0.3f;
+		o2s['\t'] = 0.9f;
+	}
 	return _glyphs[sz];
 }
 

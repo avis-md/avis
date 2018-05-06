@@ -102,7 +102,7 @@ void ParMenu::Draw_List() {
 				if (rj.expanded) {
 					for (uint k = 0; k < rj.cnt; k++) {
 						Engine::DrawQuad(expandPos - 138, off, 136, 16, white(1, 0.4f));
-						UI::Label(expandPos - 136, off, 12, &Particles::particles_Name[rj.offset + k], PAR_MAX_NAME_LEN, font, white());
+						UI::Label(expandPos - 136, off, 12, &Particles::particles_Name[(rj.offset + k)*PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, font, white());
 						Vec3& col = Particles::colorPallete[Particles::particles_Col[rj.offset + k]];
 						Engine::Button(expandPos - 18, off, 16, 16, Icons::circle, Vec4(col, 0.8f), Vec4(col, 1), Vec4(col, 0.5f));
 						off += 17;

@@ -283,6 +283,7 @@ void UI::Label(float x, float y, float s, string st, Font* font, Vec4 col, float
 }
 
 void UI::Label(float x, float y, float s, char* str, uint sz, Font* font, Vec4 col, float maxw) {
+	sz = min(sz, strlen(str));
 	if (s <= 0) return;
 	GLuint tex = font->glyph((uint)round(s));
 	font->SizeVec(sz);
@@ -291,7 +292,7 @@ void UI::Label(float x, float y, float s, char* str, uint sz, Font* font, Vec4 c
 		float totalW = 0;
 		for (uint i = 0; i < sz * 4; i += 4) {
 			char& c = str[i / 4];
-			totalW = ceil(totalW + font->w2s[c] * s + s*0.1f);
+				totalW += font->o2s[c] * s;
 		}
 		x -= totalW * (align & 15) * 0.5f;
 	}
@@ -305,36 +306,26 @@ void UI::Label(float x, float y, float s, char* str, uint sz, Font* font, Vec4 c
 	float defx = x;
 	for (uint i = 0; i < sz * 4; i += 4) {
 		char& c = str[i / 4];
-		if (!c) {
-			sz = i * 4;
-			break;
-		} else if (c == '\n') {
+		if (c == '\n')
 			c = ' ';
-			Vec3 off = -Vec3(font->off[c].x, font->off[c].y, 0)*s;
-			w = font->w2h[c] * s;
-			font->poss[i] = AU(Vec3(x, y - s, 1) + off)*ds;
-			font->poss[i + 1] = AU(Vec3(x + s, y - s, 1) + off)*ds;
-			font->poss[i + 2] = AU(Vec3(x, y, 1) + off)*ds;
-			font->poss[i + 3] = AU(Vec3(x + s, y, 1) + off)*ds;
-			font->cs[i] = c;
-			font->cs[i + 1] = c;
-			font->cs[i + 2] = c;
-			font->cs[i + 3] = c;
-			x = defx; //ceil(x + font->w2s[c] * s + s*0.1f);
+
+		Vec3 off = -Vec3(font->off[c].x, font->off[c].y, 0)*s;
+		w = font->w2h[c] * s;
+		font->poss[i] = AU(Vec3(x, y - s, 1) + off)*ds;
+		font->poss[i + 1] = AU(Vec3(x + s, y - s, 1) + off)*ds;
+		font->poss[i + 2] = AU(Vec3(x, y, 1) + off)*ds;
+		font->poss[i + 3] = AU(Vec3(x + s, y, 1) + off)*ds;
+		font->cs[i] = c;
+		font->cs[i + 1] = c;
+		font->cs[i + 2] = c;
+		font->cs[i + 3] = c;
+
+		if (c == '\n') {
+			x = defx;
 			y -= s * 1.3f;
 		}
 		else {
-			Vec3 off = -Vec3(font->off[c].x, font->off[c].y, 0)*s;
-			w = font->w2h[c] * s;
-			font->poss[i] = AU(Vec3(x, y - s, 1) + off)*ds;
-			font->poss[i + 1] = AU(Vec3(x + s, y - s, 1) + off)*ds;
-			font->poss[i + 2] = AU(Vec3(x, y, 1) + off)*ds;
-			font->poss[i + 3] = AU(Vec3(x + s, y, 1) + off)*ds;
-			font->cs[i] = c;
-			font->cs[i + 1] = c;
-			font->cs[i + 2] = c;
-			font->cs[i + 3] = c;
-			x = ceil(x + font->w2s[c] * s + s*0.1f);
+			x += font->o2s[c] * s;
 		}
 	}
 	font->poss[sz * 4] = Vec3(x, 0, 0)*ds;
@@ -366,33 +357,4 @@ void UI::Label(float x, float y, float s, char* str, uint sz, Font* font, Vec4 c
 	glDrawElements(GL_TRIANGLES, 6 * sz, GL_UNSIGNED_INT, &font->ids[0]);
 	glBindVertexArray(0);
 	glUseProgram(0);
-	/*
-	uint prog = font->fontProgram;
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, &font->poss[0]);
-	glUseProgram(prog);
-	GLint baseColLoc = glGetUniformLocation(prog, "col");
-	glUniform4f(baseColLoc, Vec4.r, Vec4.g, Vec4.b, Vec4.a);
-	GLint baseImageLoc = glGetUniformLocation(prog, "sampler");
-	glUniform1i(baseImageLoc, 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, 0, &font->poss[0]);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_TRUE, 0, &font->uvs[0]);
-	glVertexAttribPointer(2, 1, GL_FLOAT, GL_TRUE, 0, &font->cs[0]);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawElements(GL_TRIANGLES, 6*sz, GL_UNSIGNED_INT, &font->ids[0]);
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(2);
-	glUseProgram(0);
-
-	glDisableClientState(GL_VERTEX_ARRAY);
-	*/
 }

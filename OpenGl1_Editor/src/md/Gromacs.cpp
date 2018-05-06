@@ -187,19 +187,7 @@ void Gromacs::Read(const string& file) {
 
 void Gromacs::LoadFiles() {
 	/*
-	std::ifstream strm(IO::path + "/colors.txt", std::ios::binary);
-	_type2color.clear();
-	if (strm.is_open()) {
-		string s;
-		while (!strm.eof()) {
-			std::getline(strm, s);
-			auto p = string_split(s, ' ');
-			if (p.size() != 4) continue;
-			_type2color.emplace(*(ushort*)&p[0], Vec3(std::stof(p[1]), std::stof(p[2]), std::stof(p[3])));
-		}
-		strm.close();
-	}
-	strm.open(IO::path + "/bondlengths.txt", std::ios::binary);
+	std::ifstream strm(IO::path + "/bondlengths.txt", std::ios::binary);
 	_bondLengths.clear();
 	if (strm.is_open()) {
 		string s;

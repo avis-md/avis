@@ -32,7 +32,7 @@ protected:
 	static GLuint fontProgram;
 
 	float w2h[256];
-	float w2s[256];
+	float o2s[256];
 	Vec2 off[256];
 
 	uint vecSize;
