@@ -103,22 +103,7 @@ void ParGraphics::Update() {
 		float rz0 = rotZ;
 		float rw0 = rotW;
 		Vec3 center0 = rotCenter;
-		/*
-		if (Input::KeyHold(Key_UpArrow)) rotScale -= 2 * Time::delta;
-		else if (Input::KeyHold(Key_DownArrow)) rotScale += 2 * Time::delta;
-		if (Input::KeyHold(Key_W)) rotW -= 100 * Time::delta;
-		else if (Input::KeyHold(Key_S)) rotW += 100 * Time::delta;
-		//camz = Clamp<float>(camz, 0.5f, 10);
-		if (Input::KeyHold(Key_A)) rotZ -= 100 * Time::delta;
-		else if (Input::KeyHold(Key_D)) rotZ += 100 * Time::delta;
-		//camz = Clamp<float>(camz, 0.5f, 10);
-		if (Input::KeyHold(Key_J)) rotCenter.x -= 1 * Time::delta;
-		else if (Input::KeyHold(Key_L)) rotCenter.x += 1 * Time::delta;
-		if (Input::KeyHold(Key_K)) rotCenter.y -= 1 * Time::delta;
-		else if (Input::KeyHold(Key_I)) rotCenter.y += 1 * Time::delta;
-		if (Input::KeyHold(Key_O)) rotCenter.z -= 1 * Time::delta;
-		else if (Input::KeyHold(Key_U)) rotCenter.z += 1 * Time::delta;
-		*/
+
 		if (Input::mouse0) {
 			if (Input::mouse0State == MOUSE_DOWN && VisSystem::InMainWin(Input::mousePos)) {
 				dragging = true;
@@ -136,6 +121,11 @@ void ParGraphics::Update() {
 		}
 		else if (Input::mouseScroll != 0 && VisSystem::InMainWin(Input::mousePos)) {
 			rotScale += 0.05f * Input::mouseScroll;
+		}
+		else {
+			if (Input::KeyDown(Key_Escape)) {
+				VisSystem::mouseMode = VIS_MOUSE_MODE::ROTATE;
+			}
 		}
 
 		if (s0 != rotScale || rz0 != rotZ || rw0 != rotW || center0 != rotCenter) Scene::dirty = true;

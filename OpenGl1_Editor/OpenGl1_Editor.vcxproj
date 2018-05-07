@@ -261,8 +261,8 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\Editor.cpp" />
     <ClCompile Include="src\EditorShortcuts.cpp" />
     <ClCompile Include="src\Engine.cpp" />
-    <ClCompile Include="src\md\Gromacs.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\md\Gromacs.cpp" />
     <ClCompile Include="src\makegen.cpp" />
     <ClCompile Include="src\md\ParMenu.cpp" />
     <ClCompile Include="src\md\Particles.cpp" />
@@ -300,6 +300,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\utils\random.cpp" />
     <ClCompile Include="src\utils\rect.cpp" />
     <ClCompile Include="src\utils\serial.cpp" />
+    <ClCompile Include="src\utils\spline.cpp" />
     <ClCompile Include="src\utils\stream.cpp" />
     <ClCompile Include="src\utils\strext.cpp" />
     <ClCompile Include="src\utils\xml.cpp" />
@@ -381,6 +382,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClInclude Include="src\utils\random.h" />
     <ClInclude Include="src\utils\rect.h" />
     <ClInclude Include="src\utils\serial.h" />
+    <ClInclude Include="src\utils\spline.h" />
     <ClInclude Include="src\utils\stream.h" />
     <ClInclude Include="src\utils\strext.h" />
     <ClInclude Include="src\utils\xml.h" />
