@@ -2,7 +2,8 @@
 
 Texture* Icons::expand, *Icons::collapse, *Icons::python, *Icons::play, *Icons::playall,
 *Icons::left, *Icons::right, *Icons::cross, *Icons::visible, *Icons::hidden, *Icons::circle,
-*Icons::select, *Icons::deselect, *Icons::flipselect;
+*Icons::select, *Icons::deselect, *Icons::flipselect,
+*Icons::toolRot, *Icons::toolMov, *Icons::toolSel;
 
 void Icons::Init() {
 	expand = new Texture(IO::path + "/res/expand.png", false, TEX_FILTER_POINT);
@@ -19,4 +20,7 @@ void Icons::Init() {
 	select = new Texture(IO::path + "/res/select.png", false, TEX_FILTER_POINT);
 	deselect = new Texture(IO::path + "/res/deselect.png", false, TEX_FILTER_POINT);
 	flipselect = new Texture(IO::path + "/res/flipselect.png", false, TEX_FILTER_POINT);
+	toolRot = new Texture(IO::path + "/res/tool_rot.png", false, TEX_FILTER_POINT);
+	toolMov = new Texture(IO::path + "/res/tool_mov.png", false, TEX_FILTER_POINT);
+	toolSel = new Texture(IO::path + "/res/tool_sel.png", false, TEX_FILTER_POINT);
 }

@@ -53,23 +53,23 @@ void PyBrowse::DoDraw(Folder* f, float& off, uint layer) {
 }
 
 void PyBrowse::Draw() {
-	Engine::DrawQuad(0.0f, 0.0f, expandPos, (float)Display::height, white(0.9f, 0.15f));
+	Engine::DrawQuad(0.0f, 0.0f, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
 	if (expanded) {
 		float f = 20;
-		Engine::BeginStencil(0.0f, 0.0f, expandPos, (float)Display::height);
+		Engine::BeginStencil(0.0f, 0.0f, expandPos, Display::height - 18.0f);
 		UI::Label(5.0f, 3.0f, 12.0f, "Python Files", PyNode::font, white());
 		DoDraw(&folder, f, 0);
 		Engine::EndStencil();
-		Engine::DrawQuad(expandPos, Display::height - 16.0f, 16.0f, 16.0f, white(1, 0.2f));
-		if (Engine::Button(expandPos, Display::height - 16.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		Engine::DrawQuad(expandPos, Display::height - 34.0f, 16.0f, 16.0f, white(1, 0.2f));
+		if (Engine::Button(expandPos, Display::height - 34.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = min(expandPos + 1500 * Time::delta, 150.0f);
 	}
 	else {
-		if (Engine::Button(expandPos, Display::height - 16.0f, 110.0f, 16.0f, white(1, 0.2f), white(1, 0.2f), white(1, 0.2f)) == MOUSE_RELEASE)
+		if (Engine::Button(expandPos, Display::height - 34.0f, 110.0f, 16.0f, white(1, 0.2f), white(1, 0.2f), white(1, 0.2f)) == MOUSE_RELEASE)
 			expanded = true;
-		UI::Texture(expandPos, Display::height - 16.0f, 16.0f, 16.0f, Icons::expand);
-		UI::Label(expandPos + 18, Display::height - 15.0f, 12.0f, "Python Files", PyNode::font, white());
+		UI::Texture(expandPos, Display::height - 34.0f, 16.0f, 16.0f, Icons::expand);
+		UI::Label(expandPos + 18, Display::height - 33.0f, 12.0f, "Python Files", PyNode::font, white());
 		expandPos = max(expandPos - 1500 * Time::delta, 0.0f);
 	}
 }

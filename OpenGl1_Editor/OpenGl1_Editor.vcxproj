@@ -304,6 +304,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\utils\strext.cpp" />
     <ClCompile Include="src\utils\xml.cpp" />
     <ClCompile Include="src\vis\pargraphics.cpp" />
+    <ClCompile Include="src\vis\system.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="hdr\hdr.h" />
@@ -384,6 +385,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClInclude Include="src\utils\strext.h" />
     <ClInclude Include="src\utils\xml.h" />
     <ClInclude Include="src\vis\pargraphics.h" />
+    <ClInclude Include="src\vis\system.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

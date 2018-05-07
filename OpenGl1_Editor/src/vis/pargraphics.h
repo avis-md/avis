@@ -16,9 +16,18 @@ public:
 	static std::vector<uint> hlIds;
 	static std::vector<std::pair<uint, uint>> drawLists, drawListsB;
 
+	static Vec3 rotCenter;
+	static float rotW, rotZ;
+	static float rotScale;
+
+	static bool dragging;
+	static Vec3 scrX, scrY;
+
 	static GLuint emptyVao;
 
 	static void Init(), UpdateDrawLists();
+
+	static void Update();
 
 	static void Rerender();
 
@@ -27,6 +36,8 @@ public:
 
 	//gbuffers to screen
 	static void Reblit();
+
+	static void DrawMenu();
 
 protected:
 	static void BlitSky();

@@ -7,6 +7,7 @@ flat in uint v2f_id2;
 in vec3 v2f_pos;
 in vec3 v2f_wpos1;
 in vec3 v2f_wpos2;
+in float v2f_scl;
 
 uniform vec2 screenSize;
 
@@ -44,7 +45,7 @@ void main()
 	vec3 td = normalize(v2f_wpos2 - v2f_wpos1);
     float lm = length(v2f_wpos2 - v2f_wpos1);
     float L = length(v2f_wpos2 - v2f_wpos1);
-	float r = 0.004;
+	float r = 0.004 * v2f_scl;
     //*
     vec4 ndc = vec4(
         (gl_FragCoord.x / screenSize.x - 0.5) * 2.0,

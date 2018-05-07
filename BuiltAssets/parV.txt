@@ -11,6 +11,7 @@ uniform vec2 screenSize;
 
 flat out int v2f_id;
 out vec3 v2f_pos;
+out float v2f_scl;
 
 void main(){
     vec4 wpos = _MV*vec4(pos, 1);
@@ -18,11 +19,14 @@ void main(){
     gl_Position = _P*wpos;
     v2f_pos = wpos.xyz;
     v2f_id = gl_VertexID + 1;
+	
+	vec4 unitVec = _MV*vec4(1, 0, 0, 0);
+	v2f_scl = length(unitVec);
     
     vec3 wdir = wpos.xyz - camPos;
     float z = length(wdir);
     float ca = dot(normalize(wpos.xyz - camPos), camFwd);
 	float z2 = z * ca;
-	gl_PointSize = 0.02 * screenSize.x / z2;
+	gl_PointSize = v2f_scl * 0.02 * screenSize.x / z2;
 	if (z < 0.1) gl_PointSize = 0;
 }

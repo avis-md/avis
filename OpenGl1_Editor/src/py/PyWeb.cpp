@@ -61,8 +61,8 @@ void PyWeb::Update() {
 
 void PyWeb::Draw() {
 	PyNode::width = 220;
-	Engine::DrawQuad(PyBrowse::expandPos, 0.0f, (float)Display::width, (float)Display::height, white(0.8f, 0.05f));
-	Engine::BeginStencil(PyBrowse::expandPos, 0.0f, (float)Display::width, (float)Display::height);
+	Engine::DrawQuad(PyBrowse::expandPos, 0.0f, (float)Display::width, Display::height - 18.0f, white(0.8f, 0.05f));
+	Engine::BeginStencil(PyBrowse::expandPos, 0.0f, (float)Display::width, Display::height - 18.0f);
 	byte ms = Input::mouse0State;
 	if (executing) {
 		Input::mouse0 = false;
@@ -178,7 +178,7 @@ void PyWeb::Draw() {
 }
 
 void PyWeb::DrawSide() {
-	Engine::DrawQuad(Display::width - expandPos, 0.0f, 180.0f, (float)Display::height, white(0.9f, 0.15f));
+	Engine::DrawQuad(Display::width - expandPos, 0.0f, 180.0f, Display::height - 18.0f, white(0.9f, 0.15f));
 	if (expanded) {
 		float w = 180;
 		PyNode::width = w - 2;
@@ -203,17 +203,17 @@ void PyWeb::DrawSide() {
 			poss.y += n->DrawSide();
 		}
 		//Engine::EndStencil();
-		Engine::DrawQuad(Display::width - expandPos - 16.0f, Display::height - 16.0f, 16.0f, 16.0f, white(0.9f, 0.15f));
-		if (Engine::Button(Display::width - expandPos - 16.0f, Display::height - 16.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		Engine::DrawQuad(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, white(0.9f, 0.15f));
+		if (Engine::Button(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = min(expandPos + 1500 * Time::delta, 180.0f);
 	}
 	else {
-		Engine::DrawQuad(Display::width - expandPos, 0.0f, expandPos, (float)Display::height, white(0.9f, 0.15f));
-		if (Engine::Button(Display::width - expandPos - 110.0f, Display::height - 16.0f, 110.0f, 16.0f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
+		Engine::DrawQuad(Display::width - expandPos, 0.0f, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
+		if (Engine::Button(Display::width - expandPos - 110.0f, Display::height - 34.0f, 110.0f, 16.0f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
-		UI::Texture(Display::width - expandPos - 110.0f, Display::height - 16.0f, 16.0f, 16.0f, Icons::expand);
-		UI::Label(Display::width - expandPos - 92.0f, Display::height - 15.0f, 12.0f, "Analysis", PyNode::font, white());
+		UI::Texture(Display::width - expandPos - 110.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::expand);
+		UI::Label(Display::width - expandPos - 92.0f, Display::height - 33.0f, 12.0f, "Analysis", PyNode::font, white());
 		expandPos = max(expandPos - 1500*Time::delta, 2.0f);
 	}
 }

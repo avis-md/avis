@@ -9,7 +9,7 @@ float ParMenu::expandPos = 150;
 Font* ParMenu::font = nullptr;
 
 void ParMenu::Draw() {
-	Engine::DrawQuad(0, 0, expandPos, (float)Display::height, white(0.9f, 0.15f));
+	Engine::DrawQuad(0, 0, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
 	if (expanded) {
 		float f = 20;
 		switch (activeMenu) {
@@ -39,17 +39,16 @@ void ParMenu::Draw() {
 		font->Align(ALIGN_TOPLEFT);
 		Engine::ResetUIMatrix();
 
-		Engine::DrawQuad(expandPos, Display::height - 16.0f, 16, 16, white(0.9f, 0.15f));
-		if (Engine::Button(expandPos, Display::height - 16.0f, 16, 16, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		Engine::DrawQuad(expandPos, Display::height - 34.0f, 16, 16, white(0.9f, 0.15f));
+		if (Engine::Button(expandPos, Display::height - 34.0f, 16, 16, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
-		Engine::EndStencil();
 		expandPos = min(expandPos + 1500 * Time::delta, 150.0f);
 	}
 	else {
-		if (Engine::Button(expandPos, Display::height - 16.0f, 115, 16, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
+		if (Engine::Button(expandPos, Display::height - 34.0f, 115, 16, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
-		UI::Texture(expandPos, Display::height - 16.0f, 16, 16, Icons::expand);
-		UI::Label(expandPos + 18, Display::height - 15.0f, 12, "Particle View", font, white());
+		UI::Texture(expandPos, Display::height - 34.0f, 16, 16, Icons::expand);
+		UI::Label(expandPos + 18, Display::height - 33.0f, 12, "Particle View", font, white());
 		expandPos = max(expandPos - 1500 * Time::delta, 0.0f);
 	}
 }
@@ -64,8 +63,8 @@ void ParMenu::Draw_List() {
 	if (Engine::Button(36, 2, 16, 16, Icons::flipselect, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
 
 	}
-	Engine::DrawQuad(1, 18, expandPos - 2, Display::height - 19.0f, white(0.9f, 0.1f));
-	Engine::BeginStencil(0, 0, expandPos, (float)Display::height);
+	Engine::DrawQuad(1, 18, expandPos - 2, Display::height - 37.0f, white(0.9f, 0.1f));
+	Engine::BeginStencil(0, 0, expandPos, Display::height - 18.0f);
 	float off = 20;
 	for (uint i = 0; i < Particles::residueListSz; i++) {
 		auto& rli = Particles::residueLists[i];
@@ -118,16 +117,5 @@ loopout:
 }
 
 void ParMenu::Draw_Vis() {
-	UI::Label(expandPos - 148, 3, 12, "Ambient", font, white());
-	Engine::DrawQuad(expandPos - 149, 18, 148, 35, white(0.9f, 0.1f));
-	UI::Label(expandPos - 147, 20, 12, "Strength", font, white());
-	ParGraphics::reflStr = Engine::DrawSliderFill(expandPos - 80, 19, 78, 16, 0, 2, ParGraphics::reflStr, white(1, 0.5f), white());
-	UI::Label(expandPos - 147, 37, 12, "Falloff", font, white());
-	ParGraphics::reflStrDecay = Engine::DrawSliderFill(expandPos - 80, 36, 78, 16, 0, 50, ParGraphics::reflStrDecay, white(1, 0.5f), white());
-	UI::Label(expandPos - 148, 54, 12, "Rim Light", font, white());
-	Engine::DrawQuad(expandPos - 149, 69, 148, 35, white(0.9f, 0.1f));
-	UI::Label(expandPos - 147, 71, 12, "Offset", font, white());
-	ParGraphics::rimOff = Engine::DrawSliderFill(expandPos - 80, 69, 78, 16, 0, 1, ParGraphics::rimOff, white(1, 0.5f), white());
-	UI::Label(expandPos - 147, 88, 12, "Strength", font, white());
-	ParGraphics::rimStr = Engine::DrawSliderFill(expandPos - 80, 88, 78, 16, 0, 5, ParGraphics::rimStr, white(1, 0.5f), white());
+	ParGraphics::DrawMenu();
 }

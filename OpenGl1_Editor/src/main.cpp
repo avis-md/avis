@@ -8,6 +8,7 @@
 #include "py/PyWeb.h"
 #include "md/ParMenu.h"
 #include "vis/pargraphics.h"
+#include "vis/system.h"
 
 float camz = 10;
 Vec3 center;
@@ -23,6 +24,7 @@ GLuint emptyVao;
 bool drawMesh;
 
 void rendFunc() {
+	/*
 	MVP::Switch(false);
 	MVP::Clear();
 	float csz = cos(-rz*deg2rad);
@@ -33,47 +35,27 @@ void rendFunc() {
 	MVP::Mul(mMatrix);
 	//MVP::Translate(-gro->boundingBox.x / 2, -gro->boundingBox.y / 2, -gro->boundingBox.z / 2);
 	MVP::Translate(center);
-	
+	*/
 	ParGraphics::Rerender();
 }
 
 void updateFunc() {
-	if (!UI::editingText) {
-		float camz0 = camz;
-		float rz0 = rz;
-		float rw0 = rw;
-		Vec3 center0 = center;
-		if (Input::KeyHold(Key_UpArrow)) camz -= 10 * Time::delta;
-		else if (Input::KeyHold(Key_DownArrow)) camz += 10 * Time::delta;
-		camz = max(camz, 0.0f);
-		if (Input::KeyHold(Key_W)) rw -= 100 * Time::delta;
-		else if (Input::KeyHold(Key_S)) rw += 100 * Time::delta;
-		//camz = Clamp<float>(camz, 0.5f, 10);
-		if (Input::KeyHold(Key_A)) rz -= 100 * Time::delta;
-		else if (Input::KeyHold(Key_D)) rz += 100 * Time::delta;
-		//camz = Clamp<float>(camz, 0.5f, 10);
-		if (Input::KeyHold(Key_J)) center.x -= 1 * Time::delta;
-		else if (Input::KeyHold(Key_L)) center.x += 1 * Time::delta;
-		if (Input::KeyHold(Key_I)) center.y -= 1 * Time::delta;
-		else if (Input::KeyHold(Key_K)) center.y += 1 * Time::delta;
-		if (Input::KeyHold(Key_U)) center.z -= 1 * Time::delta;
-		else if (Input::KeyHold(Key_O)) center.z += 1 * Time::delta;
+	ParGraphics::Update();
 
-		if (camz0 != camz || rz0 != rz || rw0 != rw || center0 != center) Scene::dirty = true;
-	}
+	PyWeb::Update();
 }
 
 void paintfunc2() {
-	PyWeb::Update();
 	if (PyWeb::drawFull)
 		PyWeb::Draw();
 	else {
 		ParMenu::Draw();
 		PyWeb::DrawSide();
 	}
+	VisSystem::DrawBar();
 
 	ParGraphics::hlIds.clear();
-	if (!PyWeb::drawFull && (Input::mousePos.x > ParMenu::expandPos + 16) && (Input::mousePos.x < Display::width - PyWeb::expandPos)) {
+	if (VisSystem::InMainWin(Input::mousePos)) {
 		auto id = ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y);
 		if (id) {
 			ParGraphics::hlIds.push_back(id);
@@ -91,6 +73,8 @@ int main(int argc, char **argv)
 	bg = new Background(IO::path + "/refl.hdr");
 	font = new Font(IO::path + "/arimo.ttf", ALIGN_TOPLEFT);
 	
+	VisSystem::font = font;
+
 	Icons::Init();
 	Particles::Init();
 	ParGraphics::Init();
@@ -123,12 +107,24 @@ int main(int argc, char **argv)
 
 	Display::Resize(800, 600, false);
 
+	auto lastMillis = Time::millis;
+	bool dirty = false;
+
+	ChokoLait::mainCamera->object->transform.localPosition(Vec3(0, 0, -1));
+
 	while (ChokoLait::alive()) {
 		ChokoLait::Update(updateFunc);
 		//ChokoLait::mainCamera->object->transform.localPosition(Vec3(0, 0, -camz));
+		//ChokoLait::mainCamera->object->transform.localPosition(-ParGraphics::rotCenter);
 
+		dirty = Scene::dirty;
 		//ChokoLait::Paint(nullptr, paintfunc2);
 		ChokoLait::Paint(rendFunc, paintfunc2);
+		auto m = Time::millis;
+		VisSystem::uiMs = (uint)(m - lastMillis);
+		if (dirty)
+			VisSystem::renderMs = VisSystem::uiMs;
+		lastMillis = m;
 	}
 	//*/
 }

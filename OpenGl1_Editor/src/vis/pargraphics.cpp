@@ -1,4 +1,6 @@
 #include "pargraphics.h"
+#include "md/ParMenu.h"
+#include "vis/system.h"
 
 Texture* ParGraphics::refl = nullptr;
 float ParGraphics::reflStr = 1, ParGraphics::reflStrDecay = 2, ParGraphics::rimOff = 0.5f, ParGraphics::rimStr = 1;
@@ -11,6 +13,14 @@ GLint ParGraphics::selHlProgLocs[] = {}, ParGraphics::colProgLocs[] = {};
 
 std::vector<uint> ParGraphics::hlIds;
 std::vector<std::pair<uint, uint>> ParGraphics::drawLists, ParGraphics::drawListsB;
+
+Vec3 ParGraphics::rotCenter = Vec3();
+float ParGraphics::rotW = 0, ParGraphics::rotZ = 0;
+float ParGraphics::rotScale = 1;
+
+Vec3 ParGraphics::scrX, ParGraphics::scrY;
+
+bool ParGraphics::dragging = false;
 
 GLuint ParGraphics::emptyVao;
 
@@ -87,7 +97,84 @@ void ParGraphics::UpdateDrawLists() {
 	Scene::dirty = true;
 }
 
+void ParGraphics::Update() {
+	if (!UI::editingText) {
+		float s0 = rotScale;
+		float rz0 = rotZ;
+		float rw0 = rotW;
+		Vec3 center0 = rotCenter;
+		/*
+		if (Input::KeyHold(Key_UpArrow)) rotScale -= 2 * Time::delta;
+		else if (Input::KeyHold(Key_DownArrow)) rotScale += 2 * Time::delta;
+		if (Input::KeyHold(Key_W)) rotW -= 100 * Time::delta;
+		else if (Input::KeyHold(Key_S)) rotW += 100 * Time::delta;
+		//camz = Clamp<float>(camz, 0.5f, 10);
+		if (Input::KeyHold(Key_A)) rotZ -= 100 * Time::delta;
+		else if (Input::KeyHold(Key_D)) rotZ += 100 * Time::delta;
+		//camz = Clamp<float>(camz, 0.5f, 10);
+		if (Input::KeyHold(Key_J)) rotCenter.x -= 1 * Time::delta;
+		else if (Input::KeyHold(Key_L)) rotCenter.x += 1 * Time::delta;
+		if (Input::KeyHold(Key_K)) rotCenter.y -= 1 * Time::delta;
+		else if (Input::KeyHold(Key_I)) rotCenter.y += 1 * Time::delta;
+		if (Input::KeyHold(Key_O)) rotCenter.z -= 1 * Time::delta;
+		else if (Input::KeyHold(Key_U)) rotCenter.z += 1 * Time::delta;
+		*/
+		if (Input::mouse0) {
+			if (Input::mouse0State == MOUSE_DOWN && VisSystem::InMainWin(Input::mousePos)) {
+				dragging = true;
+			}
+			else if (dragging) {
+				if ((VisSystem::mouseMode == VIS_MOUSE_MODE::ROTATE) && !Input::KeyHold(Key_LeftShift)) {
+					rotW -= 180 * Input::mouseDelta.y / Display::height;
+					rotZ += 180 * Input::mouseDelta.x / Display::width;
+				}
+				else if ((VisSystem::mouseMode == VIS_MOUSE_MODE::PAN) || (((VisSystem::mouseMode == VIS_MOUSE_MODE::ROTATE) && Input::KeyHold(Key_LeftShift)))) {
+					rotCenter -= 5.0f * scrX * (Input::mouseDelta.x / Display::width);
+					rotCenter += 5.0f * scrY * (Input::mouseDelta.y / Display::height);
+				}
+			}
+		}
+		else if (Input::mouseScroll != 0 && VisSystem::InMainWin(Input::mousePos)) {
+			rotScale += 0.05f * Input::mouseScroll;
+		}
+
+		if (s0 != rotScale || rz0 != rotZ || rw0 != rotW || center0 != rotCenter) Scene::dirty = true;
+	}
+}
+
 void ParGraphics::Rerender() {
+	//*
+	MVP::Switch(false);
+	MVP::Clear();
+	float csz = cos(-rotZ*deg2rad);
+	float snz = sin(-rotZ*deg2rad);
+	float csw = cos(rotW*deg2rad);
+	float snw = sin(rotW*deg2rad);
+	Mat4x4 mMatrix = Mat4x4(1, 0, 0, 0, 0, csw, snw, 0, 0, -snw, csw, 0, 0, 0, 0, 1) * Mat4x4(csz, 0, -snz, 0, 0, 1, 0, 0, snz, 0, csz, 0, 0, 0, 0, 1);
+	MVP::Mul(mMatrix);
+	float s = pow(2, rotScale);
+	MVP::Scale(s, s, s);
+	MVP::Translate(-rotCenter.x, -rotCenter.y, -rotCenter.z);
+
+	if (dragging) {
+		auto imvp = glm::inverse(MVP::projection() * MVP::modelview());
+		scrX = imvp * Vec4(1, 0, 0, 0);
+		scrY = imvp * Vec4(0, 1, 0, 0);
+	}
+	//*/
+	/*
+	MVP::Switch(true);
+	float mww = pow(2, rotScale);
+	//MVP::Scale(mww, mww*Display::height / Display::width, 1);
+	MVP::Push();
+	float csz = cos(-rotZ*deg2rad);
+	float snz = sin(-rotZ*deg2rad);
+	float csw = cos(rotW*deg2rad);
+	float snw = sin(rotW*deg2rad);
+	Mat4x4 mMatrix = Mat4x4(1, 0, 0, 0, 0, csw, snw, 0, 0, -snw, csw, 0, 0, 0, 0, 1) * Mat4x4(csz, 0, -snz, 0, 0, 1, 0, 0, snz, 0, csz, 0, 0, 0, 0, 1);
+	MVP::Mul(mMatrix);
+	MVP::Translate(-rotCenter.x, -rotCenter.y, -rotCenter.z);
+	*/
 	auto _mv = MVP::modelview();
 	auto _p = MVP::projection();
 	auto _cpos = ChokoLait::mainCamera->object->transform.position();
@@ -212,4 +299,49 @@ void ParGraphics::BlitHl() {
 
 	glUseProgram(0);
 	glBindVertexArray(0);
+}
+
+void ParGraphics::DrawMenu() {
+	float s0 = rotScale;
+	float rz0 = rotZ;
+	float rw0 = rotW;
+	Vec3 center0 = rotCenter;
+
+	auto& expandPos = ParMenu::expandPos;
+	auto& font = ParMenu::font;
+	UI::Label(expandPos - 148, 3, 12, "Ambient", font, white());
+	Engine::DrawQuad(expandPos - 149, 18, 148, 36, white(0.9f, 0.1f));
+	UI::Label(expandPos - 147, 20, 12, "Strength", font, white());
+	reflStr = Engine::DrawSliderFill(expandPos - 80, 19, 78, 16, 0, 2, reflStr, white(1, 0.5f), white());
+	UI::Label(expandPos - 147, 37, 12, "Falloff", font, white());
+	reflStrDecay = Engine::DrawSliderFill(expandPos - 80, 36, 78, 16, 0, 50, reflStrDecay, white(1, 0.5f), white());
+	
+	UI::Label(expandPos - 148, 54, 12, "Rim Light", font, white());
+	Engine::DrawQuad(expandPos - 149, 68, 148, 38, white(0.9f, 0.1f));
+	UI::Label(expandPos - 147, 71, 12, "Offset", font, white());
+	rimOff = Engine::DrawSliderFill(expandPos - 80, 69, 78, 16, 0, 1, rimOff, white(1, 0.5f), white());
+	UI::Label(expandPos - 147, 88, 12, "Strength", font, white());
+	rimStr = Engine::DrawSliderFill(expandPos - 80, 88, 78, 16, 0, 5, rimStr, white(1, 0.5f), white());
+
+	UI::Label(expandPos - 148, 105, 12, "Camera", font, white());
+	Engine::DrawQuad(expandPos - 149, 121, 148, 106, white(0.9f, 0.1f));
+	UI::Label(expandPos - 147, 122, 12, "Center X", font, white());
+	UI::Label(expandPos - 147, 139, 12, "Center Y", font, white());
+	UI::Label(expandPos - 147, 156, 12, "Center Z", font, white());
+	rotCenter.x = TryParse(UI::EditText(expandPos - 80, 122, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotCenter.x), font, true, nullptr, white()), 0.0f);
+	rotCenter.y = TryParse(UI::EditText(expandPos - 80, 139, 78, 16, 12, Vec4(0.4f, 0.6f, 0.4f, 1), std::to_string(rotCenter.y), font, true, nullptr, white()), 0.0f);
+	rotCenter.z = TryParse(UI::EditText(expandPos - 80, 156, 78, 16, 12, Vec4(0.4f, 0.4f, 0.6f, 1), std::to_string(rotCenter.z), font, true, nullptr, white()), 0.0f);
+	
+	UI::Label(expandPos - 147, 174, 12, "Rotation W", font, white());
+	UI::Label(expandPos - 147, 191, 12, "Rotation Y", font, white());
+	rotW = TryParse(UI::EditText(expandPos - 80, 174, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotW), font, true, nullptr, white()), 0.0f);
+	rotZ = TryParse(UI::EditText(expandPos - 80, 191, 78, 16, 12, Vec4(0.4f, 0.6f, 0.4f, 1), std::to_string(rotZ), font, true, nullptr, white()), 0.0f);
+	
+	UI::Label(expandPos - 147, 209, 12, "Scale", font, white());
+	rotScale = TryParse(UI::EditText(expandPos - 80, 209, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotScale), font, true, nullptr, white()), 0.0f);
+
+	rotW = Clamp<float>(rotW, -90, 90);
+	rotZ = Repeat<float>(rotZ, 0, 360);
+
+	if (s0 != rotScale || rz0 != rotZ || rw0 != rotW || center0 != rotCenter) Scene::dirty = true;
 }
