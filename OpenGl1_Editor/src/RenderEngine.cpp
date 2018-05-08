@@ -312,8 +312,8 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 		MVP::Switch(false);
 		MVP::Clear();
 
-		DrawSceneObjectsOpaque(Scene::active->objects);
 		if (func) func();
+		DrawSceneObjectsOpaque(Scene::active->objects);
 		//MVP::Switch(false);
 		//MVP::Clear();
 		Scene::dirty = false;

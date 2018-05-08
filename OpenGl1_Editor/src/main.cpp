@@ -10,6 +10,7 @@
 #include "vis/pargraphics.h"
 #include "vis/system.h"
 #include "utils/spline.h"
+#include "utils/solidify.h"
 
 float camz = 10;
 Vec3 center;
@@ -24,22 +25,9 @@ GLuint emptyVao;
 
 bool drawMesh;
 
-const uint dim = 10;
-Vec3* pts, res[4 * dim + 1];
+pMesh splineMesh;
 
 void rendFunc() {
-	/*
-	MVP::Switch(false);
-	MVP::Clear();
-	float csz = cos(-rz*deg2rad);
-	float snz = sin(-rz*deg2rad);
-	float csw = cos(rw*deg2rad);
-	float snw = sin(rw*deg2rad);
-	Mat4x4 mMatrix = Mat4x4(1, 0, 0, 0, 0, csw, snw, 0, 0, -snw, csw, 0, 0, 0, 0, 1) * Mat4x4(csz, 0, -snz, 0, 0, 1, 0, 0, snz, 0, csz, 0, 0, 0, 0, 1);
-	MVP::Mul(mMatrix);
-	//MVP::Translate(-gro->boundingBox.x / 2, -gro->boundingBox.y / 2, -gro->boundingBox.z / 2);
-	MVP::Translate(center);
-	*/
 	ParGraphics::Rerender();
 }
 
@@ -69,15 +57,6 @@ void paintfunc2() {
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, &Particles::particles_Name[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, font, white());
 		}
 	}
-
-	Engine::DrawQuad(0, 0, Display::width, Display::height, black());
-	UI::SetVao(5, pts);
-	glBindVertexArray(UI::_vao);
-	glDrawArrays(GL_LINE_STRIP, 0, 5);
-	UI::SetVao(4 * dim + 1, res);
-	glBindVertexArray(UI::_vao);
-	glDrawArrays(GL_LINES, 0, 4 * dim + 1);
-	glBindVertexArray(0);
 }
 
 int main(int argc, char **argv)
@@ -125,9 +104,18 @@ int main(int argc, char **argv)
 	
 	ChokoLait::mainCamera->object->transform.localPosition(Vec3(0, 0, -1));
 	
-	pts = new Vec3[5]{ Vec3(0, 0, 0), Vec3(0, 0.2f, 0), Vec3(0.1f, 0.3f, 0), Vec3(0.4f, 0.05f, 0), Vec3(0.8f, 0.6f, 0) };
-	//res = new Vec3[5 * 3 + 1];
-	Spline::ToSpline(pts, 5, dim, res);
+	Vec3 pts[5]{ Vec3(0, 0, 0.2f), Vec3(0, 0.2f, 0), Vec3(0.1f, 0.3f, 1), Vec3(0.4f, 0.05f, 1), Vec3(0.8f, 0.6f, 0.5f) };
+	Vec3 res[4 * 12 + 1];
+	Spline::ToSpline(pts, 5, 12, res);
+	splineMesh = Solidify::Do(res, 4 * 12 + 1, 0.01f, 12);
+
+	Shader* proShad = new Shader(IO::GetText(IO::path + "/proV.txt"), IO::GetText(IO::path + "/proF.txt"));
+	pMaterial proMat = std::make_shared<Material>(proShad);
+
+	auto obj = SceneObject::New("123");
+	Scene::active->AddObject(obj);
+	obj->AddComponent<MeshFilter>()->mesh(splineMesh);
+	obj->AddComponent<MeshRenderer>()->materials[0](proMat);
 
 	while (ChokoLait::alive()) {
 		ChokoLait::Update(updateFunc);

@@ -90,6 +90,7 @@ pComponent SceneObject::AddComponent(pComponent c) {
 	}
 	_components.push_back(c);
 	_componentCount++;
+	Refresh();
 	return c;
 }
 

@@ -63,9 +63,10 @@ void ParGraphics::Init() {
 
 	colProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText("D:\\colorerFrag.txt")))->pointer;
 	colProgLocs[0] = glGetUniformLocation(colProg, "idTex");
-	colProgLocs[1] = glGetUniformLocation(colProg, "screenSize");
-	colProgLocs[2] = glGetUniformLocation(colProg, "id2col");
-	colProgLocs[3] = glGetUniformLocation(colProg, "colList");
+	colProgLocs[1] = glGetUniformLocation(colProg, "spTex");
+	colProgLocs[2] = glGetUniformLocation(colProg, "screenSize");
+	colProgLocs[3] = glGetUniformLocation(colProg, "id2col");
+	colProgLocs[4] = glGetUniformLocation(colProg, "colList");
 
 	glGenVertexArrays(1, &emptyVao);
 
@@ -213,12 +214,15 @@ void ParGraphics::Recolor() {
 	glUniform1i(colProgLocs[0], 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_idTex);
-	glUniform2f(colProgLocs[1], (float)Display::width, (float)Display::height);
-	glUniform1i(colProgLocs[2], 1);
+	glUniform1i(colProgLocs[1], 1);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
+	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_texs[2]);
+	glUniform2f(colProgLocs[2], (float)Display::width, (float)Display::height);
 	glUniform1i(colProgLocs[3], 2);
 	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
+	glUniform1i(colProgLocs[4], 3);
+	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

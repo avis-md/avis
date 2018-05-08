@@ -300,6 +300,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\utils\random.cpp" />
     <ClCompile Include="src\utils\rect.cpp" />
     <ClCompile Include="src\utils\serial.cpp" />
+    <ClCompile Include="src\utils\solidify.cpp" />
     <ClCompile Include="src\utils\spline.cpp" />
     <ClCompile Include="src\utils\stream.cpp" />
     <ClCompile Include="src\utils\strext.cpp" />
@@ -382,6 +383,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClInclude Include="src\utils\random.h" />
     <ClInclude Include="src\utils\rect.h" />
     <ClInclude Include="src\utils\serial.h" />
+    <ClInclude Include="src\utils\solidify.h" />
     <ClInclude Include="src\utils\spline.h" />
     <ClInclude Include="src\utils\stream.h" />
     <ClInclude Include="src\utils\strext.h" />
