@@ -290,6 +290,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClCompile Include="src\ui\icons.cpp" />
     <ClCompile Include="src\utils\color.cpp" />
     <ClCompile Include="src\asset\compute.cpp" />
+    <ClCompile Include="src\utils\dialog.cpp" />
     <ClCompile Include="src\utils\fft.cpp" />
     <ClCompile Include="src\utils\net.cpp" />
     <ClCompile Include="src\RenderEngine.cpp" />
@@ -365,6 +366,7 @@ xcopy /y "$(SolutionDir)Debug\Library\include\*" "D:\TestProject2\System\"</Comm
     <ClInclude Include="src\scene\sceneobject.h" />
     <ClInclude Include="src\scene\transform.h" />
     <ClInclude Include="src\ui\icons.h" />
+    <ClInclude Include="src\utils\dialog.h" />
     <ClInclude Include="src\utils\rawvector.h" />
     <ClInclude Include="src\utils\plot.h" />
     <ClInclude Include="src\utils\ptrext.h" />
