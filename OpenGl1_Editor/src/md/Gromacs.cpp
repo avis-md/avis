@@ -1,146 +1,141 @@
 #pragma once
 #include "Gromacs.h"
+#include "utils/rawvector.h"
+
+std::unordered_map<uint, float> Gromacs::_bondLengths;
+
+uint _find_char_not_of(char* first, char* last, char c) {
+	for (char* f = first; first < last; first++) {
+		if (*first != c)
+			return first - f;
+	}
+	return -1;
+}
 
 void Gromacs::Read(const string& file) {
-	/*
+	Particles::Clear();
+	glGenVertexArrays(1, &Particles::posVao);
+	glGenBuffers(1, &Particles::posBuffer);
+	glGenBuffers(1, &Particles::connBuffer);
+	glGenBuffers(1, &Particles::colIdBuffer);
+
 	std::ifstream strm(file, std::ios::binary);
 	if (!strm.is_open()) {
-		std::cout << "gromacs: cannot open file!" << std::endl;
+		Debug::Warning("Gromacs", "Cannot open file!");
 		return;
 	}
 
 	Vec4* poss = 0, *cols = 0;
 	char buf[100] = {};
-	while (!strm.eof()) {
+
+	strm.getline(buf, 100);
+	if (strm.eof()) {
+		Debug::Warning("Gromacs", "Cannot read from file!");
+		return;
+	}
+	string s(buf, 100);
+	auto tp = string_find(s, "t=");
+	if (tp > -1) {
+		//frm.name = s.substr(0, tp);
+		//frm.time = std::stof(s.substr(tp + 2));
+	}
+	else {
+		//frm.name = s;
+		//frm.time = 0;
+	}
+	strm.getline(buf, 100);
+	Particles::particleSz = std::stoi(string(buf));
+	Particles::particles_Name = new char[Particles::particleSz * PAR_MAX_NAME_LEN]{};
+	Particles::particles_ResName = new char[Particles::particleSz * PAR_MAX_NAME_LEN]{};
+	Particles::particles_Pos = new Vec3[Particles::particleSz];
+	Particles::particles_Vel = new Vec3[Particles::particleSz];
+	Particles::particles_Col = new byte[Particles::particleSz];
+
+	auto rs = rawvector<ResidueList, uint>(Particles::residueLists, Particles::residueListSz);
+
+	uint64_t currResNm = -1, currResId = -1;
+	ResidueList* trs = 0;
+	Residue* tr = 0;
+	auto rsv = rawvector<Residue, uint>(Particles::residueLists->residues, Particles::residueLists->residueSz);
+	bool isfr = true, isfl = true;
+	for (uint i = 0; i < Particles::particleSz; i++) {
 		strm.getline(buf, 100);
-		if (strm.eof()) break;
-		frames.push_back(Frame());
-		auto& frm = frames.back();
-		string s(buf, 100);
-		auto tp = string_find(s, "t=");
-		if (tp > -1) {
-			frm.name = s.substr(0, tp);
-			frm.time = std::stof(s.substr(tp + 2));
-		}
-		else {
-			frm.name = s;
-			frm.time = 0;
-		}
-		strm.getline(buf, 100);
-		frm.count = std::stoi(string(buf));
-		frm.particles.resize(frm.count);
+		//prt.residueNumber = std::stoul(string(buf, 5));
+		uint64_t resId = *((uint64_t*)buf) & 0x000000ffffffffff;
+		uint64_t resNm = *((uint64_t*)(buf + 5)) & 0x000000ffffffffff;
+		memcpy(Particles::particles_ResName + i * PAR_MAX_NAME_LEN, buf + 5, 5);
+		uint n0 = _find_char_not_of(buf + 10, buf + 15, ' ');
+		memcpy(Particles::particles_Name + i * PAR_MAX_NAME_LEN, buf + 10 + n0, 5 - n0);
+		//prt.atomId = (ushort)prt.atomName[0];
+		//prt.atomNumber = std::stoul(string(buf + 15, 5));
+		Vec3 vec;
+		vec.x = std::stof(string(buf + 20, 8));
+		vec.y = std::stof(string(buf + 28, 8));
+		vec.z = std::stof(string(buf + 36, 8));
+		Particles::particles_Pos[i] = vec;
+		vec.x = std::stof(string(buf + 44, 8));
+		vec.y = std::stof(string(buf + 52, 8));
+		vec.z = std::stof(string(buf + 60, 8));
+		Particles::particles_Vel[i] = vec;
 
-		if (!poss) {
-			poss = new Vec4[frm.count]{};
-			cols = new Vec4[frm.count]{};
+		if (currResNm != resNm) {
+			if (!isfl) rs.push(ResidueList());
+			else isfl = false;
+			trs = &Particles::residueLists[Particles::residueListSz - 1];
+			rsv = rawvector<Residue, uint>(trs->residues, trs->residueSz);
+			trs->name = string(buf + 5, 5);
+			currResNm = resNm;
+			isfr = true;
 		}
-		for (uint i = 0; i < frm.count; i++) {
-			auto& prt = frm.particles[i];
-			strm.getline(buf, 100);
-			prt.residueNumber = std::stoul(string(buf, 5));
-			prt.residueName = string(buf + 5, 5);
-			prt.atomName = string(buf + 10, 5);
-			while (prt.atomName[0] == ' ') prt.atomName = prt.atomName.substr(1);
-			prt.atomId = (ushort)prt.atomName[0];
-			prt.atomNumber = std::stoul(string(buf + 15, 5));
-			prt.position.x = std::stof(string(buf + 20, 8));
-			prt.position.y = std::stof(string(buf + 28, 8));
-			prt.position.z = std::stof(string(buf + 36, 8));
-			prt.velocity.x = std::stof(string(buf + 44, 8));
-			prt.velocity.y = std::stof(string(buf + 52, 8));
-			prt.velocity.z = std::stof(string(buf + 60, 8));
-			if (!ubo_positions) {
-				*(Vec3*)&poss[i] = prt.position;
-				*(Vec3*)&cols[i] = _type2color[prt.atomId];
-			}
-		}
-		string bx;
-		std::getline(strm, bx);
-		auto spl = string_split(bx, ' ', true);
-		boundingBox.x = std::stof(spl[0]);
-		boundingBox.y = std::stof(spl[1]);
-		boundingBox.z = std::stof(spl[2]);
 
-		frm.conns.resize(frm.count, glm::i32vec4(-1, -1, -1, -1));
-		frm.connSzs.resize(frm.count);
-
-		auto co = file + ".conn";
-		bool cok = false;
-		std::ifstream cstrm(co, std::ios::binary);
-		if (cstrm.is_open()) {
-			uint ccnt;
-			cstrm >> ccnt;
-			if (ccnt == frm.count) {
-				std::cout << "using connection data file" << std::endl;
-				string ss;
-				for (uint i = 0; i < ccnt; i++) {
-					for (uint j = 0; j < 4; j++)
-						cstrm >> frm.conns[i][j];
-				}
-				cok = true;
-			}
-			cstrm.close();
+		if (currResId != resId) {
+			if (!isfr) rsv.push(Residue());
+			else isfr = false;
+			tr = &trs->residues[trs->residueSz-1];
+			tr->offset = i;
+			uint n02 = _find_char_not_of(buf, buf + 5, ' ');
+			tr->name = string(buf + n02, 5 - n02);
+			tr->cnt = 0;
+			currResId = resId;
 		}
-		if (!cok) {
-			for (uint i = 0; i < frm.count - 1; i++) {
-				auto pos = frm.particles[i].position;
-				auto id = frm.particles[i].atomId;
-				auto& n = frm.connSzs[i];
-				for (uint j = i + 1; j < frm.count; j++) {
-					if (j != i) {
-						auto ds = frm.particles[j].position - pos;
-						auto dst = ds.x * ds.x + ds.y * ds.y + ds.z * ds.z;
-						auto& n2 = frm.connSzs[j];
-						if (dst < 0.0625) { //250pm
-							auto id2 = frm.particles[j].atomId;
-							float bst = _bondLengths[id + (id2 << 16)];
-							if (dst < bst) {
-								if (n < 4) frm.conns[i][n++] = j;
-								if (n2 < 4) frm.conns[j][n2++] = i;
-							}
-						}
+
+		tr->cnt++;
+	}
+	string bx;
+	std::getline(strm, bx);
+	auto spl = string_split(bx, ' ', true);
+	Particles::boundingBox.x = std::stof(spl[0]);
+	Particles::boundingBox.y = std::stof(spl[1]);
+	Particles::boundingBox.z = std::stof(spl[2]);
+
+
+	/*
+	for (uint i = 0; i < Particles::particleSz - 1; i++) {
+		auto pos = Particles::particles_Pos[i];
+		auto id = (ushort)Particles::particles_Name[i * PAR_MAX_NAME_LEN];
+
+		for (uint j = i + 1; j < Particles::particleSz; j++) {
+			if (j != i) {
+				auto ds = frm.particles[j].position - pos;
+				auto dst = ds.x * ds.x + ds.y * ds.y + ds.z * ds.z;
+				auto& n2 = frm.connSzs[j];
+				if (dst < 0.0625) { //250pm
+					auto id2 = frm.particles[j].atomId;
+					float bst = _bondLengths[id + (id2 << 16)];
+					if (dst < bst) {
+						if (n < 4) frm.conns[i][n++] = j;
+						if (n2 < 4) frm.conns[j][n2++] = i;
 					}
 				}
 			}
-			std::ofstream costrm(co, std::ios::out | std::ios::binary);
-			costrm << frm.count << "\n";
-			for (uint i = 0; i < frm.count; i++) {
-				for (uint j = 0; j < 4; j++)
-					costrm << frm.conns[i][j] << " ";
-				costrm << "\n";
-			}
-			costrm.flush();
-			costrm.close();
-		}
-		if (!ubo_positions) {
-#ifdef GRO_USE_COMPUTE
-			ubo_positions = new ComputeBuffer<Vec4>(frm.count, poss);
-			ubo_colors = new ComputeBuffer<Vec4>(frm.count, cols);
-			ubo_conns = new ComputeBuffer<glm::i32vec4>(frm.count, &frm.conns[0]);
-#else
-			ubo_positions = new ShaderBuffer<Vec4>(frm.count, poss);
-			ubo_colors = new ShaderBuffer<Vec4>(frm.count, cols);
-#endif
-			delete[](poss);
-			delete[](cols);
 		}
 	}
 	*/
-	Particles::Clear();
-	
-	Particles::particleSz = 10000000;
+
+	/*
 	Particles::connSz = 5000000;
 	Particles::particles_Conn = new Int2[5000000];
-	Particles::particles_Name = new char[10000000 * PAR_MAX_NAME_LEN];
-	Particles::particles_ResName = new char[10000000 * PAR_MAX_NAME_LEN];
-	Particles::particles_Pos = new Vec3[10000000];
-	//Particles::particles_Vel = new Vec3[10000000];
-	Particles::particles_Col = new byte[10000000];
 
-	glGenVertexArrays(1, &Particles::posVao);
-	glGenBuffers(1, &Particles::posBuffer);
-	glGenBuffers(1, &Particles::connBuffer);
-	glGenBuffers(1, &Particles::colIdBuffer);
 
 	for (uint i = 0; i < 10000000; i++) {
 		Particles::particles_Pos[i] = Vec3((i % 100), ((i % 10000) / 100), (i / 10000)) * 0.1f;
@@ -149,15 +144,16 @@ void Gromacs::Read(const string& file) {
 		memcpy(Particles::particles_Name + i * PAR_MAX_NAME_LEN, "OW", 3);// +std::to_string(i % 3);
 		memcpy(Particles::particles_ResName + i * PAR_MAX_NAME_LEN, "WATER", 6);
 	}
+	*/
 
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::posBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 10000000 * sizeof(Vec3), Particles::particles_Pos, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(Vec3), Particles::particles_Pos, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::connBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 10000000 * sizeof(uint), Particles::particles_Conn, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, Particles::connSz * 2 * sizeof(uint), Particles::particles_Conn, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::colIdBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 10000000 * sizeof(byte), Particles::particles_Col, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(byte), Particles::particles_Col, GL_STATIC_DRAW);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	
@@ -169,26 +165,9 @@ void Gromacs::Read(const string& file) {
 	glBindVertexArray(0);
 
 	Particles::GenTexBufs();
-
-	Particles::residueLists = new ResidueList[1000];
-	Particles::residueListSz = 1000;
-
-	for (uint i = 0; i < 1000; i++) {
-		Particles::residueLists[i].name = "WATER";// +std::to_string(i);
-		Particles::residueLists[i].residues = new Residue[100];
-		Particles::residueLists[i].residueSz = 100;
-		for (uint j = 0; j < 100; j++) {
-			Particles::residueLists[i].residues[j].name = "W" + std::to_string(j);
-			Particles::residueLists[i].residues[j].offset = i * 10000 + j * 100;
-			Particles::residueLists[i].residues[j].cnt = 100;
-			Particles::residueLists[i].residues[j].offset_b = i * 5000 + j * 50;
-			Particles::residueLists[i].residues[j].cnt_b = 50;
-		}
-	}
 }
 
 void Gromacs::LoadFiles() {
-	/*
 	std::ifstream strm(IO::path + "/bondlengths.txt", std::ios::binary);
 	_bondLengths.clear();
 	if (strm.is_open()) {
@@ -207,5 +186,4 @@ void Gromacs::LoadFiles() {
 		}
 		strm.close();
 	}
-	*/
 }

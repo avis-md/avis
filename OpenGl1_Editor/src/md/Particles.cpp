@@ -10,6 +10,8 @@ Vec3* Particles::particles_Pos, *Particles::particles_Vel;
 byte* Particles::particles_Col;
 Int2* Particles::particles_Conn;
 
+Vec3 Particles::boundingBox;
+
 Vec3 Particles::colorPallete[] = {};
 GLuint Particles::colorPalleteTex;
 

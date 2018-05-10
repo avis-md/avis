@@ -26,14 +26,14 @@ struct ResidueList { //residues with the same name
 	ResidueList() : visible(true), expanded(false) {}
 
 	~ResidueList() {
-		delete[](residues);
+		if (residues) std::free(residues);
 	}
 	
 	uint maxOff;
 	bool visible, expanded;
 	string name;
-	Residue* residues;
-	uint residueSz;
+	Residue* residues = 0;
+	uint residueSz = 0;
 };
 
 class Particles {
@@ -47,6 +47,8 @@ public:
 	static Vec3* particles_Pos, *particles_Vel;
 	static byte* particles_Col;
 	static Int2* particles_Conn;
+
+	static Vec3 boundingBox;
 
 	static Vec3 colorPallete[256];
 	static GLuint colorPalleteTex;
