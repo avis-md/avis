@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "complex": "cpp",
+        "memory": "cpp",
+        "rb_tree": "cpp"
+    }
+}

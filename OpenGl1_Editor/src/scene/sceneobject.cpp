@@ -1,13 +1,11 @@
 #include "Engine.h"
 #include "Editor.h"
 
-SceneObject::_offset_map SceneObject::_offsets = {};
-
 SceneObject::SceneObject(Vec3 pos, Quat rot, Vec3 scale) : SceneObject("New Object", pos, rot, scale) {}
 SceneObject::SceneObject(string s, Vec3 pos, Quat rot, Vec3 scale) : _expanded(true), Object(s) {
 	id = Engine::GetNewId();
 }
-SceneObject::SceneObject(byte* data) : _expanded(true), Object(*((uint*)data + 1), string((char*)data + SceneObject::_offsets.name)) {}
+SceneObject::SceneObject(byte* data) {}
 
 SceneObject::~SceneObject() {
 

@@ -36,7 +36,7 @@ std::vector<string> Dialog::OpenFile() {
 		}
 	}
 #elif defined(PLATFORM_LNX) || defined(PLATFORM_OSX)
-	FILE* f = popen("zenity --file-selection --multiple --separator=|");
+	FILE* f = popen("zenity --file-selection --multiple --separator=|", "r");
 	char buf[1024];
 	fgets(buf, 1024, f);
 	res = string_split(string(buf, 1024), '|', true);

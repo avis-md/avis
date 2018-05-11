@@ -177,7 +177,7 @@ string IO::InitPath() {
 	GetModuleFileName(NULL, cpath, 200);
 	string path2 = cpath;
 	path2 = path2.substr(0, path2.find_last_of('\\') + 1);
-#elif defined(PLATFORM_LNX)
+#elif defined(PLATFORM_LNX) || defined(PLATFORM_OSX)
 	getcwd(cpath, 199);
 	string path2 = cpath;
 #endif

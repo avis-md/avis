@@ -163,7 +163,7 @@ Vec4 Animation::Get(const string& s) {
 }
 
 Vec4 Animation::Get(uint i) {
-	if (i < 0 || i >= keyvals.size()) return Vec4();
+	if (i >= keyvals.size()) return Vec4();
 	return keyvals[i];
 }
 

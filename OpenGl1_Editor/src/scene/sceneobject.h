@@ -69,20 +69,13 @@ protected:
 	SceneObject(Vec3 pos, Quat rot = Quat(), Vec3 scale = Vec3(1, 1, 1));
 	SceneObject(string s = "New Object", Vec3 pos = Vec3(), Quat rot = Quat(), Vec3 scale = Vec3(1, 1, 1));
 	SceneObject(byte* data);
-	static pSceneObject New(byte* data) {
-		auto p = pSceneObject(new SceneObject(data));
-		p->transform.Init(p, data + offsetof(SceneObject, transform));
-		return p;
-	}
+	//static pSceneObject New(byte* data) {
+		//auto p = pSceneObject(new SceneObject(data));
+		//p->transform.Init(p, data + offsetof(SceneObject, transform));
+		//return pSceneObject();
+	//}
 
 	static pSceneObject _FromId(const std::vector<pSceneObject>& objs, ulong id);
-
-	static struct _offset_map {
-		uint name = offsetof(SceneObject, name),
-			transform = offsetof(SceneObject, transform),
-			components = offsetof(SceneObject, _components),
-			children = offsetof(SceneObject, children);
-	} _offsets;
 
 	void Refresh();
 };

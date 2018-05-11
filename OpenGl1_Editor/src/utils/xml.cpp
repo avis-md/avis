@@ -1,4 +1,4 @@
-#include "Xml.h"
+#include "xml.h"
 
 void RemoveNewLine(string& s) {
 	for (int a = s.size() - 1; a > 0; a--) {

@@ -1,6 +1,8 @@
 #pragma once
 #include "Engine.h"
 
+#ifdef FEATURE_AUDIO_PLAYBACK
+
 #ifdef PLATFORM_WIN
 #include <mmdeviceapi.h>
 #include <Audioclient.h>
@@ -23,10 +25,13 @@ extern const IID IID_IAudioClient;
 extern const IID IID_IAudioRenderClient;
 #endif
 
+#endif
+
 typedef bool(*audioRequestPacketCallback) (byte* data, uint count); //datasize = count*channels*sizeof(type)
 
 class AudioEngine {
 public:
+#ifdef FEATURE_AUDIO_PLAYBACK
 #ifdef PLATFORM_WIN
 	static REFERENCE_TIME requestedSamples, actualSamples;
 	static IMMDeviceEnumerator *pEnumerator;
@@ -66,4 +71,13 @@ public:
 	static void Start(audioRequestPacketCallback callback), Stop();
 
 	static void _DoPlayStream();
+
+#else
+
+	static bool Init() {
+		return false;
+	}
+	static void Start(audioRequestPacketCallback callback), Stop();
+
+#endif
 };

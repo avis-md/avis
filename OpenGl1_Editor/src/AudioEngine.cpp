@@ -1,5 +1,7 @@
 #include "AudioEngine.h"
 
+#ifdef FEATURE_AUDIO_PLAYBACK
+
 #ifdef PLATFORM_WIN
 const CLSID CLSID_MMDeviceEnumerator = __uuidof(MMDeviceEnumerator);
 const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
@@ -129,3 +131,5 @@ void AudioEngine::_DoPlayStream()
 	pAudioClient->Stop();  // Stop playing.
 #endif
 }
+
+#endif

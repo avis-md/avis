@@ -34,9 +34,9 @@ void UI::InitVao() {
 	glGenBuffers(1, &_vboV);
 	glGenBuffers(1, &_vboU);
 	glBindBuffer(GL_ARRAY_BUFFER, _vboV);
-	glBufferStorage(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec3), nullptr, GL_DYNAMIC_STORAGE_BIT);
+	glBufferData(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec3), nullptr, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, _vboU);
-	glBufferStorage(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec2), nullptr, GL_DYNAMIC_STORAGE_BIT);
+	glBufferData(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec2), nullptr, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(_vao);
 	glEnableVertexAttribArray(0);
@@ -283,7 +283,7 @@ void UI::Label(float x, float y, float s, string st, Font* font, Vec4 col, float
 }
 
 void UI::Label(float x, float y, float s, char* str, uint sz, Font* font, Vec4 col, float maxw) {
-	sz = min(sz, strlen(str));
+	sz = min(sz, (uint)strlen(str));
 	if (s <= 0) return;
 	GLuint tex = font->glyph((uint)round(s));
 	font->SizeVec(sz);

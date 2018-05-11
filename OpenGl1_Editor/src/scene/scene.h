@@ -84,8 +84,4 @@ protected:
 #ifdef IS_EDITOR
 	void Save(Editor* e);
 #endif
-	static struct _offset_map {
-		uint objCount = offsetof(Scene, objectCount),
-			objs = offsetof(Scene, objects);
-	} _offsets;
 };

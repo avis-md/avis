@@ -1,5 +1,19 @@
 #pragma once
 
+#if defined(__APPLE__)
+#ifndef PLATFORM_OSX
+#define PLATFORM_OSX
+#endif
+#elif defined (__linux__)
+#ifndef PLATFORM_LNX
+#define PLATFORM_LNX
+#endif
+#elif defined (__WIN32__)
+#ifndef PLATFORM_WIN
+#define PLATFORM_WIN
+#endif
+#endif
+
 //comment out to not use during runtime
 /*
 Use the ffmpeg library. If commented out, VideoTexture will not be available.
@@ -17,7 +31,7 @@ Use audio. makes loading slower.
 //#define FEATURE_AUDIO_PLAYBACK
 
 //uncomment out to not use during building
-//#define DISABLE_AV_CODECS
+#define DISABLE_AV_CODECS
 
 
 

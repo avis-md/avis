@@ -38,6 +38,10 @@ Vec4 white(float f, float i) { return Vec4(i, i, i, f); }
 void fopen_s(FILE** f, const char* c, const char* m) {
 	*f = fopen(c, m);
 }
+void _putenv_s(string nm, const char* loc) {
+	string s = ((nm) + "=" + string(loc));
+	putenv(&s[0]);
+}
 
 #endif
 
@@ -96,7 +100,7 @@ void Engine::Init(string path) {
 	}
 	Engine::_mainThreadId = std::this_thread::get_id();
 
-#if defined(PLATFORM_WIN) || defined(PLATFORM_LNX)
+#if defined(PLATFORM_WIN) || defined(PLATFORM_LNX) || defined(PLATFORM_OSX)
 	string vertcode = "#version 330\nlayout(location = 0) in vec3 pos;\nlayout(location = 1) in vec2 uv;\nout vec2 UV;\nvoid main(){ \ngl_Position.xyz = pos;\ngl_Position.w = 1.0;\nUV = uv;\n}";
 	string vertcodeW = "#version 330\nlayout(location = 0) in vec3 pos;\nlayout(location = 1) in vec2 uv;\nuniform mat4 MVP;\nout vec2 UV;\nvoid main(){ \ngl_Position = MVP * vec4(pos, 1);\ngl_Position /= gl_Position.w;\nUV = uv;\n}";
 	string fragcode = "#version 330\nin vec2 UV;\nuniform sampler2D sampler;\nuniform vec4 col;\nuniform float level;\nout vec4 color;void main(){\ncolor = textureLod(sampler, UV, level)*col;\n}"; //out vec3 Vec4;\n

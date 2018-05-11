@@ -1,5 +1,5 @@
 #include "system.h"
-#include "py/pyweb.h"
+#include "py/PyWeb.h"
 #include "ui/icons.h"
 
 Vec4 VisSystem::accentColor = Vec4(1, 1, 1, 1);

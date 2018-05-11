@@ -1,7 +1,5 @@
 #include "Engine.h"
 
-Transform::_offset_map Transform::_offsets = {};
-
 void Transform::Init(pSceneObject& sc, Vec3 pos, Quat rot, Vec3 scl) {
 	object(sc);
 	_rotation = rot;

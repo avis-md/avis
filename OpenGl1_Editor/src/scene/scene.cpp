@@ -120,8 +120,6 @@ void Deserialize(std::ifstream& stream, SceneObject* obj) {
 
 bool Scene::dirty = false;
 
-Scene::_offset_map Scene::_offsets = {};
-
 Scene* Scene::active = nullptr;
 std::ifstream* Scene::strm = nullptr;
 #ifndef IS_EDITOR

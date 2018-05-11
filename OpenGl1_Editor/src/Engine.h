@@ -70,17 +70,23 @@
 
 #include <Windows.h>
 #include <WinSock2.h>
-#include <signal.h>
 #pragma comment(lib, "Secur32.lib")
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "iphlpapi.lib")
 //#pragma comment(lib, "Dbghelp.lib")
 #else //networking is identical on *nix systems
 #include <arpa/inet.h>
-#ifdef PLATFORM_LNX
+#if defined(PLATFORM_LNX) || defined(PLATFORM_OSX)
 #include <unistd.h>
 #include <execinfo.h>
 #endif
+#endif
+
+#include <signal.h>
+#if defined(PLATFORM_LNX)
+#define __debugbreak() raise(SIGTRAP)
+#elif defined(PLATFORM_OSX)
+#define __debugbreak() raise(SIGTRAP)
 #endif
 
 /* gl (windows) */
@@ -121,7 +127,7 @@ extern void glPolygonMode(GLenum a, GLenum b);
 #define GL_LINE 0U
 #define GL_FILL 0U
 
-#elif defined(PLATFORM_LNX)
+#elif defined(PLATFORM_LNX) || defined(PLATFORM_OSX)
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 //#define GLFW_EXPOSE_NATIVE_X11
@@ -172,19 +178,6 @@ public:
 class ffmpeg_init {};
 #endif
 #pragma endregion
-
-enum PLATFORM : unsigned char {
-	PLATFORM_WINDOWS,
-	PLATFORM_ANDROID,
-	PLATFORM_LINUX
-};
-#if defined(PLATFORM_WIN)
-const PLATFORM platform = PLATFORM_WINDOWS;
-#elif defined(PLATFORM_ADR)
-const PLATFORM platform = PLATFORM_ANDROID;
-#elif defined(PLATFORM_LNX)
-const PLATFORM platform = PLATFORM_LINUX;
-#endif
 
 #ifndef IS_EDITOR
 extern bool _pipemode;
@@ -242,6 +235,7 @@ public:
 #ifndef PLATFORM_WIN
 void fopen_s(FILE** f, const char* c, const char* m);
 #define sscanf_s sscanf
+void _putenv_s(string nm, const char* loc);
 #endif
 
 #define F2ISTREAM(_varname, _pathname) std::ifstream _f2i_ifstream((_pathname).c_str(), std::ios::in | std::ios::binary); \
@@ -280,6 +274,8 @@ const uint ECACHESZ_PADDING = 1;
 //we really shouldn't be doing this
 #ifdef PLATFORM_WIN
 #define _allowshared(T) friend class std::_Ref_count_obj<T>
+#elif defined(PLATFORM_OSX)
+#define _allowshared(T)
 #else
 #define _allowshared(T) friend class __gnu_cxx::new_allocator<T>
 #endif

@@ -7,13 +7,13 @@ See https://chokomancarr.github.io/ChokoLait/ for documentation and examples.
 */
 
 #include "Defines.h"
-
+/*
 #if defined(__ANDROID__)
 #define PLATFORM_ADR
 #elif defined(__APPLE__)
-#define PLATFORM_IOS
+#define PLATFORM_OSX
 #endif
-
+*/
 #ifndef CHOKO_LAIT_BUILD
 #ifndef CHOKO_LAIT
 #define CHOKO_LAIT
@@ -21,10 +21,8 @@ See https://chokomancarr.github.io/ChokoLait/ for documentation and examples.
 #ifndef TEST_LAIT
 #if defined(PLATFORM_WIN)
 #pragma comment(lib, "chokolait_win.lib")
-#elif defined(PLATFORM_ADR)
-//#pragma comment(lib, "chokolait_adr.so")
-#endif
 #pragma comment(lib, "opengl32.lib")
+#endif
 #endif
 #endif
 

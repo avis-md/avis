@@ -47,12 +47,6 @@ private:
 	Vec3 _localScale;
 	Mat4x4 _localMatrix, _worldMatrix;
 
-	static struct _offset_map {
-		uint position = offsetof(Transform, _position),
-			rotation = offsetof(Transform, _rotation),
-			scale = offsetof(Transform, _localScale);
-	} _offsets;
-
 	void _W2LPos(), _L2WPos();
 	void _UpdateWQuat(), _UpdateLQuat(), _L2WQuat(), _W2LQuat();
 	void _UpdateWEuler(), _UpdateLEuler();
