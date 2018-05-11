@@ -8,7 +8,7 @@
 #ifndef PLATFORM_LNX
 #define PLATFORM_LNX
 #endif
-#elif defined (__WIN32__)
+#elif defined (__WIN32__) || defined(_WIN32)
 #ifndef PLATFORM_WIN
 #define PLATFORM_WIN
 #endif

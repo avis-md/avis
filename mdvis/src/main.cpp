@@ -37,7 +37,7 @@ void updateFunc() {
 	PyWeb::Update();
 }
 
-void paintfunc2() {
+void paintfunc() {
 	if (PyWeb::drawFull)
 		PyWeb::Draw();
 	else {
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 
 		dirty = Scene::dirty;
 		//ChokoLait::Paint(nullptr, paintfunc2);
-		ChokoLait::Paint(rendFunc, paintfunc2);
+		ChokoLait::Paint(rendFunc, paintfunc);
 		auto m = Time::millis;
 		VisSystem::uiMs = (uint)(m - lastMillis);
 		if (dirty)

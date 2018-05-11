@@ -23,6 +23,7 @@ Audio::Playback* Audio::Play(AudioClip* clip, float pos) {
 }
 
 bool Audio::Gen(byte* data, uint count) {
+#ifdef FEATURE_AUDIO_PLAYBACK
 #ifdef PLATFORM_WIN
 	auto pc = count * AudioEngine::pwfx->nChannels;
 	auto sz = sources.size();
@@ -42,6 +43,7 @@ bool Audio::Gen(byte* data, uint count) {
 		}
 	}
 	return true;
+#endif
 #endif
 	return false;
 }

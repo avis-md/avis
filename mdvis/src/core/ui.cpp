@@ -34,9 +34,9 @@ void UI::InitVao() {
 	glGenBuffers(1, &_vboV);
 	glGenBuffers(1, &_vboU);
 	glBindBuffer(GL_ARRAY_BUFFER, _vboV);
-	glBufferData(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec3), nullptr, GL_STATIC_DRAW);
+	glBufferStorage(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec3), nullptr, GL_DYNAMIC_STORAGE_BIT);
 	glBindBuffer(GL_ARRAY_BUFFER, _vboU);
-	glBufferData(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec2), nullptr, GL_STATIC_DRAW);
+	glBufferStorage(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec2), nullptr, GL_DYNAMIC_STORAGE_BIT);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(_vao);
 	glEnableVertexAttribArray(0);

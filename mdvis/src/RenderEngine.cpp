@@ -905,6 +905,7 @@ void Light::InitShadow() {
 }
 
 void Light::InitRSM() {
+	return;
 	glGenFramebuffers(1, &_rsmFbo);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _rsmFbo);
 

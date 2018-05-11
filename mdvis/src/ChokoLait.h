@@ -14,17 +14,6 @@ See https://chokomancarr.github.io/ChokoLait/ for documentation and examples.
 #define PLATFORM_OSX
 #endif
 */
-#ifndef CHOKO_LAIT_BUILD
-#ifndef CHOKO_LAIT
-#define CHOKO_LAIT
-#endif
-#ifndef TEST_LAIT
-#if defined(PLATFORM_WIN)
-#pragma comment(lib, "chokolait_win.lib")
-#pragma comment(lib, "opengl32.lib")
-#endif
-#endif
-#endif
 
 #define CHOKOLAIT_INIT_VARS ChokoLait __chokolait_instance;
 

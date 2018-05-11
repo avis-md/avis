@@ -10,8 +10,6 @@ std::vector<string> Dialog::OpenFile() {
 #if defined(PLATFORM_WIN)
 	OPENFILENAME fn = {};
 	char buf[1024]{};
-	HWND hwnd;
-	HANDLE hf;
 
 	fn.lStructSize = sizeof(fn);
 	fn.hwndOwner = glfwGetWin32Window(Display::window);

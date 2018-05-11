@@ -182,6 +182,7 @@ void ParGraphics::Rerender() {
 	for (auto& p : drawLists)
 		glDrawArrays(GL_POINTS, p.first, p.second);
 
+	/*
 	glUseProgram(parConProg);
 	glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
 	glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
@@ -198,7 +199,7 @@ void ParGraphics::Rerender() {
 	glBindVertexArray(emptyVao);
 	for (auto& p : drawListsB)
 		glDrawArrays(GL_POINTS, p.first, p.second);
-
+	*/
 	glBindVertexArray(0);
 	glUseProgram(0);
 }
