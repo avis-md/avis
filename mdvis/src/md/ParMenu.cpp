@@ -42,14 +42,14 @@ void ParMenu::Draw() {
 		Engine::DrawQuad(expandPos, Display::height - 34.0f, 16, 16, white(0.9f, 0.15f));
 		if (Engine::Button(expandPos, Display::height - 34.0f, 16, 16, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
-		expandPos = min(expandPos + 1500 * Time::delta, 150.0f);
+		expandPos = Clamp(expandPos + 1500 * Time::delta, 2.0f, 150.0f);
 	}
 	else {
 		if (Engine::Button(expandPos, Display::height - 34.0f, 115, 16, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(expandPos, Display::height - 34.0f, 16, 16, Icons::expand);
 		UI::Label(expandPos + 18, Display::height - 33.0f, 12, "Particle View", font, white());
-		expandPos = max(expandPos - 1500 * Time::delta, 0.0f);
+		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.0f, 150.0f);
 	}
 }
 

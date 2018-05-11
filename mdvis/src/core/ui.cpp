@@ -34,9 +34,9 @@ void UI::InitVao() {
 	glGenBuffers(1, &_vboV);
 	glGenBuffers(1, &_vboU);
 	glBindBuffer(GL_ARRAY_BUFFER, _vboV);
-	glBufferStorage(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec3), nullptr, GL_DYNAMIC_STORAGE_BIT);
+	glBufferData(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec3), nullptr, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, _vboU);
-	glBufferStorage(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec2), nullptr, GL_DYNAMIC_STORAGE_BIT);
+	glBufferData(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec2), nullptr, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(_vao);
 	glEnableVertexAttribArray(0);
@@ -344,6 +344,10 @@ void UI::Label(float x, float y, float s, char* str, uint sz, Font* font, Vec4 c
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sz * 4 * sizeof(float), &font->cs[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Font::idbuf);
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sz * 6 * sizeof(uint), &font->ids[0]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 	glUseProgram(font->fontProgram);
 	GLint baseColLoc = glGetUniformLocation(font->fontProgram, "col");
 	glUniform4f(baseColLoc, col.r, col.g, col.b, col.a);
@@ -354,7 +358,9 @@ void UI::Label(float x, float y, float s, char* str, uint sz, Font* font, Vec4 c
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBindVertexArray(Font::vao);
-	glDrawElements(GL_TRIANGLES, 6 * sz, GL_UNSIGNED_INT, &font->ids[0]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Font::idbuf);
+	glDrawElements(GL_TRIANGLES, 6 * sz, GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
 }

@@ -92,21 +92,23 @@ GLint Engine::defWMVPLoc = 0;
 Font* Engine::defaultFont;
 Rect* Engine::stencilRect = nullptr;
 
+GLuint _draw_quad_buffer;
+
 void Engine::Init(string path) {
 	if (path != "") {
-		fallbackTex = new Texture(path.substr(0, path.find_last_of('\\') + 1) + "fallback.bmp");
+		fallbackTex = new Texture(IO::path + "/fallback.bmp");
 		if (!fallbackTex->loaded)
 			std::cout << "cannot load fallback texture!" << std::endl;
 	}
 	Engine::_mainThreadId = std::this_thread::get_id();
 
 #if defined(PLATFORM_WIN) || defined(PLATFORM_LNX) || defined(PLATFORM_OSX)
-	string vertcode = "#version 330\nlayout(location = 0) in vec3 pos;\nlayout(location = 1) in vec2 uv;\nout vec2 UV;\nvoid main(){ \ngl_Position.xyz = pos;\ngl_Position.w = 1.0;\nUV = uv;\n}";
-	string vertcodeW = "#version 330\nlayout(location = 0) in vec3 pos;\nlayout(location = 1) in vec2 uv;\nuniform mat4 MVP;\nout vec2 UV;\nvoid main(){ \ngl_Position = MVP * vec4(pos, 1);\ngl_Position /= gl_Position.w;\nUV = uv;\n}";
-	string fragcode = "#version 330\nin vec2 UV;\nuniform sampler2D sampler;\nuniform vec4 col;\nuniform float level;\nout vec4 color;void main(){\ncolor = textureLod(sampler, UV, level)*col;\n}"; //out vec3 Vec4;\n
-	string fragcode2 = "#version 330\nin vec2 UV;\nuniform sampler2D sampler;\nuniform vec4 col;\nuniform float level;\nout vec4 color;void main(){\ncolor = vec4(1, 1, 1, textureLod(sampler, UV, level).r)*col;\n}"; //out vec3 Vec4;\n
-	string fragcode3 = "#version 330\nin vec2 UV;\nuniform vec4 col;\nout vec4 color;void main(){\ncolor = col;\n}";
-	string fragcodeSky = "#version 330\nin vec2 UV;uniform sampler2D sampler;uniform vec2 dir;uniform float length;out vec4 color;void main(){float ay = asin((UV.y) / length);float l2 = length*cos(ay);float ax = asin((dir.x + UV.x) / l2);color = textureLod(sampler, vec2((dir.x + ax / 3.14159)*sin(dir.y + ay / 3.14159) + 0.5, (dir.y + ay / 3.14159)), 0);color.a = 1;}";
+	string vertcode = "#version 330 core\nlayout(location = 0) in vec3 pos;\nlayout(location = 1) in vec2 uv;\nout vec2 UV;\nvoid main(){ \ngl_Position.xyz = pos;\ngl_Position.w = 1.0;\nUV = uv;\n}";
+	string vertcodeW = "#version 330 core\nlayout(location = 0) in vec3 pos;\nlayout(location = 1) in vec2 uv;\nuniform mat4 MVP;\nout vec2 UV;\nvoid main(){ \ngl_Position = MVP * vec4(pos, 1);\ngl_Position /= gl_Position.w;\nUV = uv;\n}";
+	string fragcode = "#version 330 core\nin vec2 UV;\nuniform sampler2D sampler;\nuniform vec4 col;\nuniform float level;\nout vec4 color;void main(){\ncolor = textureLod(sampler, UV, level)*col;\n}"; //out vec3 Vec4;\n
+	string fragcode2 = "#version 330 core\nin vec2 UV;\nuniform sampler2D sampler;\nuniform vec4 col;\nuniform float level;\nout vec4 color;void main(){\ncolor = vec4(1, 1, 1, textureLod(sampler, UV, level).r)*col;\n}"; //out vec3 Vec4;\n
+	string fragcode3 = "#version 330 core\nin vec2 UV;\nuniform vec4 col;\nout vec4 color;void main(){\ncolor = col;\n}";
+	string fragcodeSky = "#version 330 core\nin vec2 UV;uniform sampler2D sampler;uniform vec2 dir;uniform float length;out vec4 color;void main(){float ay = asin((UV.y) / length);float l2 = length*cos(ay);float ax = asin((dir.x + UV.x) / l2);color = textureLod(sampler, vec2((dir.x + ax / 3.14159)*sin(dir.y + ay / 3.14159) + 0.5, (dir.y + ay / 3.14159)), 0);color.a = 1;}";
 #elif defined(PLATFORM_ADR)
 	string vertcode = "#version 300 es\nlayout(location = 0) in vec3 pos;\nlayout(location = 1) in vec2 uv;\nout vec2 UV;\nvoid main(){ \ngl_Position.xyz = pos;\ngl_Position.w = 1.0;\nUV = uv;\n}";
 	string fragcode = "#version 300 es\nin vec2 UV;\nuniform sampler2D sampler;\nuniform vec4 col;\nuniform float level;\nout vec4 color;void main(){\ncolor = textureLod(sampler, UV, level)*col;\n}"; //out vec3 Vec4;\n
@@ -141,6 +143,13 @@ void Engine::Init(string path) {
 	Editor::instance->InitMaterialPreviewer();
 #endif
 	ScanQuadParams();
+
+	uint d[6] = {0, 2, 1, 2, 3, 1};
+
+	glGenBuffers(1, &_draw_quad_buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _draw_quad_buffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(uint), d, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 #ifdef IS_EDITOR
 	//string colorPickerV = "#version 330 core\nlayout(location = 0) in vec3 pos;\nlayout(location = 1) in vec2 uv;\nout vec2 UV;\nvoid main(){ \ngl_Position.xyz = pos;\ngl_Position.w = 1.0;\nUV = uv;\n}";
@@ -470,14 +479,15 @@ void Engine::DrawQuad(float x, float y, float w, float h, Vec4 col) {
 		//Vec3 v = quadPoss[y];
 		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
 	}
-	uint quadIndexes[6] = { 0, 2, 1, 2, 3, 1 };
 
 	UI::SetVao(4, quadPoss);
 
 	glUseProgram(Engine::defProgram);
 	glUniform4f(Engine::defColLoc, col.r, col.g, col.b, col.a);
 	glBindVertexArray(UI::_vao);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, quadIndexes);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _draw_quad_buffer);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
 	/*
@@ -511,7 +521,7 @@ void Engine::DrawQuad(float x, float y, float w, float h, GLuint texture, Vec2 u
 		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
 	}
 	Vec2 quadUvs[4]{ uv0, uv1, uv2, uv3 };
-	uint quadIndexes[6] = { 0, 1, 2, 1, 3, 2 };
+	//uint quadIndexes[6] = { 0, 1, 2, 1, 3, 2 };
 	uint prog = single ? unlitProgramA : unlitProgram;
 
 	UI::SetVao(4, quadPoss, quadUvs);
@@ -523,7 +533,9 @@ void Engine::DrawQuad(float x, float y, float w, float h, GLuint texture, Vec2 u
 	glUniform4f(single ? drawQuadLocsA[1] : drawQuadLocs[1], Vec4.r, Vec4.g, Vec4.b, Vec4.a);
 	glUniform1f(single ? drawQuadLocsA[2] : drawQuadLocs[2], miplevel);
 	glBindVertexArray(UI::_vao);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, quadIndexes);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _draw_quad_buffer);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
 }

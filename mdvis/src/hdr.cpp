@@ -63,6 +63,11 @@ unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int
 	FILE* fp;
 	fopen_s(&fp, filename, "rb");
 
+    if (!fp) {
+        Debug::Error("hdr", "failed to load hdri: " + string(filename) + "!");
+        return nullptr;
+    }
+
     /* Verify the RADIANCE signature */
     fseek(fp, 0, SEEK_SET);
     fread(buf, 1, sizeof(szSignature)-1, fp);

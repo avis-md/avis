@@ -19,7 +19,6 @@ float repx, repy, repz;
 
 Gromacs* gro;
 Shader* shad, *shad2;
-Background* bg;
 Font* font;
 GLuint emptyVao;
 
@@ -62,7 +61,6 @@ void paintfunc() {
 int main(int argc, char **argv)
 {
 	ChokoLait::Init(800, 800);
-	bg = new Background(IO::path + "/refl.hdr");
 	font = new Font(IO::path + "/arimo.ttf", ALIGN_TOPLEFT);
 	
 	VisSystem::font = font;
@@ -86,11 +84,6 @@ int main(int argc, char **argv)
 		ChokoLait::Paint(nullptr, paintfunc2);
 	}
 	*/
-	//*
-	auto& set = Scene::active->settings;
-	set.sky = bg;
-	set.skyStrength = 1.5f;
-	set.skyBrightness = 0;
 	//Gromacs::LoadFiles();
 	Gromacs::Read(IO::path + "/md.gro");
 	ParGraphics::UpdateDrawLists();

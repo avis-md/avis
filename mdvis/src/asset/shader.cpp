@@ -373,7 +373,7 @@ GLuint Shader::FromVF(const string& vert, const string& frag) {
 		glGetProgramiv(pointer, GL_INFO_LOG_LENGTH, &info_log_length);
 		std::vector<char> program_log(info_log_length);
 		glGetProgramInfoLog(pointer, info_log_length, NULL, &program_log[0]);
-		std::cout << "Shader link error" << std::endl << &program_log[0] << std::endl;
+		Debug::Error("Shader", "Link error: " + string(&program_log[0]));
 		glDeleteProgram(pointer);
 		return 0;
 	}

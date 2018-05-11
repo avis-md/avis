@@ -25,8 +25,8 @@ bool ParGraphics::dragging = false;
 GLuint ParGraphics::emptyVao;
 
 void ParGraphics::Init() {
-	refl = new Texture(IO::path + "refl.png", true, TEX_FILTER_BILINEAR, 1, GL_REPEAT, GL_MIRRORED_REPEAT);
-	reflProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText("D:\\reflFrag.txt")))->pointer;
+	refl = new Texture(IO::path + "/refl.png", true, TEX_FILTER_BILINEAR, 1, GL_REPEAT, GL_MIRRORED_REPEAT);
+	reflProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText(IO::path + "/reflFrag.txt")))->pointer;
 	reflProgLocs[0] = glGetUniformLocation(reflProg, "_IP");
 	reflProgLocs[1] = glGetUniformLocation(reflProg, "screenSize");
 	reflProgLocs[2] = glGetUniformLocation(reflProg, "inColor");
@@ -55,13 +55,13 @@ void ParGraphics::Init() {
 	parConProgLocs[5] = glGetUniformLocation(parConProg, "posTex");
 	parConProgLocs[6] = glGetUniformLocation(parConProg, "connTex");
 
-	selHlProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText("D:\\selectorFrag.txt")))->pointer;
+	selHlProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText(IO::path + "/selectorFrag.txt")))->pointer;
 	selHlProgLocs[0] = glGetUniformLocation(selHlProg, "screenSize");
 	selHlProgLocs[1] = glGetUniformLocation(selHlProg, "myId");
 	selHlProgLocs[2] = glGetUniformLocation(selHlProg, "idTex");
 	selHlProgLocs[3] = glGetUniformLocation(selHlProg, "hlCol");
 
-	colProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText("D:\\colorerFrag.txt")))->pointer;
+	colProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText(IO::path + "/colorerFrag.txt")))->pointer;
 	colProgLocs[0] = glGetUniformLocation(colProg, "idTex");
 	colProgLocs[1] = glGetUniformLocation(colProg, "spTex");
 	colProgLocs[2] = glGetUniformLocation(colProg, "screenSize");
@@ -209,8 +209,6 @@ void ParGraphics::Recolor() {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, ChokoLait::mainCamera->d_colfbo);
 
-	glBindVertexArray(Camera::fullscreenVao);
-
 	glUseProgram(colProg);
 	glUniform1i(colProgLocs[0], 0);
 	glActiveTexture(GL_TEXTURE0);
@@ -227,7 +225,11 @@ void ParGraphics::Recolor() {
 	glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, Camera::fullscreenIndices);
+
+	glBindVertexArray(Camera::fullscreenVao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	glUseProgram(0);
 	glBindVertexArray(0);
@@ -244,8 +246,6 @@ void ParGraphics::Reblit() {
 void ParGraphics::BlitSky() {
 	auto _p = MVP::projection();
 	auto cam = ChokoLait::mainCamera().get();
-
-	glBindVertexArray(Camera::fullscreenVao);
 
 	glUseProgram(reflProg);
 	glUniformMatrix4fv(reflProgLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
@@ -271,15 +271,16 @@ void ParGraphics::BlitSky() {
 	glUniform1f(reflProgLocs[10], rimStr);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, Camera::fullscreenIndices);
 
-	glUseProgram(0);
+	glBindVertexArray(Camera::fullscreenVao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	glUseProgram(0);
 }
 
 void ParGraphics::BlitHl() {
-	glBindVertexArray(Camera::fullscreenVao);
-
 	glUseProgram(selHlProg);
 
 	glUniform2f(selHlProgLocs[0], (float)Display::width, (float)Display::height);
@@ -290,10 +291,13 @@ void ParGraphics::BlitHl() {
 	glUniform3f(selHlProgLocs[3], 1.0f, 1.0f, 0.0f);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, Camera::fullscreenIndices);
-
-	glUseProgram(0);
+	
+	glBindVertexArray(Camera::fullscreenVao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	glUseProgram(0);
 }
 
 void ParGraphics::DrawMenu() {

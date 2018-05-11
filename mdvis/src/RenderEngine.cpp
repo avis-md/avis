@@ -245,6 +245,7 @@ GLuint Camera::fullscreenVbo = 0;
 //const float Camera::fullscreenVerts[] = { -1, -1, 1,  -1, 1, 1,  1, -1, 1,  1, 1, 1 };
 const float Camera::fullscreenVerts[] = { -1, -1,  -1, 1,  1, -1,  1, 1 };
 const int Camera::fullscreenIndices[] = { 0, 1, 2, 1, 3, 2 };
+GLuint Camera::rectIdBuf = 0;
 GLuint Camera::d_probeMaskProgram = 0;
 GLuint Camera::d_probeProgram = 0;
 GLuint Camera::d_blurProgram = 0;

@@ -6,6 +6,7 @@ GLuint Font::fontProgram = 0;
 uint Font::vaoSz = 0;
 GLuint Font::vao = 0;
 GLuint Font::vbos[] = { 0, 0, 0 };
+GLuint Font::idbuf = 0;
 
 void Font::Init() {
 	int err = FT_Init_FreeType(&_ftlib);
@@ -62,6 +63,7 @@ void Font::InitVao(uint sz) {
 	if (!!vao) {
 		glDeleteVertexArrays(1, &vao);
 		glDeleteBuffers(3, vbos);
+		glDeleteBuffers(1, &idbuf);
 	}
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(3, vbos);
@@ -84,6 +86,10 @@ void Font::InitVao(uint sz) {
 	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, NULL);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	glGenBuffers(1, &idbuf);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idbuf);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sz * 6 * sizeof(uint), nullptr, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 #ifdef IS_EDITOR
 	if (PopupSelector::drawing)
 		glfwMakeContextCurrent(PopupSelector::window);

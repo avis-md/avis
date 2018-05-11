@@ -43,7 +43,7 @@ protected:
 	void SizeVec(uint sz);
 
 	static uint vaoSz;
-	static GLuint vao, vbos[3];
+	static GLuint vao, vbos[3], idbuf;
 
 	std::unordered_map<uint, GLuint> _glyphs; //each glyph size is fontSize*16
 	GLuint CreateGlyph(uint size, bool recalcW2h = false);

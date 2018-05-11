@@ -9,7 +9,7 @@ void PyBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 	auto ff = IO::GetFiles(path, ".py");
 
 	for (auto f : ff) {
-		auto nm = f.substr(f.find_last_of('\\') + 1);
+		auto nm = f.substr(f.find_last_of('/') + 1);
 		if (nm.substr(0, 2) == "__") continue;
 		fo->scripts.push_back(nullptr);
 		PyReader::Read(incPath + nm.substr(0, nm.size() - 3), &fo->scripts.back());
@@ -21,14 +21,14 @@ void PyBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 	for (auto f : fd) {
 		if (f == "." || f == "..") continue;
 		fo->subfolders.push_back(Folder(f));
-		DoScan(&fo->subfolders.back(), path + "\\" + f, incPath + f + "/");
+		DoScan(&fo->subfolders.back(), path + "/" + f, incPath + f + "/");
 		if (!fo->subfolders.back().scripts.size() && !fo->subfolders.back().subfolders.size())
 			fo->subfolders.pop_back();
 	}
 }
 
 void PyBrowse::Scan() {
-	DoScan(&folder, IO::path + "\\py", "");
+	DoScan(&folder, IO::path + "/py", "");
 }
 
 void PyBrowse::DoDraw(Folder* f, float& off, uint layer) {

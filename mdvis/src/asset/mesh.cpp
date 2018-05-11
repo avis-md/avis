@@ -450,13 +450,13 @@ void Mesh::InitVao() {
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(4, vbos);
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[0]); //pos
-	glBufferStorage(GL_ARRAY_BUFFER, vertexCount * sizeof(Vec3), &vertices[0], GL_DYNAMIC_STORAGE_BIT);
+	glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vec3), &vertices[0], GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[1]); //uv
-	glBufferStorage(GL_ARRAY_BUFFER, vertexCount * sizeof(Vec2), &uv0[0], GL_DYNAMIC_STORAGE_BIT);
+	glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vec2), &uv0[0], GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[2]); //norm
-	glBufferStorage(GL_ARRAY_BUFFER, vertexCount * sizeof(Vec3), &normals[0], GL_DYNAMIC_STORAGE_BIT);
+	glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vec3), &normals[0], GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[3]); //tan
-	glBufferStorage(GL_ARRAY_BUFFER, vertexCount * sizeof(Vec3), &tangents[0], GL_DYNAMIC_STORAGE_BIT);
+	glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vec3), &tangents[0], GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(vao);
 	glEnableVertexAttribArray(0);

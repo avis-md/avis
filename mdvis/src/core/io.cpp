@@ -1,12 +1,18 @@
 #include "Engine.h"
 #include "Editor.h"
 
+#ifndef PLATFORM_WIN
+#include <sys/types.h>
+#include <dirent.h>
+#endif
+
 string IO::path = IO::InitPath();
 
 std::vector<string> IO::GetFiles(const string& folder, string ext)
 {
 	if (folder == "") return std::vector<string>();
 	std::vector<string> names;
+	auto exts = ext.size();
 #ifdef PLATFORM_WIN
 	string search_path = folder + "/*" + ext;
 	WIN32_FIND_DATA fd;
@@ -21,14 +27,16 @@ std::vector<string> IO::GetFiles(const string& folder, string ext)
 		} while (FindNextFile(hFind, &fd));
 		FindClose(hFind);
 	}
-#elif defined(PLATFORM_ADR)
+#else //if defined(PLATFORM_ADR)
 	DIR* dir = opendir(&folder[0]);
-	dirent* ep;
-	do {
+	struct dirent* ep;
+	while (ep = readdir(dir)) {
 		string nm(ep->d_name);
-		if (nm != "." && nm != "..")
-			names.push_back(nm);
-	} while (ep = readdir(dir));
+		if (nm != "." && nm != "..") {
+			if (!exts || ((nm.size() > (exts + 1)) && (nm.substr(nm.size() - exts) == ext)))
+				names.push_back(nm);
+		}
+	}
 #endif
 	return names;
 }

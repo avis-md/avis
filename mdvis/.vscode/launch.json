@@ -8,12 +8,12 @@
             "name": "(lldb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/Users/chokopan/Github/mdvis/OpenGl1_Editor/build/a.out",
+            "program": "/Users/chokopan/Github/mdvis/mdvis/build/a.out",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "/Users/chokopan/Github/mdvis/OpenGl1_Editor/build",
+            "cwd": "/Users/chokopan/Github/mdvis/mdvis/build",
             "environment": [],
-            "externalConsole": false,
+            "externalConsole": true,
             "MIMode": "lldb",
             "preLaunchTask": "make"
         }
