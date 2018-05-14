@@ -13,6 +13,8 @@ Int2* Particles::particles_Conn;
 Vec3 Particles::boundingBox;
 
 Vec3 Particles::colorPallete[] = {};
+ushort Particles::defColPallete[] = {};
+byte Particles::defColPalleteSz = 0;
 GLuint Particles::colorPalleteTex;
 
 GLuint Particles::posVao;

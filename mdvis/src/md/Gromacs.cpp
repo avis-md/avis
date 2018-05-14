@@ -3,6 +3,7 @@
 #include "utils/rawvector.h"
 
 std::unordered_map<uint, float> Gromacs::_bondLengths;
+std::unordered_map<ushort, Vec3> Gromacs::_type2Col;
 
 uint _find_char_not_of(char* first, char* last, char c) {
 	for (char* f = first; first < last; first++) {
@@ -52,6 +53,7 @@ void Gromacs::Read(const string& file) {
 	Particles::particles_Col = new byte[Particles::particleSz];
 
 	auto rs = rawvector<ResidueList, uint>(Particles::residueLists, Particles::residueListSz);
+	auto cn = rawvector<Int2, uint>(Particles::particles_Conn, Particles::connSz);
 
 	uint64_t currResNm = -1, currResId = -1;
 	ResidueList* trs = 0;
@@ -69,14 +71,14 @@ void Gromacs::Read(const string& file) {
 		//prt.atomId = (ushort)prt.atomName[0];
 		//prt.atomNumber = std::stoul(string(buf + 15, 5));
 		Vec3 vec;
-		vec.x = std::stof(string(buf + 20, 8));
-		vec.y = std::stof(string(buf + 28, 8));
-		vec.z = std::stof(string(buf + 36, 8));
-		Particles::particles_Pos[i] = vec;
 		vec.x = std::stof(string(buf + 44, 8));
 		vec.y = std::stof(string(buf + 52, 8));
 		vec.z = std::stof(string(buf + 60, 8));
 		Particles::particles_Vel[i] = vec;
+		vec.x = std::stof(string(buf + 20, 8));
+		vec.y = std::stof(string(buf + 28, 8));
+		vec.z = std::stof(string(buf + 36, 8));
+		Particles::particles_Pos[i] = vec;
 
 		if (currResNm != resNm) {
 			if (!isfl) rs.push(ResidueList());
@@ -97,6 +99,13 @@ void Gromacs::Read(const string& file) {
 			tr->name = string(buf + n02, 5 - n02);
 			tr->cnt = 0;
 			currResId = resId;
+		}
+		else {
+			for (uint i = 0; i <= tr->cnt; i++) {
+				Vec3 dp = Particles::particles_Pos[i + tr->offset] - vec;
+				auto dst = glm::length2(dp);
+
+			}
 		}
 
 		tr->cnt++;
@@ -168,13 +177,13 @@ void Gromacs::Read(const string& file) {
 }
 
 void Gromacs::LoadFiles() {
-	std::ifstream strm(IO::path + "/bondlengths.txt", std::ios::binary);
+	std::ifstream strm(IO::path + "/bondlengths.txt");
 	_bondLengths.clear();
 	if (strm.is_open()) {
 		string s;
 		while (!strm.eof()) {
 			std::getline(strm, s);
-			auto p = string_split(s, ' ');
+			auto p = string_split(s, ' ', true);
 			if (p.size() != 2) continue;
 			auto p2 = string_split(p[0], '-');
 			if (p2.size() != 2) continue;
@@ -183,6 +192,23 @@ void Gromacs::LoadFiles() {
 			auto ln = pow(std::stof(p[1]) * 0.001f, 2);
 			_bondLengths.emplace(i1 + (i2 << 16), ln);
 			_bondLengths.emplace(i2 + (i1 << 16), ln);
+		}
+		strm.close();
+	}
+	strm.open(IO::path + "/colors.txt");
+	_type2Col.clear();
+	if (strm.is_open()) {
+		string s;
+		Vec3 col;
+		while (!strm.eof()) {
+			std::getline(strm, s);
+			auto p = string_split(s, ' ', true);
+			if (p.size() != 4) continue;
+			auto i = *(ushort*)&p[0];
+			col.x = std::stof(p[1]);
+			col.y = std::stof(p[2]);
+			col.z = std::stof(p[3]);
+			_type2Col.emplace(i, col);
 		}
 		strm.close();
 	}

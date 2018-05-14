@@ -138,7 +138,6 @@ void ChokoLait::Init(int scrW, int scrH) {
 		Time::startMillis = milliseconds();
 
 		glfwSetWindowSize(window, scrW, scrH);
-		glfwShowWindow(window);
 		ReshapeGL(window, scrW, scrH);
 
 		glfwSetFramebufferSizeCallback(window, ReshapeGL);

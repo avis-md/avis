@@ -19,7 +19,6 @@ void PyBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 	IO::GetFolders(path, &fd);
 
 	for (auto f : fd) {
-		if (f == "." || f == "..") continue;
 		fo->subfolders.push_back(Folder(f));
 		DoScan(&fo->subfolders.back(), path + "/" + f, incPath + f + "/");
 		if (!fo->subfolders.back().scripts.size() && !fo->subfolders.back().subfolders.size())

@@ -22,7 +22,7 @@ std::vector<string> IO::GetFiles(const string& folder, string ext)
 			// read all (real) files in current folder
 			// , delete '!' read other 2 default folder . and ..
 			if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-				names.push_back(folder + "\\" + fd.cFileName);
+				names.push_back(fd.cFileName);
 			}
 		} while (FindNextFile(hFind, &fd));
 		FindClose(hFind);
@@ -32,7 +32,7 @@ std::vector<string> IO::GetFiles(const string& folder, string ext)
 	struct dirent* ep;
 	while (ep = readdir(dir)) {
 		string nm(ep->d_name);
-		if (nm != "." && nm != "..") {
+		if (ep->d_type == DT_REG) {
 			if (!exts || ((nm.size() > (exts + 1)) && (nm.substr(nm.size() - exts) == ext)))
 				names.push_back(nm);
 		}
@@ -93,6 +93,15 @@ void IO::GetFolders(const string& folder, std::vector<string>* names, bool hidde
 			}
 		} while (::FindNextFile(hFind, &fd));
 		::FindClose(hFind);
+	}
+#else
+	DIR* dir = opendir(&folder[0]);
+	struct dirent* ep;
+	while (ep = readdir(dir)) {
+		string nm(ep->d_name);
+		if (nm[0] != '.' && ep->d_type == DT_DIR) {
+			names->push_back(string(ep->d_name));
+		}
 	}
 #endif
 }

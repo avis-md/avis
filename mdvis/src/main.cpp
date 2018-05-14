@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 		ChokoLait::Paint(nullptr, paintfunc2);
 	}
 	*/
-	//Gromacs::LoadFiles();
+	Gromacs::LoadFiles();
 	Gromacs::Read(IO::path + "/md.gro");
 	ParGraphics::UpdateDrawLists();
 
@@ -109,6 +109,8 @@ int main(int argc, char **argv)
 	Scene::active->AddObject(obj);
 	obj->AddComponent<MeshFilter>()->mesh(splineMesh);
 	obj->AddComponent<MeshRenderer>()->materials[0](proMat);
+
+	glfwShowWindow(Display::window);
 
 	while (ChokoLait::alive()) {
 		ChokoLait::Update(updateFunc);
