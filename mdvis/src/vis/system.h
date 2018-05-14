@@ -15,6 +15,12 @@ public:
 
 	static VIS_MOUSE_MODE mouseMode;
 	
+	static std::unordered_map<uint, float> _bondLengths;
+	static std::unordered_map<ushort, Vec3> _type2Col;
+	static std::unordered_map<ushort, std::array<float, 2>> radii;
+
+	static void Init();
+
 	static bool InMainWin(const Vec2& pos);
 
 	static void DrawBar();

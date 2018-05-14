@@ -5,6 +5,7 @@ uniform mat4 _P;
 flat in int v2f_id;
 in vec3 v2f_pos;
 in float v2f_scl;
+in float v2f_rad;
 
 uniform vec2 screenSize;
 
@@ -24,7 +25,7 @@ void Output(vec4 col, vec3 norm, vec3 spec, float gloss, vec4 emi) {
 
 void main()
 {
-    float R = 0.01 * v2f_scl;
+    float R = v2f_rad * v2f_scl;
     //*
     vec4 ndc = vec4(
         (gl_FragCoord.x / screenSize.x - 0.5) * 2.0,

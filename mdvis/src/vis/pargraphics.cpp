@@ -45,6 +45,7 @@ void ParGraphics::Init() {
 	parProgLocs[2] = glGetUniformLocation(parProg, "camPos");
 	parProgLocs[3] = glGetUniformLocation(parProg, "camFwd");
 	parProgLocs[4] = glGetUniformLocation(parProg, "screenSize");
+	parProgLocs[5] = glGetUniformLocation(parProg, "radTex");
 
 	parConProg = (new Shader(IO::GetText(IO::path + "/parConV.txt"), IO::GetText(IO::path + "/parConF.txt")))->pointer;
 	parConProgLocs[0] = glGetUniformLocation(parConProg, "_MV");
@@ -72,6 +73,8 @@ void ParGraphics::Init() {
 
 	hlIds.resize(1);
 	ChokoLait::mainCamera->onBlit = Reblit;
+
+
 }
 
 void ParGraphics::UpdateDrawLists() {
@@ -181,6 +184,9 @@ void ParGraphics::Rerender() {
 	glUniform3f(parProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
 	glUniform3f(parProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
 	glUniform2f(parProgLocs[4], (float)Display::width, (float)Display::height);
+	glUniform1i(parProgLocs[5], 1);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
 
 	glBindVertexArray(Particles::posVao);
 	for (auto& p : drawLists)

@@ -1,8 +1,6 @@
 #include "Gromacs.h"
+#include "vis/system.h"
 #include "utils/rawvector.h"
-
-std::unordered_map<uint, float> Gromacs::_bondLengths;
-std::unordered_map<ushort, Vec3> Gromacs::_type2Col;
 
 uint _find_char_not_of(char* first, char* last, char c) {
 	for (char* f = first; first < last; first++) {
@@ -18,6 +16,7 @@ void Gromacs::Read(const string& file) {
 	glGenBuffers(1, &Particles::posBuffer);
 	glGenBuffers(1, &Particles::connBuffer);
 	glGenBuffers(1, &Particles::colIdBuffer);
+	glGenBuffers(1, &Particles::radBuffer);
 
 	std::ifstream strm(file, std::ios::binary);
 	if (!strm.is_open()) {
@@ -50,6 +49,7 @@ void Gromacs::Read(const string& file) {
 	Particles::particles_Pos = new Vec3[Particles::particleSz];
 	Particles::particles_Vel = new Vec3[Particles::particleSz];
 	Particles::particles_Col = new byte[Particles::particleSz];
+	Particles::particles_Rad = new float[Particles::particleSz];
 
 	auto rs = rawvector<ResidueList, uint>(Particles::residueLists, Particles::residueListSz);
 	auto cn = rawvector<Int2, uint>(Particles::particles_Conn, Particles::connSz);
@@ -86,6 +86,7 @@ void Gromacs::Read(const string& file) {
 			currResNm = resNm;
 		}
 
+		auto id1 = Particles::particles_Name[i * PAR_MAX_NAME_LEN];
 		if (currResId != resId) {
 			rsv.push(Residue());
 			tr = &trs->residues[trs->residueSz-1];
@@ -102,9 +103,8 @@ void Gromacs::Read(const string& file) {
 				Vec3 dp = Particles::particles_Pos[tr->offset + j] - vec;
 				auto dst = glm::length2(dp);
 				if (dst < 0.0625) { //2.5A
-					auto id1 = Particles::particles_Name[i * PAR_MAX_NAME_LEN];
 					auto id2 = Particles::particles_Name[j * PAR_MAX_NAME_LEN];
-					float bst = _bondLengths[id1 + (id2 << 16)];
+					float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
 					if (dst < bst) {
 						cn.push(Int2(i, tr->offset + j));
 						tr->cnt_b++;
@@ -112,6 +112,10 @@ void Gromacs::Read(const string& file) {
 				}
 			}
 		}
+
+		float rad = VisSystem::radii[id1][1];
+		
+		Particles::particles_Rad[i] = rad;
 
 		tr->cnt++;
 	}
@@ -161,13 +165,16 @@ void Gromacs::Read(const string& file) {
 	*/
 
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::posBuffer);
-	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(Vec3), Particles::particles_Pos, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(Vec3), Particles::particles_Pos, GL_DYNAMIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::connBuffer);
 	glBufferData(GL_ARRAY_BUFFER, Particles::connSz * 2 * sizeof(uint), Particles::particles_Conn, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::colIdBuffer);
 	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(byte), Particles::particles_Col, GL_STATIC_DRAW);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, Particles::radBuffer);
+	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(float), nullptr, GL_STATIC_DRAW);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	
@@ -178,44 +185,10 @@ void Gromacs::Read(const string& file) {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
+	Particles::UpdateRadBuf();
 	Particles::GenTexBufs();
 }
 
 void Gromacs::LoadFiles() {
-	std::ifstream strm(IO::path + "/bondlengths.txt");
-	_bondLengths.clear();
-	if (strm.is_open()) {
-		string s;
-		while (!strm.eof()) {
-			std::getline(strm, s);
-			auto p = string_split(s, ' ', true);
-			if (p.size() != 2) continue;
-			auto p2 = string_split(p[0], '-');
-			if (p2.size() != 2) continue;
-			auto i1 = *(ushort*)&(p2[0])[0];
-			auto i2 = *(ushort*)&(p2[1])[0];
-			std::cout << std::hex << std::to_string(i1) << std::endl;
-			auto ln = pow(std::stof(p[1]) * 0.001f, 2);
-			_bondLengths.emplace(i1 + (i2 << 16), ln);
-			_bondLengths.emplace(i2 + (i1 << 16), ln);
-		}
-		strm.close();
-	}
-	strm.open(IO::path + "/colors.txt");
-	_type2Col.clear();
-	if (strm.is_open()) {
-		string s;
-		Vec3 col;
-		while (!strm.eof()) {
-			std::getline(strm, s);
-			auto p = string_split(s, ' ', true);
-			if (p.size() != 4) continue;
-			auto i = *(ushort*)&p[0];
-			col.x = std::stof(p[1]);
-			col.y = std::stof(p[2]);
-			col.z = std::stof(p[3]);
-			_type2Col.emplace(i, col);
-		}
-		strm.close();
-	}
+	
 }

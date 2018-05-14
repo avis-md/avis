@@ -47,6 +47,7 @@ public:
 	static Vec3* particles_Pos, *particles_Vel;
 	static byte* particles_Col;
 	static Int2* particles_Conn;
+	static float* particles_Rad;
 
 	static Vec3 boundingBox;
 
@@ -55,11 +56,12 @@ public:
 	static byte defColPalleteSz;
 	static GLuint colorPalleteTex;
 
-	static void Init(), Clear(), GenTexBufs(), UpdateColorTex();
+	static void Init(), Clear(), GenTexBufs(), UpdateColorTex(), UpdateRadBuf();
 
 	static GLuint posVao;
 	static GLuint posBuffer; //xyz
 	static GLuint connBuffer; //uint uint
 	static GLuint colIdBuffer; //byte
-	static GLuint posTexBuffer, connTexBuffer, colorIdTexBuffer;
+	static GLuint radBuffer; //float
+	static GLuint posTexBuffer, connTexBuffer, colorIdTexBuffer, radTexBuffer;
 };

@@ -8,7 +8,7 @@ public:
 	static float reflStr, reflStrDecay, rimOff, rimStr;
 
 	static GLuint reflProg, parProg, parConProg;
-	static GLint reflProgLocs[11], parProgLocs[5], parConProgLocs[7];
+	static GLint reflProgLocs[11], parProgLocs[6], parConProgLocs[7];
 
 	static GLuint selHlProg, colProg;
 	static GLint selHlProgLocs[4], colProgLocs[5];

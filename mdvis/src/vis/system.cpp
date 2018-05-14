@@ -8,6 +8,63 @@ Font* VisSystem::font;
 
 VIS_MOUSE_MODE VisSystem::mouseMode = VIS_MOUSE_MODE::ROTATE;
 
+std::unordered_map<uint, float> VisSystem::_bondLengths;
+std::unordered_map<ushort, Vec3> VisSystem::_type2Col;
+std::unordered_map<ushort, std::array<float, 2>> VisSystem::radii;
+
+void VisSystem::Init() {
+	radii.clear();
+	std::ifstream strm(IO::path + "/radii.txt");
+	if (strm.is_open()) {
+		string s;
+		while (!strm.eof()) {
+			std::getline(strm, s);
+			auto p = string_split(s, ' ', true);
+			if (p.size() != 5) continue;
+			auto i = *(ushort*)&(p[0])[0];
+			auto ar = std::stof(p[1]);
+			auto vr = std::stof(p[4]);
+			radii.emplace(i, std::array<float,2>({{ar, vr}}));
+		}
+		strm.close();
+	}
+	strm.open(IO::path + "/bondlengths.txt");
+	_bondLengths.clear();
+	if (strm.is_open()) {
+		string s;
+		while (!strm.eof()) {
+			std::getline(strm, s);
+			auto p = string_split(s, ' ', true);
+			if (p.size() != 2) continue;
+			auto p2 = string_split(p[0], '-');
+			if (p2.size() != 2) continue;
+			auto i1 = *(ushort*)&(p2[0])[0];
+			auto i2 = *(ushort*)&(p2[1])[0];
+			auto ln = pow(std::stof(p[1]) * 0.001f, 2);
+			_bondLengths.emplace(i1 + (i2 << 16), ln);
+			_bondLengths.emplace(i2 + (i1 << 16), ln);
+		}
+		strm.close();
+	}
+	strm.open(IO::path + "/colors.txt");
+	_type2Col.clear();
+	if (strm.is_open()) {
+		string s;
+		Vec3 col;
+		while (!strm.eof()) {
+			std::getline(strm, s);
+			auto p = string_split(s, ' ', true);
+			if (p.size() != 4) continue;
+			auto i = *(ushort*)&p[0];
+			col.x = std::stof(p[1]);
+			col.y = std::stof(p[2]);
+			col.z = std::stof(p[3]);
+			_type2Col.emplace(i, col);
+		}
+		strm.close();
+	}
+}
+
 bool VisSystem::InMainWin(const Vec2& pos) {
 	if (PyWeb::drawFull) return false;
 	else return (pos.x > ParMenu::expandPos + 16) && (pos.x < Display::width - PyWeb::expandPos) && (pos.y < Display::height - 18);

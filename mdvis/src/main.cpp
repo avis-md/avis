@@ -84,7 +84,8 @@ int main(int argc, char **argv)
 		ChokoLait::Paint(nullptr, paintfunc2);
 	}
 	*/
-	Gromacs::LoadFiles();
+	VisSystem::Init();
+
 	Gromacs::Read(IO::path + "/md.gro");
 	ParGraphics::UpdateDrawLists();
 

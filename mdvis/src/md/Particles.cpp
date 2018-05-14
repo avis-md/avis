@@ -9,6 +9,7 @@ char* Particles::particles_Name, *Particles::particles_ResName;
 Vec3* Particles::particles_Pos, *Particles::particles_Vel;
 byte* Particles::particles_Col;
 Int2* Particles::particles_Conn;
+float* Particles::particles_Rad;
 
 Vec3 Particles::boundingBox;
 
@@ -21,7 +22,8 @@ GLuint Particles::posVao;
 GLuint Particles::posBuffer;
 GLuint Particles::connBuffer;
 GLuint Particles::colIdBuffer;
-GLuint Particles::posTexBuffer, Particles::connTexBuffer, Particles::colorIdTexBuffer;
+GLuint Particles::radBuffer;
+GLuint Particles::posTexBuffer, Particles::connTexBuffer, Particles::colorIdTexBuffer, Particles::radTexBuffer;
 
 void Particles::Init() {
 	colorPallete[0].r = colorPallete[1].g = colorPallete[2].b = 1;
@@ -73,5 +75,15 @@ void Particles::GenTexBufs() {
 	glBindTexture(GL_TEXTURE_BUFFER, colorIdTexBuffer);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R8, colIdBuffer);
 
+	glGenTextures(1, &radTexBuffer);
+	glBindTexture(GL_TEXTURE_BUFFER, radTexBuffer);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, radBuffer);
+
 	glBindTexture(GL_TEXTURE_BUFFER, 0);
+}
+
+void Particles::UpdateRadBuf() {
+	glBindBuffer(GL_ARRAY_BUFFER, Particles::radBuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, Particles::particleSz * sizeof(float), particles_Rad);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
