@@ -24,7 +24,7 @@ XmlNode* Xml::Parse(const string& path) {
 }
 
 bool Xml::Read(string& s, uint& pos, XmlNode* parent) {
-	uint off, off2;
+	size_t off, off2;
 	off = s.find_first_of('<', pos);
 	off2 = s.find_first_of('>', off);
 	if (off2 < off) return false;

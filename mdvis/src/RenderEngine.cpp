@@ -263,6 +263,7 @@ std::vector<string> Camera::fetchTexturesUpdated = std::vector<string>();
 const string Camera::_gbufferNames[4] = {"Diffuse", "Normal", "Specular-Gloss", "Emission"};
 
 GLuint Camera::DoFetchTexture(string s) {
+	/*
 	if (s == "") {
 		ushort a = 0;
 		s = "temp_fetch_" + a;
@@ -274,7 +275,7 @@ GLuint Camera::DoFetchTexture(string s) {
 		glBindTexture(GL_TEXTURE_2D, fetchTextures[s]);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, Display::width, Display::height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	}
-
+	*/
 	return 0;
 }
 
@@ -744,6 +745,8 @@ void Camera::_DrawLights(std::vector<pSceneObject>& oo, Mat4x4& ip, GLuint targe
 				case LIGHTTYPE_SPOT:
 					_DoDrawLight_Spot(l, ip, d_fbo, d_texs, d_depthTex, 0, 0, (float)Display::width, (float)Display::height, targetFbo);
 					break;
+				default:
+					break;
 				}
 			}
 		}
@@ -860,7 +863,7 @@ void Light::InitShadow() {
 	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
 	if (Status != GL_FRAMEBUFFER_COMPLETE) {
-		Debug::Error("ShadowMap", "FB error:" + Status);
+		Debug::Error("ShadowMap", "FB error:" + std::to_string(Status));
 		abort();
 	}
 	else {
@@ -893,7 +896,7 @@ void Light::InitShadow() {
 
 		Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if (Status != GL_FRAMEBUFFER_COMPLETE) {
-			Debug::Error("ShadowMap", "FB cube error: " + Status);
+			Debug::Error("ShadowMap", "FB cube error: " + std::to_string(Status));
 			abort();
 		}
 	}
@@ -924,7 +927,7 @@ void Light::InitRSM() {
 	GLint Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
 	if (Status != GL_FRAMEBUFFER_COMPLETE) {
-		Debug::Error("GI_RsmMap", "FB error:" + Status);
+		Debug::Error("GI_RsmMap", "FB error:" + std::to_string(Status));
 		abort();
 	}
 	else {
@@ -948,7 +951,7 @@ void Light::InitRSM() {
 	Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
 	if (Status != GL_FRAMEBUFFER_COMPLETE) {
-		Debug::Error("GI_FluxMap", "FB error:" + Status);
+		Debug::Error("GI_FluxMap", "FB error:" + std::to_string(Status));
 		abort();
 	}
 	else {
@@ -1174,7 +1177,7 @@ RenderCubeMap::RenderCubeMap() : map(256, true) {
 		glDrawBuffers(1, DrawBuffers);
 		GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if (Status != GL_FRAMEBUFFER_COMPLETE) {
-			Debug::Error("CubeMap", "FBO error: " + Status);
+			Debug::Error("CubeMap", "FBO error: " + std::to_string(Status));
 			abort();
 
 		}

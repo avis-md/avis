@@ -122,15 +122,17 @@ void ParGraphics::Update() {
 				}
 			}
 		}
-		else if (Input::mouseScroll != 0 && VisSystem::InMainWin(Input::mousePos)) {
-			rotScale += 0.05f * Input::mouseScroll;
-		}
 		else {
-			if (Input::KeyDown(Key_Escape)) {
-				VisSystem::mouseMode = VIS_MOUSE_MODE::ROTATE;
+			dragging = false;
+			if (Input::mouseScroll != 0 && VisSystem::InMainWin(Input::mousePos)) {
+				rotScale += 0.05f * Input::mouseScroll;
+			}
+			else {
+				if (Input::KeyDown(Key_Escape)) {
+					VisSystem::mouseMode = VIS_MOUSE_MODE::ROTATE;
+				}
 			}
 		}
-
 		if (s0 != rotScale || rz0 != rotZ || rw0 != rotW || center0 != rotCenter) Scene::dirty = true;
 	}
 }

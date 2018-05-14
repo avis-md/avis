@@ -21,8 +21,8 @@ void main(){
     uint id2 = texelFetch(connTex, gl_VertexID * 2 + 1).r;
     v2f_id1 = id1 + 1U;//gl_VertexID * 2 + 1;
     v2f_id2 = id2 + 1U;//gl_VertexID * 2 + 2;
-	vec3 pos1 = texelFetch(posTex, gl_VertexID * 2).rgb;
-	vec3 pos2 = texelFetch(posTex, gl_VertexID * 2 + 1).rgb;
+	vec3 pos1 = texelFetch(posTex, int(id1)).rgb;
+	vec3 pos2 = texelFetch(posTex, int(id2)).rgb;
 	vec3 pos = (pos1 + pos2) * 0.5;
 	
 	vec4 wpos = _MV*vec4(pos1, 1);

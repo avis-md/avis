@@ -266,8 +266,8 @@ unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int
     }
     free(imagergbe);
 
-    //*dataformat = GL_RGB;
-    //*datatype   = GL_FLOAT;
+    *dataformat = GL_RGB;
+    *datatype   = GL_FLOAT;
 	*/
 
     return imagergbe;

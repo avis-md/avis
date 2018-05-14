@@ -270,10 +270,11 @@ Material::Material(std::istream& stream, uint offset) : AssetObject(ASSETTYPE_MA
 }
 
 Material::~Material() {
-	for (auto& a : vals) {
-		for (auto& b : a.second)
-			delete(b.second);
-	}
+	//for (auto& a : vals) {
+	//	for (auto& b : a.second)
+	//		delete(b.second);
+	//}
+	std::cout << "Warning: Material not cleaned up!" << std::endl;
 }
 
 void Material::ResetVals() {

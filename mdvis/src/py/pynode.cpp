@@ -54,6 +54,9 @@ void PyNode::Execute() {
 			case PY_VARTYPE::FLOAT:
 				script->SetVal(i, inputV[i].first.fval);
 				break;
+			default:
+				Debug::Error("PyNode", "Value not handled!");
+				break;
 			}
 		}
 	}
@@ -111,7 +114,7 @@ void PyNode::Draw() {
 				if (vr.type == PY_VARTYPE::INT || vr.type == PY_VARTYPE::FLOAT) {
 					string s = std::to_string((vr.type == PY_VARTYPE::INT) ? vr.ival : vr.fval);
 					s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, font, true, nullptr, white());
-					if ((vr.type == PY_VARTYPE::INT)) vr.ival = TryParse(s, 0);
+					if (vr.type == PY_VARTYPE::INT) vr.ival = TryParse(s, 0);
 					else vr.fval = TryParse(s, 0.0f);
 				}
 			}
@@ -166,7 +169,7 @@ float PyNode::DrawSide() {
 				if (vr.type == PY_VARTYPE::INT || vr.type == PY_VARTYPE::FLOAT) {
 					string s = std::to_string((vr.type == PY_VARTYPE::INT) ? vr.ival : vr.fval);
 					s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, font, true, nullptr, white());
-					if ((vr.type == PY_VARTYPE::INT)) vr.ival = TryParse(s, 0);
+					if (vr.type == PY_VARTYPE::INT) vr.ival = TryParse(s, 0);
 					else vr.fval = TryParse(s, 0.0f);
 				}
 			}

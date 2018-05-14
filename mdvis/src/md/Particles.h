@@ -51,8 +51,8 @@ public:
 	static Vec3 boundingBox;
 
 	static Vec3 colorPallete[256];
-	static ushort Particles::defColPallete[256];
-	static byte Particles::defColPalleteSz;
+	static ushort defColPallete[256];
+	static byte defColPalleteSz;
 	static GLuint colorPalleteTex;
 
 	static void Init(), Clear(), GenTexBufs(), UpdateColorTex();

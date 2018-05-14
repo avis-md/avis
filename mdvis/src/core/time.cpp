@@ -20,21 +20,15 @@ long long milliseconds() {
 	else {
 		return GetTickCount64();
 	}
-#elif defined(PLATFORM_ADR)
-	struct timespec now;
-	clock_gettime(CLOCK_MONOTONIC, &now);
-	return now.tv_sec * 1000LL + now.tv_nsec / 1000000LL;
+#else
+	struct timeval time;
+	gettimeofday(&time, 0);
+	return time.tv_sec * 1000 + time.tv_usec / 1000;
 #endif
 }
 
 void Time::Update() {
-#ifdef PLATFORM_WIN
 	long long millis = milliseconds();
-#else
-	struct timeval time;
-	gettimeofday(&time, 0);
-	long long millis = time.tv_sec * 1000 + time.tv_usec / 1000;
-#endif
 	Time::delta = (millis - Time::millis)*0.001f;
 	Time::time = (millis - Time::startMillis)*0.001f;
 	Time::millis = millis;

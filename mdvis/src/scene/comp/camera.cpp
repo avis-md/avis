@@ -42,6 +42,8 @@ void Camera::ApplyGL() {
 		glClearDepthf(1);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		break;
+	default:
+		break;
 	}
 
 	MVP::Switch(true);

@@ -1,4 +1,3 @@
-#pragma once
 #include "Gromacs.h"
 #include "utils/rawvector.h"
 
@@ -193,8 +192,9 @@ void Gromacs::LoadFiles() {
 			if (p.size() != 2) continue;
 			auto p2 = string_split(p[0], '-');
 			if (p2.size() != 2) continue;
-			auto i1 = *(ushort*)&p2[0];
-			auto i2 = *(ushort*)&p2[1];
+			auto i1 = *(ushort*)&(p2[0])[0];
+			auto i2 = *(ushort*)&(p2[1])[0];
+			std::cout << std::hex << std::to_string(i1) << std::endl;
 			auto ln = pow(std::stof(p[1]) * 0.001f, 2);
 			_bondLengths.emplace(i1 + (i2 << 16), ln);
 			_bondLengths.emplace(i2 + (i1 << 16), ln);
