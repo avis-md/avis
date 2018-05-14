@@ -59,7 +59,6 @@ void Gromacs::Read(const string& file) {
 	ResidueList* trs = 0;
 	Residue* tr = 0;
 	auto rsv = rawvector<Residue, uint>(Particles::residueLists->residues, Particles::residueLists->residueSz);
-	bool isfr = true, isfl = true;
 	for (uint i = 0; i < Particles::particleSz; i++) {
 		strm.getline(buf, 100);
 		//prt.residueNumber = std::stoul(string(buf, 5));
@@ -81,30 +80,37 @@ void Gromacs::Read(const string& file) {
 		Particles::particles_Pos[i] = vec;
 
 		if (currResNm != resNm) {
-			if (!isfl) rs.push(ResidueList());
-			else isfl = false;
+			rs.push(ResidueList());
 			trs = &Particles::residueLists[Particles::residueListSz - 1];
 			rsv = rawvector<Residue, uint>(trs->residues, trs->residueSz);
 			trs->name = string(buf + 5, 5);
 			currResNm = resNm;
-			isfr = true;
 		}
 
 		if (currResId != resId) {
-			if (!isfr) rsv.push(Residue());
-			else isfr = false;
+			rsv.push(Residue());
 			tr = &trs->residues[trs->residueSz-1];
 			tr->offset = i;
+			tr->offset_b = Particles::connSz;
 			uint n02 = _find_char_not_of(buf, buf + 5, ' ');
 			tr->name = string(buf + n02, 5 - n02);
 			tr->cnt = 0;
+			tr->cnt_b = 0;
 			currResId = resId;
 		}
 		else {
-			for (uint i = 0; i <= tr->cnt; i++) {
-				Vec3 dp = Particles::particles_Pos[i + tr->offset] - vec;
+			for (uint j = 0; j < tr->cnt; j++) {
+				Vec3 dp = Particles::particles_Pos[tr->offset + j] - vec;
 				auto dst = glm::length2(dp);
-
+				if (dst < 0.0625) { //2.5A
+					auto id1 = Particles::particles_Name[i * PAR_MAX_NAME_LEN];
+					auto id2 = Particles::particles_Name[j * PAR_MAX_NAME_LEN];
+					float bst = _bondLengths[id1 + (id2 << 16)];
+					if (dst < bst) {
+						cn.push(Int2(i, tr->offset + j));
+						tr->cnt_b++;
+					}
+				}
 			}
 		}
 

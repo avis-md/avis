@@ -19,8 +19,6 @@ std::vector<string> IO::GetFiles(const string& folder, string ext)
 	HANDLE hFind = FindFirstFile(search_path.c_str(), &fd);
 	if (hFind != INVALID_HANDLE_VALUE) {
 		do {
-			// read all (real) files in current folder
-			// , delete '!' read other 2 default folder . and ..
 			if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
 				names.push_back(fd.cFileName);
 			}
@@ -88,7 +86,7 @@ void IO::GetFolders(const string& folder, std::vector<string>* names, bool hidde
 	HANDLE hFind = ::FindFirstFile(search_path.c_str(), &fd);
 	if (hFind != INVALID_HANDLE_VALUE) {
 		do {
-			if ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && (hidden || !(fd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN))) {
+			if ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && (hidden || !(fd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)) && (fd.cFileName[0] != '.')) {
 				names->push_back(fd.cFileName);
 			}
 		} while (::FindNextFile(hFind, &fd));

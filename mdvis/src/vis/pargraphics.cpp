@@ -85,7 +85,8 @@ void ParGraphics::UpdateDrawLists() {
 			auto& rs = Particles::residueLists[di].residues[0];
 			auto& rs2 = Particles::residueLists[i - 1].residues[Particles::residueLists[i - 1].residueSz-1];
 			drawLists.push_back(std::pair<uint, uint>(rs.offset, rs2.offset - rs.offset + rs2.cnt));
-			drawListsB.push_back(std::pair<uint, uint>(rs.offset_b, rs2.offset_b - rs.offset_b + rs2.cnt_b));
+			auto bcnt = rs2.offset_b - rs.offset_b + rs2.cnt_b;
+			if (!!bcnt) drawListsB.push_back(std::pair<uint, uint>(rs.offset_b, bcnt));
 			di = -1;
 		}
 	}
@@ -93,7 +94,8 @@ void ParGraphics::UpdateDrawLists() {
 		auto& rs = Particles::residueLists[di].residues[0];
 		auto& rs2 = Particles::residueLists[Particles::residueListSz-1].residues[Particles::residueLists[Particles::residueListSz - 1].residueSz - 1];
 		drawLists.push_back(std::pair<uint, uint>(rs.offset, rs2.offset - rs.offset + rs2.cnt));
-		drawListsB.push_back(std::pair<uint, uint>(rs.offset_b, rs2.offset_b - rs.offset_b + rs2.cnt_b));
+		auto bcnt = rs2.offset_b - rs.offset_b + rs2.cnt_b;
+		if (!!bcnt) drawListsB.push_back(std::pair<uint, uint>(rs.offset_b, bcnt));
 	}
 	Scene::dirty = true;
 }
@@ -182,7 +184,7 @@ void ParGraphics::Rerender() {
 	for (auto& p : drawLists)
 		glDrawArrays(GL_POINTS, p.first, p.second);
 
-	/*
+	//*
 	glUseProgram(parConProg);
 	glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
 	glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
@@ -199,7 +201,7 @@ void ParGraphics::Rerender() {
 	glBindVertexArray(emptyVao);
 	for (auto& p : drawListsB)
 		glDrawArrays(GL_POINTS, p.first, p.second);
-	*/
+	//*/
 	glBindVertexArray(0);
 	glUseProgram(0);
 }
