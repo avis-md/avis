@@ -94,6 +94,52 @@ string IO::ReadFile(const string& path) {
 	return buffer.str();
 }
 
+#ifdef PLATFORM_WIN
+std::vector<string> IO::GetRegistryKeys(HKEY key) {
+	TCHAR    achKey[255];
+	TCHAR    achClass[MAX_PATH] = TEXT("");
+	DWORD    cchClassName = MAX_PATH;
+	DWORD	 size;
+	std::vector<string> res;
+
+	if (RegQueryInfoKey(key, achClass, &cchClassName, NULL, &size, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == ERROR_SUCCESS) {
+		DWORD cbName = 255;
+		for (uint i = 0; i < size; i++) {
+			if (RegEnumKeyEx(key, i, achKey, &cbName, NULL, NULL, NULL, NULL) == ERROR_SUCCESS) {
+				res.push_back(achKey);
+			}
+		}
+	}
+	return res;
+}
+
+std::vector<std::pair<string, string>> IO::GetRegistryKeyValues(HKEY hKey, DWORD numValues)
+{
+	std::vector<std::pair<string, string>> vals;
+	for (DWORD i = 0; i < numValues; i++)
+	{
+		char valueName[201];
+		DWORD valNameLen = 200;
+		DWORD dataType;
+		byte data[501];
+		DWORD dataSize = 500;
+
+		auto val = RegEnumValue(hKey,
+			i,
+			valueName,
+			&valNameLen,
+			NULL,
+			&dataType,
+			data, &dataSize);
+
+		if (!!val) break;
+		vals.push_back(std::pair<string, string>(string(valueName), string((char*)data)));
+	}
+
+	return vals;
+}
+#endif
+
 string IO::GetText(const string& path) {
 	std::ifstream strm(path);
 	std::stringstream ss;

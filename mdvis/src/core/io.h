@@ -13,7 +13,7 @@ public:
 	static bool HasDirectory(string szPath);
 	static bool HasFile(string szPath);
 	static string ReadFile(const string& path);
-#if defined(IS_EDITOR) || defined(PLATFORM_WIN)
+#if defined(PLATFORM_WIN)
 	static std::vector<string> GetRegistryKeys(HKEY key);
 	static std::vector<std::pair<string, string>> GetRegistryKeyValues(HKEY hKey, DWORD numValues = 5);
 #endif

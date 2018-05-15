@@ -61,7 +61,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Anaconda\include;./src;./glew;./glfw;./glm;./jpeg;./freetype;./ffmpeg</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Anaconda\include;./src;./include/glew;./include/glfw;./include/glm;./include/jpeg;./include/freetype;./include/ffmpeg</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;CHOKO_LAIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -69,7 +69,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Anaconda\libs\;..\packages\gl\;..\packages\jpg\;..\packages\freetype\;..\packages\ffmpeg\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Anaconda\libs\;.\lib\</AdditionalLibraryDirectories>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <SubSystem>Console</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
@@ -89,7 +89,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Anaconda\include\;./src;./glew;./glfw;./glm;./jpeg;./hdr;./png;./freetype;./ffmpeg</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Anaconda\include;./src;./include/glew;./include/glfw;./include/glm;./include/jpeg;./include/freetype;./include/ffmpeg</AdditionalIncludeDirectories>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;CHOKO_LAIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -99,7 +99,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>C:\Anaconda\libs\;..\packages\gl\;..\packages\jpg\;..\packages\freetype\;..\packages\ffmpeg\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Anaconda\libs\;.\lib\</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>

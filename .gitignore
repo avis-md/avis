@@ -40,14 +40,8 @@ packages/
 TestLait/
 
 # library files
-ffmpeg/
-freetype/
-glew/
-glfw/
-glm/
-hdr/
-jpeg/
-png/
+include/
+lib/
 
 # Visual Studio 2015 cache/options directory
 .vs/
