@@ -1,17 +1,9 @@
 #pragma once
 #include "Engine.h"
+#include "vis/system.h"
 
-const uint PAR_MAX_NAME_LEN = 10;
+const uint PAR_MAX_NAME_LEN = 6;
 
-/*
-struct Particle {
-	bool visible;
-	string name;
-	Vec3 position, velocity;
-	byte colorKey;
-	byte conns[4];
-};
-*/
 struct Residue {
 	Residue() : visible(true), expanded(false) {}
 
@@ -23,7 +15,7 @@ struct Residue {
 };
 
 struct ResidueList { //residues with the same name
-	ResidueList() : visible(true), expanded(false) {}
+	ResidueList() : visible(true), expanded(false), drawMode(VIS_DRAW_MODE::LINES) {}
 
 	~ResidueList() {
 		if (residues) std::free(residues);
@@ -34,6 +26,7 @@ struct ResidueList { //residues with the same name
 	string name;
 	Residue* residues = 0;
 	uint residueSz = 0;
+	VIS_DRAW_MODE drawMode;
 };
 
 class Particles {

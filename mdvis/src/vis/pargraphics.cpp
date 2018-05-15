@@ -12,7 +12,7 @@ GLuint ParGraphics::selHlProg, ParGraphics::colProg;
 GLint ParGraphics::selHlProgLocs[] = {}, ParGraphics::colProgLocs[] = {};
 
 std::vector<uint> ParGraphics::hlIds;
-std::vector<std::pair<uint, uint>> ParGraphics::drawLists, ParGraphics::drawListsB;
+std::vector<std::pair<uint, std::pair<uint, VIS_DRAW_MODE>>> ParGraphics::drawLists, ParGraphics::drawListsB;
 
 Vec3 ParGraphics::rotCenter = Vec3();
 float ParGraphics::rotW = 0, ParGraphics::rotZ = 0;
@@ -87,18 +87,18 @@ void ParGraphics::UpdateDrawLists() {
 		else if ((di > -1) && !r.visible) {
 			auto& rs = Particles::residueLists[di].residues[0];
 			auto& rs2 = Particles::residueLists[i - 1].residues[Particles::residueLists[i - 1].residueSz-1];
-			drawLists.push_back(std::pair<uint, uint>(rs.offset, rs2.offset - rs.offset + rs2.cnt));
+			drawLists.push_back(std::pair<uint, std::pair<uint, VIS_DRAW_MODE>>(rs.offset, std::pair<uint, VIS_DRAW_MODE>(rs2.offset - rs.offset + rs2.cnt, r.drawMode & 0x0f)));
 			auto bcnt = rs2.offset_b - rs.offset_b + rs2.cnt_b;
-			if (!!bcnt) drawListsB.push_back(std::pair<uint, uint>(rs.offset_b, bcnt));
+			if (!!bcnt) drawListsB.push_back(std::pair<uint, std::pair<uint, VIS_DRAW_MODE>>(rs.offset_b, std::pair<uint, VIS_DRAW_MODE>(bcnt, r.drawMode & 0xf0)));
 			di = -1;
 		}
 	}
 	if (di > -1) {
 		auto& rs = Particles::residueLists[di].residues[0];
 		auto& rs2 = Particles::residueLists[Particles::residueListSz-1].residues[Particles::residueLists[Particles::residueListSz - 1].residueSz - 1];
-		drawLists.push_back(std::pair<uint, uint>(rs.offset, rs2.offset - rs.offset + rs2.cnt));
+		drawLists.push_back(std::pair<uint, std::pair<uint, VIS_DRAW_MODE>>(rs.offset, std::pair<uint, VIS_DRAW_MODE>(rs2.offset - rs.offset + rs2.cnt, Particles::residueLists[di].drawMode & 0x0f)));
 		auto bcnt = rs2.offset_b - rs.offset_b + rs2.cnt_b;
-		if (!!bcnt) drawListsB.push_back(std::pair<uint, uint>(rs.offset_b, bcnt));
+		if (!!bcnt) drawListsB.push_back(std::pair<uint, std::pair<uint, VIS_DRAW_MODE>>(rs.offset_b, std::pair<uint, VIS_DRAW_MODE>(bcnt, Particles::residueLists[di].drawMode & 0xf0)));
 	}
 	Scene::dirty = true;
 }
@@ -190,7 +190,7 @@ void ParGraphics::Rerender() {
 
 	glBindVertexArray(Particles::posVao);
 	for (auto& p : drawLists)
-		glDrawArrays(GL_POINTS, p.first, p.second);
+		glDrawArrays(GL_POINTS, p.first, p.second.first);
 
 	//*
 	glUseProgram(parConProg);
@@ -208,7 +208,7 @@ void ParGraphics::Rerender() {
 
 	glBindVertexArray(emptyVao);
 	for (auto& p : drawListsB)
-		glDrawArrays(GL_POINTS, p.first, p.second);
+		glDrawArrays(GL_POINTS, p.first, p.second.first);
 	//*/
 	glBindVertexArray(0);
 	glUseProgram(0);

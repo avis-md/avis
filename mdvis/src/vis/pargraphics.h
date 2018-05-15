@@ -1,6 +1,7 @@
 #pragma once
 #include "ChokoLait.h"
 #include "md/Particles.h"
+#include "vis/system.h"
 
 enum class DRAW_TYPE {
 	
@@ -18,7 +19,7 @@ public:
 	static GLint selHlProgLocs[4], colProgLocs[5];
 
 	static std::vector<uint> hlIds;
-	static std::vector<std::pair<uint, uint>> drawLists, drawListsB;
+	static std::vector<std::pair<uint, std::pair<uint, VIS_DRAW_MODE>>> drawLists, drawListsB;
 
 	static Vec3 rotCenter;
 	static float rotW, rotZ;
