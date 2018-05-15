@@ -12,7 +12,7 @@ enum CURSORTYPE : byte {
 class Display {
 public:
 	static int width, height;
-	const static uint dpi = 96;
+	static int actualWidth, actualHeight;
 	static glm::mat3 uiMatrix;
 	static bool uiMatrixIsI;
 

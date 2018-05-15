@@ -45,6 +45,8 @@ void paintfunc() {
 	}
 	VisSystem::DrawBar();
 
+	auto pos = Input::mousePos;
+
 	ParGraphics::hlIds.clear();
 	if (VisSystem::InMainWin(Input::mousePos)) {
 		auto id = ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y);

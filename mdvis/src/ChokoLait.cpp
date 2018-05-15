@@ -140,7 +140,7 @@ void ChokoLait::Init(int scrW, int scrH) {
 		glfwSetWindowSize(window, scrW, scrH);
 		ReshapeGL(window, scrW, scrH);
 
-		glfwSetFramebufferSizeCallback(window, ReshapeGL);
+		glfwSetWindowSizeCallback(window, ReshapeGL);
 		glfwSetCursorPosCallback(window, MotionGL);
 		glfwSetMouseButtonCallback(window, MouseGL);
 		glfwSetScrollCallback(window, MouseScrGL);
@@ -217,7 +217,10 @@ void ChokoLait::MotionGL(GLFWwindow* window, double x, double y) {
 }
 
 void ChokoLait::ReshapeGL(GLFWwindow* window, int w, int h) {
-	glViewport(0, 0, w, h);
 	Display::width = w;
 	Display::height = h;
+	glfwGetFramebufferSize(window, &w, &h);
+	glViewport(0, 0, w, h);
+	Display::actualWidth = w;
+	Display::actualHeight = h;
 }

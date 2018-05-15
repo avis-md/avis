@@ -272,7 +272,7 @@ const uint ECACHESZ_PADDING = 1;
 #pragma region class names
 
 //we really shouldn't be doing this
-#ifdef PLATFORM_WIN
+#if defined(PLATFORM_WIN)
 #define _allowshared(T) friend class std::_Ref_count_obj<T>
 #elif defined(PLATFORM_OSX)
 #define _allowshared(T)

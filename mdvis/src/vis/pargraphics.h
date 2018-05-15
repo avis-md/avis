@@ -2,6 +2,10 @@
 #include "ChokoLait.h"
 #include "md/Particles.h"
 
+enum class DRAW_TYPE {
+	
+};
+
 class ParGraphics {
 public:
 	static Texture* refl;
