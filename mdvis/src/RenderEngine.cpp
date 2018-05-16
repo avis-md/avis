@@ -403,8 +403,8 @@ uint Camera::GetIdAt(uint x, uint y) {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, d_fbo);
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
 	float pixel;
-	x = uint(x * Display::width * quality/ Display::actualWidth);
-	y = uint(y * Display::height * quality / Display::actualHeight);
+	x = uint(x * quality);
+	y = uint(y * quality);
 	glReadPixels(x, d_h - y, 1, 1, GL_RED, GL_FLOAT, &pixel);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	return (uint)floor(pixel);

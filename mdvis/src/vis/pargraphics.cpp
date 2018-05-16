@@ -366,7 +366,7 @@ void ParGraphics::DrawMenu() {
 	auto ql = cm->quality;
 	if (Engine::Button(expandPos - 97, 226, 16, 16, Icons::refresh, white(0.8f), white(), white(1, 0.6f)) == MOUSE_RELEASE)
 		ql = 1;
-	ql = Engine::DrawSliderFill(expandPos - 80, 226, 78, 16, 0.5f, 1.5f, ql, white(1, 0.5f), white());
+	ql = Engine::DrawSliderFill(expandPos - 80, 226, 78, 16, 0.25f, 1.5f, ql, white(1, 0.5f), white());
 	UI::Label(expandPos - 78, 226, 12, std::to_string(int(ql * 100)) + "%", font, black(0.6f));
 	if (ql != cm->quality) {
 		cm->quality = ql;
