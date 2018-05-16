@@ -74,7 +74,9 @@ void ParGraphics::Init() {
 	hlIds.resize(1);
 	ChokoLait::mainCamera->onBlit = Reblit;
 
-
+	rotCenter = Vec3(1.6f, 1.6f, 16);
+	rotZ = 90;
+	rotScale = -5;
 }
 
 void ParGraphics::UpdateDrawLists() {
@@ -226,7 +228,7 @@ void ParGraphics::Recolor() {
 	glUniform1i(colProgLocs[1], 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_texs[2]);
-	glUniform2f(colProgLocs[2], (float)Display::width, (float)Display::height);
+	glUniform2f(colProgLocs[2], (float)Display::actualWidth, (float)Display::actualHeight);
 	glUniform1i(colProgLocs[3], 2);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
@@ -259,7 +261,7 @@ void ParGraphics::BlitSky() {
 
 	glUseProgram(reflProg);
 	glUniformMatrix4fv(reflProgLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
-	glUniform2f(reflProgLocs[1], (float)Display::width, (float)Display::height);
+	glUniform2f(reflProgLocs[1], (float)Display::actualWidth, (float)Display::actualHeight);
 	glUniform1i(reflProgLocs[2], 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, cam->d_colTex);
@@ -293,7 +295,7 @@ void ParGraphics::BlitSky() {
 void ParGraphics::BlitHl() {
 	glUseProgram(selHlProg);
 
-	glUniform2f(selHlProgLocs[0], (float)Display::width, (float)Display::height);
+	glUniform2f(selHlProgLocs[0], (float)Display::actualWidth, (float)Display::actualHeight);
 	glUniform1i(selHlProgLocs[1], hlIds[0]);
 	glUniform1i(selHlProgLocs[2], 0);
 	glActiveTexture(GL_TEXTURE0);

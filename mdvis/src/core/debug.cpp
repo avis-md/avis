@@ -68,7 +68,7 @@ uint Debug::StackTrace(uint count, void** frames) {
 	uint c;
 #ifdef PLATFORM_WIN
 	c = CaptureStackBackTrace(0, count, frames, NULL);
-#elif defined(PLATFORM_LNX)
+#else
 	c = backtrace(frames, count);
 #endif
 	return c;
