@@ -13,9 +13,9 @@ ifeq ($(UNAME_S),Darwin)
 endif
 
 CXX = g++ 
-CXXFLAGS = -O0 -g -std=c++11 -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ -I/usr/include/python2.7/ -I/usr/local/include/python2.7/ -D CHOKO_LAIT $(OSFLAG) -ferror-limit=1
+CXXFLAGS = -O0 -g -std=c++11 -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ -I/usr/include/python2.7/ -I/usr/local/include/python2.7/ -I/usr/local/include/xdrfile/ -D CHOKO_LAIT $(OSFLAG) -ferror-limit=1
 LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
-LIBS = -L/usr/lib/python2.7 -L/usr/local/lib/python2.7 -lpthread -lm $(GLLIB) -lz -lpython2.7
+LIBS = -L/usr/lib/python2.7 -L/usr/local/lib/python2.7 -lpthread -lm $(GLLIB) -lxdrfile -lz -lpython2.7
 
 OBJS = obj/hdr.o obj/lodepng.o obj/AudioEngine.o obj/ChokoLait.o obj/Editor.o obj/EditorShortcuts.o obj/Engine.o obj/main.o obj/RenderEngine.o obj/SceneObjects.o obj/Types.o obj/asset/animation.o obj/asset/animclip.o obj/asset/assetmanager.o obj/asset/assetobject.o obj/asset/audioclip.o obj/asset/cameffect.o obj/asset/compute.o obj/asset/cubemap.o obj/asset/material.o obj/asset/mesh.o obj/asset/resources.o obj/asset/shader.o obj/asset/img/background.o obj/asset/img/rendertexture.o obj/asset/img/texture.o obj/asset/img/texture3d.o obj/asset/img/videotexture.o obj/core/audio.o obj/core/bbox.o obj/core/debug.o obj/core/display.o obj/core/font.o obj/core/input.o obj/core/io.o obj/core/mvp.o obj/core/time.o obj/core/ui.o obj/md/Gromacs.o obj/md/ParMenu.o obj/md/Particles.o obj/py/pybrowse.o obj/py/pynode.o obj/py/pyreader.o obj/py/PyWeb.o obj/py/nodes/pynode_inputs.o obj/py/nodes/pynode_plot.o obj/scene/object.o obj/scene/scene.o obj/scene/sceneobject.o obj/scene/transform.o obj/scene/comp/animator.o obj/scene/comp/armature.o obj/scene/comp/audiolistener.o obj/scene/comp/audiosource.o obj/scene/comp/camera.o obj/scene/comp/component.o obj/scene/comp/light.o obj/scene/comp/meshfilter.o obj/scene/comp/meshrenderer.o obj/scene/comp/scenescript.o obj/scene/comp/skinnedmeshrenderer.o obj/ui/icons.o obj/utils/color.o obj/utils/fft.o obj/utils/net.o obj/utils/plot.o obj/utils/precedurals.o obj/utils/random.o obj/utils/rect.o obj/utils/serial.o obj/utils/solidify.o obj/utils/spline.o obj/utils/stream.o obj/utils/strext.o obj/utils/xml.o obj/utils/dialog.o obj/vis/pargraphics.o obj/vis/system.o
 

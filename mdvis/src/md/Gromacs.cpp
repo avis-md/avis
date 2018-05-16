@@ -1,6 +1,8 @@
 #include "Gromacs.h"
 #include "vis/system.h"
 #include "utils/rawvector.h"
+#include "xdrfile/xdrfile.h"
+#include "xdrfile/xdrfile_trr.h"
 
 uint _find_char_not_of(char* first, char* last, char c) {
 	for (char* f = first; first < last; first++) {
@@ -189,6 +191,20 @@ void Gromacs::Read(const string& file) {
 	Particles::GenTexBufs();
 }
 
-void Gromacs::LoadFiles() {
+
+bool Gromacs::ReadTrj(const string& path) {
+	auto file = xdrfile_open(path.c_str(), "rb");
+	if (!file) return false;
+
+	int natoms = 0;
 	
+	if (!!read_trr_natoms_2(file, &natoms)) {
+	xdrfile_close(file);
+	return false;
+	}
+
+	std::cout << "trr file: num=" << natoms << std::endl;
+
+	xdrfile_close(file);
+	return true;
 }

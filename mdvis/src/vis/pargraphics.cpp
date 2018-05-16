@@ -1,6 +1,7 @@
 #include "pargraphics.h"
 #include "md/ParMenu.h"
 #include "vis/system.h"
+#include "ui/icons.h"
 
 Texture* ParGraphics::refl = nullptr;
 float ParGraphics::reflStr = 1, ParGraphics::reflStrDecay = 2, ParGraphics::rimOff = 0.5f, ParGraphics::rimStr = 1;
@@ -46,6 +47,7 @@ void ParGraphics::Init() {
 	parProgLocs[3] = glGetUniformLocation(parProg, "camFwd");
 	parProgLocs[4] = glGetUniformLocation(parProg, "screenSize");
 	parProgLocs[5] = glGetUniformLocation(parProg, "radTex");
+	parProgLocs[6] = glGetUniformLocation(parProg, "radScl");
 
 	parConProg = (new Shader(IO::GetText(IO::path + "/parConV.txt"), IO::GetText(IO::path + "/parConF.txt")))->pointer;
 	parConProgLocs[0] = glGetUniformLocation(parConProg, "_MV");
@@ -74,7 +76,7 @@ void ParGraphics::Init() {
 	hlIds.resize(1);
 	ChokoLait::mainCamera->onBlit = Reblit;
 
-	rotCenter = Vec3(1.6f, 1.6f, 16);
+	rotCenter = Vec3(4, 4, 4);
 	rotZ = 90;
 	rotScale = -5;
 }
@@ -180,15 +182,18 @@ void ParGraphics::Rerender() {
 	auto _cpos = ChokoLait::mainCamera->object->transform.position();
 	auto _cfwd = ChokoLait::mainCamera->object->transform.forward();
 
+	auto ql = ChokoLait::mainCamera->quality;
+	
 	glUseProgram(parProg);
 	glUniformMatrix4fv(parProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
 	glUniformMatrix4fv(parProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
 	glUniform3f(parProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
 	glUniform3f(parProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-	glUniform2f(parProgLocs[4], (float)Display::width, (float)Display::height);
+	glUniform2f(parProgLocs[4], Display::width * ql, Display::height * ql);
 	glUniform1i(parProgLocs[5], 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
+	glUniform1f(parProgLocs[6], 0.2f);
 
 	glBindVertexArray(Particles::posVao);
 	for (auto& p : drawLists)
@@ -200,7 +205,7 @@ void ParGraphics::Rerender() {
 	glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
 	glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
 	glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-	glUniform2f(parConProgLocs[4], (float)Display::width, (float)Display::height);
+	glUniform2f(parConProgLocs[4], Display::width * ql, Display::height * ql);
 	glUniform1i(parConProgLocs[5], 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
@@ -217,18 +222,22 @@ void ParGraphics::Rerender() {
 }
 
 void ParGraphics::Recolor() {
+	auto cam = ChokoLait::mainCamera.raw();
+
+	glViewport(0, 0, int(Display::width * cam->quality), int(Display::height * cam->quality));
+
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, ChokoLait::mainCamera->d_colfbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, cam->d_colfbo);
 
 	glUseProgram(colProg);
 	glUniform1i(colProgLocs[0], 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_idTex);
+	glBindTexture(GL_TEXTURE_2D, cam->d_idTex);
 	glUniform1i(colProgLocs[1], 1);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_texs[2]);
-	glUniform2f(colProgLocs[2], (float)Display::actualWidth, (float)Display::actualHeight);
+	glBindTexture(GL_TEXTURE_2D, cam->d_texs[2]);
+	glUniform2f(colProgLocs[2], Display::width * cam->quality, Display::height * cam->quality);
 	glUniform1i(colProgLocs[3], 2);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
@@ -246,6 +255,7 @@ void ParGraphics::Recolor() {
 	glUseProgram(0);
 	glBindVertexArray(0);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glViewport(0, 0, Display::actualWidth, Display::actualHeight);
 }
 
 void ParGraphics::Reblit() {
@@ -325,7 +335,7 @@ void ParGraphics::DrawMenu() {
 	UI::Label(expandPos - 147, 20, 12, "Strength", font, white());
 	reflStr = Engine::DrawSliderFill(expandPos - 80, 19, 78, 16, 0, 2, reflStr, white(1, 0.5f), white());
 	UI::Label(expandPos - 147, 37, 12, "Falloff", font, white());
-	reflStrDecay = Engine::DrawSliderFill(expandPos - 80, 36, 78, 16, 0, 50, reflStrDecay, white(1, 0.5f), white());
+	reflStrDecay = Engine::DrawSliderFill(expandPos - 80, 36, 78, 16, 0, 200, reflStrDecay, white(1, 0.5f), white());
 	
 	UI::Label(expandPos - 148, 54, 12, "Rim Light", font, white());
 	Engine::DrawQuad(expandPos - 149, 68, 148, 38, white(0.9f, 0.1f));
@@ -335,7 +345,7 @@ void ParGraphics::DrawMenu() {
 	rimStr = Engine::DrawSliderFill(expandPos - 80, 88, 78, 16, 0, 5, rimStr, white(1, 0.5f), white());
 
 	UI::Label(expandPos - 148, 105, 12, "Camera", font, white());
-	Engine::DrawQuad(expandPos - 149, 121, 148, 106, white(0.9f, 0.1f));
+	Engine::DrawQuad(expandPos - 149, 138, 148, 106, white(0.9f, 0.1f));
 	UI::Label(expandPos - 147, 122, 12, "Center X", font, white());
 	UI::Label(expandPos - 147, 139, 12, "Center Y", font, white());
 	UI::Label(expandPos - 147, 156, 12, "Center Z", font, white());
@@ -350,6 +360,18 @@ void ParGraphics::DrawMenu() {
 	
 	UI::Label(expandPos - 147, 209, 12, "Scale", font, white());
 	rotScale = TryParse(UI::EditText(expandPos - 80, 209, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotScale), font, true, nullptr, white()), 0.0f);
+
+	UI::Label(expandPos - 147, 226, 12, "Quality", font, white());
+	auto cm = ChokoLait::mainCamera.raw();
+	auto ql = cm->quality;
+	if (Engine::Button(expandPos - 97, 226, 16, 16, Icons::refresh, white(0.8f), white(), white(1, 0.6f)) == MOUSE_RELEASE)
+		ql = 1;
+	ql = Engine::DrawSliderFill(expandPos - 80, 226, 78, 16, 0.5f, 1.5f, ql, white(1, 0.5f), white());
+	UI::Label(expandPos - 78, 226, 12, std::to_string(int(ql * 100)) + "%", font, black(0.6f));
+	if (ql != cm->quality) {
+		cm->quality = ql;
+		Scene::dirty = true;
+	}
 
 	rotW = Clamp<float>(rotW, -90, 90);
 	rotZ = Repeat<float>(rotZ, 0, 360);

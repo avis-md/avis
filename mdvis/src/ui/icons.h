@@ -8,5 +8,6 @@ public:
 	static Texture* expand, *collapse, *python, *play, *playall,
 		*left, *right, *cross, *visible, *hidden, *circle,
 		*select, *deselect, *flipselect,
-		*toolRot, *toolMov, *toolSel;
+		*toolRot, *toolMov, *toolSel,
+		*refresh;
 };

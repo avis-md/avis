@@ -1,15 +1,8 @@
 #include "Engine.h"
 #include "Editor.h"
 
-const int Camera::camVertsIds[19] = { 0, 1, 0, 2, 0, 3, 0, 4, 1, 2, 2, 4, 4, 3, 3, 1, 1, 2, 5 };
-
-Camera::Camera() : Component("Camera", COMP_CAM, DRAWORDER_NONE), ortographic(false), fov(60), orthoSize(10), screenPos(0.0f, 0.0f, 1.0f, 1.0f), clearType(CAM_CLEAR_COLOR), clearColor(black(1)), _tarRT(-1), nearClip(0.01f), farClip(500) {
-#ifdef IS_EDITOR
-	UpdateCamVerts();
-#else
-	//if (!d_fbo)
-	InitGBuffer();
-#endif
+Camera::Camera() : Component("Camera", COMP_CAM, DRAWORDER_NONE), ortographic(false), fov(60), orthoSize(10), screenPos(0.0f, 0.0f, 1.0f, 1.0f), clearType(CAM_CLEAR_COLOR), clearColor(black(1)), _tarRT(-1), nearClip(0.01f), farClip(500), quality(1) {
+	InitGBuffer(Display::width, Display::height);
 }
 
 Camera::Camera(std::ifstream& stream, SceneObject* o, long pos) : Camera() {
@@ -20,14 +13,6 @@ Camera::Camera(std::ifstream& stream, SceneObject* o, long pos) : Camera() {
 	_Strm2Val(stream, screenPos.y);
 	_Strm2Val(stream, screenPos.w);
 	_Strm2Val(stream, screenPos.h);
-
-	/*
-	#ifndef IS_EDITOR
-	if (d_skyProgram == 0) {
-	InitShaders();
-	}
-	#endif
-	*/
 }
 
 void Camera::ApplyGL() {
@@ -146,5 +131,3 @@ void Camera::InitShaders() {
 
 	Light::ScanParams();
 }
-
-void Camera::UpdateCamVerts() {}

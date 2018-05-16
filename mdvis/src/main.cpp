@@ -88,7 +88,8 @@ int main(int argc, char **argv)
 	*/
 	VisSystem::Init();
 
-	Gromacs::Read(IO::path + "/md.gro");
+	Gromacs::Read(IO::path + "/pbc.gro");
+	bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");
 	ParGraphics::UpdateDrawLists();
 
 	glEnable(GL_PROGRAM_POINT_SIZE);

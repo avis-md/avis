@@ -230,8 +230,8 @@ bool RenderTexture::Parse(string path) {
 }
 
 
-void Camera::InitGBuffer() {
-	_InitGBuffer(&d_fbo, &d_colfbo, d_texs, &d_depthTex, &d_idTex, &d_colTex);
+void Camera::InitGBuffer(uint w, uint h) {
+	_InitGBuffer(&d_fbo, &d_colfbo, d_texs, &d_depthTex, &d_idTex, &d_colTex, w, h);
 	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (Status != GL_FRAMEBUFFER_COMPLETE) {
 		Debug::Error("Camera (" + name + ")", "FB error:" + std::to_string(Status));
@@ -280,16 +280,18 @@ GLuint Camera::DoFetchTexture(string s) {
 }
 
 void Camera::Render(RenderTexture* target, renderFunc func) {
-	if (target? (d_w != target->width || d_h != target->height) : (d_w != Display::width || d_h != Display::height)) {
+	uint t_w = (uint)((target? target->width : (uint)Display::width) * quality);
+	uint t_h = (uint)((target? target->height : (uint)Display::height) * quality);
+	if ((d_w != t_w) || (d_h != t_h)) {
 		glDeleteFramebuffers(1, &d_fbo);
 		glDeleteFramebuffers(1, &d_colfbo);
 		glDeleteTextures(3, d_texs + 1);
 		glDeleteTextures(1, &d_idTex);
 		glDeleteTextures(1, &d_colTex);
 		glDeleteTextures(1, &d_depthTex);
-		InitGBuffer();
-		d_w = target ? target->width : Display::width;
-		d_h = target ? target->height : Display::height;
+		InitGBuffer(t_w, t_h);
+		d_w = t_w;
+		d_h = t_h;
 		Scene::dirty = true;
 	}
 	if (Scene::dirty) {
@@ -313,6 +315,7 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 		ApplyGL();
 		MVP::Switch(false);
 		MVP::Clear();
+		glViewport(0, 0, d_w, d_h);
 
 		if (func) func();
 		DrawSceneObjectsOpaque(Scene::active->objects);
@@ -321,15 +324,12 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 		Scene::dirty = false;
 
 		d_texs[0] = d_colTex;
+		glViewport(0, 0, Display::actualWidth, Display::actualHeight);
 	}
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(false);
 
 	//DumpBuffers();
-	//return;
-//#ifdef SHOW_GBUFFERS
-	//DumpBuffers();
-//#else
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 	glDisable(GL_DEPTH_TEST);
@@ -403,6 +403,8 @@ uint Camera::GetIdAt(uint x, uint y) {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, d_fbo);
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
 	float pixel;
+	x = uint(x * Display::width * quality/ Display::actualWidth);
+	y = uint(y * Display::height * quality / Display::actualHeight);
 	glReadPixels(x, d_h - y, 1, 1, GL_RED, GL_FLOAT, &pixel);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	return (uint)floor(pixel);

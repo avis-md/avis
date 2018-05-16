@@ -6,5 +6,5 @@
 class Gromacs {
 public:
 	static void Read(const string& file);
-	static void LoadFiles();
+	static bool ReadTrj(const string& file); //short for trajectory(.trr)
 };

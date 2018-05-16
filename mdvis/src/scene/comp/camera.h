@@ -25,29 +25,7 @@ public:
 	GLuint d_fbo, d_colfbo, d_texs[4], d_idTex, d_depthTex, d_colTex;
 	uint d_w, d_h;
 
-	/*
-	friend int main(int argc, char **argv);
-	friend void Serialize(Editor* e, SceneObject* o, std::ofstream* stream);
-	friend void Deserialize(std::ifstream& stream, SceneObject* obj);
-	friend class EB_Viewer;
-	friend class EB_Inspector;
-	friend class EB_Previewer;
-	friend class Background;
-	friend class MeshRenderer;
-	friend class SkinnedMeshRenderer;
-	friend class Engine;
-	friend class Editor;
-	friend class Light;
-	friend class ReflectiveQuad;
-	friend class Texture;
-	friend class RenderTexture;
-	friend class ReflectionProbe;
-	friend class CubeMap;
-	friend class Color;
-	friend class PyWeb;
-	_allowshared(Camera);
-protected:
-*/
+
 	Camera(std::ifstream& stream, SceneObject* o, long pos = -1);
 
 	std::vector<ASSETID> _effects;
@@ -69,8 +47,6 @@ protected:
 	static void GenShaderFromPath(const string& pathv, const string& pathf, GLuint* program);
 	static void GenShaderFromPath(GLuint vertex_shader, const string& path, GLuint* program);
 
-	Vec3 camVerts[6];
-	static const int camVertsIds[19];
 	static GLuint rectIdBuf;
 	static GLuint d_probeMaskProgram, d_probeProgram, d_blurProgram, d_blurSBProgram, d_skyProgram, d_pLightProgram, d_sLightProgram, d_sLightCSProgram, d_sLightRSMProgram, d_sLightRSMFluxProgram;
 	static GLuint d_reflQuadProgram;
@@ -81,6 +57,7 @@ protected:
 	static const int fullscreenIndices[];
 
 	int _tarRT;
+	float quality;
 
 	static std::unordered_map<string, GLuint> fetchTextures;
 	static std::vector<string> fetchTexturesUpdated;
@@ -92,14 +69,5 @@ protected:
 	void ApplyGL();
 
 	static void InitShaders();
-	void UpdateCamVerts();
-	void InitGBuffer();
-
-#ifdef IS_EDITOR
-	void DrawEditor(EB_Viewer* ebv, GLuint shader = 0) override;
-	void DrawInspector(Editor* e, Component* c, Vec4 v, uint& pos) override;
-	void Serialize(Editor* e, std::ofstream* stream) override;
-
-	static void _SetClear0(EditorBlock* b), _SetClear1(EditorBlock* b), _SetClear2(EditorBlock* b), _SetClear3(EditorBlock* b);
-#endif
+	void InitGBuffer(uint w, uint h);
 };
