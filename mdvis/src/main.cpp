@@ -50,8 +50,9 @@ void paintfunc() {
 	ParGraphics::hlIds.clear();
 	if (VisSystem::InMainWin(Input::mousePos)) {
 		auto id = ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y);
-		if (id) {
+		if (!!id) {
 			ParGraphics::hlIds.push_back(id);
+			id--;
 			Engine::DrawQuad(Input::mousePos.x + 14, Input::mousePos.y + 2, 120, 60, white(0.8f, 0.1f));
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Particle " + std::to_string(id - 1), font, white());
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, &Particles::particles_ResName[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, font, white());

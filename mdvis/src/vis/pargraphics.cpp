@@ -132,9 +132,13 @@ void ParGraphics::Update() {
 		}
 		else {
 			dragging = false;
-			ChokoLait::mainCamera->applyGBuffer2 = false;
+			if (ChokoLait::mainCamera->applyGBuffer2) {
+				ChokoLait::mainCamera->applyGBuffer2 = false;
+				Scene::dirty = true;
+			}
 			if (Input::mouseScroll != 0 && VisSystem::InMainWin(Input::mousePos)) {
 				rotScale += 0.05f * Input::mouseScroll;
+				ChokoLait::mainCamera->applyGBuffer2 = true;
 			}
 			else {
 				if (Input::KeyDown(Key_Escape)) {
@@ -195,7 +199,7 @@ void ParGraphics::Rerender() {
 	glUniform1i(parProgLocs[5], 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
-	glUniform1f(parProgLocs[6], 0.2f);
+	glUniform1f(parProgLocs[6], 1);
 
 	glBindVertexArray(Particles::posVao);
 	for (auto& p : drawLists)
@@ -347,7 +351,7 @@ void ParGraphics::DrawMenu() {
 	rimStr = Engine::DrawSliderFill(expandPos - 80, 88, 78, 16, 0, 5, rimStr, white(1, 0.5f), white());
 
 	UI::Label(expandPos - 148, 105, 12, "Camera", font, white());
-	Engine::DrawQuad(expandPos - 149, 155, 148, 106, white(0.9f, 0.1f));
+	Engine::DrawQuad(expandPos - 149, 121, 148, 140, white(0.9f, 0.1f));
 	UI::Label(expandPos - 147, 122, 12, "Center X", font, white());
 	UI::Label(expandPos - 147, 139, 12, "Center Y", font, white());
 	UI::Label(expandPos - 147, 156, 12, "Center Z", font, white());
@@ -381,6 +385,17 @@ void ParGraphics::DrawMenu() {
 		cm->useGBuffer2 = a2;
 		if (a2) cm->GenGBuffer2();
 		Scene::dirty = true;
+	}
+	if (a2) {
+		Engine::DrawQuad(expandPos - 149, 260, 148, 18, white(0.9f, 0.1f));
+		UI::Label(expandPos - 147, 260, 12, "Quality 2", font, white());
+		ql = cm->quality2;
+		ql = Engine::DrawSliderFill(expandPos - 80, 260, 78, 16, 0.25f, 1, ql, white(1, 0.5f), white());
+		UI::Label(expandPos - 78, 260, 12, std::to_string(int(ql * 100)) + "%", font, black(0.6f));
+		if (ql != cm->quality2) {
+			cm->quality2 = ql;
+			Scene::dirty = true;
+		}
 	}
 
 	rotW = Clamp<float>(rotW, -90, 90);

@@ -23,8 +23,8 @@ public:
 	
 	onBlitFunc onBlit;
 	GLuint d_fbo, d_colfbo, d_texs[4], d_idTex, d_depthTex, d_colTex;
-	GLuint d_fbo2, d_texs2[4], _d_fbo, _d_texs[4];
-	uint d_w, d_h, d_w2, d_h2, _d_w, _d_h;
+	GLuint d_fbo2, d_texs2[4], d_depthTex2, _d_fbo, _d_texs[4], _d_depthTex;
+	uint d_w, d_h, d_w2, d_h2, _d_w, _d_h, _w, _h;
 	bool useGBuffer2, applyGBuffer2;
 	void GenGBuffer2();
 	void LoadGBuffer2(), UnloadGBuffer2();
