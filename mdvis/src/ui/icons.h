@@ -9,5 +9,5 @@ public:
 		*left, *right, *cross, *visible, *hidden, *circle,
 		*select, *deselect, *flipselect,
 		*toolRot, *toolMov, *toolSel,
-		*refresh;
+		*refresh, *checkbox;
 };

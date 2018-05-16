@@ -361,9 +361,9 @@ bool Engine::Toggle(float x, float y, float s, Vec4 col, bool t) {
 }
 bool Engine::Toggle(float x, float y, float s, Texture* texture, bool t, Vec4 col, ORIENTATION o) {
 	byte b;
-	if (o == 0)
+	if (o == ORIENT_NONE)
 		b = Button(x, y, s, s, texture, col, Lerp(col, white(), 0.5f), Lerp(col, black(), 0.5f));
-	else if (o == 1)
+	else if (o == ORIENT_HORIZONTAL)
 		b = Button(x, y, s, s, texture, col, Lerp(col, white(), 0.5f), Lerp(col, black(), 0.5f), t ? 0.5f : 0, 0, 0.5f, 1);
 	else
 		b = Button(x, y, s, s, texture, col, Lerp(col, white(), 0.5f), Lerp(col, black(), 0.5f), 0, t ? 0.5f : 0, 1, 0.5f);

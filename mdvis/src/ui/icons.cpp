@@ -4,7 +4,7 @@ Texture* Icons::expand, *Icons::collapse, *Icons::python, *Icons::play, *Icons::
 *Icons::left, *Icons::right, *Icons::cross, *Icons::visible, *Icons::hidden, *Icons::circle,
 *Icons::select, *Icons::deselect, *Icons::flipselect,
 *Icons::toolRot, *Icons::toolMov, *Icons::toolSel,
-*Icons::refresh;
+*Icons::refresh, *Icons::checkbox;
 
 void Icons::Init() {
 	expand = new Texture(IO::path + "/res/expand.png", false, TEX_FILTER_POINT);
@@ -25,4 +25,5 @@ void Icons::Init() {
 	toolMov = new Texture(IO::path + "/res/tool_mov.png", false, TEX_FILTER_POINT);
 	toolSel = new Texture(IO::path + "/res/tool_sel.png", false, TEX_FILTER_POINT);
 	refresh = new Texture(IO::path + "/res/refresh.png", false);
+	checkbox = new Texture(IO::path + "/res/checkbox.png", false);
 }

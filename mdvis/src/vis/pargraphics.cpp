@@ -117,6 +117,7 @@ void ParGraphics::Update() {
 		if (Input::mouse0) {
 			if (Input::mouse0State == MOUSE_DOWN && VisSystem::InMainWin(Input::mousePos)) {
 				dragging = true;
+				ChokoLait::mainCamera->applyGBuffer2 = true;
 			}
 			else if (dragging) {
 				if ((VisSystem::mouseMode == VIS_MOUSE_MODE::ROTATE) && !Input::KeyHold(Key_LeftShift)) {
@@ -131,6 +132,7 @@ void ParGraphics::Update() {
 		}
 		else {
 			dragging = false;
+			ChokoLait::mainCamera->applyGBuffer2 = false;
 			if (Input::mouseScroll != 0 && VisSystem::InMainWin(Input::mousePos)) {
 				rotScale += 0.05f * Input::mouseScroll;
 			}
@@ -345,7 +347,7 @@ void ParGraphics::DrawMenu() {
 	rimStr = Engine::DrawSliderFill(expandPos - 80, 88, 78, 16, 0, 5, rimStr, white(1, 0.5f), white());
 
 	UI::Label(expandPos - 148, 105, 12, "Camera", font, white());
-	Engine::DrawQuad(expandPos - 149, 138, 148, 106, white(0.9f, 0.1f));
+	Engine::DrawQuad(expandPos - 149, 155, 148, 106, white(0.9f, 0.1f));
 	UI::Label(expandPos - 147, 122, 12, "Center X", font, white());
 	UI::Label(expandPos - 147, 139, 12, "Center Y", font, white());
 	UI::Label(expandPos - 147, 156, 12, "Center Z", font, white());
@@ -370,6 +372,14 @@ void ParGraphics::DrawMenu() {
 	UI::Label(expandPos - 78, 226, 12, std::to_string(int(ql * 100)) + "%", font, black(0.6f));
 	if (ql != cm->quality) {
 		cm->quality = ql;
+		Scene::dirty = true;
+	}
+	bool a2 = cm->useGBuffer2;
+	UI::Label(expandPos - 147, 243, 12, "Use Dynamic Quality", font, white());
+	a2 = Engine::Toggle(expandPos - 19, 243, 16, Icons::checkbox, a2, white(), ORIENT_HORIZONTAL);
+	if (a2 != cm->useGBuffer2) {
+		cm->useGBuffer2 = a2;
+		if (a2) cm->GenGBuffer2();
 		Scene::dirty = true;
 	}
 

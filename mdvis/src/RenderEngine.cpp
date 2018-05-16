@@ -103,6 +103,42 @@ void _InitGBuffer(GLuint* d_fbo, GLuint* d_colfbo, GLuint* d_texs, GLuint* d_dep
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
+void Camera::GenGBuffer2() {
+	useGBuffer2 = true;
+	uint dw2 = uint(d_w * quality2);
+	uint dh2 = uint(d_h * quality2);
+
+	if ((dw2 != d_w2) || (dh2 != d_h2)) {
+		d_w2 = dw2;
+		d_h2 = dh2;
+
+		if (!!d_fbo2) {
+			glDeleteFramebuffers(1, &d_fbo2);
+			glDeleteTextures(4, d_texs2);
+		}
+		glGenFramebuffers(1, &d_fbo2);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_fbo2);
+
+		// Create the gbuffer textures
+		glGenTextures(4, d_texs);
+
+		glBindTexture(GL_TEXTURE_2D, d_texs[0]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, d_w2, d_h2, 0, GL_RED, GL_UNSIGNED_INT, NULL);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, d_texs[0], 0);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		for (uint i = 1; i < 4; i++) {
+			glBindTexture(GL_TEXTURE_2D, d_texs[i]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, d_w2, d_h2, 0, GL_RGBA, GL_FLOAT, NULL);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, d_texs[i], 0);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		}
+	}
+}
+
 
 RenderTexture::RenderTexture(uint w, uint h, RT_FLAGS flags, const GLvoid* pixels, GLenum pixelFormat, GLenum minFilter, GLenum magFilter, GLenum wrapS, GLenum wrapT) : Texture(), depth(!!(flags & RT_FLAG_DEPTH)), stencil(!!(flags & RT_FLAG_STENCIL)), hdr(!!(flags & RT_FLAG_HDR)) {
 	width = w;
@@ -294,8 +330,19 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 		d_h = t_h;
 		Scene::dirty = true;
 	}
+	if (useGBuffer2) {
+		GenGBuffer2();
+		_d_fbo = d_fbo;
+		memcpy(_d_texs, d_texs, 4 * sizeof(GLuint));
+	}
+	
 	if (Scene::dirty) {
 		d_texs[0] = d_idTex;
+
+		if (useGBuffer2 && applyGBuffer2) {
+			d_fbo = d_fbo2;
+			memcpy(d_texs, d_texs2, 4 * sizeof(GLuint));
+		}
 
 		float zero[] = { 0,0,0,0 };
 		float one = 1;
@@ -322,6 +369,11 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 		//MVP::Switch(false);
 		//MVP::Clear();
 		Scene::dirty = false;
+
+		if (useGBuffer2 && applyGBuffer2) {
+			d_fbo = _d_fbo;
+			memcpy(d_texs, _d_texs, 4 * sizeof(GLuint));
+		}
 
 		d_texs[0] = d_colTex;
 		glViewport(0, 0, Display::actualWidth, Display::actualHeight);
