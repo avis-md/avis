@@ -199,7 +199,7 @@ void ParGraphics::Rerender() {
 	glUniform1i(parProgLocs[5], 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
-	glUniform1f(parProgLocs[6], 1);
+	glUniform1f(parProgLocs[6], 0.2f);
 
 	glBindVertexArray(Particles::posVao);
 	for (auto& p : drawLists)

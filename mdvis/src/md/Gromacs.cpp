@@ -12,7 +12,7 @@ uint _find_char_not_of(char* first, char* last, char c) {
 	return -1;
 }
 
-void Gromacs::Read(const string& file) {
+void Gromacs::Read(const string& file, bool hasAnim) {
 	Particles::Clear();
 	glGenVertexArrays(1, &Particles::posVao);
 	glGenBuffers(1, &Particles::posBuffer);
@@ -48,8 +48,10 @@ void Gromacs::Read(const string& file) {
 	Particles::particleSz = std::stoi(string(buf));
 	Particles::particles_Name = new char[Particles::particleSz * PAR_MAX_NAME_LEN]{};
 	Particles::particles_ResName = new char[Particles::particleSz * PAR_MAX_NAME_LEN]{};
-	Particles::particles_Pos = new Vec3[Particles::particleSz];
-	Particles::particles_Vel = new Vec3[Particles::particleSz];
+	if (!hasAnim) {
+		Particles::particles_Pos = new Vec3[Particles::particleSz];
+		Particles::particles_Vel = new Vec3[Particles::particleSz];
+	}
 	Particles::particles_Col = new byte[Particles::particleSz];
 	Particles::particles_Rad = new float[Particles::particleSz];
 
@@ -60,6 +62,7 @@ void Gromacs::Read(const string& file) {
 	ResidueList* trs = 0;
 	Residue* tr = 0;
 	auto rsv = rawvector<Residue, uint>(Particles::residueLists->residues, Particles::residueLists->residueSz);
+	Vec3 vec;
 	for (uint i = 0; i < Particles::particleSz; i++) {
 		strm.getline(buf, 100);
 		//prt.residueNumber = std::stoul(string(buf, 5));
@@ -70,16 +73,16 @@ void Gromacs::Read(const string& file) {
 		memcpy(Particles::particles_Name + i * PAR_MAX_NAME_LEN, buf + 10 + n0, 5 - n0);
 		//prt.atomId = (ushort)prt.atomName[0];
 		//prt.atomNumber = std::stoul(string(buf + 15, 5));
-		Vec3 vec;
-		vec.x = std::stof(string(buf + 44, 8));
-		vec.y = std::stof(string(buf + 52, 8));
-		vec.z = std::stof(string(buf + 60, 8));
-		Particles::particles_Vel[i] = vec;
-		vec.x = std::stof(string(buf + 20, 8));
-		vec.y = std::stof(string(buf + 28, 8));
-		vec.z = std::stof(string(buf + 36, 8));
-		Particles::particles_Pos[i] = vec;
-
+		if (!hasAnim) {
+			vec.x = std::stof(string(buf + 44, 8));
+			vec.y = std::stof(string(buf + 52, 8));
+			vec.z = std::stof(string(buf + 60, 8));
+			Particles::particles_Vel[i] = vec;
+			vec.x = std::stof(string(buf + 20, 8));
+			vec.y = std::stof(string(buf + 28, 8));
+			vec.z = std::stof(string(buf + 36, 8));
+			Particles::particles_Pos[i] = vec;
+		}
 		if (currResNm != resNm) {
 			rs.push(ResidueList());
 			trs = &Particles::residueLists[Particles::residueListSz - 1];
@@ -101,15 +104,17 @@ void Gromacs::Read(const string& file) {
 			currResId = resId;
 		}
 		else {
-			for (uint j = 0; j < tr->cnt; j++) {
-				Vec3 dp = Particles::particles_Pos[tr->offset + j] - vec;
-				auto dst = glm::length2(dp);
-				if (dst < 0.0625) { //2.5A
-					auto id2 = Particles::particles_Name[j * PAR_MAX_NAME_LEN];
-					float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
-					if (dst < bst) {
-						cn.push(Int2(i, tr->offset + j));
-						tr->cnt_b++;
+			if (!hasAnim) {
+				for (uint j = 0; j < tr->cnt; j++) {
+					Vec3 dp = Particles::particles_Pos[tr->offset + j] - vec;
+					auto dst = glm::length2(dp);
+					if (dst < 0.0625) { //2.5A
+						auto id2 = Particles::particles_Name[j * PAR_MAX_NAME_LEN];
+						float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
+						if (dst < bst) {
+							cn.push(Int2(i, tr->offset + j));
+							tr->cnt_b++;
+						}
 					}
 				}
 			}
@@ -193,18 +198,33 @@ void Gromacs::Read(const string& file) {
 
 
 bool Gromacs::ReadTrj(const string& path) {
-	auto file = xdrfile_open(path.c_str(), "rb");
-	if (!file) return false;
 
 	int natoms = 0;
 	
-	if (!!read_trr_natoms_2(file, &natoms)) {
-	xdrfile_close(file);
-	return false;
+	auto file = xdrfile_open(path.c_str(), "rb");
+	if (!file) return false;
+	
+	//extern int read_trr(XDRFILE *xd,int natoms,int *step,float *t,float *lambda,
+	//	matrix box,rvec *x,rvec *v,rvec *f);
+	int step;
+	float t, lambda;
+	auto& anm = Particles::anim;
+	anm.reading = true;
+	Vec3* poss;
+
+	auto frm = rawvector<Vec3*, uint>(anm.poss, anm.frameCount);
+
+	for (bool ok;;) {
+		poss = new Vec3[Particles::particleSz];
+		ok = read_trr(file, &natoms, &step, &t, &lambda, 0, (float*)poss, 0, 0);
+		if (!!ok) {
+			delete[](poss);
+			break;
+		}
+		if (!Particles::particles_Pos) Particles::particles_Pos = poss;
+		frm.push(poss);
 	}
-
-	std::cout << "trr file: num=" << natoms << std::endl;
-
 	xdrfile_close(file);
-	return true;
+	anm.reading = false;
+	return !!Particles::anim.frameCount;
 }

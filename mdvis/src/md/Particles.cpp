@@ -11,6 +11,8 @@ byte* Particles::particles_Col;
 Int2* Particles::particles_Conn;
 float* Particles::particles_Rad;
 
+AnimData Particles::anim;
+
 Vec3 Particles::boundingBox;
 
 Vec3 Particles::colorPallete[] = {};
@@ -85,5 +87,20 @@ void Particles::GenTexBufs() {
 void Particles::UpdateRadBuf() {
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::radBuffer);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, Particles::particleSz * sizeof(float), particles_Rad);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Particles::IncFrame(bool loop) {
+	anim.activeFrame++;
+	if (anim.activeFrame == anim.frameCount) {
+		if (loop) anim.activeFrame = 0;
+		else {
+			anim.activeFrame--;
+			return;
+		}
+	}
+	particles_Pos = anim.poss[anim.activeFrame];
+	glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(Vec3), particles_Pos);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

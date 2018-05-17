@@ -31,6 +31,8 @@ void rendFunc() {
 }
 
 void updateFunc() {
+	Particles::IncFrame(true);
+	Scene::dirty = true;
 	ParGraphics::Update();
 
 	PyWeb::Update();
@@ -89,7 +91,7 @@ int main(int argc, char **argv)
 	*/
 	VisSystem::Init();
 
-	Gromacs::Read(IO::path + "/pbc.gro");
+	Gromacs::Read(IO::path + "/pbc.gro", true);
 	bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");
 	ParGraphics::UpdateDrawLists();
 

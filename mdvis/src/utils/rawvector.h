@@ -12,11 +12,13 @@ public:
 
 	//rawvector() : _pointer(dummyVal), size(dummySz) {}
 
-	rawvector(T*& pointer, S& size) : _pointer(&pointer), size(&size) {
-		size = 0;
-		*_pointer = (T*)malloc(sizeof(T));
-		//T val = T();
-		//memcpy(*_pointer, &val, sizeof(T));
+	rawvector(T*& pointer, S& size, bool alloc = true) : _pointer(&pointer), size(&size) {
+		if (alloc) {
+			size = 0;
+			*_pointer = (T*)malloc(sizeof(T));
+			//T val = T();
+			//memcpy(*_pointer, &val, sizeof(T));
+		}
 	}
 
 	rawvector<T, S>& operator= (const rawvector<T, S>& rhs) {

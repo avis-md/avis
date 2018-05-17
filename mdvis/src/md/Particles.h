@@ -29,6 +29,17 @@ struct ResidueList { //residues with the same name
 	VIS_DRAW_MODE drawMode;
 };
 
+struct AnimData {
+	AnimData () : reading(false), frameCount(0), activeFrame(0) {}
+
+	bool reading;
+	uint frameCount, activeFrame;
+	Vec3** poss;
+
+private:
+	AnimData(const AnimData&);
+};
+
 class Particles {
 public:
 	static ResidueList* residueLists;
@@ -41,6 +52,9 @@ public:
 	static byte* particles_Col;
 	static Int2* particles_Conn;
 	static float* particles_Rad;
+
+	static AnimData anim;
+	static void IncFrame(bool loop);
 
 	static Vec3 boundingBox;
 
