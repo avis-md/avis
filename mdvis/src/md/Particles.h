@@ -32,9 +32,11 @@ struct ResidueList { //residues with the same name
 struct AnimData {
 	AnimData () : reading(false), frameCount(0), activeFrame(0) {}
 
-	bool reading;
+	bool reading, dynamicBonds;
 	uint frameCount, activeFrame;
 	Vec3** poss;
+	uint* connCounts;
+	Int2** conns;
 
 private:
 	AnimData(const AnimData&);
@@ -52,6 +54,7 @@ public:
 	static byte* particles_Col;
 	static Int2* particles_Conn;
 	static float* particles_Rad;
+	static Int2* particles_Res;
 
 	static AnimData anim;
 	static void IncFrame(bool loop);

@@ -54,6 +54,7 @@ void Gromacs::Read(const string& file, bool hasAnim) {
 	}
 	Particles::particles_Col = new byte[Particles::particleSz];
 	Particles::particles_Rad = new float[Particles::particleSz];
+	Particles::particles_Res = new Int2[Particles::particleSz];
 
 	auto rs = rawvector<ResidueList, uint>(Particles::residueLists, Particles::residueListSz);
 	auto cn = rawvector<Int2, uint>(Particles::particles_Conn, Particles::connSz);
@@ -63,6 +64,7 @@ void Gromacs::Read(const string& file, bool hasAnim) {
 	Residue* tr = 0;
 	auto rsv = rawvector<Residue, uint>(Particles::residueLists->residues, Particles::residueLists->residueSz);
 	Vec3 vec;
+
 	for (uint i = 0; i < Particles::particleSz; i++) {
 		strm.getline(buf, 100);
 		//prt.residueNumber = std::stoul(string(buf, 5));
@@ -123,9 +125,11 @@ void Gromacs::Read(const string& file, bool hasAnim) {
 		float rad = VisSystem::radii[id1][1];
 		
 		Particles::particles_Rad[i] = rad;
+		Particles::particles_Res[i] = Int2(Particles::residueListSz-1, trs->residueSz-1);
 
 		tr->cnt++;
 	}
+
 	string bx;
 	std::getline(strm, bx);
 	auto spl = string_split(bx, ' ', true);
@@ -175,7 +179,7 @@ void Gromacs::Read(const string& file, bool hasAnim) {
 	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(Vec3), Particles::particles_Pos, GL_DYNAMIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::connBuffer);
-	glBufferData(GL_ARRAY_BUFFER, Particles::connSz * 2 * sizeof(uint), Particles::particles_Conn, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, Particles::connSz * 2 * sizeof(uint), Particles::particles_Conn, GL_DYNAMIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::colIdBuffer);
 	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(byte), Particles::particles_Col, GL_STATIC_DRAW);
@@ -204,8 +208,11 @@ bool Gromacs::ReadTrj(const string& path) {
 	auto file = xdrfile_open(path.c_str(), "rb");
 	if (!file) return false;
 	
-	//extern int read_trr(XDRFILE *xd,int natoms,int *step,float *t,float *lambda,
-	//	matrix box,rvec *x,rvec *v,rvec *f);
+	if (Particles::particles_Pos) {
+		delete[](Particles::particles_Pos);
+		Particles::particles_Pos = 0;
+	}
+
 	int step;
 	float t, lambda;
 	auto& anm = Particles::anim;
@@ -221,7 +228,37 @@ bool Gromacs::ReadTrj(const string& path) {
 			delete[](poss);
 			break;
 		}
-		if (!Particles::particles_Pos) Particles::particles_Pos = poss;
+		if (!Particles::particles_Pos) {
+			Particles::particles_Pos = poss;
+			/*
+			auto cn = rawvector<Int2, uint>(Particles::particles_Conn, Particles::connSz, false);
+			Int2 lr = Particles::particles_Res[0];
+			for (uint i = 0; i < Particles::particleSz; i++) {
+				auto id1 = Particles::particles_Name[i * PAR_MAX_NAME_LEN];
+				auto& loc = Particles::particles_Res[i];
+				auto& tr = Particles::residueLists[loc[0]].residues[loc[1]];
+				if (loc != lr) {
+					lr = loc;
+					tr.offset_b = Particles::connSz;
+				}
+				for (uint j = 0; j < tr.cnt; j++) {
+					Vec3 dp = poss[tr.offset + j] - poss[i];
+					auto dst = glm::length2(dp);
+					if (dst < 0.0625) { //2.5A
+						auto id2 = Particles::particles_Name[j * PAR_MAX_NAME_LEN];
+						float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
+						if (dst < bst) {
+							cn.push(Int2(i, tr.offset + j));
+							tr.cnt_b++;
+						}
+					}
+				}
+			}
+			glBindBuffer(GL_ARRAY_BUFFER, Particles::connBuffer);
+			glBufferSubData(GL_ARRAY_BUFFER, Particles::connSz * 2 * sizeof(uint), 0, Particles::particles_Conn);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			*/
+		}
 		frm.push(poss);
 	}
 	xdrfile_close(file);

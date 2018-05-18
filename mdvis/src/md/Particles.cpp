@@ -10,6 +10,7 @@ Vec3* Particles::particles_Pos, *Particles::particles_Vel;
 byte* Particles::particles_Col;
 Int2* Particles::particles_Conn;
 float* Particles::particles_Rad;
+Int2* Particles::particles_Res;
 
 AnimData Particles::anim;
 

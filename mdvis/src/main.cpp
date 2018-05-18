@@ -91,7 +91,7 @@ int main(int argc, char **argv)
 	*/
 	VisSystem::Init();
 
-	Gromacs::Read(IO::path + "/pbc.gro", true);
+	Gromacs::Read(IO::path + "/pbc.gro", false);
 	bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");
 	ParGraphics::UpdateDrawLists();
 
