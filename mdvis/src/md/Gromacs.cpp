@@ -122,6 +122,13 @@ void Gromacs::Read(const string& file, bool hasAnim) {
 			}
 		}
 
+		for (byte b = 0; b < Particles::defColPalleteSz; b++) {
+			if (id1 == Particles::defColPallete[b]) {
+				Particles::particles_Col[i] = b;
+				break;
+			}
+		}
+
 		float rad = VisSystem::radii[id1][1];
 		
 		Particles::particles_Rad[i] = rad;
@@ -137,43 +144,6 @@ void Gromacs::Read(const string& file, bool hasAnim) {
 	Particles::boundingBox.y = std::stof(spl[1]);
 	Particles::boundingBox.z = std::stof(spl[2]);
 
-
-	/*
-	for (uint i = 0; i < Particles::particleSz - 1; i++) {
-		auto pos = Particles::particles_Pos[i];
-		auto id = (ushort)Particles::particles_Name[i * PAR_MAX_NAME_LEN];
-
-		for (uint j = i + 1; j < Particles::particleSz; j++) {
-			if (j != i) {
-				auto ds = frm.particles[j].position - pos;
-				auto dst = ds.x * ds.x + ds.y * ds.y + ds.z * ds.z;
-				auto& n2 = frm.connSzs[j];
-				if (dst < 0.0625) { //250pm
-					auto id2 = frm.particles[j].atomId;
-					float bst = _bondLengths[id + (id2 << 16)];
-					if (dst < bst) {
-						if (n < 4) frm.conns[i][n++] = j;
-						if (n2 < 4) frm.conns[j][n2++] = i;
-					}
-				}
-			}
-		}
-	}
-	*/
-
-	/*
-	Particles::connSz = 5000000;
-	Particles::particles_Conn = new Int2[5000000];
-
-
-	for (uint i = 0; i < 10000000; i++) {
-		Particles::particles_Pos[i] = Vec3((i % 100), ((i % 10000) / 100), (i / 10000)) * 0.1f;
-		((int*)Particles::particles_Conn)[i] = i;
-		Particles::particles_Col[i] = i % 3;
-		memcpy(Particles::particles_Name + i * PAR_MAX_NAME_LEN, "OW", 3);// +std::to_string(i % 3);
-		memcpy(Particles::particles_ResName + i * PAR_MAX_NAME_LEN, "WATER", 6);
-	}
-	*/
 
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::posBuffer);
 	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(Vec3), Particles::particles_Pos, GL_DYNAMIC_DRAW);
@@ -198,6 +168,7 @@ void Gromacs::Read(const string& file, bool hasAnim) {
 
 	Particles::UpdateRadBuf();
 	Particles::GenTexBufs();
+	//Particles::UpdateColorTex();
 }
 
 

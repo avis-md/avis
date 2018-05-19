@@ -23,6 +23,8 @@ Vec3 ParGraphics::scrX, ParGraphics::scrY;
 
 bool ParGraphics::dragging = false;
 
+bool ParGraphics::animate = false, ParGraphics::seek = false;
+
 GLuint ParGraphics::emptyVao;
 
 void ParGraphics::Init() {
@@ -108,6 +110,10 @@ void ParGraphics::UpdateDrawLists() {
 }
 
 void ParGraphics::Update() {
+	if (animate && !seek) {
+		Particles::IncFrame(true);
+		Scene::dirty = true;
+	}
 	if (!UI::editingText) {
 		float s0 = rotScale;
 		float rz0 = rotZ;

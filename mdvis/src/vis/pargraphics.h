@@ -28,6 +28,8 @@ public:
 	static bool dragging;
 	static Vec3 scrX, scrY;
 
+	static bool animate, seek;
+
 	static GLuint emptyVao;
 
 	static void Init(), UpdateDrawLists();

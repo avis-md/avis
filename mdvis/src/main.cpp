@@ -31,8 +31,6 @@ void rendFunc() {
 }
 
 void updateFunc() {
-	Particles::IncFrame(true);
-	Scene::dirty = true;
 	ParGraphics::Update();
 
 	PyWeb::Update();
@@ -71,6 +69,7 @@ int main(int argc, char **argv)
 	VisSystem::font = font;
 
 	Icons::Init();
+	VisSystem::Init();
 	Particles::Init();
 	ParGraphics::Init();
 	
@@ -89,12 +88,11 @@ int main(int argc, char **argv)
 		ChokoLait::Paint(nullptr, paintfunc2);
 	}
 	*/
-	VisSystem::Init();
 
 	Gromacs::Read(IO::path + "/pbc.gro", false);
 	bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");
 	ParGraphics::UpdateDrawLists();
-
+	
 	glEnable(GL_PROGRAM_POINT_SIZE);
 
 	Display::Resize(800, 600, false);

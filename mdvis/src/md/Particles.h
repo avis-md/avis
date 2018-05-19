@@ -58,6 +58,7 @@ public:
 
 	static AnimData anim;
 	static void IncFrame(bool loop);
+	static void SetFrame(uint frm);
 
 	static Vec3 boundingBox;
 

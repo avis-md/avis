@@ -29,9 +29,6 @@ GLuint Particles::radBuffer;
 GLuint Particles::posTexBuffer, Particles::connTexBuffer, Particles::colorIdTexBuffer, Particles::radTexBuffer;
 
 void Particles::Init() {
-	colorPallete[0].r = colorPallete[1].g = colorPallete[2].b = 1;
-	colorPallete[0].g = colorPallete[0].b = colorPallete[1].r = colorPallete[1].b = colorPallete[2].r = colorPallete[2].g = 0;
-
 	glGenTextures(1, &colorPalleteTex);
 	glBindTexture(GL_TEXTURE_2D, colorPalleteTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 16, 16, 0, GL_RGB, GL_FLOAT, colorPallete);
@@ -92,16 +89,21 @@ void Particles::UpdateRadBuf() {
 }
 
 void Particles::IncFrame(bool loop) {
-	anim.activeFrame++;
-	if (anim.activeFrame == anim.frameCount) {
-		if (loop) anim.activeFrame = 0;
-		else {
-			anim.activeFrame--;
-			return;
-		}
+	if (anim.activeFrame == anim.frameCount - 1) {
+		if (loop) SetFrame(0);
+		else return;
 	}
-	particles_Pos = anim.poss[anim.activeFrame];
-	glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(Vec3), particles_Pos);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	else SetFrame(anim.activeFrame + 1);
+}
+
+void Particles::SetFrame(uint frm) {
+	if (frm == anim.activeFrame) return;
+	else {
+		anim.activeFrame = frm;
+		particles_Pos = anim.poss[anim.activeFrame];
+		glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(Vec3), particles_Pos);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		Scene::active->dirty = true;
+	}
 }

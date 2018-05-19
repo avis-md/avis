@@ -1,4 +1,5 @@
 #include "system.h"
+#include "vis/pargraphics.h"
 #include "py/PyWeb.h"
 #include "ui/icons.h"
 
@@ -55,11 +56,13 @@ void VisSystem::Init() {
 			std::getline(strm, s);
 			auto p = string_split(s, ' ', true);
 			if (p.size() != 4) continue;
-			auto i = *(ushort*)&p[0];
+			auto i = *(ushort*)&(p[0][0]);
 			col.x = std::stof(p[1]);
 			col.y = std::stof(p[2]);
 			col.z = std::stof(p[3]);
 			_type2Col.emplace(i, col);
+			Particles::colorPallete[Particles::defColPalleteSz] = col;
+			Particles::defColPallete[Particles::defColPalleteSz++] = i;
 		}
 		strm.close();
 	}
@@ -74,9 +77,28 @@ void VisSystem::DrawBar() {
 	Engine::DrawQuad(0, Display::height - 18.0f, (float)Display::width, 18, white(0.9f, 0.1f));
 	UI::Label(2, Display::height - 16.0f, 12, "Render: " + std::to_string(renderMs) + "ms  UI: " + std::to_string(uiMs) + "ms", font, white(0.5f));
 
+	if (Engine::Button(150, Display::height - 17.0f, 16, 16, Icons::right, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+		ParGraphics::animate = !ParGraphics::animate;
+	}
+
+	float al = float(Particles::anim.activeFrame) / (Particles::anim.frameCount-1);
+	al = Engine::DrawSliderFill(170, Display::height - 13.0f, Display::width - 340.0f, 9, 0, 1, al, white(0.5f), red(0.5f));
+	//Engine::DrawQuad(170, Display::height - 13.0f, Display::width - 340.0f, 9, white(0.5f));
+	//Engine::DrawQuad(170, Display::height - 13.0f, (Display::width - 340.0f) * al, 9, red(0.5f));
+	
+	if ((Engine::Button(170, Display::height - 13.0f, Display::width - 340.0f, 9) & 0x0f) == MOUSE_DOWN)
+		ParGraphics::seek = true;
+	else ParGraphics::seek = ParGraphics::seek && Input::mouse0;
+
+	if (ParGraphics::seek) {
+		Particles::SetFrame((uint)roundf(al * (Particles::anim.frameCount - 1)));
+	}
+
+	UI::Label(Display::width - 165.0f, Display::height - 16.0f, 12, std::to_string(Particles::anim.activeFrame + 1) + "/" + std::to_string(Particles::anim.frameCount), font, white());
+
 	byte sel = (byte)mouseMode;
 	for (byte b = 0; b < 3; b++) {
-		if (Engine::Button(170 + 17 * b, Display::height - 17.0f, 16, 16, (&Icons::toolRot)[b], (sel == b) ? Vec4(1, 0.7f, 0.4f, 1) : white(0.7f), white(), white(0.5f)) == MOUSE_RELEASE) {
+		if (Engine::Button(Display::width - 60 + 17 * b, Display::height - 17.0f, 16, 16, (&Icons::toolRot)[b], (sel == b) ? Vec4(1, 0.7f, 0.4f, 1) : white(0.7f), white(), white(0.5f)) == MOUSE_RELEASE) {
 			mouseMode = (VIS_MOUSE_MODE)b;
 		}
 	}
