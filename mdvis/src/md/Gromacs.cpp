@@ -1,5 +1,6 @@
 #include "Gromacs.h"
 #include "vis/system.h"
+#include "md/Protein.h"
 #include "utils/rawvector.h"
 #include "xdrfile/xdrfile.h"
 #include "xdrfile/xdrfile_trr.h"
@@ -65,6 +66,8 @@ void Gromacs::Read(const string& file, bool hasAnim) {
 	auto rsv = rawvector<Residue, uint>(Particles::residueLists->residues, Particles::residueLists->residueSz);
 	Vec3 vec;
 
+	uint lastOff = 0, lastCnt = 0;
+
 	for (uint i = 0; i < Particles::particleSz; i++) {
 		strm.getline(buf, 100);
 		//prt.residueNumber = std::stoul(string(buf, 5));
@@ -95,28 +98,37 @@ void Gromacs::Read(const string& file, bool hasAnim) {
 
 		auto id1 = Particles::particles_Name[i * PAR_MAX_NAME_LEN];
 		if (currResId != resId) {
+			if (!!i) {
+				if (tr->type != 255) {
+					lastOff = tr->offset;
+					lastCnt = tr->cnt;
+				}
+				else {
+					lastOff = i;
+					lastCnt = 0;
+				}
+			}
 			rsv.push(Residue());
 			tr = &trs->residues[trs->residueSz-1];
 			tr->offset = i;
 			tr->offset_b = Particles::connSz;
 			uint n02 = _find_char_not_of(buf, buf + 5, ' ');
 			tr->name = string(buf + n02, 5 - n02);
+			tr->type = AminoAcidType(buf + 5);
 			tr->cnt = 0;
 			tr->cnt_b = 0;
 			currResId = resId;
 		}
-		else {
-			if (!hasAnim) {
-				for (uint j = 0; j < tr->cnt; j++) {
-					Vec3 dp = Particles::particles_Pos[tr->offset + j] - vec;
-					auto dst = glm::length2(dp);
-					if (dst < 0.0625) { //2.5A
-						auto id2 = Particles::particles_Name[j * PAR_MAX_NAME_LEN];
-						float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
-						if (dst < bst) {
-							cn.push(Int2(i, tr->offset + j));
-							tr->cnt_b++;
-						}
+		if (!hasAnim) {
+			for (uint j = 0; j < lastCnt + tr->cnt; j++) {
+				Vec3 dp = Particles::particles_Pos[lastOff + j] - vec;
+				auto dst = glm::length2(dp);
+				if (dst < 0.0625) { //2.5A
+					auto id2 = Particles::particles_Name[(lastOff + j) * PAR_MAX_NAME_LEN];
+					float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
+					if (dst < bst) {
+						cn.push(Int2(i, lastOff + j));
+						tr->cnt_b++;
 					}
 				}
 			}

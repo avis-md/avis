@@ -12,6 +12,7 @@ struct Residue {
 	string name;
 	uint offset, offset_b;
 	ushort cnt, cnt_b;
+	byte type;
 };
 
 struct ResidueList { //residues with the same name
@@ -48,7 +49,7 @@ public:
 	static uint residueListSz;
 	static uint particleSz;
 	static uint connSz;
-	
+
 	static char* particles_Name, *particles_ResName; //10 chars per name
 	static Vec3* particles_Pos, *particles_Vel;
 	static byte* particles_Col;

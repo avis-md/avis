@@ -44,7 +44,3 @@ private:
 	T** _pointer;
 	S* size;
 };
-
-void rawvector_free(void* v) {
-	free(v);
-}
