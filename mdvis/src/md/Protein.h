@@ -28,16 +28,19 @@ byte AminoAcidType(const char* nm);
 
 class Protein {
 public:
-    const char* signature = "\x1N\x2H\x0C\x2H\x0C\x1O\x0\x0";
-
     Protein() : cnt(0) {}
 
     uint cnt;
     Int2 first;
     uint* chain;
+    pMesh mesh;
 
     static byte proCnt;
     static Protein* pros;
 
-    void Refresh();
+    static void Init();
+    static void Refresh();
+
+    static Shader* shad;
+    static pMaterial mat;
 };

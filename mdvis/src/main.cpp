@@ -7,6 +7,7 @@
 #include "ui/icons.h"
 #include "py/PyWeb.h"
 #include "md/ParMenu.h"
+#include "md/Protein.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
 #include "utils/spline.h"
@@ -91,6 +92,7 @@ int main(int argc, char **argv)
 
 	Gromacs::Read(IO::path + "/pbc.gro", false);
 	bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");
+	Protein::Refresh();
 	ParGraphics::UpdateDrawLists();
 	
 	glEnable(GL_PROGRAM_POINT_SIZE);
