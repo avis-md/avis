@@ -28,19 +28,22 @@ byte AminoAcidType(const char* nm);
 
 class Protein {
 public:
-    Protein() : cnt(0) {}
+    Protein() : cnt(0), chainReso(5), loopReso(12) {}
 
     uint cnt;
     Int2 first;
     uint* chain;
     pMesh mesh;
-
+    GLuint idBuf, idBufTex;
+    byte chainReso, loopReso;
+    
     static byte proCnt;
     static Protein* pros;
 
     static void Init();
     static void Refresh();
+    static void Draw();
 
     static Shader* shad;
-    static pMaterial mat;
+    static GLint shadLocs[7];
 };

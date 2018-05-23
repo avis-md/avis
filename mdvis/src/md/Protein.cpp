@@ -1,10 +1,16 @@
 #include "Protein.h"
 #include "utils/rawvector.h"
+#include "utils/spline.h"
+#include "utils/solidify.h"
+#include "vis/pargraphics.h"
 
 //const byte signature[] = { 2, 'H', 0, 'C', 2, 'H', 0, 'C', 1, 'O', 0 };
 
 byte Protein::proCnt = 0;
 Protein* Protein::pros;
+
+Shader* Protein::shad;
+GLint Protein::shadLocs[];
 
 byte AminoAcidType (const char* nm) {
 	uint32_t i = *(uint32_t*)nm;
@@ -17,40 +23,13 @@ byte AminoAcidType (const char* nm) {
 }
 
 /*
-N-HA
+N
 |
-CA-HB
+C-H
 |
-CB=O
-
-//pattern = id, number[pattern]
-
-//chain: HAHBOCBCAN
+C=O
 */
-/*
-bool DoSearch (const std::vector<uint>& cs, byte** pattern, uint*& ids, const std::vector<std::vector<uint>>& conns) {
-    auto s = cs.size();
-    uint* ido = ids;
-    for (byte b = 0, bc = *((*pattern)++); b < bc; b++) {
-		char n2 = *((*pattern)++);
-        bool ok = false;
-		for (uint j = 0; j < s; j++) {
-			if (Particles::particles_Name[cs[j] * PAR_MAX_NAME_LEN] == n2) {
-				if (DoSearch(conns[j], pattern, ids, conns)) {
-                    *(ids++) = j;
-                    j = s;
-                    ok = true;
-                }
-            }
-		}
-		if (!ok) {
-            ids = ido;
-            return false;
-	    }
-    }
-    return true;
-}
-*/
+
 bool _Has(const std::vector<uint>& c, char _c) {
     for (auto& a : c) {
         if (Particles::particles_Name[a * PAR_MAX_NAME_LEN] == _c)
@@ -62,6 +41,24 @@ bool _Has(const std::vector<uint>& c, char _c) {
 #define _FOR(conn, c, i) for (auto& i : conn) { \
     if (Particles::particles_Name[i * PAR_MAX_NAME_LEN] == c)
 
+byte _CntOf(const std::vector<uint>& c, char _c) {
+    byte i = 0;
+    _FOR(c, _c, a) {
+        i++;
+    }}
+    return i;
+}
+
+void Protein::Init() {
+	shad = new Shader(IO::GetText(IO::path + "/prochainV.txt"), IO::GetText(IO::path + "/prochainF.txt"));
+    shadLocs[0] = glGetUniformLocation(shad->pointer, "_MV");
+    shadLocs[1] = glGetUniformLocation(shad->pointer, "_P");
+    shadLocs[2] = glGetUniformLocation(shad->pointer, "poss");
+    shadLocs[3] = glGetUniformLocation(shad->pointer, "ids");
+    shadLocs[4] = glGetUniformLocation(shad->pointer, "chainSz");
+    shadLocs[5] = glGetUniformLocation(shad->pointer, "chainReso");
+    shadLocs[6] = glGetUniformLocation(shad->pointer, "loopReso");
+}
 
 void Protein::Refresh() {
     if (pros) std::free(pros);
@@ -103,13 +100,17 @@ void Protein::Refresh() {
                     if (Particles::particles_Name[(a + rs.offset) * PAR_MAX_NAME_LEN] == 'N') {
                         //if (_Has(conns[a], 'H')) {
                             _FOR(conns[a], 'C', b) {
-                                if (_Has(conns[b - rs.offset], 'H')) {
-                                    _FOR(conns[b - rs.offset], 'C', c) {
-                                        if (_Has(conns[c - rs.offset], 'O')) {
-                                            ch[0] = a + rs.offset;
-                                            ch[1] = b;
-                                            ch[2] = c;
-                                            goto found;
+                                auto& cb = conns[b - rs.offset];
+                                if (_Has(cb, 'H')) {
+                                    _FOR(cb, 'C', c) {
+                                        auto& cc = conns[c - rs.offset];
+                                        if (_Has(cc, 'O')) {
+                                            if (_CntOf(cc, 'C') == 1) {
+                                                ch[0] = a + rs.offset;
+                                                ch[1] = b;
+                                                ch[2] = c;
+                                                goto found;
+                                            }
                                         }
                                     }}
                                 }
@@ -121,8 +122,64 @@ void Protein::Refresh() {
                 found:;
             }
             else {
-                if (p) p = 0;
+                if (p) {
+                    /*
+                    std::vector<Vec3> pts(p->cnt * 3);
+                    for (uint i = 0; i < p->cnt * 3; i++)
+                        pts[i] = Particles::particles_Pos[p->chain[i]];
+                    std::vector<Vec3> res((p->cnt * 3 - 1) * 12 + 1);
+                    Spline::ToSpline(&pts[0], p->cnt * 3, 12, &res[0]);
+                    p->mesh = Solidify::Do(&res[0], (p->cnt * 3 - 1) * 12 + 1, 0.02f, 12);
+
+                    auto obj = SceneObject::New("Protein");
+                    Scene::active->AddObject(obj);
+                    obj->AddComponent<MeshFilter>()->mesh(p->mesh);
+                    obj->AddComponent<MeshRenderer>()->materials[0](mat);
+                    */
+                    
+                    glGenBuffers(1, &p->idBuf);
+                    glBindBuffer(GL_ARRAY_BUFFER, p->idBuf);
+                    glBufferData(GL_ARRAY_BUFFER, 3 * p->cnt * sizeof(uint), p->chain, GL_STATIC_DRAW);
+                    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+                    glGenTextures(1, &p->idBufTex);
+                    glBindTexture(GL_TEXTURE_BUFFER, p->idBufTex);
+                    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32UI, p->idBuf);
+                    glBindTexture(GL_TEXTURE_BUFFER, 0);
+
+                    p = 0;
+                }
             }
         }
+    }
+}
+
+void Protein::Draw() {
+    for (byte b = 0; b < proCnt; b++) {
+        auto& p = pros[b];
+
+        auto _mv = MVP::modelview();
+        auto _p = MVP::projection();
+        
+        glUseProgram(shad->pointer);
+        glUniformMatrix4fv(shadLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+        glUniformMatrix4fv(shadLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+        glUniform1i(shadLocs[2], 1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+        glUniform1i(shadLocs[3], 2);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_BUFFER, p.idBufTex);
+        glUniform1i(shadLocs[4], p.cnt * 3);
+        glUniform1i(shadLocs[5], p.chainReso);
+        glUniform1i(shadLocs[6], p.loopReso);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glBindVertexArray(ParGraphics::emptyVao);
+        glDrawArrays(GL_TRIANGLES, 0, 6 * (p.cnt * 3 - 1) * p.chainReso * p.loopReso);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        //*/
+        glBindVertexArray(0);
+        glUseProgram(0);
     }
 }

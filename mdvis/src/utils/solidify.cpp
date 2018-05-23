@@ -22,9 +22,10 @@ pMesh Solidify::Do(Vec3* path, uint cnt, float rad, uint dim, Vec3* str) {
 		lops[i] = glm::cross(dirs[i], bilops[i]);
 	}
 
-	float* cs = new float[dim] {};
-	float* ss = new float[dim] {};
+	float* cs = new float[dim];
+	float* ss = new float[dim];
 	cs[0] = 1;
+	ss[0] = 0;
 	for (uint i = 1; i < dim; i++) {
 		cs[i] = cosf(2 * PI * i / dim);
 		ss[i] = sinf(2 * PI * i / dim);

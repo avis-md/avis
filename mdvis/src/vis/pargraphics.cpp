@@ -1,5 +1,6 @@
 #include "pargraphics.h"
 #include "md/ParMenu.h"
+#include "md/Protein.h"
 #include "vis/system.h"
 #include "ui/icons.h"
 
@@ -231,6 +232,8 @@ void ParGraphics::Rerender() {
 	//*/
 	glBindVertexArray(0);
 	glUseProgram(0);
+
+	Protein::Draw();
 }
 
 void ParGraphics::Recolor() {

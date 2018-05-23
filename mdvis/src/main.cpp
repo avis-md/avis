@@ -10,8 +10,6 @@
 #include "md/Protein.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
-#include "utils/spline.h"
-#include "utils/solidify.h"
 
 float camz = 10;
 Vec3 center;
@@ -73,6 +71,7 @@ int main(int argc, char **argv)
 	VisSystem::Init();
 	Particles::Init();
 	ParGraphics::Init();
+	Protein::Init();
 	
 	PyReader::Init();
 	PyNode::Init();
@@ -82,13 +81,6 @@ int main(int argc, char **argv)
 	
 	PyWeb::Init();
 	ParMenu::font = font;
-
-	/*
-	while (ChokoLait::alive()) {
-		ChokoLait::Update();
-		ChokoLait::Paint(nullptr, paintfunc2);
-	}
-	*/
 
 	Gromacs::Read(IO::path + "/pbc.gro", false);
 	bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");
@@ -103,29 +95,12 @@ int main(int argc, char **argv)
 	bool dirty = false;
 	
 	ChokoLait::mainCamera->object->transform.localPosition(Vec3(0, 0, -1));
-	
-	Vec3 pts[5]{ Vec3(0, 0, 0.2f), Vec3(0, 0.2f, 0), Vec3(0.1f, 0.3f, 1), Vec3(0.4f, 0.05f, 1), Vec3(0.8f, 0.6f, 0.5f) };
-	Vec3 res[4 * 12 + 1];
-	Spline::ToSpline(pts, 5, 12, res);
-	splineMesh = Solidify::Do(res, 4 * 12 + 1, 0.01f, 12);
-
-	Shader* proShad = new Shader(IO::GetText(IO::path + "/proV.txt"), IO::GetText(IO::path + "/proF.txt"));
-	pMaterial proMat = std::make_shared<Material>(proShad);
-
-	auto obj = SceneObject::New("123");
-	Scene::active->AddObject(obj);
-	obj->AddComponent<MeshFilter>()->mesh(splineMesh);
-	obj->AddComponent<MeshRenderer>()->materials[0](proMat);
 
 	glfwShowWindow(Display::window);
 
 	while (ChokoLait::alive()) {
 		ChokoLait::Update(updateFunc);
-		//ChokoLait::mainCamera->object->transform.localPosition(Vec3(0, 0, -camz));
-		//ChokoLait::mainCamera->object->transform.localPosition(-ParGraphics::rotCenter);
-
 		dirty = Scene::dirty;
-		//ChokoLait::Paint(nullptr, paintfunc2);
 		ChokoLait::Paint(rendFunc, paintfunc);
 		auto m = Time::millis;
 		VisSystem::uiMs = (uint)(m - lastMillis);
