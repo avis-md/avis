@@ -1,4 +1,5 @@
 #include "ParMenu.h"
+#include "md/Protein.h"
 #include "vis/pargraphics.h"
 #include "ui/icons.h"
 
@@ -16,7 +17,9 @@ void ParMenu::Draw() {
 		case 0:
 			Draw_List();
 			break;
-
+		case 2:
+			Protein::DrawMenu();
+			break;
 		case 3:
 			Draw_Vis();
 			break;

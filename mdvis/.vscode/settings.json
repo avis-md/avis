@@ -39,6 +39,7 @@
         "tuple": "cpp",
         "__functional_03": "cpp",
         "__locale": "cpp",
-        "locale": "cpp"
+        "locale": "cpp",
+        "sstream": "cpp"
     }
 }

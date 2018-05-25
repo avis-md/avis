@@ -32,7 +32,7 @@ public:
 
     uint cnt;
     Int2 first;
-    uint* chain;
+    uint* chain; //N[]C[]C[], where [] is any non-chain bond
     pMesh mesh;
     GLuint idBuf, idBufTex;
     byte chainReso, loopReso;
@@ -42,7 +42,7 @@ public:
 
     static void Init();
     static void Refresh();
-    static void Draw();
+    static void Draw(), DrawMenu();
 
     static Shader* shad;
     static GLint shadLocs[7];

@@ -1,8 +1,10 @@
 #include "Protein.h"
+#include "md/ParMenu.h"
 #include "utils/rawvector.h"
 #include "utils/spline.h"
 #include "utils/solidify.h"
 #include "vis/pargraphics.h"
+#include "utils/solidify.h"
 
 //const byte signature[] = { 2, 'H', 0, 'C', 2, 'H', 0, 'C', 1, 'O', 0 };
 
@@ -30,12 +32,14 @@ C-H
 C=O
 */
 
-bool _Has(const std::vector<uint>& c, char _c) {
+uint _Has(const std::vector<uint>& c, char _c) {
+    uint i = 0;
     for (auto& a : c) {
         if (Particles::particles_Name[a * PAR_MAX_NAME_LEN] == _c)
-            return true;
+            return i;
+        i++;
     }
-    return false;
+    return ~0U;
 }
 
 #define _FOR(conn, c, i) for (auto& i : conn) { \
@@ -74,14 +78,14 @@ void Protein::Refresh() {
                     proVec.push(Protein());
                     p = pros + (proCnt-1);
                     p->first = Int2(i, j);
-                    p->chain = (uint*)std::malloc(sizeof(uint) * 3);
+                    p->chain = (uint*)std::malloc(sizeof(uint) * 6);
                     ch = p->chain;
                     p->cnt = 1;
                 }
                 else {
                     p->cnt++;
-                    p->chain = (uint*)std::realloc(p->chain, sizeof(uint) * 3 * p->cnt);
-                    ch = p->chain + (3 * (p->cnt-1));
+                    p->chain = (uint*)std::realloc(p->chain, sizeof(uint) * 6 * p->cnt);
+                    ch = p->chain + (6 * (p->cnt-1));
                 }
 
                 auto conns = std::vector<std::vector<uint>>(rs.cnt);
@@ -101,14 +105,24 @@ void Protein::Refresh() {
                         //if (_Has(conns[a], 'H')) {
                             _FOR(conns[a], 'C', b) {
                                 auto& cb = conns[b - rs.offset];
-                                if (_Has(cb, 'H')) {
+                                uint b2 = _Has(cb, 'H');
+                                if (b2 < ~0U) {
                                     _FOR(cb, 'C', c) {
                                         auto& cc = conns[c - rs.offset];
-                                        if (_Has(cc, 'O')) {
+                                        uint c2 = _Has(cc, 'O');
+                                        if (c2 < ~0U) {
                                             if (_CntOf(cc, 'C') == 1) {
                                                 ch[0] = a + rs.offset;
-                                                ch[1] = b;
-                                                ch[2] = c;
+                                                for (auto ca : conns[a]) {
+                                                    if (ca >= rs.offset && ca != b) {
+                                                        ch[1] = ca;
+                                                        break;
+                                                    }
+                                                }
+                                                ch[2] = b;
+                                                ch[3] = b2;
+                                                ch[4] = c;
+                                                ch[5] = c2;
                                                 goto found;
                                             }
                                         }
@@ -136,10 +150,13 @@ void Protein::Refresh() {
                     obj->AddComponent<MeshFilter>()->mesh(p->mesh);
                     obj->AddComponent<MeshRenderer>()->materials[0](mat);
                     */
+
+                    //p->chainTangents = new Vec3[p->cnt * 3];
+                    //Solidify::GetTangents(p->chain, p->cnt, p->chainTangents);
                     
                     glGenBuffers(1, &p->idBuf);
                     glBindBuffer(GL_ARRAY_BUFFER, p->idBuf);
-                    glBufferData(GL_ARRAY_BUFFER, 3 * p->cnt * sizeof(uint), p->chain, GL_STATIC_DRAW);
+                    glBufferData(GL_ARRAY_BUFFER, 6 * p->cnt * sizeof(uint), p->chain, GL_STATIC_DRAW);
                     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
                     glGenTextures(1, &p->idBufTex);
@@ -174,12 +191,33 @@ void Protein::Draw() {
         glUniform1i(shadLocs[5], p.chainReso);
         glUniform1i(shadLocs[6], p.loopReso);
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glBindVertexArray(ParGraphics::emptyVao);
         glDrawArrays(GL_TRIANGLES, 0, 6 * (p.cnt * 3 - 1) * p.chainReso * p.loopReso);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         //*/
         glBindVertexArray(0);
         glUseProgram(0);
+    }
+}
+
+void Protein::DrawMenu() {
+    //
+    auto& expandPos = ParMenu::expandPos;
+	auto& font = ParMenu::font;
+	
+    auto cr = pros->chainReso;
+    auto lr = pros->loopReso;
+    
+    UI::Label(expandPos - 148, 3, 12, "Curve Resolution", font, white());
+	cr = (byte)Engine::DrawSliderFill(expandPos - 80, 2, 78, 16, 4, 20, cr, white(1, 0.5f), white());
+    UI::Label(expandPos - 147, 20, 12, "Bevel Resolution", font, white());
+	lr = (byte)Engine::DrawSliderFill(expandPos - 80, 19, 78, 16, 4, 20, lr, white(1, 0.5f), white());
+
+    if (cr != pros->chainReso || lr != pros->loopReso) {
+        Scene::dirty = true;
+
+        pros->chainReso = cr;
+        pros->loopReso = lr;
     }
 }

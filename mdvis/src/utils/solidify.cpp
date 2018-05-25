@@ -1,5 +1,23 @@
 #include "solidify.h"
 
+void Solidify::GetTangents(Vec3* path, uint cnt, Vec3* tans) {
+	Vec3* dirs = new Vec3[cnt];
+	dirs[0] = Normalize(path[1] - path[0]);
+	for (uint i = 1; i < cnt - 1; i++) {
+		dirs[i] = Normalize(path[i+1] - path[i-1]);
+	}
+	dirs[cnt-1] = Normalize(path[cnt-1] - path[cnt-2]);
+
+	tans[0] = glm::cross(Vec3(1, 0, 0), dirs[0]);
+	if (!glm::length(tans[0])) tans[0] = glm::cross(Vec3(0, 1, 0), dirs[0]);
+	tans[0] = Normalize(tans[0]);
+	for (uint i = 1; i < cnt; i++) {
+		auto tmp = Normalize(glm::cross(tans[i-1], dirs[i]));
+		tans[i] = glm::cross(dirs[i], tmp);
+	}
+	delete[](dirs);
+}
+
 pMesh Solidify::Do(Vec3* path, uint cnt, float rad, uint dim, Vec3* str) {
 	std::vector<Vec3> verts(cnt * dim), norms(cnt * dim);
 	std::vector<int> tris((cnt-1) * dim * 2 * 3);
