@@ -113,16 +113,19 @@ void Protein::Refresh() {
                                         if (c2 < ~0U) {
                                             if (_CntOf(cc, 'C') == 1) {
                                                 ch[0] = a + rs.offset;
+                                                /*
                                                 for (auto ca : conns[a]) {
                                                     if (ca >= rs.offset && ca != b) {
                                                         ch[1] = ca;
                                                         break;
                                                     }
                                                 }
+                                                */
                                                 ch[2] = b;
-                                                ch[3] = b2;
+                                                //ch[3] = b2;
                                                 ch[4] = c;
-                                                ch[5] = c2;
+                                                //ch[5] = c2;
+                                                ch[1] = ch[3] = ch[5] = 0;
                                                 goto found;
                                             }
                                         }
@@ -154,6 +157,19 @@ void Protein::Refresh() {
                     //p->chainTangents = new Vec3[p->cnt * 3];
                     //Solidify::GetTangents(p->chain, p->cnt, p->chainTangents);
                     
+                    for (int i = 0; i < p->cnt * 3; i++) {
+                        auto& p1 = Particles::particles_Pos[p->chain[i * 2]];
+                        for (int j = 0; j < p->cnt * 3; i++) {
+                            if (j < (i - 3) || j > (i + 3)) {
+                                auto& p2 = Particles::particles_Pos[p->chain[j * 2]];
+                                if (glm::length2(p1 - p2) < 33) {
+                                    p->chain[i * 2 + 1] = j;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     glGenBuffers(1, &p->idBuf);
                     glBindBuffer(GL_ARRAY_BUFFER, p->idBuf);
                     glBufferData(GL_ARRAY_BUFFER, 6 * p->cnt * sizeof(uint), p->chain, GL_STATIC_DRAW);
@@ -209,10 +225,10 @@ void Protein::DrawMenu() {
     auto cr = pros->chainReso;
     auto lr = pros->loopReso;
     
-    UI::Label(expandPos - 148, 3, 12, "Curve Resolution", font, white());
-	cr = (byte)Engine::DrawSliderFill(expandPos - 80, 2, 78, 16, 4, 20, cr, white(1, 0.5f), white());
-    UI::Label(expandPos - 147, 20, 12, "Bevel Resolution", font, white());
-	lr = (byte)Engine::DrawSliderFill(expandPos - 80, 19, 78, 16, 4, 20, lr, white(1, 0.5f), white());
+    UI::Label(expandPos - 148, 3, 12, "Curve Reso", font, white());
+	cr = (byte)Engine::DrawSliderFill(expandPos - 80, 2, 78, 16, 2, 20, cr, white(1, 0.5f), white());
+    UI::Label(expandPos - 147, 20, 12, "Bevel Reso", font, white());
+	lr = (byte)Engine::DrawSliderFill(expandPos - 80, 19, 78, 16, 6, 20, lr, white(1, 0.5f), white());
 
     if (cr != pros->chainReso || lr != pros->loopReso) {
         Scene::dirty = true;
