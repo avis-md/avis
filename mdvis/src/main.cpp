@@ -95,18 +95,24 @@ int main(int argc, char **argv)
 	bool dirty = false;
 	
 	ChokoLait::mainCamera->object->transform.localPosition(Vec3(0, 0, -1));
+	ChokoLait::mainCamera->quality = 1;
+	ChokoLait::mainCamera->quality2 = 1;
 
 	glfwShowWindow(Display::window);
 
 	while (ChokoLait::alive()) {
-		ChokoLait::Update(updateFunc);
-		dirty = Scene::dirty;
-		ChokoLait::Paint(rendFunc, paintfunc);
-		auto m = Time::millis;
-		VisSystem::uiMs = (uint)(m - lastMillis);
-		if (dirty)
-			VisSystem::renderMs = VisSystem::uiMs;
-		lastMillis = m;
+		if (!Display::width || !Display::height)
+			glfwPollEvents();
+		else {
+			ChokoLait::Update(updateFunc);
+			dirty = Scene::dirty;
+			ChokoLait::Paint(rendFunc, paintfunc);
+			auto m = Time::millis;
+			VisSystem::uiMs = (uint)(m - lastMillis);
+			if (dirty)
+				VisSystem::renderMs = VisSystem::uiMs;
+			lastMillis = m;
+		}
 	}
 	//*/
 }

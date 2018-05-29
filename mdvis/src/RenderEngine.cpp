@@ -330,8 +330,8 @@ GLuint Camera::DoFetchTexture(string s) {
 }
 
 void Camera::Render(RenderTexture* target, renderFunc func) {
-	uint t_w = (uint)((target? target->width : (uint)Display::width) * quality);
-	uint t_h = (uint)((target? target->height : (uint)Display::height) * quality);
+	uint t_w = (uint)roundf((target? target->width : Display::width) * quality);
+	uint t_h = (uint)roundf((target? target->height : Display::height) * quality);
 	if ((d_w != t_w) || (d_h != t_h)) {
 		glDeleteFramebuffers(1, &d_fbo);
 		glDeleteFramebuffers(1, &d_colfbo);
