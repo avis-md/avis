@@ -2,6 +2,7 @@
 #include "md/Protein.h"
 #include "vis/pargraphics.h"
 #include "ui/icons.h"
+#include "ui/popups.h"
 
 int ParMenu::activeMenu = 0;
 const string ParMenu::menuNames[] = { "Particles", "Visualize", "Proteins", "Display" };
@@ -77,6 +78,11 @@ void ParMenu::Draw_List() {
 				rli.expanded = !rli.expanded;
 			}
 			UI::Label(expandPos - 132, off, 12, rli.name, font, white(rli.visible ? 1 : 0.5f));
+			if (Engine::Button(expandPos - 35, off, 16, 16, Icons::OfDM(rli.drawType), white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+				Popups::type = POPUP_TYPE::DRAWMODE;
+				Popups::pos = Vec2(expandPos - 35, off);
+				Popups::data = &rli.drawType;
+			}
 			if (Engine::Button(expandPos - 18, off, 16, 16, rli.visible ? Icons::visible : Icons::hidden, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
 				rli.visible = !rli.visible;
 				ParGraphics::UpdateDrawLists();
@@ -94,6 +100,11 @@ void ParMenu::Draw_List() {
 						rj.expanded = !rj.expanded;
 					}
 					UI::Label(expandPos - 128, off, 12, rj.name, font, white((rli.visible && rj.visible) ? 1 : 0.5f));
+					if (Engine::Button(expandPos - 35, off, 16, 16, Icons::OfDM(rj.drawType), white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+						Popups::type = POPUP_TYPE::DRAWMODE;
+						Popups::pos = Vec2(expandPos - 35, off);
+						Popups::data = &rj.drawType;
+					}
 					if (Engine::Button(expandPos - 18, off, 16, 16, rj.visible ? Icons::visible : Icons::hidden, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
 						rj.visible = !rj.visible;
 					}

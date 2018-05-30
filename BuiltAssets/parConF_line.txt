@@ -1,0 +1,26 @@
+#version 330 core
+
+flat in uint v2f_id1;
+flat in uint v2f_id2;
+in float v2f_u;
+
+layout (location=0) out vec4 outColor; //rgba
+layout (location=1) out vec4 outNormal; //xyz []
+layout (location=2) out vec4 outSpec; //spec gloss
+layout (location=3) out vec4 outEmi; //emi occlu
+
+void Output(vec4 col, vec3 norm, vec3 spec, float gloss, vec4 emi) {
+    outColor = col;
+    outNormal.rgb = normalize(norm);
+    outNormal.a = 0;
+    outSpec.rgb = spec;
+    outSpec.a = gloss;
+    outEmi = emi;
+}
+
+void main()
+{
+	uint id = (v2f_u > 0.5) ? v2f_id2 : v2f_id1;
+
+    Output(vec4(id, 0, 0, 0), vec3(0, 0, -1), vec3(0.3, 0.3, 0.3), 0.5, vec4(0, 0, 0, 0));
+}

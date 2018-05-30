@@ -10,5 +10,11 @@ public:
 		*select, *deselect, *flipselect,
 		*toolRot, *toolMov, *toolSel,
 		*refresh, *checkbox,
-		*zoomIn, *zoomOut;
+		*zoomIn, *zoomOut,
+		*dm_none,
+		*dm_point, *dm_ball, *dm_vdw,
+		*dm_line, *dm_stick,
+		*dm_lineball, *dm_stickball;
+	
+	static Texture* OfDM(byte b);
 };

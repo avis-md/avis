@@ -19,6 +19,8 @@ GLuint UI::_vao = 0;
 GLuint UI::_vboV = 0;
 GLuint UI::_vboU = 0;
 
+byte UI::_layer, UI::_layerMax;
+
 void UI::Init() {
 	_defaultStyle.fontSize = 12;
 	_defaultStyle.normal.Set(white(1, 0.3f), black());
@@ -47,6 +49,10 @@ void UI::InitVao() {
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+}
+
+void UI::IncLayer() {
+	_layer++;
 }
 
 void UI::SetVao(uint sz, void* verts, void* uvs) {
@@ -100,6 +106,8 @@ void UI::PreLoop() {
 	_activeEditTextId = 0;
 
 	editingText = !!_editingEditText[0];
+	_layerMax = _layer;
+	_layer = 0;
 }
 
 #define _checkdraw assert(UI::CanDraw() && "UI functions can only be called from the Overlay function!");

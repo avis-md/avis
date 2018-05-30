@@ -3,18 +3,19 @@
 #include "md/Protein.h"
 #include "vis/system.h"
 #include "ui/icons.h"
+#include "ui/popups.h"
 
 Texture* ParGraphics::refl = nullptr;
 float ParGraphics::reflStr = 1, ParGraphics::reflStrDecay = 2, ParGraphics::rimOff = 0.5f, ParGraphics::rimStr = 1;
 
-GLuint ParGraphics::reflProg, ParGraphics::parProg, ParGraphics::parConProg;
-GLint ParGraphics::reflProgLocs[] = {}, ParGraphics::parProgLocs[] = {}, ParGraphics::parConProgLocs[] = {};
+GLuint ParGraphics::reflProg, ParGraphics::parProg, ParGraphics::parConProg, ParGraphics::parConLineProg;
+GLint ParGraphics::reflProgLocs[] = {}, ParGraphics::parProgLocs[] = {}, ParGraphics::parConProgLocs[] = {}, ParGraphics::parConLineProgLocs[] = {};
 
 GLuint ParGraphics::selHlProg, ParGraphics::colProg;
 GLint ParGraphics::selHlProgLocs[] = {}, ParGraphics::colProgLocs[] = {};
 
 std::vector<uint> ParGraphics::hlIds;
-std::vector<std::pair<uint, std::pair<uint, VIS_DRAW_MODE>>> ParGraphics::drawLists, ParGraphics::drawListsB;
+std::vector<std::pair<uint, std::pair<uint, byte>>> ParGraphics::drawLists, ParGraphics::drawListsB;
 
 Vec3 ParGraphics::rotCenter = Vec3();
 uint ParGraphics::rotCenterTrackId = -1;
@@ -64,6 +65,12 @@ void ParGraphics::Init() {
 	parConProgLocs[5] = glGetUniformLocation(parConProg, "posTex");
 	parConProgLocs[6] = glGetUniformLocation(parConProg, "connTex");
 
+	parConLineProg = (new Shader(IO::GetText(IO::path + "/parConV_line.txt"), IO::GetText(IO::path + "/parConF_line.txt")))->pointer;
+	parConLineProgLocs[0] = glGetUniformLocation(parConLineProg, "_MV");
+	parConLineProgLocs[1] = glGetUniformLocation(parConLineProg, "_P");
+	parConLineProgLocs[2] = glGetUniformLocation(parConLineProg, "posTex");
+	parConLineProgLocs[3] = glGetUniformLocation(parConLineProg, "connTex");
+
 	selHlProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText(IO::path + "/selectorFrag.txt")))->pointer;
 	selHlProgLocs[0] = glGetUniformLocation(selHlProg, "screenSize");
 	selHlProgLocs[1] = glGetUniformLocation(selHlProg, "myId");
@@ -91,24 +98,34 @@ void ParGraphics::UpdateDrawLists() {
 	drawLists.clear();
 	drawListsB.clear();
 	int di = -1;
+	byte dt;
 	for (uint i = 0; i < Particles::residueListSz; i++) {
 		auto& r = Particles::residueLists[i];
-		if ((di == -1) && r.visible) di = i;
-		else if ((di > -1) && !r.visible) {
+		if ((di == -1) && r.visible) {
+			di = i;
+			dt = r.drawType;
+		}
+		else if ((di > -1) && ((!r.visible) || (dt != r.drawType))) {
 			auto& rs = Particles::residueLists[di].residues[0];
 			auto& rs2 = Particles::residueLists[i - 1].residues[Particles::residueLists[i - 1].residueSz-1];
-			drawLists.push_back(std::pair<uint, std::pair<uint, VIS_DRAW_MODE>>(rs.offset, std::pair<uint, VIS_DRAW_MODE>(rs2.offset - rs.offset + rs2.cnt, r.drawMode & 0x0f)));
+			if (!!(dt & 0x0f) && (dt != 0x11)) {
+				drawLists.push_back(std::pair<uint, std::pair<uint, byte>>(rs.offset, std::pair<uint, byte>(rs2.offset - rs.offset + rs2.cnt, (dt == 0x01) ? 0x0f : (dt & 0x0f))));
+			}
 			auto bcnt = rs2.offset_b - rs.offset_b + rs2.cnt_b;
-			if (!!bcnt) drawListsB.push_back(std::pair<uint, std::pair<uint, VIS_DRAW_MODE>>(rs.offset_b, std::pair<uint, VIS_DRAW_MODE>(bcnt, r.drawMode & 0xf0)));
-			di = -1;
+			if (!!bcnt && !!(dt >> 4)) drawListsB.push_back(std::pair<uint, std::pair<uint, byte>>(rs.offset_b, std::pair<uint, byte>(bcnt, dt >> 4)));
+			if (!r.visible) di = -1;
+			else {
+				di = i;
+				dt = r.drawType;
+			}
 		}
 	}
 	if (di > -1) {
 		auto& rs = Particles::residueLists[di].residues[0];
 		auto& rs2 = Particles::residueLists[Particles::residueListSz-1].residues[Particles::residueLists[Particles::residueListSz - 1].residueSz - 1];
-		drawLists.push_back(std::pair<uint, std::pair<uint, VIS_DRAW_MODE>>(rs.offset, std::pair<uint, VIS_DRAW_MODE>(rs2.offset - rs.offset + rs2.cnt, Particles::residueLists[di].drawMode & 0x0f)));
+		if (!!(dt & 0x0f) && (dt != 0x11)) drawLists.push_back(std::pair<uint, std::pair<uint, byte>>(rs.offset, std::pair<uint, byte>(rs2.offset - rs.offset + rs2.cnt, (dt == 0x01) ? 0x0f : (dt & 0x0f))));
 		auto bcnt = rs2.offset_b - rs.offset_b + rs2.cnt_b;
-		if (!!bcnt) drawListsB.push_back(std::pair<uint, std::pair<uint, VIS_DRAW_MODE>>(rs.offset_b, std::pair<uint, VIS_DRAW_MODE>(bcnt, Particles::residueLists[di].drawMode & 0xf0)));
+		if (!!bcnt && !!(dt >> 4)) drawListsB.push_back(std::pair<uint, std::pair<uint, byte>>(rs.offset_b, std::pair<uint, byte>(bcnt, dt >> 4)));
 	}
 	Scene::dirty = true;
 }
@@ -224,33 +241,55 @@ void ParGraphics::Rerender() {
 	glUniform1i(parProgLocs[5], 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
-	glUniform1f(parProgLocs[6], 0.2f);
 
 	glBindVertexArray(Particles::posVao);
-	for (auto& p : drawLists)
+	for (auto& p : drawLists) {
+		//glPolygonMode(GL_FRONT_AND_BACK, (p.second.second == 0x0f) ? GL_POINT : GL_FILL);
+		if (p.second.second == 1) glUniform1f(parProgLocs[6], -1);
+		else if (p.second.second == 0x0f) glUniform1f(parProgLocs[6], 0);
+		else if (p.second.second == 2) glUniform1f(parProgLocs[6], 0.2f);
+		else glUniform1f(parProgLocs[6], 1);
 		glDrawArrays(GL_POINTS, p.first, p.second.first);
-
-	//*
-	glUseProgram(parConProg);
-	glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
-	glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
-	glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
-	glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-	glUniform2f(parConProgLocs[4], Display::width * ql, Display::height * ql);
-	glUniform1i(parConProgLocs[5], 1);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
-	glUniform1i(parConProgLocs[6], 2);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
-
+	}
+	
 	glBindVertexArray(emptyVao);
-	for (auto& p : drawListsB)
-		glDrawArrays(GL_POINTS, p.first, p.second.first);
-	//*/
+	for (auto& p : drawListsB) {
+		byte& tp = p.second.second;
+		if (tp == 1) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glUseProgram(parConLineProg);
+			glUniformMatrix4fv(parConLineProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+			glUniformMatrix4fv(parConLineProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+			glUniform1i(parConLineProgLocs[2], 1);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+			glUniform1i(parConLineProgLocs[3], 2);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
+			glDrawArrays(GL_LINES, p.first * 2, p.second.first * 2);
+		}
+		else {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			glUseProgram(parConProg);
+			glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+			glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+			glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
+			glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
+			glUniform2f(parConProgLocs[4], Display::width * ql, Display::height * ql);
+			glUniform1i(parConProgLocs[5], 1);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+			glUniform1i(parConProgLocs[6], 2);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
+			glDrawArrays(GL_POINTS, p.first, p.second.first);
+		}
+	}
+	
 	glBindVertexArray(0);
 	glUseProgram(0);
 
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	Protein::Draw();
 }
 
@@ -440,4 +479,42 @@ void ParGraphics::DrawMenu() {
 	rotZ = Repeat<float>(rotZ, 0, 360);
 
 	if (rf != rotCenterTrackId || s0 != rotScale || rz0 != rotZ || rw0 != rotW || center0 != rotCenter) Scene::dirty = true;
+}
+
+void ParGraphics::DrawPopupDM() {
+	auto& font = ParMenu::font;
+	auto& dt = *((byte*)Popups::data);
+	auto dto = dt;
+	byte a = dt & 0x0f;
+	byte b = dt >> 4;
+	Engine::DrawQuad(Popups::pos.x - 1, Popups::pos.y - 1, 18, 18, black(0.7f));
+	Engine::DrawQuad(Popups::pos.x - 1, Popups::pos.y + 15, 113, 37, black(0.7f));
+	Engine::DrawQuad(Popups::pos.x, Popups::pos.y, 16, 16, white(1, 0.3f));
+	UI::Texture(Popups::pos.x, Popups::pos.y, 16, 16, Icons::OfDM(dt));
+	Engine::DrawQuad(Popups::pos.x, Popups::pos.y + 16, 111, 35, white(1, 0.3f));
+
+	UI::Label(Popups::pos.x + 2, Popups::pos.y + 18, 12, "Atoms", font, white());
+	for (byte i = 0; i < 4; i++) {
+		if (Engine::Button(Popups::pos.x + 42 + 17 * i, Popups::pos.y + 18, 16, 16, (&Icons::dm_none)[i], (i == a)? yellow() : white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+			dt = (dt & 0xf0) | i;
+			if (!dt) dt = 0x10;
+			else if (i == 3) dt = i;
+		}
+	}
+	UI::Label(Popups::pos.x + 2, Popups::pos.y + 35, 12, "Bonds", font, white());
+	if (Engine::Button(Popups::pos.x + 42, Popups::pos.y + 35, 16, 16, Icons::dm_none, (!b)? yellow() : white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+			dt &= 0x0f;
+			if (a == 0) dt = 1;
+		}
+	for (byte i = 0; i < 2; i++) {
+		if (Engine::Button(Popups::pos.x + 59 + 17 * i, Popups::pos.y + 35, 16, 16, (&Icons::dm_line)[i], ((i+1) == b)? yellow() : white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+			dt = (dt & 0x0f) | (i << 4) + 0x10;
+			if (a == 3) dt = dt = (i << 4) + 0x12;
+		}
+	}
+
+	if (Input::mouse0 && !Engine::Button(Popups::pos.x, Popups::pos.y + 16, 111, 60)) {
+		Popups::type = POPUP_TYPE::NONE;
+	}
+	if (dto != dt) ParGraphics::UpdateDrawLists();
 }

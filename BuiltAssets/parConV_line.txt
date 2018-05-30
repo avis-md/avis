@@ -1,0 +1,21 @@
+#version 330 core
+
+uniform mat4 _MV, _P;
+
+uniform samplerBuffer posTex;
+uniform usamplerBuffer connTex;
+
+flat out uint v2f_id1;
+flat out uint v2f_id2;
+out float v2f_u;
+
+void main(){
+	int vid = (gl_VertexID / 2) * 2;
+    uint id1 = texelFetch(connTex, vid).r;
+    uint id2 = texelFetch(connTex, vid + 1).r;
+    v2f_id1 = id1 + 1U;
+    v2f_id2 = id2 + 1U;
+	v2f_u = mod(gl_VertexID, 2);
+	vec3 pos = texelFetch(posTex, int((v2f_u > 0.5) ? id2 : id1)).rgb;
+    gl_Position = _P*_MV*vec4(pos, 1);
+}

@@ -3,23 +3,19 @@
 #include "md/Particles.h"
 #include "vis/system.h"
 
-enum class DRAW_TYPE {
-	
-};
-
 class ParGraphics {
 public:
 	static Texture* refl;
 	static float reflStr, reflStrDecay, rimOff, rimStr;
 
-	static GLuint reflProg, parProg, parConProg;
-	static GLint reflProgLocs[11], parProgLocs[7], parConProgLocs[7];
+	static GLuint reflProg, parProg, parConProg, parConLineProg;
+	static GLint reflProgLocs[11], parProgLocs[7], parConProgLocs[7], parConLineProgLocs[5];
 
 	static GLuint selHlProg, colProg;
 	static GLint selHlProgLocs[4], colProgLocs[5];
 
 	static std::vector<uint> hlIds;
-	static std::vector<std::pair<uint, std::pair<uint, VIS_DRAW_MODE>>> drawLists, drawListsB;
+	static std::vector<std::pair<uint, std::pair<uint, byte>>> drawLists, drawListsB;
 
 	static Vec3 rotCenter;
 	static uint rotCenterTrackId;
@@ -48,6 +44,7 @@ public:
 	static void Reblit();
 
 	static void DrawMenu();
+	static void DrawPopupDM();
 
 protected:
 	static void BlitSky();

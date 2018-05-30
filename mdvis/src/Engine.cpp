@@ -214,7 +214,7 @@ void Engine::EndStencil() {
 }
 
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h) {
-	if (!UI::focused) return MOUSE_NONE;
+	if (!UI::focused || (UI::_layer < UI::_layerMax)) return MOUSE_NONE;
 	if (stencilRect) {
 		if (!stencilRect->Intersection(Rect(x, y, w, h)).Inside(Input::mousePos)) return MOUSE_NONE;
 	}
@@ -227,7 +227,7 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4,
 	return Button(x, y, w, h, normalVec4, Lerp(normalVec4, white(), 0.5f), Lerp(normalVec4, black(), 0.5f), label, labelSize, labelFont, labelVec4, labelCenter);
 }
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4) {
-	if (!UI::focused || (Input::mouse0State != 0 && !Rect(x, y, w, h).Inside(Input::mouseDownPos))) {
+	if (!UI::focused || (UI::_layer < UI::_layerMax) ||(Input::mouse0State != 0 && !Rect(x, y, w, h).Inside(Input::mouseDownPos))) {
 		DrawQuad(x, y, w, h, normalVec4);
 		return MOUSE_NONE;
 	}
@@ -249,7 +249,7 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4,
 	return inside ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
 }
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Texture* texture, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, float uvx, float uvy, float uvw, float uvh) {
-	if (!UI::focused || (Input::mouse0State != 0 && !Rect(x, y, w, h).Inside(Input::mouseDownPos))) {
+	if (!UI::focused || (UI::_layer < UI::_layerMax) || (Input::mouse0State != 0 && !Rect(x, y, w, h).Inside(Input::mouseDownPos))) {
 		DrawQuad(x, y, w, h, (texture->loaded) ? texture->pointer : Engine::fallbackTex->pointer, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh), false, normalVec4);
 		return MOUSE_NONE;
 	}
@@ -275,80 +275,6 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4,
 	ALIGNMENT al = labelFont->alignment;
 	labelFont->alignment = labelCenter? ALIGN_MIDCENTER : ALIGN_MIDLEFT;
 	UI::Label(round(x + (labelCenter? w*0.5f : 2)), round(y + 0.4f*h), labelSize, label, labelFont, labelVec4);
-	labelFont->alignment = al;
-	return b;
-}
-
-MOUSE_STATUS Engine::EButton(bool a, float x, float y, float w, float h, Vec4 normalVec4) {
-	return EButton(a, x, y, w, h, normalVec4, Lerp(normalVec4, white(), 0.5f), Lerp(normalVec4, black(), 0.5f));
-}
-MOUSE_STATUS Engine::EButton(bool a, float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4) {
-	if (Input::mouse0State != 0 && !Rect(x, y, w, h).Inside(Input::mouseDownPos)) {
-		DrawQuad(x, y, w, h, normalVec4);
-		return MOUSE_NONE;
-	}
-	if (a) {
-		bool inside = Rect(x, y, w, h).Inside(Input::mousePos);
-		if (stencilRect) {
-			if (!stencilRect->Intersection(Rect(x, y, w, h)).Inside(Input::mousePos))
-				inside = false;
-		}
-		switch (Input::mouse0State) {
-		case 0:
-		case MOUSE_UP:
-			DrawQuad(x, y, w, h, inside ? highlightVec4 : normalVec4);
-			break;
-		case MOUSE_DOWN:
-		case MOUSE_HOLD:
-			DrawQuad(x, y, w, h, inside ? pressVec4 : normalVec4);
-			break;
-		}
-		return inside ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
-	}
-	else {
-		DrawQuad(x, y, w, h, normalVec4);
-		return MOUSE_NONE;
-	}
-}
-MOUSE_STATUS Engine::EButton(bool a, float x, float y, float w, float h, Vec4 normalVec4, string label, float labelSize, Font* labelFont, Vec4 labelVec4) {
-	return EButton(a, x, y, w, h, normalVec4, Lerp(normalVec4, white(), 0.5f), Lerp(normalVec4, black(), 0.5f), label, labelSize, labelFont, labelVec4);
-}
-MOUSE_STATUS Engine::EButton(bool a, float x, float y, float w, float h, Texture* texture, Vec4 Vec4) {
-	return EButton(a, x, y, w, h, texture, Vec4, Lerp(Vec4, white(), 0.5f), Lerp(Vec4, black(), 0.5f));
-}
-MOUSE_STATUS Engine::EButton(bool a, float x, float y, float w, float h, Texture* texture, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4) {
-	if (Input::mouse0State != 0 && !Rect(x, y, w, h).Inside(Input::mouseDownPos)) {
-		DrawQuad(x, y, w, h, (texture->loaded) ? texture->pointer : Engine::fallbackTex->pointer, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0), false, normalVec4);
-		return MOUSE_NONE;
-	}
-	if (a) {
-	bool inside = Rect(x, y, w, h).Inside(Input::mousePos);
-	if (stencilRect) {
-		if (!stencilRect->Intersection(Rect(x, y, w, h)).Inside(Input::mousePos))
-			inside = false;
-	}
-	switch (Input::mouse0State) {
-	case 0:
-	case MOUSE_UP:
-		DrawQuad(x, y, w, h, (texture->loaded) ? texture->pointer : Engine::fallbackTex->pointer, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0), false, inside ? highlightVec4 : normalVec4);
-		break;
-	case MOUSE_DOWN:
-	case MOUSE_HOLD:
-		DrawQuad(x, y, w, h, (texture->loaded) ? texture->pointer : Engine::fallbackTex->pointer, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0), false, inside ? pressVec4 : normalVec4);
-		break;
-	}
-	return inside ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
-	}
-	else {
-		DrawQuad(x, y, w, h, (texture->loaded) ? texture->pointer : Engine::fallbackTex->pointer, normalVec4);
-		return MOUSE_NONE;
-	}
-}
-MOUSE_STATUS Engine::EButton(bool a, float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, string label, float labelSize, Font* labelFont, Vec4 labelVec4) {
-	MOUSE_STATUS b = EButton(a, x, y, w, h, normalVec4, Lerp(normalVec4, white(), 0.5f), Lerp(normalVec4, black(), 0.5f));
-	ALIGNMENT al = labelFont->alignment;
-	labelFont->alignment = ALIGN_MIDLEFT;
-	UI::Label(round(x + 2), round(y + 0.4f*h), labelSize, label, labelFont, labelVec4);
 	labelFont->alignment = al;
 	return b;
 }

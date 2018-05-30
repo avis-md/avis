@@ -7,6 +7,7 @@ enum class VIS_MOUSE_MODE : byte {
 	SELECT
 };
 
+/*
 enum class VIS_DRAW_MODE : byte {
 	//atoms
 	NONE = 0x00,
@@ -20,7 +21,7 @@ template<typename T> inline VIS_DRAW_MODE operator|(VIS_DRAW_MODE a, T b)
 {return static_cast<VIS_DRAW_MODE>(static_cast<uint>(a) | static_cast<uint>(b));}
 template<typename T> inline VIS_DRAW_MODE operator&(VIS_DRAW_MODE a, T b)
 {return static_cast<VIS_DRAW_MODE>(static_cast<uint>(a) & static_cast<uint>(b));}
-
+*/
 class VisSystem {
 public:
 	static Vec4 accentColor;

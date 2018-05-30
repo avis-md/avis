@@ -5,18 +5,18 @@
 const uint PAR_MAX_NAME_LEN = 6;
 
 struct Residue {
-	Residue() : visible(true), expanded(false) {}
+	Residue() : visible(true), expanded(false), drawType(0x22) {}
 
 	uint maxOff;
 	bool visible, expanded;
 	string name;
 	uint offset, offset_b;
 	ushort cnt, cnt_b;
-	byte type;
+	byte type, drawType;
 };
 
 struct ResidueList { //residues with the same name
-	ResidueList() : visible(true), expanded(false), drawMode(VIS_DRAW_MODE::LINES) {}
+	ResidueList() : visible(true), expanded(false), drawType(0x22) {}
 
 	~ResidueList() {
 		if (residues) std::free(residues);
@@ -27,7 +27,7 @@ struct ResidueList { //residues with the same name
 	string name;
 	Residue* residues = 0;
 	uint residueSz = 0;
-	VIS_DRAW_MODE drawMode;
+	byte drawType;
 };
 
 struct AnimData {

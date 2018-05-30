@@ -50,5 +50,7 @@ public:
 	static uint _vboSz;
 	static GLuint _vao, _vboV, _vboU;
 
-	static void Init();
+	static byte _layer, _layerMax;
+
+	static void Init(), IncLayer();
 };

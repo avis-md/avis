@@ -5,6 +5,7 @@
 //#include <numpy/arrayobject.h>
 
 #include "ui/icons.h"
+#include "ui/popups.h"
 #include "py/PyWeb.h"
 #include "md/ParMenu.h"
 #include "md/Protein.h"
@@ -40,37 +41,33 @@ void updateFunc() {
 }
 
 void paintfunc() {
+	bool stealFocus = false;
+
 	if (PyWeb::drawFull)
 		PyWeb::Draw();
 	else {
 		ParMenu::Draw();
 		PyWeb::DrawSide();
+
+		if (ParGraphics::zoomFade > 0) {
+			auto zf = min(ParGraphics::zoomFade * 2, 1.0f);
+			Engine::DrawQuad(Display::width * 0.5f - 150.0f, Display::height - 100.0f, 300, 20, white(zf * 0.9f, 0.15f));
+			UI::Texture(Display::width * 0.5f - 150.0f, Display::height - 98.0f, 16, 16, Icons::zoomOut, white(zf));
+			UI::Texture(Display::width * 0.5f + 134.0f, Display::height - 98.0f, 16, 16, Icons::zoomIn, white(zf));
+			Engine::DrawQuad(Display::width * 0.5f - 130.0f, Display::height - 91.0f, 260, 2, white(zf, 0.8f));
+			Engine::DrawQuad(Display::width * 0.5f - 133.0f + 260 * InverseLerp(-6.0f, 2.0f, ParGraphics::rotScale), Display::height - 98.0f, 6, 16, white(zf));
+			ParGraphics::zoomFade -= Time::delta;
+		}
 	}
 	VisSystem::DrawBar();
 
-	bool stealFocus = false;
+	Popups::Draw();
 
 	auto pos = Input::mousePos;
 
-	if (ParGraphics::zoomFade > 0) {
-		auto zf = min(ParGraphics::zoomFade * 2, 1.0f);
-		Engine::DrawQuad(Display::width * 0.5f - 150.0f, Display::height - 100.0f, 300, 20, white(zf * 0.9f, 0.15f));
-		UI::Texture(Display::width * 0.5f - 150.0f, Display::height - 98.0f, 16, 16, Icons::zoomOut, white(zf));
-		UI::Texture(Display::width * 0.5f + 134.0f, Display::height - 98.0f, 16, 16, Icons::zoomIn, white(zf));
-		Engine::DrawQuad(Display::width * 0.5f - 130.0f, Display::height - 91.0f, 260, 2, white(zf, 0.8f));
-		Engine::DrawQuad(Display::width * 0.5f - 133.0f + 260 * InverseLerp(-6.0f, 2.0f, ParGraphics::rotScale), Display::height - 98.0f, 6, 16, white(zf));
-		//if (Rect(Display::width * 0.5f - 150.0f, Display::height - 100.0f, 300, 20).Inside(Input::mousePos)) {
-		//	ParGraphics::zoomFade = 2;
-		//	stealFocus = true;
-		//}
-		//else
-			ParGraphics::zoomFade -= Time::delta;
-	}
 	ParGraphics::hlIds.clear();
 	if (!stealFocus && VisSystem::InMainWin(Input::mousePos)) {
 
-		
-		
 		auto id = ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y);
 		if (!!id) {
 			ParGraphics::hlIds.push_back(id);

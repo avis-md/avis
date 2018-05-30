@@ -22,7 +22,8 @@ void main(){
     gl_Position = _P*wpos;
     v2f_pos = wpos.xyz;
     v2f_id = gl_VertexID + 1;
-	v2f_rad = 0.1 * texelFetch(radTex,gl_VertexID).r * radScl;
+	if (radScl <= 0) v2f_rad = 0.008;
+	else v2f_rad = 0.1 * texelFetch(radTex,gl_VertexID).r * radScl;
 	
 	vec4 unitVec = _MV*vec4(1, 0, 0, 0);
 	v2f_scl = length(unitVec);
@@ -31,6 +32,7 @@ void main(){
     float z = length(wdir);
     float ca = dot(normalize(wpos.xyz - camPos), camFwd);
 	float z2 = z * ca;
-	gl_PointSize = v2f_scl * v2f_rad * 2 * screenSize.x / z2;
 	if (z < 0.1) gl_PointSize = 0;
+	else if (radScl == 0) gl_PointSize = 1;
+	else gl_PointSize = v2f_scl * v2f_rad * 2 * screenSize.x / z2;
 }

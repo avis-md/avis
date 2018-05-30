@@ -5,28 +5,55 @@ Texture* Icons::expand, *Icons::collapse, *Icons::python, *Icons::play, *Icons::
 *Icons::select, *Icons::deselect, *Icons::flipselect,
 *Icons::toolRot, *Icons::toolMov, *Icons::toolSel,
 *Icons::refresh, *Icons::checkbox,
-*Icons::zoomIn, *Icons::zoomOut;
+*Icons::zoomIn, *Icons::zoomOut,
+*Icons::dm_none, *Icons::dm_point, *Icons::dm_ball, *Icons::dm_vdw, *Icons::dm_line, *Icons::dm_stick, *Icons::dm_lineball, *Icons::dm_stickball;
+
+#define TEXN(nm) new Texture(IO::path + "/res/" #nm ".png", false)
+#define TEX(nm) nm = new Texture(IO::path + "/res/" #nm ".png", false)
+#define TEXNP(nm) new Texture(IO::path + "/res/" #nm ".png", false, TEX_FILTER_POINT)
+#define TEXP(nm) nm = new Texture(IO::path + "/res/" #nm ".png", false, TEX_FILTER_POINT)
 
 void Icons::Init() {
-	expand = new Texture(IO::path + "/res/expand.png", false, TEX_FILTER_POINT);
-	collapse = new Texture(IO::path + "/res/collapse.png", false, TEX_FILTER_POINT);
-	python = new Texture(IO::path + "/res/python.png", false);
-	play = new Texture(IO::path + "/res/play.png", false);
-	playall = new Texture(IO::path + "/res/play2.png", false);
-	left = new Texture(IO::path + "/res/left.png", false);
-	right = new Texture(IO::path + "/res/right.png", false);
-	cross = new Texture(IO::path + "/res/cross.png", false);
-	visible = new Texture(IO::path + "/res/visible.png", false);
-	hidden = new Texture(IO::path + "/res/hidden.png", false);
-	circle = new Texture(IO::path + "/res/circle.png", false);
-	select = new Texture(IO::path + "/res/select.png", false, TEX_FILTER_POINT);
-	deselect = new Texture(IO::path + "/res/deselect.png", false, TEX_FILTER_POINT);
-	flipselect = new Texture(IO::path + "/res/flipselect.png", false, TEX_FILTER_POINT);
-	toolRot = new Texture(IO::path + "/res/tool_rot.png", false, TEX_FILTER_POINT);
-	toolMov = new Texture(IO::path + "/res/tool_mov.png", false, TEX_FILTER_POINT);
-	toolSel = new Texture(IO::path + "/res/tool_sel.png", false, TEX_FILTER_POINT);
-	refresh = new Texture(IO::path + "/res/refresh.png", false);
-	checkbox = new Texture(IO::path + "/res/checkbox.png", false);
-	zoomIn = new Texture(IO::path + "/res/zoomin.png", false);
-	zoomOut = new Texture(IO::path + "/res/zoomout.png", false);
+	TEXP(expand);
+	TEXP(collapse);
+	TEX(python);
+	TEX(play);
+	playall = TEXN(play2);
+	TEX(left);
+	TEX(right);
+	TEX(cross);
+	TEX(visible);
+	TEX(hidden);
+	TEX(circle);
+	TEXP(select);
+	TEXP(deselect);
+	TEXP(flipselect);
+	toolRot = TEXNP(tool_rot);
+	toolMov = TEXNP(tool_mov);
+	toolSel = TEXNP(tool_sel);
+	TEX(refresh);
+	TEX(checkbox);
+	zoomIn = TEXN(zoomin);
+	zoomOut = TEXN(zoomout);
+	TEX(dm_none);
+	TEX(dm_point);
+	TEX(dm_ball);
+	TEX(dm_vdw);
+	TEX(dm_line);
+	TEX(dm_stick);
+	TEX(dm_lineball);
+	TEX(dm_stickball);
+}
+
+Texture* Icons::OfDM(byte b) {
+	switch (b) {
+		case 0x01: return dm_point;
+		case 0x02: return dm_ball;
+		case 0x03: return dm_vdw;
+		case 0x10: case 0x11: return dm_line;
+		case 0x12: return dm_lineball;
+		case 0x20: case 0x21: return dm_stick;
+		case 0x22: return dm_stickball;
+		default: return nullptr;
+	}
 }
