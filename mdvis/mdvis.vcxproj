@@ -151,6 +151,7 @@
     <ClCompile Include="src\md\ParMenu.cpp" />
     <ClCompile Include="src\md\Particles.cpp" />
     <ClCompile Include="src\md\Protein.cpp" />
+    <ClCompile Include="src\ui\popups.cpp" />
     <ClCompile Include="src\xdrfile\xdrfile.c" />
     <ClCompile Include="src\xdrfile\xdrfile_trr.c" />
     <ClCompile Include="src\xdrfile\xdrfile_xtc.c" />
@@ -232,6 +233,7 @@
     <ClInclude Include="src\md\ParMenu.h" />
     <ClInclude Include="src\md\Particles.h" />
     <ClInclude Include="src\md\Protein.h" />
+    <ClInclude Include="src\ui\popups.h" />
     <ClInclude Include="src\xdrfile\xdrfile.h" />
     <ClInclude Include="src\xdrfile\xdrfile_trr.h" />
     <ClInclude Include="src\xdrfile\xdrfile_xtc.h" />

@@ -45,7 +45,7 @@ void main()
 	vec3 td = normalize(v2f_wpos2 - v2f_wpos1);
     float lm = length(v2f_wpos2 - v2f_wpos1);
     float L = length(v2f_wpos2 - v2f_wpos1);
-	float r = 0.004 * v2f_scl;
+	float r = 0.008 * v2f_scl;
     //*
     vec4 ndc = vec4(
         (gl_FragCoord.x / screenSize.x - 0.5) * 2.0,
