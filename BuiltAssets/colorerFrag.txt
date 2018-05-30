@@ -16,7 +16,7 @@ void main () {
 	}
 	float cdf = texelFetch(id2col, id-1).r;
 	int cd = int(cdf * 255);
-	fragCol = texture(colList, vec2((mod(cd, 16) + 0.5) / 16.0, (floor(cd / 16) + 0.5) / 16.0));
+	fragCol = texture(colList, vec2((mod(cd, 16) + 0.5) / 16.0, ((cd / 16) + 0.5) / 16.0));
     //fragCol = texture(colList, vec2((cd + 0.5) / 16.0, 0.5 / 16.0));
     fragCol.a = 1;
 	//fragCol = texture(colList, gl_FragCoord.xy / screenSize);
