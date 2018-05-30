@@ -22,8 +22,11 @@ public:
 	static std::vector<std::pair<uint, std::pair<uint, VIS_DRAW_MODE>>> drawLists, drawListsB;
 
 	static Vec3 rotCenter;
+	static uint rotCenterTrackId;
 	static float rotW, rotZ;
 	static float rotScale;
+
+	static float zoomFade;
 
 	static bool dragging;
 	static Vec3 scrX, scrY;

@@ -17,8 +17,11 @@ std::vector<uint> ParGraphics::hlIds;
 std::vector<std::pair<uint, std::pair<uint, VIS_DRAW_MODE>>> ParGraphics::drawLists, ParGraphics::drawListsB;
 
 Vec3 ParGraphics::rotCenter = Vec3();
+uint ParGraphics::rotCenterTrackId = -1;
 float ParGraphics::rotW = 0, ParGraphics::rotZ = 0;
 float ParGraphics::rotScale = 1;
+
+float ParGraphics::zoomFade = 0;
 
 Vec3 ParGraphics::scrX, ParGraphics::scrY;
 
@@ -145,7 +148,9 @@ void ParGraphics::Update() {
 			}
 			if (Input::mouseScroll != 0 && VisSystem::InMainWin(Input::mousePos)) {
 				rotScale += 0.05f * Input::mouseScroll;
+				rotScale = Clamp(rotScale, -6.0f, 2.0f);
 				ChokoLait::mainCamera->applyGBuffer2 = true;
+				zoomFade = 2;
 			}
 			else {
 				if (Input::KeyDown(Key_Escape)) {
@@ -159,8 +164,12 @@ void ParGraphics::Update() {
 
 void ParGraphics::Rerender() {
 	//*
-	MVP::Switch(false);
-	MVP::Clear();
+	//MVP::Switch(true);
+	//MVP::Push();
+	//float s = pow(2, rotScale);
+	//MVP::Scale(s, s, s);
+	//MVP::Switch(false);
+	//MVP::Clear();
 	float csz = cos(-rotZ*deg2rad);
 	float snz = sin(-rotZ*deg2rad);
 	float csw = cos(rotW*deg2rad);
@@ -169,7 +178,16 @@ void ParGraphics::Rerender() {
 	MVP::Mul(mMatrix);
 	float s = pow(2, rotScale);
 	MVP::Scale(s, s, s);
+	if (rotCenterTrackId < ~0) {
+		rotCenter = Particles::particles_Pos[rotCenterTrackId];
+	}
 	MVP::Translate(-rotCenter.x, -rotCenter.y, -rotCenter.z);
+
+	//MVP::Switch(true);
+	//MVP::Push();
+	//float s = pow(2, rotScale);
+	//MVP::Scale(s, s, s);
+	//MVP::Switch(false);
 
 	if (dragging) {
 		auto imvp = glm::inverse(MVP::projection() * MVP::modelview());
@@ -360,47 +378,58 @@ void ParGraphics::DrawMenu() {
 	rimStr = Engine::DrawSliderFill(expandPos - 80, 88, 78, 16, 0, 5, rimStr, white(1, 0.5f), white());
 
 	UI::Label(expandPos - 148, 105, 12, "Camera", font, white());
-	Engine::DrawQuad(expandPos - 149, 121, 148, 140, white(0.9f, 0.1f));
-	UI::Label(expandPos - 147, 122, 12, "Center X", font, white());
-	UI::Label(expandPos - 147, 139, 12, "Center Y", font, white());
-	UI::Label(expandPos - 147, 156, 12, "Center Z", font, white());
-	rotCenter.x = TryParse(UI::EditText(expandPos - 80, 122, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotCenter.x), font, true, nullptr, white()), 0.0f);
-	rotCenter.y = TryParse(UI::EditText(expandPos - 80, 139, 78, 16, 12, Vec4(0.4f, 0.6f, 0.4f, 1), std::to_string(rotCenter.y), font, true, nullptr, white()), 0.0f);
-	rotCenter.z = TryParse(UI::EditText(expandPos - 80, 156, 78, 16, 12, Vec4(0.4f, 0.4f, 0.6f, 1), std::to_string(rotCenter.z), font, true, nullptr, white()), 0.0f);
+	Engine::DrawQuad(expandPos - 149, 121, 165, 140, white(0.9f, 0.1f));
+	UI::Label(expandPos - 147, 122, 12, "Target", font, white());
+	bool htr = (rotCenterTrackId < ~0);
+	auto rf = rotCenterTrackId;
+	rotCenterTrackId = TryParse(UI::EditText(expandPos - 80, 122, 62, 16, 12, white(1, 0.5f), htr? std::to_string(rotCenterTrackId) : "", font, true, nullptr, white()), ~0U);
+	if (htr && Engine::Button(expandPos - 97, 122, 16, 16, red()) == MOUSE_RELEASE) {
+		rotCenterTrackId = -1;
+	}
+	if (Engine::Button(expandPos - 18, 122, 16, 16, white(1, 0.5f)) == MOUSE_RELEASE) {
+		
+	}
+	UI::Label(expandPos - 147, 139, 12, "Center X", font, white());
+	UI::Label(expandPos - 147, 156, 12, "Center Y", font, white());
+	UI::Label(expandPos - 147, 173, 12, "Center Z", font, white());
+	rotCenter.x = TryParse(UI::EditText(expandPos - 80, 139, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotCenter.x), font, true, nullptr, white(!htr ? 1 : 0.5f)), 0.0f);
+	rotCenter.y = TryParse(UI::EditText(expandPos - 80, 156, 78, 16, 12, Vec4(0.4f, 0.6f, 0.4f, 1), std::to_string(rotCenter.y), font, true, nullptr, white(!htr ? 1 : 0.5f)), 0.0f);
+	rotCenter.z = TryParse(UI::EditText(expandPos - 80, 173, 78, 16, 12, Vec4(0.4f, 0.4f, 0.6f, 1), std::to_string(rotCenter.z), font, true, nullptr, white(!htr ? 1 : 0.5f)), 0.0f);
 	
-	UI::Label(expandPos - 147, 174, 12, "Rotation W", font, white());
-	UI::Label(expandPos - 147, 191, 12, "Rotation Y", font, white());
-	rotW = TryParse(UI::EditText(expandPos - 80, 174, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotW), font, true, nullptr, white()), 0.0f);
-	rotZ = TryParse(UI::EditText(expandPos - 80, 191, 78, 16, 12, Vec4(0.4f, 0.6f, 0.4f, 1), std::to_string(rotZ), font, true, nullptr, white()), 0.0f);
+	UI::Label(expandPos - 147, 191, 12, "Rotation W", font, white());
+	UI::Label(expandPos - 147, 208, 12, "Rotation Y", font, white());
+	rotW = TryParse(UI::EditText(expandPos - 80, 191, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotW), font, true, nullptr, white()), 0.0f);
+	rotZ = TryParse(UI::EditText(expandPos - 80, 208, 78, 16, 12, Vec4(0.4f, 0.6f, 0.4f, 1), std::to_string(rotZ), font, true, nullptr, white()), 0.0f);
 	
-	UI::Label(expandPos - 147, 209, 12, "Scale", font, white());
-	rotScale = TryParse(UI::EditText(expandPos - 80, 209, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotScale), font, true, nullptr, white()), 0.0f);
+	UI::Label(expandPos - 147, 226, 12, "Scale", font, white());
+	rotScale = TryParse(UI::EditText(expandPos - 80, 226, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotScale), font, true, nullptr, white()), 0.0f);
+	rotScale = Clamp(rotScale, -6.0f, 2.0f);
 
-	UI::Label(expandPos - 147, 226, 12, "Quality", font, white());
+	UI::Label(expandPos - 147, 243, 12, "Quality", font, white());
 	auto cm = ChokoLait::mainCamera.raw();
 	auto ql = cm->quality;
-	if (Engine::Button(expandPos - 97, 226, 16, 16, Icons::refresh, white(0.8f), white(), white(1, 0.6f)) == MOUSE_RELEASE)
+	if (Engine::Button(expandPos - 97, 243, 16, 16, Icons::refresh, white(0.8f), white(), white(1, 0.6f)) == MOUSE_RELEASE)
 		ql = 1;
-	ql = Engine::DrawSliderFill(expandPos - 80, 226, 78, 16, 0.25f, 1.5f, ql, white(1, 0.5f), white());
-	UI::Label(expandPos - 78, 226, 12, std::to_string(int(ql * 100)) + "%", font, black(0.6f));
+	ql = Engine::DrawSliderFill(expandPos - 80, 243, 78, 16, 0.25f, 1.5f, ql, white(1, 0.5f), white());
+	UI::Label(expandPos - 78, 243, 12, std::to_string(int(ql * 100)) + "%", font, black(0.6f));
 	if (ql != cm->quality) {
 		cm->quality = ql;
 		Scene::dirty = true;
 	}
 	bool a2 = cm->useGBuffer2;
-	UI::Label(expandPos - 147, 243, 12, "Use Dynamic Quality", font, white());
-	a2 = Engine::Toggle(expandPos - 19, 243, 16, Icons::checkbox, a2, white(), ORIENT_HORIZONTAL);
+	UI::Label(expandPos - 147, 260, 12, "Use Dynamic Quality", font, white());
+	a2 = Engine::Toggle(expandPos - 19, 260, 16, Icons::checkbox, a2, white(), ORIENT_HORIZONTAL);
 	if (a2 != cm->useGBuffer2) {
 		cm->useGBuffer2 = a2;
 		if (a2) cm->GenGBuffer2();
 		Scene::dirty = true;
 	}
 	if (a2) {
-		Engine::DrawQuad(expandPos - 149, 260, 148, 18, white(0.9f, 0.1f));
-		UI::Label(expandPos - 147, 260, 12, "Quality 2", font, white());
+		Engine::DrawQuad(expandPos - 149, 277, 148, 18, white(0.9f, 0.1f));
+		UI::Label(expandPos - 147, 277, 12, "Quality 2", font, white());
 		ql = cm->quality2;
-		ql = Engine::DrawSliderFill(expandPos - 80, 260, 78, 16, 0.25f, 1, ql, white(1, 0.5f), white());
-		UI::Label(expandPos - 78, 260, 12, std::to_string(int(ql * 100)) + "%", font, black(0.6f));
+		ql = Engine::DrawSliderFill(expandPos - 80, 277, 78, 16, 0.25f, 1, ql, white(1, 0.5f), white());
+		UI::Label(expandPos - 78, 277, 12, std::to_string(int(ql * 100)) + "%", font, black(0.6f));
 		if (ql != cm->quality2) {
 			cm->quality2 = ql;
 			Scene::dirty = true;
@@ -410,5 +439,5 @@ void ParGraphics::DrawMenu() {
 	rotW = Clamp<float>(rotW, -90, 90);
 	rotZ = Repeat<float>(rotZ, 0, 360);
 
-	if (s0 != rotScale || rz0 != rotZ || rw0 != rotW || center0 != rotCenter) Scene::dirty = true;
+	if (rf != rotCenterTrackId || s0 != rotScale || rz0 != rotZ || rw0 != rotW || center0 != rotCenter) Scene::dirty = true;
 }

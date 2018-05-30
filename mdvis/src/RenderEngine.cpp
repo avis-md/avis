@@ -384,7 +384,11 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 		glDepthFunc(GL_LEQUAL);
 		glDepthMask(true);
 		glDisable(GL_BLEND);
+		MVP::Switch(true);
+		MVP::Clear();
 		ApplyGL();
+		//MVP::Push();
+		//MVP::Scale(2, 2, 1);
 		MVP::Switch(false);
 		MVP::Clear();
 		glViewport(0, 0, d_w, d_h);

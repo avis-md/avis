@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "/Users/chokopan/Github/mdvis/mdvis/build/a.out",
-            "args": [],
+            "args": ["-debug"],
             "stopAtEntry": false,
             "cwd": "/Users/chokopan/Github/mdvis/mdvis/build",
             "environment": [],

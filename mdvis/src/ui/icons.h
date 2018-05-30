@@ -9,5 +9,6 @@ public:
 		*left, *right, *cross, *visible, *hidden, *circle,
 		*select, *deselect, *flipselect,
 		*toolRot, *toolMov, *toolSel,
-		*refresh, *checkbox;
+		*refresh, *checkbox,
+		*zoomIn, *zoomOut;
 };
