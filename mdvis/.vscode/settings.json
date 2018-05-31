@@ -45,6 +45,7 @@
         "__tree": "cpp",
         "slist": "cpp",
         "list": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "istream": "cpp"
     }
 }

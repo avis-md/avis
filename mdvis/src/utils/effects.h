@@ -18,8 +18,8 @@ class Effects {
 public:
     static void Init(EFF_ENABLE_MASK mask);
 
-	static byte Blur(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, int w, int h);
-    static byte SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLuint tx3, GLuint nrm, GLuint dph, float str, int cnt, float rad, int w, int h);
+	static byte Blur(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, float rad, int w, int h);
+    static byte SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLuint tx3, GLuint nrm, GLuint dph, float str, int cnt, float rad, float blr, int w, int h);
 
 protected:
     static GLuint blurProg, ssaoProg, ssaoProg2;

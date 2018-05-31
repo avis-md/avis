@@ -15,15 +15,14 @@ void Effects::Init(EFF_ENABLE_MASK mask) {
 		_InitSSAO(vs);
 }
 
-byte Effects::Blur(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, int w, int h) {
+byte Effects::Blur(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, float rad, int w, int h) {
 	glUseProgram(blurProg);
 	glBindVertexArray(Camera::fullscreenVao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
-
 	glUniform1i(blurProgLocs[0], 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tx1);
-	glUniform1f(blurProgLocs[1], 1);
+	glUniform1f(blurProgLocs[1], rad);
 	glUniform2f(blurProgLocs[2], (float)w, (float)h);
 	glUniform1f(blurProgLocs[3], 0);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, t2);
@@ -40,7 +39,7 @@ byte Effects::Blur(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, int w, int h) {
 	return 2;
 }
 
-byte Effects::SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLuint tx3, GLuint nrm, GLuint dph, float str, int cnt, float rad, int w, int h) {
+byte Effects::SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLuint tx3, GLuint nrm, GLuint dph, float str, int cnt, float rad, float blr, int w, int h) {
 	glUseProgram(ssaoProg);
 	glUniform1i(ssaoProgLocs[0], 0);
 	glActiveTexture(GL_TEXTURE0);
@@ -53,7 +52,7 @@ byte Effects::SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLui
 	glBindTexture(GL_TEXTURE_2D, noiseTex);
 	glUniform2f(ssaoProgLocs[3], (float)w, (float)h);
 	glUniform1f(ssaoProgLocs[4], rad);
-	glUniform1f(ssaoProgLocs[5], 1);
+	//glUniform1f(ssaoProgLocs[5], 1);
 	glUniform1i(ssaoProgLocs[6], cnt);
 	glUniformMatrix4fv(ssaoProgLocs[7], 1, GL_FALSE, glm::value_ptr(MVP::projection()));
 	glUniformMatrix4fv(ssaoProgLocs[8], 1, GL_FALSE, glm::value_ptr(glm::inverse(MVP::projection())));
@@ -63,8 +62,8 @@ byte Effects::SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLui
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, t3);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-	Blur(t3, t2, tx3, tx2, w, h);
-	//*
+	if (blr > 0) Blur(t3, t2, tx3, tx2, blr / 20, w, h);
+	
 	glUseProgram(ssaoProg2);
 	glUniform1i(ssaoProg2Locs[0], 0);
 	glActiveTexture(GL_TEXTURE0);
@@ -79,7 +78,7 @@ byte Effects::SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLui
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, t2);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	//*/
+	
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
@@ -89,7 +88,7 @@ byte Effects::SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLui
 #define gu(i, nm) locs[i] = glGetUniformLocation(prog, #nm)
 
 void Effects::_InitBlur(const string& vs) {
-	auto& prog = blurProg = Shader::FromVF(vs, IO::GetText(IO::path + "blurFrag.txt"));
+	auto& prog = blurProg = Shader::FromVF(vs, IO::GetText(IO::path + "/blurFrag.txt"));
 	auto& locs = blurProgLocs;
 	gu(0, mainTex);
 	gu(1, mul);
@@ -98,7 +97,7 @@ void Effects::_InitBlur(const string& vs) {
 }
 
 void Effects::_InitSSAO(const string& vs) {
-	auto prog = ssaoProg = Shader::FromVF(vs, IO::GetText(IO::path + "ssaoFrag.txt"));
+	auto prog = ssaoProg = Shader::FromVF(vs, IO::GetText(IO::path + "/ssaoFrag.txt"));
 	GLint* locs = ssaoProgLocs;
 	gu(0, normTex);
 	gu(1, depthTex);
@@ -110,7 +109,7 @@ void Effects::_InitSSAO(const string& vs) {
 	gu(7, _P);
 	gu(8, _IP);
 	
-	prog = ssaoProg2 = Shader::FromVF(vs, IO::GetText(IO::path + "ssaoFrag2.txt"));
+	prog = ssaoProg2 = Shader::FromVF(vs, IO::GetText(IO::path + "/ssaoFrag2.txt"));
 	locs = ssaoProg2Locs;
 	gu(0, tex1);
 	gu(1, tex2);

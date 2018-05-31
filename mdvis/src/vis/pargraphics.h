@@ -31,6 +31,20 @@ public:
 
 	static GLuint emptyVao;
 
+	class Eff {
+	public:
+		static bool expanded;
+		static bool showSSAO, showGlow;
+		static bool useSSAO, useGlow;
+
+		static float ssaoRad, ssaoStr, ssaoBlur;
+		static int ssaoSamples;
+
+		static float glowThres, glowRad, glowStr;
+
+		static void Apply(), DrawMenu(float off);
+	};
+
 	static void Init(), UpdateDrawLists();
 
 	static void Update();

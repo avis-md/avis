@@ -33,6 +33,53 @@ bool ParGraphics::animate = false, ParGraphics::seek = false;
 
 GLuint ParGraphics::emptyVao;
 
+//---------------- effects vars -------------------
+
+bool ParGraphics::Eff::expanded;
+bool ParGraphics::Eff::showSSAO, ParGraphics::Eff::showGlow;
+bool ParGraphics::Eff::useSSAO, ParGraphics::Eff::useGlow;
+
+float ParGraphics::Eff::ssaoRad, ParGraphics::Eff::ssaoStr, ParGraphics::Eff::ssaoBlur;
+int ParGraphics::Eff::ssaoSamples;
+
+float ParGraphics::Eff::glowThres, ParGraphics::Eff::glowRad, ParGraphics::Eff::glowStr;
+
+void ParGraphics::Eff::Apply() {
+	auto cam = ChokoLait::mainCamera().get();
+	byte cnt = 0;
+	//cnt += Effects::Blur(cam->d_tfbo[0], cam->d_tfbo[1], cam->d_ttexs[0], cam->d_ttexs[1], _rad*20, Display::width, Display::height);
+	if (useSSAO) cnt += Effects::SSAO(cam->d_tfbo[0], cam->d_tfbo[1], cam->d_tfbo[2], cam->d_ttexs[0], cam->d_ttexs[1], cam->d_ttexs[2], cam->d_texs[1], cam->d_depthTex, ssaoStr, ssaoSamples, ssaoRad, ssaoBlur, Display::width, Display::height);
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->d_tfbo[cnt % 2]);
+	
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::width, Display::height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+}
+
+void ParGraphics::Eff::DrawMenu(float off) {
+	auto& expandPos = ParMenu::expandPos;
+	auto& font = ParMenu::font;
+	
+	UI::Label(expandPos - 148, off, 12, "Effects", font, white());
+
+	off += 17;
+	Engine::DrawQuad(expandPos - 148, off, 146, 17 * 5, white(0.9f, 0.1f));
+	UI::Label(expandPos - 146, off, 12, "Ambient Occlusion", font, white());
+	useSSAO = Engine::Toggle(expandPos - 20, off, 16, Icons::checkbox, useSSAO, white(), ORIENT_HORIZONTAL);
+	UI::Label(expandPos - 145, off + 17, 12, "Samples", font, white());
+	ssaoSamples = TryParse(UI::EditText(expandPos - 80, off + 17, 76, 16, 12, white(1, 0.5f), std::to_string(ssaoSamples), font, true, nullptr, white()), 0);
+	ssaoSamples = Clamp(ssaoSamples, 5, 50);
+	UI::Label(expandPos - 145, off + 34, 12, "Radius", font, white());
+	ssaoRad = Engine::DrawSliderFill(expandPos - 80, off + 34, 76, 16, 0.001f, 0.1f, ssaoRad, white(1, 0.5f), white());
+	UI::Label(expandPos - 145, off + 51, 12, "Strength", font, white());
+	ssaoStr = Engine::DrawSliderFill(expandPos - 80, off + 51, 76, 16, 0, 3, ssaoStr, white(1, 0.5f), white());
+	UI::Label(expandPos - 145, off + 68, 12, "Blur", font, white());
+	ssaoBlur = Engine::DrawSliderFill(expandPos - 80, off + 68, 76, 16, 0, 40, ssaoBlur, white(1, 0.5f), white());
+	
+}
+
+
 void ParGraphics::Init() {
 	refl = new Texture(IO::path + "/refl.png", true, TEX_FILTER_BILINEAR, 1, GL_REPEAT, GL_MIRRORED_REPEAT);
 	reflProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText(IO::path + "/reflFrag.txt")))->pointer;
@@ -329,8 +376,7 @@ void ParGraphics::Recolor() {
 	glBindVertexArray(0);
 	glViewport(0, 0, Display::actualWidth, Display::actualHeight);
 }
-int _cnt;
-float _rad, _str;
+
 void ParGraphics::Reblit() {
 	auto cam = ChokoLait::mainCamera().get();
 	Recolor();
@@ -343,15 +389,8 @@ void ParGraphics::Reblit() {
 	//glBlendFunc(GL_ONE, GL_ZERO);
 	glDisable(GL_BLEND);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	byte cnt = 0;
-	//cnt += Effects::Blur(cam->d_tfbo[0], cam->d_tfbo[1], cam->d_ttexs[0], cam->d_ttexs[1], Display::width, Display::height);
-	cnt += Effects::SSAO(cam->d_tfbo[0], cam->d_tfbo[1], cam->d_tfbo[2], cam->d_ttexs[0], cam->d_ttexs[1], cam->d_ttexs[2], cam->d_texs[1], cam->d_depthTex, _str, _cnt, _rad, Display::width, Display::height);
-
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->d_tfbo[cnt % 2]);
 	
-	glReadBuffer(GL_COLOR_ATTACHMENT0);
-	glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::width, Display::height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	Eff::Apply();
 	//*/
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glEnable(GL_BLEND);
@@ -418,10 +457,6 @@ void ParGraphics::BlitHl() {
 }
 
 void ParGraphics::DrawMenu() {
-	_str = Engine::DrawSliderFill(200, 30, 200, 16, 0, 3, _str, red(), white());
-	_cnt = (int)round(Engine::DrawSliderFill(200, 50, 200, 16, 10, 100, (float)_cnt, red(), white()));
-	_rad = Engine::DrawSliderFill(200, 70, 200, 16, 0.001f, 0.1f, _rad, red(), white());
-
 	float s0 = rotScale;
 	float rz0 = rotZ;
 	float rw0 = rotW;
@@ -501,6 +536,8 @@ void ParGraphics::DrawMenu() {
 			Scene::dirty = true;
 		}
 	}
+
+	Eff::DrawMenu(a2? 294 : 277);
 
 	rotW = Clamp<float>(rotW, -90, 90);
 	rotZ = Repeat<float>(rotZ, 0, 360);
