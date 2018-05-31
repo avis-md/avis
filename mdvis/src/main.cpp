@@ -66,7 +66,7 @@ void paintfunc() {
 	auto pos = Input::mousePos;
 
 	ParGraphics::hlIds.clear();
-	if (!stealFocus && VisSystem::InMainWin(Input::mousePos)) {
+	if (UI::_layerMax == 0 && !stealFocus && VisSystem::InMainWin(Input::mousePos)) {
 
 		auto id = ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y);
 		if (!!id) {
