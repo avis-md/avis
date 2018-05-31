@@ -11,6 +11,7 @@
 #include "md/Protein.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
+#include "utils/effects.h"
 
 bool __debug = false;
 
@@ -108,6 +109,8 @@ int main(int argc, char **argv)
 	
 	PyWeb::Init();
 	ParMenu::font = font;
+
+	Effects::Init(0xffff);
 
 	Gromacs::Read(IO::path + "/pbc.gro", false);
 	bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");

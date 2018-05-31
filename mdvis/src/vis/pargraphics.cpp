@@ -4,6 +4,7 @@
 #include "vis/system.h"
 #include "ui/icons.h"
 #include "ui/popups.h"
+#include "utils/effects.h"
 
 Texture* ParGraphics::refl = nullptr;
 float ParGraphics::reflStr = 1, ParGraphics::reflStrDecay = 2, ParGraphics::rimOff = 0.5f, ParGraphics::rimStr = 1;
@@ -326,13 +327,35 @@ void ParGraphics::Recolor() {
 
 	glUseProgram(0);
 	glBindVertexArray(0);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glViewport(0, 0, Display::actualWidth, Display::actualHeight);
 }
-
+int _cnt;
+float _rad, _str;
 void ParGraphics::Reblit() {
+	auto cam = ChokoLait::mainCamera().get();
 	Recolor();
+	//glViewport(0, 0, Display::actualWidth, Display::actualHeight);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->d_tfbo[0]);
+	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	BlitSky();
+	//*
+	glViewport(0, 0, Display::actualWidth, Display::actualHeight);
+	//glBlendFunc(GL_ONE, GL_ZERO);
+	glDisable(GL_BLEND);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	byte cnt = 0;
+	//cnt += Effects::Blur(cam->d_tfbo[0], cam->d_tfbo[1], cam->d_ttexs[0], cam->d_ttexs[1], Display::width, Display::height);
+	cnt += Effects::SSAO(cam->d_tfbo[0], cam->d_tfbo[1], cam->d_tfbo[2], cam->d_ttexs[0], cam->d_ttexs[1], cam->d_ttexs[2], cam->d_texs[1], cam->d_depthTex, _str, _cnt, _rad, Display::width, Display::height);
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->d_tfbo[cnt % 2]);
+	
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::width, Display::height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	//*/
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	if (hlIds.size())
 		BlitHl();
 }
@@ -395,6 +418,10 @@ void ParGraphics::BlitHl() {
 }
 
 void ParGraphics::DrawMenu() {
+	_str = Engine::DrawSliderFill(200, 30, 200, 16, 0, 3, _str, red(), white());
+	_cnt = (int)round(Engine::DrawSliderFill(200, 50, 200, 16, 10, 100, (float)_cnt, red(), white()));
+	_rad = Engine::DrawSliderFill(200, 70, 200, 16, 0.001f, 0.1f, _rad, red(), white());
+
 	float s0 = rotScale;
 	float rz0 = rotZ;
 	float rw0 = rotW;

@@ -91,10 +91,11 @@ public:
 #endif
 	static bool LoadShader(GLenum shaderType, string source, GLuint& shader, string* err = nullptr);
 
+	static GLuint FromVF(const string& vert, const string& frag);
+
 	friend class Camera;
 	friend class Engine;
 
 protected:
-	static GLuint FromVF(const string& vert, const string& frag);
 	bool inherited = false;
 };

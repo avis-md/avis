@@ -282,10 +282,28 @@ bool RenderTexture::Parse(string path) {
 
 void Camera::InitGBuffer(uint w, uint h) {
 	_InitGBuffer(&d_fbo, &d_colfbo, d_texs, &d_depthTex, &d_idTex, &d_colTex, w, h);
-	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if (Status != GL_FRAMEBUFFER_COMPLETE) {
-		Debug::Error("Camera (" + name + ")", "FB error:" + std::to_string(Status));
+
+	glGenFramebuffers(NUM_EXTRA_TEXS, d_tfbo);
+	glGenTextures(NUM_EXTRA_TEXS, d_ttexs);
+
+	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+	for (byte i = 0; i < NUM_EXTRA_TEXS; i++) {
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_tfbo[i]);
+		glBindTexture(GL_TEXTURE_2D, d_ttexs[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, (int)Display::width, (int)Display::height, 0, GL_RED, GL_UNSIGNED_INT, NULL);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, d_ttexs[i], 0);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glDrawBuffers(1, DrawBuffers);
+		GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (Status != GL_FRAMEBUFFER_COMPLETE) {
+			Debug::Error("Camera", "FB error t:" + std::to_string(Status));
+		}
 	}
+
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
@@ -333,12 +351,16 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 	uint t_w = (uint)roundf((target? target->width : Display::width) * quality);
 	uint t_h = (uint)roundf((target? target->height : Display::height) * quality);
 	if ((d_w != t_w) || (d_h != t_h)) {
-		glDeleteFramebuffers(1, &d_fbo);
-		glDeleteFramebuffers(1, &d_colfbo);
-		glDeleteTextures(3, d_texs + 1);
-		glDeleteTextures(1, &d_idTex);
-		glDeleteTextures(1, &d_colTex);
-		glDeleteTextures(1, &d_depthTex);
+		if (!!d_fbo) {
+			glDeleteFramebuffers(1, &d_fbo);
+			glDeleteFramebuffers(1, &d_colfbo);
+			glDeleteFramebuffers(NUM_EXTRA_TEXS, d_tfbo);
+			glDeleteTextures(3, d_texs + 1);
+			glDeleteTextures(1, &d_idTex);
+			glDeleteTextures(1, &d_colTex);
+			glDeleteTextures(1, &d_depthTex);
+			glDeleteTextures(NUM_EXTRA_TEXS, d_ttexs);
+		}
 		InitGBuffer(t_w, t_h);
 		_d_fbo = d_fbo;
 		memcpy(_d_texs, d_texs, 4 * sizeof(GLuint));
@@ -364,15 +386,17 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 			Display::height = (uint)(_h * quality2);
 		}
 	}
-	
+
+	float zero[] = { 0,0,0,0 };
+	float one = 1;
 	if (Scene::dirty) {
 		d_texs[0] = d_idTex;
 
 
-		float zero[] = { 0,0,0,0 };
-		float one = 1;
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_colfbo);
+		//glClearBufferfv(GL_COLOR, 0, zero);
+		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_tfbo[1]);
 		//glClearBufferfv(GL_COLOR, 0, zero);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_fbo);
 		glClearBufferfv(GL_COLOR, 0, zero);
@@ -413,7 +437,8 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 	//DumpBuffers();
 	//return;
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, *d_tfbo);
+	glClearBufferfv(GL_COLOR, 0, zero);
 
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(false);
