@@ -377,7 +377,6 @@ GLuint Shader::FromVF(const string& vert, const string& frag) {
 		glDeleteProgram(pointer);
 		return 0;
 	}
-	std::cout << "shader linked" << std::endl;
 
 	glDetachShader(pointer, vertex_shader);
 	glDeleteShader(vertex_shader);

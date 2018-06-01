@@ -39,6 +39,12 @@ void updateFunc() {
 	ParGraphics::Update();
 
 	PyWeb::Update();
+
+	if (Input::KeyDown(Key_F)) {
+		auto& o = ChokoLait::mainCamera->ortographic;
+		o = !o;
+		Scene::dirty = true;
+	}
 }
 
 void paintfunc() {
@@ -90,6 +96,8 @@ int main(int argc, char **argv)
 		}
 	}
 
+	if (!__debug) Debug::suppress = 1;
+
 	ChokoLait::Init(800, 800);
 	font = new Font(IO::path + "/arimo.ttf", ALIGN_TOPLEFT);
 	
@@ -111,6 +119,11 @@ int main(int argc, char **argv)
 	ParMenu::font = font;
 
 	Effects::Init(0xffff);
+
+	pSceneObject lht = SceneObject::New(Vec3());
+	Scene::AddObject(lht);
+	auto l = lht->AddComponent<Light>();
+	ParGraphics::SetLight(l.get());
 
 	Gromacs::Read(IO::path + "/pbc.gro", false);
 	bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");

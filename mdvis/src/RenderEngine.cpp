@@ -348,6 +348,7 @@ GLuint Camera::DoFetchTexture(string s) {
 }
 
 void Camera::Render(RenderTexture* target, renderFunc func) {
+	active = this;
 	uint t_w = (uint)roundf((target? target->width : Display::width) * quality);
 	uint t_h = (uint)roundf((target? target->height : Display::height) * quality);
 	if ((d_w != t_w) || (d_h != t_h)) {
@@ -447,7 +448,7 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 	glBlendFunc(GL_ONE, GL_ONE);
 
 	//RenderLights();
-
+	
 	if (onBlit) onBlit();
 	
 	if (useGBuffer2 && applyGBuffer2) {
@@ -857,7 +858,7 @@ void Camera::_DrawLights(std::vector<pSceneObject>& oo, Mat4x4& ip, GLuint targe
 		for (auto c : o->_components) {
 			if (c->componentType == COMP_LHT) {
 				Light* l = (Light*)c.get();
-				switch (l->_lightType) {
+				switch (l->lightType) {
 				case LIGHTTYPE_POINT:
 					_DoDrawLight_Point(l, ip, d_fbo, d_texs, d_depthTex, 0, 0, (float)Display::width, (float)Display::height, targetFbo);
 					break;
@@ -903,9 +904,9 @@ void Camera::RenderLights(GLuint targetFbo) {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetFbo);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, targetFbo);
 
-	_ApplyEmission(d_fbo, d_texs, (float)Display::width, (float)Display::height, targetFbo);
+	//_ApplyEmission(d_fbo, d_texs, (float)Display::width, (float)Display::height, targetFbo);
 	Mat4x4 mat = glm::inverse(MVP::projection());
-	_RenderSky(mat, d_texs, d_depthTex); //wont work well on ortho, will it?
+	//_RenderSky(mat, d_texs, d_depthTex); //wont work well on ortho, will it?
 	//glViewport(v.r, Display::height - v.g - v.a, v.b, v.a - EB_HEADER_SIZE - 2);
 	_DrawLights(Scene::active->objects, mat);
 	//glViewport(0, 0, Display::width, Display::height);
@@ -958,7 +959,7 @@ void Light::InitShadow() {
 	glGenFramebuffers(1, &_shadowFbo);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _shadowFbo);
 
-	glGenTextures(3, _shadowGITexs);
+	//glGenTextures(3, _shadowGITexs);
 	glGenTextures(1, &_shadowMap);
 
 	for (uint i = 0; i < 3; i++) {
@@ -989,8 +990,8 @@ void Light::InitShadow() {
 		Debug::Message("ShadowMap", "FB ok");
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
-	GLenum e;
-	//* depth cube
+	/*
+	//depth cube
 	glGenFramebuffers(6, _shadowCubeFbos);
 	glGenTextures(1, &_shadowCubeMap);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, _shadowCubeMap);
@@ -1001,13 +1002,11 @@ void Light::InitShadow() {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	e = glGetError();
 	for (uint a = 0; a < 6; a++) {
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + a, 0, GL_DEPTH_COMPONENT32F, 512, 512, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
 	}
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	e = glGetError();
 
 	for (uint a = 0; a < 6; a++) {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _shadowCubeFbos[a]);
@@ -1021,8 +1020,9 @@ void Light::InitShadow() {
 	}
 
 	Debug::Message("ShadowMap", "FB cube ok");
-	//*/
+
 	InitRSM();
+	*/
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }

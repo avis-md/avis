@@ -12,6 +12,8 @@ public:
 
 	static uint StackTrace(uint count, void** buffer);
 
+	static byte suppress;
+
 	friend class ChokoLait;
 protected:
 	static std::ofstream* stream;

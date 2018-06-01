@@ -1,2 +1,0 @@
-[i]Debug: Log Initialized
-[e]Default Resources: fatal: cannot open default resources at /Users/chokopan/Github/mdvis/OpenGl1_Editor/defaultresources.bin!

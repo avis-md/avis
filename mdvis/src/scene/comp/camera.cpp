@@ -1,6 +1,8 @@
 #include "Engine.h"
 #include "Editor.h"
 
+Camera* Camera::active;
+
 Camera::Camera() : Component("Camera", COMP_CAM, DRAWORDER_NONE), ortographic(false), fov(60), orthoSize(10), screenPos(0.0f, 0.0f, 1.0f, 1.0f), clearType(CAM_CLEAR_COLOR), clearColor(black(1)), _tarRT(-1), nearClip(0.01f), farClip(500), quality(1), quality2(0.5f), useGBuffer2(false), applyGBuffer2(false) {
 	InitGBuffer(Display::width, Display::height);
 }
@@ -34,7 +36,12 @@ void Camera::ApplyGL() {
 	MVP::Switch(true);
 	MVP::Clear();
 	Quat q = glm::inverse(object->transform.rotation());
-	MVP::Mul(glm::perspectiveFov(fov * deg2rad, (float)Display::width, (float)Display::height, 0.01f, 500.0f));
+	if (ortographic) {
+		float hw = Display::height * 1.0f / Display::width;
+		MVP::Mul(glm::ortho(-1.0f, 1.0f, -hw, hw, 0.01f, 500.0f));
+	} else {
+		MVP::Mul(glm::perspectiveFov(fov * deg2rad, (float)Display::width, (float)Display::height, 0.01f, 500.0f));
+	}
 	MVP::Scale(1, 1, -1);
 	MVP::Mul(QuatFunc::ToMatrix(q));
 	Vec3 pos = -object->transform.position();

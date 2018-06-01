@@ -9,6 +9,8 @@ class Camera : public Component {
 public:
 	Camera();
 
+	static Camera* active;
+
 	bool ortographic;
 	float fov, orthoSize;
 	Rect screenPos;
@@ -23,7 +25,7 @@ public:
 
 	uint GetIdAt(uint x, uint y);
 	
-	onBlitFunc onBlit;
+	onBlitFunc onPreBlit, onBlit;
 	GLuint d_fbo, d_colfbo, d_texs[4], d_idTex, d_depthTex, d_colTex;
 	GLuint d_fbo2, d_texs2[4], d_depthTex2, _d_fbo, _d_texs[4], _d_depthTex;
 	GLuint d_tfbo[NUM_EXTRA_TEXS], d_ttexs[NUM_EXTRA_TEXS];

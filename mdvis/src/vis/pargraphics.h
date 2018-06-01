@@ -8,6 +8,8 @@ public:
 	static Texture* refl;
 	static float reflStr, reflStrDecay, rimOff, rimStr;
 
+	static Light* light;
+
 	static GLuint reflProg, parProg, parConProg, parConLineProg;
 	static GLint reflProgLocs[11], parProgLocs[7], parConProgLocs[7], parConLineProgLocs[5];
 
@@ -46,6 +48,7 @@ public:
 	};
 
 	static void Init(), UpdateDrawLists();
+	static void SetLight(Light* l);
 
 	static void Update();
 

@@ -79,8 +79,9 @@ bool IO::HasFile(string szPath)
 #ifdef PLATFORM_WIN
 	DWORD dwAttrib = GetFileAttributes(&szPath[0]);
 	return (dwAttrib != INVALID_FILE_ATTRIBUTES);// && (dwAttrib & FILE_ATTRIBUTE_NORMAL));
+#else
+	return (access(&szPath[0], F_OK ) != -1);
 #endif
-	return false;
 }
 
 string IO::ReadFile(const string& path) {

@@ -102,21 +102,12 @@ void Engine::Init(string path) {
 	}
 	Engine::_mainThreadId = std::this_thread::get_id();
 
-#if defined(PLATFORM_WIN) || defined(PLATFORM_LNX) || defined(PLATFORM_OSX)
 	string vertcode = "#version 330 core\nlayout(location = 0) in vec3 pos;\nlayout(location = 1) in vec2 uv;\nout vec2 UV;\nvoid main(){ \ngl_Position.xyz = pos;\ngl_Position.w = 1.0;\nUV = uv;\n}";
 	string vertcodeW = "#version 330 core\nlayout(location = 0) in vec3 pos;\nlayout(location = 1) in vec2 uv;\nuniform mat4 MVP;\nout vec2 UV;\nvoid main(){ \ngl_Position = MVP * vec4(pos, 1);\ngl_Position /= gl_Position.w;\nUV = uv;\n}";
 	string fragcode = "#version 330 core\nin vec2 UV;\nuniform sampler2D sampler;\nuniform vec4 col;\nuniform float level;\nout vec4 color;void main(){\ncolor = textureLod(sampler, UV, level)*col;\n}"; //out vec3 Vec4;\n
 	string fragcode2 = "#version 330 core\nin vec2 UV;\nuniform sampler2D sampler;\nuniform vec4 col;\nuniform float level;\nout vec4 color;void main(){\ncolor = vec4(1, 1, 1, textureLod(sampler, UV, level).r)*col;\n}"; //out vec3 Vec4;\n
 	string fragcode3 = "#version 330 core\nin vec2 UV;\nuniform vec4 col;\nout vec4 color;void main(){\ncolor = col;\n}";
 	string fragcodeSky = "#version 330 core\nin vec2 UV;uniform sampler2D sampler;uniform vec2 dir;uniform float length;out vec4 color;void main(){float ay = asin((UV.y) / length);float l2 = length*cos(ay);float ax = asin((dir.x + UV.x) / l2);color = textureLod(sampler, vec2((dir.x + ax / 3.14159)*sin(dir.y + ay / 3.14159) + 0.5, (dir.y + ay / 3.14159)), 0);color.a = 1;}";
-#elif defined(PLATFORM_ADR)
-	string vertcode = "#version 300 es\nlayout(location = 0) in vec3 pos;\nlayout(location = 1) in vec2 uv;\nout vec2 UV;\nvoid main(){ \ngl_Position.xyz = pos;\ngl_Position.w = 1.0;\nUV = uv;\n}";
-	string fragcode = "#version 300 es\nin vec2 UV;\nuniform sampler2D sampler;\nuniform vec4 col;\nuniform float level;\nout vec4 color;void main(){\ncolor = textureLod(sampler, UV, level)*col;\n}"; //out vec3 Vec4;\n
-	string fragcode2 = "#version 300 es\nin vec2 UV;\nuniform sampler2D sampler;\nuniform vec4 col;\nuniform float level;\nout vec4 color;void main(){\ncolor = vec4(1, 1, 1, textureLod(sampler, UV, level).r)*col;\n}"; //out vec3 Vec4;\n
-	string fragcode3 = "#version 300 es\nin vec2 UV;\nuniform vec4 col;\nout vec4 color;void main(){\ncolor = col;\n}";
-	string fragcodeSky = "#version 300 es\nin vec2 UV;uniform sampler2D sampler;uniform vec2 dir;uniform float length;out vec4 color;void main(){float ay = asin((UV.y) / length);float l2 = length*cos(ay);float ax = asin((dir.x + UV.x) / l2);color = textureLod(sampler, vec2((dir.x + ax / 3.14159)*sin(dir.y + ay / 3.14159) + 0.5, (dir.y + ay / 3.14159)), 0.0);color.a = 1.0;}";
-#endif
-	std::cout << "loading shaders..." << std::endl;
 
 	unlitProgram = Shader::FromVF(vertcode, fragcode);
 	unlitProgramA = Shader::FromVF(vertcode, fragcode2);
@@ -125,23 +116,20 @@ void Engine::Init(string path) {
 	defProgramW = Shader::FromVF(vertcodeW, fragcode3);
 	skyProgram = Shader::FromVF(vertcode, fragcodeSky);
 
-	std::cout << "...done" << std::endl;
+	std::cout << " done" << std::endl;
 
 	Input::RegisterCallbacks();
 	MVP::Reset();
 	UI::Init();
 	//ffmpeg_init finit = ffmpeg_init();
-	Material::LoadOris();
+	//Material::LoadOris();
 	Light::InitShadow();
 	Camera::InitShaders();
 	Font::Init();
 	//SkinnedMeshRenderer::InitSkinning();
 	//VoxelRenderer::Init();
 	//if (!AudioEngine::Init()) Debug::Warning("AudioEngine", "Failed to initialize audio output!");
-#ifdef IS_EDITOR
-	Editor::InitShaders();
-	Editor::instance->InitMaterialPreviewer();
-#endif
+
 	ScanQuadParams();
 
 	uint d[6] = {0, 2, 1, 2, 3, 1};
@@ -416,24 +404,6 @@ void Engine::DrawQuad(float x, float y, float w, float h, Vec4 col) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
-	/*
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, &quadPoss[0]);
-	glUseProgram(prog);
-
-	glUniform4f(drawQuadLocsC[0], Vec4.r, Vec4.g, Vec4.b, Vec4.a);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, 0, &quadPoss[0]);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, &quadIndexes[0]);
-
-	glDisableVertexAttribArray(0);
-	glUseProgram(0);
-
-	glDisableClientState(GL_VERTEX_ARRAY);
-	*/
 }
 
 void Engine::DrawQuad(float x, float y, float w, float h, GLuint texture, Vec2 uv0, Vec2 uv1, Vec2 uv2, Vec2 uv3, bool single, Vec4 Vec4, float miplevel) {
@@ -541,19 +511,6 @@ void Engine::DrawLine(Vec3 v1, Vec3 v2, Vec4 col, float width) {
 	for (int y = 0; y < 2; y++) {
 		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
 	}
-	/*
-	uint quadIndexes[2] = { 0, 1 };
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, &quadPoss[0]);
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, 0, &quadPoss[0]);
-	glColor4f(col.r, col.g, col.b, col.a);
-	glLineWidth(width);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glDrawElements(GL_LINES, 2, GL_UNSIGNED_INT, &quadIndexes[0]);
-	//glDisableVertexAttribArray(0);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	*/
 	UI::SetVao(2, quadPoss);
 
 	glUseProgram(Engine::defProgram);
@@ -564,16 +521,6 @@ void Engine::DrawLine(Vec3 v1, Vec3 v2, Vec4 col, float width) {
 	glUseProgram(0);
 }
 void Engine::DrawLineW(Vec3 v1, Vec3 v2, Vec4 col, float width) {
-	/*
-	uint quadIndexes[2] = { 0, 1 };
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, &quadPoss[0]);
-	glColor4f(col.r, col.g, col.b, col.a);
-	glLineWidth(width);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glDrawElements(GL_LINES, 2, GL_UNSIGNED_INT, &quadIndexes[0]);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	*/
 	Vec3 quadPoss[2]{ v1, v2 };
 	UI::SetVao(2, quadPoss);
 	
@@ -692,13 +639,10 @@ void Engine::DrawCircleW(Vec3 c, Vec3 x, Vec3 y, float r, uint n, Vec4 col, floa
 	ids.push_back(0);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, &poss[0]);
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, 0, &quadPoss[0]);
 	glColor4f(col.r, col.g, col.b, col.a);
 	glLineWidth(width);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glDrawElements(GL_LINES, ids.size(), GL_UNSIGNED_INT, &ids[0]);
-	//glDisableVertexAttribArray(0);
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 

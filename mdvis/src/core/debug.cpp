@@ -5,7 +5,10 @@
 #include <android/log.h>
 #endif
 
+byte Debug::suppress = 0;
+
 void Debug::Message(string c, string s) {
+	if (suppress > 0) return;
 #ifndef IS_EDITOR
 	if (stream) *stream << "[i]" << c << ": " << s << std::endl;
 #endif
@@ -16,6 +19,7 @@ void Debug::Message(string c, string s) {
 #endif
 }
 void Debug::Warning(string c, string s) {
+	if (suppress > 1) return;
 #ifndef IS_EDITOR
 	if (stream) *stream << "[w]" << c << ": " << s << std::endl;
 #else

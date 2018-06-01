@@ -8,7 +8,7 @@
             "name": "(lldb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/Users/chokopan/Github/mdvis/mdvis/build/a.out",
+            "program": "/Users/chokopan/Github/mdvis/mdvis/build/mdvis",
             "args": ["-debug"],
             "stopAtEntry": false,
             "cwd": "/Users/chokopan/Github/mdvis/mdvis/build",

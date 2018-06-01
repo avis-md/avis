@@ -9,6 +9,8 @@
 Texture* ParGraphics::refl = nullptr;
 float ParGraphics::reflStr = 1, ParGraphics::reflStrDecay = 2, ParGraphics::rimOff = 0.5f, ParGraphics::rimStr = 1;
 
+Light* ParGraphics::light;
+
 GLuint ParGraphics::reflProg, ParGraphics::parProg, ParGraphics::parConProg, ParGraphics::parConLineProg;
 GLint ParGraphics::reflProgLocs[] = {}, ParGraphics::parProgLocs[] = {}, ParGraphics::parConProgLocs[] = {}, ParGraphics::parConLineProgLocs[] = {};
 
@@ -176,6 +178,15 @@ void ParGraphics::UpdateDrawLists() {
 		if (!!bcnt && !!(dt >> 4)) drawListsB.push_back(std::pair<uint, std::pair<uint, byte>>(rs.offset_b, std::pair<uint, byte>(bcnt, dt >> 4)));
 	}
 	Scene::dirty = true;
+}
+
+void ParGraphics::SetLight(Light* l) {
+	light = l;
+	l->lightType = LIGHTTYPE_DIRECTIONAL;
+	l->drawShadow = true;
+	l->shadowOnly = true;
+	l->shadowStrength = 1;
+	l->maxDist = 20;
 }
 
 void ParGraphics::Update() {

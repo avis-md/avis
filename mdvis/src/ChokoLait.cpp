@@ -73,6 +73,12 @@ void ChokoLait::_InitVars() {
 #endif
 
 	const string& path = IO::InitPath();
+	if (!IO::HasFile(path + "/defaultresources.bin")) {
+		std::cout << "Neccessary files not found in current directory!\n"
+		 << "If you are running from another directory, make sure to run mdvis.sh instead of mdvis directly!" << std::endl;
+		exit(-1);
+	}
+
 	Debug::Init(path);
 	DefaultResources::Init(path + "/defaultresources.bin");
 

@@ -21,7 +21,7 @@ OBJS = obj/md/Protein.o obj/hdr.o obj/lodepng.o obj/AudioEngine.o obj/ChokoLait.
 
 HEADERS = md/Protein.h hdr.h lodepng.h AssetObjects.h AudioEngine.h ChokoLait.h Defines.h Editor.h Engine.h SceneObjects.h SceneScriptResolver.h asset/animation.h asset/animclip.h asset/assetmanager.h asset/assetobject.h asset/audioclip.h asset/cameffect.h asset/compute.h asset/cubemap.h asset/material.h asset/mesh.h asset/resources.h asset/shader.h asset/img/background.h asset/img/rendertexture.h asset/img/texture.h asset/img/texture3d.h asset/img/videotexture.h core/audio.h core/bbox.h core/debug.h core/display.h core/font.h core/input.h core/io.h core/math.h core/mvp.h core/time.h core/ui.h md/Gromacs.h md/ParMenu.h md/Particles.h py/pybrowse.h py/pynode.h py/pyreader.h py/PyWeb.h py/nodes/pynode_inputs.h py/nodes/pynode_plot.h scene/object.h scene/scene.h scene/sceneobject.h scene/texturerenderer.h scene/transform.h scene/comp/animator.h scene/comp/armature.h scene/comp/audiolistener.h scene/comp/audiosource.h scene/comp/camera.h scene/comp/component.h scene/comp/light.h scene/comp/meshfilter.h scene/comp/meshrenderer.h scene/comp/scenescript.h scene/comp/skinnedmeshrenderer.h scene/comp/voxelrenderer.h ui/popups.h ui/icons.h utils/color.h utils/effects.h utils/fft.h utils/ifaddrs.h utils/net.h utils/plot.h utils/precedurals.h utils/ptrext.h utils/random.h utils/rawvector.h utils/rect.h utils/serial.h utils/solidify.h utils/spline.h utils/stream.h utils/strext.h utils/xml.h utils/dialog.o vis/pargraphics.h vis/system.h
 
-../build/a.out: $(OBJS)
+../build/mdvis: $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
 
 obj/md/Protein.o: md/Protein.cpp $(HEADERS)
@@ -272,4 +272,4 @@ obj/vis/system.o: vis/system.cpp $(HEADERS)
 
 clean:
 	find ./obj -name '*.o' -exec rm {} \;
-	rm -f ../build/.out
+	rm -f ../build/mdvis

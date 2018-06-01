@@ -24,13 +24,13 @@ enum LIGHT_FALLOFF : byte {
 class Light : public Component {
 public:
 	Light();
-	LIGHTTYPE lightType() { return _lightType; }
+	LIGHTTYPE lightType;
 
 	float intensity = 1;
 	Vec4 color = white();
 	float angle = 60;
 	float minDist = 0.01f, maxDist = 5;
-	bool drawShadow = true;
+	bool drawShadow = true, shadowOnly = false;
 	float shadowBias = 0.001f, shadowStrength = 1;
 	bool contactShadows = false;
 	float contactShadowDistance = 0.1f;
@@ -52,7 +52,6 @@ public:
 	friend class EB_Previewer;
 	_allowshared(Light);
 protected:
-	LIGHTTYPE _lightType;
 	Light(std::ifstream& stream, SceneObject* o, long pos = -1);
 	//Mat4x4 _shadowMatrix;
 	ASSETID _cookie = -1, _hsvMap = -1;
