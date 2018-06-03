@@ -60,7 +60,7 @@ public:
 	static GLuint d_reflQuadProgram;
 	static GLint d_skyProgramLocs[];
 
-	static GLuint fullscreenVao, fullscreenVbo;
+	static GLuint emptyVao;
 	static const float fullscreenVerts[];
 	static const int fullscreenIndices[];
 

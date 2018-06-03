@@ -208,7 +208,7 @@ void Protein::Draw() {
         glUniform1i(shadLocs[6], p.loopReso);
 
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glBindVertexArray(ParGraphics::emptyVao);
+        glBindVertexArray(Camera::emptyVao);
         glDrawArrays(GL_TRIANGLES, 0, 6 * (p.cnt * 3 - 1) * p.chainReso * p.loopReso);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         //*/

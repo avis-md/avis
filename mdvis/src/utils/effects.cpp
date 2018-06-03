@@ -5,7 +5,7 @@ GLint Effects::blurProgLocs[], Effects::ssaoProgLocs[], Effects::ssaoProg2Locs[]
 GLuint Effects::noiseTex;
 
 void Effects::Init(EFF_ENABLE_MASK mask) {
-	auto vs = DefaultResources::GetStr("lightPassVert.txt");
+	auto vs = IO::GetText(IO::path + "minVert.txt");//DefaultResources::GetStr("lightPassVert.txt");
 
 	if (!!(mask & EFF_ENABLE_BLUR))
 		_InitBlur(vs);
@@ -17,8 +17,9 @@ void Effects::Init(EFF_ENABLE_MASK mask) {
 
 byte Effects::Blur(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, float rad, int w, int h) {
 	glUseProgram(blurProg);
-	glBindVertexArray(Camera::fullscreenVao);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
+	glBindVertexArray(Camera::emptyVao);
+	//glBindVertexArray(Camera::fullscreenVao);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
 	glUniform1i(blurProgLocs[0], 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tx1);
@@ -26,14 +27,16 @@ byte Effects::Blur(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, float rad, int 
 	glUniform2f(blurProgLocs[2], (float)w, (float)h);
 	glUniform1f(blurProgLocs[3], 0);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, t2);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glBindTexture(GL_TEXTURE_2D, tx2);
 	glUniform1f(blurProgLocs[3], 1);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, t1);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
 	return 2;
@@ -57,10 +60,11 @@ byte Effects::SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLui
 	glUniformMatrix4fv(ssaoProgLocs[7], 1, GL_FALSE, glm::value_ptr(MVP::projection()));
 	glUniformMatrix4fv(ssaoProgLocs[8], 1, GL_FALSE, glm::value_ptr(glm::inverse(MVP::projection())));
 
-	glBindVertexArray(Camera::fullscreenVao);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
+	glBindVertexArray(Camera::emptyVao);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, t3);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	if (blr > 0) Blur(t3, t2, tx3, tx2, blr / 20, w, h);
 	
@@ -74,12 +78,13 @@ byte Effects::SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLui
 	glUniform1f(ssaoProg2Locs[2], str);
 	glUniform2f(ssaoProg2Locs[3], (float)w, (float)h);
 
-	glBindVertexArray(Camera::fullscreenVao);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
+	glBindVertexArray(Camera::emptyVao);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, t2);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 	
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
 	return 1;

@@ -93,7 +93,8 @@ void Camera::InitShaders() {
 	GLuint vertex_shader;
 	string err = "";
 
-	if (!Shader::LoadShader(GL_VERTEX_SHADER, DefaultResources::GetStr("lightPassVert.txt"), vertex_shader, &err)) {
+	//if (!Shader::LoadShader(GL_VERTEX_SHADER, DefaultResources::GetStr("lightPassVert.txt"), vertex_shader, &err)) {
+	if (!Shader::LoadShader(GL_VERTEX_SHADER, IO::GetText(IO::path + "/minVert.txt"), vertex_shader, &err)) {
 		Debug::Error("Cam Shader Compiler", "v! " + err);
 		abort();
 	}
@@ -119,17 +120,7 @@ void Camera::InitShaders() {
 	d_skyProgramLocs[7] = glGetUniformLocation(d_skyProgram, "screenSize");
 	d_skyProgramLocs[8] = glGetUniformLocation(d_skyProgram, "skyStrengthB");
 
-	glGenBuffers(1, &fullscreenVbo);
-	glBindBuffer(GL_ARRAY_BUFFER, fullscreenVbo);
-	glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(Vec2), &fullscreenVerts[0], GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glGenVertexArrays(1, &fullscreenVao);
-	glBindVertexArray(fullscreenVao);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, fullscreenVbo);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	glGenVertexArrays(1, &emptyVao);
 	
 	glGenBuffers(1, &rectIdBuf);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rectIdBuf);

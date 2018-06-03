@@ -31,8 +31,6 @@ public:
 
 	static bool animate, seek;
 
-	static GLuint emptyVao;
-
 	class Eff {
 	public:
 		static bool expanded;

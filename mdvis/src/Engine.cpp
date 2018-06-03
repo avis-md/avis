@@ -116,8 +116,6 @@ void Engine::Init(string path) {
 	defProgramW = Shader::FromVF(vertcodeW, fragcode3);
 	skyProgram = Shader::FromVF(vertcode, fragcodeSky);
 
-	std::cout << " done" << std::endl;
-
 	Input::RegisterCallbacks();
 	MVP::Reset();
 	UI::Init();

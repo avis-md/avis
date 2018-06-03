@@ -33,8 +33,6 @@ bool ParGraphics::dragging = false;
 
 bool ParGraphics::animate = false, ParGraphics::seek = false;
 
-GLuint ParGraphics::emptyVao;
-
 //---------------- effects vars -------------------
 
 bool ParGraphics::Eff::expanded;
@@ -71,9 +69,9 @@ void ParGraphics::Eff::DrawMenu(float off) {
 	useSSAO = Engine::Toggle(expandPos - 20, off, 16, Icons::checkbox, useSSAO, white(), ORIENT_HORIZONTAL);
 	UI::Label(expandPos - 145, off + 17, 12, "Samples", font, white());
 	ssaoSamples = TryParse(UI::EditText(expandPos - 80, off + 17, 76, 16, 12, white(1, 0.5f), std::to_string(ssaoSamples), font, true, nullptr, white()), 0);
-	ssaoSamples = Clamp(ssaoSamples, 5, 50);
+	ssaoSamples = Clamp(ssaoSamples, 10, 100);
 	UI::Label(expandPos - 145, off + 34, 12, "Radius", font, white());
-	ssaoRad = Engine::DrawSliderFill(expandPos - 80, off + 34, 76, 16, 0.001f, 0.1f, ssaoRad, white(1, 0.5f), white());
+	ssaoRad = Engine::DrawSliderFill(expandPos - 80, off + 34, 76, 16, 0.001f, 0.05f, ssaoRad, white(1, 0.5f), white());
 	UI::Label(expandPos - 145, off + 51, 12, "Strength", font, white());
 	ssaoStr = Engine::DrawSliderFill(expandPos - 80, off + 51, 76, 16, 0, 3, ssaoStr, white(1, 0.5f), white());
 	UI::Label(expandPos - 145, off + 68, 12, "Blur", font, white());
@@ -84,7 +82,8 @@ void ParGraphics::Eff::DrawMenu(float off) {
 
 void ParGraphics::Init() {
 	refl = new Texture(IO::path + "/refl.png", true, TEX_FILTER_BILINEAR, 1, GL_REPEAT, GL_MIRRORED_REPEAT);
-	reflProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText(IO::path + "/reflFrag.txt")))->pointer;
+	//reflProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText(IO::path + "/reflFrag.txt")))->pointer;
+	reflProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), IO::GetText(IO::path + "/reflFrag.txt"));
 	reflProgLocs[0] = glGetUniformLocation(reflProg, "_IP");
 	reflProgLocs[1] = glGetUniformLocation(reflProg, "screenSize");
 	reflProgLocs[2] = glGetUniformLocation(reflProg, "inColor");
@@ -97,7 +96,7 @@ void ParGraphics::Init() {
 	reflProgLocs[9] = glGetUniformLocation(reflProg, "rimOffset");
 	reflProgLocs[10] = glGetUniformLocation(reflProg, "rimStrength");
 	
-	parProg = (new Shader(IO::GetText(IO::path + "/parV.txt"), IO::GetText(IO::path + "/parF.txt")))->pointer;
+	parProg = Shader::FromVF(IO::GetText(IO::path + "/parV.txt"), IO::GetText(IO::path + "/parF.txt"));
 	parProgLocs[0] = glGetUniformLocation(parProg, "_MV");
 	parProgLocs[1] = glGetUniformLocation(parProg, "_P");
 	parProgLocs[2] = glGetUniformLocation(parProg, "camPos");
@@ -106,7 +105,7 @@ void ParGraphics::Init() {
 	parProgLocs[5] = glGetUniformLocation(parProg, "radTex");
 	parProgLocs[6] = glGetUniformLocation(parProg, "radScl");
 
-	parConProg = (new Shader(IO::GetText(IO::path + "/parConV.txt"), IO::GetText(IO::path + "/parConF.txt")))->pointer;
+	parConProg = Shader::FromVF(IO::GetText(IO::path + "/parConV.txt"), IO::GetText(IO::path + "/parConF.txt"));
 	parConProgLocs[0] = glGetUniformLocation(parConProg, "_MV");
 	parConProgLocs[1] = glGetUniformLocation(parConProg, "_P");
 	parConProgLocs[2] = glGetUniformLocation(parConProg, "camPos");
@@ -115,26 +114,24 @@ void ParGraphics::Init() {
 	parConProgLocs[5] = glGetUniformLocation(parConProg, "posTex");
 	parConProgLocs[6] = glGetUniformLocation(parConProg, "connTex");
 
-	parConLineProg = (new Shader(IO::GetText(IO::path + "/parConV_line.txt"), IO::GetText(IO::path + "/parConF_line.txt")))->pointer;
+	parConLineProg = Shader::FromVF(IO::GetText(IO::path + "/parConV_line.txt"), IO::GetText(IO::path + "/parConF_line.txt"));
 	parConLineProgLocs[0] = glGetUniformLocation(parConLineProg, "_MV");
 	parConLineProgLocs[1] = glGetUniformLocation(parConLineProg, "_P");
 	parConLineProgLocs[2] = glGetUniformLocation(parConLineProg, "posTex");
 	parConLineProgLocs[3] = glGetUniformLocation(parConLineProg, "connTex");
 
-	selHlProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText(IO::path + "/selectorFrag.txt")))->pointer;
+	selHlProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), IO::GetText(IO::path + "/selectorFrag.txt"));
 	selHlProgLocs[0] = glGetUniformLocation(selHlProg, "screenSize");
 	selHlProgLocs[1] = glGetUniformLocation(selHlProg, "myId");
 	selHlProgLocs[2] = glGetUniformLocation(selHlProg, "idTex");
 	selHlProgLocs[3] = glGetUniformLocation(selHlProg, "hlCol");
 
-	colProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText(IO::path + "/colorerFrag.txt")))->pointer;
+	colProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), IO::GetText(IO::path + "/colorerFrag.txt"));
 	colProgLocs[0] = glGetUniformLocation(colProg, "idTex");
 	colProgLocs[1] = glGetUniformLocation(colProg, "spTex");
 	colProgLocs[2] = glGetUniformLocation(colProg, "screenSize");
 	colProgLocs[3] = glGetUniformLocation(colProg, "id2col");
 	colProgLocs[4] = glGetUniformLocation(colProg, "colList");
-
-	glGenVertexArrays(1, &emptyVao);
 
 	hlIds.resize(1);
 	ChokoLait::mainCamera->onBlit = Reblit;
@@ -142,6 +139,11 @@ void ParGraphics::Init() {
 	rotCenter = Vec3(4, 4, 4);
 	rotZ = 90;
 	rotScale = -5;
+
+	Eff::ssaoSamples = 20;
+	Eff::ssaoRad = 0.015f;
+	Eff::ssaoStr = 1;
+	Eff::ssaoBlur = 6.5f;
 }
 
 void ParGraphics::UpdateDrawLists() {
@@ -311,7 +313,7 @@ void ParGraphics::Rerender() {
 		glDrawArrays(GL_POINTS, p.first, p.second.first);
 	}
 	
-	glBindVertexArray(emptyVao);
+	glBindVertexArray(Camera::emptyVao);
 	for (auto& p : drawListsB) {
 		byte& tp = p.second.second;
 		if (tp == 1) {
@@ -378,10 +380,11 @@ void ParGraphics::Recolor() {
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	glBindVertexArray(Camera::fullscreenVao);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(Camera::emptyVao);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	glUseProgram(0);
 	glBindVertexArray(0);
@@ -439,10 +442,11 @@ void ParGraphics::BlitSky() {
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	glBindVertexArray(Camera::fullscreenVao);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(Camera::emptyVao);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
 }
@@ -459,10 +463,11 @@ void ParGraphics::BlitHl() {
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	
-	glBindVertexArray(Camera::fullscreenVao);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(Camera::emptyVao);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
 }

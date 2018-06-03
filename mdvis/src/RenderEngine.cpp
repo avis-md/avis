@@ -210,13 +210,14 @@ void RenderTexture::Blit(GLuint src, RenderTexture* dst, GLuint shd, string texN
 	glBindTexture(GL_TEXTURE_2D, src);
 	//glEnableClientState(GL_VERTEX_ARRAY);
 	//glVertexPointer(2, GL_FLOAT, 0, &Camera::fullscreenVerts[0]);
-	glBindVertexArray(Camera::fullscreenVao);
+	glBindVertexArray(Camera::emptyVao);
 
 	//glEnableVertexAttribArray(0);
 	//glVertexAttribPointer(0, 2, GL_FLOAT, GL_TRUE, 0, &Camera::fullscreenVerts[0]);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, &Camera::fullscreenIndices[0]);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, &Camera::fullscreenIndices[0]);
 
 	glBindVertexArray(0);
 	//glDisableVertexAttribArray(0);
@@ -241,12 +242,13 @@ void RenderTexture::Blit(Texture* src, RenderTexture* dst, Material* mat, string
 
 	//glEnableClientState(GL_VERTEX_ARRAY);
 	//glVertexPointer(2, GL_FLOAT, 0, &Camera::fullscreenVerts[0]);
-	glBindVertexArray(Camera::fullscreenVao);
+	glBindVertexArray(Camera::emptyVao);
 	//glEnableVertexAttribArray(0);
 	//glVertexAttribPointer(0, 2, GL_FLOAT, GL_TRUE, 0, &Camera::fullscreenVerts[0]);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, &Camera::fullscreenIndices[0]);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, &Camera::fullscreenIndices[0]);
 
 	glBindVertexArray(0);
 	//glDisableVertexAttribArray(0);
@@ -308,8 +310,7 @@ void Camera::InitGBuffer(uint w, uint h) {
 }
 
 
-GLuint Camera::fullscreenVao = 0;
-GLuint Camera::fullscreenVbo = 0;
+GLuint Camera::emptyVao = 0;
 //const float Camera::fullscreenVerts[] = { -1, -1, 1,  -1, 1, 1,  1, -1, 1,  1, 1, 1 };
 const float Camera::fullscreenVerts[] = { -1, -1,  -1, 1,  1, -1,  1, 1 };
 const int Camera::fullscreenIndices[] = { 0, 1, 2, 1, 3, 2 };
@@ -479,7 +480,7 @@ void Camera::_RenderSky(Mat4x4 ip, GLuint d_texs[], GLuint d_depthTex, float w, 
 	GLint scrSzLoc = d_skyProgramLocs[7];
 	GLint skyBrtLoc = d_skyProgramLocs[8];
 
-	glBindVertexArray(fullscreenVao);
+	glBindVertexArray(emptyVao);
 	//glEnableClientState(GL_VERTEX_ARRAY);
 	//glVertexPointer(2, GL_FLOAT, 0, fullscreenVerts);
 	glUseProgram(d_skyProgram);
@@ -509,7 +510,8 @@ void Camera::_RenderSky(Mat4x4 ip, GLuint d_texs[], GLuint d_depthTex, float w, 
 	glUniform1f(skyBrtLoc, Scene::active->settings.skyBrightness);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, fullscreenIndices);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, fullscreenIndices);
 
 	//glDisableVertexAttribArray(0);
 	glUseProgram(0);
@@ -641,7 +643,7 @@ void Camera::_DoDrawLight_Point(Light* l, Mat4x4& ip, GLuint d_fbo, GLuint d_tex
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, d_fbo);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tar);
 #define sloc l->paramLocs_Point
-	glBindVertexArray(Camera::fullscreenVao);
+	glBindVertexArray(Camera::emptyVao);
 	//glEnableClientState(GL_VERTEX_ARRAY);
 	//glVertexPointer(2, GL_FLOAT, 0, fullscreenVerts);
 	glUseProgram(d_pLightProgram);
@@ -690,7 +692,8 @@ void Camera::_DoDrawLight_Point(Light* l, Mat4x4& ip, GLuint d_fbo, GLuint d_tex
 	}
 #undef sloc
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, fullscreenIndices);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, fullscreenIndices);
 
 	glBindVertexArray(0);
 	//glDisableVertexAttribArray(0);
@@ -715,7 +718,7 @@ void Camera::_DoDrawLight_Spot_Contact(Light* l, Mat4x4& p, GLuint d_depthTex, f
 #define sloc l->paramLocs_SpotCS
 	//glEnableClientState(GL_VERTEX_ARRAY);
 	//glVertexPointer(2, GL_FLOAT, 0, fullscreenVerts);
-	glBindVertexArray(fullscreenVao);
+	glBindVertexArray(emptyVao);
 	glUseProgram(d_sLightCSProgram);
 
 	//glEnableVertexAttribArray(0);
@@ -735,7 +738,8 @@ void Camera::_DoDrawLight_Spot_Contact(Light* l, Mat4x4& p, GLuint d_depthTex, f
 	glUniform3f(sloc[5], wpos2.x, wpos2.y, wpos2.z);
 #undef sloc
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, fullscreenIndices);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, fullscreenIndices);
 
 	//glEnable(GL_BLEND);
 	//glDisableVertexAttribArray(0);
@@ -776,7 +780,7 @@ void Camera::_DoDrawLight_Spot(Light* l, Mat4x4& ip, GLuint d_fbo, GLuint d_texs
 #define sloc l->paramLocs_Spot
 	//glEnableClientState(GL_VERTEX_ARRAY);
 	//glVertexPointer(2, GL_FLOAT, 0, fullscreenVerts);
-	glBindVertexArray(fullscreenVao);
+	glBindVertexArray(emptyVao);
 	glUseProgram(d_sLightProgram);
 
 	//glEnableVertexAttribArray(0);
@@ -840,7 +844,8 @@ void Camera::_DoDrawLight_Spot(Light* l, Mat4x4& ip, GLuint d_fbo, GLuint d_texs
 	}
 #undef sloc
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, fullscreenIndices);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, fullscreenIndices);
 
 	if (Scene::active->settings.GIType == GITYPE_RSM && Scene::active->settings.rsmRadius > 0)
 		l->DrawRSM(ip, lp, w, h, d_texs, d_depthTex);
@@ -1146,7 +1151,7 @@ void Light::BlitRSMFlux() {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, _shadowFbo);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fluxFbo);
 #define sloc paramLocs_SpotFluxer
-	glBindVertexArray(Camera::fullscreenVao);
+	glBindVertexArray(Camera::emptyVao);
 	//glEnableClientState(GL_VERTEX_ARRAY);
 	//glVertexPointer(2, GL_FLOAT, 0, Camera::fullscreenVerts);
 	glUseProgram(Camera::d_sLightRSMFluxProgram);
