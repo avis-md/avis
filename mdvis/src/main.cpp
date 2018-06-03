@@ -6,7 +6,7 @@
 
 #include "ui/icons.h"
 #include "ui/popups.h"
-#include "py/PyWeb.h"
+#include "web/anweb.h"
 #include "md/ParMenu.h"
 #include "md/Protein.h"
 #include "vis/pargraphics.h"
@@ -38,7 +38,7 @@ void rendFunc() {
 void updateFunc() {
 	ParGraphics::Update();
 
-	PyWeb::Update();
+	AnWeb::Update();
 
 	if (Input::KeyDown(Key_F)) {
 		auto& o = ChokoLait::mainCamera->ortographic;
@@ -50,11 +50,11 @@ void updateFunc() {
 void paintfunc() {
 	bool stealFocus = false;
 
-	if (PyWeb::drawFull)
-		PyWeb::Draw();
+	if (AnWeb::drawFull)
+		AnWeb::Draw();
 	else {
 		ParMenu::Draw();
-		PyWeb::DrawSide();
+		AnWeb::DrawSide();
 
 		if (ParGraphics::zoomFade > 0) {
 			auto zf = min(ParGraphics::zoomFade * 2, 1.0f);
@@ -113,9 +113,9 @@ int main(int argc, char **argv)
 	PyNode::Init();
 	PyNode::font = font;
 
-	PyBrowse::Scan();
+	AnBrowse::Scan();
 	
-	PyWeb::Init();
+	AnWeb::Init();
 	ParMenu::font = font;
 
 	Effects::Init(0xffff);
