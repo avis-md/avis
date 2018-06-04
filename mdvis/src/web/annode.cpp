@@ -1,4 +1,5 @@
 #include "anweb.h"
+#include "anconv.h"
 #include "ui/icons.h"
 
 Font* AnNode::font = nullptr;
@@ -67,6 +68,12 @@ void AnNode::Draw() {
 					if (isi) inputVDef[i].i = TryParse(s, 0);
 					else inputVDef[i].f = TryParse(s, 0.0f);
 				}
+				else {
+					UI::Label(pos.x + width * 0.33f, y, 12, script->invars[i].second, font, white(0.3f));
+				}
+			}
+			else {
+				UI::Label(pos.x + width * 0.33f, y, 12, "<connected>", font, yellow());
 			}
 		}
 		y += 2;
@@ -123,7 +130,6 @@ float AnNode::DrawSide() {
 					if (isi) inputVDef[i].i = TryParse(s, 0);
 					else inputVDef[i].f = TryParse(s, 0.0f);
 				}
-				
 			}
 			else {
 				UI::Label(pos.x + width * 0.33f, y, 12, "<connected>", font, yellow());
@@ -157,12 +163,18 @@ void AnNode::ConnectTo(uint id, AnNode* tar, uint tarId) {
 	}
 }
 
-
-PyNode::PyNode(PyScript* scr) : AnNode(scr) {
+AnNode::AnNode(AnScript* scr) : script(scr), canTile(false) {
 	if (!scr) return;
 	title = scr->name;
 	inputR.resize(scr->invars.size(), std::pair<AnNode*, uint>());
 	outputR.resize(scr->outvars.size(), std::pair<AnNode*, uint>());
+	conV.resize(outputR.size());
+}
+
+
+PyNode::PyNode(PyScript* scr) : AnNode(scr) {
+	if (!scr) return;
+	title += " (python)";
 	inputV.resize(scr->invars.size());
 	outputV.resize(scr->outvars.size());
 	inputVDef.resize(scr->invars.size());
@@ -173,6 +185,19 @@ PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 	}
 	for (uint i = 0; i < scr->outvars.size(); i++) {
 		outputV[i] = scr->_outvars[i];
+		switch (scr->_outvars[i].type) {
+		case AN_VARTYPE::INT:
+			conV[i].value = new int();
+			break;
+		case AN_VARTYPE::FLOAT:
+			conV[i].value = new float();
+			break;
+		case AN_VARTYPE::LIST:
+			conV[i].dimVals.resize(outputV[i].dim);
+			for (int j = 0; j < outputV[i].dim; j++)
+				conV[i].dimVals[j] = new int();
+			break;
+		}
 	}
 }
 
@@ -200,5 +225,78 @@ void PyNode::Execute() {
 	for (uint i = 0; i < script->outvars.size(); i++) {
 		outputV[i].value = scr->pRets[i];
 		Py_INCREF(outputV[i].value);
+		switch (outputV[i].type) {
+		case AN_VARTYPE::FLOAT:
+			*(float*)conV[i].value = PyFloat_AsDouble(outputV[i].value);
+			break;
+		case AN_VARTYPE::INT:
+			*(float*)conV[i].value = PyFloat_AsDouble(outputV[i].value);
+			break;
+		case AN_VARTYPE::LIST:
+			delete[]((float*)conV[i].value);
+			conV[i].value = AnConv::FromPy(outputV[i].value, conV[i].dimVals.size(), &conV[i].dimVals[0]);
+			break;
+		}
 	}
+}
+
+
+CNode::CNode(CScript* scr) : AnNode(scr) {
+	if (!scr) return;
+	title += " (c++)";
+	inputV.resize(scr->invars.size());
+	outputV.resize(scr->outvars.size());
+	inputVDef.resize(scr->invars.size());
+	for (uint i = 0; i < scr->invars.size(); i++) {
+		inputV[i] = scr->_invars[i].value;
+		if (scr->_invars[i].type == AN_VARTYPE::FLOAT) inputVDef[i].f = 0;
+		else inputVDef[i].i = 0;
+	}
+	for (uint i = 0; i < scr->outvars.size(); i++) {
+		outputV[i] = scr->_outvars[i].value;
+	}
+}
+
+void CNode::Execute() {
+	auto scr = (CScript*)script;
+	for (uint i = 0; i < script->invars.size(); i++) {
+		if (inputR[i].first) {
+			auto& cv = inputR[i].first->conV[inputR[i].second];
+			switch (scr->_invars[i].type) {
+			case AN_VARTYPE::INT:
+				script->Set(i, *((int*)cv.value));
+				break;
+			case AN_VARTYPE::FLOAT:
+				script->Set(i, *((float*)cv.value));
+				break;
+			case AN_VARTYPE::LIST:
+				auto& mv = scr->_invars[i];
+				auto& vc = *((float**)mv.value) = (float*)cv.value;
+				for (int j = 0; j < mv.dimVals.size(); j++) {
+					*mv.dimVals[j] = *cv.dimVals[j];
+				}
+				break;
+			//default:
+			//	Debug::Error("CNode", "Value not handled!");
+			//	break;
+			}
+		}
+		else {
+			switch (scr->_invars[i].type) {
+			case AN_VARTYPE::INT:
+				script->Set(i, inputVDef[i].i);
+				break;
+			case AN_VARTYPE::FLOAT:
+				script->Set(i, inputVDef[i].f);
+				break;
+			default:
+				Debug::Error("CNode", "Value not handled!");
+				break;
+			}
+		}
+	}
+
+	script->Exec();
+	
+
 }

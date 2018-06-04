@@ -45,24 +45,17 @@ bool PyReader::Read(string path, PyScript** _scr) { //"path/to/script[no .py]"
 	while (!strm.eof()) {
 		std::getline(strm, ln);
 		string ln2 = ln.substr(0, 4);
-		if (ln2 == "#out") {
-			scr->_outvars.push_back(PyVar());
-			auto& bk = scr->_outvars.back();
-			bk.typeName = ln.substr(5);
-			ParseType(bk.typeName, &bk);
-			std::getline(strm, ln);
-			bk.name = ln.substr(0, ln.find_first_of(' '));
-			scr->outvars.push_back(std::pair<string, string>(bk.name, bk.typeName));
-			scr->pRets.push_back(PyObject_GetAttrString(scr->pModule, bk.name.c_str()));
-		}
-		else if (ln2 == "#in ") {
+		if (ln2 == "#in ") {
 			auto ss = string_split(ln, ' ');
 			auto sz = ss.size() - 1;
 			for (uint i = 0; i < sz; i++) {
 				scr->_invars.push_back(PyVar());
 				auto& bk = scr->_invars.back();
 				bk.typeName = ss[i + 1];
-				ParseType(bk.typeName, &bk);
+				if (!ParseType(bk.typeName, &bk)) {
+					Debug::Warning("PyReader::ParseType", "input arg type \"" + bk.typeName + "\" not recognized!");
+					return false;
+				}
 			}
 			std::getline(strm, ln);
 			auto c1 = ln.find_first_of('('), c2 = ln.find_first_of(')');
@@ -83,8 +76,24 @@ bool PyReader::Read(string path, PyScript** _scr) { //"path/to/script[no .py]"
 			}
 			scr->pArgs = PyTuple_New(sz);
 		}
+		else if (ln2 == "#out") {
+			scr->_outvars.push_back(PyVar());
+			auto& bk = scr->_outvars.back();
+			bk.typeName = ln.substr(5);
+			if (!ParseType(bk.typeName, &bk)) {
+				Debug::Warning("PyReader::ParseType", "output arg type \"" + bk.typeName + "\" not recognized!");
+				return false;
+			}
+			std::getline(strm, ln);
+			bk.name = ln.substr(0, ln.find_first_of(' '));
+			scr->outvars.push_back(std::pair<string, string>(bk.name, bk.typeName));
+			scr->pRets.push_back(PyObject_GetAttrString(scr->pModule, bk.name.c_str()));
+		}
 	}
 
+	if (!scr->invars.size()) {
+		Debug::Warning("PyReader", "Script has no input parameters!");
+	}
 	if (!scr->outvars.size()) {
 		Debug::Warning("PyReader", "Script has no output parameters!");
 	}
@@ -93,54 +102,13 @@ bool PyReader::Read(string path, PyScript** _scr) { //"path/to/script[no .py]"
 }
 
 bool PyReader::ParseType(string s, PyVar* var) {
-	if (s == "int") var->type = AN_VARTYPE::INT;
-	else if (s == "float") var->type = AN_VARTYPE::FLOAT;
-	else {
-		string s2 = s.substr(0, 4);
-		auto c1 = s.find_first_of('(');
-		if (c1 != 4) {
-			Debug::Warning("PyReader::ParseType", "Opening braces for type not found!");
-			return false;
-		}
-		auto c2 = s.size() - 1;
-		if (s[c2] != ')') {
-			Debug::Warning("PyReader::ParseType", "Closing braces for type not found!");
-			return false;
-		}
-		if (s2 == "list") {
-			var->type = AN_VARTYPE::LIST;
-			var->child1 = new PyVar();
-			ParseType(s.substr(c1 + 1, c2 - c1 - 1), var->child1);
-		}
-		/*
-		else if (s2 == "pair") {
-			var->type = AN_VARTYPE::PAIR;
-			uint cm = 0, ct = 0;
-			for (size_t i = 5; i < s.size(); i++) {
-				char c = s[i];
-				if (c == '(')
-					ct++;
-				else if (c == ')')
-					ct--;
-				else if (c == ',' && !ct) {
-					cm = i;
-					break;
-				}
-			}
-			if (!cm) {
-				Debug::Warning("PyReader::ParseType", "Separator for pair not found!");
-				return false;
-			}
-			var->child1 = new PyVar();
-			var->child2 = new PyVar();
-			ParseType(s.substr(c1 + 1, cm - c1 - 1), var->child1);
-			ParseType(s.substr(cm + 1, c2 - cm - 1), var->child2);
-		}
-		*/
-		else {
-			Debug::Warning("PyReader::ParseType", "Type not supported: \"" + s + "\"!");
-			return false;
-		}
+	if (s.substr(0, 3) == "int") var->type = AN_VARTYPE::INT;
+	else if (s.substr(0, 5) == "float") var->type = AN_VARTYPE::FLOAT;
+	else if (s.substr(0, 4) == "list") {
+		var->type = AN_VARTYPE::LIST;
+		s = s.substr(5, s.find(')') - 5);
+		var->dim = std::stoi(s);
 	}
+	else return false;
 	return true;
 }

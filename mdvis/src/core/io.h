@@ -11,6 +11,7 @@ public:
 #endif
 	static void GetFolders(const string& path, std::vector<string>* names, bool hidden = false);
 	static bool HasDirectory(string szPath);
+	static void MakeDirectory(string szPath);
 	static bool HasFile(string szPath);
 	static string ReadFile(const string& path);
 #if defined(PLATFORM_WIN)

@@ -3,13 +3,6 @@
 #include <Python.h>
 #include "anweb.h"
 
-enum class PY_VARTYPE {
-	INT,
-	FLOAT,
-	LIST,
-	PAIR,
-};
-
 class PyReader {
 public:
 	static void Init();

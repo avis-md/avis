@@ -8,8 +8,7 @@
 
 string IO::path = IO::InitPath();
 
-std::vector<string> IO::GetFiles(const string& folder, string ext)
-{
+std::vector<string> IO::GetFiles(const string& folder, string ext) {
 	if (folder == "") return std::vector<string>();
 	std::vector<string> names;
 	auto exts = ext.size();
@@ -39,8 +38,7 @@ std::vector<string> IO::GetFiles(const string& folder, string ext)
 	return names;
 }
 
-void IO::GetFolders(const string& folder, std::vector<string>* names, bool hidden)
-{
+void IO::GetFolders(const string& folder, std::vector<string>* names, bool hidden) {
 #ifdef PLATFORM_WIN
 	string search_path = folder + "/*";
 	WIN32_FIND_DATA fd;
@@ -65,8 +63,7 @@ void IO::GetFolders(const string& folder, std::vector<string>* names, bool hidde
 #endif
 }
 
-bool IO::HasDirectory(string szPath)
-{
+bool IO::HasDirectory(string szPath) {
 #ifdef PLATFORM_WIN
 	DWORD dwAttrib = GetFileAttributes(&szPath[0]);
 	return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
@@ -74,8 +71,15 @@ bool IO::HasDirectory(string szPath)
 	return false;
 }
 
-bool IO::HasFile(string szPath)
-{
+void IO::MakeDirectory(string szPath) {
+#ifdef PLATFORM_WIN
+	SECURITY_ATTRIBUTES sa = {};
+	sa.nLength = sizeof(sa);
+	CreateDirectory(&szPath[0], &sa);
+#endif
+}
+
+bool IO::HasFile(string szPath) {
 #ifdef PLATFORM_WIN
 	DWORD dwAttrib = GetFileAttributes(&szPath[0]);
 	return (dwAttrib != INVALID_FILE_ATTRIBUTES);// && (dwAttrib & FILE_ATTRIBUTE_NORMAL));
@@ -114,8 +118,7 @@ std::vector<string> IO::GetRegistryKeys(HKEY key) {
 	return res;
 }
 
-std::vector<std::pair<string, string>> IO::GetRegistryKeyValues(HKEY hKey, DWORD numValues)
-{
+std::vector<std::pair<string, string>> IO::GetRegistryKeyValues(HKEY hKey, DWORD numValues) {
 	std::vector<std::pair<string, string>> vals;
 	for (DWORD i = 0; i < numValues; i++)
 	{

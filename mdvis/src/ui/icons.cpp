@@ -1,11 +1,12 @@
 #include "icons.h"
 
-Texture* Icons::expand, *Icons::collapse, *Icons::python, *Icons::play, *Icons::playall,
+Texture* Icons::expand, *Icons::collapse, *Icons::play, *Icons::playall,
 *Icons::left, *Icons::right, *Icons::cross, *Icons::visible, *Icons::hidden, *Icons::circle,
 *Icons::select, *Icons::deselect, *Icons::flipselect,
 *Icons::toolRot, *Icons::toolMov, *Icons::toolSel,
 *Icons::refresh, *Icons::checkbox,
 *Icons::zoomIn, *Icons::zoomOut,
+*Icons::lang_c, *Icons::lang_py, *Icons::lang_ft,
 *Icons::dm_none, *Icons::dm_point, *Icons::dm_ball, *Icons::dm_vdw, *Icons::dm_line, *Icons::dm_stick, *Icons::dm_lineball, *Icons::dm_stickball;
 
 #define TEXN(nm) new Texture(IO::path + "/res/" #nm ".png", false)
@@ -16,7 +17,6 @@ Texture* Icons::expand, *Icons::collapse, *Icons::python, *Icons::play, *Icons::
 void Icons::Init() {
 	TEXP(expand);
 	TEXP(collapse);
-	TEX(python);
 	TEX(play);
 	playall = TEXN(play2);
 	TEX(left);
@@ -35,6 +35,9 @@ void Icons::Init() {
 	TEX(checkbox);
 	zoomIn = TEXN(zoomin);
 	zoomOut = TEXN(zoomout);
+	TEX(lang_c);
+	lang_py = TEXN(lang_python);
+	lang_ft = TEXN(lang_fortran);
 	TEX(dm_none);
 	TEX(dm_point);
 	TEX(dm_ball);

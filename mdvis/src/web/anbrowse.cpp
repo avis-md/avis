@@ -7,12 +7,21 @@ float AnBrowse::expandPos = 150;
 
 void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 	auto ff = IO::GetFiles(path, ".py");
-
 	for (auto f : ff) {
 		auto nm = f.substr(f.find_last_of('/') + 1);
 		if (nm.substr(0, 2) == "__") continue;
 		fo->scripts.push_back(nullptr);
 		PyReader::Read(incPath + nm.substr(0, nm.size() - 3), (PyScript**)&fo->scripts.back());
+	}
+
+	ff = IO::GetFiles(path, ".cpp");
+	if (ff.size() && !IO::HasDirectory(path + "/__ccache__/"))
+		IO::MakeDirectory(path + "/__ccache__/");
+
+	for (auto f : ff) {
+		auto nm = f.substr(f.find_last_of('/') + 1);
+		fo->scripts.push_back(nullptr);
+		CReader::Read(incPath + nm.substr(0, nm.size() - 4), (CScript**)&fo->scripts.back());
 	}
 
 	std::vector<string> fd;
@@ -44,7 +53,12 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 			if (Engine::Button(2.0f + 5 * layer, off, 150.0f, 16.0f, white(1, 0.35f)) == MOUSE_RELEASE) {
 				AnWeb::selScript = fs;
 			}
-			UI::Texture(2.0f + 5 * layer, off, 16.0f, 16.0f, Icons::python);
+			Texture* icon = 0;
+			if (fs->type == AN_SCRTYPE::C)
+				icon = Icons::lang_c;
+			else if (fs->type == AN_SCRTYPE::PYTHON)
+				icon = Icons::lang_py;
+			UI::Texture(2.0f + 5 * layer, off, 16.0f, 16.0f, icon);
 			UI::Label(22.0f + 5 * layer, off + 1, 12.0f, fs->name, AnNode::font, white());
 			off += 17;
 		}

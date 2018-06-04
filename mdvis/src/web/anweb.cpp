@@ -32,7 +32,8 @@ void AnWeb::Insert(AnNode* node, Vec2 pos) {
 }
 
 void AnWeb::Init() {
-	
+	Insert(new Node_Inputs());
+	Insert(new Node_Inputs_ActPar());
 }
 
 void AnWeb::Update() {
@@ -133,6 +134,10 @@ void AnWeb::Draw() {
 				switch (selScript->type) {
 				case AN_SCRTYPE::PYTHON:
 					pn = new PyNode((PyScript*)selScript);
+					break;
+				case AN_SCRTYPE::C:
+					pn = new CNode((CScript*)selScript);
+					break;
 				default:
 					abort();
 				}
@@ -172,7 +177,14 @@ void AnWeb::Draw() {
 		if (selScript) selScript = nullptr;
 		else drawFull = false;
 	}
-	if (selScript) UI::Texture(Input::mousePos.x - 16, Input::mousePos.y - 16, 32, 32, Icons::python, white(0.3f));
+	if (selScript) {
+		Texture* icon = 0;
+		if (selScript->type == AN_SCRTYPE::C)
+			icon = Icons::lang_c;
+		else if (selScript->type == AN_SCRTYPE::PYTHON)
+			icon = Icons::lang_py;
+		UI::Texture(Input::mousePos.x - 16, Input::mousePos.y - 16, 32, 32, icon, white(0.3f));
+	}
 
 	if (Engine::Button(Display::width - 71.0f, 1.0f, 70.0f, 16.0f, white(1, 0.4f), "Done", 12.0f, AnNode::font, white(), true) == MOUSE_RELEASE)
 		drawFull = false;

@@ -30,6 +30,7 @@ public:
 
 	std::vector<std::pair<AnNode*, uint>> inputR, outputR;
 	std::vector<union AnVarBase> inputVDef;
+	std::vector<CVar> conV;
 
 	static void Init();
 
@@ -42,8 +43,8 @@ public:
 	void ConnectTo(uint id, AnNode* tar, uint tarId); //out -> in
 
 protected:
-	AnNode(AnScript* scr) : script(scr), canTile(false) {}
-
+	AnNode(AnScript* scr);
+	
 	static Texture* tex_circle_open, *tex_circle_conn;
 };
 
@@ -53,5 +54,14 @@ public:
 	
 	std::vector<PyVar> inputV, outputV;
 	
+	void Execute() override;
+};
+
+class CNode : public AnNode {
+public:
+	CNode(CScript*);
+
+	std::vector<void*> inputV, outputV;
+
 	void Execute() override;
 };

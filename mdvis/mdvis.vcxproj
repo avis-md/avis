@@ -156,9 +156,11 @@
     <ClCompile Include="src\utils\effects.cpp" />
     <ClCompile Include="src\utils\runcmd.cpp" />
     <ClCompile Include="src\web\anbrowse.cpp" />
+    <ClCompile Include="src\web\anconv.cpp" />
     <ClCompile Include="src\web\annode.cpp" />
     <ClCompile Include="src\web\anscript.cpp" />
     <ClCompile Include="src\web\anweb.cpp" />
+    <ClCompile Include="src\web\creader.cpp" />
     <ClCompile Include="src\web\nodes\node_inputs.cpp" />
     <ClCompile Include="src\web\nodes\node_plot.cpp" />
     <ClCompile Include="src\web\pyreader.cpp" />
@@ -242,6 +244,7 @@
     <ClInclude Include="src\utils\effects.h" />
     <ClInclude Include="src\utils\runcmd.h" />
     <ClInclude Include="src\web\anbrowse.h" />
+    <ClInclude Include="src\web\anconv.h" />
     <ClInclude Include="src\web\annode.h" />
     <ClInclude Include="src\web\anscript.h" />
     <ClInclude Include="src\web\anweb.h" />

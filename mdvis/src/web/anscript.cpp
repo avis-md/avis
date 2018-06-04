@@ -81,3 +81,26 @@ void* PyScript::Get(uint i) {
 	Debug::Warning("PyScript", "Cannot convert type \"" + _outvars[i].typeName + "\" to C++ type!");
 	return nullptr;
 }
+
+
+string CScript::Exec() {
+	funcLoc();
+	return "";
+}
+
+void CScript::Set(uint i, int v) {
+	*((int*)_invars[i].value) = v;
+}
+
+void CScript::Set(uint i, float v) {
+	*((float*)_invars[i].value) = v;
+}
+
+void CScript::Set(uint i, void* v) {
+
+}
+
+void* CScript::Get(uint i) {
+
+	return nullptr;
+}
