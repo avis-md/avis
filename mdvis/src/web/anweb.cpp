@@ -32,19 +32,7 @@ void AnWeb::Insert(AnNode* node, Vec2 pos) {
 }
 
 void AnWeb::Init() {
-	auto scr = AnBrowse::folder.scripts[1];
-	auto scr2 = AnBrowse::folder.scripts[0];
-
-	Insert(new Node_Inputs());
-	Insert(new Node_Inputs_ActPar());
-	Insert(scr);
-	Insert(scr2);
-	Insert(new Node_Plot());
-	nodes[2]->outputR[0].first = nodes[3];
-	nodes[3]->inputR[0].first = nodes[2];
-	nodes[3]->outputR[1].first = nodes[4];
-	nodes[4]->inputR[0].first = nodes[3];
-	nodes[4]->inputR[0].second = 1;
+	
 }
 
 void AnWeb::Update() {
@@ -141,7 +129,13 @@ void AnWeb::Draw() {
 	if (Input::mouse0State == MOUSE_UP) {
 		if (selScript) {
 			if (iter >= 0) {
-				auto pn = new AnNode(selScript);
+				AnNode* pn;
+				switch (selScript->type) {
+				case AN_SCRTYPE::PYTHON:
+					pn = new PyNode((PyScript*)selScript);
+				default:
+					abort();
+				}
 				if (iterTile) {
 					if (iterTileTop) nodes[iter + 1]->canTile = true;
 					else pn->canTile = true;
@@ -153,16 +147,16 @@ void AnWeb::Draw() {
 		else {
 			for (auto nn = nodes.begin(); nn != nodes.end(); nn++) {
 				auto& n = *nn;
-				if (n->op == PYNODE_OP::REMOVE) {
+				if (n->op == ANNODE_OP::REMOVE) {
 					if ((nn + 1) != nodes.end()) {
 						if (!n->canTile && (*(nn + 1))->canTile)
 							(*(nn + 1))->canTile = false;
 					}
 					for (uint i = 0; i < n->inputR.size(); i++) {
-						if (n->inputR[i]) n->inputR[i]->outputR[n->inputV[i].second] = nullptr;
+						if (n->inputR[i].first) n->inputR[i].first->outputR[n->inputR[i].second].first = nullptr;
 					}
 					for (uint i = 0; i < n->outputR.size(); i++) {
-						if (n->outputR[i]) n->outputR[i]->inputR[n->outputV[i].second] = nullptr;
+						if (n->outputR[i].first) n->outputR[i].first->inputR[n->outputR[i].second].first = nullptr;
 					}
 					delete(n);
 					nodes.erase(nn);

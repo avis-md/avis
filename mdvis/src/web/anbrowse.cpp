@@ -12,7 +12,7 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 		auto nm = f.substr(f.find_last_of('/') + 1);
 		if (nm.substr(0, 2) == "__") continue;
 		fo->scripts.push_back(nullptr);
-		PyReader::Read(incPath + nm.substr(0, nm.size() - 3), &fo->scripts.back());
+		PyReader::Read(incPath + nm.substr(0, nm.size() - 3), (PyScript**)&fo->scripts.back());
 	}
 
 	std::vector<string> fd;

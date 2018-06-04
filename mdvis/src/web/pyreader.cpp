@@ -40,7 +40,7 @@ bool PyReader::Read(string path, PyScript** _scr) { //"path/to/script[no .py]"
 	Py_INCREF(scr->pFunc);
 
 	//extract io variables
-	std::ifstream strm(IO::path + "/py/" + path + ".py");
+	std::ifstream strm(IO::path + "/nodes/" + path + ".py");
 	string ln;
 	while (!strm.eof()) {
 		std::getline(strm, ln);
@@ -93,8 +93,8 @@ bool PyReader::Read(string path, PyScript** _scr) { //"path/to/script[no .py]"
 }
 
 bool PyReader::ParseType(string s, PyVar* var) {
-	if (s == "int") var->type = PY_VARTYPE::INT;
-	else if (s == "float") var->type = PY_VARTYPE::FLOAT;
+	if (s == "int") var->type = AN_VARTYPE::INT;
+	else if (s == "float") var->type = AN_VARTYPE::FLOAT;
 	else {
 		string s2 = s.substr(0, 4);
 		auto c1 = s.find_first_of('(');
@@ -108,12 +108,13 @@ bool PyReader::ParseType(string s, PyVar* var) {
 			return false;
 		}
 		if (s2 == "list") {
-			var->type = PY_VARTYPE::LIST;
+			var->type = AN_VARTYPE::LIST;
 			var->child1 = new PyVar();
 			ParseType(s.substr(c1 + 1, c2 - c1 - 1), var->child1);
 		}
+		/*
 		else if (s2 == "pair") {
-			var->type = PY_VARTYPE::PAIR;
+			var->type = AN_VARTYPE::PAIR;
 			uint cm = 0, ct = 0;
 			for (size_t i = 5; i < s.size(); i++) {
 				char c = s[i];
@@ -135,6 +136,7 @@ bool PyReader::ParseType(string s, PyVar* var) {
 			ParseType(s.substr(c1 + 1, cm - c1 - 1), var->child1);
 			ParseType(s.substr(cm + 1, c2 - cm - 1), var->child2);
 		}
+		*/
 		else {
 			Debug::Warning("PyReader::ParseType", "Type not supported: \"" + s + "\"!");
 			return false;

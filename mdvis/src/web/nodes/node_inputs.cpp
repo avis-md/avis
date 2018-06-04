@@ -1,17 +1,17 @@
 #include "../anweb.h"
 
-Node_Inputs::Node_Inputs() : AnNode(nullptr) {
-	//width = 150;
+Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
+	DmScript* scr = (DmScript*)script;
+
 	title = "All Particles";
 	titleCol = Vec3(0.225f, 0.5f, 0.25f);
 	canTile = true;
-	auto v = std::pair<PyVar, uint>();
-	v.first.type = PY_VARTYPE::LIST;
-	v.first.typeName = "array(array(float))";
-	outputR.resize(2, nullptr);
-	outputV.resize(2, v);
-	outputV[0].first.name = "positions";
-	outputV[1].first.name = "velocities";
+	auto v = std::pair<string, string>();
+	v.second = "array(array(float))";
+	outputR.resize(2);
+	scr->outvars.resize(2, v);
+	scr->outvars[0].first = "positions";
+	scr->outvars[1].first = "velocities";
 }
 
 void Node_Inputs::Draw() {
@@ -23,7 +23,7 @@ void Node_Inputs::Draw() {
 	float y = pos.y + 20;
 	for (uint i = 0; i < 2; i++, y += 17) {
 		if (!AnWeb::selConnNode || ((!AnWeb::selConnIdIsOut) && (AnWeb::selConnNode != this))) {
-			if (Engine::Button(pos.x + width - 5, y + 3, 10, 10, outputR[i] ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
+			if (Engine::Button(pos.x + width - 5, y + 3, 10, 10, outputR[i].first ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
 				if (!AnWeb::selConnNode) {
 					AnWeb::selConnNode = this;
 					AnWeb::selConnId = i;
@@ -38,17 +38,17 @@ void Node_Inputs::Draw() {
 		}
 		else if (AnWeb::selConnNode == this && AnWeb::selConnId == i && AnWeb::selConnIdIsOut) {
 			Engine::DrawLine(Vec2(pos.x + width, y + 8), Input::mousePos, white(), 1);
-			UI::Texture(pos.x + width - 5, y + 3, 10, 10, outputR[i] ? tex_circle_conn : tex_circle_open);
+			UI::Texture(pos.x + width - 5, y + 3, 10, 10, outputR[i].first ? tex_circle_conn : tex_circle_open);
 		}
 		else {
-			UI::Texture(pos.x + width - 5, y + 3, 10, 10, outputR[i] ? tex_circle_conn : tex_circle_open, red(0.3f));
+			UI::Texture(pos.x + width - 5, y + 3, 10, 10, outputR[i].first ? tex_circle_conn : tex_circle_open, red(0.3f));
 		}
 
 		//UI::Texture(pos.x + width - 5, y + 3, 10, 10, outputR[i] ? tex_circle_conn : tex_circle_open);
 		font->Align(ALIGN_TOPRIGHT);
-		UI::Label(pos.x + width - 10, y, 12, outputV[i].first.name, font, white());
+		UI::Label(pos.x + width - 10, y, 12, script->outvars[i].first, font, white());
 		font->Align(ALIGN_TOPLEFT);
-		UI::Label(pos.x + 2, y, 12, outputV[i].first.typeName, font, white(0.3f), width * 0.67f - 6);
+		UI::Label(pos.x + 2, y, 12, script->outvars[i].second, font, white(0.3f), width * 0.67f - 6);
 	}
 }
 

@@ -3,6 +3,7 @@
 #include <Python.h>
 
 enum class AN_SCRTYPE {
+	NONE,
 	C,
 	PYTHON,
 	FORTRAN
@@ -23,12 +24,24 @@ public:
 	virtual string Exec() = 0;
 	virtual void Set(uint i, int v) = 0, Set(uint i, float v) = 0, Set(uint i, void* v) = 0;
 	virtual void* Get(uint i) = 0;
+
+protected:
+	AnScript(AN_SCRTYPE t) : type(t) {}
+};
+
+class DmScript : public AnScript {
+public:
+	DmScript() : AnScript(AN_SCRTYPE::NONE) {}
+
+	string Exec() override { return ""; }
+	void Set(uint i, int v) override, Set(uint i, float v) override, Set(uint i, void* v) override;
+	void* Get(uint i) override;
 };
 
 struct PyVar {
 public:
 	string name, typeName;
-	PY_VARTYPE type;
+	AN_VARTYPE type;
 	PyVar *child1, *child2;
 
 	PyObject* value;
@@ -36,6 +49,8 @@ public:
 
 class PyScript : public AnScript {
 public:
+	PyScript() : AnScript(AN_SCRTYPE::PYTHON) {}
+
 	std::vector<PyVar> _invars, _outvars;
 
 	string Exec() override;

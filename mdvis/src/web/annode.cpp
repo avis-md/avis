@@ -168,7 +168,7 @@ PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 	inputVDef.resize(scr->invars.size());
 	for (uint i = 0; i < scr->invars.size(); i++) {
 		inputV[i] = scr->_invars[i];
-		if (scr->_invars[i].type == PY_VARTYPE::FLOAT) inputVDef[i].f = 0;
+		if (scr->_invars[i].type == AN_VARTYPE::FLOAT) inputVDef[i].f = 0;
 		else inputVDef[i].i = 0;
 	}
 	for (uint i = 0; i < scr->outvars.size(); i++) {
@@ -184,10 +184,10 @@ void PyNode::Execute() {
 		}
 		else {
 			switch (scr->_invars[i].type) {
-			case PY_VARTYPE::INT:
+			case AN_VARTYPE::INT:
 				script->Set(i, inputVDef[i].i);
 				break;
-			case PY_VARTYPE::FLOAT:
+			case AN_VARTYPE::FLOAT:
 				script->Set(i, inputVDef[i].f);
 				break;
 			default:

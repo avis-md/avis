@@ -158,6 +158,7 @@
     <ClCompile Include="src\web\anbrowse.cpp" />
     <ClCompile Include="src\web\annode.cpp" />
     <ClCompile Include="src\web\anscript.cpp" />
+    <ClCompile Include="src\web\anweb.cpp" />
     <ClCompile Include="src\web\nodes\node_inputs.cpp" />
     <ClCompile Include="src\web\nodes\node_plot.cpp" />
     <ClCompile Include="src\web\pyreader.cpp" />

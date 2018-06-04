@@ -1,5 +1,22 @@
 #include "anweb.h"
 
+void DmScript::Set(uint i, int v) {
+	
+}
+
+void DmScript::Set(uint i, float v) {
+	
+}
+
+void DmScript::Set(uint i, void* v) {
+	
+}
+
+void* DmScript::Get(uint i) {
+	return nullptr;
+}
+
+
 string PyScript::Exec() {
 	for (uint i = 0; i < invars.size(); ++i) {
 		auto& val = _invars[i].value;
@@ -41,10 +58,10 @@ void PyScript::Set(uint i, void* v) {
 void* PyScript::Get(uint i) {
 	if (outvars.size() <= i) return nullptr;
 	switch (_outvars[i].type) {
-	case PY_VARTYPE::INT:
+	case AN_VARTYPE::INT:
 		return new int(_PyLong_AsInt(pRets[i]));
 		break;
-	case PY_VARTYPE::FLOAT:
+	case AN_VARTYPE::FLOAT:
 		return new float((float)PyFloat_AsDouble(pRets[i]));
 		break;
 	default:

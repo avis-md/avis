@@ -1,6 +1,7 @@
 #include "system.h"
+#include "md/ParMenu.h"
 #include "vis/pargraphics.h"
-#include "py/PyWeb.h"
+#include "web/anweb.h"
 #include "ui/icons.h"
 
 Vec4 VisSystem::accentColor = Vec4(1, 1, 1, 1);
@@ -69,8 +70,8 @@ void VisSystem::Init() {
 }
 
 bool VisSystem::InMainWin(const Vec2& pos) {
-	if (PyWeb::drawFull) return false;
-	else return (pos.x > ParMenu::expandPos + 16) && (pos.x < Display::width - PyWeb::expandPos) && (pos.y < Display::height - 18);
+	if (AnWeb::drawFull) return false;
+	else return (pos.x > ParMenu::expandPos + 16) && (pos.x < Display::width - AnWeb::expandPos) && (pos.y < Display::height - 18);
 }
 
 void VisSystem::DrawBar() {

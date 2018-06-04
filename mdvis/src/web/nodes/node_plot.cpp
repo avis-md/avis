@@ -2,12 +2,11 @@
 #include "utils/plot.h"
 #include "ui/icons.h"
 
-Node_Plot::Node_Plot() : AnNode(nullptr) {
+Node_Plot::Node_Plot() : AnNode(new DmScript()) {
 	//width = 200;
 	canTile = true;
 	inputR.resize(1);
-	inputV[0].first.type = PY_VARTYPE::LIST;
-	inputV[0].first.typeName = "list(float)";
+	script->invars.push_back(std::pair<string, string>("array", "list(float)"));
 }
 
 void Node_Plot::Draw() {
@@ -21,9 +20,9 @@ void Node_Plot::Draw() {
 		Engine::DrawQuad(pos.x, pos.y + 16, width, 3 + 17 * cnt + width, white(0.7f, 0.25f));
 		float y = pos.y + 18;
 		//for (uint i = 0; i < 1; i++, y += 17) {
-		uint i = 0;
+		const uint i = 0;
 		if (!AnWeb::selConnNode || (AnWeb::selConnIdIsOut && AnWeb::selConnNode != this)) {
-			if (Engine::Button(pos.x - 5, y + 3, 10, 10, inputR[i] ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
+			if (Engine::Button(pos.x - 5, y + 3, 10, 10, inputR[i].first ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
 				if (!AnWeb::selConnNode) {
 					AnWeb::selConnNode = this;
 					AnWeb::selConnId = i;
@@ -38,12 +37,12 @@ void Node_Plot::Draw() {
 		}
 		else if (AnWeb::selConnNode == this && AnWeb::selConnId == i && !AnWeb::selConnIdIsOut) {
 			Engine::DrawLine(Vec2(pos.x, y + 8), Input::mousePos, white(), 1);
-			UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[i] ? tex_circle_conn : tex_circle_open);
+			UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[i].first ? tex_circle_conn : tex_circle_open);
 		}
 		else {
-			UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[i] ? tex_circle_conn : tex_circle_open, red(0.3f));
+			UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[i].first ? tex_circle_conn : tex_circle_open, red(0.3f));
 		}
-		//UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[0] ? tex_circle_conn : tex_circle_open);
+		//UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[0].first ? tex_circle_conn : tex_circle_open);
 		UI::Label(pos.x + 10, y, 12, "value 1", font, white());
 		//}
 		if (valXs.size()) {
@@ -70,15 +69,16 @@ Vec2 Node_Plot::DrawConn() {
 	auto cnt = 1;
 	float y = pos.y + 18;
 	//for (uint i = 0; i < script->invarCnt; i++, y += 17) {
-		if (inputR[0]) Engine::DrawLine(Vec2(pos.x, expanded ? y + 8 : pos.y + 8), Vec2(inputR[0]->pos.x + inputR[0]->width, inputR[0]->expanded ? inputR[0]->pos.y + 20 + 8 + (inputV[0].second + inputR[0]->script->invarCnt) * 17 : inputR[0]->pos.y + 8), white(), 2);
+		if (inputR[0].first) Engine::DrawLine(Vec2(pos.x, expanded ? y + 8 : pos.y + 8), Vec2(inputR[0].first->pos.x + inputR[0].first->width, inputR[0].first->expanded ? inputR[0].first->pos.y + 20 + 8 + (inputR[0].second + inputR[0].first->script->invars.size()) * 17 : inputR[0].first->pos.y + 8), white(), 2);
 	//}
 	if (expanded) return Vec2(width, 19 + 17 * cnt + width);
 	else return Vec2(width, 16);
 }
 
-void PyNode_Plot::Execute() {
-	if (!inputR[0]) return;
-	auto ref = inputR[0]->outputV[inputV[0].second].first.value;
+void Node_Plot::Execute() {
+	/*
+	if (!inputR[0].first) return;
+	auto ref = inputR[0].first->script[inputV[0].second].first.value;
 	auto sz = PyList_Size(ref);
 	valXs.resize(sz);
 	valYs.resize(sz);
@@ -87,4 +87,5 @@ void PyNode_Plot::Execute() {
 		auto obj = PyList_GetItem(ref, a);
 		valYs[a] = (float)PyFloat_AsDouble(obj);
 	}
+	*/
 }
