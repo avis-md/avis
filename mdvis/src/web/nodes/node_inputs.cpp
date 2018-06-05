@@ -1,4 +1,5 @@
 #include "../anweb.h"
+#include "md/Particles.h"
 
 Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	DmScript* scr = (DmScript*)script;
@@ -7,11 +8,19 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	titleCol = Vec3(0.225f, 0.5f, 0.25f);
 	canTile = true;
 	auto v = std::pair<string, string>();
-	v.second = "array(array(float))";
+	v.second = "list(2)";
 	outputR.resize(2);
 	scr->outvars.resize(2, v);
 	scr->outvars[0].first = "positions";
 	scr->outvars[1].first = "velocities";
+
+	conV.resize(2);
+	auto& poss = conV[0];
+	poss.dimVals.resize(2);
+	poss.dimVals[0] = (int*)&Particles::particleSz;
+	poss.dimVals[1] = new int(3);
+	
+	conV[1] = poss;
 }
 
 void Node_Inputs::Draw() {
@@ -57,11 +66,16 @@ Vec2 Node_Inputs::DrawConn() {
 }
 
 void Node_Inputs::Execute() {
-	
+	conV[0].value = Particles::particles_Pos;
+	conV[1].value = Particles::particles_Vel;
 }
 
 
 Node_Inputs_ActPar::Node_Inputs_ActPar() : Node_Inputs() {
 	title = "Selected Particles";
 	titleCol = Vec3(0.3f, 0.3f, 0.5f);
+}
+
+void Node_Inputs_ActPar::Execute() {
+
 }

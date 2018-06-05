@@ -125,6 +125,9 @@ int main(int argc, char **argv)
 	auto l = lht->AddComponent<Light>();
 	ParGraphics::SetLight(l.get());
 
+	AnWeb::Insert(new CNode((CScript*)AnBrowse::folder.scripts[2]));
+	AnWeb::Insert(new Node_Plot());
+
 	Gromacs::Read(IO::path + "/pbc.gro", false);
 	bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");
 	Protein::Refresh();

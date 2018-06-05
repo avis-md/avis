@@ -6,7 +6,7 @@ Node_Plot::Node_Plot() : AnNode(new DmScript()) {
 	//width = 200;
 	canTile = true;
 	inputR.resize(1);
-	script->invars.push_back(std::pair<string, string>("array", "list(float)"));
+	script->invars.push_back(std::pair<string, string>("array", "list(1)"));
 }
 
 void Node_Plot::Draw() {
@@ -14,7 +14,7 @@ void Node_Plot::Draw() {
 	this->pos = pos;
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
-	UI::Label(pos.x + 20, pos.y + 1, 12, "Plot list(float)", font, white());
+	UI::Label(pos.x + 20, pos.y + 1, 12, "Plot list(DIM=1)", font, white());
 	DrawToolbar();
 	if (expanded) {
 		Engine::DrawQuad(pos.x, pos.y + 16, width, 3 + 17 * cnt + width, white(0.7f, 0.25f));
@@ -76,16 +76,14 @@ Vec2 Node_Plot::DrawConn() {
 }
 
 void Node_Plot::Execute() {
-	/*
 	if (!inputR[0].first) return;
-	auto ref = inputR[0].first->script[inputV[0].second].first.value;
-	auto sz = PyList_Size(ref);
+	CVar& cv = inputR[0].first->conV[inputR[0].second];
+	auto& sz = *cv.dimVals[0];
 	valXs.resize(sz);
 	valYs.resize(sz);
-	for (Py_ssize_t a = 0; a < sz; a++) {
-		valXs[a] = (float)a;
-		auto obj = PyList_GetItem(ref, a);
-		valYs[a] = (float)PyFloat_AsDouble(obj);
+	for (int i = 0; i < sz; i++) {
+		valXs[i] = i;
 	}
-	*/
+	float* src = *((float**)cv.value);
+	memcpy(&valYs[0], src, sz * sizeof(float));
 }

@@ -45,7 +45,7 @@ bool CReader::Read(string path, CScript** _scr) {
 
 #ifdef PLATFORM_WIN
 	//&& cl /nologo /c /FoD:/ D:/lib.c && link /dll /nologo /out:D:/lib.dll D:/lib.obj"
-	const string cl = "cl /nologo /c /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
+	const string cl = "cl /nologo /c -Od /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
 	const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".dll\" \"" + fp2 + nm + ".obj\"";
 	RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " && " + lk);
 #else

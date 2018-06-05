@@ -254,6 +254,7 @@ CNode::CNode(CScript* scr) : AnNode(scr) {
 	}
 	for (uint i = 0; i < scr->outvars.size(); i++) {
 		outputV[i] = scr->_outvars[i].value;
+		conV[i] = scr->_outvars[i];
 	}
 }
 
@@ -297,6 +298,6 @@ void CNode::Execute() {
 	}
 
 	script->Exec();
-	
+
 
 }

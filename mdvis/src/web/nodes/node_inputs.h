@@ -15,4 +15,5 @@ public:
 class Node_Inputs_ActPar : public Node_Inputs {
 public:
 	Node_Inputs_ActPar();
+	void Execute() override;
 };
