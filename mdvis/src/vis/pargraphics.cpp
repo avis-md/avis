@@ -5,6 +5,7 @@
 #include "ui/icons.h"
 #include "ui/popups.h"
 #include "utils/effects.h"
+#include "web/anweb.h"
 
 Texture* ParGraphics::refl = nullptr;
 float ParGraphics::reflStr = 1, ParGraphics::reflStrDecay = 2, ParGraphics::rimOff = 0.5f, ParGraphics::rimStr = 1;
@@ -88,7 +89,7 @@ void ParGraphics::Init() {
 	reflProgLocs[1] = glGetUniformLocation(reflProg, "screenSize");
 	reflProgLocs[2] = glGetUniformLocation(reflProg, "inColor");
 	reflProgLocs[3] = glGetUniformLocation(reflProg, "inNormal");
-	reflProgLocs[4] = glGetUniformLocation(reflProg, "inSpec");
+	reflProgLocs[4] = glGetUniformLocation(reflProg, "inEmit");
 	reflProgLocs[5] = glGetUniformLocation(reflProg, "inDepth");
 	reflProgLocs[6] = glGetUniformLocation(reflProg, "inSky");
 	reflProgLocs[7] = glGetUniformLocation(reflProg, "skyStrength");
@@ -352,6 +353,7 @@ void ParGraphics::Rerender() {
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	Protein::Draw();
+	AnWeb::DrawScene();
 }
 
 void ParGraphics::Recolor() {
@@ -405,6 +407,11 @@ void ParGraphics::Reblit() {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	
 	Eff::Apply();
+	
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->d_fbo);
+
+	//glReadBuffer(GL_COLOR_ATTACHMENT0 + GBUFFER_EMISSION_AO);
+	//glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::width, Display::height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 	//*/
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glEnable(GL_BLEND);
@@ -428,7 +435,7 @@ void ParGraphics::BlitSky() {
 	glBindTexture(GL_TEXTURE_2D, cam->d_texs[1]);
 	glUniform1i(reflProgLocs[4], 2);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, cam->d_texs[2]);
+	glBindTexture(GL_TEXTURE_2D, cam->d_texs[3]);
 	glUniform1i(reflProgLocs[5], 3);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, cam->d_depthTex);

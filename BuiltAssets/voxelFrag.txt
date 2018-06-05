@@ -1,0 +1,26 @@
+#version 330
+in vec3 v2f_uvw;
+//in vec3 v2f_wpos;
+
+//uniform vec2 screenSize;
+//uniform mat4 _IP;
+uniform sampler3D tex;
+uniform vec3 cutPos;
+uniform vec3 cutDir;
+
+layout (location=0) out vec4 outId; //rgba
+layout (location=1) out vec4 outNormal; //xyz []
+layout (location=2) out vec4 outSpec; //spec gloss
+layout (location=3) out vec4 outEmi; //emi occlu
+
+void main()
+{
+	if (dot(v2f_uvw - cutPos, cutDir) > 0)
+		discard;
+	
+	outId = vec4(0,0,0,0);
+	outNormal = vec4(0,0,0,0);
+	outSpec = vec4(0,0,0,0);
+	outEmi.rgb = v2f_uvw;//texture(tex, uvw).rgb;
+	outEmi.a = 1;
+}

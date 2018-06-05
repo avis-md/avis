@@ -31,13 +31,14 @@ public:
 	std::vector<std::pair<AnNode*, uint>> inputR, outputR;
 	std::vector<union AnVarBase> inputVDef;
 	std::vector<CVar> conV;
-
+		
 	static void Init();
 
 	bool Select();
 	virtual Vec2 DrawConn();
 	virtual void Draw();
 	virtual float DrawSide();
+	virtual void DrawScene() {}
 	void DrawToolbar();
 	virtual void Execute() = 0;
 	void ConnectTo(uint id, AnNode* tar, uint tarId); //out -> in

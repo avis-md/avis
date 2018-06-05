@@ -9,6 +9,8 @@ float AnNode::width = 220;
 void AnNode::Init() {
 	tex_circle_open = new Texture(IO::path + "/res/node_open.png");
 	tex_circle_conn = new Texture(IO::path + "/res/node_conn.png");
+
+	Node_Volume::Init();
 }
 
 bool AnNode::Select() {

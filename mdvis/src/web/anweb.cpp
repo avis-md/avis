@@ -231,6 +231,10 @@ void AnWeb::DrawSide() {
 	}
 }
 
+void AnWeb::DrawScene() {
+	for (auto& n : nodes) n->DrawScene();
+}
+
 void AnWeb::Execute() {
 	if (!executing) {
 		executing = true;

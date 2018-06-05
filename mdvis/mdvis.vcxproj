@@ -163,6 +163,7 @@
     <ClCompile Include="src\web\creader.cpp" />
     <ClCompile Include="src\web\nodes\node_inputs.cpp" />
     <ClCompile Include="src\web\nodes\node_plot.cpp" />
+    <ClCompile Include="src\web\nodes\node_volume.cpp" />
     <ClCompile Include="src\web\pyreader.cpp" />
     <ClCompile Include="src\xdrfile\xdrfile.c" />
     <ClCompile Include="src\xdrfile\xdrfile_trr.c" />
@@ -251,6 +252,7 @@
     <ClInclude Include="src\web\creader.h" />
     <ClInclude Include="src\web\nodes\node_inputs.h" />
     <ClInclude Include="src\web\nodes\node_plot.h" />
+    <ClInclude Include="src\web\nodes\node_volume.h" />
     <ClInclude Include="src\web\pyreader.h" />
     <ClInclude Include="src\xdrfile\xdrfile.h" />
     <ClInclude Include="src\xdrfile\xdrfile_trr.h" />
@@ -267,7 +269,6 @@
     <ClInclude Include="src\scene\comp\scenescript.h" />
     <ClInclude Include="src\scene\comp\skinnedmeshrenderer.h" />
     <ClInclude Include="src\scene\texturerenderer.h" />
-    <ClInclude Include="src\scene\comp\voxelrenderer.h" />
     <ClInclude Include="src\scene\scene.h" />
     <ClInclude Include="src\scene\sceneobject.h" />
     <ClInclude Include="src\scene\transform.h" />

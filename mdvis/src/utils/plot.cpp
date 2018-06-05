@@ -28,4 +28,6 @@ void plt::plot(float x, float y, float w, float h, float* dx, float* dy, uint cn
 	glDrawArrays(GL_LINE_STRIP, 0, cnt);
 	glBindVertexArray(0);
 	glUseProgram(0);
+
+	delete[](poss);
 }

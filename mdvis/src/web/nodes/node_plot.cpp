@@ -43,7 +43,7 @@ void Node_Plot::Draw() {
 			UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[i].first ? tex_circle_conn : tex_circle_open, red(0.3f));
 		}
 		//UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[0].first ? tex_circle_conn : tex_circle_open);
-		UI::Label(pos.x + 10, y, 12, "value 1", font, white());
+		UI::Label(pos.x + 10, y, 12, "values", font, white());
 		//}
 		if (valXs.size()) {
 			plt::plot(pos.x + 2, pos.y + 18 + 17 * cnt, width - 4, width - 4, &valXs[0], &valYs[0], valXs.size());
