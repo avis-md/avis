@@ -46,6 +46,7 @@
         "slist": "cpp",
         "list": "cpp",
         "*.ipp": "cpp",
-        "istream": "cpp"
+        "istream": "cpp",
+        "queue": "cpp"
     }
 }

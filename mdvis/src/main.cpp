@@ -127,7 +127,7 @@ int main(int argc, char **argv)
 
 	AnWeb::Insert(new CNode((CScript*)AnBrowse::folder.scripts[2]));
 	AnWeb::Insert(new Node_Plot());
-	AnWeb::Insert(new Node_Volume());
+	//AnWeb::Insert(new Node_Volume());
 
 	Gromacs::Read(IO::path + "/pbc.gro", false);
 	bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");

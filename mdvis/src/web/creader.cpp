@@ -25,6 +25,7 @@ bool CReader::Read(string path, CScript** _scr) {
 	auto ls = fp.find_last_of('/');
 	string nm = fp.substr(ls + 1);
 	string fp2 = fp.substr(0, ls + 1) + "__ccache__/";
+	if (!IO::HasDirectory(fp2)) IO::MakeDirectory(fp2);
 
 	auto s = IO::GetText(fp + ".cpp");
 #ifdef PLATFORM_WIN
@@ -49,7 +50,11 @@ bool CReader::Read(string path, CScript** _scr) {
 	const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".dll\" \"" + fp2 + nm + ".obj\"";
 	RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " && " + lk);
 #else
-
+	const string cmd = "g++ -std=c++11 -shared -O0 -fPIC -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\"";
+	//const string cl = "g++ /nologo /c -Od /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
+	//const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".dll\" \"" + fp2 + nm + ".obj\"";
+	std::cout << cmd << std::endl;
+	RunCmd::Run(cmd);
 #endif
 
 	const string ss = fp + "_temp__.cpp";
@@ -57,7 +62,13 @@ bool CReader::Read(string path, CScript** _scr) {
 
 	auto scr = *_scr = new CScript();
 	scr->name = path;
-	scr->lib = new DyLib(fp2 + nm + ".dll");
+	scr->lib = new DyLib(fp2 + nm + 
+#ifdef PLATFORM_WIN
+	".dll"
+#else
+	".so"
+#endif
+	);
 	if (!scr->lib) {
 		Debug::Warning("CReader", "Failed to load script into memory!");
 		return false;

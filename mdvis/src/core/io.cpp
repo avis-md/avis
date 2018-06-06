@@ -4,6 +4,7 @@
 #ifndef PLATFORM_WIN
 #include <sys/types.h>
 #include <dirent.h>
+#include <sys/stat.h>
 #endif
 
 string IO::path = IO::InitPath();
@@ -67,8 +68,10 @@ bool IO::HasDirectory(string szPath) {
 #ifdef PLATFORM_WIN
 	DWORD dwAttrib = GetFileAttributes(&szPath[0]);
 	return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+#else
+	struct stat st;
+	return !stat(&szPath[0], &st);
 #endif
-	return false;
 }
 
 void IO::MakeDirectory(string szPath) {
@@ -76,6 +79,8 @@ void IO::MakeDirectory(string szPath) {
 	SECURITY_ATTRIBUTES sa = {};
 	sa.nLength = sizeof(sa);
 	CreateDirectory(&szPath[0], &sa);
+#else
+	mkdir(&szPath[0], 0777);
 #endif
 }
 

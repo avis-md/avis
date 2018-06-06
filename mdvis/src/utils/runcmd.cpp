@@ -16,5 +16,7 @@ void RunCmd::Run(string cmd) {
 
 	CloseHandle(pi.hThread);
 	CloseHandle(pi.hProcess);
+#else
+	system(&cmd[0]);
 #endif
 }

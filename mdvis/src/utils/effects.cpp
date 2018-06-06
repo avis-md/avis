@@ -5,7 +5,7 @@ GLint Effects::blurProgLocs[], Effects::ssaoProgLocs[], Effects::ssaoProg2Locs[]
 GLuint Effects::noiseTex;
 
 void Effects::Init(EFF_ENABLE_MASK mask) {
-	auto vs = IO::GetText(IO::path + "minVert.txt");//DefaultResources::GetStr("lightPassVert.txt");
+	auto vs = IO::GetText(IO::path + "/minVert.txt");//DefaultResources::GetStr("lightPassVert.txt");
 
 	if (!!(mask & EFF_ENABLE_BLUR))
 		_InitBlur(vs);

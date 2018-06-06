@@ -40,8 +40,8 @@ void Debug::Error(string c, string s) {
 	std::cout << "[e]" << c << ": " << s << std::endl;
 #ifdef PLATFORM_WIN
 	__debugbreak();
-	abort();
 #endif
+	abort();
 }
 
 void Debug::DoDebugObjectTree(const std::vector<pSceneObject>& o, int i) {
