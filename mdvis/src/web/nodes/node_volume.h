@@ -19,7 +19,7 @@ protected:
 	int nx, ny, nz;
 	Vec3 cutC, cutD;
 	GLuint tex;
-	static GLuint shad, shadC;
-	static GLint shadLocs[10], shadCLocs[10];
+	static GLuint shad;
+	static GLint shadLocs[10];
 	static GLuint vao, vbo, veo;
 };

@@ -1,3 +1,4 @@
+#include "ChokoLait.h"
 #include "node_volume.h"
 #include "../anweb.h"
 #include "ui/icons.h"
@@ -10,8 +11,8 @@ const uint Node_Volume::cubeIndices[] = {
 	0, 2, 4, 2, 6, 4,	1, 3, 5, 3, 7, 5,
 	0, 1, 4, 1, 5, 4,	2, 3, 6, 3, 7, 6 };
 
-GLuint Node_Volume::shad, Node_Volume::shadC;
-GLint Node_Volume::shadLocs[], Node_Volume::shadCLocs[];
+GLuint Node_Volume::shad;
+GLint Node_Volume::shadLocs[];
 GLuint Node_Volume::vao, Node_Volume::vbo, Node_Volume::veo;
 
 void Node_Volume::Init() {
@@ -34,14 +35,11 @@ void Node_Volume::Init() {
 	LC(0, _MV);
 	LC(1, _P);
 	LC(2, size);
-	LC(3, tex);
-	LC(4, cutPos);
-	LC(5, cutDir);
-#undef LC
-#define LC(i, nm) shadCLocs[i] = glGetUniformLocation(shadC, #nm)
-	shadC = Shader::FromVF(IO::GetText(IO::path + "/voxelCutVert.txt"), IO::GetText(IO::path + "/voxelCutFrag.txt"));
-	LC(0, _MV);
-	LC(1, _P);
+	LC(3, camPos);
+	LC(4, tex);
+	LC(5, cutPos);
+	LC(6, cutDir);
+	LC(7, _IMV);
 }
 
 Node_Volume::Node_Volume() : AnNode(new DmScript()) {
@@ -51,7 +49,7 @@ Node_Volume::Node_Volume() : AnNode(new DmScript()) {
 	script->invars.push_back(std::pair<string, string>("array", "list(3)"));
 	ox = oy = oz = 4;
 	sx = sy = sz = 5;
-	cutC = Vec3(0.5f, 0.5f, 0.5f);
+	cutC = Vec3(0, 0, 0);
 	cutD = Vec3(1, 1, 0);
 }
 
@@ -123,9 +121,11 @@ void Node_Volume::DrawScene() {
 	glUniformMatrix4fv(shadLocs[0], 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
 	glUniformMatrix4fv(shadLocs[1], 1, GL_FALSE, glm::value_ptr(MVP::projection()));
 	glUniform3f(shadLocs[2], sx, sy, sz);
-	
-	glUniform3f(shadLocs[4], cutC.x, cutC.y, cutC.z);
-	glUniform3f(shadLocs[5], cutD.x, cutD.y, cutD.z);
+	auto& cam = ChokoLait::mainCamera->object->transform.position();
+	glUniform3f(shadLocs[3], cam.x, cam.y, cam.z);
+	glUniform3f(shadLocs[5], cutC.x, cutC.y, cutC.z);
+	glUniform3f(shadLocs[6], cutD.x, cutD.y, cutD.z);
+	glUniformMatrix4fv(shadLocs[7], 1, GL_FALSE, glm::value_ptr(glm::inverse(MVP::modelview())));
 
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veo);
@@ -133,16 +133,6 @@ void Node_Volume::DrawScene() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
-
-	float cs = 1.0f / sqrtf(2.0f);
-
-	//MVP::Mul(Mat4x4(cs, -cs, 0, 0, cs, cs, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
-	glUseProgram(shadC);
-	glUniformMatrix4fv(shadCLocs[0], 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
-	glUniformMatrix4fv(shadCLocs[1], 1, GL_FALSE, glm::value_ptr(MVP::projection()));
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	glUseProgram(0);
-	MVP::Pop();
 }
 
 void Node_Volume::Execute() {
