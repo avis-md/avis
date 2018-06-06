@@ -5,6 +5,7 @@ uniform vec2 screenSize;
 uniform sampler2D inColor;
 uniform sampler2D inNormal;
 uniform sampler2D inSpec;
+uniform sampler2D inEmit;
 uniform sampler2D inDepth;
 
 uniform sampler2D inSky;
@@ -30,6 +31,7 @@ void main () {
 	vec4 dCol = texture(inColor, uv);
 	vec4 nCol = texture(inNormal, uv);
 	vec4 sCol = texture(inSpec, uv);
+	vec4 eCol = texture(inEmit, uv);
 	float z = texture(inDepth, uv).x;
 	float nClip = 0.01;
 	float fClip = 500.0;
@@ -40,7 +42,12 @@ void main () {
         fragCol = vec4(0, 0, 0, 0);
         return;
     }
-    
+	if (length(nCol.xyz) == 0) {
+		fragCol = eCol * eCol.a;
+		return;
+	}
+	 
+	
     vec3 skycol = skyColAt(nCol.xyz).rgb;
     float skystr = skycol.r*0.3 + skycol.g*0.6 + skycol.b*0.1;
     fragCol.rgb = mix(skycol * dCol.rgb, vec3(1, 1, 1), pow(skystr, 3)) * skyStrength * (1 - skyStrDecay * zLinear);
@@ -56,6 +63,5 @@ void main () {
     
     float nf = dot(fwd, nCol.xyz);
     fragCol.rgb += skycol * max(nf + rimOffset, 0) * rimStrength;
-    
     fragCol.a = 1;
 }
