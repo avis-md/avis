@@ -6,6 +6,7 @@ Node_Plot::Node_Plot() : AnNode(new DmScript()) {
 	//width = 200;
 	canTile = true;
 	inputR.resize(1);
+	script->name = ".Plot";
 	script->invars.push_back(std::pair<string, string>("array", "list(1)"));
 }
 

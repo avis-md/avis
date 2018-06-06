@@ -12,6 +12,7 @@ public:
 		*refresh, *checkbox,
 		*zoomIn, *zoomOut,
 		*lang_c, *lang_py, *lang_ft,
+		*icon_anl,
 		*dm_none,
 		*dm_point, *dm_ball, *dm_vdw,
 		*dm_line, *dm_stick,

@@ -46,6 +46,7 @@ Node_Volume::Node_Volume() : AnNode(new DmScript()) {
 	//width = 200;
 	canTile = true;
 	inputR.resize(1);
+	script->name = ".voxel";
 	script->invars.push_back(std::pair<string, string>("array", "list(3)"));
 	ox = oy = oz = 4;
 	sx = sy = sz = 5;

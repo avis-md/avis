@@ -7,6 +7,7 @@ Texture* Icons::expand, *Icons::collapse, *Icons::play, *Icons::playall,
 *Icons::refresh, *Icons::checkbox,
 *Icons::zoomIn, *Icons::zoomOut,
 *Icons::lang_c, *Icons::lang_py, *Icons::lang_ft,
+*Icons::icon_anl,
 *Icons::dm_none, *Icons::dm_point, *Icons::dm_ball, *Icons::dm_vdw, *Icons::dm_line, *Icons::dm_stick, *Icons::dm_lineball, *Icons::dm_stickball;
 
 #define TEXN(nm) new Texture(IO::path + "/res/" #nm ".png", false)
@@ -38,6 +39,7 @@ void Icons::Init() {
 	TEX(lang_c);
 	lang_py = TEXN(lang_python);
 	lang_ft = TEXN(lang_fortran);
+	TEX(icon_anl);
 	TEX(dm_none);
 	TEX(dm_point);
 	TEX(dm_ball);

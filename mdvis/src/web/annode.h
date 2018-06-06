@@ -18,6 +18,7 @@ public:
 	AnScript* script;
 	bool selected;
 	Vec2 pos;
+	uint id;
 	static float width;
 	string title;
 	Vec3 titleCol = Vec3(0.35f, 0.35f, 0.35f);
@@ -42,7 +43,7 @@ public:
 	void DrawToolbar();
 	virtual void Execute() = 0;
 	void ConnectTo(uint id, AnNode* tar, uint tarId); //out -> in
-
+	void Save(std::ofstream& strm);
 protected:
 	AnNode(AnScript* scr);
 	

@@ -47,6 +47,8 @@
         "list": "cpp",
         "*.ipp": "cpp",
         "istream": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "cfenv": "cpp",
+        "map": "cpp"
     }
 }

@@ -188,6 +188,9 @@ void AnWeb::Draw() {
 
 	if (Engine::Button(Display::width - 71.0f, 1.0f, 70.0f, 16.0f, white(1, 0.4f), "Done", 12.0f, AnNode::font, white(), true) == MOUSE_RELEASE)
 		drawFull = false;
+	
+	if (Engine::Button(200, 1.0f, 70.0f, 16.0f, white(1, 0.4f), "Save", 12.0f, AnNode::font, white(), true) == MOUSE_RELEASE)
+		Save(IO::path + "/nodes/rdf.anl");
 }
 
 void AnWeb::DrawSide() {
@@ -246,4 +249,20 @@ void AnWeb::Execute() {
 void AnWeb::DoExecute() {
 	for (auto n : nodes) n->Execute();
 	executing = false;
+}
+
+#define sp << " "
+#define nl << "\n"
+void AnWeb::Save(const string& s) {
+	std::ofstream strm(s, std::ios::binary);
+	strm << nodes.size() nl;
+	uint i = 0;
+	for (auto n : nodes) {
+		n->id = i++;
+		n->Save(strm);
+	}
+}
+
+void AnWeb::Load(const string& s) {
+
 }

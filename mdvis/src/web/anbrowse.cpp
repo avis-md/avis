@@ -6,7 +6,13 @@ bool AnBrowse::expanded = true;
 float AnBrowse::expandPos = 150;
 
 void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
-	auto ff = IO::GetFiles(path, ".py");
+	auto ff = IO::GetFiles(path, ".anl");
+	fo->saves.reserve(ff.size());
+	for (auto f : ff) {
+		string nm = f.substr(f.find_last_of('/') + 1);
+		fo->saves.push_back(incPath + nm.substr(0, nm.size() - 4));
+	}
+	ff = IO::GetFiles(path, ".py");
 	for (auto f : ff) {
 		auto nm = f.substr(f.find_last_of('/') + 1);
 		if (nm.substr(0, 2) == "__") continue;
@@ -29,9 +35,11 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 
 	for (auto f : fd) {
 		fo->subfolders.push_back(Folder(f));
-		DoScan(&fo->subfolders.back(), path + "/" + f, incPath + f + "/");
-		if (!fo->subfolders.back().scripts.size() && !fo->subfolders.back().subfolders.size())
+		auto& bk = fo->subfolders.back();
+		DoScan(&bk, path + "/" + f, incPath + f + "/");
+		if (!bk.scripts.size() && !bk.subfolders.size())
 			fo->subfolders.pop_back();
+		bk.fullName = incPath + f;
 	}
 }
 
@@ -49,6 +57,14 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 		layer++;
 		for (auto& fd : f->subfolders)
 			DoDraw(&fd, off, layer);
+		for (auto& fs : f->saves) {
+			if (Engine::Button(2.0f + 5 * layer, off, 150.0f, 16.0f, white(1, 0.35f)) == MOUSE_RELEASE) {
+				
+			}
+			UI::Texture(2.0f + 5 * layer, off, 16.0f, 16.0f, Icons::icon_anl);
+			UI::Label(22.0f + 5 * layer, off + 1, 12.0f, fs, AnNode::font, white());
+			off += 17;
+		}
 		for (auto& fs : f->scripts) {
 			if (Engine::Button(2.0f + 5 * layer, off, 150.0f, 16.0f, white(1, 0.35f)) == MOUSE_RELEASE) {
 				AnWeb::selScript = fs;

@@ -7,10 +7,11 @@ public:
 	static struct Folder {
 		Folder(string nm) : name(nm) {}
 
-		string name;
+		string name, fullName;
 		bool expanded = true;
 		std::vector<AnScript*> scripts;
 		std::vector<Folder> subfolders;
+		std::vector<string> saves;
 	} folder;
 
 	static bool expanded;

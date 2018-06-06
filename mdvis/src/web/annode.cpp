@@ -173,6 +173,38 @@ AnNode::AnNode(AnScript* scr) : script(scr), canTile(false) {
 	conV.resize(outputR.size());
 }
 
+#define sp << " "
+#define nl << "\n"
+void AnNode::Save(std::ofstream& strm) {
+	string ext;
+	strm << (int)script->type sp << (script->name + ext) sp;
+	uint iv = 0;
+	std::vector<int> is;
+	std::vector<bool> ii;
+	for (int i = 0; i < script->invars.size(); i++) {
+		if (script->invars[i].second == "int" || script->invars[i].second == "float") {
+			iv++;
+			is.push_back(i);
+			ii.push_back(script->invars[i].second == "int");
+		}
+	}
+	strm << iv sp << inputR.size() sp << (int)canTile nl;
+	iv = 0;
+	for (auto& i : is) {
+		auto j = is[i];
+		strm << script->invars[j].first sp << (ii[i]? inputVDef[j].i : inputVDef[j].f) nl;
+	}
+
+	int i = 0;
+	for (auto& p : inputR) {
+		if (p.first)
+			strm << p.first->id sp << p.first->script->outvars[p.second].first sp << script->invars[i].first nl;
+		else
+			strm << "0" nl;
+		i++;
+	}
+}
+
 
 PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 	if (!scr) return;

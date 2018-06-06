@@ -3,6 +3,7 @@
 
 Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	DmScript* scr = (DmScript*)script;
+	script->name = ".in";
 
 	title = "All Particles";
 	titleCol = Vec3(0.225f, 0.5f, 0.25f);
@@ -74,6 +75,7 @@ void Node_Inputs::Execute() {
 Node_Inputs_ActPar::Node_Inputs_ActPar() : Node_Inputs() {
 	title = "Selected Particles";
 	titleCol = Vec3(0.3f, 0.3f, 0.5f);
+	script->name = ".insel";
 }
 
 void Node_Inputs_ActPar::Execute() {
