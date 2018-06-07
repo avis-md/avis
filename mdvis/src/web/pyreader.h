@@ -1,6 +1,5 @@
 #pragma once
 #include "Engine.h"
-#include <Python.h>
 #include "anweb.h"
 
 class PyReader {

@@ -22,6 +22,12 @@ bool Net::listening = false;
 
 dataReceivedCallback Net::onDataReceived = 0;
 
+void Net::Init() {
+#ifdef PLATFORM_WIN
+	if (!wsa) InitWsa();
+#endif
+}
+
 std::vector<string> Net::MyIp() {
 	std::vector<string> res;
 	ulong sz = 25000;

@@ -12,6 +12,8 @@ typedef void(*dataReceivedCallback)(uint ip, uint port, byte* data, uint dataCou
 
 class Net {
 public:
+	static void Init();
+	
 	static std::vector<string> MyIp();
 	
 	static bool Listen(uint port, dataReceivedCallback callback);

@@ -61,7 +61,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Anaconda\include;./src;./include/glew;./include/glfw;./include/glm;./include/jpeg;./include/freetype;./include/ffmpeg</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Anaconda\include;./src;./include/glew;./include/glfw;./include/glm;./include/jpeg;./include/freetype;./include/ffmpeg;./include/ssh2</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;CHOKO_LAIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -155,6 +155,7 @@
     <ClCompile Include="src\utils\dylib.cpp" />
     <ClCompile Include="src\utils\effects.cpp" />
     <ClCompile Include="src\utils\runcmd.cpp" />
+    <ClCompile Include="src\utils\ssh.cpp" />
     <ClCompile Include="src\web\anbrowse.cpp" />
     <ClCompile Include="src\web\anconv.cpp" />
     <ClCompile Include="src\web\annode.cpp" />
@@ -244,6 +245,7 @@
     <ClInclude Include="src\utils\dylib.h" />
     <ClInclude Include="src\utils\effects.h" />
     <ClInclude Include="src\utils\runcmd.h" />
+    <ClInclude Include="src\utils\ssh.h" />
     <ClInclude Include="src\web\anbrowse.h" />
     <ClInclude Include="src\web\anconv.h" />
     <ClInclude Include="src\web\annode.h" />

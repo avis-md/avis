@@ -5,6 +5,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <termios.h>
+#include <unistd.h>
 #endif
 
 string IO::path = IO::InitPath();
@@ -102,6 +104,28 @@ string IO::ReadFile(const string& path) {
 	std::stringstream buffer;
 	buffer << stream.rdbuf();
 	return buffer.str();
+}
+
+void IO::HideInput(bool hide) {
+#ifdef PLATFORM_WIN
+    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE); 
+    DWORD mode;
+    GetConsoleMode(hStdin, &mode);
+    if(hide)
+        mode &= ~ENABLE_ECHO_INPUT;
+    else
+        mode |= ENABLE_ECHO_INPUT;
+    SetConsoleMode(hStdin, mode );
+#else
+    struct termios tty;
+    tcgetattr(STDIN_FILENO, &tty);
+    if( !enable )
+        tty.c_lflag &= ~ECHO;
+    else
+        tty.c_lflag |= ECHO;
+
+    (void) tcsetattr(STDIN_FILENO, TCSANOW, &tty);
+#endif
 }
 
 #ifdef PLATFORM_WIN

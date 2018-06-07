@@ -87,6 +87,9 @@ void paintfunc() {
 	}
 }
 
+#define ssize_t _W64 int
+#include "utils/ssh.h"
+
 int main(int argc, char **argv)
 {
 	for (auto a = 0; a < argc; a++) {
@@ -100,7 +103,34 @@ int main(int argc, char **argv)
 
 	ChokoLait::Init(800, 800);
 	font = new Font(IO::path + "/arimo.ttf", ALIGN_TOPLEFT);
-	
+
+	SSH::Init();
+	SSHConfig sshc;
+	sshc.user = "chokopan";
+	sshc.auth = SSH_Auth::PASSWORD;
+
+	std::cout << "ip: ";
+	std::getline(std::cin, sshc.ip);
+
+	std::cout << "port: ";
+	string ln;
+	std::getline(std::cin, ln);
+	sshc.port = (short)std::stoul(ln);
+
+	std::cout << "pw: ";
+	IO::HideInput(true);
+	std::getline(std::cin, sshc.pw);
+	IO::HideInput(false);
+	std::cout << std::endl;
+	auto ssh = SSH::Connect(sshc);
+	ssh.EnableDump(100);
+
+	string input;
+	for (;;) {
+		std::getline(std::cin, input);
+		ssh.Write(input);
+	}
+
 	VisSystem::font = font;
 
 	Icons::Init();
