@@ -58,6 +58,8 @@ public:
 
 	PyObject* pModule, *pFunc, *pArgs;
 	std::vector<PyObject*> pRets;
+
+	static std::unordered_map<string, PyScript*> allScrs;
 };
 
 struct CVar {
@@ -85,4 +87,6 @@ public:
 	
 	typedef void (*emptyFunc)();
 	emptyFunc funcLoc;
+
+	static std::unordered_map<string, CScript*> allScrs;
 };

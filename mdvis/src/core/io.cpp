@@ -119,7 +119,7 @@ void IO::HideInput(bool hide) {
 #else
     struct termios tty;
     tcgetattr(STDIN_FILENO, &tty);
-    if( !enable )
+    if(hide)
         tty.c_lflag &= ~ECHO;
     else
         tty.c_lflag |= ECHO;

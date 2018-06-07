@@ -85,13 +85,17 @@ bool SSH::Write(string s) {
 
 void SSH::EnableDump(uint rate) {
 	stopDump = false;
-	dumpthread = new std::thread(DoDump, *this, rate);
+	dumpthread = new std::thread(DoDump, this, rate);
 }
 
-void SSH::DoDump(SSH& inst, uint rate) {
-	while (!inst.stopDump) {
-		auto s = inst.Read(1000);
+void SSH::DoDump(SSH* inst, uint rate) {
+	while (!inst->stopDump) {
+		auto s = inst->Read(1000);
 		if (s.size()) std::cout << s;
+#ifdef PLATFORM_WIN
 		Sleep(rate);
+#else
+		usleep(rate * 1000);
+#endif
 	}
 }

@@ -17,6 +17,8 @@ void* DmScript::Get(uint i) {
 }
 
 
+std::unordered_map<string, PyScript*> PyScript::allScrs;
+
 string PyScript::Exec() {
 	for (uint i = 0; i < invars.size(); ++i) {
 		auto& val = _invars[i].value;
@@ -82,6 +84,8 @@ void* PyScript::Get(uint i) {
 	return nullptr;
 }
 
+
+std::unordered_map<string, CScript*> CScript::allScrs;
 
 string CScript::Exec() {
 	funcLoc();

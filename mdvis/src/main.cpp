@@ -87,7 +87,7 @@ void paintfunc() {
 	}
 }
 
-#define ssize_t _W64 int
+//#define ssize_t _W64 int
 #include "utils/ssh.h"
 
 int main(int argc, char **argv)
@@ -105,31 +105,6 @@ int main(int argc, char **argv)
 	font = new Font(IO::path + "/arimo.ttf", ALIGN_TOPLEFT);
 
 	SSH::Init();
-	SSHConfig sshc;
-	sshc.user = "chokopan";
-	sshc.auth = SSH_Auth::PASSWORD;
-
-	std::cout << "ip: ";
-	std::getline(std::cin, sshc.ip);
-
-	std::cout << "port: ";
-	string ln;
-	std::getline(std::cin, ln);
-	sshc.port = (short)std::stoul(ln);
-
-	std::cout << "pw: ";
-	IO::HideInput(true);
-	std::getline(std::cin, sshc.pw);
-	IO::HideInput(false);
-	std::cout << std::endl;
-	auto ssh = SSH::Connect(sshc);
-	ssh.EnableDump(100);
-
-	string input;
-	for (;;) {
-		std::getline(std::cin, input);
-		ssh.Write(input);
-	}
 
 	VisSystem::font = font;
 
@@ -155,9 +130,10 @@ int main(int argc, char **argv)
 	auto l = lht->AddComponent<Light>();
 	ParGraphics::SetLight(l.get());
 
-	AnWeb::Insert(new CNode((CScript*)AnBrowse::folder.scripts[2]));
-	AnWeb::Insert(new Node_Plot());
+	//AnWeb::Insert(new CNode((CScript*)AnBrowse::folder.scripts[2]));
+	//AnWeb::Insert(new Node_Plot());
 	//AnWeb::Insert(new Node_Volume());
+	AnWeb::Load(IO::path + "/nodes/rdf.anl");
 
 	Gromacs::Read(IO::path + "/pbc.gro", false);
 	bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");

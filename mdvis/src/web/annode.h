@@ -43,7 +43,7 @@ public:
 	void DrawToolbar();
 	virtual void Execute() = 0;
 	void ConnectTo(uint id, AnNode* tar, uint tarId); //out -> in
-	void Save(std::ofstream& strm);
+	void Save(std::ofstream& strm), Load(std::ifstream& strm);
 protected:
 	AnNode(AnScript* scr);
 	

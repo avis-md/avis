@@ -264,5 +264,30 @@ void AnWeb::Save(const string& s) {
 }
 
 void AnWeb::Load(const string& s) {
-
+	std::ifstream strm(s, std::ios::binary);
+	uint sz;
+	strm >> sz;
+	nodes.resize(sz);
+	int t;
+	string nm;
+	for (auto a = 0; a < sz; a++) {
+		strm >> t >> nm;
+		switch (t) {
+		case 0:
+			if (nm == ".in") nodes[a] = new Node_Inputs();
+			else if (nm == ".insel") nodes[a] = new Node_Inputs_ActPar();
+			else if (nm == ".Vol") nodes[a] = new Node_Volume();
+			else if (nm == ".Plot") nodes[a] = new Node_Plot();
+			break;
+		case 1:
+			nodes[a] = new CNode(CScript::allScrs[nm]);
+			break;
+		case 2:
+			nodes[a] = new PyNode(PyScript::allScrs[nm]);
+			break;
+		default:
+			abort();
+		}
+		nodes[a]->Load(strm);
+	}
 }

@@ -35,5 +35,5 @@ protected:
 
 	bool stopDump;
 	std::thread* dumpthread;
-	static void DoDump(SSH& inst, uint rate);
+	static void DoDump(SSH* inst, uint rate);
 };

@@ -200,9 +200,50 @@ void AnNode::Save(std::ofstream& strm) {
 		if (p.first)
 			strm << p.first->id sp << p.first->script->outvars[p.second].first sp << script->invars[i].first nl;
 		else
-			strm << "0" nl;
+			strm << "-1" nl;
 		i++;
 	}
+}
+
+void AnNode::Load(std::ifstream& strm) {
+	int ic, cc, ct;
+	strm >> ic >> cc >> ct;
+	string vn, tp;
+	for (auto i = 0; i < ic; i++) {
+		strm >> vn >> tp;
+		for (uint b = 0; b < script->invars.size(); b++) {
+			string nn = script->invars[b].first;
+			if (nn == vn) {
+				auto t = ((CScript*)script)->_invars[b].type;
+				if (t == AN_VARTYPE::FLOAT)
+					inputVDef[b].f = TryParse(tp, 0.0f);
+				else if (t == AN_VARTYPE::INT)
+					inputVDef[b].i = TryParse(tp, 0);
+			}
+		}
+	}
+	for (auto i = 0; i < cc; i++) {
+		strm >> ic;
+		if (ic < 0) continue;
+		strm >> vn >> tp;
+		AnNode* n2 = AnWeb::nodes[ic];
+		uint i1 = -1, i2 = -1;
+		for (uint b = 0; b < n2->script->outvars.size(); b++) {
+			if (n2->script->outvars[b].first == vn) {
+				i2 = b;
+				break;
+			}
+		}
+		for (uint b = 0; b < script->invars.size(); b++) {
+			if (script->invars[b].first == tp) {
+				i1 = b;
+				break;
+			}
+		}
+		if (i1 == -1 || i2 == -1) continue;
+		n2->ConnectTo(i2, this, i1);
+	}
+	canTile = !!ct;
 }
 
 
