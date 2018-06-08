@@ -87,7 +87,6 @@ void paintfunc() {
 	}
 }
 
-//#define ssize_t _W64 int
 #include "utils/ssh.h"
 
 int main(int argc, char **argv)

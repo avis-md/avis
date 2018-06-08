@@ -1,5 +1,8 @@
 #pragma once
 #include "Engine.h"
+#ifdef PLATFORM_WIN
+#define ssize_t _W64 int
+#endif
 #include <libssh2.h>
 #ifdef PLATFORM_WIN
 #pragma comment(lib, "libssh2_win.lib")
