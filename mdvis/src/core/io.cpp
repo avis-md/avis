@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Editor.h"
 
 #ifndef PLATFORM_WIN
 #include <sys/types.h>

@@ -1,7 +1,9 @@
 #include "anweb.h"
+#ifndef IS_ANSERVER
 #include "ui/icons.h"
 #include "md/Particles.h"
 #include "vis/pargraphics.h"
+#endif
 
 AnNode* AnWeb::selConnNode = nullptr;
 uint AnWeb::selConnId = 0;
@@ -37,6 +39,7 @@ void AnWeb::Init() {
 }
 
 void AnWeb::Update() {
+#ifndef IS_ANSERVER
 	if (Input::mouse0) {
 		if (Input::mouse0State == MOUSE_DOWN) {
 			for (auto n : nodes) n->selected = false;
@@ -53,9 +56,11 @@ void AnWeb::Update() {
 	if (!executing && execThread) {
 		if (execThread->joinable()) execThread->join();
 	}
+#endif
 }
 
 void AnWeb::Draw() {
+#ifndef IS_ANSERVER
 	AnNode::width = 220;
 	Engine::DrawQuad(AnBrowse::expandPos, 0.0f, (float)Display::width, Display::height - 18.0f, white(0.8f, 0.05f));
 	Engine::BeginStencil(AnBrowse::expandPos, 0.0f, (float)Display::width, Display::height - 18.0f);
@@ -191,9 +196,11 @@ void AnWeb::Draw() {
 	
 	if (Engine::Button(200, 1.0f, 70.0f, 16.0f, white(1, 0.4f), "Save", 12.0f, AnNode::font, white(), true) == MOUSE_RELEASE)
 		Save(IO::path + "/nodes/rdf.anl");
+#endif
 }
 
 void AnWeb::DrawSide() {
+#ifndef IS_ANSERVER
 	Engine::DrawQuad(Display::width - expandPos, 0.0f, 180.0f, Display::height - 18.0f, white(0.9f, 0.15f));
 	if (expanded) {
 		float w = 180;
@@ -232,10 +239,13 @@ void AnWeb::DrawSide() {
 		UI::Label(Display::width - expandPos - 92.0f, Display::height - 33.0f, 12.0f, "Analysis (A)", AnNode::font, white());
 		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.0f, 180.0f);
 	}
+#endif
 }
 
 void AnWeb::DrawScene() {
+#ifndef IS_ANSERVER
 	for (auto& n : nodes) n->DrawScene();
+#endif
 }
 
 void AnWeb::Execute() {

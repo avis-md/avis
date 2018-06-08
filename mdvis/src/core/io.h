@@ -6,9 +6,6 @@
 class IO {
 public:
 	static std::vector<string> GetFiles(const string& path, string ext = "");
-#ifdef IS_EDITOR
-	static std::vector<EB_Browser_File> GetFilesE(Editor* e, const string& path);
-#endif
 	static void GetFolders(const string& path, std::vector<string>* names, bool hidden = false);
 	static bool HasDirectory(string szPath);
 	static void MakeDirectory(string szPath);

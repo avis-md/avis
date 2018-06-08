@@ -1,25 +1,34 @@
 #include "anweb.h"
 #include "anconv.h"
+#ifndef IS_ANSERVER
 #include "ui/icons.h"
+#endif
 
 Font* AnNode::font = nullptr;
 Texture* AnNode::tex_circle_open = nullptr, *AnNode::tex_circle_conn = nullptr;
 float AnNode::width = 220;
 
 void AnNode::Init() {
+#ifndef IS_ANSERVER
 	tex_circle_open = new Texture(IO::path + "/res/node_open.png");
 	tex_circle_conn = new Texture(IO::path + "/res/node_conn.png");
+#endif
 
 	Node_Volume::Init();
 }
 
 bool AnNode::Select() {
+#ifndef IS_ANSERVER
 	bool in = Rect(pos.x + 16, pos.y, width - 16, 16).Inside(Input::mousePos);
 	if (in) selected = true;
 	return in;
+#else
+	return false;
+#endif
 }
 
 Vec2 AnNode::DrawConn() {
+#ifndef IS_ANSERVER
 	auto cnt = (script->invars.size() + script->outvars.size());
 	float y = pos.y + 18;
 	for (uint i = 0; i < script->invars.size(); i++, y += 17) {
@@ -27,9 +36,13 @@ Vec2 AnNode::DrawConn() {
 	}
 	if (expanded) return Vec2(width, 19 + 17 * cnt);
 	else return Vec2(width, 16);
+#else
+	return Vec2();
+#endif
 }
 
 void AnNode::Draw() {
+#ifndef IS_ANSERVER
 	auto cnt = (script->invars.size() + script->outvars.size());
 	Engine::DrawQuad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
@@ -111,9 +124,11 @@ void AnNode::Draw() {
 		}
 		if (AnWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));
 	}
+#endif
 }
 
 float AnNode::DrawSide() {
+#ifndef IS_ANSERVER
 	auto cnt = (script->invars.size());
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
@@ -141,9 +156,13 @@ float AnNode::DrawSide() {
 		return 19.0f + 17 * cnt;
 	}
 	else return 17.0f;
+#else
+	return 0;
+#endif
 }
 
 void AnNode::DrawToolbar() {
+#ifndef IS_ANSERVER
 	if (Engine::Button(pos.x + width - 50, pos.y, 16, 16, Icons::left, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
 		op = ANNODE_OP::LEFT;
 	}
@@ -153,6 +172,7 @@ void AnNode::DrawToolbar() {
 	if (Engine::Button(pos.x + width - 16, pos.y, 16, 16, Icons::cross, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
 		op = ANNODE_OP::REMOVE;
 	}
+#endif
 }
 
 void AnNode::ConnectTo(uint id, AnNode* tar, uint tarId) {

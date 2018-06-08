@@ -1,6 +1,8 @@
 #include "../anweb.h"
+#ifndef IS_ANSERVER
 #include "utils/plot.h"
 #include "ui/icons.h"
+#endif
 
 Node_Plot::Node_Plot() : AnNode(new DmScript()) {
 	//width = 200;
@@ -11,6 +13,7 @@ Node_Plot::Node_Plot() : AnNode(new DmScript()) {
 }
 
 void Node_Plot::Draw() {
+#ifndef IS_ANSERVER
 	auto cnt = 1;
 	this->pos = pos;
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
@@ -50,9 +53,11 @@ void Node_Plot::Draw() {
 			plt::plot(pos.x + 2, pos.y + 18 + 17 * cnt, width - 4, width - 4, &valXs[0], &valYs[0], valXs.size());
 		}
 	}
+#endif
 }
 
 float Node_Plot::DrawSide() {
+#ifndef IS_ANSERVER
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 20, pos.y + 1, 12, "Plot list(float)", font, white());
@@ -64,9 +69,13 @@ float Node_Plot::DrawSide() {
 		return width + 21;
 	}
 	else return 17;
+#else
+	return 0;
+#endif
 }
 
 Vec2 Node_Plot::DrawConn() {
+#ifndef IS_ANSERVER
 	auto cnt = 1;
 	float y = pos.y + 18;
 	//for (uint i = 0; i < script->invarCnt; i++, y += 17) {
@@ -74,9 +83,13 @@ Vec2 Node_Plot::DrawConn() {
 	//}
 	if (expanded) return Vec2(width, 19 + 17 * cnt + width);
 	else return Vec2(width, 16);
+#else
+	return Vec2();
+#endif
 }
 
 void Node_Plot::Execute() {
+#ifndef IS_ANSERVER
 	if (!inputR[0].first) return;
 	CVar& cv = inputR[0].first->conV[inputR[0].second];
 	auto& sz = *cv.dimVals[0];
@@ -87,4 +100,5 @@ void Node_Plot::Execute() {
 	}
 	float* src = *((float**)cv.value);
 	memcpy(&valYs[0], src, sz * sizeof(float));
+#endif
 }

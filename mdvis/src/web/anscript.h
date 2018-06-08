@@ -1,8 +1,9 @@
 #pragma once
 #include "Engine.h"
 #include <Python.h>
+#ifndef IS_ANSERVER
 #include "utils/dylib.h"
-
+#endif
 enum class AN_SCRTYPE {
 	NONE,
 	C,

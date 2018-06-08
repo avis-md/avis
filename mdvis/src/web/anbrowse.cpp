@@ -1,5 +1,7 @@
 #include "anweb.h"
+#ifndef IS_ANSERVER
 #include "ui/icons.h"
+#endif
 
 AnBrowse::Folder AnBrowse::folder = Folder("nodes");
 bool AnBrowse::expanded = true;
@@ -48,6 +50,7 @@ void AnBrowse::Scan() {
 }
 
 void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
+#ifndef IS_ANSERVER
 	Engine::DrawQuad(2.0f + 5 * layer, off, 150.0f, 16.0f, white(1, 0.3f));
 	if (Engine::Button(2.0f + 5 * layer, off, 16.0f, 16.0f, f->expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 		f->expanded = !f->expanded;
@@ -79,9 +82,11 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 			off += 17;
 		}
 	}
+#endif
 }
 
 void AnBrowse::Draw() {
+#ifndef IS_ANSERVER
 	Engine::DrawQuad(0.0f, 0.0f, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
 	if (expanded) {
 		float f = 20;
@@ -101,4 +106,5 @@ void AnBrowse::Draw() {
 		UI::Label(expandPos + 18, Display::height - 33.0f, 12.0f, "Python Files", AnNode::font, white());
 		expandPos = max(expandPos - 1500 * Time::delta, 0.0f);
 	}
+#endif
 }

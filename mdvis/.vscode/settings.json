@@ -49,6 +49,9 @@
         "istream": "cpp",
         "queue": "cpp",
         "cfenv": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "ios": "cpp",
+        "atomic": "cpp",
+        "system_error": "cpp"
     }
 }

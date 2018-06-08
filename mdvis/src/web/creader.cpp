@@ -1,5 +1,9 @@
 #include "anweb.h"
+#ifndef IS_ANSERVER
 #include "utils/runcmd.h"
+#else
+#include "../../utils/runcmd.h"
+#endif
 
 #ifdef PLATFORM_WIN
 string CReader::vcbatPath = "C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\bin\\vcvars32.bat";

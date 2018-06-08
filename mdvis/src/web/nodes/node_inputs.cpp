@@ -1,5 +1,7 @@
 #include "../anweb.h"
+#ifndef IS_ANSERVER
 #include "md/Particles.h"
+#endif
 
 Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	DmScript* scr = (DmScript*)script;
@@ -18,13 +20,16 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	conV.resize(2);
 	auto& poss = conV[0];
 	poss.dimVals.resize(2);
+#ifndef IS_ANSERVER
 	poss.dimVals[0] = (int*)&Particles::particleSz;
+#endif
 	poss.dimVals[1] = new int(3);
 	
 	conV[1] = poss;
 }
 
 void Node_Inputs::Draw() {
+#ifndef IS_ANSERVER
 	auto cnt = 2;
 	this->pos = pos;
 	Engine::DrawQuad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
@@ -60,6 +65,7 @@ void Node_Inputs::Draw() {
 		font->Align(ALIGN_TOPLEFT);
 		UI::Label(pos.x + 2, y, 12, script->outvars[i].second, font, white(0.3f), width * 0.67f - 6);
 	}
+#endif
 }
 
 Vec2 Node_Inputs::DrawConn() {
@@ -67,8 +73,10 @@ Vec2 Node_Inputs::DrawConn() {
 }
 
 void Node_Inputs::Execute() {
+#ifndef IS_ANSERVER
 	conV[0].value = Particles::particles_Pos;
 	conV[1].value = Particles::particles_Vel;
+#endif
 }
 
 

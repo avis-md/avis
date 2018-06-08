@@ -1,7 +1,9 @@
+#ifndef IS_ANSERVER
 #include "ChokoLait.h"
+#include "ui/icons.h"
+#endif
 #include "node_volume.h"
 #include "../anweb.h"
-#include "ui/icons.h"
 
 const Vec3 Node_Volume::cubeVerts[] = {
 	Vec3(-1, -1, -1), Vec3(1, -1, -1), Vec3(-1, 1, -1), Vec3(1, 1, -1),
@@ -16,6 +18,7 @@ GLint Node_Volume::shadLocs[];
 GLuint Node_Volume::vao, Node_Volume::vbo, Node_Volume::veo;
 
 void Node_Volume::Init() {
+#ifndef IS_ANSERVER
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(Vec3), cubeVerts, GL_STATIC_DRAW);
@@ -40,6 +43,7 @@ void Node_Volume::Init() {
 	LC(5, cutPos);
 	LC(6, cutDir);
 	LC(7, _IMV);
+#endif
 }
 
 Node_Volume::Node_Volume() : AnNode(new DmScript()) {
@@ -55,6 +59,7 @@ Node_Volume::Node_Volume() : AnNode(new DmScript()) {
 }
 
 void Node_Volume::Draw() {
+#ifndef IS_ANSERVER
 	auto cnt = 1;
 	this->pos = pos;
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
@@ -89,9 +94,11 @@ void Node_Volume::Draw() {
 		UI::Label(pos.x + 10, y, 12, "values", font, white());
 		
 	}
+#endif
 }
 
 float Node_Volume::DrawSide() {
+#ifndef IS_ANSERVER
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 20, pos.y + 1, 12, "Density Plot", font, white());
@@ -101,9 +108,13 @@ float Node_Volume::DrawSide() {
 		return 34;
 	}
 	else return 17;
+#else
+	return 0;
+#endif
 }
 
 Vec2 Node_Volume::DrawConn() {
+#ifndef IS_ANSERVER
 	auto cnt = 1;
 	float y = pos.y + 18;
 	//for (uint i = 0; i < script->invarCnt; i++, y += 17) {
@@ -111,9 +122,13 @@ Vec2 Node_Volume::DrawConn() {
 	//}
 	if (expanded) return Vec2(width, 19 + 17 * cnt + width);
 	else return Vec2(width, 16);
+#else
+	return Vec2();
+#endif
 }
 
 void Node_Volume::DrawScene() {
+#ifndef IS_ANSERVER
 	MVP::Switch(false);
 	MVP::Push();
 	MVP::Translate(ox, oy, oz);
@@ -134,9 +149,11 @@ void Node_Volume::DrawScene() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
+#endif
 }
 
 void Node_Volume::Execute() {
+#ifndef IS_ANSERVER
 	if (!inputR[0].first) return;
 	CVar& cv = inputR[0].first->conV[inputR[0].second];
 	auto& sz1 = *cv.dimVals[0];
@@ -161,4 +178,5 @@ void Node_Volume::Execute() {
 	}
 
 	float* src = *((float**)cv.value);
+#endif
 }
