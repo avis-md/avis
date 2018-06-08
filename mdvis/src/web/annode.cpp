@@ -266,6 +266,13 @@ void AnNode::Load(std::ifstream& strm) {
 	canTile = !!ct;
 }
 
+void AnNode::SaveIn(const string& path) {
+	string nm = script->name;
+	std::replace(nm.begin(), nm.end(), '/', '_');
+	std::ofstream strm(path + std::to_string(id) + "_" + nm);
+	
+}
+
 
 PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 	if (!scr) return;

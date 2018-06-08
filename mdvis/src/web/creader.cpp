@@ -1,8 +1,6 @@
 #include "anweb.h"
 #ifndef IS_ANSERVER
 #include "utils/runcmd.h"
-#else
-#include "../../utils/runcmd.h"
 #endif
 
 #ifdef PLATFORM_WIN

@@ -115,8 +115,8 @@ int main(int argc, char **argv)
 	Protein::Init();
 	
 	PyReader::Init();
-	PyNode::Init();
-	PyNode::font = font;
+	AnNode::Init();
+	AnNode::font = font;
 
 	AnBrowse::Scan();
 	

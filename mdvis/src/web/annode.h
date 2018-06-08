@@ -44,6 +44,8 @@ public:
 	virtual void Execute() = 0;
 	void ConnectTo(uint id, AnNode* tar, uint tarId); //out -> in
 	void Save(std::ofstream& strm), Load(std::ifstream& strm);
+	void SaveIn(const string& path), LoadIn(const string& path);
+	void SaveOut(const string& path), LoadOut(const string& path);
 protected:
 	AnNode(AnScript* scr);
 	

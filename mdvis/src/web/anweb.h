@@ -23,7 +23,8 @@ public:
 	static void Insert(AnScript* scr, Vec2 pos = Vec2(100, 100));
 	static void Insert(AnNode* node, Vec2 pos = Vec2(100, 100));
 	static void Init(), Update(), Draw(), DrawSide(), DrawScene(), Execute(), DoExecute();
-	static void Save(const string& s), Load(const string& s);
+	static void Save(const string& s);
+	static void Load(const string& s);
 };
 
 #include "anbrowse.h"

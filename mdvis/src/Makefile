@@ -34,3 +34,12 @@ obj/%.o: %.cpp
 clean:
 	find ./obj -name '*.o' -exec rm {} \;
 	rm -f ../build/mdvis
+clean-all:
+	$(MAKE) clean
+	cd web && $(MAKE) clean
+
+srv:
+	cd web && $(MAKE)
+	
+all:
+	$(MAKE) && $(MAKE) srv

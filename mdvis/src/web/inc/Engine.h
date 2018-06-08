@@ -57,7 +57,8 @@ void _putenv_s(string nm, const char* loc);
 Vec4 black(float f = 1);
 Vec4 red(float f = 1, float i = 1), green(float f = 1, float i = 1), blue(float f = 1, float i = 1), cyan(float f = 1, float i = 1), yellow(float f = 1, float i = 1), white(float f = 1, float i = 1);
 
-#include "../../core/io.h"
-#include "../../core/debug.h"
-#include "../../utils/dylib.h"
-#include "../../utils/strext.h"
+#include "io.h"
+#include "debug.h"
+#include "runcmd.h"
+#include "dylib.h"
+#include "strext.h"
