@@ -4,14 +4,14 @@
 #ifndef IS_ANSERVER
 #include "utils/dylib.h"
 #endif
-enum class AN_SCRTYPE {
+enum class AN_SCRTYPE : byte {
 	NONE,
 	C,
 	PYTHON,
 	FORTRAN
 };
 
-enum class AN_VARTYPE {
+enum class AN_VARTYPE : byte {
 	INT,
 	FLOAT,
 	LIST
@@ -73,6 +73,9 @@ public:
 	void* value; //same as pRets
 	std::vector<string> dimNames;
 	std::vector<int*> dimVals;
+
+	void Write(std::ofstream& strm);
+	void Read(std::ifstream& strm);
 };
 
 class CScript : public AnScript {

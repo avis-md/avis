@@ -79,6 +79,16 @@ void Node_Inputs::Execute() {
 #endif
 }
 
+void Node_Inputs::SaveIn(const string& path) {
+	string nm = script->name;
+	std::replace(nm.begin(), nm.end(), '/', '_');
+	std::ofstream strm(path + std::to_string(id) + "_in_" + nm);
+	if (strm.is_open()) {
+		conV[0].Write(strm);
+		conV[1].Write(strm);
+	}
+}
+
 
 Node_Inputs_ActPar::Node_Inputs_ActPar() : Node_Inputs() {
 	title = "Selected Particles";

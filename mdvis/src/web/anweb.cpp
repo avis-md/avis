@@ -275,6 +275,8 @@ void AnWeb::Save(const string& s) {
 
 void AnWeb::Load(const string& s) {
 	std::ifstream strm(s, std::ios::binary);
+	if (!strm.is_open())
+		return;
 	uint sz;
 	strm >> sz;
 	nodes.resize(sz);

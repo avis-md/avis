@@ -85,6 +85,57 @@ void* PyScript::Get(uint i) {
 }
 
 
+void CVar::Write(std::ofstream& strm) {
+	_StreamWrite(&type, &strm, 1);
+	switch (type) {
+	case AN_VARTYPE::FLOAT:
+		_StreamWrite((float*)value, &strm, sizeof(float));
+		break;
+	case AN_VARTYPE::INT:
+		_StreamWrite((int32_t*)value, &strm, sizeof(int32_t));
+		break;
+	case AN_VARTYPE::LIST:
+		int32_t sz = (int32_t)dimVals.size();
+		_StreamWrite(&sz, &strm, sizeof(int32_t));
+		int totalSz = 0;
+		for (auto a = 0; a < sz; a++) {
+			_StreamWrite((int32_t*)dimVals[a], &strm, sizeof(int32_t));
+			totalSz *= *dimVals[a];
+		}
+		_StreamWrite(*((float**)value), &strm, totalSz * sizeof(float));
+		break;
+	}
+}
+
+void CVar::Read(std::ifstream& strm) {
+	_Strm2Val(strm, type);
+	switch (type) {
+	case AN_VARTYPE::FLOAT:
+		value = new float();
+		_Strm2Val(strm, *((float**)value));
+		break;
+	case AN_VARTYPE::INT:
+		value = new int();
+		_Strm2Val(strm, *((int32_t**)value));
+		break;
+	case AN_VARTYPE::LIST:
+		int32_t sz = 0;
+		_Strm2Val(strm, *((int32_t**)sz));
+		dimVals.resize(sz);
+		int totalSz = 0;
+		for (auto a = 0; a < sz; a++) {
+			dimVals[a] = new int();
+			_Strm2Val(strm, *dimVals[a]);
+			totalSz *= *dimVals[a];
+		}
+		value = new uintptr_t();
+		auto loc = *((float**)value) = new float[totalSz];
+		strm.read((char*)loc, totalSz * sizeof(float));
+		break;
+	}
+}
+
+
 std::unordered_map<string, CScript*> CScript::allScrs;
 
 string CScript::Exec() {

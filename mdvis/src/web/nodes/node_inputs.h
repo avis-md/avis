@@ -10,6 +10,9 @@ public:
 	float DrawSide() override { return 0; }
 	void Execute() override;
 	std::vector<PyNode*> nodes;
+
+	void SaveIn(const string& path) override;
+	void LoadIn(const string& path) override;
 };
 
 class Node_Inputs_ActPar : public Node_Inputs {
