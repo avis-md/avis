@@ -30,6 +30,7 @@ public:
 	static Vec3 scrX, scrY;
 
 	static bool animate, seek;
+	static bool tfboDirty;
 
 	class Eff {
 	public:

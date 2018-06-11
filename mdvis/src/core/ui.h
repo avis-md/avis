@@ -13,6 +13,7 @@ public:
 
 	//Draws an editable text box. EditText does not work on recursive functions.
 	static string EditText(float x, float y, float w, float h, float s, Vec4 bcol, const string& str, Font* font, bool delayed = false, bool* changed = nullptr, Vec4 fcol = black(), Vec4 hcol = Vec4(0, 120.0f / 255, 215.0f / 255, 1), Vec4 acol = white(), bool ser = true);
+	static string EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, const string& str, char repl, Font* font, bool delayed = false, bool* changed = nullptr, Vec4 fcol = black(), Vec4 hcol = Vec4(0, 120.0f / 255, 215.0f / 255, 1), Vec4 acol = white(), bool ser = true);
 
 	static bool CanDraw();
 

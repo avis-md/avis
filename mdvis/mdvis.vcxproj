@@ -160,6 +160,7 @@
     <ClCompile Include="src\web\anconv.cpp" />
     <ClCompile Include="src\web\annode.cpp" />
     <ClCompile Include="src\web\anscript.cpp" />
+    <ClCompile Include="src\web\anops.cpp" />
     <ClCompile Include="src\web\anweb.cpp" />
     <ClCompile Include="src\web\creader.cpp" />
     <ClCompile Include="src\web\nodes\node_inputs.cpp" />
@@ -250,6 +251,7 @@
     <ClInclude Include="src\web\anconv.h" />
     <ClInclude Include="src\web\annode.h" />
     <ClInclude Include="src\web\anscript.h" />
+    <ClInclude Include="src\web\anops.h" />
     <ClInclude Include="src\web\anweb.h" />
     <ClInclude Include="src\web\creader.h" />
     <ClInclude Include="src\web\nodes\node_inputs.h" />

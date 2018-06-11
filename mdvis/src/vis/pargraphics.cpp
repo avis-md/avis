@@ -33,6 +33,7 @@ Vec3 ParGraphics::scrX, ParGraphics::scrY;
 bool ParGraphics::dragging = false;
 
 bool ParGraphics::animate = false, ParGraphics::seek = false;
+bool ParGraphics::tfboDirty = true;
 
 //---------------- effects vars -------------------
 
@@ -48,8 +49,17 @@ float ParGraphics::Eff::glowThres, ParGraphics::Eff::glowRad, ParGraphics::Eff::
 void ParGraphics::Eff::Apply() {
 	auto cam = ChokoLait::mainCamera().get();
 	byte cnt = 0;
-	//cnt += Effects::Blur(cam->d_tfbo[0], cam->d_tfbo[1], cam->d_ttexs[0], cam->d_ttexs[1], _rad*20, Display::width, Display::height);
-	if (useSSAO) cnt += Effects::SSAO(cam->d_tfbo[0], cam->d_tfbo[1], cam->d_tfbo[2], cam->d_ttexs[0], cam->d_ttexs[1], cam->d_ttexs[2], cam->d_texs[1], cam->d_depthTex, ssaoStr, ssaoSamples, ssaoRad, ssaoBlur, Display::width, Display::height);
+	if (tfboDirty) {
+		//cnt += Effects::Blur(cam->d_tfbo[0], cam->d_tfbo[1], cam->d_ttexs[0], cam->d_ttexs[1], _rad*20, Display::width, Display::height);
+		if (useSSAO) cnt += Effects::SSAO(cam->d_tfbo[0], cam->d_tfbo[1], cam->d_tfbo[2], cam->d_ttexs[0], cam->d_ttexs[1], cam->d_ttexs[2], cam->d_texs[1], cam->d_depthTex, ssaoStr, ssaoSamples, ssaoRad, ssaoBlur, Display::width, Display::height);
+
+		if ((cnt % 2) == 1) {
+			std::swap(cam->d_tfbo[0], cam->d_tfbo[1]);
+			std::swap(cam->d_ttexs[0], cam->d_ttexs[1]);
+			cnt = 0;
+		}
+		if (AnWeb::drawFull) cnt += Effects::Blur(cam->d_tfbo[0], cam->d_tfbo[1], cam->d_ttexs[0], cam->d_ttexs[1], 1.0f, Display::width, Display::height);
+	}
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->d_tfbo[cnt % 2]);
@@ -395,11 +405,16 @@ void ParGraphics::Recolor() {
 
 void ParGraphics::Reblit() {
 	auto cam = ChokoLait::mainCamera().get();
-	Recolor();
-	//glViewport(0, 0, Display::actualWidth, Display::actualHeight);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->d_tfbo[0]);
-	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	BlitSky();
+	if (!AnWeb::drawFull) tfboDirty = true;
+	if (tfboDirty) {
+		float zero[] = { 0,0,0,0 };
+		glClearBufferfv(GL_COLOR, 0, zero);
+		Recolor();
+		//glViewport(0, 0, Display::actualWidth, Display::actualHeight);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->d_tfbo[0]);
+		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		BlitSky();
+	}
 	//*
 	glViewport(0, 0, Display::actualWidth, Display::actualHeight);
 	//glBlendFunc(GL_ONE, GL_ZERO);
@@ -407,6 +422,9 @@ void ParGraphics::Reblit() {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	
 	Eff::Apply();
+
+	if (tfboDirty && AnWeb::drawFull)
+		tfboDirty = false;
 	
 	//glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->d_fbo);
 

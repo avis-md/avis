@@ -277,6 +277,122 @@ string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, cons
 	//#endif
 }
 
+string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, const string& str2, char repl, Font* font, bool delayed, bool* changed, Vec4 fcol, Vec4 hcol, Vec4 acol, bool ser) {
+	string str = str2;
+	string pstr = "";
+	_checkdraw;
+	GetEditTextId();
+	bool isActive = (UI::IsSameId(_activeEditText, _editingEditText) && (_activeEditTextId == _editingEditTextId));
+
+	if (changed) *changed = false;
+
+	if (isActive) {
+		auto al = font->alignment;
+		font->Align(ALIGN_MIDLEFT);
+
+		if (!delayed) _editTextString = str;
+		if (!!_editTextCursorPos) _editTextCursorPos -= Input::KeyDown(Key_LeftArrow);
+		_editTextCursorPos += Input::KeyDown(Key_RightArrow);
+		_editTextCursorPos = Clamp<uint>(_editTextCursorPos, 0U, _editTextString.size());
+		if (!Input::KeyHold(Key_LeftShift) && (Input::KeyDown(Key_LeftArrow) || Input::KeyDown(Key_RightArrow))) {
+			_editTextCursorPos2 = _editTextCursorPos;
+			_editTextBlinkTime = 0;
+		}
+		auto ssz = Input::inputString.size();
+		if (ssz) {
+			if (_editTextCursorPos == _editTextCursorPos2) {
+				_editTextString = _editTextString.substr(0, _editTextCursorPos) + Input::inputString + _editTextString.substr(_editTextCursorPos);
+				_editTextCursorPos += ssz;
+				_editTextCursorPos2 += ssz;
+			}
+			else {
+				_editTextString = _editTextString.substr(0, min(_editTextCursorPos, _editTextCursorPos2)) + Input::inputString + _editTextString.substr(max(_editTextCursorPos, _editTextCursorPos2));
+				_editTextCursorPos = min(_editTextCursorPos, _editTextCursorPos2) + ssz;
+				_editTextCursorPos2 = _editTextCursorPos;
+			}
+			if (!delayed && changed) *changed = true;
+			_editTextBlinkTime = 0;
+		}
+		if (Input::KeyDown(Key_Backspace)) {
+			if (_editTextCursorPos == _editTextCursorPos2) {
+				_editTextString = _editTextString.substr(0, _editTextCursorPos - 1) + _editTextString.substr(_editTextCursorPos);
+				if (!!_editTextCursorPos) {
+					_editTextCursorPos--;
+					_editTextCursorPos2--;
+				}
+			}
+			else {
+				_editTextString = _editTextString.substr(0, min(_editTextCursorPos, _editTextCursorPos2)) + _editTextString.substr(max(_editTextCursorPos, _editTextCursorPos2));
+				_editTextCursorPos = min(_editTextCursorPos, _editTextCursorPos2);
+				_editTextCursorPos2 = _editTextCursorPos;
+			}
+			if (!delayed && changed) *changed = true;
+			_editTextBlinkTime = 0;
+		}
+		if (Input::KeyDown(Key_Delete) && _editTextCursorPos < _editTextString.size()) {
+			_editTextString = _editTextString.substr(0, _editTextCursorPos) + _editTextString.substr(_editTextCursorPos + 1);
+			if (!delayed && changed) *changed = true;
+			_editTextBlinkTime = 0;
+		}
+		Engine::DrawQuad(x, y, w, h, black());
+		Engine::DrawQuad(x + 1, y + 1, w - 2, h - 2, white());
+		pstr.resize(_editTextString.size(), repl);
+		UI::Label(x + 2, y + 0.4f*h, s, pstr, font);
+
+		auto szz = _editTextString.size();
+		if (!!Input::mouse0State && !!szz && Rect(x, y, w, h).Inside(Input::mousePos)) {
+			_editTextCursorPos = 0;
+			for (uint i = 1; i <= szz; i++) {
+				_editTextCursorPos += (Input::mousePos.x > Display::width*(font->poss[i * 4 - 2].x + font->poss[i * 4].x) / 2);
+			}
+			_editTextCursorPos2 = 0;
+			for (uint i = 1; i <= szz; i++) {
+				_editTextCursorPos2 += (Input::mouseDownPos.x > Display::width*(font->poss[i * 4 - 2].x + font->poss[i * 4].x) / 2);
+			}
+			_editTextBlinkTime = 0;
+		}
+		
+		float xp;
+		if (!_editTextCursorPos) xp = x + 2;
+		else xp = font->poss[_editTextCursorPos * 4].x*Display::width;
+		float xp2;
+		if (!_editTextCursorPos2) xp2 = x + 2;
+		else xp2 = font->poss[_editTextCursorPos2 * 4].x*Display::width;
+		if (_editTextCursorPos != _editTextCursorPos2) {
+			Engine::DrawQuad(xp, y + 2, xp2 - xp, h - 4, hcol);
+			pstr.resize(_editTextString.size(), repl);
+			UI::Label(min(xp, xp2), y + 0.4f*h, s, pstr.substr(min(_editTextCursorPos, _editTextCursorPos2), abs((int)_editTextCursorPos - (int)_editTextCursorPos2)), font, acol);
+		}
+		_editTextBlinkTime += Time::delta;
+		if (fmod(_editTextBlinkTime, 1) < 0.5f) Engine::DrawLine(Vec2(xp, y + 2), Vec2(xp, y + h - 2), (_editTextCursorPos == _editTextCursorPos2) ? black() : white(), 1);
+		font->Align(al);
+
+		if ((Input::mouse0State == MOUSE_UP && !Rect(x, y, w, h).Inside(Input::mousePos)) || Input::KeyDown(Key_Enter)) {
+			memset(_editingEditText, 0, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
+			_activeEditTextId = 0;
+			if (changed && delayed) *changed = true;
+			return delayed ? _editTextString : str;
+		}
+		if (Input::KeyDown(Key_Escape)) {
+			memset(_editingEditText, 0, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
+			_activeEditTextId = 0;
+			return str;
+		}
+		return delayed ? str : _editTextString;
+	}
+	else {
+		pstr.resize(str.size(), repl);
+		if (Engine::Button(x, y, w, h, bcol, pstr, s, font, fcol, false) == MOUSE_RELEASE) {
+			memcpy(_editingEditText, _activeEditText, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
+			_editingEditTextId = _activeEditTextId;
+			_editTextCursorPos = str.size();
+			_editTextCursorPos2 = 0;
+			_editTextBlinkTime = 0;
+			if (delayed) _editTextString = str;
+		}
+	}
+	return str;
+}
 Vec3 AU(Vec3 vec) {
 	if (!Display::uiMatrixIsI) {
 		vec.y = Display::height - vec.y;

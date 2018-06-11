@@ -5,7 +5,8 @@
 
 AnBrowse::Folder AnBrowse::folder = Folder("nodes");
 bool AnBrowse::expanded = true;
-float AnBrowse::expandPos = 150;
+bool AnBrowse::mscFdExpanded[] = {};
+float AnBrowse::expandPos = 0;
 
 void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 	auto ff = IO::GetFiles(path, ".anl");
@@ -91,19 +92,37 @@ void AnBrowse::Draw() {
 	if (expanded) {
 		float f = 20;
 		Engine::BeginStencil(0.0f, 0.0f, expandPos, Display::height - 18.0f);
-		UI::Label(5.0f, 3.0f, 12.0f, "Python Files", AnNode::font, white());
+		UI::Label(5.0f, 3.0f, 12.0f, "Scripts", AnNode::font, white());
+
+		Engine::DrawQuad(2, f, 150.0f, 16.0f, white(1, 0.3f));
+		if (Engine::Button(2, f, 16.0f, 16.0f, mscFdExpanded[0] ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+			mscFdExpanded[0] = !mscFdExpanded[0];
+		UI::Label(22, f + 1, 12.0f, "Miscellaneous", AnNode::font, white());
+		f += 17;
+		if (mscFdExpanded[0]) {
+			for (int a = 0; a < 2; a++) {
+				if (Engine::Button(7, f, 150.0f, 16.0f, white(1, 0.35f)) == MOUSE_RELEASE) {
+					AnWeb::selScript = (AnScript*)1;
+					AnWeb::selSpNode = AN_NODE_MISC::PLOT + a;
+				}
+				UI::Texture(7, f, 16.0f, 16.0f, Icons::lightning);
+				UI::Label(27, f + 1, 12.0f, AN_NODE_MISC_NAMES[a], AnNode::font, white());
+				f += 17;
+			}
+		}
+
 		DoDraw(&folder, f, 0);
 		Engine::EndStencil();
 		Engine::DrawQuad(expandPos, Display::height - 34.0f, 16.0f, 16.0f, white(1, 0.2f));
-		if (Engine::Button(expandPos, Display::height - 34.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		if ((!UI::editingText && Input::KeyUp(Key_S)) || Engine::Button(expandPos, Display::height - 34.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = min(expandPos + 1500 * Time::delta, 150.0f);
 	}
 	else {
-		if (Engine::Button(expandPos, Display::height - 34.0f, 110.0f, 16.0f, white(1, 0.2f), white(1, 0.2f), white(1, 0.2f)) == MOUSE_RELEASE)
+		if ((!UI::editingText && Input::KeyUp(Key_S)) || Engine::Button(expandPos, Display::height - 34.0f, 110.0f, 16.0f, white(1, 0.2f), white(1, 0.2f), white(1, 0.2f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(expandPos, Display::height - 34.0f, 16.0f, 16.0f, Icons::expand);
-		UI::Label(expandPos + 18, Display::height - 33.0f, 12.0f, "Python Files", AnNode::font, white());
+		UI::Label(expandPos + 18, Display::height - 33.0f, 12.0f, "Scripts (S)", AnNode::font, white());
 		expandPos = max(expandPos - 1500 * Time::delta, 0.0f);
 	}
 #endif

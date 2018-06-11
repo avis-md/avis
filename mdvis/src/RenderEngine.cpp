@@ -440,7 +440,7 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 	//return;
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, *d_tfbo);
-	glClearBufferfv(GL_COLOR, 0, zero);
+	//glClearBufferfv(GL_COLOR, 0, zero);
 
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(false);

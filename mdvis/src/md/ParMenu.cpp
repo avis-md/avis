@@ -44,12 +44,12 @@ void ParMenu::Draw() {
 		Engine::ResetUIMatrix();
 
 		Engine::DrawQuad(expandPos, Display::height - 34.0f, 16, 16, white(0.9f, 0.15f));
-		if (Input::KeyUp(Key_T) || Engine::Button(expandPos, Display::height - 34.0f, 16, 16, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		if ((!UI::editingText && Input::KeyUp(Key_T)) || Engine::Button(expandPos, Display::height - 34.0f, 16, 16, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = Clamp(expandPos + 1500 * Time::delta, 2.0f, 150.0f);
 	}
 	else {
-		if (Input::KeyUp(Key_T) || Engine::Button(expandPos, Display::height - 34.0f, 115, 16, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
+		if ((!UI::editingText && Input::KeyUp(Key_T)) || Engine::Button(expandPos, Display::height - 34.0f, 115, 16, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(expandPos, Display::height - 34.0f, 16, 16, Icons::expand);
 		UI::Label(expandPos + 18, Display::height - 33.0f, 12, "Toolbar (T)", font, white());

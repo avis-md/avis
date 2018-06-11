@@ -1,5 +1,6 @@
 #include "anweb.h"
 #ifndef IS_ANSERVER
+#include "anops.h"
 #include "ui/icons.h"
 #include "md/Particles.h"
 #include "vis/pargraphics.h"
@@ -9,13 +10,17 @@ AnNode* AnWeb::selConnNode = nullptr;
 uint AnWeb::selConnId = 0;
 bool AnWeb::selConnIdIsOut = false, AnWeb::selPreClear = false;
 AnScript* AnWeb::selScript = nullptr;
+byte AnWeb::selSpNode = 0;
 
 std::vector<AnNode*> AnWeb::nodes;
 
 bool AnWeb::drawFull = false, AnWeb::expanded = true, AnWeb::executing = false;
-float AnWeb::maxScroll, AnWeb::scrollPos = 0, AnWeb::expandPos = 150.0f;
+float AnWeb::maxScroll, AnWeb::scrollPos = 0, AnWeb::expandPos = 0;
 
 std::thread* AnWeb::execThread = nullptr;
+
+bool AnWeb::hasPy = true, AnWeb::hasC = true, AnWeb::hasFt = false;
+bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
 
 void AnWeb::Insert(AnScript* scr, Vec2 pos) {
 	AnNode* nd;
@@ -62,8 +67,8 @@ void AnWeb::Update() {
 void AnWeb::Draw() {
 #ifndef IS_ANSERVER
 	AnNode::width = 220;
-	Engine::DrawQuad(AnBrowse::expandPos, 0.0f, (float)Display::width, Display::height - 18.0f, white(0.8f, 0.05f));
-	Engine::BeginStencil(AnBrowse::expandPos, 0.0f, (float)Display::width, Display::height - 18.0f);
+	Engine::DrawQuad(AnBrowse::expandPos, 0.0f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.0f, white(0.8f, 0.05f));
+	Engine::BeginStencil(AnBrowse::expandPos, 0.0f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.0f);
 	byte ms = Input::mouse0State;
 	if (executing) {
 		Input::mouse0 = false;
@@ -123,7 +128,7 @@ void AnWeb::Draw() {
 	}
 	if (Input::mouse0State == MOUSE_UP && selPreClear) selConnNode = nullptr;
 
-	float canScroll = max(maxScroll - (Display::width - AnBrowse::expandPos), 0.0f);
+	float canScroll = max(maxScroll - (Display::width - AnBrowse::expandPos - AnOps::expandPos), 0.0f);
 	//if (Input::KeyHold(Key_RightArrow)) scrollPos += 1000 * Time::delta;
 	//if (Input::KeyHold(Key_LeftArrow)) scrollPos -= 1000 * Time::delta;
 	scrollPos = Clamp(scrollPos - Input::mouseScroll * 1000 * Time::delta, 0.0f, canScroll);
@@ -136,15 +141,29 @@ void AnWeb::Draw() {
 		if (selScript) {
 			if (iter >= 0) {
 				AnNode* pn;
-				switch (selScript->type) {
-				case AN_SCRTYPE::PYTHON:
-					pn = new PyNode((PyScript*)selScript);
-					break;
-				case AN_SCRTYPE::C:
-					pn = new CNode((CScript*)selScript);
-					break;
-				default:
-					abort();
+				if ((uintptr_t)selScript > 1) {
+					switch (selScript->type) {
+					case AN_SCRTYPE::PYTHON:
+						pn = new PyNode((PyScript*)selScript);
+						break;
+					case AN_SCRTYPE::C:
+						pn = new CNode((CScript*)selScript);
+						break;
+					default:
+						abort();
+					}
+				}
+				else {
+					switch (selSpNode) {
+					case AN_NODE_MISC::PLOT:
+						pn = new Node_Plot();
+						break;
+					case AN_NODE_MISC::VOLUME:
+						pn = new Node_Volume();
+						break;
+					default:
+						abort();
+					}
 				}
 				if (iterTile) {
 					if (iterTileTop) nodes[iter + 1]->canTile = true;
@@ -177,25 +196,42 @@ void AnWeb::Draw() {
 	}
 
 	AnBrowse::Draw();
+	AnOps::Draw();
 
 	if (Input::KeyDown(Key_Escape)) {
 		if (selScript) selScript = nullptr;
-		else drawFull = false;
+		else {
+			drawFull = false;
+			AnBrowse::expandPos = AnOps::expandPos = 0;
+		}
 	}
 	if (selScript) {
 		Texture* icon = 0;
-		if (selScript->type == AN_SCRTYPE::C)
+		if ((uintptr_t)selScript == 1)
+			icon = Icons::lightning;
+		else if (selScript->type == AN_SCRTYPE::C)
 			icon = Icons::lang_c;
 		else if (selScript->type == AN_SCRTYPE::PYTHON)
 			icon = Icons::lang_py;
 		UI::Texture(Input::mousePos.x - 16, Input::mousePos.y - 16, 32, 32, icon, white(0.3f));
 	}
 
-	if (Engine::Button(Display::width - 71.0f, 1.0f, 70.0f, 16.0f, white(1, 0.4f), "Done", 12.0f, AnNode::font, white(), true) == MOUSE_RELEASE)
+	if (Engine::Button(Display::width - AnOps::expandPos - 71.0f, 1.0f, 70.0f, 16.0f, white(1, 0.4f), "Done", 12.0f, AnNode::font, white(), true) == MOUSE_RELEASE) {
 		drawFull = false;
+		AnBrowse::expandPos = AnOps::expandPos = 0;
+	}
 	
-	if (Engine::Button(200, 1.0f, 70.0f, 16.0f, white(1, 0.4f), "Save", 12.0f, AnNode::font, white(), true) == MOUSE_RELEASE)
+	if (Engine::Button(200, 1, 70.0f, 16.0f, white(1, 0.4f), "Save", 12.0f, AnNode::font, white(), true) == MOUSE_RELEASE)
 		Save(IO::path + "/nodes/rdf.anl");
+
+	if (Engine::Button(275, 1, 70, 16, white(1, executing ? 0.2f : 0.4f), "Run", 12, AnNode::font, white(), true) == MOUSE_RELEASE) {
+
+	}
+	if (Engine::Button(350, 1, 107, 16, white(1, executing ? 0.2f : 0.4f), "Run All", 12, AnNode::font, white(), true) == MOUSE_RELEASE) {
+		AnWeb::Execute();
+	}
+	UI::Texture(275, 1, 16, 16, Icons::play);
+	UI::Texture(350, 1, 16, 16, Icons::playall);
 #endif
 }
 
@@ -227,13 +263,13 @@ void AnWeb::DrawSide() {
 		}
 		//Engine::EndStencil();
 		Engine::DrawQuad(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, white(0.9f, 0.15f));
-		if (Input::KeyUp(Key_A) || Engine::Button(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = Clamp(expandPos + 1500 * Time::delta, 0.0f, 180.0f);
 	}
 	else {
 		Engine::DrawQuad(Display::width - expandPos, 0.0f, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
-		if (Input::KeyUp(Key_A) || Engine::Button(Display::width - expandPos - 110.0f, Display::height - 34.0f, 110.0f, 16.0f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
+		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(Display::width - expandPos - 110.0f, Display::height - 34.0f, 110.0f, 16.0f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(Display::width - expandPos - 110.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::expand);
 		UI::Label(Display::width - expandPos - 92.0f, Display::height - 33.0f, 12.0f, "Analysis (A)", AnNode::font, white());
