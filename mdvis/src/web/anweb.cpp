@@ -271,6 +271,18 @@ void AnWeb::Save(const string& s) {
 		n->id = i++;
 		n->Save(strm);
 	}
+	strm.close();
+	SaveIn();
+}
+
+void AnWeb::SaveIn() {
+	string path = IO::path + "/nodes/__tmp__/";
+	if (!IO::HasDirectory(path)) IO::MakeDirectory(path);
+	path += "in/";
+	if (!IO::HasDirectory(path)) IO::MakeDirectory(path);
+	for (auto n : nodes) {
+		n->SaveIn(path);
+	}
 }
 
 void AnWeb::Load(const string& s) {
@@ -301,5 +313,12 @@ void AnWeb::Load(const string& s) {
 			abort();
 		}
 		nodes[a]->Load(strm);
+	}
+}
+
+void AnWeb::LoadIn() {
+	string path = IO::path + "/nodes/__tmp__/in/";
+	for (auto n : nodes) {
+		n->LoadIn(path);
 	}
 }

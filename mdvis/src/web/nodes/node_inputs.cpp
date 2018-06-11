@@ -20,6 +20,7 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	conV.resize(2);
 	auto& poss = conV[0];
 	poss.dimVals.resize(2);
+	poss.type = AN_VARTYPE::LIST;
 #ifndef IS_ANSERVER
 	poss.dimVals[0] = (int*)&Particles::particleSz;
 #endif
@@ -80,20 +81,33 @@ void Node_Inputs::Execute() {
 }
 
 void Node_Inputs::SaveIn(const string& path) {
+	Execute();
 	string nm = script->name;
-	std::replace(nm.begin(), nm.end(), '/', '_');
-	std::ofstream strm(path + std::to_string(id) + "_in_" + nm);
+	//std::replace(nm.begin(), nm.end(), '/', '_');
+	std::ofstream strm(path + std::to_string(id) + nm);
 	if (strm.is_open()) {
 		conV[0].Write(strm);
 		conV[1].Write(strm);
 	}
 }
 
+void Node_Inputs::LoadIn(const string& path) {
+	string nm = script->name;
+	//std::replace(nm.begin(), nm.end(), '/', '_');
+	std::ifstream strm(path + std::to_string(id) + nm);
+	if (strm.is_open()) {
+		conV[0].Read(strm);
+		conV[1].Read(strm);
+	}
+}
 
 Node_Inputs_ActPar::Node_Inputs_ActPar() : Node_Inputs() {
 	title = "Selected Particles";
 	titleCol = Vec3(0.3f, 0.3f, 0.5f);
 	script->name = ".insel";
+
+	conV[0].dimVals[0] = new int(0);
+	conV[1].dimVals[0] = new int(0);
 }
 
 void Node_Inputs_ActPar::Execute() {

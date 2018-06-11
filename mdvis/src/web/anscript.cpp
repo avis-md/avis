@@ -92,17 +92,17 @@ void CVar::Write(std::ofstream& strm) {
 		_StreamWrite((float*)value, &strm, sizeof(float));
 		break;
 	case AN_VARTYPE::INT:
-		_StreamWrite((int32_t*)value, &strm, sizeof(int32_t));
+		_StreamWrite((int32_t*)value, &strm, 4);
 		break;
 	case AN_VARTYPE::LIST:
-		int32_t sz = (int32_t)dimVals.size();
-		_StreamWrite(&sz, &strm, sizeof(int32_t));
-		int totalSz = 0;
+		auto sz = dimVals.size();
+		_StreamWrite(&sz, &strm, 1);
+		int totalSz = 1;
 		for (auto a = 0; a < sz; a++) {
-			_StreamWrite((int32_t*)dimVals[a], &strm, sizeof(int32_t));
+			_StreamWrite((int32_t*)dimVals[a], &strm, 4);
 			totalSz *= *dimVals[a];
 		}
-		_StreamWrite(*((float**)value), &strm, totalSz * sizeof(float));
+		if (totalSz > 0) strm.write((char*)value, totalSz * sizeof(float));
 		break;
 	}
 }
@@ -119,18 +119,17 @@ void CVar::Read(std::ifstream& strm) {
 		_Strm2Val(strm, *((int32_t**)value));
 		break;
 	case AN_VARTYPE::LIST:
-		int32_t sz = 0;
-		_Strm2Val(strm, *((int32_t**)sz));
+		byte sz = 0;
+		_Strm2Val(strm, sz);
 		dimVals.resize(sz);
-		int totalSz = 0;
+		int totalSz = 1;
 		for (auto a = 0; a < sz; a++) {
 			dimVals[a] = new int();
 			_Strm2Val(strm, *dimVals[a]);
 			totalSz *= *dimVals[a];
 		}
-		value = new uintptr_t();
-		auto loc = *((float**)value) = new float[totalSz];
-		strm.read((char*)loc, totalSz * sizeof(float));
+		value = new float[max(totalSz, 1)];
+		if (totalSz) strm.read((char*)value, totalSz * sizeof(float));
 		break;
 	}
 }

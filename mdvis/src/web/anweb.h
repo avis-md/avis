@@ -24,7 +24,7 @@ public:
 	static void Insert(AnNode* node, Vec2 pos = Vec2(100, 100));
 	static void Init(), Update(), Draw(), DrawSide(), DrawScene(), Execute(), DoExecute();
 	static void Save(const string& s), SaveIn(), SaveOut();
-	static void Load(const string& s), LoadIn(), SaveOut();
+	static void Load(const string& s), LoadIn(), LoadOut();
 };
 
 #include "anbrowse.h"
