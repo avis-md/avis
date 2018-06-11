@@ -216,7 +216,7 @@ void AnWeb::Draw() {
 		UI::Texture(Input::mousePos.x - 16, Input::mousePos.y - 16, 32, 32, icon, white(0.3f));
 	}
 
-	if (Engine::Button(Display::width - AnOps::expandPos - 71.0f, 1.0f, 70.0f, 16.0f, white(1, 0.4f), "Done", 12.0f, AnNode::font, white(), true) == MOUSE_RELEASE) {
+	if (Engine::Button(Display::width - 71.0f, 1.0f, 70.0f, 16.0f, white(1, 0.4f), "Done", 12.0f, AnNode::font, white(), true) == MOUSE_RELEASE) {
 		drawFull = false;
 		AnBrowse::expandPos = AnOps::expandPos = 0;
 	}

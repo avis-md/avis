@@ -50,7 +50,7 @@ void Node_Plot::Draw() {
 		UI::Label(pos.x + 10, y, 12, "values", font, white());
 		//}
 		if (valXs.size()) {
-			plt::plot(pos.x + 2, pos.y + 18 + 17 * cnt, width - 4, width - 4, &valXs[0], &valYs[0], valXs.size());
+			plt::plot(pos.x + 12, pos.y + 18 + 17 * cnt, width - 14, width - 14, &valXs[0], &valYs[0], valXs.size(), font, 10, white(1, 0.8f));
 		}
 	}
 #endif
@@ -64,7 +64,7 @@ float Node_Plot::DrawSide() {
 	if (expanded) {
 		Engine::DrawQuad(pos.x, pos.y + 16, width, 4 + width, white(0.7f, 0.25f));
 		if (valXs.size()) {
-			plt::plot(pos.x + 2, pos.y + 18, width - 4, width - 4, &valXs[0], &valYs[0], valXs.size());
+			plt::plot(pos.x + 12, pos.y + 18, width - 14, width - 14, &valXs[0], &valYs[0], valXs.size(), font, 10, white(1, 0.8f));
 		}
 		return width + 21;
 	}

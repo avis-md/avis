@@ -149,7 +149,7 @@ void ParGraphics::Init() {
 
 	rotCenter = Vec3(4, 4, 4);
 	rotZ = 90;
-	rotScale = -5;
+	rotScale = 0;
 
 	Eff::ssaoSamples = 20;
 	Eff::ssaoRad = 0.015f;
@@ -405,7 +405,7 @@ void ParGraphics::Recolor() {
 
 void ParGraphics::Reblit() {
 	auto cam = ChokoLait::mainCamera().get();
-	if (!AnWeb::drawFull) tfboDirty = true;
+	if (!AnWeb::drawFull || Scene::dirty) tfboDirty = true;
 	if (tfboDirty) {
 		float zero[] = { 0,0,0,0 };
 		glClearBufferfv(GL_COLOR, 0, zero);

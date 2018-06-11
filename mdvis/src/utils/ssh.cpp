@@ -88,6 +88,19 @@ bool SSH::Write(string s) {
 	return sz == s.size();
 }
 
+void SSH::Flush() {
+	auto sz = 1;
+	while (!sz) {
+		auto s = Read(1000);
+		sz = s.size();
+#ifdef PLATFORM_WIN
+		Sleep(100);
+#else
+		usleep(100000);
+#endif
+	}
+}
+
 void SSH::EnableDump(uint rate) {
 	stopDump = false;
 	dumpthread = new std::thread(DoDump, this, rate);
@@ -179,7 +192,7 @@ void SSH::SendFile(const string& from, const string& to) {
 }
 
 bool SSH::HasCmd(string cmd, string& path) {
-	cmd = "echo \"<\"; command -v " + cmd + "; echo \">\"";
+	cmd = "echo \"<\"\"<\"; command -v " + cmd + "; echo \">\"\">\"";
 	Write(cmd);
 	string s;
 	for (;;) {
@@ -189,13 +202,11 @@ bool SSH::HasCmd(string cmd, string& path) {
 #else
 		usleep(100000);
 #endif
-		auto posn1 = s.find_first_of('>');
-		auto pos0 = s.find_first_of('<', posn1);
-		if (pos0 == string::npos) continue;
-		auto pos1 = s.find_first_of('>', pos0);
-		if (pos1 == string::npos) continue;
-		if (pos1 > (pos0 + 3)) {
-			path = s.substr(pos0 + 2, pos1 - pos0 - 3);
+		auto pos0 = string_find(s, "<<");
+		auto pos1 = string_find(s, ">>");
+		if (pos0 == -1 || pos1 == -1) continue;
+		if (pos1 > (pos0 + 5)) {
+			path = s.substr(pos0 + 3, pos1 - pos0 - 4);
 			return true;
 		}
 		else {

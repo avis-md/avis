@@ -31,6 +31,7 @@ public:
 	static SSH Connect(const SSHConfig& conf);
 	string Read(uint maxlen);
 	bool Write(string s);
+	void Flush();
 	void EnableSFTP(), DisableSFTP();
 	void MkDir(const string& path);
 	bool HasFile(const string& path);

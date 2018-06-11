@@ -423,7 +423,6 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 		DrawSceneObjectsOpaque(Scene::active->objects);
 		//MVP::Switch(false);
 		//MVP::Clear();
-		Scene::dirty = false;
 
 		d_texs[0] = d_colTex;
 		glViewport(0, 0, Display::actualWidth, Display::actualHeight);
@@ -460,6 +459,8 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 		d_depthTex = _d_depthTex;
 		d_idTex = _d_texs[0];
 	}
+
+	Scene::dirty = false;
 	//_ApplyEmission(d_fbo, d_texs, (float)Display::width, (float)Display::height, 0);
 //#endif
 }
