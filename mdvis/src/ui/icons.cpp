@@ -4,7 +4,7 @@ Texture* Icons::expand, *Icons::collapse, *Icons::play, *Icons::playall,
 *Icons::left, *Icons::right, *Icons::cross, *Icons::visible, *Icons::hidden, *Icons::circle,
 *Icons::select, *Icons::deselect, *Icons::flipselect,
 *Icons::toolRot, *Icons::toolMov, *Icons::toolSel,
-*Icons::refresh, *Icons::checkbox,
+*Icons::refresh, *Icons::checkbox, *Icons::browse,
 *Icons::zoomIn, *Icons::zoomOut,
 *Icons::lang_c, *Icons::lang_py, *Icons::lang_ft, *Icons::lightning,
 *Icons::icon_anl,
@@ -34,6 +34,7 @@ void Icons::Init() {
 	toolSel = TEXNP(tool_sel);
 	TEX(refresh);
 	TEX(checkbox);
+	TEX(browse);
 	zoomIn = TEXN(zoomin);
 	zoomOut = TEXN(zoomout);
 	TEX(lang_c);

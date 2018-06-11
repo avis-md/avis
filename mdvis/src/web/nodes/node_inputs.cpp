@@ -6,9 +6,9 @@
 Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	DmScript* scr = (DmScript*)script;
 	script->name = ".in";
-
+	
 	title = "All Particles";
-	titleCol = Vec3(0.225f, 0.5f, 0.25f);
+	titleCol = Vec3(0.3f, 0.3f, 0.5f);
 	canTile = true;
 	auto v = std::pair<string, string>();
 	v.second = "list(2)";
@@ -69,10 +69,6 @@ void Node_Inputs::Draw() {
 #endif
 }
 
-Vec2 Node_Inputs::DrawConn() {
-	return Vec2(width, 19 + 17 * 2);
-}
-
 void Node_Inputs::Execute() {
 #ifndef IS_ANSERVER
 	conV[0].value = Particles::particles_Pos;
@@ -103,7 +99,6 @@ void Node_Inputs::LoadIn(const string& path) {
 
 Node_Inputs_ActPar::Node_Inputs_ActPar() : Node_Inputs() {
 	title = "Selected Particles";
-	titleCol = Vec3(0.3f, 0.3f, 0.5f);
 	script->name = ".insel";
 
 	conV[0].dimVals[0] = new int(0);

@@ -537,6 +537,8 @@ enum FFT_WINDOW : byte {
 class Engine { //why do I have this class again?
 public:
 	static void BeginStencil(float x, float y, float w, float h);
+	static void PushStencil(float x, float y, float w, float h);
+	static void PopStencil();
 	static void EndStencil();
 	static void DrawLine(Vec2 v1, Vec2 v2, Vec4 col, float width);
 	static void DrawLine(Vec3 v1, Vec3 v2, Vec4 col, float width);
@@ -577,7 +579,6 @@ public:
 	static std::unordered_map<ASSETTYPE, std::vector<std::pair<byte, long>>, std::hash<byte>> dataPoss;
 	static std::unordered_map<ASSETTYPE, std::vector<void*>, std::hash<byte>> dataPossCache;
 
-//private: //fk users
 	static GLint drawQuadLocs[3], drawQuadLocsA[3], drawQuadLocsC[1];
 	static void ScanQuadParams();
 	static void DrawQuad(float x, float y, float w, float h, uint texture, float miplevel = 0);
@@ -596,15 +597,11 @@ public:
 	static std::unordered_map<byte, std::vector<string>> assetData;
 
 	static std::thread::id _mainThreadId;
-	//static std::unordered_map<string, byte[]> assetDataLoaded;
-	//byte GetAsset(string name);
-	friend int main(int argc, char **argv);
-	friend class ChokoLait;
-	friend void Start();
-protected:
+
 	static void Init(string path = "");
 	static bool LoadDatas(string path);
 
+	static std::vector<Rect> stencilRects;
 	static Rect* stencilRect;
 };
 

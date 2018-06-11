@@ -155,7 +155,7 @@ void UI::Texture(float x, float y, float w, float h, ::Texture* texture, Vec4 ti
 }
 
 string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, const string& str2, Font* font, bool delayed, bool* changed, Vec4 fcol, Vec4 hcol, Vec4 acol, bool ser) {
-	//#ifdef PLATFORM_WIN
+	Engine::PushStencil(x, y, w, h);
 	string str = str2;
 	_checkdraw;
 	GetEditTextId();
@@ -247,14 +247,11 @@ string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, cons
 		if (fmod(_editTextBlinkTime, 1) < 0.5f) Engine::DrawLine(Vec2(xp, y + 2), Vec2(xp, y + h - 2), (_editTextCursorPos == _editTextCursorPos2) ? black() : white(), 1);
 		font->Align(al);
 
+		Engine::PopStencil();
 		if ((Input::mouse0State == MOUSE_UP && !Rect(x, y, w, h).Inside(Input::mousePos)) || Input::KeyDown(Key_Enter)) {
 			memset(_editingEditText, 0, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
 			_activeEditTextId = 0;
 			if (changed && delayed) *changed = true;
-
-#ifdef IS_EDITOR
-			if (delayed && ser) UndoStack::Add(new UndoStack::UndoObj((void*)&str2, 0, 0, UndoStack::UNDO_TYPE_STRING, 0, 0, _editTextString));
-#endif
 
 			return delayed ? _editTextString : str;
 		}
@@ -273,6 +270,7 @@ string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, cons
 		_editTextBlinkTime = 0;
 		if (delayed) _editTextString = str;
 	}
+	Engine::PopStencil();
 	return str;
 	//#endif
 }

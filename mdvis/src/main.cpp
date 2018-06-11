@@ -12,6 +12,7 @@
 #include "vis/pargraphics.h"
 #include "vis/system.h"
 #include "utils/effects.h"
+#include "web/nodes/node_gromacs.h"
 
 bool __debug = false;
 
@@ -129,10 +130,8 @@ int main(int argc, char **argv)
 	auto l = lht->AddComponent<Light>();
 	ParGraphics::SetLight(l.get());
 
-	//AnWeb::Insert(new CNode((CScript*)AnBrowse::folder.scripts[2]));
-	//AnWeb::Insert(new Node_Plot());
-	//AnWeb::Insert(new Node_Volume());
 	AnWeb::Load(IO::path + "/nodes/rdf.anl");
+	AnWeb::nodes.push_back(new Node_Gromacs());
 
 	Gromacs::Read(IO::path + "/pbc.gro", false);
 	bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");

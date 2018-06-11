@@ -5,11 +5,12 @@ class Node_Inputs : public AnNode {
 public:
 	Node_Inputs();
 
-	Vec2 DrawConn() override;
+	Vec2 DrawConn() override {
+		return Vec2(width, 19 + 17 * 2);
+	}
 	void Draw() override;
 	float DrawSide() override { return 0; }
 	void Execute() override;
-	std::vector<PyNode*> nodes;
 
 	void SaveIn(const string& path) override;
 	void LoadIn(const string& path) override;

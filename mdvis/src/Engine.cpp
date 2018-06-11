@@ -90,6 +90,7 @@ GLint Engine::defWColLoc = 0;
 GLint Engine::defWMVPLoc = 0;
 
 Font* Engine::defaultFont;
+std::vector<Rect> Engine::stencilRects;
 Rect* Engine::stencilRect = nullptr;
 
 GLuint _draw_quad_buffer;
@@ -189,6 +190,30 @@ void Engine::BeginStencil(float x, float y, float w, float h) {
 	glStencilFunc(GL_EQUAL, 1, 0xFF);
 
 	stencilRect = new Rect(x, y, w, h);
+	stencilRects.resize(1, *stencilRect);
+}
+
+void Engine::PushStencil(float x, float y, float w, float h) {
+	if (!stencilRect) BeginStencil(x, y, w, h);
+	else {
+		stencilRects.push_back(Rect(x, y, w, h));
+		Rect rt = Rect(0, 0, Display::width, Display::height);
+		for (auto& r : stencilRects)
+			rt = rt.Intersection(r);
+		EndStencil();
+		BeginStencil(rt.x, rt.y, rt.w, rt.h);
+	}
+}
+
+void Engine::PopStencil() {
+	stencilRects.pop_back();
+	EndStencil();
+	if (!!stencilRects.size()) {
+		Rect rt = Rect(0, 0, Display::width, Display::height);
+		for (auto& r : stencilRects)
+			rt = rt.Intersection(r);
+		BeginStencil(rt.x, rt.y, rt.w, rt.h);
+	}
 }
 
 void Engine::EndStencil() {
@@ -196,6 +221,7 @@ void Engine::EndStencil() {
 	glDisable(GL_DEPTH_TEST);
 
 	delete(stencilRect);
+	stencilRects.clear();
 	stencilRect = nullptr;
 }
 
