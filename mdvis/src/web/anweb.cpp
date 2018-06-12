@@ -293,11 +293,13 @@ void AnWeb::Execute() {
 			execThread->join();
 			delete(execThread);
 		}
+#ifndef IS_ANSERVER
 		if (AnOps::remote) {
 			Save(activeFile);
 			execThread = new std::thread(DoExecute_Srv);
 		}
 		else
+#endif
 			execThread = new std::thread(DoExecute);
 	}
 }
@@ -308,6 +310,7 @@ void AnWeb::DoExecute() {
 }
 
 void AnWeb::DoExecute_Srv() {
+#ifndef IS_ANSERVER
 	AnOps::message = "checking for lock";
 	if (AnOps::ssh.HasFile(AnOps::path + "/.lock")) {
 		Debug::Warning("AnWeb", "An existing session is running!");
@@ -323,6 +326,7 @@ void AnWeb::DoExecute_Srv() {
 	AnOps::message = "running";
 	AnOps::ssh.Write("mdvis_ansrv");
 	AnOps::message = "ready";
+#endif
 }
 
 #define sp << " "

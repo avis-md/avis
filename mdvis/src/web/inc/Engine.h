@@ -6,7 +6,6 @@
 #include <execinfo.h>
 #include <signal.h>
 
-#include <complex>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -62,3 +61,5 @@ Vec4 red(float f = 1, float i = 1), green(float f = 1, float i = 1), blue(float 
 #include "runcmd.h"
 #include "dylib.h"
 #include "strext.h"
+#include "stream.h"
+#include "math2.h"

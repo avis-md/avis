@@ -1,6 +1,7 @@
 #include "anweb.h"
 #ifndef IS_ANSERVER
 #include "ui/icons.h"
+#include "utils/runcmd.h"
 #endif
 
 AnBrowse::Folder AnBrowse::folder = Folder("nodes");
@@ -126,4 +127,54 @@ void AnBrowse::Draw() {
 		expandPos = max(expandPos - 1500 * Time::delta, 0.0f);
 	}
 #endif
+}
+
+void AnBrowse::PreC() {
+	DoPreC(IO::path + "/nodes/");
+}
+
+void AnBrowse::PreFt() {
+	
+}
+
+void AnBrowse::DoPreC(const string& path) {
+	auto ff = IO::GetFiles(path, ".cpp");
+	if (ff.size() && !IO::HasDirectory(path + "__ccache__/"))
+		IO::MakeDirectory(path + "__ccache__/");
+
+	for (auto f : ff) {
+		//auto nm = f.substr(f.find_last_of('/') + 1);
+		auto nm = f.substr(0, f.find_last_of('.'));
+		std::cout << "Compiling " << path + nm << std::endl;
+
+		auto s = IO::GetText(path + f);
+		s = "\
+#define VARIN extern \"C\"\n\
+#define VAROUT VARIN\n\
+#define ENTRY VARIN\n\
+#define VECSZ(...)\n\
+#define VECVAR VARIN\n\
+\n" + s;
+
+		const string ss = path + nm + "_temp__.cpp";
+		std::ofstream ostrm(ss);
+		ostrm << s;
+		ostrm.close();
+
+		const string cmd = "g++ -std=c++11 -shared -O0 -fPIC -o \"" + path + "__ccache__/" + nm + ".so\" \"" + path + nm + "_temp__.cpp\"";
+		std::cout << cmd << std::endl;
+		RunCmd::Run(cmd);
+		remove(&ss[0]);
+	}
+
+	std::vector<string> fd;
+	IO::GetFolders(path, &fd);
+
+	for (auto f : fd) {
+		DoPreC(path + "/" + f);
+	}
+}
+
+void AnBrowse::DoPreFt() {
+	
 }

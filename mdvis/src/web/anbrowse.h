@@ -20,4 +20,7 @@ public:
 
 	static void Scan(), DoScan(Folder* f, const string& path, const string& incPath);
 	static void Draw(), DoDraw(Folder* f, float& off, uint layer);
+
+	static void PreC(), PreFt();
+	static void DoPreC(const string& path), DoPreFt();
 };
