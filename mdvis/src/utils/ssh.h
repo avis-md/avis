@@ -32,6 +32,7 @@ public:
 	string Read(uint maxlen);
 	bool Write(string s);
 	void Flush();
+	bool WaitFor(string s, uint rate, uint timeout = -1);
 	void EnableSFTP(), DisableSFTP();
 	void MkDir(const string& path);
 	bool HasFile(const string& path);

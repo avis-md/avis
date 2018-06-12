@@ -110,19 +110,22 @@ void AnOps::Connect() {
 		return;
 	}
 
+	ssh.Flush();
 	ssh.EnableSFTP();
+
 	message = "initializing files";
 	if (!ssh.HasFile(path + "/mdvis_ansrv")) {
 		ssh.MkDir(path);
 		ssh.SendFile(IO::path + "/bin/mdvis_ansrv", path + "/mdvis_ansrv");
 		ssh.Write("chmod +rx " + path + "/mdvis_ansrv");
 	}
-	AnOps::ssh.Write("mkdir nodes; mkdir -p ser/in; mkdir ser/out");
+	ssh.Write("cd " + path);
+	ssh.Write("mkdir nodes; mkdir -p ser/in; mkdir ser/out");
+	ssh.Flush();
 
 	message = "scanning runtime";
 
-	ssh.Write("cd " + path);
-
+	
 	string pth;
 	AnWeb::hasC_s = ssh.HasCmd("g++", pth);
 	Debug::Message("AnOps", "g++ location: " + pth);
@@ -130,6 +133,8 @@ void AnOps::Connect() {
 	Debug::Message("AnOps", "python location: " + pth);
 	AnWeb::hasFt_s = ssh.HasCmd("gfortran", pth);
 	Debug::Message("AnOps", "gfortran location: " + pth);
+
+	SendNodes(true);
 	
 	connectStatus = 255;
 	message = "connected";
@@ -143,6 +148,30 @@ void AnOps::Disconnect() {
 	AnWeb::hasFt_s = false;
 
 	message = "disconnected";
+}
+
+void AnOps::SendNodes(bool cp) {
+	message = "syncing nodes";
+	DoSendNodes(IO::path + "/nodes/", "nodes/");
+	message = "compiling";
+	ssh.Write("./mdvis_ansrv -p -c 1; echo '<''>'");
+	ssh.WaitFor("<>", 500);
+}
+
+void AnOps::DoSendNodes(string p, string rp) {
+	auto fs = IO::GetFiles(p, ".cpp");
+	auto fs2 = IO::GetFiles(p, ".py");
+	fs.insert(fs.end(), fs2.begin(), fs2.end());
+	if (!!fs.size()) {
+		ssh.Write("mkdir -p " + rp);
+		for (auto& f : fs) {
+			ssh.SendFile(p + f, path + "/" + rp + f);
+		}
+	}
+	IO::GetFolders(p, &fs);
+	for (auto& f : fs) {
+		DoSendNodes(p + f + "/", rp + f + "/");
+	}
 }
 
 void AnOps::SendIn() {

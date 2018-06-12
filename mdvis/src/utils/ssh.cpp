@@ -89,12 +89,20 @@ bool SSH::Write(string s) {
 }
 
 void SSH::Flush() {
-	auto sz = 1;
-	while (!!sz) {
-		auto s = Read(1000);
-		sz = s.size();
-		Engine::Sleep(200);
+	Write("echo '#''#'");
+	WaitFor("##", 100);
+}
+
+bool SSH::WaitFor(string s, uint rate, uint timeout) {
+	string o = "";
+	uint t = 0;
+	while(t < timeout) {
+		o += Read(500);
+		if (string_find(o, s) > -1) return true;
+		Engine::Sleep(rate);
+		t += rate;
 	}
+	return false;
 }
 
 void SSH::EnableDump(uint rate) {
@@ -126,7 +134,7 @@ bool SSH::HasFile(const string& path) {
 	Write(cmd);
 	string s;
 	for (;;) {
-		s += Read(100);
+		s += Read(500);
 		Engine::Sleep(100);
 		auto pos0 = string_find(s, "!<");
 		auto pos1 = string_find(s, "!>");
@@ -166,11 +174,15 @@ void SSH::MkDir(const string& path) {
 }
 
 void SSH::SendFile(const string& from, const string& to) {
+	Flush();
 	std::ifstream strm(from, std::ios::binary); 
 	auto hnd = libssh2_sftp_open(sftpChannel, &to[0], 
 		LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT | LIBSSH2_FXF_TRUNC | 
 		LIBSSH2_SFTP_S_IRWXU | LIBSSH2_SFTP_S_IRWXG | LIBSSH2_SFTP_S_IROTH, 0);
 	if (!hnd || !strm) {
+		char* err;
+		libssh2_session_last_error(session, &err, 0, 0);
+		Debug::Warning("SSH", "Failed to send file: " + string(err));
 		return;
 	}
 	else {

@@ -60,6 +60,7 @@ std::vector<string> IO::GetFiles(const string& folder, string ext) {
 }
 
 void IO::GetFolders(const string& folder, std::vector<string>* names, bool hidden) {
+	names->clear();
 #ifdef PLATFORM_WIN
 	string search_path = folder + "/*";
 	WIN32_FIND_DATA fd;
@@ -204,6 +205,7 @@ string IO::InitPath() {
 	GetModuleFileName(NULL, cpath, 200);
 	string path2 = cpath;
 	path2 = path2.substr(0, path2.find_last_of('\\') + 1);
+	std::replace(path2.begin(), path2.end(), '\\', '/');
 #else
 	getcwd(cpath, 199);
 	string path2 = cpath;

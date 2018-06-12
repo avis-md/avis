@@ -18,6 +18,8 @@ public:
 	static void Draw();
 	static std::thread* conThread;
 	static void Connect(), Disconnect();
+	static void SendNodes(bool cp);
+	static void DoSendNodes(string p, string rp);
 	static void SendIn(), RecvOut();
 
 	static SSH ssh;
