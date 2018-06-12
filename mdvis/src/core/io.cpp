@@ -25,7 +25,7 @@ string IO::OpenFile(string ext) {
 	GetOpenFileName(&fn);
 	return string(buf);
 #else
-
+	
 #endif
 }
 

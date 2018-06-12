@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
 	
 	AnWeb::Init();
 
-	AnWeb::Load(IO::path + "/nodes/rdf.anl");
+	AnWeb::Load(IO::path + "/ser/web.anl");
 	AnWeb::LoadIn();
 	AnWeb::Execute();
 
