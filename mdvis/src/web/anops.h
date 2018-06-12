@@ -13,10 +13,12 @@ public:
 	static ushort port;
 
 	static string path;
+	static string message;
 
 	static void Draw();
 	static std::thread* conThread;
 	static void Connect(), Disconnect();
+	static void SendIn(), RecvOut();
 
 	static SSH ssh;
 };

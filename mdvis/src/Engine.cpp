@@ -376,6 +376,14 @@ void Engine::ResetUIMatrix() {
 	Display::uiMatrixIsI = true;
 }
 
+void Engine::Sleep(uint ms) {
+#ifdef PLATFORM_WIN
+	::Sleep(ms);
+#else
+	usleep(ms * 1000);
+#endif
+}
+
 GLint Engine::drawQuadLocs[] = { 0, 0, 0 };
 GLint Engine::drawQuadLocsA[] = { 0, 0, 0 };
 GLint Engine::drawQuadLocsC[] = { 0 };

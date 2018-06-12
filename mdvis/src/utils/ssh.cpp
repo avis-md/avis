@@ -90,14 +90,10 @@ bool SSH::Write(string s) {
 
 void SSH::Flush() {
 	auto sz = 1;
-	while (!sz) {
+	while (!!sz) {
 		auto s = Read(1000);
 		sz = s.size();
-#ifdef PLATFORM_WIN
-		Sleep(100);
-#else
-		usleep(100000);
-#endif
+		Engine::Sleep(200);
 	}
 }
 
@@ -110,11 +106,7 @@ void SSH::DoDump(SSH* inst, uint rate) {
 	while (!inst->stopDump) {
 		auto s = inst->Read(1000);
 		if (s.size()) std::cout << s;
-#ifdef PLATFORM_WIN
-		Sleep(rate);
-#else
-		usleep(rate * 1000);
-#endif
+		Engine::Sleep(100);
 	}
 }
 
@@ -130,12 +122,23 @@ void SSH::DisableSFTP() {
 }
 
 bool SSH::HasFile(const string& path) {
-	auto hnd = libssh2_sftp_open(sftpChannel, &path[0], LIBSSH2_FXF_READ, 0);
-	if (!!hnd) {
-		libssh2_sftp_close(hnd);
-		return true;
+	auto cmd = "echo '!''<'; test -e " + path + " && echo 'file found!!''>' || echo '!''>'";
+	Write(cmd);
+	string s;
+	for (;;) {
+		s += Read(100);
+		Engine::Sleep(100);
+		auto pos0 = string_find(s, "!<");
+		auto pos1 = string_find(s, "!>");
+		if (pos0 == -1) s = "";
+		if (pos1 == -1) continue;
+		if (pos1 > (pos0 + 5)) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
-	else return false;
 }
 
 void SSH::GetFile(const string& from, const string& to) {
@@ -166,8 +169,7 @@ void SSH::SendFile(const string& from, const string& to) {
 	std::ifstream strm(from, std::ios::binary); 
 	auto hnd = libssh2_sftp_open(sftpChannel, &to[0], 
 		LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT | LIBSSH2_FXF_TRUNC | 
-		LIBSSH2_SFTP_S_IRUSR | LIBSSH2_SFTP_S_IWUSR | 
-		LIBSSH2_SFTP_S_IRGRP | LIBSSH2_SFTP_S_IROTH, 0);
+		LIBSSH2_SFTP_S_IRWXU | LIBSSH2_SFTP_S_IRWXG | LIBSSH2_SFTP_S_IROTH, 0);
 	if (!hnd || !strm) {
 		return;
 	}
@@ -197,11 +199,7 @@ bool SSH::HasCmd(string cmd, string& path) {
 	string s;
 	for (;;) {
 		s += Read(100);
-#ifdef PLATFORM_WIN
-		Sleep(100);
-#else
-		usleep(100000);
-#endif
+		Engine::Sleep(100);
 		auto pos0 = string_find(s, "<<");
 		auto pos1 = string_find(s, ">>");
 		if (pos0 == -1 || pos1 == -1) continue;

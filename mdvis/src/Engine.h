@@ -566,6 +566,8 @@ public:
 	static void RotateUI(float a, Vec2 point);
 	static void ResetUIMatrix();
 
+	static void Sleep(uint ms);
+
 	static GLuint defProgram, defProgramW, unlitProgram, unlitProgramA, unlitProgramC, skyProgram;
 	static GLint defColLoc, defWColLoc, defWMVPLoc;
 	//static uint blurProgram, blurSBProgram;

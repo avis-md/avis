@@ -10,6 +10,7 @@ bool AnOps::remote = true;
 string AnOps::user = "chokopan", AnOps::ip = "192.168.0.180", AnOps::pw;
 ushort AnOps::port = 22;
 string AnOps::path = "/Users/chokopan/mdvis";
+string AnOps::message = "disconnected";
 
 std::thread* AnOps::conThread;
 
@@ -54,9 +55,10 @@ void AnOps::Draw() {
 					Disconnect();
 				}
 			}
+			UI::Label(Display::width - expandPos + 2, 138, 12, message, AnNode::font, Vec4(0.1f, 1.0f, 0.1f, 1.0f));
 
-			UI::Label(Display::width - expandPos + 4, 140, 12, "Working directory", AnNode::font, white());
-			path = UI::EditText(Display::width - expandPos + 1, 157, 178, 16, 12, white(1, 0.5f), path, AnNode::font, true, nullptr, white());
+			UI::Label(Display::width - expandPos + 4, 157, 12, "Working directory", AnNode::font, white());
+			path = UI::EditText(Display::width - expandPos + 1, 174, 178, 16, 12, white(1, 0.5f), path, AnNode::font, true, nullptr, white());
 
 			off = 177;
 		}
@@ -76,7 +78,7 @@ void AnOps::Draw() {
 		Engine::DrawQuad(Display::width - expandPos + 164, off + 34, 14, 14, (remote ? AnWeb::hasPy_s : AnWeb::hasPy) ? green() : red());
 		UI::Label(Display::width - expandPos + 4, off + 51, 12, "Fortran", AnNode::font, white());
 		Engine::DrawQuad(Display::width - expandPos + 164, off + 51, 14, 14, (remote ? AnWeb::hasFt_s : AnWeb::hasFt) ? green() : red());
-
+		
 		Engine::DrawQuad(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, white(0.9f, 0.15f));
 		if ((!UI::editingText && (Input::KeyUp(Key_O)) || Engine::Button(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE))
 			expanded = false;
@@ -93,6 +95,7 @@ void AnOps::Draw() {
 }
 
 void AnOps::Connect() {
+	message = "connecting";
 	connectStatus = 1;
 	SSHConfig config;
 	config.ip = ip;
@@ -102,13 +105,23 @@ void AnOps::Connect() {
 	config.pw = pw;
 	ssh = SSH::Connect(config);
 	connectStatus = ssh.ok? 2 : 0;
-	if (!connectStatus) return;
-	
+	if (!connectStatus) {
+		message = "failed to connect";
+		return;
+	}
+
 	ssh.EnableSFTP();
+	message = "initializing files";
 	if (!ssh.HasFile(path + "/mdvis_ansrv")) {
 		ssh.MkDir(path);
 		ssh.SendFile(IO::path + "/bin/mdvis_ansrv", path + "/mdvis_ansrv");
+		ssh.Write("chmod +rx " + path + "/mdvis_ansrv");
 	}
+	AnOps::ssh.Write("mkdir nodes; mkdir -p ser/in; mkdir ser/out");
+
+	message = "scanning runtime";
+
+	ssh.Write("cd " + path);
 
 	string pth;
 	AnWeb::hasC_s = ssh.HasCmd("g++", pth);
@@ -119,6 +132,7 @@ void AnOps::Connect() {
 	Debug::Message("AnOps", "gfortran location: " + pth);
 	
 	connectStatus = 255;
+	message = "connected";
 }
 
 void AnOps::Disconnect() {
@@ -127,4 +141,15 @@ void AnOps::Disconnect() {
 	AnWeb::hasC_s = false;
 	AnWeb::hasPy_s = false;
 	AnWeb::hasFt_s = false;
+
+	message = "disconnected";
+}
+
+void AnOps::SendIn() {
+	message = "syncing";
+	auto ins = IO::GetFiles(IO::path + "/nodes/__tmp__/in/");
+	for (auto& i : ins) {
+		ssh.SendFile(IO::path + "/nodes/__tmp__/in/" + i, path + "/ser/in/" + i);
+		ssh.Write("chmod +r ser/in/" + i);
+	}
 }

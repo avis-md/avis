@@ -20,6 +20,7 @@ public:
 	static AnScript* selScript;
 	static byte selSpNode;
 
+	static string activeFile;
 	static std::vector<AnNode*> nodes;
 
 	static bool drawFull, expanded, executing;
@@ -32,7 +33,8 @@ public:
 
 	static void Insert(AnScript* scr, Vec2 pos = Vec2(100, 100));
 	static void Insert(AnNode* node, Vec2 pos = Vec2(100, 100));
-	static void Init(), Update(), Draw(), DrawSide(), DrawScene(), Execute(), DoExecute();
+	static void Init(), Update(), Draw(), DrawSide(), DrawScene();
+	static void Execute(), DoExecute(), DoExecute_Srv();
 	static void Save(const string& s), SaveIn(), SaveOut();
 	static void Load(const string& s), LoadIn(), LoadOut();
 };
@@ -41,3 +43,4 @@ public:
 #include "nodes/node_inputs.h"
 #include "nodes/node_plot.h"
 #include "nodes/node_volume.h"
+#include "nodes/node_gromacs.h"

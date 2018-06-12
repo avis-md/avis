@@ -131,7 +131,6 @@ int main(int argc, char **argv)
 	ParGraphics::SetLight(l.get());
 
 	AnWeb::Load(IO::path + "/nodes/rdf.anl");
-	AnWeb::nodes.push_back(new Node_Gromacs());
 
 	Gromacs::Read(IO::path + "/pbc.gro", false);
 	bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");

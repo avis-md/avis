@@ -12,6 +12,7 @@ bool AnWeb::selConnIdIsOut = false, AnWeb::selPreClear = false;
 AnScript* AnWeb::selScript = nullptr;
 byte AnWeb::selSpNode = 0;
 
+string AnWeb::activeFile;
 std::vector<AnNode*> AnWeb::nodes;
 
 bool AnWeb::drawFull = false, AnWeb::expanded = true, AnWeb::executing = false;
@@ -227,8 +228,9 @@ void AnWeb::Draw() {
 	if (Engine::Button(275, 1, 70, 16, white(1, executing ? 0.2f : 0.4f), "Run", 12, AnNode::font, white(), true) == MOUSE_RELEASE) {
 
 	}
-	if (Engine::Button(350, 1, 107, 16, white(1, executing ? 0.2f : 0.4f), "Run All", 12, AnNode::font, white(), true) == MOUSE_RELEASE) {
-		AnWeb::Execute();
+	bool canexec = (!AnOps::remote || (AnOps::connectStatus == 255));
+	if (Engine::Button(350, 1, 107, 16, white(1, (!canexec || executing) ? 0.2f : 0.4f), "Run All", 12, AnNode::font, white(), true) == MOUSE_RELEASE) {
+		if (canexec) AnWeb::Execute();
 	}
 	UI::Texture(275, 1, 16, 16, Icons::play);
 	UI::Texture(350, 1, 16, 16, Icons::playall);
@@ -287,14 +289,40 @@ void AnWeb::DrawScene() {
 void AnWeb::Execute() {
 	if (!executing) {
 		executing = true;
-		if (execThread) delete(execThread);
-		execThread = new std::thread(DoExecute);
+		if (execThread) {
+			execThread->join();
+			delete(execThread);
+		}
+		if (AnOps::remote) {
+			Save(activeFile);
+			execThread = new std::thread(DoExecute_Srv);
+		}
+		else
+			execThread = new std::thread(DoExecute);
 	}
 }
 
 void AnWeb::DoExecute() {
 	for (auto n : nodes) n->Execute();
 	executing = false;
+}
+
+void AnWeb::DoExecute_Srv() {
+	AnOps::message = "checking for lock";
+	if (AnOps::ssh.HasFile(AnOps::path + "/.lock")) {
+		Debug::Warning("AnWeb", "An existing session is running!");
+		executing = false;
+		return;
+	}
+	AnOps::message = "cleaning old files";
+	AnOps::ssh.Write("cd nodes && rm -f ./* && cd ../ser && rm -f ./* && cd in && rm -f ./* && cd ../out && rm -f ./* && cd ../..");
+	AnOps::message = "syncing files";
+	AnOps::ssh.SendFile(activeFile, AnOps::path + "/ser/web.anl");
+	AnOps::ssh.Write("chmod +r ser/web.anl");
+	AnOps::SendIn();
+	AnOps::message = "running";
+	AnOps::ssh.Write("mdvis_ansrv");
+	AnOps::message = "ready";
 }
 
 #define sp << " "
@@ -316,6 +344,12 @@ void AnWeb::SaveIn() {
 	if (!IO::HasDirectory(path)) IO::MakeDirectory(path);
 	path += "in/";
 	if (!IO::HasDirectory(path)) IO::MakeDirectory(path);
+	else {
+		auto fls = IO::GetFiles(path);
+		for (auto& f : fls) {
+			remove((path + "/" + f).c_str());
+		}
+	}
 	for (auto n : nodes) {
 		n->SaveIn(path);
 	}
@@ -338,6 +372,8 @@ void AnWeb::Load(const string& s) {
 			else if (nm == ".insel") nodes[a] = new Node_Inputs_ActPar();
 			else if (nm == ".Vol") nodes[a] = new Node_Volume();
 			else if (nm == ".Plot") nodes[a] = new Node_Plot();
+			else if (nm == ".ingro") nodes[a] = new Node_Gromacs();
+			else abort();
 			break;
 		case 1:
 			nodes[a] = new CNode(CScript::allScrs[nm]);
@@ -350,10 +386,15 @@ void AnWeb::Load(const string& s) {
 		}
 		nodes[a]->Load(strm);
 	}
+	activeFile = s;
 }
 
 void AnWeb::LoadIn() {
+#ifdef IS_ANSERVER
+	string path = IO::path + "/ser/in/";
+#else
 	string path = IO::path + "/nodes/__tmp__/in/";
+#endif
 	for (auto n : nodes) {
 		n->LoadIn(path);
 	}
