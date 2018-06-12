@@ -24,9 +24,8 @@ HEADERS = anbrowse.h anconv.h annode.h anscript.h anweb.h creader.h pyreader.h
 HEADERS += nodes/node_inputs.h nodes/node_plot.h nodes/node_volume.h nodes/node_gromacs.h
 HEADERS += inc/Engine.h inc/io.h inc/debug.txt inc/dylib.h inc/strext.h inc/runcmd.h inc/stream.h inc/math2.h
 
-../../build/mdvis_ansrv: $(OBJS)
+/Users/chokopan/mdvis/mdvis_ansrv: $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
-	cp -f ../../build/mdvis_ansrv /Users/chokopan/mdvis
 
 obj/%.o: $(HEADERS)
 obj/%.o: %.cpp
@@ -34,4 +33,4 @@ obj/%.o: %.cpp
 
 clean:
 	find ./obj -name '*.o' -exec rm {} \;
-	rm -f ../../build/mdvis_ansrv
+	rm -f /Users/chokopan/mdvis/mdvis_ansrv

@@ -12,9 +12,9 @@ void AnNode::Init() {
 #ifndef IS_ANSERVER
 	tex_circle_open = new Texture(IO::path + "/res/node_open.png");
 	tex_circle_conn = new Texture(IO::path + "/res/node_conn.png");
-#endif
 
 	Node_Volume::Init();
+#endif
 }
 
 bool AnNode::Select() {
@@ -368,13 +368,11 @@ void CNode::Execute() {
 			case AN_VARTYPE::LIST:
 				auto& mv = scr->_invars[i];
 				auto& vc = *((float**)mv.value) = (float*)cv.value;
+				
 				for (int j = 0; j < mv.dimVals.size(); j++) {
 					*mv.dimVals[j] = *cv.dimVals[j];
 				}
 				break;
-			//default:
-			//	Debug::Error("CNode", "Value not handled!");
-			//	break;
 			}
 		}
 		else {
@@ -393,6 +391,4 @@ void CNode::Execute() {
 	}
 
 	script->Exec();
-
-
 }

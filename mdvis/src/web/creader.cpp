@@ -27,9 +27,12 @@ bool CReader::Read(string path, CScript** _scr) {
 	auto ls = fp.find_last_of('/');
 	string nm = fp.substr(ls + 1);
 	string fp2 = fp.substr(0, ls + 1) + "__ccache__/";
-	if (!IO::HasDirectory(fp2)) IO::MakeDirectory(fp2);
-
+   
 	auto s = IO::GetText(fp + ".cpp");
+
+#ifndef IS_ANSERVER
+
+	if (!IO::HasDirectory(fp2)) IO::MakeDirectory(fp2);
 #ifdef PLATFORM_WIN
 	const string dlx = " __declspec(dllexport)";
 #else
@@ -58,9 +61,10 @@ bool CReader::Read(string path, CScript** _scr) {
 	std::cout << cmd << std::endl;
 	RunCmd::Run(cmd);
 #endif
-
 	const string ss = fp + "_temp__.cpp";
 	remove(&ss[0]);
+
+#endif
 
 	auto scr = *_scr = new CScript();
 	scr->name = path;

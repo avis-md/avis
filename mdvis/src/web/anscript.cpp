@@ -125,11 +125,16 @@ void CVar::Read(std::ifstream& strm) {
 		int totalSz = 1;
 		for (auto a = 0; a < sz; a++) {
 			dimVals[a] = new int();
-			_Strm2Val(strm, *dimVals[a]);
+			_Strm2Val(strm, *((int32_t*)dimVals[a]));
 			totalSz *= *dimVals[a];
 		}
 		value = new float[max(totalSz, 1)];
-		if (totalSz) strm.read((char*)value, totalSz * sizeof(float));
+		if (!!totalSz) {
+			strm.read((char*)value, totalSz * sizeof(float));
+			if (strm.gcount() != totalSz * sizeof(float)) {
+				Debug::Error("CVar", "not enough bytes read!");
+			}
+		}
 		break;
 	}
 }

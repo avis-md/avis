@@ -305,7 +305,9 @@ void AnWeb::Execute() {
 }
 
 void AnWeb::DoExecute() {
-	for (auto n : nodes) n->Execute();
+	for (auto n : nodes) {
+		n->Execute();
+	}
 	executing = false;
 }
 
@@ -389,6 +391,7 @@ void AnWeb::Load(const string& s) {
 			abort();
 		}
 		nodes[a]->Load(strm);
+		nodes[a]->id = a;
 	}
 	activeFile = s;
 }
