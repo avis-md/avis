@@ -6,6 +6,7 @@
 #include <execinfo.h>
 #include <signal.h>
 
+#include <algorithm>
 #include <string>
 #include <iostream>
 #include <fstream>
