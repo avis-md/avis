@@ -58,13 +58,6 @@ int main(int argc, char** argv) {
 
         AnWeb::SaveOut();
 
-        int sz = *AnWeb::nodes[2]->conV[0].dimVals[0];
-        std::cout << "size is: " << sz << std::endl;
-        float* dt = *((float**)AnWeb::nodes[2]->conV[0].value);
-        for (int i = 0; i < sz; i++) {
-            std::cout << dt[i] << "\n";
-        }
-
         std::cout << "finished" << std::endl;
 
         remove((IO::path + "/.lock").c_str());

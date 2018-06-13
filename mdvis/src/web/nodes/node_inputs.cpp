@@ -80,7 +80,7 @@ void Node_Inputs::SaveIn(const string& path) {
 	Execute();
 	string nm = script->name;
 	//std::replace(nm.begin(), nm.end(), '/', '_');
-	std::ofstream strm(path + std::to_string(id) + nm);
+	std::ofstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
 		conV[0].Write(strm);
 		conV[1].Write(strm);
@@ -90,10 +90,13 @@ void Node_Inputs::SaveIn(const string& path) {
 void Node_Inputs::LoadIn(const string& path) {
 	string nm = script->name;
 	//std::replace(nm.begin(), nm.end(), '/', '_');
-	std::ifstream strm(path + std::to_string(id) + nm);
+	std::ifstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
 		conV[0].Read(strm);
 		conV[1].Read(strm);
+	}
+	else {
+		Debug::Error("Node", "cannot open input file!");
 	}
 }
 
