@@ -290,7 +290,7 @@ void AnWeb::Execute() {
 	if (!executing) {
 		executing = true;
 		if (execThread) {
-			execThread->join();
+			if (execThread->joinable()) execThread->join();
 			delete(execThread);
 		}
 #ifndef IS_ANSERVER
@@ -322,14 +322,17 @@ void AnWeb::DoExecute_Srv() {
 		return;
 	}
 	AnOps::message = "cleaning old files";
-	AnOps::ssh.Write("cd nodes && rm -f ./* && cd ../ser && rm -f ./* && cd in && rm -f ./* && cd ../out && rm -f ./* && cd ../..");
+	AnOps::ssh.Write("cd ser; rm -f ./*; cd in; rm -f ./*; cd ../out; rm -f ./*; cd " + AnOps::path);
 	AnOps::message = "syncing files";
 	AnOps::ssh.SendFile(activeFile, AnOps::path + "/ser/web.anl");
-	AnOps::ssh.Write("chmod +r ser/web.anl");
 	AnOps::SendIn();
+	AnOps::ssh.Write("chmod +r ser/web.anl");
 	AnOps::message = "running";
-	AnOps::ssh.Write("mdvis_ansrv");
-	AnOps::message = "ready";
+	AnOps::ssh.Write("./mdvis_ansrv; echo '$%''%$'");
+	AnOps::ssh.WaitFor("$%%$", 200);
+	AnOps::RecvOut();
+	AnOps::message = "finished";
+	executing = false;
 #endif
 }
 

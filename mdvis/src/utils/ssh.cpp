@@ -90,15 +90,17 @@ bool SSH::Write(string s) {
 
 void SSH::Flush() {
 	Write("echo '#''#'");
-	WaitFor("##", 100);
+	WaitFor("##", 200);
 }
 
 bool SSH::WaitFor(string s, uint rate, uint timeout) {
 	string o = "";
 	uint t = 0;
+	auto ms = s.size();
 	while(t < timeout) {
 		o += Read(500);
 		if (string_find(o, s) > -1) return true;
+		o = o.substr(0, o.size() - ms);
 		Engine::Sleep(rate);
 		t += rate;
 	}
@@ -127,6 +129,23 @@ void SSH::DisableSFTP() {
 		libssh2_sftp_shutdown(sftpChannel);
 		sftpChannel = 0;
 	}
+}
+
+std::vector<string> SSH::ListFiles(const string& path) {
+	std::vector<string> res;
+	auto hnd = libssh2_sftp_opendir(sftpChannel, path.c_str());
+	if (hnd) {
+		for (;;) {
+			char mem[512], lentry[512];
+			LIBSSH2_SFTP_ATTRIBUTES attr;
+			auto rc = libssh2_sftp_readdir_ex(hnd, mem, 512, lentry, 512, &attr);
+			if (rc > 0) {
+				res.push_back(string(mem, rc));
+			}
+			else break;
+		}
+	}
+	return res;
 }
 
 bool SSH::HasFile(const string& path) {
