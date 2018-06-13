@@ -331,6 +331,7 @@ void AnWeb::DoExecute_Srv() {
 	AnOps::ssh.Write("./mdvis_ansrv; echo '$%''%$'");
 	AnOps::ssh.WaitFor("$%%$", 200);
 	AnOps::RecvOut();
+	LoadOut();
 	AnOps::message = "finished";
 	executing = false;
 #endif
@@ -431,5 +432,12 @@ void AnWeb::LoadIn() {
 #endif
 	for (auto n : nodes) {
 		n->LoadIn(path);
+	}
+}
+
+void AnWeb::LoadOut() {
+	string path = IO::path + "/nodes/__tmp__/out/";
+	for (auto n : nodes) {
+		n->LoadOut(path);
 	}
 }

@@ -10,7 +10,7 @@ public:
 	float DrawSide() override;
 	void Execute() override;
 	void SaveOut(const string& path) override {}
-	void LoadOut(const string& path) override {}
+	void LoadOut(const string& path) override;
 	std::vector<PyNode*> nodes;
 
 protected:

@@ -189,8 +189,10 @@ void AnOps::SendIn() {
 
 void AnOps::RecvOut() {
 	message = "syncing output";
-	auto fls = ssh.ListFiles(path + "ser/out/");
+	if (!IO::HasDirectory(IO::path + "/nodes/__tmp__/out/")) IO::MakeDirectory(IO::path + "/nodes/__tmp__/out/");
+	auto fls = ssh.ListFiles(path + "/ser/out/");
 	for (auto& f : fls) {
-		std::cout << "f " << f << std::endl;
+		if (f[0] != '.')
+			ssh.GetFile(path + "/ser/out/" + f, IO::path + "/nodes/__tmp__/out/" + f);
 	}
 }

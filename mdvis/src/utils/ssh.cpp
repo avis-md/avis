@@ -169,6 +169,7 @@ bool SSH::HasFile(const string& path) {
 }
 
 void SSH::GetFile(const string& from, const string& to) {
+	Flush();
 	auto hnd = libssh2_sftp_open(sftpChannel, &from[0], LIBSSH2_FXF_READ, 0);
 	std::ofstream strm(to, std::ios::binary);
 	if (!hnd || !strm) {
@@ -177,8 +178,8 @@ void SSH::GetFile(const string& from, const string& to) {
 	else {
 		char mem[4096];
 		for (;;) {
-			auto wc = libssh2_sftp_write(hnd, mem, 4096);
-			if (wc < 0) break;
+			auto wc = libssh2_sftp_read(hnd, mem, 4096);
+			if (wc <= 0) break;
 			strm.write(mem, wc);
 		}
 		libssh2_sftp_close(hnd);

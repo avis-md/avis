@@ -102,3 +102,7 @@ void Node_Plot::Execute() {
 	memcpy(&valYs[0], src, sz * sizeof(float));
 #endif
 }
+
+void Node_Plot::LoadOut(const string& path) {
+	Execute();
+}
