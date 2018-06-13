@@ -105,7 +105,8 @@ void CVar::Write(std::ofstream& strm) {
 		if (totalSz > 0) {
 			auto po = strm.tellp();
 			strm.write(*((char**)value), totalSz * sizeof(float));
-			if ((strm.tellp() - po) != totalSz * sizeof(float)) {
+			long wt = (long)(strm.tellp() - po);
+			if (wt < totalSz * sizeof(float) || strm.bad()) {
 				Debug::Error("CVar", "not enough bytes written!");
 			}
 		}

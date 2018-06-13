@@ -35,6 +35,7 @@ public:
 	bool WaitFor(string s, uint rate, uint timeout = -1);
 	void EnableSFTP(), DisableSFTP();
 	void MkDir(const string& path);
+	std::vector<string> ListFiles(const string& path);
 	bool HasFile(const string& path);
 	void GetFile(const string& from, const string& to), SendFile(const string& from, const string& to);
 	bool HasCmd(string cmd, string& path);

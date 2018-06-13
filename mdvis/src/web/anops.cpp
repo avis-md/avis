@@ -120,7 +120,7 @@ void AnOps::Connect() {
 		ssh.Write("chmod +rx " + path + "/mdvis_ansrv");
 	}
 	ssh.Write("cd " + path);
-	ssh.Write("mkdir nodes; mkdir -p ser/in; mkdir ser/out");
+	ssh.Write("mkdir nodes; rm -f nodes/*; mkdir -p ser/in; mkdir ser/out");
 	ssh.Flush();
 
 	message = "scanning runtime";
@@ -166,6 +166,7 @@ void AnOps::DoSendNodes(string p, string rp) {
 		ssh.Write("mkdir -p " + rp);
 		for (auto& f : fs) {
 			ssh.SendFile(p + f, path + "/" + rp + f);
+			ssh.Write("chmod +r " + path + "/" + rp + f);
 		}
 	}
 	IO::GetFolders(p, &fs);
@@ -175,10 +176,21 @@ void AnOps::DoSendNodes(string p, string rp) {
 }
 
 void AnOps::SendIn() {
-	message = "syncing";
+	message = "syncing input";
 	auto ins = IO::GetFiles(IO::path + "/nodes/__tmp__/in/");
 	for (auto& i : ins) {
 		ssh.SendFile(IO::path + "/nodes/__tmp__/in/" + i, path + "/ser/in/" + i);
+	}
+	ssh.Flush();
+	for (auto& i : ins) {
 		ssh.Write("chmod +r ser/in/" + i);
+	}
+}
+
+void AnOps::RecvOut() {
+	message = "syncing output";
+	auto fls = ssh.ListFiles(path + "ser/out/");
+	for (auto& f : fls) {
+		std::cout << "f " << f << std::endl;
 	}
 }
