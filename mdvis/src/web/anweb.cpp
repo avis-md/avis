@@ -306,6 +306,8 @@ void AnWeb::Execute() {
 
 void AnWeb::DoExecute() {
 	for (auto n : nodes) {
+		std::cout << n->id << " ";
+		std::flush(std::cout);
 		n->Execute();
 	}
 	executing = false;
@@ -383,8 +385,10 @@ void AnWeb::SaveOut() {
 
 void AnWeb::Load(const string& s) {
 	std::ifstream strm(s, std::ios::binary);
-	if (!strm.is_open())
+	if (!strm.is_open()) {
+		Debug::Warning("AnWeb", "Cannot open save file!");
 		return;
+	}
 	uint sz;
 	strm >> sz;
 	nodes.resize(sz);

@@ -43,16 +43,18 @@ int main(int argc, char** argv) {
         
         AnWeb::Load(IO::path + "/ser/web.anl");
 
+        std::cout << AnWeb::nodes.size() << " Nodes are: ";
         for (auto& n : AnWeb::nodes)
             std::cout << "\"" + n->title + "\"" << " ";
         std::cout << std::endl;
 
         AnWeb::LoadIn();
 
-        std::cout << "Executing... ";
-        std::flush(std::cout);
+        std::cout << "Executing..." << std::endl;
 
         AnWeb::DoExecute();
+
+        std::cout << "Saving..." << std::endl;
 
         AnWeb::SaveOut();
 
