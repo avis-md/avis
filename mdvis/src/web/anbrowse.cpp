@@ -4,6 +4,10 @@
 #include "utils/runcmd.h"
 #endif
 
+#ifdef PLATFORM_WIN
+   #define stat _stat
+#endif
+
 AnBrowse::Folder AnBrowse::folder = Folder("nodes");
 bool AnBrowse::expanded = true;
 bool AnBrowse::mscFdExpanded[] = {};
@@ -129,15 +133,15 @@ void AnBrowse::Draw() {
 #endif
 }
 
-void AnBrowse::PreC() {
-	DoPreC(IO::path + "/nodes/");
+void AnBrowse::PreC(bool f) {
+	DoPreC(IO::path + "/nodes/", f);
 }
 
-void AnBrowse::PreFt() {
+void AnBrowse::PreFt(bool f) {
 	
 }
 
-void AnBrowse::DoPreC(const string& path) {
+void AnBrowse::DoPreC(const string& path, bool _f) {
 	auto ff = IO::GetFiles(path, ".cpp");
 	if (ff.size() && !IO::HasDirectory(path + "__ccache__/"))
 		IO::MakeDirectory(path + "__ccache__/");
@@ -145,6 +149,19 @@ void AnBrowse::DoPreC(const string& path) {
 	for (auto f : ff) {
 		//auto nm = f.substr(f.find_last_of('/') + 1);
 		auto nm = f.substr(0, f.find_last_of('.'));
+
+		if (!_f) {
+			string srf = path + f;
+			string obf = path + "__ccache__/" + nm + ".so";
+			struct stat tsf, tof;
+			if (!stat(srf.c_str(), & tsf) && !stat(obf.c_str(), & tof)) {
+				if (tsf.st_mtime < tof.st_mtime) {
+					std::cout << "Skipping " << path + nm << std::endl;
+					continue;
+				}
+			}
+		}
+		
 		std::cout << "Compiling " << path + nm << std::endl;
 
 		auto s = IO::GetText(path + f);
@@ -171,7 +188,7 @@ void AnBrowse::DoPreC(const string& path) {
 	IO::GetFolders(path, &fd);
 
 	for (auto f : fd) {
-		DoPreC(path + "/" + f);
+		DoPreC(path + "/" + f, _f);
 	}
 }
 

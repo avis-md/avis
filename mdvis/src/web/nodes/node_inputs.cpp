@@ -71,8 +71,8 @@ void Node_Inputs::Draw() {
 
 void Node_Inputs::Execute() {
 #ifndef IS_ANSERVER
-	conV[0].value = Particles::particles_Pos;
-	conV[1].value = Particles::particles_Vel;
+	conV[0].value = &Particles::particles_Pos;
+	conV[1].value = &Particles::particles_Vel;
 #endif
 }
 

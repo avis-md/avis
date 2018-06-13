@@ -46,8 +46,8 @@ public:
 	void Save(std::ofstream& strm), Load(std::ifstream& strm);
 	virtual void SaveIn(const string& path) {};
 	virtual void LoadIn(const string& path) {};
-	virtual void SaveOut(const string& path) {};
-	virtual void LoadOut(const string& path) {};
+	virtual void SaveOut(const string& path);
+	virtual void LoadOut(const string& path);
 protected:
 	AnNode(AnScript* scr);
 	

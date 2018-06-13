@@ -102,7 +102,13 @@ void CVar::Write(std::ofstream& strm) {
 			_StreamWrite((int32_t*)dimVals[a], &strm, 4);
 			totalSz *= *dimVals[a];
 		}
-		if (totalSz > 0) strm.write((char*)value, totalSz * sizeof(float));
+		if (totalSz > 0) {
+			auto po = strm.tellp();
+			strm.write(*((char**)value), totalSz * sizeof(float));
+			if ((strm.tellp() - po) != totalSz * sizeof(float)) {
+				Debug::Error("CVar", "not enough bytes written!");
+			}
+		}
 		break;
 	}
 }
@@ -128,9 +134,10 @@ void CVar::Read(std::ifstream& strm) {
 			_Strm2Val(strm, *((int32_t*)dimVals[a]));
 			totalSz *= *dimVals[a];
 		}
-		value = new float[max(totalSz, 1)];
+		auto vec = new float[max(totalSz, 1)];
+		value = new uintptr_t((uintptr_t)vec);
 		if (!!totalSz) {
-			strm.read((char*)value, totalSz * sizeof(float));
+			strm.read((char*)vec, totalSz * sizeof(float));
 			if (strm.gcount() != totalSz * sizeof(float)) {
 				Debug::Error("CVar", "not enough bytes read!");
 			}

@@ -14,6 +14,8 @@ public:
 
 	void SaveIn(const string& path) override;
 	void LoadIn(const string& path) override;
+	void SaveOut(const string& path) override {}
+	void LoadOut(const string& path) override {}
 };
 
 class Node_Inputs_ActPar : public Node_Inputs {

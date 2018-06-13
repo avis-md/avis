@@ -150,6 +150,7 @@ bool CReader::Read(string path, CScript** _scr) {
 				scr->_outvars.push_back(vr);
 				bk = &scr->_outvars.back();
 				bk->name = s2.substr(6, s2.find_first_of('=') - 6).substr(0, ln.find_first_of(';'));
+				bk->type = AN_VARTYPE::LIST;
 				int ii = 0;
 				for (auto& a : bk->dimNames) {
 					if (!!a[0]) vecvarLocs.push_back(std::pair<string, int**>(a, &bk->dimVals[ii]));

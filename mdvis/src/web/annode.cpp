@@ -266,6 +266,36 @@ void AnNode::Load(std::ifstream& strm) {
 	canTile = !!ct;
 }
 
+void AnNode::SaveOut(const string& path) {
+	string nm = script->name;
+	//std::replace(nm.begin(), nm.end(), '/', '_');
+	std::ofstream strm(path + std::to_string(id) + nm, std::ios::binary);
+	if (strm.is_open()) {
+		auto cs = conV.size();
+		_StreamWrite(&cs, &strm, 1);
+		for (auto& c : conV) {
+			c.Write(strm);
+		}
+		strm.close();
+	}
+}
+
+void AnNode::LoadOut(const string& path) {
+	string nm = script->name;
+	std::ifstream strm(path + std::to_string(id) + nm, std::ios::binary);
+	if (strm.is_open()) {
+		byte sz = 0;
+		_Strm2Val(strm, sz);
+		if (sz != conV.size()) {
+			Debug::Warning("Node", "output data corrupted!");
+			return;
+		}
+		for (auto& c : conV) {
+			c.Read(strm);
+		}
+	}
+}
+
 
 PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 	if (!scr) return;
@@ -367,7 +397,7 @@ void CNode::Execute() {
 				break;
 			case AN_VARTYPE::LIST:
 				auto& mv = scr->_invars[i];
-				auto& vc = *((float**)mv.value) = (float*)cv.value;
+				*((float**)mv.value) = *((float**)cv.value);
 				
 				for (int j = 0; j < mv.dimVals.size(); j++) {
 					*mv.dimVals[j] = *cv.dimVals[j];

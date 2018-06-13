@@ -361,6 +361,26 @@ void AnWeb::SaveIn() {
 	}
 }
 
+void AnWeb::SaveOut() {
+#ifdef IS_ANSERVER
+	string path = IO::path + "/ser/";
+#else
+	string path = IO::path + "/nodes/__tmp__/";
+#endif
+	if (!IO::HasDirectory(path)) IO::MakeDirectory(path);
+	path += "out/";
+	if (!IO::HasDirectory(path)) IO::MakeDirectory(path);
+	else {
+		auto fls = IO::GetFiles(path);
+		for (auto& f : fls) {
+			remove((path + "/" + f).c_str());
+		}
+	}
+	for (auto n : nodes) {
+		n->SaveOut(path);
+	}
+}
+
 void AnWeb::Load(const string& s) {
 	std::ifstream strm(s, std::ios::binary);
 	if (!strm.is_open())

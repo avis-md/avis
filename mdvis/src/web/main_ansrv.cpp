@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
         switch (compileType) {
         case 0: //c++
 		    std::cout << "Compiling c++ nodes..." << std::endl;
-            AnBrowse::PreC();
+            AnBrowse::PreC(forceCompile);
             break;
         case 1: //fortran
             break;
@@ -53,6 +53,15 @@ int main(int argc, char** argv) {
         std::flush(std::cout);
 
         AnWeb::DoExecute();
+
+        AnWeb::SaveOut();
+
+        int sz = *AnWeb::nodes[2]->conV[0].dimVals[0];
+        std::cout << "size is: " << sz << std::endl;
+        float* dt = *((float**)AnWeb::nodes[2]->conV[0].value);
+        for (int i = 0; i < sz; i++) {
+            std::cout << dt[i] << "\n";
+        }
 
         std::cout << "finished" << std::endl;
 

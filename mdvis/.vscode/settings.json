@@ -52,6 +52,8 @@
         "map": "cpp",
         "ios": "cpp",
         "atomic": "cpp",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "fstream": "cpp",
+        "ostream": "cpp"
     }
 }
