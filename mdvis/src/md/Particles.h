@@ -67,6 +67,7 @@ public:
 	static ushort defColPallete[256];
 	static byte defColPalleteSz;
 	static GLuint colorPalleteTex;
+	static bool palleteDirty;
 
 	static void Init(), Clear(), GenTexBufs(), UpdateColorTex(), UpdateRadBuf();
 

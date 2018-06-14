@@ -1,0 +1,26 @@
+#include "node_recolor.h"
+#include "md/Particles.h"
+
+Node_Recolor::Node_Recolor() : AnNode(new DmScript()) {
+    canTile = true;
+	inputR.resize(1);
+	script->name = ".Recol";
+	script->invars.push_back(std::pair<string, string>("grad", "list(1)"));
+}
+
+void Node_Recolor::Execute() {
+    if (!inputR[0].first) return;
+	CVar& cv = inputR[0].first->conV[inputR[0].second];
+	auto& sz = *cv.dimVals[0];
+	if (sz != Particles::particleSz) return;
+
+	float* src = *((float**)cv.value);
+	for (auto a = 0; a < sz; a++) {
+        Particles::particles_Col[a] = (byte)roundf(255 * src[a]);
+    }
+    Particles::palleteDirty = true;
+}
+
+void Node_Recolor::LoadOut(const string& path) {
+    Execute();
+}

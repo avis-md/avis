@@ -7,6 +7,14 @@ uniform sampler2D colList;
 
 layout (location = 0) out vec4 fragCol;
 
+vec3 gradfill(float f) {
+	vec3 v;
+	v.r = clamp(2 - 4 * f, 0, 1);
+	v.g = clamp(4 - abs(4 - 4 * f), 0, 1);
+	v.b = clamp(4 * f - 2, 0, 1);
+	return v;
+}
+
 void main () {
 	float idf = floor(texture(idTex, gl_FragCoord.xy / screenSize).x);
 	int id = int(idf);
@@ -16,7 +24,8 @@ void main () {
 	}
 	float cdf = texelFetch(id2col, id-1).r;
 	int cd = int(cdf * 255);
-	fragCol = texture(colList, vec2((mod(cd, 16) + 0.5) / 16.0, ((cd / 16) + 0.5) / 16.0));
+	fragCol.rgb = gradfill(cd / 255.0);
+	//fragCol = texture(colList, vec2((mod(cd, 16) + 0.5) / 16.0, ((cd / 16) + 0.5) / 16.0));
     //fragCol = texture(colList, vec2((cd + 0.5) / 16.0, 0.5 / 16.0));
     fragCol.a = 1;
 	//fragCol = texture(colList, gl_FragCoord.xy / screenSize);

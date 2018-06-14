@@ -20,6 +20,7 @@ Vec3 Particles::colorPallete[] = {};
 ushort Particles::defColPallete[] = {};
 byte Particles::defColPalleteSz = 0;
 GLuint Particles::colorPalleteTex;
+bool Particles::palleteDirty = false;
 
 GLuint Particles::posVao;
 GLuint Particles::posBuffer;

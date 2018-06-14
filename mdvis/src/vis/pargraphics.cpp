@@ -369,6 +369,13 @@ void ParGraphics::Rerender() {
 void ParGraphics::Recolor() {
 	auto cam = ChokoLait::mainCamera.raw();
 
+	if (Particles::palleteDirty) {
+		glBindBuffer(GL_ARRAY_BUFFER, Particles::colIdBuffer);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, Particles::particleSz * sizeof(byte), Particles::particles_Col);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		Particles::palleteDirty = false;
+	}
+
 	glViewport(0, 0, int(Display::width * cam->quality), int(Display::height * cam->quality));
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

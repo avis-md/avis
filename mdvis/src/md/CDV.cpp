@@ -70,6 +70,7 @@ void CDV::Read(const string& file, bool hasAnim) {
 
 		Particles::particles_Rad[id] = 3 - rd;
 		Particles::particles_Res[id] = Int2(0, 0);
+		Particles::particles_Col[id] = (byte)(rand()%256);
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::posBuffer);
@@ -103,15 +104,15 @@ bool CDV::ReadTrj(const string& path) {
 	anm.reading = true;
 	Vec3* poss;
     
-    anm.poss = new Vec3*[140];
-    anm.frameCount = 140;
+    anm.frameCount = 3;
+    anm.poss = new Vec3*[anm.frameCount];
 
 	anm.poss[0] = Particles::particles_Pos;
 
 	string s;
 	uint id;
 	double px, py, pz;
-	for (uint i = 1; i < 140; i++) {
+	for (uint i = 1; i < anm.frameCount; i++) {
 		std::stringstream sstrm;
 		sstrm << std::setw(6) << std::setfill('0') << i * 100;
 		std::ifstream strm(path + sstrm.str() + ".cdv");

@@ -74,20 +74,6 @@ float Node_Plot::DrawSide() {
 #endif
 }
 
-Vec2 Node_Plot::DrawConn() {
-#ifndef IS_ANSERVER
-	auto cnt = 1;
-	float y = pos.y + 18;
-	//for (uint i = 0; i < script->invarCnt; i++, y += 17) {
-		if (inputR[0].first) Engine::DrawLine(Vec2(pos.x, expanded ? y + 8 : pos.y + 8), Vec2(inputR[0].first->pos.x + inputR[0].first->width, inputR[0].first->expanded ? inputR[0].first->pos.y + 20 + 8 + (inputR[0].second + inputR[0].first->script->invars.size()) * 17 : inputR[0].first->pos.y + 8), white(), 2);
-	//}
-	if (expanded) return Vec2(width, 19 + 17 * cnt + width);
-	else return Vec2(width, 16);
-#else
-	return Vec2();
-#endif
-}
-
 void Node_Plot::Execute() {
 #ifndef IS_ANSERVER
 	if (!inputR[0].first) return;

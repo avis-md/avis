@@ -306,7 +306,6 @@ void AnWeb::Execute() {
 
 void AnWeb::DoExecute() {
 	for (auto n : nodes) {
-		std::cout << n->id << " ";
 		std::flush(std::cout);
 		n->Execute();
 	}

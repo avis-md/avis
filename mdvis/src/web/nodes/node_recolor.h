@@ -1,16 +1,11 @@
 #pragma once
 #include "../annode.h"
 
-class Node_Plot : public AnNode {
+class Node_Recolor : public AnNode {
 public:
-	Node_Plot();
-
-	void Draw() override;
-	float DrawSide() override;
+	Node_Recolor();
+    
 	void Execute() override;
 	void SaveOut(const string& path) override {}
 	void LoadOut(const string& path) override;
-	
-protected:
-	std::vector<float> valXs, valYs;
 };
