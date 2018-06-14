@@ -1,0 +1,9 @@
+4
+0 .in 0 0 1
+0 .insel 0 0 1
+1 par 1 2 0
+wall 5.5
+-1
+0 positions poss
+0 .Plot 0 1 1
+2 rdf array

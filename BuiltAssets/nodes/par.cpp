@@ -1,5 +1,6 @@
 #include <iostream>
-#include <math.h>
+#include <cmath>
+#include <cstring>
 
 VARIN float wall = 0;
 
@@ -23,9 +24,9 @@ ENTRY void Execute() {
 	float mypos_z = poss[2];
 	for (int c = 3; c < parCnt * 3; c += 3) {
 		auto pos = poss + c;
-		float dpx = abs(pos[0] - mypos_x);
-		float dpy = abs(pos[1] - mypos_y);
-		float dpz = abs(pos[2] - mypos_z);
+		float dpx = fabs(pos[0] - mypos_x);
+		float dpy = fabs(pos[1] - mypos_y);
+		float dpz = fabs(pos[2] - mypos_z);
 		dpx /= wall;
 		dpx = wall * (dpx - roundf(dpx));
 		dpy /= wall;
@@ -34,9 +35,8 @@ ENTRY void Execute() {
 		dpz = wall * (dpy - roundf(dpz));
 		
 		float dst = sqrt(dpx*dpx + dpy*dpy + dpz*dpz);
+		if (dst >= wall) continue;
 		int loc = (int)roundf(dst * 100.0f / wall);
-		if (loc >= 100)
-			continue;
 		rdf[loc] += 1;
 	}
 	for (auto a = 0; a < 100; a++) {
