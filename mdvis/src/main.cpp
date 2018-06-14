@@ -1,6 +1,7 @@
 #include "ChokoLait.h"
 #include "md/Particles.h"
 #include "md/Gromacs.h"
+#include "md/CDV.h"
 //#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 //#include <numpy/arrayobject.h>
 
@@ -131,10 +132,12 @@ int main(int argc, char **argv)
 	ParGraphics::SetLight(l.get());
 
 	AnWeb::Load(IO::path + "/nodes/rdf.anl");
-
-	Gromacs::Read(IO::path + "/pbc.gro", false);
-	bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");
-	Protein::Refresh();
+	CDV::Read(IO::path + "/ayuba/position000000.cdv", false);
+	CDV::ReadTrj(IO::path + "/ayuba/position");
+	//Gromacs::Read(IO::path + "/pbc.gro", false);
+	//bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");
+	
+	//Protein::Refresh();
 	ParGraphics::UpdateDrawLists();
 	
 	glEnable(GL_PROGRAM_POINT_SIZE);
