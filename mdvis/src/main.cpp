@@ -132,7 +132,7 @@ int main(int argc, char **argv)
 	ParGraphics::SetLight(l.get());
 
 	//AnWeb::Load(IO::path + "/nodes/rdf.anl");
-	AnWeb::nodes.push_back(new Node_Recolor());
+	AnWeb::nodes.push_back(new Node_Recolor_All());
 	CDV::Read(IO::path + "/ayuba/position000000.cdv", false);
 	CDV::ReadTrj(IO::path + "/ayuba/position");
 	//Gromacs::Read(IO::path + "/pbc.gro", false);

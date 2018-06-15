@@ -147,7 +147,7 @@ void ParGraphics::Init() {
 	hlIds.resize(1);
 	ChokoLait::mainCamera->onBlit = Reblit;
 
-	rotCenter = Vec3(4, 4, 4);
+	rotCenter = Vec3();//4, 4, 4);
 	rotZ = 90;
 	rotScale = 0;
 

@@ -28,7 +28,7 @@ void CDV::Read(const string& file, bool hasAnim) {
 	string s;
     while (std::getline(strm, s)) {
         pi = TryParse(string_split(s, ' ')[0], -1);
-        Particles::particleSz = max(Particles::particleSz, pi);
+        Particles::particleSz = max(Particles::particleSz, pi+1);
     }
     std::cout << "ps " << Particles::particleSz << std::endl;
 
@@ -42,27 +42,23 @@ void CDV::Read(const string& file, bool hasAnim) {
     Particles::residueLists->residues->cnt = Particles::particleSz;
 
 	if (!hasAnim) {
-		Particles::particles_Pos = new Vec3[Particles::particleSz];
-		Particles::particles_Vel = new Vec3[Particles::particleSz];
+		Particles::particles_Pos = new Vec3[Particles::particleSz]{};
+		Particles::particles_Vel = new Vec3[Particles::particleSz]{};
 	}
-	Particles::particles_Col = new byte[Particles::particleSz];
-	Particles::particles_Rad = new float[Particles::particleSz] {};
-	Particles::particles_Res = new Int2[Particles::particleSz];
+	Particles::particles_Col = new byte[Particles::particleSz]{};
+	Particles::particles_Rad = new float[Particles::particleSz]{};
+	Particles::particles_Res = new Int2[Particles::particleSz]{};
     
 	uint id, rd;
 	double px, py, pz;
 
 	strm.clear();
-    strm.seekg(sps);
+	strm.seekg(0, std::ios::beg);
+	std::getline(strm, s);
+	std::getline(strm, s);
 
 	for (uint i = 0; i < Particles::particleSz; i++) {
-		std::getline(strm, s);
-		auto ss = string_split(s, ' ');
-		id = TryParse(ss[0], -1);
-		rd = TryParse(ss[1], 0.0f);
-		px = TryParse(ss[2], 0.0f);
-		py = TryParse(ss[3], 0.0f);
-		pz = TryParse(ss[4], 0.0f);
+		strm >> id >> rd >> px >> py >> pz;
 
 		if (!hasAnim) {
 			Particles::particles_Pos[id] = Vec3(px, py, pz) * 0.1f;
@@ -83,7 +79,7 @@ void CDV::Read(const string& file, bool hasAnim) {
 	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(byte), Particles::particles_Col, GL_STATIC_DRAW);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::radBuffer);
-	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(float), nullptr, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(float), Particles::particles_Rad, GL_STATIC_DRAW);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	
@@ -93,8 +89,7 @@ void CDV::Read(const string& file, bool hasAnim) {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-
-	Particles::UpdateRadBuf();
+	
 	Particles::GenTexBufs();
 }
 
@@ -104,13 +99,13 @@ bool CDV::ReadTrj(const string& path) {
 	anm.reading = true;
 	Vec3* poss;
     
-    anm.frameCount = 3;
+    anm.frameCount = 5;
     anm.poss = new Vec3*[anm.frameCount];
 
 	anm.poss[0] = Particles::particles_Pos;
 
 	string s;
-	uint id;
+	uint id, dm;
 	double px, py, pz;
 	for (uint i = 1; i < anm.frameCount; i++) {
 		std::stringstream sstrm;
@@ -121,13 +116,9 @@ bool CDV::ReadTrj(const string& path) {
 
 		anm.poss[i] = new Vec3[Particles::particleSz];
 		for (uint j = 0; j < Particles::particleSz; j++) {
-			std::getline(strm, s);
-			auto ss = string_split(s, ' ');
-			id = TryParse(ss[0], -1);
-			px = TryParse(ss[2], 0.0f);
-			py = TryParse(ss[3], 0.0f);
-			pz = TryParse(ss[4], 0.0f);
-			anm.poss[i][j] = Vec3(px, py, pz) * 0.1f;
+			auto& ps = anm.poss[i][j];
+			strm >> id >> dm >> ps.x >> ps.y >> ps.z;
+			ps *= 0.1f;
 		}
 	}
 

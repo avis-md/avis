@@ -146,6 +146,7 @@
     <ClCompile Include="src\EditorShortcuts.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\md\CDV.cpp" />
     <ClCompile Include="src\md\Gromacs.cpp" />
     <ClCompile Include="src\makegen.cpp" />
     <ClCompile Include="src\md\ParMenu.cpp" />
@@ -166,6 +167,7 @@
     <ClCompile Include="src\web\nodes\node_gromacs.cpp" />
     <ClCompile Include="src\web\nodes\node_inputs.cpp" />
     <ClCompile Include="src\web\nodes\node_plot.cpp" />
+    <ClCompile Include="src\web\nodes\node_recolor.cpp" />
     <ClCompile Include="src\web\nodes\node_volume.cpp" />
     <ClCompile Include="src\web\pyreader.cpp" />
     <ClCompile Include="src\xdrfile\xdrfile.c" />
@@ -238,6 +240,7 @@
     <ClInclude Include="src\core\input.h" />
     <ClInclude Include="src\core\io.h" />
     <ClInclude Include="src\core\mvp.h" />
+    <ClInclude Include="src\md\CDV.h" />
     <ClInclude Include="src\md\Gromacs.h" />
     <ClInclude Include="src\makegen.h" />
     <ClInclude Include="src\md\ParMenu.h" />
@@ -258,6 +261,7 @@
     <ClInclude Include="src\web\nodes\node_gromacs.h" />
     <ClInclude Include="src\web\nodes\node_inputs.h" />
     <ClInclude Include="src\web\nodes\node_plot.h" />
+    <ClInclude Include="src\web\nodes\node_recolor.h" />
     <ClInclude Include="src\web\nodes\node_volume.h" />
     <ClInclude Include="src\web\pyreader.h" />
     <ClInclude Include="src\xdrfile\xdrfile.h" />

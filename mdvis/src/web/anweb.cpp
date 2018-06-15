@@ -440,3 +440,9 @@ void AnWeb::LoadOut() {
 		n->LoadOut(path);
 	}
 }
+
+void AnWeb::OnAnimFrame() {
+	for (auto n : nodes) {
+		n->OnAnimFrame();
+	}
+}

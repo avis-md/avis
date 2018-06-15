@@ -31,38 +31,51 @@ bool CReader::Read(string path, CScript** _scr) {
 	auto s = IO::GetText(fp + ".cpp");
 
 #ifndef IS_ANSERVER
-
 	if (!IO::HasDirectory(fp2)) IO::MakeDirectory(fp2);
+
+	struct stat stt;
+	stat((fp + ".cpp").c_str(), &stt);
+	auto mt = stt.st_mtime;
+	stat((fp2 + nm + ".obj").c_str(), &stt);
+	auto ot = stt.st_mtime;
+
+	if (mt > ot) {
+
 #ifdef PLATFORM_WIN
-	const string dlx = " __declspec(dllexport)";
+		const string dlx = " __declspec(dllexport)";
 #else
-	const string dlx = "";
+		const string dlx = "";
 #endif
-	s = "\
+		s = "\
 #define VARIN extern \"C\"" + dlx + "\n\
 #define VAROUT VARIN\n\
 #define ENTRY VARIN\n\
 #define VECSZ(...)\n\
 #define VECVAR VARIN\n\
 \n" + s;
-	std::ofstream ostrm(fp + "_temp__.cpp");
-	ostrm << s;
-	ostrm.close();
+		std::ofstream ostrm(fp + "_temp__.cpp");
+		ostrm << s;
+		ostrm.close();
 
 #ifdef PLATFORM_WIN
-	//&& cl /nologo /c /FoD:/ D:/lib.c && link /dll /nologo /out:D:/lib.dll D:/lib.obj"
-	const string cl = "cl /nologo /c -Od /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
-	const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".dll\" \"" + fp2 + nm + ".obj\"";
-	RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " && " + lk);
+		//&& cl /nologo /c /FoD:/ D:/lib.c && link /dll /nologo /out:D:/lib.dll D:/lib.obj"
+		const string cl = "cl /nologo /c -Od /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
+		const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".dll\" \"" + fp2 + nm + ".obj\"";
+		RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " && " + lk);
 #else
-	const string cmd = "g++ -std=c++11 -shared -O0 -fPIC -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\"";
-	//const string cl = "g++ /nologo /c -Od /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
-	//const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".dll\" \"" + fp2 + nm + ".obj\"";
-	std::cout << cmd << std::endl;
-	RunCmd::Run(cmd);
+		const string cmd = "g++ -std=c++11 -shared -O0 -fPIC -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\"";
+		//const string cl = "g++ /nologo /c -Od /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
+		//const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".dll\" \"" + fp2 + nm + ".obj\"";
+		std::cout << cmd << std::endl;
+		RunCmd::Run(cmd);
 #endif
-	const string ss = fp + "_temp__.cpp";
-	remove(&ss[0]);
+		const string ss = fp + "_temp__.cpp";
+		remove(&ss[0]);
+
+	}
+	else {
+		std::cout << "skipping " << nm << std::endl;
+	}
 
 #endif
 

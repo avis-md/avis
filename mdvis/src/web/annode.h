@@ -48,6 +48,8 @@ public:
 	virtual void LoadIn(const string& path) {};
 	virtual void SaveOut(const string& path);
 	virtual void LoadOut(const string& path);
+
+	virtual void OnAnimFrame() {}
 protected:
 	AnNode(AnScript* scr);
 	

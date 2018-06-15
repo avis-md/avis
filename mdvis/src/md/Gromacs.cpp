@@ -167,7 +167,7 @@ void Gromacs::Read(const string& file, bool hasAnim) {
 	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(byte), Particles::particles_Col, GL_STATIC_DRAW);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::radBuffer);
-	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(float), nullptr, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(float), Particles::particles_Rad, GL_STATIC_DRAW);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	
@@ -178,7 +178,7 @@ void Gromacs::Read(const string& file, bool hasAnim) {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	Particles::UpdateRadBuf();
+	//Particles::UpdateRadBuf();
 	Particles::GenTexBufs();
 	//Particles::UpdateColorTex();
 }

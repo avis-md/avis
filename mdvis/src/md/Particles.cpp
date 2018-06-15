@@ -1,4 +1,5 @@
 #include "Particles.h"
+#include "web/anweb.h"
 
 ResidueList* Particles::residueLists;
 uint Particles::residueListSz;
@@ -105,6 +106,7 @@ void Particles::SetFrame(uint frm) {
 		glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(Vec3), particles_Pos);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		AnWeb::OnAnimFrame();
 		Scene::active->dirty = true;
 	}
 }

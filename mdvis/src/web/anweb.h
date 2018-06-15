@@ -37,6 +37,8 @@ public:
 	static void Execute(), DoExecute(), DoExecute_Srv();
 	static void Save(const string& s), SaveIn(), SaveOut();
 	static void Load(const string& s), LoadIn(), LoadOut();
+
+	static void OnAnimFrame();
 };
 
 #include "anbrowse.h"

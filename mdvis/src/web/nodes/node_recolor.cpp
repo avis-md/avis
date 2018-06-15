@@ -24,3 +24,31 @@ void Node_Recolor::Execute() {
 void Node_Recolor::LoadOut(const string& path) {
     Execute();
 }
+
+Node_Recolor_All::Node_Recolor_All() {
+	script->name = ".RecolA";
+	script->invars[0].second = "list(2)";
+}
+
+void Node_Recolor_All::Execute() {
+	if (!inputR[0].first) return;
+	CVar& cv = inputR[0].first->conV[inputR[0].second];
+	auto& st = *cv.dimVals[0];
+	auto& sz = *cv.dimVals[1];
+	if (st != Particles::anim.frameCount || sz != Particles::particleSz) return;
+	
+	data.resize(st * sz);
+
+	float* src = *((float**)cv.value);
+
+	for (uint a = 0; a < st * sz; a++) {
+		data[a] = (byte)roundf(255 * src[a]);
+	}
+	OnAnimFrame();
+}
+
+void Node_Recolor_All::OnAnimFrame() {
+	if (!data.size()) return;
+	Particles::particles_Col = &data[Particles::particleSz * Particles::anim.activeFrame];
+	Particles::palleteDirty = true;
+}
