@@ -9,9 +9,9 @@ layout (location = 0) out vec4 fragCol;
 
 vec3 gradfill(float f) {
 	vec3 v;
-	v.r = clamp(2 - 4 * f, 0, 1);
-	v.g = clamp(4 - abs(4 - 4 * f), 0, 1);
-	v.b = clamp(4 * f - 2, 0, 1);
+	v.b = clamp(2 - 4 * f, 0, 1);
+	v.g = clamp(2 - abs(2 - 4 * f), 0, 1);
+	v.r = clamp(4 * f - 2, 0, 1);
 	return v;
 }
 

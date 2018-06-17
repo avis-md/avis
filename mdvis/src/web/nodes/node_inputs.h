@@ -6,7 +6,7 @@ public:
 	Node_Inputs();
 
 	Vec2 DrawConn() override {
-		return Vec2(width, 19 + 17 * 2);
+		return Vec2(width, 19 + 17 * 4);
 	}
 	void Draw() override;
 	float DrawSide() override { return 0; }

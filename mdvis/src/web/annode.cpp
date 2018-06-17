@@ -132,7 +132,7 @@ float AnNode::DrawSide() {
 	auto cnt = (script->invars.size());
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
-	UI::Label(pos.x + 20, pos.y + 1, 12, script->name, font, white());
+	UI::Label(pos.x + 20, pos.y + 1, 12, title, font, white());
 	if (expanded) {
 		Engine::DrawQuad(pos.x, pos.y + 16, width, 2.0f + 17 * cnt, white(0.7f, 0.25f));
 		float y = pos.y + 18;

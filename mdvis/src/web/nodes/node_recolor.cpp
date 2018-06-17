@@ -2,7 +2,9 @@
 #include "md/Particles.h"
 
 Node_Recolor::Node_Recolor() : AnNode(new DmScript()) {
-    canTile = true;
+	title = "Recolor";
+	titleCol = Vec3(0.3f, 0.5f, 0.3f);
+    canTile = false;
 	inputR.resize(1);
 	script->name = ".Recol";
 	script->invars.push_back(std::pair<string, string>("grad", "list(1)"));
@@ -42,7 +44,7 @@ void Node_Recolor_All::Execute() {
 	float* src = *((float**)cv.value);
 
 	for (uint a = 0; a < st * sz; a++) {
-		data[a] = (byte)roundf(255 * src[a]);
+		data[a] = (byte)Clamp<float>(roundf(255 * src[a]), 0, 255);
 	}
 	OnAnimFrame();
 }

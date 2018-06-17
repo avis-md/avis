@@ -99,10 +99,11 @@ bool CDV::ReadTrj(const string& path) {
 	anm.reading = true;
 	Vec3* poss;
     
-    anm.frameCount = 5;
+    anm.frameCount = 140;
     anm.poss = new Vec3*[anm.frameCount];
 
-	anm.poss[0] = Particles::particles_Pos;
+	anm.poss[0] = new Vec3[Particles::particleSz * anm.frameCount];//Particles::particles_Pos;
+	memcpy(anm.poss[0], Particles::particles_Pos, sizeof(Vec3) * Particles::particleSz);
 
 	string s;
 	uint id, dm;
@@ -114,7 +115,7 @@ bool CDV::ReadTrj(const string& path) {
 		std::getline(strm, s);
 		std::getline(strm, s);
 
-		anm.poss[i] = new Vec3[Particles::particleSz];
+		anm.poss[i] = anm.poss[0] + i * Particles::particleSz;
 		for (uint j = 0; j < Particles::particleSz; j++) {
 			auto& ps = anm.poss[i][j];
 			strm >> id >> dm >> ps.x >> ps.y >> ps.z;
