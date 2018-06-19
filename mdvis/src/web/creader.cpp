@@ -52,6 +52,7 @@ bool CReader::Read(string path, CScript** _scr) {
 #define ENTRY VARIN\n\
 #define VECSZ(...)\n\
 #define VECVAR VARIN\n\
+#define PROGRS VARIN\n\
 \n" + s;
 		std::ofstream ostrm(fp + "_temp__.cpp");
 		ostrm << s;
@@ -104,7 +105,9 @@ bool CReader::Read(string path, CScript** _scr) {
 	while (!strm.eof()) {
 		std::getline(strm, ln);
 		string ln2 = ln.substr(0, 6);
-		if (ln2 == "VARIN ") {
+		long long lln2 = *((long long*)&ln2[0]) & 0x0000ffffffffffff;
+#define TL(s) (*((long long*)s) & 0x0000ffffffffffff)
+		if (lln2 == TL("VARIN ")) {
 			auto ss = string_split(ln, ' ', true);
 			if (ss.size() < 3) {
 				Debug::Warning("CReader", "incomplete type for VARIN!");
@@ -144,7 +147,7 @@ bool CReader::Read(string path, CScript** _scr) {
 				return false;
 			}
 		}
-		else if (ln2 == "VAROUT") {
+		else if (lln2 == TL("VAROUT")) {
 			auto ss = string_split(ln, ' ', true);
 			if (ss.size() < 3) {
 				Debug::Warning("CReader", "incomplete type for VAROUT!");
@@ -186,7 +189,7 @@ bool CReader::Read(string path, CScript** _scr) {
 				return false;
 			}
 		}
-		else if (ln2 == "VECVAR") {
+		else if (lln2 == TL("VECVAR")) {
 			auto ss = string_split(ln, ' ', true);
 			if (ss.size() < 3) {
 				Debug::Warning("CReader", "incomplete type for VECVAR!");
@@ -203,7 +206,24 @@ bool CReader::Read(string path, CScript** _scr) {
 			}
 			vecvars.push_back(std::pair<string, int*>(nm, (int*)loc));
 		}
-		if (ln2 == "VECSZ(") {
+		else if (lln2 == TL("PROGRS")) {
+			auto ss = string_split(ln, ' ', true);
+			if (ss.size() < 3) {
+				Debug::Warning("CReader", "incomplete type for PROGRS!");
+				return false;
+			}
+			if (ss[1] != "float") {
+				Debug::Warning("CReader", "PROGRS type must be float!");
+				return false;
+			}
+			auto nm = ss[2].substr(0, ln.find_first_of('=')).substr(0, ln.find_first_of(';'));
+			scr->progress = scr->lib->GetSym(nm);
+			if (!scr->progress) {
+				Debug::Warning("CReader", "cannot find \"" + nm + "\" from memory!");
+				return false;
+			}
+		}
+		if (lln2 == TL("VECSZ(")) {
 			auto p1 = 6;
 			auto p2 = ln.find_first_of(')');
 			if (p2 < p1) {

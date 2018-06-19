@@ -25,6 +25,7 @@ public:
 
 	bool expanded = true;
 	bool canTile = false;
+	bool executing = false;
 	ANNODE_OP op;
 
 	static Font* font;

@@ -1,5 +1,8 @@
 #include "node_addbond.h"
+#ifndef IS_ANSERVER
 #include "md/Particles.h"
+#include "ui/icons.h"
+#endif
 
 Node_AddBond::Node_AddBond() : AnNode(new DmScript()) {
 	title = "Extra Bonds";
@@ -30,6 +33,23 @@ void Node_AddBond::Execute() {
 		c2.second[i] = *((Int2**)cv2.value) + off;
 		off += c2.first[i];
 	}
+}
+
+float Node_AddBond::DrawSide() {
+	auto f = AnNode::DrawSide();
+	auto& c2 = Particles::particles_Conn2[animId];
+	if (Engine::Button(pos.x + width - 17, pos.y, 16, 16, c2.visible? Icons::visible : Icons::hidden, white(0.8f), white(), white(1, 0.5f))) {
+		c2.visible = !c2.visible;
+	}
+	if (Engine::Button(pos.x + width - 50, pos.y, 16, 16, Icons::dm_line, (!c2.drawMode)? yellow() : white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+		c2.drawMode = 0;
+		Scene::dirty = true;
+	}
+	if (Engine::Button(pos.x + width - 34, pos.y, 16, 16, Icons::dm_stick, (!c2.drawMode)? white(0.8f) : yellow(), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+		c2.drawMode = 1;
+		Scene::dirty = true;
+	}
+	return f;
 }
 
 void Node_AddBond::LoadOut(const string& path) {

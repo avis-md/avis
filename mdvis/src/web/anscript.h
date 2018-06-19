@@ -22,6 +22,7 @@ public:
 	string name;
 	AN_SCRTYPE type;
 	std::vector<std::pair<string, string>> invars, outvars;
+	void* progress = 0;
 
 	virtual string Exec() = 0;
 	virtual void Set(uint i, int v) = 0, Set(uint i, float v) = 0, Set(uint i, void* v) = 0;

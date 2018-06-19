@@ -133,8 +133,15 @@ float AnNode::DrawSide() {
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 20, pos.y + 1, 12, title, font, white());
+	if (executing) {
+		Engine::DrawQuad(pos.x, pos.y + 16, width, 2, white(0.7f, 0.25f));
+		if (script->progress)
+			Engine::DrawQuad(pos.x, pos.y + 16, 2 + (width - 2) * *((float*)script->progress), 2, red());
+		else
+			Engine::DrawQuad(pos.x, pos.y + 16, width * 0.1f, 2, red());
+	}
 	if (expanded) {
-		Engine::DrawQuad(pos.x, pos.y + 16, width, 2.0f + 17 * cnt, white(0.7f, 0.25f));
+		Engine::DrawQuad(pos.x, pos.y + (executing? 18 : 16), width, 2.0f + 17 * cnt, white(0.7f, 0.25f));
 		float y = pos.y + 18;
 		for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 			UI::Label(pos.x + 2, y, 12, script->invars[i].first, font, white());
@@ -143,13 +150,16 @@ float AnNode::DrawSide() {
 				auto isi = (vr == "int");
 				if (isi || (vr == "float")) {
 					string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].f);
-					s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, font, true, nullptr, white());
+					s = UI::EditText(pos.x + width * 0.4f, y, width * 0.6f - 3, 16, 12, white(1, 0.5f), s, font, true, nullptr, white());
 					if (isi) inputVDef[i].i = TryParse(s, 0);
 					else inputVDef[i].f = TryParse(s, 0.0f);
 				}
+				else {
+					UI::Label(pos.x + width * 0.4f, y, 12, script->invars[i].second, font, white(0.3f));
+				}
 			}
 			else {
-				UI::Label(pos.x + width * 0.33f, y, 12, "<connected>", font, yellow());
+				UI::Label(pos.x + width * 0.4f, y, 12, "<connected>", font, yellow());
 			}
 		}
 		if (AnWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));

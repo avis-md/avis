@@ -62,6 +62,8 @@ public:
 		uint cnt, ocnt = 0;
 		Int2* ids;
 		GLuint buf = 0, tbuf = 0;
+		byte drawMode;
+		bool visible;
 	};
 	static std::vector<conn2info> particles_Conn2;
 

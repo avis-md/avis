@@ -252,13 +252,6 @@ void ParGraphics::Update() {
 }
 
 void ParGraphics::Rerender() {
-	//*
-	//MVP::Switch(true);
-	//MVP::Push();
-	//float s = pow(2, rotScale);
-	//MVP::Scale(s, s, s);
-	//MVP::Switch(false);
-	//MVP::Clear();
 	float csz = cos(-rotZ*deg2rad);
 	float snz = sin(-rotZ*deg2rad);
 	float csw = cos(rotW*deg2rad);
@@ -272,31 +265,11 @@ void ParGraphics::Rerender() {
 	}
 	MVP::Translate(-rotCenter.x, -rotCenter.y, -rotCenter.z);
 
-	//MVP::Switch(true);
-	//MVP::Push();
-	//float s = pow(2, rotScale);
-	//MVP::Scale(s, s, s);
-	//MVP::Switch(false);
-
 	if (dragging) {
 		auto imvp = glm::inverse(MVP::projection() * MVP::modelview());
 		scrX = imvp * Vec4(1, 0, 0, 0);
 		scrY = imvp * Vec4(0, 1, 0, 0);
 	}
-	//*/
-	/*
-	MVP::Switch(true);
-	float mww = pow(2, rotScale);
-	//MVP::Scale(mww, mww*Display::height / Display::width, 1);
-	MVP::Push();
-	float csz = cos(-rotZ*deg2rad);
-	float snz = sin(-rotZ*deg2rad);
-	float csw = cos(rotW*deg2rad);
-	float snw = sin(rotW*deg2rad);
-	Mat4x4 mMatrix = Mat4x4(1, 0, 0, 0, 0, csw, snw, 0, 0, -snw, csw, 0, 0, 0, 0, 1) * Mat4x4(csz, 0, -snz, 0, 0, 1, 0, 0, snz, 0, csz, 0, 0, 0, 0, 1);
-	MVP::Mul(mMatrix);
-	MVP::Translate(-rotCenter.x, -rotCenter.y, -rotCenter.z);
-	*/
 	auto _mv = MVP::modelview();
 	auto _p = MVP::projection();
 	auto _cpos = ChokoLait::mainCamera->object->transform.position();
@@ -359,34 +332,36 @@ void ParGraphics::Rerender() {
 	}
 	for (auto& c2 : Particles::particles_Conn2) {
 		if (!c2.cnt) continue;
-		/*
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glUseProgram(parConLineProg);
-		glUniformMatrix4fv(parConLineProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
-		glUniformMatrix4fv(parConLineProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
-		glUniform1i(parConLineProgLocs[2], 1);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
-		glUniform1i(parConLineProgLocs[3], 2);
-		glActiveTexture(GL_TEXTURE2);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
-		glDrawArrays(GL_LINES, 0, c2.cnt * 2);
-		*/
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glUseProgram(parConProg);
-		glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
-		glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
-		glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
-		glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-		glUniform2f(parConProgLocs[4], Display::width * ql, Display::height * ql);
-		glUniform1i(parConProgLocs[5], 1);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
-		glUniform1i(parConProgLocs[6], 2);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
-		glDrawArrays(GL_POINTS, 0, c2.cnt);
+		if (!c2.drawMode) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glUseProgram(parConLineProg);
+			glUniformMatrix4fv(parConLineProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+			glUniformMatrix4fv(parConLineProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+			glUniform1i(parConLineProgLocs[2], 1);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+			glUniform1i(parConLineProgLocs[3], 2);
+			glActiveTexture(GL_TEXTURE2);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
+			glDrawArrays(GL_LINES, 0, c2.cnt * 2);
+		}
+		else {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			glUseProgram(parConProg);
+			glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+			glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+			glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
+			glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
+			glUniform2f(parConProgLocs[4], Display::width * ql, Display::height * ql);
+			glUniform1i(parConProgLocs[5], 1);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+			glUniform1i(parConProgLocs[6], 2);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
+			glDrawArrays(GL_POINTS, 0, c2.cnt);
+		}
 	}
 	
 	glBindVertexArray(0);
@@ -432,9 +407,6 @@ void ParGraphics::Recolor() {
 
 	glBindVertexArray(Camera::emptyVao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
-	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	glUseProgram(0);
 	glBindVertexArray(0);
@@ -448,9 +420,7 @@ void ParGraphics::Reblit() {
 		float zero[] = { 0,0,0,0 };
 		glClearBufferfv(GL_COLOR, 0, zero);
 		Recolor();
-		//glViewport(0, 0, Display::actualWidth, Display::actualHeight);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->d_tfbo[0]);
-		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		BlitSky();
 	}
 	//*
@@ -464,11 +434,6 @@ void ParGraphics::Reblit() {
 	if (tfboDirty && AnWeb::drawFull)
 		tfboDirty = false;
 	
-	//glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->d_fbo);
-
-	//glReadBuffer(GL_COLOR_ATTACHMENT0 + GBUFFER_EMISSION_AO);
-	//glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::width, Display::height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-	//*/
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -507,9 +472,6 @@ void ParGraphics::BlitSky() {
 
 	glBindVertexArray(Camera::emptyVao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
-	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
 }
@@ -528,9 +490,6 @@ void ParGraphics::BlitHl() {
 	
 	glBindVertexArray(Camera::emptyVao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
-	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
 }

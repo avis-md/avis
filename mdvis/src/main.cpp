@@ -47,6 +47,12 @@ void updateFunc() {
 		o = !o;
 		Scene::dirty = true;
 	}
+	if (Input::KeyDown(Key_RightArrow)) {
+		Particles::IncFrame(false);
+	}
+	if (Input::KeyDown(Key_LeftArrow)) {
+		if (!!Particles::anim.activeFrame) Particles::SetFrame(Particles::anim.activeFrame - 1);
+	}
 }
 
 void paintfunc() {
@@ -133,7 +139,7 @@ int main(int argc, char **argv)
 	ParGraphics::SetLight(l.get());
 
 	//AnWeb::Load(IO::path + "/nodes/rdf.anl");
-	//AnWeb::nodes.push_back(new Node_Recolor_All());
+	AnWeb::nodes.push_back(new Node_Recolor_All());
 	AnWeb::nodes.push_back(new Node_AddBond());
 	CDV::Read(IO::path + "/ayuba/position000000.cdv", false);
 	CDV::ReadTrj(IO::path + "/ayuba/position");

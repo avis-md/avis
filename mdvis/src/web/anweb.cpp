@@ -307,7 +307,9 @@ void AnWeb::Execute() {
 void AnWeb::DoExecute() {
 	for (auto n : nodes) {
 		std::flush(std::cout);
+		n->executing = true;
 		n->Execute();
+		n->executing = false;
 	}
 	executing = false;
 }
