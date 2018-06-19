@@ -357,6 +357,37 @@ void ParGraphics::Rerender() {
 			glDrawArrays(GL_POINTS, p.first, p.second.first);
 		}
 	}
+	for (auto& c2 : Particles::particles_Conn2) {
+		if (!c2.cnt) continue;
+		/*
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glUseProgram(parConLineProg);
+		glUniformMatrix4fv(parConLineProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+		glUniformMatrix4fv(parConLineProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+		glUniform1i(parConLineProgLocs[2], 1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+		glUniform1i(parConLineProgLocs[3], 2);
+		glActiveTexture(GL_TEXTURE2);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
+		glDrawArrays(GL_LINES, 0, c2.cnt * 2);
+		*/
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glUseProgram(parConProg);
+		glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+		glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+		glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
+		glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
+		glUniform2f(parConProgLocs[4], Display::width * ql, Display::height * ql);
+		glUniform1i(parConProgLocs[5], 1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+		glUniform1i(parConProgLocs[6], 2);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
+		glDrawArrays(GL_POINTS, 0, c2.cnt);
+	}
 	
 	glBindVertexArray(0);
 	glUseProgram(0);

@@ -18,6 +18,7 @@ Camera::Camera(std::ifstream& stream, SceneObject* o, long pos) : Camera() {
 }
 
 void Camera::ApplyGL() {
+	/*
 	switch (clearType) {
 	case CAM_CLEAR_COLOR:
 		glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
@@ -31,7 +32,7 @@ void Camera::ApplyGL() {
 		break;
 	default:
 		break;
-	}
+	}*/
 
 	MVP::Switch(true);
 	MVP::Clear();

@@ -47,3 +47,4 @@ public:
 #include "nodes/node_volume.h"
 #include "nodes/node_gromacs.h"
 #include "nodes/node_recolor.h"
+#include "nodes/node_addbond.h"

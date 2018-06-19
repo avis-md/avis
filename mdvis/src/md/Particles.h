@@ -38,7 +38,8 @@ struct AnimData {
 	Vec3** poss;
 	uint* connCounts;
 	Int2** conns;
-
+	std::vector<std::pair<uint*, Int2**>> conns2;
+	
 private:
 	AnimData(const AnimData&);
 };
@@ -56,6 +57,15 @@ public:
 	static Int2* particles_Conn;
 	static float* particles_Rad;
 	static Int2* particles_Res;
+
+	struct conn2info {
+		uint cnt, ocnt = 0;
+		Int2* ids;
+		GLuint buf = 0, tbuf = 0;
+	};
+	static std::vector<conn2info> particles_Conn2;
+
+	static void UpdateConBufs2();
 
 	static AnimData anim;
 	static void IncFrame(bool loop);

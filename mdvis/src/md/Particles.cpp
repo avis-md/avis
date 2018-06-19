@@ -13,6 +13,8 @@ Int2* Particles::particles_Conn;
 float* Particles::particles_Rad;
 Int2* Particles::particles_Res;
 
+std::vector<Particles::conn2info> Particles::particles_Conn2;
+
 AnimData Particles::anim;
 
 Vec3 Particles::boundingBox;
@@ -90,6 +92,26 @@ void Particles::UpdateRadBuf() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void Particles::UpdateConBufs2() {
+	for (auto& c2 : particles_Conn2) {
+		if (!c2.cnt) continue;
+		if (!c2.buf) glGenBuffers(1, &c2.buf);
+		glBindBuffer(GL_ARRAY_BUFFER, c2.buf);
+		if (c2.ocnt < c2.cnt)
+			glBufferData(GL_ARRAY_BUFFER, c2.cnt * sizeof(Int2), c2.ids, GL_DYNAMIC_DRAW);
+		else
+			glBufferSubData(GL_ARRAY_BUFFER, 0, c2.cnt * sizeof(Int2), c2.ids);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		c2.ocnt = c2.cnt;
+		if (!c2.tbuf) {
+			glGenTextures(1, &c2.tbuf);
+		}
+		glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
+		glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, c2.buf);
+		glBindTexture(GL_TEXTURE_BUFFER, 0);
+	}
+}
+
 void Particles::IncFrame(bool loop) {
 	if (anim.activeFrame == anim.frameCount - 1) {
 		if (loop) SetFrame(0);
@@ -106,6 +128,16 @@ void Particles::SetFrame(uint frm) {
 		glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(Vec3), particles_Pos);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		bool has = false;
+		for (int i = anim.conns2.size() - 1; i >= 0; i--) {
+			auto& c2 = anim.conns2[i];
+			if (!c2.first) continue;
+			auto& c = particles_Conn2[i];
+			c.cnt = c2.first[frm];
+			c.ids = c2.second[frm];
+			has = true;
+		}
+		if (has) UpdateConBufs2();
 		AnWeb::OnAnimFrame();
 		Scene::active->dirty = true;
 	}

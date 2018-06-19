@@ -85,6 +85,7 @@ void paintfunc() {
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Particle " + std::to_string(id), font, white());
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, &Particles::particles_ResName[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, font, white());
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, &Particles::particles_Name[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, font, white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, std::to_string(Particles::particles_Pos[id]), font, white());
 		}
 	}
 }
@@ -132,7 +133,8 @@ int main(int argc, char **argv)
 	ParGraphics::SetLight(l.get());
 
 	//AnWeb::Load(IO::path + "/nodes/rdf.anl");
-	AnWeb::nodes.push_back(new Node_Recolor_All());
+	//AnWeb::nodes.push_back(new Node_Recolor_All());
+	AnWeb::nodes.push_back(new Node_AddBond());
 	CDV::Read(IO::path + "/ayuba/position000000.cdv", false);
 	CDV::ReadTrj(IO::path + "/ayuba/position");
 	//Gromacs::Read(IO::path + "/pbc.gro", false);
@@ -152,6 +154,24 @@ int main(int argc, char **argv)
 	ChokoLait::mainCamera->quality = 1;
 	ChokoLait::mainCamera->quality2 = 1;
 
+	/*
+	Particles::anim.conns2.resize(1);
+	auto& bk2 = Particles::anim.conns2.back();
+	bk2.first = new uint[140] {};
+	bk2.second = new Int2*[140];
+	for (uint a = 1; a <= 140; a++) {
+		bk2.first[a-1] = a;
+		bk2.second[a-1] = new Int2[a];
+		for (uint b = 0; b < a * 2; b++) {
+			((int*)bk2.second[a-1])[b] = b;
+		}
+	}
+	Particles::particles_Conn2.resize(1);
+	auto& bk = Particles::particles_Conn2.back();
+	bk.cnt = 1;
+	bk.ids = Particles::anim.conns2[0].second[0];
+	Particles::UpdateConBufs2();
+	*/
 	glfwShowWindow(Display::window);
 
 	while (ChokoLait::alive()) {

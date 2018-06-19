@@ -58,14 +58,11 @@ bool CReader::Read(string path, CScript** _scr) {
 		ostrm.close();
 
 #ifdef PLATFORM_WIN
-		//&& cl /nologo /c /FoD:/ D:/lib.c && link /dll /nologo /out:D:/lib.dll D:/lib.obj"
 		const string cl = "cl /nologo /c -Od /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
 		const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".dll\" \"" + fp2 + nm + ".obj\"";
 		RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " && " + lk);
 #else
-		const string cmd = "g++ -std=c++11 -shared -O0 -fPIC -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\"";
-		//const string cl = "g++ /nologo /c -Od /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
-		//const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".dll\" \"" + fp2 + nm + ".obj\"";
+		const string cmd = "g++ -std=c++11 -shared -O0 -fPIC -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\"";
 		std::cout << cmd << std::endl;
 		RunCmd::Run(cmd);
 #endif
@@ -156,14 +153,16 @@ bool CReader::Read(string path, CScript** _scr) {
 			CVar* bk = 0;
 			if (vec > 0) {
 				auto s2 = _rm_spaces(ln.substr(6));
-				if (s2.substr(0, 6) != "float*") {
-					Debug::Warning("CReader", "list VAROUT must be float*!");
+				bool isf = s2.substr(0, 6) == "float*";
+				if (!isf && s2.substr(0, 4) != "int*") {
+					Debug::Warning("CReader", "unsupported type for list!");
 					return false;
 				}
 				scr->_outvars.push_back(vr);
 				bk = &scr->_outvars.back();
-				bk->name = s2.substr(6, s2.find_first_of('=') - 6).substr(0, ln.find_first_of(';'));
+				bk->name = s2.substr(isf ? 6 : 4, s2.find_first_of('=') - (isf ? 6 : 4)).substr(0, ln.find_first_of(';'));
 				bk->type = AN_VARTYPE::LIST;
+				if (!isf) bk->typeName = "i" + bk->typeName;
 				int ii = 0;
 				for (auto& a : bk->dimNames) {
 					if (!!a[0]) vecvarLocs.push_back(std::pair<string, int**>(a, &bk->dimVals[ii]));
