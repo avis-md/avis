@@ -13,6 +13,11 @@
 
 string IO::path = IO::InitPath();
 
+std::thread IO::readstdiothread;
+bool IO::readingStdio;
+FILE IO::stdout_o, IO::stderr_o;
+string IO::stdiop;
+
 string IO::OpenFile(string ext) {
 #ifdef PLATFORM_WIN
 	char buf[1024]{};
@@ -199,6 +204,37 @@ string IO::GetText(const string& path) {
 	return ss.str();
 }
 
+void IO::StartReadStdio(string path, stdioCallback callback) {
+	readingStdio = true;
+	stdout_o = *stdout;
+	stderr_o = *stderr;
+	string p = path + ".out";
+	string p2 = path + ".err";
+	stdiop = path;
+#ifdef PLATFORM_WIN
+	*stdout = *_fsopen(p.c_str(), "w", _SH_DENYWR);
+	*stderr = *_fsopen(p2.c_str(), "w", _SH_DENYWR);
+#else
+
+#endif
+	
+	readstdiothread = std::thread(DoReadStdio, callback);
+}
+
+void IO::StopReadStdio() {
+	string p = stdiop + ".out";
+	string p2 = stdiop + ".err";
+
+	readingStdio = false;
+	if (readstdiothread.joinable()) readstdiothread.join();
+	fclose(stdout);
+	fclose(stderr);
+	*stdout = stdout_o;
+	*stderr = stderr_o;
+	remove(p.c_str());
+	remove(p2.c_str());
+}
+
 string IO::InitPath() {
 	char cpath[200];
 #ifdef PLATFORM_WIN
@@ -213,4 +249,39 @@ string IO::InitPath() {
 	path = path2;
 	Debug::Message("IO", "Path set to " + path);
 	return path2;
+}
+
+void IO::DoReadStdio(stdioCallback cb) {
+	string p = stdiop + ".out";
+	string p2 = stdiop + ".err";
+
+	std::ifstream strm(p);
+	std::ifstream strm2(p2);
+	std::string line;
+	if (!strm.is_open() || !strm2.is_open())
+		Debug::Warning("IO", "Cannot open file for stdout / stderr!");
+	else {
+		while (readingStdio) {
+			bool has = false;
+			if (std::getline(strm, line)) {
+				has = true;
+				cb(line, false);
+			}
+			else {
+				if (!strm.eof()) break;
+				strm.clear();
+			}
+			if (std::getline(strm2, line)) {
+				has = true;
+				cb(line, true);
+			}
+			else {
+				if (!strm2.eof()) break;
+				strm2.clear();
+			}
+			if (!has) Engine::Sleep(100);
+		}
+	}
+	strm.close();
+	strm2.close();
 }

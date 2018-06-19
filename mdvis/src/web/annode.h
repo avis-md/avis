@@ -28,6 +28,10 @@ public:
 	bool executing = false;
 	ANNODE_OP op;
 
+	bool logExpanded = true;
+	byte logMask = 7;
+	std::vector<std::pair<byte, string>> log;
+
 	static Font* font;
 
 	std::vector<std::pair<AnNode*, uint>> inputR, outputR;
@@ -40,6 +44,7 @@ public:
 	virtual Vec2 DrawConn();
 	virtual void Draw();
 	virtual float DrawSide();
+	float DrawLog(), DrawSideLog();
 	virtual void DrawScene() {}
 	void DrawToolbar();
 	virtual void Execute() = 0;

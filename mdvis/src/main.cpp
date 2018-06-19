@@ -98,8 +98,20 @@ void paintfunc() {
 
 #include "utils/ssh.h"
 
+void testt(string s, bool e) {
+	if (e) std::cout << "e!! ";
+	else std::cout << "m!! ";
+	std::cout << s << std::endl;
+}
+
 int main(int argc, char **argv)
 {
+	IO::StartReadStdio("D:\\a", testt);
+	std::cout << "asef" << std::endl;
+	std::cerr << "fsda" << std::endl;
+	printf("egthsdevgftrdevgftr\n");
+	IO::StopReadStdio();
+	
 	for (auto a = 0; a < argc; a++) {
 		if (argv[a][0] == '-') {
 			if (!strcmp(argv[a] + 1, "debug"))

@@ -1,6 +1,8 @@
 #pragma once
 #include "Engine.h"
 
+typedef void(*stdioCallback)(string, bool); //bool iserror
+
 /*! File/folder reading/writing functions.
 [av] */
 class IO {
@@ -21,10 +23,17 @@ public:
 	static string GetText(const string& path);
 	static std::vector<byte> GetBytes(const string& path);
 
+	static void StartReadStdio(string path, stdioCallback callback);
+	static void StopReadStdio();
+
 	static string path;
 
-	friend class ChokoLait;
-	friend class Engine;
-	//protected:
 	static string InitPath();
+	
+private:
+	static std::thread readstdiothread;
+	static bool readingStdio;
+	static FILE stdout_o, stderr_o;
+	static string stdiop;
+	static void DoReadStdio(stdioCallback cb);
 };

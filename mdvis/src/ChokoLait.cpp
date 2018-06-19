@@ -64,13 +64,22 @@ void _dieded(int i) {
 #endif
 }
 
+void _sigfpe(int i) {
+	throw "floating-point exception!";
+}
+void _sigseg(int i) {
+	throw "segmentation error!";
+}
+
 void ChokoLait::_InitVars() {
 #ifdef PLATFORM_WIN
 	SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
 	signal(SIGABRT, &_dieded);
-#elif defined(PLATFORM_LNX)
+#else
 
 #endif
+	signal(SIGFPE, &_sigfpe);
+	signal(SIGSEGV, &_sigseg);
 
 	const string& path = IO::InitPath();
 	if (!IO::HasFile(path + "/defaultresources.bin")) {
