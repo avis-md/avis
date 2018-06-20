@@ -21,6 +21,16 @@ Node_AddBond::Node_AddBond() : AnNode(new DmScript()) {
 	animId = 0;
 }
 
+Node_AddBond::~Node_AddBond() {
+	auto& bk2 = Particles::anim.conns2[animId];
+	delete[](bk2.first);
+	for (uint i = 0; i < Particles::anim.frameCount; i++)
+		delete[](bk2.second[i]);
+	delete[](bk2.second);
+	Particles::particles_Conn2.erase(Particles::particles_Conn2.begin() + animId);
+	Particles::anim.conns2.erase(Particles::anim.conns2.begin() + animId);
+}
+
 void Node_AddBond::Execute() {
 	if (!inputR[0].first || !inputR[1].first) return;
 	CVar& cv1 = inputR[0].first->conV[inputR[0].second];

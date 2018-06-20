@@ -19,6 +19,7 @@ bool AnWeb::drawFull = false, AnWeb::expanded = true, AnWeb::executing = false;
 float AnWeb::maxScroll, AnWeb::scrollPos = 0, AnWeb::expandPos = 0;
 
 std::thread* AnWeb::execThread = nullptr;
+AnNode* AnWeb::execNode = nullptr;
 
 bool AnWeb::hasPy = true, AnWeb::hasC = true, AnWeb::hasFt = false;
 bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
@@ -305,13 +306,31 @@ void AnWeb::Execute() {
 }
 
 void AnWeb::DoExecute() {
+	IO::StartReadStdio(IO::path + "/nodes/__tmpstd", OnExecLog);
 	for (auto n : nodes) {
-		std::flush(std::cout);
-		n->executing = true;
-		n->Execute();
-		n->executing = false;
+		n->log.clear();
 	}
+	for (auto n : nodes) {
+		execNode = n;
+		n->executing = true;
+		try {
+			n->Execute();
+		}
+		catch (char* e) {
+			n->log.push_back(std::pair<byte, string>(2, string(e)));
+		}
+		n->executing = false;
+		IO::FlushStdio();
+	}
+	IO::StopReadStdio();
+	execNode = nullptr;
 	executing = false;
+}
+
+void AnWeb::OnExecLog(string s, bool e) {
+	//std::cout << ">" << s << std::endl;
+	if (execNode)
+		execNode->log.push_back(std::pair<byte, string>(e ? 1 : 0, s));
 }
 
 void AnWeb::DoExecute_Srv() {

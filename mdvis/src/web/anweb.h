@@ -27,6 +27,7 @@ public:
 	static float maxScroll, scrollPos, expandPos;
 
 	static std::thread* execThread;
+	static AnNode* execNode;
 
 	static bool hasPy, hasC, hasFt;
 	static bool hasPy_s, hasC_s, hasFt_s;
@@ -37,6 +38,7 @@ public:
 	static void Execute(), DoExecute(), DoExecute_Srv();
 	static void Save(const string& s), SaveIn(), SaveOut();
 	static void Load(const string& s), LoadIn(), LoadOut();
+	static void OnExecLog(string s, bool e);
 
 	static void OnAnimFrame();
 };

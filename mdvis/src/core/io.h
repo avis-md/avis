@@ -24,6 +24,7 @@ public:
 	static std::vector<byte> GetBytes(const string& path);
 
 	static void StartReadStdio(string path, stdioCallback callback);
+	static void FlushStdio();
 	static void StopReadStdio();
 
 	static string path;
@@ -33,7 +34,9 @@ public:
 private:
 	static std::thread readstdiothread;
 	static bool readingStdio;
-	static FILE stdout_o, stderr_o;
+	static int stdout_o, stderr_o;
+	static FILE* stdout_n, *stderr_n;
 	static string stdiop;
+	static int waitstdio;
 	static void DoReadStdio(stdioCallback cb);
 };

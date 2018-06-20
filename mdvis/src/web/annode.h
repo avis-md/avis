@@ -30,6 +30,7 @@ public:
 
 	bool logExpanded = true;
 	byte logMask = 7;
+	int logOffset = 0;
 	std::vector<std::pair<byte, string>> log;
 
 	static Font* font;
@@ -44,7 +45,7 @@ public:
 	virtual Vec2 DrawConn();
 	virtual void Draw();
 	virtual float DrawSide();
-	float DrawLog(), DrawSideLog();
+	float DrawLog(float off);
 	virtual void DrawScene() {}
 	void DrawToolbar();
 	virtual void Execute() = 0;

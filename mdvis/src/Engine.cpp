@@ -429,7 +429,7 @@ void Engine::DrawQuad(float x, float y, float w, float h, Vec4 col) {
 	UI::SetVao(4, quadPoss);
 
 	glUseProgram(Engine::defProgram);
-	glUniform4f(Engine::defColLoc, col.r, col.g, col.b, col.a);
+	glUniform4f(Engine::defColLoc, col.r, col.g, col.b, col.a * UI::alpha);
 	glBindVertexArray(UI::_vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _draw_quad_buffer);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -458,7 +458,7 @@ void Engine::DrawQuad(float x, float y, float w, float h, GLuint texture, Vec2 u
 	glUniform1i(single ? drawQuadLocsA[0] : drawQuadLocs[0], 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glUniform4f(single ? drawQuadLocsA[1] : drawQuadLocs[1], Vec4.r, Vec4.g, Vec4.b, Vec4.a);
+	glUniform4f(single ? drawQuadLocsA[1] : drawQuadLocs[1], Vec4.r, Vec4.g, Vec4.b, Vec4.a * UI::alpha);
 	glUniform1f(single ? drawQuadLocsA[2] : drawQuadLocs[2], miplevel);
 	glBindVertexArray(UI::_vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _draw_quad_buffer);
@@ -487,7 +487,7 @@ void Engine::DrawCube(Vec3 pos, float dx, float dy, float dz, Vec4 Vec4) {
 	UI::SetVao(8, quadPoss);
 
 	glUseProgram(Engine::defProgram);
-	glUniform4f(Engine::defColLoc, Vec4.r, Vec4.g, Vec4.b, Vec4.a);
+	glUniform4f(Engine::defColLoc, Vec4.r, Vec4.g, Vec4.b, Vec4.a * UI::alpha);
 
 	glBindVertexArray(UI::_vao);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -546,7 +546,7 @@ void Engine::DrawLine(Vec3 v1, Vec3 v2, Vec4 col, float width) {
 	UI::SetVao(2, quadPoss);
 
 	glUseProgram(Engine::defProgram);
-	glUniform4f(Engine::defColLoc, col.r, col.g, col.b, col.a);
+	glUniform4f(Engine::defColLoc, col.r, col.g, col.b, col.a * UI::alpha);
 	glBindVertexArray(UI::_vao);
 	glDrawArrays(GL_LINES, 0, 2);
 	glBindVertexArray(0);
@@ -610,7 +610,7 @@ void Engine::DrawTriangle(Vec2 v1, Vec2 v2, Vec2 v3, Vec4 col, bool fill, float 
 	uint quadIndexes[3] = {0, 1, 2};
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, &quadPoss[0]);
-	glColor4f(col.r, col.g, col.b, col.a);
+	glColor4f(col.r, col.g, col.b, col.a * UI::alpha);
 	glLineWidth(width);
 	glPolygonMode(GL_FRONT_AND_BACK, fill? GL_FILL : GL_LINE);
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, &quadIndexes[0]);
@@ -644,7 +644,7 @@ void Engine::DrawCircle(Vec2 c, float r, uint n, Vec4 col, float width) {
 	glVertexPointer(3, GL_FLOAT, 0, &poss[0]);
 	//glEnableVertexAttribArray(0);
 	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, 0, &quadPoss[0]);
-	glColor4f(col.r, col.g, col.b, col.a);
+	glColor4f(col.r, col.g, col.b, col.a * UI::alpha);
 	glLineWidth(width);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glDrawElements(GL_LINES, ids.size(), GL_UNSIGNED_INT, &ids[0]);

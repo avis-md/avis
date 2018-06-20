@@ -34,11 +34,42 @@ Vec2 AnNode::DrawConn() {
 	for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 		if (inputR[i].first) Engine::DrawLine(Vec2(pos.x, expanded ? y + 8 : pos.y + 8), Vec2(inputR[i].first->pos.x + inputR[i].first->width, inputR[i].first->expanded ? inputR[i].first->pos.y + 20 + 8 + (inputR[i].second + inputR[i].first->inputR.size()) * 17 : inputR[i].first->pos.y + 8), white(), 2);
 	}
-	if (expanded) return Vec2(width, 19 + 17 * cnt);
-	else return Vec2(width, 16);
+	if (expanded) return Vec2(width, 19 + 17 * cnt + DrawLog(19 + 17 * cnt));
+	else return Vec2(width, 16 + DrawLog(16));
 #else
 	return Vec2();
 #endif
+}
+
+float AnNode::DrawLog(float off) {
+	auto sz = this->log.size();
+	if (!sz) return 0;
+	auto sz2 = min<int>(sz, 10);
+	if (logExpanded) {
+		Engine::DrawQuad(pos.x, pos.y + off, width, 15 * sz2 + 2, black(0.9f));
+		for (uint i = 0; i < sz2; i++) {
+			auto& l = log[i + logOffset];
+			Vec4 col = (!l.first) ? white() : ((l.first == 1) ? yellow() : red());
+			UI::Label(pos.x + 4, pos.y + off + 1 + 15 * i, 12, l.second, font, col);
+		}
+		if (sz > 10) {
+			float mw = 115;
+			float of = logOffset * mw / sz;
+			float w = 10 * mw / sz;
+			Engine::DrawQuad(pos.x + width - 3, pos.y + off + 1 + of, 2, w, white(0.3f));
+			if (Engine::Button(pos.x + width - 17, pos.y + off + 150 - 33, 16, 16, Icons::up, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+				logOffset = max<int>(logOffset - 10, 0);
+			}
+			if (Engine::Button(pos.x + width - 17, pos.y + off + 150 - 16, 16, 16, Icons::down, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+				logOffset = min<int>(logOffset + 10, sz - 10);
+			}
+		}
+		return 15 * sz2 + 2;
+	}
+	else {
+		Engine::DrawQuad(pos.x, pos.y + off, width, 2, black(0.9f));
+		return 2;
+	}
 }
 
 void AnNode::Draw() {
@@ -133,6 +164,9 @@ float AnNode::DrawSide() {
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 20, pos.y + 1, 12, title, font, white());
+	if (this->log.size() && Engine::Button(pos.x + width - 17, pos.y, 16, 16, Icons::log, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
+		logExpanded = !logExpanded;
+	}
 	if (executing) {
 		Engine::DrawQuad(pos.x, pos.y + 16, width, 2, white(0.7f, 0.25f));
 		if (script->progress)
@@ -163,9 +197,9 @@ float AnNode::DrawSide() {
 			}
 		}
 		if (AnWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));
-		return 19.0f + 17 * cnt;
+		return 19.0f + 17 * cnt + DrawLog(18.0f + 17 * cnt);
 	}
-	else return 17.0f;
+	else return 17.0f + DrawLog(16.0f);
 #else
 	return 0;
 #endif
@@ -173,6 +207,9 @@ float AnNode::DrawSide() {
 
 void AnNode::DrawToolbar() {
 #ifndef IS_ANSERVER
+	if (this->log.size() && Engine::Button(pos.x + width - 67, pos.y, 16, 16, Icons::log, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
+		logExpanded = !logExpanded;
+	}
 	if (Engine::Button(pos.x + width - 50, pos.y, 16, 16, Icons::left, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
 		op = ANNODE_OP::LEFT;
 	}

@@ -13,6 +13,7 @@ uint UI::_editTextCursorPos2 = 0;
 string UI::_editTextString = "";
 float UI::_editTextBlinkTime = 0;
 UI::Style UI::_defaultStyle = {};
+float UI::alpha = 1;
 
 uint UI::_vboSz = 32;
 GLuint UI::_vao = 0;
@@ -134,6 +135,17 @@ void UI::Texture(float x, float y, float w, float h, ::Texture* texture, Vec4 ti
 				Engine::DrawQuad(x + 0.5f*(w - h*w2h), y, h*w2h, h, tex, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0), false, tint, miplevel);
 			else
 				Engine::DrawQuad(x, y + 0.5f*(h - w / w2h), w, w / w2h, tex, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0), false, tint, miplevel);
+		}
+		else if (scl == DRAWTEX_CROP) {
+			float w2h = ((float)texture->width) / texture->height;
+			if (w / h > w2h) {
+				float dh = (1 - ((h * texture->width / w) / texture->height)) / 2;
+				Engine::DrawQuad(x, y, w, h, tex, Vec2(0, 1-dh), Vec2(1, 1-dh), Vec2(0, dh), Vec2(1, dh), false, tint, miplevel);
+			}
+			else {
+				float dw = (1 - ((w * texture->height / h) / texture->width)) / 2;
+				Engine::DrawQuad(x, y, w, h, tex, Vec2(dw, 1), Vec2(1 - dw, 1), Vec2(dw, 0), Vec2(1 - dw, 0), false, tint, miplevel);
+			}
 		}
 		else {
 			Engine::DrawQuad(x, y, w, h, tex, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0), false, tint, miplevel);
@@ -472,7 +484,7 @@ void UI::Label(float x, float y, float s, char* str, uint sz, Font* font, Vec4 c
 
 	glUseProgram(font->fontProgram);
 	GLint baseColLoc = glGetUniformLocation(font->fontProgram, "col");
-	glUniform4f(baseColLoc, col.r, col.g, col.b, col.a);
+	glUniform4f(baseColLoc, col.r, col.g, col.b, col.a * alpha);
 	GLint baseImageLoc = glGetUniformLocation(font->fontProgram, "sampler");
 	glUniform1i(baseImageLoc, 0);
 	glActiveTexture(GL_TEXTURE0);

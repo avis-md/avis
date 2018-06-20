@@ -7,12 +7,14 @@
 
 #include "ui/icons.h"
 #include "ui/popups.h"
+#include "ui/help.h"
 #include "web/anweb.h"
 #include "md/ParMenu.h"
 #include "md/Protein.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
 #include "utils/effects.h"
+#include "utils/ssh.h"
 #include "web/nodes/node_gromacs.h"
 
 bool __debug = false;
@@ -42,16 +44,10 @@ void updateFunc() {
 
 	AnWeb::Update();
 
-	if (Input::KeyDown(Key_F)) {
+	if (!UI::editingText && !AnWeb::drawFull && Input::KeyDown(Key_F)) {
 		auto& o = ChokoLait::mainCamera->ortographic;
 		o = !o;
 		Scene::dirty = true;
-	}
-	if (Input::KeyDown(Key_RightArrow)) {
-		Particles::IncFrame(false);
-	}
-	if (Input::KeyDown(Key_LeftArrow)) {
-		if (!!Particles::anim.activeFrame) Particles::SetFrame(Particles::anim.activeFrame - 1);
 	}
 }
 
@@ -94,24 +90,12 @@ void paintfunc() {
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, std::to_string(Particles::particles_Pos[id]), font, white());
 		}
 	}
-}
 
-#include "utils/ssh.h"
-
-void testt(string s, bool e) {
-	if (e) std::cout << "e!! ";
-	else std::cout << "m!! ";
-	std::cout << s << std::endl;
+	HelpMenu::Draw();
 }
 
 int main(int argc, char **argv)
 {
-	IO::StartReadStdio("D:\\a", testt);
-	std::cout << "asef" << std::endl;
-	std::cerr << "fsda" << std::endl;
-	printf("egthsdevgftrdevgftr\n");
-	IO::StopReadStdio();
-	
 	for (auto a = 0; a < argc; a++) {
 		if (argv[a][0] == '-') {
 			if (!strcmp(argv[a] + 1, "debug"))
@@ -122,44 +106,37 @@ int main(int argc, char **argv)
 	if (!__debug) Debug::suppress = 1;
 
 	ChokoLait::Init(800, 800);
-	font = new Font(IO::path + "/arimo.ttf", ALIGN_TOPLEFT);
+	ParMenu::font = VisSystem::font = AnNode::font = font = HelpMenu::font
+		= new Font(IO::path + "/arimo.ttf", ALIGN_TOPLEFT);
 
 	SSH::Init();
-
-	VisSystem::font = font;
-
 	Icons::Init();
 	VisSystem::Init();
 	Particles::Init();
 	ParGraphics::Init();
 	Protein::Init();
-	
 	PyReader::Init();
 	AnNode::Init();
-	AnNode::font = font;
+	AnWeb::Init();
+	Effects::Init(0xffff);
 
 	AnBrowse::Scan();
 	
-	AnWeb::Init();
-	ParMenu::font = font;
-
-	Effects::Init(0xffff);
-
 	pSceneObject lht = SceneObject::New(Vec3());
 	Scene::AddObject(lht);
 	auto l = lht->AddComponent<Light>();
 	ParGraphics::SetLight(l.get());
 
 	//AnWeb::Load(IO::path + "/nodes/rdf.anl");
-	AnWeb::nodes.push_back(new Node_Recolor_All());
-	AnWeb::nodes.push_back(new Node_AddBond());
-	CDV::Read(IO::path + "/ayuba/position000000.cdv", false);
-	CDV::ReadTrj(IO::path + "/ayuba/position");
+	//AnWeb::nodes.push_back(new Node_Recolor_All());
+	//AnWeb::nodes.push_back(new Node_AddBond());
+	//CDV::Read(IO::path + "/ayuba/position000000.cdv", false);
+	//CDV::ReadTrj(IO::path + "/ayuba/position");
 	//Gromacs::Read(IO::path + "/pbc.gro", false);
 	//bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");
 	
 	//Protein::Refresh();
-	ParGraphics::UpdateDrawLists();
+	//ParGraphics::UpdateDrawLists();
 	
 	glEnable(GL_PROGRAM_POINT_SIZE);
 
@@ -172,24 +149,6 @@ int main(int argc, char **argv)
 	ChokoLait::mainCamera->quality = 1;
 	ChokoLait::mainCamera->quality2 = 1;
 
-	/*
-	Particles::anim.conns2.resize(1);
-	auto& bk2 = Particles::anim.conns2.back();
-	bk2.first = new uint[140] {};
-	bk2.second = new Int2*[140];
-	for (uint a = 1; a <= 140; a++) {
-		bk2.first[a-1] = a;
-		bk2.second[a-1] = new Int2[a];
-		for (uint b = 0; b < a * 2; b++) {
-			((int*)bk2.second[a-1])[b] = b;
-		}
-	}
-	Particles::particles_Conn2.resize(1);
-	auto& bk = Particles::particles_Conn2.back();
-	bk.cnt = 1;
-	bk.ids = Particles::anim.conns2[0].second[0];
-	Particles::UpdateConBufs2();
-	*/
 	glfwShowWindow(Display::window);
 
 	while (ChokoLait::alive()) {

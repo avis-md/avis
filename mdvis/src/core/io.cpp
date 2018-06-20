@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include <io.h>
 
 #ifdef PLATFORM_WIN
 #include "Commdlg.h"
@@ -15,8 +16,10 @@ string IO::path = IO::InitPath();
 
 std::thread IO::readstdiothread;
 bool IO::readingStdio;
-FILE IO::stdout_o, IO::stderr_o;
+int IO::stdout_o, IO::stderr_o;
+FILE* IO::stdout_n, *IO::stderr_n;
 string IO::stdiop;
+int IO::waitstdio;
 
 string IO::OpenFile(string ext) {
 #ifdef PLATFORM_WIN
@@ -204,33 +207,49 @@ string IO::GetText(const string& path) {
 	return ss.str();
 }
 
-void IO::StartReadStdio(string path, stdioCallback callback) {
-	readingStdio = true;
-	stdout_o = *stdout;
-	stderr_o = *stderr;
-	string p = path + ".out";
-	string p2 = path + ".err";
-	stdiop = path;
-#ifdef PLATFORM_WIN
-	*stdout = *_fsopen(p.c_str(), "w", _SH_DENYWR);
-	*stderr = *_fsopen(p2.c_str(), "w", _SH_DENYWR);
-#else
-
+#ifndef PLATFORM_WIN
+#define _dup dup
+#define _dup2 dup2
+#define _close close
 #endif
+
+void IO::StartReadStdio(string path, stdioCallback callback) {
+	stdiop = path;
+	string p = stdiop + ".out";
+	string p2 = stdiop + ".err";
+	readingStdio = true;
+	stdout_o = _dup(1);
+	stderr_o = _dup(2);
+	stdout_n = _fsopen(p.c_str(), "w", _SH_DENYWR);
+	stderr_n = _fsopen(p2.c_str(), "w", _SH_DENYWR);
+	//fopen_s(&stdout_n, p.c_str(), "w");
+	_dup2(_fileno(stdout_n), 1);
+	_dup2(_fileno(stderr_n), 2);
 	
 	readstdiothread = std::thread(DoReadStdio, callback);
+}
+
+void IO::FlushStdio() {
+	fflush(stdout);
+	fflush(stderr);
+	waitstdio = 1;
+	while (!!waitstdio);
 }
 
 void IO::StopReadStdio() {
 	string p = stdiop + ".out";
 	string p2 = stdiop + ".err";
 
+	fflush(stdout);
+	fflush(stderr);
+	fclose(stdout_n);
+	fclose(stderr_n);
+	_dup2(stdout_o, 1);
+	_dup2(stderr_o, 2);
+	_close(stdout_o);
+	_close(stderr_o);
 	readingStdio = false;
 	if (readstdiothread.joinable()) readstdiothread.join();
-	fclose(stdout);
-	fclose(stderr);
-	*stdout = stdout_o;
-	*stderr = stderr_o;
 	remove(p.c_str());
 	remove(p2.c_str());
 }
@@ -261,14 +280,19 @@ void IO::DoReadStdio(stdioCallback cb) {
 	if (!strm.is_open() || !strm2.is_open())
 		Debug::Warning("IO", "Cannot open file for stdout / stderr!");
 	else {
-		while (readingStdio) {
-			bool has = false;
+		bool has = false;
+		while (readingStdio || has) {
+			if (!!waitstdio) waitstdio = 2;
+			has = false;
 			if (std::getline(strm, line)) {
 				has = true;
 				cb(line, false);
 			}
 			else {
-				if (!strm.eof()) break;
+				if (!strm.eof()) {
+					Debug::Warning("IO", "Failed to read from redirected stdout!");
+					break;
+				}
 				strm.clear();
 			}
 			if (std::getline(strm2, line)) {
@@ -276,10 +300,17 @@ void IO::DoReadStdio(stdioCallback cb) {
 				cb(line, true);
 			}
 			else {
-				if (!strm2.eof()) break;
+				if (!strm2.eof()) {
+					Debug::Warning("IO", "Failed to read from redirected stdout!");
+					break;
+				}
 				strm2.clear();
 			}
-			if (!has) Engine::Sleep(100);
+			if (!has) {
+				if (waitstdio == 2)
+					waitstdio = 0;
+				Engine::Sleep(100);
+			}
 		}
 	}
 	strm.close();

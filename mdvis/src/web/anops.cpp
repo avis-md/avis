@@ -6,7 +6,7 @@ bool AnOps::expanded = true;
 byte AnOps::connectStatus;
 float AnOps::expandPos;
 
-bool AnOps::remote = true;
+bool AnOps::remote = false;
 string AnOps::user = "chokopan", AnOps::ip = "192.168.0.180", AnOps::pw;
 ushort AnOps::port = 22;
 string AnOps::path = "/Users/chokopan/mdvis";

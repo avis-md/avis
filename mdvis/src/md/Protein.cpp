@@ -218,22 +218,24 @@ void Protein::Draw() {
 }
 
 void Protein::DrawMenu() {
-    //
-    auto& expandPos = ParMenu::expandPos;
-	auto& font = ParMenu::font;
-	
-    auto cr = pros->chainReso;
-    auto lr = pros->loopReso;
-    
-    UI::Label(expandPos - 148, 3, 12, "Curve Reso", font, white());
-	cr = (byte)Engine::DrawSliderFill(expandPos - 80, 2, 78, 16, 2, 20, cr, white(1, 0.5f), white());
-    UI::Label(expandPos - 147, 20, 12, "Bevel Reso", font, white());
-	lr = (byte)Engine::DrawSliderFill(expandPos - 80, 19, 78, 16, 6, 20, lr, white(1, 0.5f), white());
+	//
+	if (!!proCnt) {
+		auto& expandPos = ParMenu::expandPos;
+		auto& font = ParMenu::font;
 
-    if (cr != pros->chainReso || lr != pros->loopReso) {
-        Scene::dirty = true;
+		auto cr = pros->chainReso;
+		auto lr = pros->loopReso;
 
-        pros->chainReso = cr;
-        pros->loopReso = lr;
-    }
+		UI::Label(expandPos - 148, 3, 12, "Curve Reso", font, white());
+		cr = (byte)Engine::DrawSliderFill(expandPos - 80, 2, 78, 16, 2, 20, cr, white(1, 0.5f), white());
+		UI::Label(expandPos - 147, 20, 12, "Bevel Reso", font, white());
+		lr = (byte)Engine::DrawSliderFill(expandPos - 80, 19, 78, 16, 6, 20, lr, white(1, 0.5f), white());
+
+		if (cr != pros->chainReso || lr != pros->loopReso) {
+			Scene::dirty = true;
+
+			pros->chainReso = cr;
+			pros->loopReso = lr;
+		}
+	}
 }

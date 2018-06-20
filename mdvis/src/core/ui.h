@@ -46,6 +46,7 @@ public:
 	static float _editTextBlinkTime;
 
 	static Style _defaultStyle;
+	static float alpha;
 
 	static void InitVao(), SetVao(uint sz, void* verts, void* uvs = nullptr);
 	static uint _vboSz;

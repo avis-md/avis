@@ -6,13 +6,13 @@ public:
 	static void Init();
 
 	static Texture* expand, *collapse, *play, *playall,
-		*left, *right, *cross, *visible, *hidden, *circle,
+		*left, *right, *up, *down, *cross, *visible, *hidden, *circle,
 		*select, *deselect, *flipselect,
 		*toolRot, *toolMov, *toolSel,
 		*refresh, *checkbox, *browse,
 		*zoomIn, *zoomOut,
 		*lang_c, *lang_py, *lang_ft, *lightning,
-		*icon_anl,
+		*icon_anl, *log,
 		*dm_none,
 		*dm_point, *dm_ball, *dm_vdw,
 		*dm_line, *dm_stick,

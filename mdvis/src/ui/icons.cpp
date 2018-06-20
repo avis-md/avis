@@ -1,13 +1,13 @@
 #include "icons.h"
 
 Texture* Icons::expand, *Icons::collapse, *Icons::play, *Icons::playall,
-*Icons::left, *Icons::right, *Icons::cross, *Icons::visible, *Icons::hidden, *Icons::circle,
+*Icons::left, *Icons::right, *Icons::up, *Icons::down, *Icons::cross, *Icons::visible, *Icons::hidden, *Icons::circle,
 *Icons::select, *Icons::deselect, *Icons::flipselect,
 *Icons::toolRot, *Icons::toolMov, *Icons::toolSel,
 *Icons::refresh, *Icons::checkbox, *Icons::browse,
 *Icons::zoomIn, *Icons::zoomOut,
 *Icons::lang_c, *Icons::lang_py, *Icons::lang_ft, *Icons::lightning,
-*Icons::icon_anl,
+*Icons::icon_anl, *Icons::log,
 *Icons::dm_none, *Icons::dm_point, *Icons::dm_ball, *Icons::dm_vdw, *Icons::dm_line, *Icons::dm_stick, *Icons::dm_lineball, *Icons::dm_stickball;
 
 #define TEXN(nm) new Texture(IO::path + "/res/" #nm ".png", false)
@@ -22,6 +22,8 @@ void Icons::Init() {
 	playall = TEXN(play2);
 	TEX(left);
 	TEX(right);
+	TEX(up);
+	TEX(down);
 	TEX(cross);
 	TEX(visible);
 	TEX(hidden);
@@ -42,6 +44,7 @@ void Icons::Init() {
 	lang_ft = TEXN(lang_fortran);
 	TEX(lightning);
 	TEX(icon_anl);
+	TEX(log);
 	TEX(dm_none);
 	TEX(dm_point);
 	TEX(dm_ball);
