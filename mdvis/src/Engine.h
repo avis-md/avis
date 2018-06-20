@@ -94,10 +94,10 @@
 #pragma comment(lib, "glfw_win.lib")
 #pragma comment(lib, "glew_win.lib")
 #include <glew.h>
-#include <glfw3.h>
+#include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define GLFW_EXPOSE_NATIVE_WGL
-#include <glfw3native.h>
+#include <GLFW/glfw3native.h>
 typedef GLFWwindow NativeWindow;
 #define LOGI(...)
 

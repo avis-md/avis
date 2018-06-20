@@ -57,6 +57,7 @@ void APIENTRY glDebugOutput(GLenum source,
 GLFWwindow* ChokoLait::window = nullptr;
 int ChokoLait::initd = 0;
 rCamera ChokoLait::mainCamera = rCamera();
+std::vector<dropFileFunc> ChokoLait::dropFuncs;
 
 void _dieded(int i) {
 #ifdef PLATFORM_WIN
@@ -159,6 +160,7 @@ void ChokoLait::Init(int scrW, int scrH) {
 		glfwSetCursorPosCallback(window, MotionGL);
 		glfwSetMouseButtonCallback(window, MouseGL);
 		glfwSetScrollCallback(window, MouseScrGL);
+		glfwSetDropCallback(window, DropGL);
 
 		glClearColor(0, 0, 0, 1.0f);
 		/*
@@ -238,4 +240,9 @@ void ChokoLait::ReshapeGL(GLFWwindow* window, int w, int h) {
 	glViewport(0, 0, w, h);
 	Display::actualWidth = w;
 	Display::actualHeight = h;
+}
+
+void ChokoLait::DropGL(GLFWwindow* window, int w, const char** c) {
+	for (auto& a : dropFuncs)
+		a(w, c);
 }

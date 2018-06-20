@@ -20,6 +20,7 @@ See https://chokomancarr.github.io/ChokoLait/ for documentation and examples.
 #include "Engine.h"
 
 typedef void(*emptyCallbackFunc)(void);
+typedef void(*dropFileFunc)(int, const char**);
 
 class ChokoLait {
 public:
@@ -34,6 +35,8 @@ public:
 	}
 
 	static rCamera mainCamera;
+
+	static std::vector<dropFileFunc> dropFuncs;
 
 	static void Init(int scrW, int scrH);
 
@@ -53,4 +56,5 @@ protected:
 	static void MouseScrGL(GLFWwindow* window, double xoff, double yoff);
 	static void MotionGL(GLFWwindow* window, double x, double y);
 	static void ReshapeGL(GLFWwindow* window, int w, int h);
+	static void DropGL(GLFWwindow* window, int n, const char** fs);
 };

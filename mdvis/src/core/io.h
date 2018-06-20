@@ -7,8 +7,6 @@ typedef void(*stdioCallback)(string, bool); //bool iserror
 [av] */
 class IO {
 public:
-	static string OpenFile(string ext);
-
 	static std::vector<string> GetFiles(const string& path, string ext = "");
 	static void GetFolders(const string& path, std::vector<string>* names, bool hidden = false);
 	static bool HasDirectory(string szPath);

@@ -6,12 +6,12 @@ bool HelpMenu::show = false;
 float HelpMenu::alpha = 0;
 
 void HelpMenu::Draw() {
-	UI::IncLayer();
 	if (!UI::editingText) {
 		if (!show && Input::KeyDown(Key_F1)) show = true;
 		if (show && Input::KeyDown(Key_Escape)) show = false;
 	}
 	if (alpha > 0) {
+		UI::IncLayer();
 		UI::alpha = alpha;
 
 		Engine::DrawQuad(0, 0, Display::width, Display::height, black(0.95f));

@@ -2,8 +2,7 @@
 #include <io.h>
 
 #ifdef PLATFORM_WIN
-#include "Commdlg.h"
-#pragma comment(lib, "Comdlg32.lib")
+
 #else
 #include <sys/types.h>
 #include <dirent.h>
@@ -20,22 +19,6 @@ int IO::stdout_o, IO::stderr_o;
 FILE* IO::stdout_n, *IO::stderr_n;
 string IO::stdiop;
 int IO::waitstdio;
-
-string IO::OpenFile(string ext) {
-#ifdef PLATFORM_WIN
-	char buf[1024]{};
-	OPENFILENAME fn = {};
-	fn.lStructSize = sizeof(fn);
-	fn.hwndOwner = glfwGetWin32Window(Display::window);
-	fn.lpstrFilter = ("\0*" + ext + "\0\0").c_str();
-	fn.lpstrFile = buf;
-	fn.nMaxFile = 1024;
-	GetOpenFileName(&fn);
-	return string(buf);
-#else
-	
-#endif
-}
 
 std::vector<string> IO::GetFiles(const string& folder, string ext) {
 	if (folder == "") return std::vector<string>();

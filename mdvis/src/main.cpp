@@ -106,6 +106,11 @@ int main(int argc, char **argv)
 	if (!__debug) Debug::suppress = 1;
 
 	ChokoLait::Init(800, 800);
+	GLFWimage icon;
+	byte chn;
+	icon.pixels = Texture::LoadPixels(IO::path + "/res/icon.png", chn, (uint&)icon.width, (uint&)icon.height);
+	glfwSetWindowIcon(Display::window, 1, &icon);
+
 	ParMenu::font = VisSystem::font = AnNode::font = font = HelpMenu::font
 		= new Font(IO::path + "/arimo.ttf", ALIGN_TOPLEFT);
 

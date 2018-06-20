@@ -193,7 +193,6 @@
     <ClCompile Include="src\ui\icons.cpp" />
     <ClCompile Include="src\utils\color.cpp" />
     <ClCompile Include="src\asset\compute.cpp" />
-    <ClCompile Include="src\utils\dialog.cpp" />
     <ClCompile Include="src\utils\fft.cpp" />
     <ClCompile Include="src\utils\net.cpp" />
     <ClCompile Include="src\RenderEngine.cpp" />
@@ -287,7 +286,6 @@
     <ClInclude Include="src\scene\sceneobject.h" />
     <ClInclude Include="src\scene\transform.h" />
     <ClInclude Include="src\ui\icons.h" />
-    <ClInclude Include="src\utils\dialog.h" />
     <ClInclude Include="src\utils\rawvector.h" />
     <ClInclude Include="src\utils\plot.h" />
     <ClInclude Include="src\utils\ptrext.h" />
@@ -315,6 +313,17 @@
     <ClInclude Include="src\vis\pargraphics.h" />
     <ClInclude Include="src\vis\system.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\glfw.3.2.1.5\build\native\glfw.targets" Condition="Exists('..\packages\glfw.3.2.1.5\build\native\glfw.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\glfw.3.2.1.5\build\native\glfw.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glfw.3.2.1.5\build\native\glfw.targets'))" />
+  </Target>
 </Project>

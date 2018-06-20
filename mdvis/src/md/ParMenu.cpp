@@ -13,17 +13,25 @@ Font* ParMenu::font = nullptr;
 void ParMenu::Draw() {
 	Engine::DrawQuad(0, 0, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
 	if (expanded) {
-		float f = 20;
-		switch (activeMenu) {
-		case 0:
-			Draw_List();
-			break;
-		case 2:
-			Protein::DrawMenu();
-			break;
-		case 3:
-			Draw_Vis();
-			break;
+		if (!Particles::particleSz) {
+			if (Engine::Button(expandPos - 110, Display::height * 0.4f - 40, 80, 80, Icons::openfile, white(0.4f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+
+			}
+			UI::Label(expandPos - 140, Display::height * 0.4f + 62, 12, " Drag & Drop Files here", font, white());
+			UI::Label(expandPos - 140, Display::height * 0.4f + 75, 12, "or Click Button to Import", font, white());
+		}
+		else {
+			switch (activeMenu) {
+			case 0:
+				Draw_List();
+				break;
+			case 2:
+				Protein::DrawMenu();
+				break;
+			case 3:
+				Draw_Vis();
+				break;
+			}
 		}
 
 		for (uint i = 0; i < 4; i++) {

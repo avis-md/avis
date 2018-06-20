@@ -33,7 +33,7 @@ void Node_Gromacs::Draw() {
 	DrawToolbar();
 	file = UI::EditText(pos.x + 32, pos.y + 18, width - 50, 16, 12, white(1, 0.5f), file, font, true, 0, white());
 	if (Engine::Button(pos.x + width - 17, pos.y + 18, 16, 16, white(1, 0.5f)) == MOUSE_RELEASE) {
-		file = IO::OpenFile("*.gro");
+		//file = IO::OpenFile("*.gro");
 	}
 	UI::Texture(pos.x + width - 17, pos.y + 18, 16, 16, Icons::browse);
 	float y = pos.y + 37;
