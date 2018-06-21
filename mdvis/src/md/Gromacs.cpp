@@ -65,7 +65,7 @@ void Gromacs::Read(const string& file, bool hasAnim) {
 	Residue* tr = 0;
 	auto rsv = rawvector<Residue, uint>(Particles::residueLists->residues, Particles::residueLists->residueSz);
 	Vec3 vec;
-
+	
 	uint lastOff = 0, lastCnt = 0;
 
 	for (uint i = 0; i < Particles::particleSz; i++) {

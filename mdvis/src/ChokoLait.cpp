@@ -98,8 +98,13 @@ void ChokoLait::_InitVars() {
 	}
 	glfwWindowHint(GLFW_VISIBLE, 0);
 
+#ifdef USE_DEBUG_CONTEXT
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+#else
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+#endif
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #ifdef USE_DEBUG_CONTEXT
@@ -160,18 +165,11 @@ void ChokoLait::Init(int scrW, int scrH) {
 		glfwSetCursorPosCallback(window, MotionGL);
 		glfwSetMouseButtonCallback(window, MouseGL);
 		glfwSetScrollCallback(window, MouseScrGL);
+		glfwSetCursorEnterCallback(window, MouseEnterGL);
 		glfwSetDropCallback(window, DropGL);
 
 		glClearColor(0, 0, 0, 1.0f);
-		/*
-		glfwSetCursorPosCallback(window, MotionGL);
-		glfwSetMouseButtonCallback(window, MouseGL);
-		glfwSetScrollCallback(window, MouseScrGL);
-
-		glfwSetWindowFocusCallback(window, FocusGL);
-
-		auto mills = milliseconds();
-		*/
+		glEnable(GL_PROGRAM_POINT_SIZE);
 
 		initd = 2;
 		Debug::Message("ChokoLait", "Init finished.");
@@ -226,6 +224,10 @@ void ChokoLait::MouseGL(GLFWwindow* window, int button, int state, int mods) {
 
 void ChokoLait::MouseScrGL(GLFWwindow* window, double xoff, double yoff) {
 	Input::_mouseScroll = (float)yoff;
+}
+
+void ChokoLait::MouseEnterGL(GLFWwindow* window, int e) {
+	
 }
 
 void ChokoLait::MotionGL(GLFWwindow* window, double x, double y) {

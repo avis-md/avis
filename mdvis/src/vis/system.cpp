@@ -111,7 +111,7 @@ void VisSystem::DrawBar() {
 
 	byte sel = (byte)mouseMode;
 	for (byte b = 0; b < 3; b++) {
-		if (Engine::Button(Display::width - 60 + 17 * b, Display::height - 17.0f, 16, 16, (&Icons::toolRot)[b], (sel == b) ? Vec4(1, 0.7f, 0.4f, 1) : white(0.7f), white(), white(0.5f)) == MOUSE_RELEASE) {
+		if (Engine::Button(Display::width - 60.0f + 17 * b, Display::height - 17.0f, 16, 16, (&Icons::toolRot)[b], (sel == b) ? Vec4(1, 0.7f, 0.4f, 1) : white(0.7f), white(), white(0.5f)) == MOUSE_RELEASE) {
 			mouseMode = (VIS_MOUSE_MODE)b;
 		}
 	}

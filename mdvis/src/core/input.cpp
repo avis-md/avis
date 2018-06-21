@@ -4,6 +4,8 @@
 bool Input::mouse0 = false;
 bool Input::mouse1 = false;
 bool Input::mouse2 = false;
+long long Input::mouseT = false;
+bool Input::dbclick = false;
 float Input::mouseScroll = 0;
 byte Input::mouse0State = 0;
 byte Input::mouse1State = 0;
@@ -18,12 +20,6 @@ Vec2 Input::mouseDownPos = Vec2(0, 0);
 
 bool Input::keyStatusOld[] = {};
 bool Input::keyStatusNew[] = {};
-
-uint Input::touchCount;
-std::array<uint, 10> Input::touchIds = std::array<uint, 10>();
-std::array<Vec2, 10> Input::touchPoss = std::array<Vec2, 10>();
-//std::array<float, 10> Input::touchForce = std::array<float, 10>();
-std::array<byte, 10> Input::touchStates = std::array<byte, 10>();
 
 string Input::_inputString = "";
 float Input::_mouseScroll = 0;
@@ -108,59 +104,18 @@ void Input::UpdateMouseNKeyboard(bool* src) {
 	else
 		mouse2State = ((mouse2State == MOUSE_UP) | (mouse2State == 0)) ? 0 : MOUSE_UP;
 
-	if (mouse0State == MOUSE_DOWN)
+	if (mouse0State == MOUSE_DOWN) {
 		mouseDownPos = mousePos;
+		auto mt = Time::millis;
+		dbclick = (mt - mouseT < 300);
+		mouseT = mt;
+	}
 	else if (!mouse0State)
 		mouseDownPos = Vec2(-1, -1);
 
 	mouseDelta = mousePos - mousePosOld;
 	mousePosOld = mousePos;
 }
-
-Vec2 Input::Motion::Pan() {
-	return Vec2();
-}
-
-Vec2 Input::Motion::Zoom() {
-	return Vec2();
-}
-
-Vec3 Input::Motion::Rotate() {
-	return Vec3();
-}
-
-#ifdef PLATFORM_ADR
-void Input::UpdateAdr(AInputEvent* e) {
-	if (e) {
-		touchCount = AMotionEvent_getPointerCount(e);
-		for (uint a = 0; a < touchCount; a++) {
-			touchIds[a] = AMotionEvent_getPointerId(e, a);
-			touchPoss[a].x = AMotionEvent_getRawX(e, a);
-			touchPoss[a].y = AMotionEvent_getRawY(e, a);
-			//touchForce[a] = AMotionEvent_getPressure(e, a);
-		}
-		auto act = AMotionEvent_getAction(e);
-		uint id = act >> 8;
-		switch (act & 255) {
-		case AMOTION_EVENT_ACTION_DOWN:
-		case AMOTION_EVENT_ACTION_POINTER_DOWN:
-			touchStates[id] = MOUSE_DOWN;
-			break;
-		case AMOTION_EVENT_ACTION_UP:
-		case AMOTION_EVENT_ACTION_POINTER_UP:
-			touchStates[id] = MOUSE_UP;
-			break;
-		default:
-			touchStates[id] = MOUSE_HOLD;
-			break;
-		}
-	}
-	else {
-		if (touchCount == 1 && touchStates[0] == MOUSE_UP)
-			touchCount = 0;
-	}
-}
-#endif
 
 void Input::PreLoop() {
 	inputString = _inputString;

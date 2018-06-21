@@ -260,7 +260,7 @@ void ParGraphics::Rerender() {
 		float snw = sin(rotW*deg2rad);
 		Mat4x4 mMatrix = Mat4x4(1, 0, 0, 0, 0, csw, snw, 0, 0, -snw, csw, 0, 0, 0, 0, 1) * Mat4x4(csz, 0, -snz, 0, 0, 1, 0, 0, snz, 0, csz, 0, 0, 0, 0, 1);
 		MVP::Mul(mMatrix);
-		float s = pow(2, rotScale);
+		float s = pow(2.0f, rotScale);
 		MVP::Scale(s, s, s);
 		if (rotCenterTrackId < ~0) {
 			rotCenter = Particles::particles_Pos[rotCenterTrackId];
@@ -428,7 +428,7 @@ void ParGraphics::Reblit() {
 			BlitSky();
 		}
 		else {
-			UI::Texture(0, 0, Display::width, Display::height, bg, DRAWTEX_CROP);
+			UI::Texture(0, 0, (float)Display::width, (float)Display::height, bg, DRAWTEX_CROP);
 		}
 	}
 	//*
@@ -583,7 +583,7 @@ void ParGraphics::DrawMenu() {
 		}
 	}
 
-	Eff::DrawMenu(a2? 294 : 277);
+	Eff::DrawMenu(a2? 294.0f : 277.0f);
 
 	rotW = Clamp<float>(rotW, -90, 90);
 	rotZ = Repeat<float>(rotZ, 0, 360);

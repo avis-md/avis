@@ -64,7 +64,7 @@ void CDV::Read(const string& file, bool hasAnim) {
 			Particles::particles_Pos[id] = Vec3(px, py, pz) * 0.1f;
 		}
 
-		Particles::particles_Rad[id] = 3 - rd;
+		Particles::particles_Rad[id] = 3.0f - rd;
 		Particles::particles_Res[id] = Int2(0, 0);
 		Particles::particles_Col[id] = (byte)(rand()%256);
 	}
@@ -97,7 +97,6 @@ void CDV::Read(const string& file, bool hasAnim) {
 bool CDV::ReadTrj(const string& path) {
 	auto& anm = Particles::anim;
 	anm.reading = true;
-	Vec3* poss;
     
     anm.frameCount = 140;
     anm.poss = new Vec3*[anm.frameCount];
@@ -107,7 +106,6 @@ bool CDV::ReadTrj(const string& path) {
 
 	string s;
 	uint id, dm;
-	double px, py, pz;
 	for (uint i = 1; i < anm.frameCount; i++) {
 		std::stringstream sstrm;
 		sstrm << std::setw(6) << std::setfill('0') << i * 100;

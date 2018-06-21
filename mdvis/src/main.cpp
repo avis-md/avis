@@ -1,7 +1,4 @@
 #include "ChokoLait.h"
-#include "md/Particles.h"
-#include "md/Gromacs.h"
-#include "md/CDV.h"
 //#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 //#include <numpy/arrayobject.h>
 
@@ -11,6 +8,9 @@
 #include "web/anweb.h"
 #include "md/ParMenu.h"
 #include "md/Protein.h"
+#include "md/parloader.h"
+#include "md/Gromacs.h"
+#include "md/CDV.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
 #include "utils/effects.h"
@@ -87,7 +87,11 @@ void paintfunc() {
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Particle " + std::to_string(id), font, white());
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, &Particles::particles_ResName[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, font, white());
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, &Particles::particles_Name[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, font, white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, std::to_string(Particles::particles_Pos[id]), font, white());
+			//UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, std::to_string(Particles::particles_Pos[id]), font, white());
+
+			if (Input::mouse0 && Input::dbclick) {
+				ParGraphics::rotCenter = Particles::particles_Pos[id];
+			}
 		}
 	}
 
@@ -109,7 +113,8 @@ int main(int argc, char **argv)
 	GLFWimage icon;
 	byte chn;
 	icon.pixels = Texture::LoadPixels(IO::path + "/res/icon.png", chn, (uint&)icon.width, (uint&)icon.height);
-	glfwSetWindowIcon(Display::window, 1, &icon);
+	if (icon.pixels) glfwSetWindowIcon(Display::window, 1, &icon);
+	delete[](icon.pixels);
 
 	ParMenu::font = VisSystem::font = AnNode::font = font = HelpMenu::font
 		= new Font(IO::path + "/arimo.ttf", ALIGN_TOPLEFT);
@@ -118,11 +123,12 @@ int main(int argc, char **argv)
 	Icons::Init();
 	VisSystem::Init();
 	Particles::Init();
+	ParLoader::Init();
 	ParGraphics::Init();
 	Protein::Init();
 	PyReader::Init();
-	AnNode::Init();
 	AnWeb::Init();
+	AnNode::Init();
 	Effects::Init(0xffff);
 
 	AnBrowse::Scan();
@@ -142,8 +148,6 @@ int main(int argc, char **argv)
 	
 	//Protein::Refresh();
 	//ParGraphics::UpdateDrawLists();
-	
-	glEnable(GL_PROGRAM_POINT_SIZE);
 
 	Display::Resize(800, 600, false);
 

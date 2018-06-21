@@ -54,6 +54,7 @@ protected:
 
 	static void MouseGL(GLFWwindow* window, int button, int state, int mods);
 	static void MouseScrGL(GLFWwindow* window, double xoff, double yoff);
+	static void MouseEnterGL(GLFWwindow* window, int e);
 	static void MotionGL(GLFWwindow* window, double x, double y);
 	static void ReshapeGL(GLFWwindow* window, int w, int h);
 	static void DropGL(GLFWwindow* window, int n, const char** fs);

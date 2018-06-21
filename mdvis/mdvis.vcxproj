@@ -149,6 +149,7 @@
     <ClCompile Include="src\md\CDV.cpp" />
     <ClCompile Include="src\md\Gromacs.cpp" />
     <ClCompile Include="src\makegen.cpp" />
+    <ClCompile Include="src\md\parloader.cpp" />
     <ClCompile Include="src\md\ParMenu.cpp" />
     <ClCompile Include="src\md\Particles.cpp" />
     <ClCompile Include="src\md\Protein.cpp" />
@@ -244,6 +245,7 @@
     <ClInclude Include="src\md\CDV.h" />
     <ClInclude Include="src\md\Gromacs.h" />
     <ClInclude Include="src\makegen.h" />
+    <ClInclude Include="src\md\parloader.h" />
     <ClInclude Include="src\md\ParMenu.h" />
     <ClInclude Include="src\md\Particles.h" />
     <ClInclude Include="src\md\Protein.h" />
