@@ -11,6 +11,7 @@
 #include "md/parloader.h"
 #include "md/Gromacs.h"
 #include "md/CDV.h"
+#include "md/mdvbin.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
 #include "utils/effects.h"
@@ -139,15 +140,17 @@ int main(int argc, char **argv)
 	ParGraphics::SetLight(l.get());
 
 	//AnWeb::Load(IO::path + "/nodes/rdf.anl");
-	//AnWeb::nodes.push_back(new Node_Recolor_All());
+	AnWeb::nodes.push_back(new Node_Recolor_All());
 	//AnWeb::nodes.push_back(new Node_AddBond());
 	//CDV::Read(IO::path + "/ayuba/position000000.cdv", false);
 	//CDV::ReadTrj(IO::path + "/ayuba/position");
 	//Gromacs::Read(IO::path + "/pbc.gro", false);
 	//bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");
-	
-	//Protein::Refresh();
-	//ParGraphics::UpdateDrawLists();
+	MDVBin::Read(IO::path + "/ayuba2/000000.bin", false);
+	MDVBin::ReadTrj(IO::path + "/ayuba2/");
+
+	Protein::Refresh();
+	ParGraphics::UpdateDrawLists();
 
 	Display::Resize(800, 600, false);
 

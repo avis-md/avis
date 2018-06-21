@@ -85,7 +85,7 @@ void Node_Inputs::Execute() {
 	conV[0].value = &Particles::particles_Pos;
 	conV[1].value = &Particles::particles_Vel;
 	conV[2].value = Particles::anim.poss;
-	conV[3].value = Particles::anim.poss;
+	conV[3].value = Particles::anim.vels;
 #endif
 }
 

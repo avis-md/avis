@@ -113,7 +113,7 @@ void Particles::UpdateConBufs2() {
 }
 
 void Particles::IncFrame(bool loop) {
-	if (anim.activeFrame == anim.frameCount - 1) {
+	if (anim.activeFrame >= anim.frameCount - 1) {
 		if (loop) SetFrame(0);
 		else return;
 	}

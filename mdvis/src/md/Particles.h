@@ -35,7 +35,7 @@ struct AnimData {
 
 	bool reading, dynamicBonds;
 	uint frameCount, activeFrame;
-	Vec3** poss;
+	Vec3** poss, **vels;
 	uint* connCounts;
 	Int2** conns;
 	std::vector<std::pair<uint*, Int2**>> conns2;
