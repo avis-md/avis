@@ -14,7 +14,7 @@ void HelpMenu::Draw() {
 		UI::IncLayer();
 		UI::alpha = alpha;
 
-		Engine::DrawQuad(0, 0, Display::width, Display::height, black(0.95f));
+		Engine::DrawQuad(0, 0, Display::width, Display::height, black(0.9f));
 		UI::Label(10, 5, 14, "HELP", font, white());
 		font->Align(ALIGN_TOPRIGHT);
 		UI::Label(Display::width - 5, 5, 10, "version 0.01", font, white(0.7f));

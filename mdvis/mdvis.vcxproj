@@ -146,6 +146,7 @@
     <ClCompile Include="src\EditorShortcuts.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\mdchan.cpp" />
     <ClCompile Include="src\md\CDV.cpp" />
     <ClCompile Include="src\md\mdvbin.cpp" />
     <ClCompile Include="src\md\Gromacs.cpp" />
@@ -243,6 +244,7 @@
     <ClInclude Include="src\core\input.h" />
     <ClInclude Include="src\core\io.h" />
     <ClInclude Include="src\core\mvp.h" />
+    <ClInclude Include="src\mdchan.h" />
     <ClInclude Include="src\md\CDV.h" />
     <ClInclude Include="src\md\mdvbin.h" />
     <ClInclude Include="src\md\Gromacs.h" />

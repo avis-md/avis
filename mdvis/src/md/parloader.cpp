@@ -13,6 +13,9 @@ std::vector<std::pair<std::vector<string>, string>> ParLoader::importers;
 bool ParLoader::showDialog = false;
 std::vector<string> ParLoader::droppedFiles;
 
+bool ParLoader::_showImp = false;
+float ParLoader::_impPos = 0, ParLoader::_impScr = 0;
+
 void ParLoader::Init() {
 	ChokoLait::dropFuncs.push_back(OnDropFile);
 }
@@ -33,9 +36,20 @@ bool ParLoader::OpenAnim(uint num, const char** paths) {
 void ParLoader::DrawOpenDialog() {
 	if (!showDialog) return;
 	UI::IncLayer();
-	float woff = Display::width*0.5f - 200;
-	float hoff = Display::height * 0.5f - 150;
 	Engine::DrawQuad(0, 0, Display::width, Display::height, black(0.7f));
+
+	float woff = Display::width*0.5f - 200 - _impPos / 2;
+	float hoff = Display::height * 0.5f - 150;
+
+	if (_showImp || _impPos > 0) {
+		Engine::DrawQuad(woff + 400, hoff, _impPos, 300, white(0.8f, 0.1f));
+		Engine::PushStencil(woff + 400, hoff, _impPos, 300);
+		UI::Label(woff + 402, hoff, 12, "Choose Importer", AnNode::font, white());
+		
+		Engine::PopStencil();
+	}
+	_impPos = _showImp? min(_impPos + 800 * Time::delta, 100.0f) : max(_impPos - 800 * Time::delta, 0.0f);
+
 	Engine::DrawQuad(woff, hoff, 400, 300, white(0.8f, 0.15f));
 	Engine::DrawQuad(woff, hoff, 400, 16, white(0.9f, 0.1f));
 	UI::Label(woff + 2, hoff, 12, loadAsTrj ? "Load Trajectory" : "Load Configuration", AnNode::font, white());
@@ -49,7 +63,9 @@ void ParLoader::DrawOpenDialog() {
 	
 	UI::Label(woff + 2, hoff + 34, 12, "Importer", AnNode::font, white(), 326);
 	UI::Label(woff + 60, hoff + 34, 12, "Gromacs (.gro)", AnNode::font, white(0.5f), 326);
-	Engine::Button(woff + 339, hoff + 34, 60, 16, white(1, 0.4f), "Change", 12, AnNode::font, white(), true);
+	if (Engine::Button(woff + 339, hoff + 34, 60, 16, white(1, 0.4f), _showImp ? "<<" : ">>", 12, AnNode::font, white(), true) == MOUSE_RELEASE) {
+		_showImp = !_showImp;
+	}
 	
 	//if (Particles::particleSz) {
 		loadAsTrj = Engine::Toggle(woff + 1, hoff + 17 * 3, 16, Icons::checkbox, loadAsTrj, white(), ORIENT_HORIZONTAL);

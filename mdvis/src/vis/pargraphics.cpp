@@ -6,8 +6,9 @@
 #include "ui/popups.h"
 #include "utils/effects.h"
 #include "web/anweb.h"
+#include "mdchan.h"
 
-Texture* ParGraphics::refl = nullptr, *ParGraphics::bg = nullptr;
+Texture* ParGraphics::refl = nullptr, *ParGraphics::bg = nullptr, *ParGraphics::logo = nullptr;
 float ParGraphics::reflStr = 1, ParGraphics::reflStrDecay = 2, ParGraphics::rimOff = 0.5f, ParGraphics::rimStr = 1;
 
 Light* ParGraphics::light;
@@ -94,6 +95,7 @@ void ParGraphics::Eff::DrawMenu(float off) {
 void ParGraphics::Init() {
 	refl = new Texture(IO::path + "/refl.png", true, TEX_FILTER_BILINEAR, 1, GL_REPEAT, GL_MIRRORED_REPEAT);
 	bg = new Texture(IO::path + "/res/bg.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
+	logo = new Texture(IO::path + "/res/logo.png", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	//reflProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText(IO::path + "/reflFrag.txt")))->pointer;
 	reflProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), IO::GetText(IO::path + "/reflFrag.txt"));
 	reflProgLocs[0] = glGetUniformLocation(reflProg, "_IP");
@@ -204,7 +206,9 @@ void ParGraphics::SetLight(Light* l) {
 }
 
 void ParGraphics::Update() {
-	if (animate && !seek) {
+	if (!Particles::particleSz)
+		Scene::dirty = true;
+	else if (animate && !seek) {
 		Particles::IncFrame(true);
 		Scene::dirty = true;
 	}
@@ -428,7 +432,14 @@ void ParGraphics::Reblit() {
 			BlitSky();
 		}
 		else {
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			UI::Texture(0, 0, (float)Display::width, (float)Display::height, bg, DRAWTEX_CROP);
+			MdChan::Draw(Vec2(Display::width * 0.5f, Display::height * 0.3f));
+			UI::Texture(Display::width * 0.5f - Display::height * 0.2f, Display::height * 0.4f, Display::height * 0.4f, Display::height * 0.2f, logo);
+			AnNode::font->Align(ALIGN_TOPCENTER);
+			UI::Label(Display::width * 0.5f, Display::height * 0.6f, 12, "Press F1 for Help", AnNode::font, white());
+			UI::Label(Display::width * 0.5f, Display::height * 0.6f + 14, 12, "Build: " __DATE__, AnNode::font, white());
+			AnNode::font->Align(ALIGN_TOPLEFT);
 		}
 	}
 	//*

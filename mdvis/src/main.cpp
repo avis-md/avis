@@ -17,6 +17,7 @@
 #include "utils/effects.h"
 #include "utils/ssh.h"
 #include "web/nodes/node_gromacs.h"
+#include "mdchan.h"
 
 bool __debug = false;
 
@@ -132,6 +133,7 @@ int main(int argc, char **argv)
 	AnWeb::Init();
 	AnNode::Init();
 	Effects::Init(0xffff);
+	MdChan::Init();
 
 	AnBrowse::Scan();
 	

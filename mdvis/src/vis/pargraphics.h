@@ -5,7 +5,7 @@
 
 class ParGraphics {
 public:
-	static Texture* refl, *bg;
+	static Texture* refl, *bg, *logo;
 	static float reflStr, reflStrDecay, rimOff, rimStr;
 
 	static Light* light;

@@ -1,6 +1,7 @@
 #pragma once
 #include "ChokoLait.h"
 #include "Particles.h"
+#include "utils/dylib.h"
 
 struct ParInfo {
 	char* path; //IN
@@ -15,6 +16,12 @@ struct ParInfo {
 	float* vel;
 };
 
+struct ParImporter {
+	string name, sig;
+	std::vector<string> exts;
+	DyLib lib;
+};
+
 class ParLoader {
 public:
 	static void Init();
@@ -27,6 +34,8 @@ public:
 	static bool showDialog;
 	static std::vector<string> droppedFiles;
 
+	static bool _showImp;
+	static float _impPos, _impScr;
 
 	static bool Open(const char* path);
 	static bool OpenAnim(uint num, const char** paths);
