@@ -20,19 +20,19 @@ LIBS = -L/usr/lib/python2.7 -L/usr/local/lib/python2.7 -lpthread -lm $(GLLIB) -l
 OBJS = obj/hdr.o obj/lodepng.o obj/AudioEngine.o obj/ChokoLait.o obj/Editor.o obj/EditorShortcuts.o obj/Engine.o obj/main.o obj/RenderEngine.o obj/SceneObjects.o obj/Types.o
 OBJS += obj/asset/animation.o obj/asset/animclip.o obj/asset/assetmanager.o obj/asset/assetobject.o obj/asset/audioclip.o obj/asset/cameffect.o obj/asset/compute.o obj/asset/cubemap.o obj/asset/material.o obj/asset/mesh.o obj/asset/resources.o obj/asset/shader.o obj/asset/img/background.o obj/asset/img/rendertexture.o obj/asset/img/texture.o obj/asset/img/texture3d.o obj/asset/img/videotexture.o
 OBJS += obj/core/audio.o obj/core/bbox.o obj/core/debug.o obj/core/display.o obj/core/font.o obj/core/input.o obj/core/io.o obj/core/mvp.o obj/core/time.o obj/core/ui.o
-OBJS += obj/md/Protein.o obj/md/Gromacs.o obj/md/CDV.o obj/md/ParMenu.o obj/md/Particles.o
-OBJS += obj/web/anbrowse.o obj/web/anconv.o obj/web/annode.o obj/web/anops.o obj/web/anscript.o obj/web/anweb.o obj/web/creader.o obj/web/pyreader.o obj/web/nodes/node_inputs.o obj/web/nodes/node_plot.o obj/web/nodes/node_volume.o obj/web/nodes/node_gromacs.o obj/web/nodes/node_recolor.o
+OBJS += obj/md/Protein.o obj/md/Gromacs.o obj/md/CDV.o obj/md/ParMenu.o obj/md/Particles.o obj/md/mdvbin.o obj/md/parloader.o
+OBJS += obj/web/anbrowse.o obj/web/anconv.o obj/web/annode.o obj/web/anops.o obj/web/anscript.o obj/web/anweb.o obj/web/creader.o obj/web/pyreader.o obj/web/nodes/node_inputs.o obj/web/nodes/node_plot.o obj/web/nodes/node_volume.o obj/web/nodes/node_gromacs.o obj/web/nodes/node_recolor.o obj/web/nodes/node_addbond.o
 OBJS += obj/scene/object.o obj/scene/scene.o obj/scene/sceneobject.o obj/scene/transform.o obj/scene/comp/animator.o obj/scene/comp/armature.o obj/scene/comp/audiolistener.o obj/scene/comp/audiosource.o obj/scene/comp/camera.o obj/scene/comp/component.o obj/scene/comp/light.o obj/scene/comp/meshfilter.o obj/scene/comp/meshrenderer.o obj/scene/comp/scenescript.o obj/scene/comp/skinnedmeshrenderer.o
 OBJS += obj/utils/ssh.o obj/utils/color.o obj/utils/effects.o obj/utils/fft.o obj/utils/net.o obj/utils/plot.o obj/utils/precedurals.o obj/utils/random.o obj/utils/rect.o obj/utils/serial.o obj/utils/solidify.o obj/utils/spline.o obj/utils/stream.o obj/utils/strext.o obj/utils/xml.o obj/utils/dialog.o obj/utils/dylib.o obj/utils/runcmd.o
-OBJS += obj/ui/popups.o obj/ui/icons.o obj/vis/pargraphics.o obj/vis/system.o
+OBJS += obj/ui/popups.o obj/ui/icons.o obj/ui/help.o obj/vis/pargraphics.o obj/vis/system.o
 
 HEADERS = hdr.h lodepng.h AssetObjects.h AudioEngine.h ChokoLait.h Defines.h Editor.h Engine.h SceneObjects.h SceneScriptResolver.h
 HEADERS += asset/animation.h asset/animclip.h asset/assetmanager.h asset/assetobject.h asset/audioclip.h asset/cameffect.h asset/compute.h asset/cubemap.h asset/material.h asset/mesh.h asset/resources.h asset/shader.h asset/img/background.h asset/img/rendertexture.h asset/img/texture.h asset/img/texture3d.h asset/img/videotexture.h
 HEADERS += core/audio.h core/bbox.h core/debug.h core/display.h core/font.h core/input.h core/io.h core/math.h core/mvp.h core/time.h core/ui.h
-HEADERS += md/Protein.h md/Gromacs.h md/CDV.h md/ParMenu.h md/Particles.h
-HEADERS += web/anbrowse.h web/anconv.h web/annode.h web/anscript.h web/anops.h web/anweb.h web/creader.h web/pyreader.h web/nodes/node_inputs.h web/nodes/node_plot.h web/nodes/node_volume.h web/nodes/node_gromacs.h web/nodes/node_recolor.h
+HEADERS += md/Protein.h md/Gromacs.h md/CDV.h md/ParMenu.h md/Particles.h md/mdvbin.h md/parloader.h
+HEADERS += web/anbrowse.h web/anconv.h web/annode.h web/anscript.h web/anops.h web/anweb.h web/creader.h web/pyreader.h web/nodes/node_inputs.h web/nodes/node_plot.h web/nodes/node_volume.h web/nodes/node_gromacs.h web/nodes/node_recolor.h web/nodes/node_addbond.h
 HEADERS += scene/object.h scene/scene.h scene/sceneobject.h scene/texturerenderer.h scene/transform.h scene/comp/animator.h scene/comp/armature.h scene/comp/audiolistener.h scene/comp/audiosource.h scene/comp/camera.h scene/comp/component.h scene/comp/light.h scene/comp/meshfilter.h scene/comp/meshrenderer.h scene/comp/scenescript.h scene/comp/skinnedmeshrenderer.h scene/comp/voxelrenderer.h
-HEADERS += ui/popups.h ui/icons.h vis/pargraphics.h vis/system.h
+HEADERS += ui/popups.h ui/icons.h ui/help.h vis/pargraphics.h vis/system.h
 HEADERS += utils/color.h utils/effects.h utils/fft.h utils/ifaddrs.h utils/net.h utils/plot.h utils/precedurals.h utils/ptrext.h utils/random.h utils/rawvector.h utils/rect.h utils/serial.h utils/solidify.h utils/spline.h utils/stream.h utils/strext.h utils/xml.h utils/dialog.o utils/dylib.h utils/runcmd.h utils/ssh.h
 
 ../build/mdvis: $(OBJS)

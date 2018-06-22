@@ -19,7 +19,7 @@ class ParLoader {
 public:
 	static void Init();
 
-	static std::vector<std::vector<string>, string> importers;
+	static std::vector<std::pair<std::vector<string>, string>> importers;
 	
 	static bool Open(const char* path);
 	static bool OpenAnim(uint num, const char** paths);

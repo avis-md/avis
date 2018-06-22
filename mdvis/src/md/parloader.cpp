@@ -3,7 +3,7 @@
 #include "Protein.h"
 #include "vis/pargraphics.h"
 
-std::vector<std::vector<string>, string> ParLoader::importers;
+std::vector<std::pair<std::vector<string>, string>> ParLoader::importers;
 
 void ParLoader::Init() {
 	ChokoLait::dropFuncs.push_back(OnDropFile);

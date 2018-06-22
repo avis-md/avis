@@ -12,5 +12,8 @@ void Popups::Draw() {
     switch (type) {
         case POPUP_TYPE::DRAWMODE:
             ParGraphics::DrawPopupDM();
+            break;
+        default:
+            break;
     }
 }

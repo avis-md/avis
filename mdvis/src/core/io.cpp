@@ -1,8 +1,7 @@
 #include "Engine.h"
-#include <io.h>
 
 #ifdef PLATFORM_WIN
-
+#include <io.h>
 #else
 #include <sys/types.h>
 #include <dirent.h>
@@ -194,6 +193,7 @@ string IO::GetText(const string& path) {
 #define _dup dup
 #define _dup2 dup2
 #define _close close
+#define _fileno fileno
 #endif
 
 void IO::StartReadStdio(string path, stdioCallback callback) {
@@ -203,9 +203,14 @@ void IO::StartReadStdio(string path, stdioCallback callback) {
 	readingStdio = true;
 	stdout_o = _dup(1);
 	stderr_o = _dup(2);
+	#ifdef PLATFORM_WIN
 	stdout_n = _fsopen(p.c_str(), "w", _SH_DENYWR);
 	stderr_n = _fsopen(p2.c_str(), "w", _SH_DENYWR);
 	//fopen_s(&stdout_n, p.c_str(), "w");
+	#else
+	stdout_n = fopen(p.c_str(), "w");
+	stderr_n = fopen(p2.c_str(), "w");
+	#endif
 	_dup2(_fileno(stdout_n), 1);
 	_dup2(_fileno(stderr_n), 2);
 	
