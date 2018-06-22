@@ -246,5 +246,6 @@ void ChokoLait::ReshapeGL(GLFWwindow* window, int w, int h) {
 
 void ChokoLait::DropGL(GLFWwindow* window, int w, const char** c) {
 	for (auto& a : dropFuncs)
-		a(w, c);
+		if (a(w, c))
+			break;
 }

@@ -20,7 +20,7 @@ See https://chokomancarr.github.io/ChokoLait/ for documentation and examples.
 #include "Engine.h"
 
 typedef void(*emptyCallbackFunc)(void);
-typedef void(*dropFileFunc)(int, const char**);
+typedef bool(*dropFileFunc)(int, const char**);
 
 class ChokoLait {
 public:

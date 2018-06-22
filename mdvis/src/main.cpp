@@ -73,6 +73,7 @@ void paintfunc() {
 	}
 	VisSystem::DrawBar();
 
+	ParLoader::DrawOpenDialog();
 	Popups::Draw();
 
 	auto pos = Input::mousePos;
@@ -146,11 +147,15 @@ int main(int argc, char **argv)
 	//CDV::ReadTrj(IO::path + "/ayuba/position");
 	//Gromacs::Read(IO::path + "/pbc.gro", false);
 	//bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");
-	MDVBin::Read(IO::path + "/ayuba2/000000.bin", false);
-	MDVBin::ReadTrj(IO::path + "/ayuba2/");
+	//MDVBin::Read(IO::path + "/ayuba2/000000.bin", false);
+	//MDVBin::ReadTrj(IO::path + "/ayuba2/");
+	string ss = IO::path + "/pbc.gro";
+	const char* c[1];
+	c[0] = &ss[0];
+	ParLoader::OnDropFile(1, &c[0]);
 
-	Protein::Refresh();
-	ParGraphics::UpdateDrawLists();
+	//Protein::Refresh();
+	//ParGraphics::UpdateDrawLists();
 
 	Display::Resize(800, 600, false);
 
