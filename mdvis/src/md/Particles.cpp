@@ -33,6 +33,19 @@ GLuint Particles::radBuffer;
 GLuint Particles::posTexBuffer, Particles::connTexBuffer, Particles::colorIdTexBuffer, Particles::radTexBuffer;
 
 void Particles::Init() {
+	glGenVertexArrays(1, &posVao);
+	glGenBuffers(1, &posBuffer);
+	glGenBuffers(1, &connBuffer);
+	glGenBuffers(1, &colIdBuffer);
+	glGenBuffers(1, &radBuffer);
+
+	glBindVertexArray(posVao);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
 	glGenTextures(1, &colorPalleteTex);
 	glBindTexture(GL_TEXTURE_2D, colorPalleteTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 16, 16, 0, GL_RGB, GL_FLOAT, colorPallete);
@@ -86,9 +99,25 @@ void Particles::GenTexBufs() {
 	glBindTexture(GL_TEXTURE_BUFFER, 0);
 }
 
+void Particles::UpdateBufs() {
+	glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
+	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(Vec3), particles_Pos, GL_DYNAMIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, connBuffer);
+	glBufferData(GL_ARRAY_BUFFER, connSz * 2 * sizeof(uint), particles_Conn, GL_DYNAMIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, colIdBuffer);
+	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(byte), particles_Col, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, radBuffer);
+	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(float), particles_Rad, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
 void Particles::UpdateRadBuf() {
-	glBindBuffer(GL_ARRAY_BUFFER, Particles::radBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, Particles::particleSz * sizeof(float), particles_Rad);
+	glBindBuffer(GL_ARRAY_BUFFER, radBuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(float), particles_Rad);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 

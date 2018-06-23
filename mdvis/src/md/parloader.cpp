@@ -4,7 +4,10 @@
 #include "vis/pargraphics.h"
 #include "web/anweb.h"
 #include "ui/icons.h"
+#include "utils/rawvector.h"
 
+int ParLoader::imp;
+string ParLoader::customImp;
 bool ParLoader::loadAsTrj = false, ParLoader::additive = false;
 int ParLoader::maxframes = 0;
 
@@ -20,9 +23,100 @@ void ParLoader::Init() {
 	ChokoLait::dropFuncs.push_back(OnDropFile);
 }
 
-bool ParLoader::Open(const char* path) {
-	Gromacs::Read(string(path), false);
+bool ParLoader::DoOpen(const char* path) {
+	ParInfo info;
+	info.path = path;
+	info.nameSz = PAR_MAX_NAME_LEN;
 
+	Gromacs::Read(&info);
+
+	Particles::particleSz = info.num;
+	Particles::connSz = 0;
+	Particles::particles_ResName = info.resname;
+	Particles::particles_Name = info.name;
+	Particles::particles_Pos = (Vec3*)info.pos;
+	Particles::particles_Vel = (Vec3*)info.vel;
+	Particles::boundingBox = *((Vec3*)info.bounds);
+	Particles::particles_Col = new byte[info.num];
+	Particles::particles_Rad = new float[info.num];
+	Particles::particles_Res = new Int2[info.num];
+
+	auto rs = rawvector<ResidueList, uint>(Particles::residueLists, Particles::residueListSz);
+	auto rsv = rawvector<Residue, uint>(Particles::residueLists->residues, Particles::residueLists->residueSz);
+	auto cn = rawvector<Int2, uint>(Particles::particles_Conn, Particles::connSz);
+
+	uint64_t currResNm = -1;
+	uint16_t currResId = -1;
+	ResidueList* trs = 0;
+	Residue* tr = 0;
+	Vec3 vec;
+
+	uint lastOff = 0, lastCnt = 0;
+
+	for (uint i = 0; i < info.num; i++) {
+		auto id1 = info.name[i * PAR_MAX_NAME_LEN];
+		auto& resId = info.resId[i];
+		uint64_t resNm = *((uint64_t*)(&info.resname[i * PAR_MAX_NAME_LEN])) & 0x000000ffffffffff;
+
+		if (currResNm != resNm) {
+			rs.push(ResidueList());
+			trs = &Particles::residueLists[Particles::residueListSz - 1];
+			rsv = rawvector<Residue, uint>(trs->residues, trs->residueSz);
+			trs->name = string(info.resname + i * PAR_MAX_NAME_LEN, 5);
+			currResNm = resNm;
+		}
+
+		if (currResId != resId) {
+			if (!!i) {
+				if (tr->type != 255) {
+					lastOff = tr->offset;
+					lastCnt = tr->cnt;
+				}
+				else {
+					lastOff = i;
+					lastCnt = 0;
+				}
+			}
+			rsv.push(Residue());
+			tr = &trs->residues[trs->residueSz - 1];
+			tr->offset = i;
+			tr->offset_b = Particles::connSz;
+			tr->name = std::to_string(resId);
+			tr->type = AminoAcidType((char*)&resNm);
+			tr->cnt = 0;
+			tr->cnt_b = 0;
+			currResId = resId;
+		}
+		Vec3 vec = *((Vec3*)(&info.pos[i * 3]));
+		for (uint j = 0; j < lastCnt + tr->cnt; j++) {
+			Vec3 dp = Particles::particles_Pos[lastOff + j] - vec;
+			auto dst = glm::length2(dp);
+			if (dst < 0.0625) { //2.5A
+				auto id2 = Particles::particles_Name[(lastOff + j) * PAR_MAX_NAME_LEN];
+				float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
+				if (dst < bst) {
+					cn.push(Int2(i, lastOff + j));
+					tr->cnt_b++;
+				}
+			}
+		}
+		for (byte b = 0; b < Particles::defColPalleteSz; b++) {
+			if (id1 == Particles::defColPallete[b]) {
+				Particles::particles_Col[i] = b;
+				break;
+			}
+		}
+
+		float rad = VisSystem::radii[id1][1];
+
+		Particles::particles_Rad[i] = rad;
+		Particles::particles_Res[i] = Int2(Particles::residueListSz - 1, trs->residueSz - 1);
+
+		tr->cnt++;
+	}
+
+	Particles::UpdateBufs();
+	Particles::GenTexBufs();
 	Protein::Refresh();
 	ParGraphics::UpdateDrawLists();
 	return true;
@@ -86,9 +180,7 @@ void ParLoader::DrawOpenDialog() {
 	}
 	if (Engine::Button(woff + 350, hoff + 283, 49, 16, white(0.4f), "Load", 12, AnNode::font, white(), true) == MOUSE_RELEASE) {
 		//
-		Gromacs::Read(droppedFiles[0], false);
-		Protein::Refresh();
-		ParGraphics::UpdateDrawLists();
+		DoOpen(droppedFiles[0].c_str());
 		showDialog = false;
 	}
 }

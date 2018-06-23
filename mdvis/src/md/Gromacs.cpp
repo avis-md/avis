@@ -13,13 +13,69 @@ uint _find_char_not_of(char* first, char* last, char c) {
 	return -1;
 }
 
+#define SETERR(msg) memcpy(info->error, msg, sizeof(msg))
+
+bool Gromacs::Read(ParInfo* info) {
+	std::ifstream strm(info->path, std::ios::binary);
+	if (!strm.is_open()) {
+		SETERR("Cannot open file!");
+		return false;
+	}
+
+	char buf[100] = {};
+	string s;
+
+	std::getline(strm, s);
+	if (strm.eof()) {
+		SETERR("Cannot read from file!");
+		return false;
+	}
+	/*
+	auto tp = string_find(s, "t=");
+	if (tp > -1) {
+		//frm.name = s.substr(0, tp);
+		//frm.time = std::stof(s.substr(tp + 2));
+	}
+	else {
+		//frm.name = s;
+		//frm.time = 0;
+	}
+	*/
+	std::getline(strm, s);
+	auto& sz = info->num = std::stoi(s);
+	info->resname = new char[sz * info->nameSz]{};
+	info->name = new char[sz * info->nameSz]{};
+	info->type = new uint16_t[sz];
+	info->resId = new uint16_t[sz];
+	info->pos = new float[sz * 3];
+	info->vel = new float[sz * 3];
+
+	for (uint i = 0; i < sz; i++) {
+		strm.getline(buf, 100);
+		if (strm.eof()) {
+			SETERR("File data is incomplete!");
+			return false;
+		}
+		uint n0 = _find_char_not_of(buf, buf + 5, ' ');
+		info->resId[i] = (uint16_t)std::stoi(string(buf + n0, 5 - n0));
+		memcpy(info->resname + i * info->nameSz, buf + 5, 5);
+		n0 = _find_char_not_of(buf + 10, buf + 15, ' ');
+		memcpy(info->name + i * info->nameSz, buf + 10 + n0, 5 - n0);
+		info->type[i] = (uint16_t)buf[10 + n0];
+		info->vel[i * 3] = std::stof(string(buf + 44, 8));
+		info->vel[i * 3 + 1] = std::stof(string(buf + 52, 8));
+		info->vel[i * 3 + 2] = std::stof(string(buf + 60, 8));
+		info->pos[i * 3] = std::stof(string(buf + 20, 8));
+		info->pos[i * 3 + 1] = std::stof(string(buf + 28, 8));
+		info->pos[i * 3 + 2] = std::stof(string(buf + 36, 8));
+	}
+
+	strm >> info->bounds[0] >> info->bounds[1] >> info->bounds[2];
+	return true;
+}
+
 void Gromacs::Read(const string& file, bool hasAnim) {
 	Particles::Clear();
-	glGenVertexArrays(1, &Particles::posVao);
-	glGenBuffers(1, &Particles::posBuffer);
-	glGenBuffers(1, &Particles::connBuffer);
-	glGenBuffers(1, &Particles::colIdBuffer);
-	glGenBuffers(1, &Particles::radBuffer);
 
 	std::ifstream strm(file, std::ios::binary);
 	if (!strm.is_open()) {
@@ -156,27 +212,7 @@ void Gromacs::Read(const string& file, bool hasAnim) {
 	Particles::boundingBox.y = std::stof(spl[1]);
 	Particles::boundingBox.z = std::stof(spl[2]);
 
-
-	glBindBuffer(GL_ARRAY_BUFFER, Particles::posBuffer);
-	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(Vec3), Particles::particles_Pos, GL_DYNAMIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, Particles::connBuffer);
-	glBufferData(GL_ARRAY_BUFFER, Particles::connSz * 2 * sizeof(uint), Particles::particles_Conn, GL_DYNAMIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, Particles::colIdBuffer);
-	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(byte), Particles::particles_Col, GL_STATIC_DRAW);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, Particles::radBuffer);
-	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(float), Particles::particles_Rad, GL_STATIC_DRAW);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	
-	glBindVertexArray(Particles::posVao);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, Particles::posBuffer);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	Particles::UpdateBufs();
 
 	//Particles::UpdateRadBuf();
 	Particles::GenTexBufs();

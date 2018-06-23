@@ -81,7 +81,7 @@ public:
 	static GLuint colorPalleteTex;
 	static bool palleteDirty;
 
-	static void Init(), Clear(), GenTexBufs(), UpdateColorTex(), UpdateRadBuf();
+	static void Init(), Clear(), GenTexBufs(), UpdateBufs(), UpdateColorTex(), UpdateRadBuf();
 
 	static GLuint posVao;
 	static GLuint posBuffer; //xyz

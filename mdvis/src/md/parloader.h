@@ -4,16 +4,18 @@
 #include "utils/dylib.h"
 
 struct ParInfo {
-	char* path; //IN
+	const char* path; //IN
 	byte nameSz; //IN
 	byte padding[3];
 	uint32_t num;
 	char* resname;
 	char* name;
-	uint16_t* type;
-	uint32_t resId;
+	uint16_t* type; //H\0 if hydrogen
+	uint16_t* resId;
 	float* pos;
 	float* vel;
+	float bounds[3];
+	char error[100];
 };
 
 struct ParImporter {
@@ -26,6 +28,8 @@ class ParLoader {
 public:
 	static void Init();
 
+	static int imp;
+	static string customImp;
 	static bool loadAsTrj, additive;
 	static int maxframes;
 
@@ -37,7 +41,7 @@ public:
 	static bool _showImp;
 	static float _impPos, _impScr;
 
-	static bool Open(const char* path);
+	static bool DoOpen(const char* path);
 	static bool OpenAnim(uint num, const char** paths);
 
 	static void DrawOpenDialog();
