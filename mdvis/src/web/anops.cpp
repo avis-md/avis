@@ -20,45 +20,45 @@ void AnOps::Draw() {
 	Engine::DrawQuad(Display::width - expandPos, 0.0f, 180.0f, Display::height - 18.0f, white(0.9f, 0.15f));
 	if (expanded) {
 		float w = 180;
-		UI::Label(Display::width - expandPos + 5, 1, 12, "Options", AnNode::font, white());
+		UI::Label(Display::width - expandPos + 5, 1, 12, "Options", white());
 		
-		UI::Label(Display::width - expandPos + 2, 18, 12, "Host", AnNode::font, white());
-		if (Engine::Button(Display::width - expandPos + 1, 35, expandPos*0.5f - 1, 16, remote ? white(1, 0.2f) : white(1, 0.1f), "Local", 12, AnNode::font, white(), true) == MOUSE_RELEASE) {
+		UI::Label(Display::width - expandPos + 2, 18, 12, "Host", white());
+		if (Engine::Button(Display::width - expandPos + 1, 35, expandPos*0.5f - 1, 16, remote ? white(1, 0.2f) : white(1, 0.1f), "Local", 12, white(), true) == MOUSE_RELEASE) {
 			if (connectStatus == 255)
 				Disconnect();
 			remote = false;
 		}
-		if (Engine::Button(Display::width - expandPos*0.5f, 35, expandPos*0.5f - 1, 16, remote ? white(1, 0.1f) : white(1, 0.2f), "Remote", 12, AnNode::font, white(), true) == MOUSE_RELEASE) {
+		if (Engine::Button(Display::width - expandPos*0.5f, 35, expandPos*0.5f - 1, 16, remote ? white(1, 0.1f) : white(1, 0.2f), "Remote", 12, white(), true) == MOUSE_RELEASE) {
 			remote = true;
 		}
 
 		float off = 53;
 
 		if (remote) {
-			UI::Label(Display::width - expandPos + 4, 52, 12, "Domain", AnNode::font, white());
-			ip = UI::EditText(Display::width - expandPos + 80, 52, 99, 16, 12, white(1, 0.5f), ip, AnNode::font, true, nullptr, white());
-			UI::Label(Display::width - expandPos + 4, 69, 12, "Port", AnNode::font, white());
-			port = TryParse(UI::EditText(Display::width - expandPos + 80, 69, 99, 16, 12, white(1, 0.5f), std::to_string(port), AnNode::font, true, nullptr, white()), 22);
-			UI::Label(Display::width - expandPos + 4, 86, 12, "Username", AnNode::font, white());
-			user = UI::EditText(Display::width - expandPos + 80, 86, 99, 16, 12, white(1, 0.5f), user, AnNode::font, true, nullptr, white());
-			UI::Label(Display::width - expandPos + 4, 103, 12, "Password", AnNode::font, white());
-			pw = UI::EditTextPass(Display::width - expandPos + 80, 103, 99, 16, 12, white(1, 0.5f), pw, '*', AnNode::font, true, nullptr, white());
+			UI::Label(Display::width - expandPos + 4, 52, 12, "Domain", white());
+			ip = UI::EditText(Display::width - expandPos + 80, 52, 99, 16, 12, white(1, 0.5f), ip, true, white());
+			UI::Label(Display::width - expandPos + 4, 69, 12, "Port", white());
+			port = TryParse(UI::EditText(Display::width - expandPos + 80, 69, 99, 16, 12, white(1, 0.5f), std::to_string(port), true, white()), 22);
+			UI::Label(Display::width - expandPos + 4, 86, 12, "Username", white());
+			user = UI::EditText(Display::width - expandPos + 80, 86, 99, 16, 12, white(1, 0.5f), user, true, white());
+			UI::Label(Display::width - expandPos + 4, 103, 12, "Password", white());
+			pw = UI::EditTextPass(Display::width - expandPos + 80, 103, 99, 16, 12, white(1, 0.5f), pw, '*', true, white());
 			
 			if (!connectStatus) {
-				if (Engine::Button(Display::width - expandPos + 100, 120, 79, 16, white(1, 0.2f), "Connect", 12, AnNode::font, white(), true) == MOUSE_RELEASE) {
+				if (Engine::Button(Display::width - expandPos + 100, 120, 79, 16, white(1, 0.2f), "Connect", 12, white(), true) == MOUSE_RELEASE) {
 					connectStatus = 1;
 					conThread = new std::thread(Connect);
 				}
 			}
 			else if (connectStatus == 255) {
-				if (Engine::Button(Display::width - expandPos + 100, 120, 79, 16, white(1, 0.2f), "Disconnect", 12, AnNode::font, white(), true) == MOUSE_RELEASE) {
+				if (Engine::Button(Display::width - expandPos + 100, 120, 79, 16, white(1, 0.2f), "Disconnect", 12, white(), true) == MOUSE_RELEASE) {
 					Disconnect();
 				}
 			}
-			UI::Label(Display::width - expandPos + 2, 138, 12, message, AnNode::font, Vec4(0.1f, 1.0f, 0.1f, 1.0f));
+			UI::Label(Display::width - expandPos + 2, 138, 12, message, Vec4(0.1f, 1.0f, 0.1f, 1.0f));
 
-			UI::Label(Display::width - expandPos + 4, 157, 12, "Working directory", AnNode::font, white());
-			path = UI::EditText(Display::width - expandPos + 1, 174, 178, 16, 12, white(1, 0.5f), path, AnNode::font, true, nullptr, white());
+			UI::Label(Display::width - expandPos + 4, 157, 12, "Working directory", white());
+			path = UI::EditText(Display::width - expandPos + 1, 174, 178, 16, 12, white(1, 0.5f), path, true, white());
 
 			off = 177;
 		}
@@ -71,12 +71,12 @@ void AnOps::Draw() {
 
 
 		off = max(off, Display::height - 68.0f - 18.f);
-		UI::Label(Display::width - expandPos + 2, off, 12, "Status", AnNode::font, white());
-		UI::Label(Display::width - expandPos + 4, off + 17, 12, "C++", AnNode::font, white());
+		UI::Label(Display::width - expandPos + 2, off, 12, "Status", white());
+		UI::Label(Display::width - expandPos + 4, off + 17, 12, "C++", white());
 		Engine::DrawQuad(Display::width - expandPos + 164, off + 18, 14, 14, (remote? AnWeb::hasC_s : AnWeb::hasC) ? green() : red());
-		UI::Label(Display::width - expandPos + 4, off + 34, 12, "Python", AnNode::font, white());
+		UI::Label(Display::width - expandPos + 4, off + 34, 12, "Python", white());
 		Engine::DrawQuad(Display::width - expandPos + 164, off + 34, 14, 14, (remote ? AnWeb::hasPy_s : AnWeb::hasPy) ? green() : red());
-		UI::Label(Display::width - expandPos + 4, off + 51, 12, "Fortran", AnNode::font, white());
+		UI::Label(Display::width - expandPos + 4, off + 51, 12, "Fortran", white());
 		Engine::DrawQuad(Display::width - expandPos + 164, off + 51, 14, 14, (remote ? AnWeb::hasFt_s : AnWeb::hasFt) ? green() : red());
 		
 		Engine::DrawQuad(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, white(0.9f, 0.15f));
@@ -89,7 +89,7 @@ void AnOps::Draw() {
 		if ((!UI::editingText && (Input::KeyUp(Key_O))) || Engine::Button(Display::width - expandPos - 110.0f, Display::height - 34.0f, 110.0f, 16.0f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(Display::width - expandPos - 110.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::expand);
-		UI::Label(Display::width - expandPos - 92.0f, Display::height - 33.0f, 12.0f, "Options (O)", AnNode::font, white());
+		UI::Label(Display::width - expandPos - 92.0f, Display::height - 33.0f, 12.0f, "Options (O)", white());
 		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.0f, 180.0f);
 	}
 }

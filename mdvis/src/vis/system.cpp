@@ -6,7 +6,6 @@
 
 Vec4 VisSystem::accentColor = Vec4(1, 1, 1, 1);
 uint VisSystem::renderMs, VisSystem::uiMs;
-Font* VisSystem::font;
 
 VIS_MOUSE_MODE VisSystem::mouseMode = VIS_MOUSE_MODE::ROTATE;
 
@@ -76,7 +75,7 @@ bool VisSystem::InMainWin(const Vec2& pos) {
 
 void VisSystem::DrawBar() {
 	Engine::DrawQuad(0, Display::height - 18.0f, (float)Display::width, 18, white(0.9f, 0.1f));
-	UI::Label(2, Display::height - 16.0f, 12, "Render: " + std::to_string(renderMs) + "ms  UI: " + std::to_string(uiMs) + "ms", font, white(0.5f));
+	UI::Label(2, Display::height - 16.0f, 12, "Render: " + std::to_string(renderMs) + "ms  UI: " + std::to_string(uiMs) + "ms", white(0.5f));
 
 	if (!!Particles::anim.frameCount) {
 		if (!UI::editingText) {
@@ -104,10 +103,10 @@ void VisSystem::DrawBar() {
 			Particles::SetFrame((uint)roundf(al * (Particles::anim.frameCount - 1)));
 		}
 
-		UI::Label(Display::width - 165.0f, Display::height - 16.0f, 12, std::to_string(Particles::anim.activeFrame + 1) + "/" + std::to_string(Particles::anim.frameCount), font, white());
+		UI::Label(Display::width - 165.0f, Display::height - 16.0f, 12, std::to_string(Particles::anim.activeFrame + 1) + "/" + std::to_string(Particles::anim.frameCount), white());
 	}
 	else
-		UI::Label(172, Display::height - 16.0f, 12, "No Animation Data", font, white(0.5f));
+		UI::Label(172, Display::height - 16.0f, 12, "No Animation Data", white(0.5f));
 
 	byte sel = (byte)mouseMode;
 	for (byte b = 0; b < 3; b++) {

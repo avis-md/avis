@@ -63,11 +63,11 @@ void Node_Volume::Draw() {
 	auto cnt = 1;
 	this->pos = pos;
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
-	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
-	UI::Label(pos.x + 20, pos.y + 1, 12, "Density Plot (DIM=3)", font, white());
+	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) expanded = !expanded;
+	UI::Label(pos.x + 20, pos.y + 1, 12, "Density Plot (DIM=3)", white());
 	DrawToolbar();
 	if (expanded) {
-		Engine::DrawQuad(pos.x, pos.y + 16, width, 3 + 17 * (cnt + 5), white(0.7f, 0.25f));
+		Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * (cnt + 5), white(0.7f, 0.25f));
 		float y = pos.y + 18;
 		const uint i = 0;
 		if (!AnWeb::selConnNode || (AnWeb::selConnIdIsOut && AnWeb::selConnNode != this)) {
@@ -91,7 +91,7 @@ void Node_Volume::Draw() {
 		else {
 			UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[i].first ? tex_circle_conn : tex_circle_open, red(0.3f));
 		}
-		UI::Label(pos.x + 10, y, 12, "values", font, white());
+		UI::Label(pos.x + 10, y, 12, "values", white());
 		
 	}
 #endif
@@ -100,8 +100,8 @@ void Node_Volume::Draw() {
 float Node_Volume::DrawSide() {
 #ifndef IS_ANSERVER
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
-	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
-	UI::Label(pos.x + 20, pos.y + 1, 12, "Density Plot", font, white());
+	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) expanded = !expanded;
+	UI::Label(pos.x + 20, pos.y + 1, 12, "Density Plot", white());
 	if (expanded) {
 		Engine::DrawQuad(pos.x, pos.y + 16, width, 17, white(0.7f, 0.25f));
 		

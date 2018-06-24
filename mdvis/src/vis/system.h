@@ -11,7 +11,6 @@ class VisSystem {
 public:
 	static Vec4 accentColor;
 	static uint renderMs, uiMs;
-	static Font* font;
 
 	static VIS_MOUSE_MODE mouseMode;
 	

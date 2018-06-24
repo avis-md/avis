@@ -45,10 +45,10 @@ void Node_Inputs::Draw() {
 	auto cnt = 4;
 	this->pos = pos;
 	Engine::DrawQuad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
-	UI::Label(pos.x + 2, pos.y + 1, 12, title, font, white());
+	UI::Label(pos.x + 2, pos.y + 1, 12, title, white());
 	Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.7f, 0.25f));
 	float y = pos.y + 20;
-	for (uint i = 0; i < cnt; i++, y += 17) {
+	for (int i = 0; i < cnt; i++, y += 17) {
 		if (!AnWeb::selConnNode || ((!AnWeb::selConnIdIsOut) && (AnWeb::selConnNode != this))) {
 			if (Engine::Button(pos.x + width - 5, y + 3, 10, 10, outputR[i].first ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
 				if (!AnWeb::selConnNode) {
@@ -72,10 +72,10 @@ void Node_Inputs::Draw() {
 		}
 
 		//UI::Texture(pos.x + width - 5, y + 3, 10, 10, outputR[i] ? tex_circle_conn : tex_circle_open);
-		font->Align(ALIGN_TOPRIGHT);
-		UI::Label(pos.x + width - 10, y, 12, script->outvars[i].first, font, white());
-		font->Align(ALIGN_TOPLEFT);
-		UI::Label(pos.x + 2, y, 12, script->outvars[i].second, font, white(0.3f), width * 0.67f - 6);
+		UI::font->Align(ALIGN_TOPRIGHT);
+		UI::Label(pos.x + width - 10, y, 12, script->outvars[i].first, white());
+		UI::font->Align(ALIGN_TOPLEFT);
+		UI::Label(pos.x + 2, y, 12, script->outvars[i].second, white(0.3f), width * 0.67f - 6);
 	}
 #endif
 }

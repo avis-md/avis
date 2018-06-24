@@ -7,6 +7,7 @@ uintptr_t UI::_lastEditText[UI_MAX_EDIT_TEXT_FRAMES] = {};
 uintptr_t UI::_editingEditText[UI_MAX_EDIT_TEXT_FRAMES] = {};
 ushort UI::_activeEditTextId = 0;
 ushort UI::_editingEditTextId = 0;
+Font* UI::font;
 bool UI::focused = true, UI::editingText = false;
 uint UI::_editTextCursorPos = 0;
 uint UI::_editTextCursorPos2 = 0;
@@ -30,6 +31,8 @@ void UI::Init() {
 	_defaultStyle.press.Set(white(1, 0.5f), black());
 
 	InitVao();
+
+	font = new Font(IO::path + "/res/font.ttf");
 }
 
 void UI::InitVao() {
@@ -166,7 +169,7 @@ void UI::Texture(float x, float y, float w, float h, ::Texture* texture, Vec4 ti
 	}
 }
 
-string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, const string& str2, Font* font, bool delayed, bool* changed, Vec4 fcol, Vec4 hcol, Vec4 acol, bool ser) {
+string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, const string& str2, bool delayed, Vec4 fcol, bool* changed, Font* font, Vec4 hcol, Vec4 acol, bool ser) {
 	Engine::PushStencil(x, y, w, h);
 	string str = str2;
 	_checkdraw;
@@ -230,7 +233,7 @@ string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, cons
 #endif
 		Engine::DrawQuad(x, y, w, h, black());
 		Engine::DrawQuad(x + 1, y + 1, w - 2, h - 2, white());
-		UI::Label(x + 2, y + 0.4f*h, s, _editTextString, font);
+		UI::Label(x + 2, y + 0.4f*h, s, _editTextString);
 
 		auto szz = _editTextString.size();
 		if (!!Input::mouse0State && !!szz && Rect(x, y, w, h).Inside(Input::mousePos)) {
@@ -253,7 +256,7 @@ string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, cons
 		else xp2 = font->poss[_editTextCursorPos2 * 4].x*Display::width;
 		if (_editTextCursorPos != _editTextCursorPos2) {
 			Engine::DrawQuad(xp, y + 2, xp2 - xp, h - 4, hcol);
-			UI::Label(min(xp, xp2), y + 0.4f*h, s, _editTextString.substr(min(_editTextCursorPos, _editTextCursorPos2), abs((int)_editTextCursorPos - (int)_editTextCursorPos2)), font, acol);
+			UI::Label(min(xp, xp2), y + 0.4f*h, s, _editTextString.substr(min(_editTextCursorPos, _editTextCursorPos2), abs((int)_editTextCursorPos - (int)_editTextCursorPos2)), acol);
 		}
 		_editTextBlinkTime += Time::delta;
 		if (fmod(_editTextBlinkTime, 1) < 0.5f) Engine::DrawLine(Vec2(xp, y + 2), Vec2(xp, y + h - 2), (_editTextCursorPos == _editTextCursorPos2) ? black() : white(), 1);
@@ -274,7 +277,7 @@ string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, cons
 		}
 		return delayed ? str : _editTextString;
 	}
-	else if (Engine::Button(x, y, w, h, bcol, str, s, font, fcol, false) == MOUSE_RELEASE) {
+	else if (Engine::Button(x, y, w, h, bcol, str, s, fcol) == MOUSE_RELEASE) {
 		memcpy(_editingEditText, _activeEditText, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
 		_editingEditTextId = _activeEditTextId;
 		_editTextCursorPos = str.size();
@@ -287,7 +290,7 @@ string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, cons
 	//#endif
 }
 
-string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, const string& str2, char repl, Font* font, bool delayed, bool* changed, Vec4 fcol, Vec4 hcol, Vec4 acol, bool ser) {
+string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, const string& str2, char repl, bool delayed, Vec4 fcol, bool* changed, Font* font, Vec4 hcol, Vec4 acol, bool ser) {
 	string str = str2;
 	string pstr = "";
 	_checkdraw;
@@ -347,7 +350,7 @@ string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, 
 		Engine::DrawQuad(x, y, w, h, black());
 		Engine::DrawQuad(x + 1, y + 1, w - 2, h - 2, white());
 		pstr.resize(_editTextString.size(), repl);
-		UI::Label(x + 2, y + 0.4f*h, s, pstr, font);
+		UI::Label(x + 2, y + 0.4f*h, s, pstr, black());
 
 		auto szz = _editTextString.size();
 		if (!!Input::mouse0State && !!szz && Rect(x, y, w, h).Inside(Input::mousePos)) {
@@ -371,7 +374,7 @@ string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, 
 		if (_editTextCursorPos != _editTextCursorPos2) {
 			Engine::DrawQuad(xp, y + 2, xp2 - xp, h - 4, hcol);
 			pstr.resize(_editTextString.size(), repl);
-			UI::Label(min(xp, xp2), y + 0.4f*h, s, pstr.substr(min(_editTextCursorPos, _editTextCursorPos2), abs((int)_editTextCursorPos - (int)_editTextCursorPos2)), font, acol);
+			UI::Label(min(xp, xp2), y + 0.4f*h, s, pstr.substr(min(_editTextCursorPos, _editTextCursorPos2), abs((int)_editTextCursorPos - (int)_editTextCursorPos2)), acol);
 		}
 		_editTextBlinkTime += Time::delta;
 		if (fmod(_editTextBlinkTime, 1) < 0.5f) Engine::DrawLine(Vec2(xp, y + 2), Vec2(xp, y + h - 2), (_editTextCursorPos == _editTextCursorPos2) ? black() : white(), 1);
@@ -392,7 +395,7 @@ string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, 
 	}
 	else {
 		pstr.resize(str.size(), repl);
-		if (Engine::Button(x, y, w, h, bcol, pstr, s, font, fcol, false) == MOUSE_RELEASE) {
+		if (Engine::Button(x, y, w, h, bcol, pstr, s, fcol, false) == MOUSE_RELEASE) {
 			memcpy(_editingEditText, _activeEditText, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
 			_editingEditTextId = _activeEditTextId;
 			_editTextCursorPos = str.size();
@@ -412,11 +415,11 @@ Vec3 AU(Vec3 vec) {
 	return vec;
 }
 
-void UI::Label(float x, float y, float s, string st, Font* font, Vec4 col, float maxw) {
-	Label(x, y, s, &st[0], st.size(), font, col, maxw);
+void UI::Label(float x, float y, float s, string st, Vec4 col, float maxw, Font* font) {
+	Label(x, y, s, &st[0], st.size(), col, maxw, font);
 }
 
-void UI::Label(float x, float y, float s, char* str, uint sz, Font* font, Vec4 col, float maxw) {
+void UI::Label(float x, float y, float s, char* str, uint sz, Vec4 col, float maxw, Font* font) {
 	sz = min(sz, (uint)strlen(str));
 	if (s <= 0) return;
 	GLuint tex = font->glyph((uint)round(s));

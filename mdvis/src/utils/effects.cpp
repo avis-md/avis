@@ -11,7 +11,8 @@ void Effects::Init(EFF_ENABLE_MASK mask) {
 		_InitBlur(vs);
 	if (!!(mask & EFF_ENABLE_GLOW))
 		;
-	if ((mask & EFF_ENABLE_FXAA) > 0x00ff);
+	if ((mask & EFF_ENABLE_FXAA) > 0x00ff)
+		;
 	if ((mask & EFF_ENABLE_SSAO) > 0x00ff)
 		_InitSSAO(vs);
 }

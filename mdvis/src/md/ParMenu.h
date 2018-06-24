@@ -10,7 +10,5 @@ public:
 	static bool expanded;
 	static float expandPos;
 
-	static Font* font;
-
 	static void Draw(), Draw_List(), Draw_Vis();
 };

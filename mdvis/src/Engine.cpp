@@ -118,17 +118,11 @@ void Engine::Init(string path) {
 	skyProgram = Shader::FromVF(vertcode, fragcodeSky);
 
 	Input::RegisterCallbacks();
-	MVP::Reset();
+	Font::Init();
 	UI::Init();
-	//ffmpeg_init finit = ffmpeg_init();
-	//Material::LoadOris();
+	MVP::Reset();
 	Light::InitShadow();
 	Camera::InitShaders();
-	Font::Init();
-	//SkinnedMeshRenderer::InitSkinning();
-	//VoxelRenderer::Init();
-	//if (!AudioEngine::Init()) Debug::Warning("AudioEngine", "Failed to initialize audio output!");
-
 	ScanQuadParams();
 
 	uint d[6] = {0, 2, 1, 2, 3, 1};
@@ -197,7 +191,7 @@ void Engine::PushStencil(float x, float y, float w, float h) {
 	if (!stencilRect) BeginStencil(x, y, w, h);
 	else {
 		stencilRects.push_back(Rect(x, y, w, h));
-		Rect rt = Rect(0, 0, Display::width, Display::height);
+		Rect rt = Rect(0, 0, (float)Display::width, (float)Display::height);
 		for (auto& r : stencilRects)
 			rt = rt.Intersection(r);
 		EndStencil();
@@ -209,7 +203,7 @@ void Engine::PopStencil() {
 	stencilRects.pop_back();
 	EndStencil();
 	if (!!stencilRects.size()) {
-		Rect rt = Rect(0, 0, Display::width, Display::height);
+		Rect rt = Rect(0, 0, (float)Display::width, (float)Display::height);
 		for (auto& r : stencilRects)
 			rt = rt.Intersection(r);
 		BeginStencil(rt.x, rt.y, rt.w, rt.h);
@@ -235,7 +229,7 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h) {
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4) {
 	return Button(x, y, w, h, normalVec4, Lerp(normalVec4, white(), 0.5f), Lerp(normalVec4, black(), 0.5f));
 }
-MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, string label, float labelSize, Font* labelFont, Vec4 labelVec4, bool labelCenter) {
+MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, string label, float labelSize, Vec4 labelVec4, bool labelCenter, Font* labelFont) {
 	return Button(x, y, w, h, normalVec4, Lerp(normalVec4, white(), 0.5f), Lerp(normalVec4, black(), 0.5f), label, labelSize, labelFont, labelVec4, labelCenter);
 }
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4) {
@@ -286,7 +280,7 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4,
 	MOUSE_STATUS b = Button(x, y, w, h, normalVec4, highlightVec4, pressVec4);
 	ALIGNMENT al = labelFont->alignment;
 	labelFont->alignment = labelCenter? ALIGN_MIDCENTER : ALIGN_MIDLEFT;
-	UI::Label(round(x + (labelCenter? w*0.5f : 2)), round(y + 0.4f*h), labelSize, label, labelFont, labelVec4);
+	UI::Label(round(x + (labelCenter? w*0.5f : 2)), round(y + 0.4f*h), labelSize, label, labelVec4, -1.0f, labelFont);
 	labelFont->alignment = al;
 	return b;
 }

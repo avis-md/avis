@@ -43,7 +43,7 @@ void Node_Recolor_All::Execute() {
 
 	float* src = *((float**)cv.value);
 
-	for (uint a = 0; a < st * sz; a++) {
+	for (int a = 0; a < st * sz; a++) {
 		data[a] = (byte)Clamp<float>(roundf(255 * src[a]), 0, 255);
 	}
 	OnAnimFrame();

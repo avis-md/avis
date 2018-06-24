@@ -33,8 +33,6 @@ public:
 	int logOffset = 0;
 	std::vector<std::pair<byte, string>> log;
 
-	static Font* font;
-
 	std::vector<std::pair<AnNode*, uint>> inputR, outputR;
 	std::vector<union AnVarBase> inputVDef;
 	std::vector<CVar> conV;

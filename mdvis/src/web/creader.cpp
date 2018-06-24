@@ -224,7 +224,7 @@ bool CReader::Read(string path, CScript** _scr) {
 			}
 		}
 		if (lln2 == TL("VECSZ(")) {
-			auto p1 = 6;
+			auto p1 = 6U;
 			auto p2 = ln.find_first_of(')');
 			if (p2 < p1) {
 				Debug::Warning("CReader", "VECSZ syntax is not correct!");

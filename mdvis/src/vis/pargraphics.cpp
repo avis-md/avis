@@ -71,22 +71,21 @@ void ParGraphics::Eff::Apply() {
 
 void ParGraphics::Eff::DrawMenu(float off) {
 	auto& expandPos = ParMenu::expandPos;
-	auto& font = ParMenu::font;
 	
-	UI::Label(expandPos - 148, off, 12, "Effects", font, white());
+	UI::Label(expandPos - 148, off, 12, "Effects", white());
 
 	off += 17;
 	Engine::DrawQuad(expandPos - 148, off, 146, 17 * 5, white(0.9f, 0.1f));
-	UI::Label(expandPos - 146, off, 12, "Ambient Occlusion", font, white());
+	UI::Label(expandPos - 146, off, 12, "Ambient Occlusion", white());
 	useSSAO = Engine::Toggle(expandPos - 20, off, 16, Icons::checkbox, useSSAO, white(), ORIENT_HORIZONTAL);
-	UI::Label(expandPos - 145, off + 17, 12, "Samples", font, white());
-	ssaoSamples = TryParse(UI::EditText(expandPos - 80, off + 17, 76, 16, 12, white(1, 0.5f), std::to_string(ssaoSamples), font, true, nullptr, white()), 0);
+	UI::Label(expandPos - 145, off + 17, 12, "Samples", white());
+	ssaoSamples = TryParse(UI::EditText(expandPos - 80, off + 17, 76, 16, 12, white(1, 0.5f), std::to_string(ssaoSamples), true, white()), 0);
 	ssaoSamples = Clamp(ssaoSamples, 10, 100);
-	UI::Label(expandPos - 145, off + 34, 12, "Radius", font, white());
+	UI::Label(expandPos - 145, off + 34, 12, "Radius", white());
 	ssaoRad = Engine::DrawSliderFill(expandPos - 80, off + 34, 76, 16, 0.001f, 0.05f, ssaoRad, white(1, 0.5f), white());
-	UI::Label(expandPos - 145, off + 51, 12, "Strength", font, white());
+	UI::Label(expandPos - 145, off + 51, 12, "Strength", white());
 	ssaoStr = Engine::DrawSliderFill(expandPos - 80, off + 51, 76, 16, 0, 3, ssaoStr, white(1, 0.5f), white());
-	UI::Label(expandPos - 145, off + 68, 12, "Blur", font, white());
+	UI::Label(expandPos - 145, off + 68, 12, "Blur", white());
 	ssaoBlur = Engine::DrawSliderFill(expandPos - 80, off + 68, 76, 16, 0, 40, ssaoBlur, white(1, 0.5f), white());
 	
 }
@@ -436,10 +435,10 @@ void ParGraphics::Reblit() {
 			UI::Texture(0, 0, (float)Display::width, (float)Display::height, bg, DRAWTEX_CROP);
 			MdChan::Draw(Vec2(Display::width * 0.5f, Display::height * 0.3f));
 			UI::Texture(Display::width * 0.5f - Display::height * 0.2f, Display::height * 0.4f, Display::height * 0.4f, Display::height * 0.2f, logo);
-			AnNode::font->Align(ALIGN_TOPCENTER);
-			UI::Label(Display::width * 0.5f, Display::height * 0.6f, 12, "Press F1 for Help", AnNode::font, white());
-			UI::Label(Display::width * 0.5f, Display::height * 0.6f + 14, 12, "Build: " __DATE__, AnNode::font, white());
-			AnNode::font->Align(ALIGN_TOPLEFT);
+			UI::font->Align(ALIGN_TOPCENTER);
+			UI::Label(Display::width * 0.5f, Display::height * 0.6f, 12, "Press F1 for Help", white());
+			UI::Label(Display::width * 0.5f, Display::height * 0.6f + 14, 12, "Build: " __DATE__, white());
+			UI::font->Align(ALIGN_TOPLEFT);
 		}
 	}
 	//*
@@ -520,62 +519,61 @@ void ParGraphics::DrawMenu() {
 	Vec3 center0 = rotCenter;
 
 	auto& expandPos = ParMenu::expandPos;
-	auto& font = ParMenu::font;
-	UI::Label(expandPos - 148, 3, 12, "Ambient", font, white());
+	UI::Label(expandPos - 148, 3, 12, "Ambient", white());
 	Engine::DrawQuad(expandPos - 149, 18, 148, 36, white(0.9f, 0.1f));
-	UI::Label(expandPos - 147, 20, 12, "Strength", font, white());
+	UI::Label(expandPos - 147, 20, 12, "Strength", white());
 	reflStr = Engine::DrawSliderFill(expandPos - 80, 19, 78, 16, 0, 2, reflStr, white(1, 0.5f), white());
-	UI::Label(expandPos - 147, 37, 12, "Falloff", font, white());
+	UI::Label(expandPos - 147, 37, 12, "Falloff", white());
 	reflStrDecay = Engine::DrawSliderFill(expandPos - 80, 36, 78, 16, 0, 200, reflStrDecay, white(1, 0.5f), white());
 	
-	UI::Label(expandPos - 148, 54, 12, "Rim Light", font, white());
+	UI::Label(expandPos - 148, 54, 12, "Rim Light", white());
 	Engine::DrawQuad(expandPos - 149, 68, 148, 38, white(0.9f, 0.1f));
-	UI::Label(expandPos - 147, 71, 12, "Offset", font, white());
+	UI::Label(expandPos - 147, 71, 12, "Offset", white());
 	rimOff = Engine::DrawSliderFill(expandPos - 80, 69, 78, 16, 0, 1, rimOff, white(1, 0.5f), white());
-	UI::Label(expandPos - 147, 88, 12, "Strength", font, white());
+	UI::Label(expandPos - 147, 88, 12, "Strength", white());
 	rimStr = Engine::DrawSliderFill(expandPos - 80, 88, 78, 16, 0, 5, rimStr, white(1, 0.5f), white());
 
-	UI::Label(expandPos - 148, 105, 12, "Camera", font, white());
+	UI::Label(expandPos - 148, 105, 12, "Camera", white());
 	Engine::DrawQuad(expandPos - 149, 121, 165, 140, white(0.9f, 0.1f));
-	UI::Label(expandPos - 147, 122, 12, "Target", font, white());
+	UI::Label(expandPos - 147, 122, 12, "Target", white());
 	bool htr = (rotCenterTrackId < ~0);
 	auto rf = rotCenterTrackId;
-	rotCenterTrackId = TryParse(UI::EditText(expandPos - 80, 122, 62, 16, 12, white(1, 0.5f), htr? std::to_string(rotCenterTrackId) : "", font, true, nullptr, white()), ~0U);
+	rotCenterTrackId = TryParse(UI::EditText(expandPos - 80, 122, 62, 16, 12, white(1, 0.5f), htr? std::to_string(rotCenterTrackId) : "", true, white()), ~0U);
 	if (htr && Engine::Button(expandPos - 97, 122, 16, 16, red()) == MOUSE_RELEASE) {
 		rotCenterTrackId = -1;
 	}
 	if (Engine::Button(expandPos - 18, 122, 16, 16, white(1, 0.5f)) == MOUSE_RELEASE) {
 		
 	}
-	UI::Label(expandPos - 147, 139, 12, "Center X", font, white());
-	UI::Label(expandPos - 147, 156, 12, "Center Y", font, white());
-	UI::Label(expandPos - 147, 173, 12, "Center Z", font, white());
-	rotCenter.x = TryParse(UI::EditText(expandPos - 80, 139, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotCenter.x), font, true, nullptr, white(!htr ? 1 : 0.5f)), 0.0f);
-	rotCenter.y = TryParse(UI::EditText(expandPos - 80, 156, 78, 16, 12, Vec4(0.4f, 0.6f, 0.4f, 1), std::to_string(rotCenter.y), font, true, nullptr, white(!htr ? 1 : 0.5f)), 0.0f);
-	rotCenter.z = TryParse(UI::EditText(expandPos - 80, 173, 78, 16, 12, Vec4(0.4f, 0.4f, 0.6f, 1), std::to_string(rotCenter.z), font, true, nullptr, white(!htr ? 1 : 0.5f)), 0.0f);
+	UI::Label(expandPos - 147, 139, 12, "Center X", white());
+	UI::Label(expandPos - 147, 156, 12, "Center Y", white());
+	UI::Label(expandPos - 147, 173, 12, "Center Z", white());
+	rotCenter.x = TryParse(UI::EditText(expandPos - 80, 139, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotCenter.x), true, white(!htr ? 1 : 0.5f)), 0.0f);
+	rotCenter.y = TryParse(UI::EditText(expandPos - 80, 156, 78, 16, 12, Vec4(0.4f, 0.6f, 0.4f, 1), std::to_string(rotCenter.y), true, white(!htr ? 1 : 0.5f)), 0.0f);
+	rotCenter.z = TryParse(UI::EditText(expandPos - 80, 173, 78, 16, 12, Vec4(0.4f, 0.4f, 0.6f, 1), std::to_string(rotCenter.z), true, white(!htr ? 1 : 0.5f)), 0.0f);
 	
-	UI::Label(expandPos - 147, 191, 12, "Rotation W", font, white());
-	UI::Label(expandPos - 147, 208, 12, "Rotation Y", font, white());
-	rotW = TryParse(UI::EditText(expandPos - 80, 191, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotW), font, true, nullptr, white()), 0.0f);
-	rotZ = TryParse(UI::EditText(expandPos - 80, 208, 78, 16, 12, Vec4(0.4f, 0.6f, 0.4f, 1), std::to_string(rotZ), font, true, nullptr, white()), 0.0f);
+	UI::Label(expandPos - 147, 191, 12, "Rotation W", white());
+	UI::Label(expandPos - 147, 208, 12, "Rotation Y", white());
+	rotW = TryParse(UI::EditText(expandPos - 80, 191, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotW), true, white()), 0.0f);
+	rotZ = TryParse(UI::EditText(expandPos - 80, 208, 78, 16, 12, Vec4(0.4f, 0.6f, 0.4f, 1), std::to_string(rotZ), true, white()), 0.0f);
 	
-	UI::Label(expandPos - 147, 226, 12, "Scale", font, white());
-	rotScale = TryParse(UI::EditText(expandPos - 80, 226, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotScale), font, true, nullptr, white()), 0.0f);
+	UI::Label(expandPos - 147, 226, 12, "Scale", white());
+	rotScale = TryParse(UI::EditText(expandPos - 80, 226, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotScale), true, white()), 0.0f);
 	rotScale = Clamp(rotScale, -6.0f, 2.0f);
 
-	UI::Label(expandPos - 147, 243, 12, "Quality", font, white());
+	UI::Label(expandPos - 147, 243, 12, "Quality", white());
 	auto cm = ChokoLait::mainCamera.raw();
 	auto ql = cm->quality;
-	if (Engine::Button(expandPos - 97, 243, 16, 16, Icons::refresh, white(0.8f), white(), white(1, 0.6f)) == MOUSE_RELEASE)
+	if (Engine::Button(expandPos - 97, 243, 16, 16, Icons::refresh) == MOUSE_RELEASE)
 		ql = 1;
 	ql = Engine::DrawSliderFill(expandPos - 80, 243, 78, 16, 0.25f, 1.5f, ql, white(1, 0.5f), white());
-	UI::Label(expandPos - 78, 243, 12, std::to_string(int(ql * 100)) + "%", font, black(0.6f));
+	UI::Label(expandPos - 78, 243, 12, std::to_string(int(ql * 100)) + "%", black(0.6f));
 	if (ql != cm->quality) {
 		cm->quality = ql;
 		Scene::dirty = true;
 	}
 	bool a2 = cm->useGBuffer2;
-	UI::Label(expandPos - 147, 260, 12, "Use Dynamic Quality", font, white());
+	UI::Label(expandPos - 147, 260, 12, "Use Dynamic Quality", white());
 	a2 = Engine::Toggle(expandPos - 19, 260, 16, Icons::checkbox, a2, white(), ORIENT_HORIZONTAL);
 	if (a2 != cm->useGBuffer2) {
 		cm->useGBuffer2 = a2;
@@ -584,10 +582,10 @@ void ParGraphics::DrawMenu() {
 	}
 	if (a2) {
 		Engine::DrawQuad(expandPos - 149, 277, 148, 18, white(0.9f, 0.1f));
-		UI::Label(expandPos - 147, 277, 12, "Quality 2", font, white());
+		UI::Label(expandPos - 147, 277, 12, "Quality 2", white());
 		ql = cm->quality2;
 		ql = Engine::DrawSliderFill(expandPos - 80, 277, 78, 16, 0.25f, 1, ql, white(1, 0.5f), white());
-		UI::Label(expandPos - 78, 277, 12, std::to_string(int(ql * 100)) + "%", font, black(0.6f));
+		UI::Label(expandPos - 78, 277, 12, std::to_string(int(ql * 100)) + "%", black(0.6f));
 		if (ql != cm->quality2) {
 			cm->quality2 = ql;
 			Scene::dirty = true;
@@ -603,7 +601,6 @@ void ParGraphics::DrawMenu() {
 }
 
 void ParGraphics::DrawPopupDM() {
-	auto& font = ParMenu::font;
 	auto& dt = *((byte*)Popups::data);
 	auto dto = dt;
 	byte a = dt & 0x0f;
@@ -614,21 +611,21 @@ void ParGraphics::DrawPopupDM() {
 	UI::Texture(Popups::pos.x, Popups::pos.y, 16, 16, Icons::OfDM(dt));
 	Engine::DrawQuad(Popups::pos.x, Popups::pos.y + 16, 111, 35, white(1, 0.3f));
 
-	UI::Label(Popups::pos.x + 2, Popups::pos.y + 18, 12, "Atoms", font, white());
+	UI::Label(Popups::pos.x + 2, Popups::pos.y + 18, 12, "Atoms", white());
 	for (byte i = 0; i < 4; i++) {
-		if (Engine::Button(Popups::pos.x + 42 + 17 * i, Popups::pos.y + 18, 16, 16, (&Icons::dm_none)[i], (i == a)? yellow() : white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+		if (Engine::Button(Popups::pos.x + 42 + 17 * i, Popups::pos.y + 18, 16, 16, (&Icons::dm_none)[i], (i == a)? yellow() : white(0.8f)) == MOUSE_RELEASE) {
 			dt = (dt & 0xf0) | i;
 			if (!dt) dt = 0x10;
 			else if (i == 3) dt = i;
 		}
 	}
-	UI::Label(Popups::pos.x + 2, Popups::pos.y + 35, 12, "Bonds", font, white());
-	if (Engine::Button(Popups::pos.x + 42, Popups::pos.y + 35, 16, 16, Icons::dm_none, (!b)? yellow() : white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+	UI::Label(Popups::pos.x + 2, Popups::pos.y + 35, 12, "Bonds", white());
+	if (Engine::Button(Popups::pos.x + 42, Popups::pos.y + 35, 16, 16, Icons::dm_none, (!b)? yellow() : white(0.8f)) == MOUSE_RELEASE) {
 			dt &= 0x0f;
 			if (a == 0) dt = 1;
 		}
 	for (byte i = 0; i < 2; i++) {
-		if (Engine::Button(Popups::pos.x + 59 + 17 * i, Popups::pos.y + 35, 16, 16, (&Icons::dm_line)[i], ((i+1) == b)? yellow() : white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+		if (Engine::Button(Popups::pos.x + 59 + 17 * i, Popups::pos.y + 35, 16, 16, (&Icons::dm_line)[i], ((i+1) == b)? yellow() : white(0.8f)) == MOUSE_RELEASE) {
 			dt = (dt & 0x0f) | (i << 4) + 0x10;
 			if (a == 3) dt = dt = (i << 4) + 0x12;
 		}

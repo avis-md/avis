@@ -94,7 +94,7 @@ void Protein::Refresh() {
                 
                 for (uint k = 0; k < rs.cnt_b; k++) {
                     auto& cn = Particles::particles_Conn[rs.offset_b + k];
-                    if (cn[1] >= rs.offset) {
+                    if (cn[1] >= (int)rs.offset) {
                         conns[cn[0] - rs.offset].push_back(cn[1]);
                         conns[cn[1] - rs.offset].push_back(cn[0]);
                     }
@@ -157,9 +157,9 @@ void Protein::Refresh() {
                     //p->chainTangents = new Vec3[p->cnt * 3];
                     //Solidify::GetTangents(p->chain, p->cnt, p->chainTangents);
                     
-                    for (int i = 0; i < p->cnt * 3; i++) {
+                    for (uint i = 0; i < p->cnt * 3; i++) {
                         auto& p1 = Particles::particles_Pos[p->chain[i * 2]];
-                        for (int j = 0; j < p->cnt * 3; i++) {
+                        for (uint j = 0; j < p->cnt * 3; i++) {
                             if (j < (i - 3) || j > (i + 3)) {
                                 auto& p2 = Particles::particles_Pos[p->chain[j * 2]];
                                 if (glm::length2(p1 - p2) < 33) {
@@ -221,14 +221,13 @@ void Protein::DrawMenu() {
 	//
 	if (!!proCnt) {
 		auto& expandPos = ParMenu::expandPos;
-		auto& font = ParMenu::font;
 
 		auto cr = pros->chainReso;
 		auto lr = pros->loopReso;
 
-		UI::Label(expandPos - 148, 3, 12, "Curve Reso", font, white());
+		UI::Label(expandPos - 148, 3, 12, "Curve Reso", white());
 		cr = (byte)Engine::DrawSliderFill(expandPos - 80, 2, 78, 16, 2, 20, cr, white(1, 0.5f), white());
-		UI::Label(expandPos - 147, 20, 12, "Bevel Reso", font, white());
+		UI::Label(expandPos - 147, 20, 12, "Bevel Reso", white());
 		lr = (byte)Engine::DrawSliderFill(expandPos - 80, 19, 78, 16, 6, 20, lr, white(1, 0.5f), white());
 
 		if (cr != pros->chainReso || lr != pros->loopReso) {

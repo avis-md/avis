@@ -4,7 +4,6 @@
 #include "ui/icons.h"
 #endif
 
-Font* AnNode::font = nullptr;
 Texture* AnNode::tex_circle_open = nullptr, *AnNode::tex_circle_conn = nullptr;
 float AnNode::width = 220;
 
@@ -34,7 +33,7 @@ Vec2 AnNode::DrawConn() {
 	for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 		if (inputR[i].first) Engine::DrawLine(Vec2(pos.x, expanded ? y + 8 : pos.y + 8), Vec2(inputR[i].first->pos.x + inputR[i].first->width, inputR[i].first->expanded ? inputR[i].first->pos.y + 20 + 8 + (inputR[i].second + inputR[i].first->inputR.size()) * 17 : inputR[i].first->pos.y + 8), white(), 2);
 	}
-	if (expanded) return Vec2(width, 19 + 17 * cnt + DrawLog(19 + 17 * cnt));
+	if (expanded) return Vec2(width, 19 + 17 * cnt + DrawLog(19.0f + 17 * cnt));
 	else return Vec2(width, 16 + DrawLog(16));
 #else
 	return Vec2();
@@ -46,11 +45,11 @@ float AnNode::DrawLog(float off) {
 	if (!sz) return 0;
 	auto sz2 = min<int>(sz, 10);
 	if (logExpanded) {
-		Engine::DrawQuad(pos.x, pos.y + off, width, 15 * sz2 + 2, black(0.9f));
-		for (uint i = 0; i < sz2; i++) {
+		Engine::DrawQuad(pos.x, pos.y + off, width, 15.0f * sz2 + 2, black(0.9f));
+		for (int i = 0; i < sz2; i++) {
 			auto& l = log[i + logOffset];
 			Vec4 col = (!l.first) ? white() : ((l.first == 1) ? yellow() : red());
-			UI::Label(pos.x + 4, pos.y + off + 1 + 15 * i, 12, l.second, font, col);
+			UI::Label(pos.x + 4, pos.y + off + 1 + 15 * i, 12, l.second, col);
 		}
 		if (sz > 10) {
 			float mw = 115;
@@ -64,7 +63,7 @@ float AnNode::DrawLog(float off) {
 				logOffset = min<int>(logOffset + 10, sz - 10);
 			}
 		}
-		return 15 * sz2 + 2;
+		return 15 * sz2 + 2.0f;
 	}
 	else {
 		Engine::DrawQuad(pos.x, pos.y + off, width, 2, black(0.9f));
@@ -77,7 +76,7 @@ void AnNode::Draw() {
 	auto cnt = (script->invars.size() + script->outvars.size());
 	Engine::DrawQuad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
-	UI::Label(pos.x + 18, pos.y + 1, 12, title, font, white());
+	UI::Label(pos.x + 18, pos.y + 1, 12, title, white());
 	DrawToolbar();
 	if (expanded) {
 		Engine::DrawQuad(pos.x, pos.y + 16.0f, width, 3.0f + 17 * cnt, white(0.7f, 0.25f));
@@ -104,22 +103,22 @@ void AnNode::Draw() {
 			else {
 				UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[i].first ? tex_circle_conn : tex_circle_open, red(0.3f));
 			}
-			UI::Label(pos.x + 10, y, 12, script->invars[i].first, font, white());
+			UI::Label(pos.x + 10, y, 12, script->invars[i].first, white());
 			if (!inputR[i].first) {
 				auto& vr = script->invars[i].second;
 				auto isi = (vr == "int");
 				if (isi || (vr == "float")) {
 					string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].f);
-					s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, font, true, nullptr, white());
+					s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, true, white());
 					if (isi) inputVDef[i].i = TryParse(s, 0);
 					else inputVDef[i].f = TryParse(s, 0.0f);
 				}
 				else {
-					UI::Label(pos.x + width * 0.33f, y, 12, script->invars[i].second, font, white(0.3f));
+					UI::Label(pos.x + width * 0.33f, y, 12, script->invars[i].second, white(0.3f));
 				}
 			}
 			else {
-				UI::Label(pos.x + width * 0.33f, y, 12, "<connected>", font, yellow());
+				UI::Label(pos.x + width * 0.33f, y, 12, "<connected>", yellow());
 			}
 		}
 		y += 2;
@@ -148,10 +147,10 @@ void AnNode::Draw() {
 			}
 
 
-			font->Align(ALIGN_TOPRIGHT);
-			UI::Label(pos.x + width - 10, y, 12, script->outvars[i].first, font, white());
-			font->Align(ALIGN_TOPLEFT);
-			UI::Label(pos.x + 2, y, 12, script->outvars[i].second, font, white(0.3f), width * 0.67f - 6);
+			UI::font->Align(ALIGN_TOPRIGHT);
+			UI::Label(pos.x + width - 10, y, 12, script->outvars[i].first, white());
+			UI::font->Align(ALIGN_TOPLEFT);
+			UI::Label(pos.x + 2, y, 12, script->outvars[i].second, white(0.3f), width * 0.67f - 6);
 		}
 		if (AnWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));
 	}
@@ -163,7 +162,7 @@ float AnNode::DrawSide() {
 	auto cnt = (script->invars.size());
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
-	UI::Label(pos.x + 20, pos.y + 1, 12, title, font, white());
+	UI::Label(pos.x + 20, pos.y + 1, 12, title, white());
 	if (this->log.size() && Engine::Button(pos.x + width - 17, pos.y, 16, 16, Icons::log, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
 		logExpanded = !logExpanded;
 	}
@@ -178,22 +177,22 @@ float AnNode::DrawSide() {
 		Engine::DrawQuad(pos.x, pos.y + (executing? 18 : 16), width, 2.0f + 17 * cnt, white(0.7f, 0.25f));
 		float y = pos.y + 18;
 		for (uint i = 0; i < script->invars.size(); i++, y += 17) {
-			UI::Label(pos.x + 2, y, 12, script->invars[i].first, font, white());
+			UI::Label(pos.x + 2, y, 12, script->invars[i].first, white());
 			if (!inputR[i].first) {
 				auto& vr = script->invars[i].second;
 				auto isi = (vr == "int");
 				if (isi || (vr == "float")) {
 					string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].f);
-					s = UI::EditText(pos.x + width * 0.4f, y, width * 0.6f - 3, 16, 12, white(1, 0.5f), s, font, true, nullptr, white());
+					s = UI::EditText(pos.x + width * 0.4f, y, width * 0.6f - 3, 16, 12, white(1, 0.5f), s, true, white());
 					if (isi) inputVDef[i].i = TryParse(s, 0);
 					else inputVDef[i].f = TryParse(s, 0.0f);
 				}
 				else {
-					UI::Label(pos.x + width * 0.4f, y, 12, script->invars[i].second, font, white(0.3f));
+					UI::Label(pos.x + width * 0.4f, y, 12, script->invars[i].second, white(0.3f));
 				}
 			}
 			else {
-				UI::Label(pos.x + width * 0.4f, y, 12, "<connected>", font, yellow());
+				UI::Label(pos.x + width * 0.4f, y, 12, "<connected>", yellow());
 			}
 		}
 		if (AnWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));
@@ -248,7 +247,7 @@ void AnNode::Save(std::ofstream& strm) {
 	uint iv = 0;
 	std::vector<int> is;
 	std::vector<bool> ii;
-	for (int i = 0; i < script->invars.size(); i++) {
+	for (uint i = 0; i < script->invars.size(); i++) {
 		if (script->invars[i].second == "int" || script->invars[i].second == "float") {
 			iv++;
 			is.push_back(i);
@@ -446,7 +445,7 @@ void CNode::Execute() {
 				auto& mv = scr->_invars[i];
 				*((float**)mv.value) = *((float**)cv.value);
 				
-				for (int j = 0; j < mv.dimVals.size(); j++) {
+				for (uint j = 0; j < mv.dimVals.size(); j++) {
 					*mv.dimVals[j] = *cv.dimVals[j];
 				}
 				break;

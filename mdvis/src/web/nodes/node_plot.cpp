@@ -18,7 +18,7 @@ void Node_Plot::Draw() {
 	this->pos = pos;
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
-	UI::Label(pos.x + 20, pos.y + 1, 12, "Plot list(DIM=1)", font, white());
+	UI::Label(pos.x + 20, pos.y + 1, 12, "Plot list(DIM=1)", white());
 	DrawToolbar();
 	if (expanded) {
 		Engine::DrawQuad(pos.x, pos.y + 16, width, 3 + 17 * cnt + width, white(0.7f, 0.25f));
@@ -47,10 +47,10 @@ void Node_Plot::Draw() {
 			UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[i].first ? tex_circle_conn : tex_circle_open, red(0.3f));
 		}
 		//UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[0].first ? tex_circle_conn : tex_circle_open);
-		UI::Label(pos.x + 10, y, 12, "values", font, white());
+		UI::Label(pos.x + 10, y, 12, "values", white());
 		//}
 		if (valXs.size()) {
-			plt::plot(pos.x + 12, pos.y + 18 + 17 * cnt, width - 14, width - 14, &valXs[0], &valYs[0], valXs.size(), font, 10, white(1, 0.8f));
+			plt::plot(pos.x + 12, pos.y + 18 + 17 * cnt, width - 14, width - 14, &valXs[0], &valYs[0], valXs.size(), UI::font, 10, white(1, 0.8f));
 		}
 	}
 #endif
@@ -60,11 +60,11 @@ float Node_Plot::DrawSide() {
 #ifndef IS_ANSERVER
 	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
-	UI::Label(pos.x + 20, pos.y + 1, 12, "Plot list(float)", font, white());
+	UI::Label(pos.x + 20, pos.y + 1, 12, "Plot list(float)", white());
 	if (expanded) {
 		Engine::DrawQuad(pos.x, pos.y + 16, width, 4 + width, white(0.7f, 0.25f));
 		if (valXs.size()) {
-			plt::plot(pos.x + 12, pos.y + 18, width - 14, width - 14, &valXs[0], &valYs[0], valXs.size(), font, 10, white(1, 0.8f));
+			plt::plot(pos.x + 12, pos.y + 18, width - 14, width - 14, &valXs[0], &valYs[0], valXs.size(), UI::font, 10, white(1, 0.8f));
 		}
 		return width + 21;
 	}
@@ -82,7 +82,7 @@ void Node_Plot::Execute() {
 	valXs.resize(sz);
 	valYs.resize(sz);
 	for (int i = 0; i < sz; i++) {
-		valXs[i] = i;
+		valXs[i] = (float)i;
 	}
 	float* src = *((float**)cv.value);
 	memcpy(&valYs[0], src, sz * sizeof(float));

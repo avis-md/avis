@@ -28,7 +28,6 @@ float repx, repy, repz;
 
 Gromacs* gro;
 Shader* shad, *shad2;
-Font* font;
 GLuint emptyVao;
 
 bool drawMesh;
@@ -87,9 +86,9 @@ void paintfunc() {
 			ParGraphics::hlIds.push_back(id);
 			id--;
 			Engine::DrawQuad(Input::mousePos.x + 14, Input::mousePos.y + 2, 120, 60, white(0.8f, 0.1f));
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Particle " + std::to_string(id), font, white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, &Particles::particles_ResName[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, font, white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, &Particles::particles_Name[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, font, white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Particle " + std::to_string(id), white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, &Particles::particles_ResName[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, &Particles::particles_Name[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
 			//UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, std::to_string(Particles::particles_Pos[id]), font, white());
 
 			if (Input::mouse0 && Input::dbclick) {
@@ -118,9 +117,6 @@ int main(int argc, char **argv)
 	icon.pixels = Texture::LoadPixels(IO::path + "/res/icon.png", chn, (uint&)icon.width, (uint&)icon.height);
 	if (icon.pixels) glfwSetWindowIcon(Display::window, 1, &icon);
 	delete[](icon.pixels);
-
-	ParMenu::font = VisSystem::font = AnNode::font = font = HelpMenu::font
-		= new Font(IO::path + "/arimo.ttf", ALIGN_TOPLEFT);
 
 	SSH::Init();
 	Icons::Init();

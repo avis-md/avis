@@ -98,14 +98,14 @@ void CVar::Write(std::ofstream& strm) {
 		auto sz = dimVals.size();
 		_StreamWrite(&sz, &strm, 1);
 		int totalSz = 1;
-		for (auto a = 0; a < sz; a++) {
+		for (uint a = 0; a < sz; a++) {
 			_StreamWrite((int32_t*)dimVals[a], &strm, 4);
 			totalSz *= *dimVals[a];
 		}
 		if (totalSz > 0) {
 			auto po = strm.tellp();
 			strm.write(*((char**)value), totalSz * sizeof(float));
-			long wt = (long)(strm.tellp() - po);
+			ulong wt = (ulong)(strm.tellp() - po);
 			if (wt < totalSz * sizeof(float) || strm.bad()) {
 				Debug::Error("CVar", "not enough bytes written!");
 			}

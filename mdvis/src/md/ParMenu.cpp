@@ -8,17 +8,16 @@ int ParMenu::activeMenu = 0;
 const string ParMenu::menuNames[] = { "Particles", "Visualize", "Proteins", "Display" };
 bool ParMenu::expanded = true;
 float ParMenu::expandPos = 150;
-Font* ParMenu::font = nullptr;
 
 void ParMenu::Draw() {
 	Engine::DrawQuad(0, 0, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
 	if (expanded) {
 		if (!Particles::particleSz) {
-			if (Engine::Button(expandPos - 110, Display::height * 0.4f - 40, 80, 80, Icons::openfile, white(0.4f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+			if (Engine::Button(expandPos - 110, Display::height * 0.4f - 40, 80, 80, Icons::openfile, white(0.4f)) == MOUSE_RELEASE) {
 
 			}
-			UI::Label(expandPos - 140, Display::height * 0.4f + 62, 12, " Drag & Drop Files here", font, white());
-			UI::Label(expandPos - 140, Display::height * 0.4f + 75, 12, "or Click Button to Import", font, white());
+			UI::Label(expandPos - 140, Display::height * 0.4f + 62, 12, " Drag & Drop Files here", white());
+			UI::Label(expandPos - 140, Display::height * 0.4f + 75, 12, "or Click Button to Import", white());
 		}
 		else {
 			switch (activeMenu) {
@@ -44,15 +43,15 @@ void ParMenu::Draw() {
 		}
 
 		Engine::RotateUI(90, Vec2(expandPos + 16, 0));
-		font->Align(ALIGN_TOPCENTER);
+		UI::font->Align(ALIGN_TOPCENTER);
 		for (uint i = 0; i < 4; i++) {
-			UI::Label(expandPos + 56 + 81 * i, 0, 12, menuNames[i], font, white());
+			UI::Label(expandPos + 56 + 81 * i, 0, 12, menuNames[i], white());
 		}
-		font->Align(ALIGN_TOPLEFT);
+		UI::font->Align(ALIGN_TOPLEFT);
 		Engine::ResetUIMatrix();
 
 		Engine::DrawQuad(expandPos, Display::height - 34.0f, 16, 16, white(0.9f, 0.15f));
-		if ((!UI::editingText && Input::KeyUp(Key_T)) || Engine::Button(expandPos, Display::height - 34.0f, 16, 16, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		if ((!UI::editingText && Input::KeyUp(Key_T)) || Engine::Button(expandPos, Display::height - 34.0f, 16, 16, Icons::collapse) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = Clamp(expandPos + 1500 * Time::delta, 2.0f, 150.0f);
 	}
@@ -60,7 +59,7 @@ void ParMenu::Draw() {
 		if ((!UI::editingText && Input::KeyUp(Key_T)) || Engine::Button(expandPos, Display::height - 34.0f, 115, 16, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(expandPos, Display::height - 34.0f, 16, 16, Icons::expand);
-		UI::Label(expandPos + 18, Display::height - 33.0f, 12, "Toolbar (T)", font, white());
+		UI::Label(expandPos + 18, Display::height - 33.0f, 12, "Toolbar (T)", white());
 		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.0f, 150.0f);
 	}
 }
@@ -82,16 +81,16 @@ void ParMenu::Draw_List() {
 		auto& rli = Particles::residueLists[i];
 		if (off > 0) {
 			Engine::DrawQuad(expandPos - 148, off, 146, 16, white(1, 0.3f));
-			if (Engine::Button(expandPos - 148, off, 16, 16, rli.expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+			if (Engine::Button(expandPos - 148, off, 16, 16, rli.expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) {
 				rli.expanded = !rli.expanded;
 			}
-			UI::Label(expandPos - 132, off, 12, rli.name, font, white(rli.visible ? 1 : 0.5f));
+			UI::Label(expandPos - 132, off, 12, rli.name, white(rli.visible ? 1 : 0.5f));
 			if (Engine::Button(expandPos - 35, off, 16, 16, Icons::OfDM(rli.drawType), white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
 				Popups::type = POPUP_TYPE::DRAWMODE;
 				Popups::pos = Vec2(expandPos - 35, off);
 				Popups::data = &rli.drawType;
 			}
-			if (Engine::Button(expandPos - 18, off, 16, 16, rli.visible ? Icons::visible : Icons::hidden, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+			if (Engine::Button(expandPos - 18, off, 16, 16, rli.visible ? Icons::visible : Icons::hidden) == MOUSE_RELEASE) {
 				rli.visible = !rli.visible;
 				ParGraphics::UpdateDrawLists();
 			}
@@ -104,16 +103,16 @@ void ParMenu::Draw_List() {
 				auto& rj = rli.residues[j];
 				if (off > 0) {
 					Engine::DrawQuad(expandPos - 143, off, 141, 16, white(1, 0.35f));
-					if (Engine::Button(expandPos - 143, off, 16, 16, rj.expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+					if (Engine::Button(expandPos - 143, off, 16, 16, rj.expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) {
 						rj.expanded = !rj.expanded;
 					}
-					UI::Label(expandPos - 128, off, 12, rj.name, font, white((rli.visible && rj.visible) ? 1 : 0.5f));
+					UI::Label(expandPos - 128, off, 12, rj.name, white((rli.visible && rj.visible) ? 1 : 0.5f));
 					if (Engine::Button(expandPos - 35, off, 16, 16, Icons::OfDM(rj.drawType), white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
 						Popups::type = POPUP_TYPE::DRAWMODE;
 						Popups::pos = Vec2(expandPos - 35, off);
 						Popups::data = &rj.drawType;
 					}
-					if (Engine::Button(expandPos - 18, off, 16, 16, rj.visible ? Icons::visible : Icons::hidden, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+					if (Engine::Button(expandPos - 18, off, 16, 16, rj.visible ? Icons::visible : Icons::hidden) == MOUSE_RELEASE) {
 						rj.visible = !rj.visible;
 					}
 				}
@@ -123,7 +122,7 @@ void ParMenu::Draw_List() {
 				if (rj.expanded) {
 					for (uint k = 0; k < rj.cnt; k++) {
 						Engine::DrawQuad(expandPos - 138, off, 136, 16, white(1, 0.4f));
-						UI::Label(expandPos - 136, off, 12, &Particles::particles_Name[(rj.offset + k)*PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, font, white());
+						UI::Label(expandPos - 136, off, 12, &Particles::particles_Name[(rj.offset + k)*PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
 						Vec3& col = Particles::colorPallete[Particles::particles_Col[rj.offset + k]];
 						Engine::Button(expandPos - 18, off, 16, 16, Icons::circle, Vec4(col, 0.8f), Vec4(col, 1), Vec4(col, 0.5f));
 						off += 17;

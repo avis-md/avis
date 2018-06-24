@@ -283,7 +283,7 @@ bool RenderTexture::Parse(string path) {
 
 
 void Camera::InitGBuffer(uint w, uint h) {
-	_InitGBuffer(&d_fbo, &d_colfbo, d_texs, &d_depthTex, &d_idTex, &d_colTex, w, h);
+	_InitGBuffer(&d_fbo, &d_colfbo, d_texs, &d_depthTex, &d_idTex, &d_colTex, (float)w, (float)h);
 
 	glGenFramebuffers(NUM_EXTRA_TEXS, d_tfbo);
 	glGenTextures(NUM_EXTRA_TEXS, d_ttexs);

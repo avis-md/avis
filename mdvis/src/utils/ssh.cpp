@@ -215,7 +215,7 @@ void SSH::SendFile(const string& from, const string& to) {
 				break;
 			uint loc = 0;
 			while (cnt > 0) {
-				auto rc = libssh2_sftp_write(hnd, mem + loc, cnt);
+				auto rc = libssh2_sftp_write(hnd, mem + loc, (size_t)cnt);
 				cnt -= rc;
 				loc += rc;
 			}
