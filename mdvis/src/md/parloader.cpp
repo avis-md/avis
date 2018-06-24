@@ -48,6 +48,8 @@ void ParLoader::Scan() {
 	std::vector<string> fds;
 	IO::GetFolders(fd, &fds);
 	for (auto& f : fds) {
+		std::cout << "Import: " << f << std::endl;
+		std::ofstream ostrm(fd + f + "/import.log");
 		std::ifstream strm(fd + f + "/config.txt");
 		if (strm.is_open()) {
 			ParImporter* imp = new ParImporter();
@@ -62,14 +64,14 @@ void ParLoader::Scan() {
 					else if (tp == "file") {
 						imp->lib = new DyLib(fd + f + OSFD + vl + LIBEXT);
 						if (!imp->lib) {
-							Debug::Warning("ParLoader", "Importer lib file not found!");
+							ostrm << "Importer lib file not found!";
 							goto err;
 						}
 					}
 				}
 				else {
 					if (!imp->lib) {
-						Debug::Warning("ParLoader", "Importer lib file must be defined before configurations!");
+						ostrm << "Importer lib file must be defined before configurations!";
 						goto err;
 					}
 					s = _RMSP(s);
@@ -88,7 +90,7 @@ void ParLoader::Scan() {
 								auto vl = s.substr(lc + 1);
 								if (tp == "func") {
 									if (!(pr.second = (ParImporter::loadsig)imp->lib->GetSym(vl))) {
-										Debug::Warning("ParLoader", "Importer function \"" + vl + "\" not found!");
+										ostrm << "Importer function \"" << vl << "\" not found!";
 										goto err;
 									}
 									vlc++;
@@ -118,7 +120,7 @@ void ParLoader::Scan() {
 								auto vl = s.substr(lc + 1);
 								if (tp == "func") {
 									if (!(pr.second = (ParImporter::loadtrjsig)imp->lib->GetSym(vl))) {
-										Debug::Warning("ParLoader", "Importer function \"" + vl + "\" not found!");
+										ostrm << "Importer function \"" << vl << "\" not found!";
 										goto err;
 									}
 									vlc++;
@@ -139,7 +141,12 @@ void ParLoader::Scan() {
 					}
 				}
 			}
+			if (!imp->name.size() || !imp->sig.size() || !imp->lib || !imp->funcs.size() || !imp->trjFuncs.size()) {
+				ostrm << "Config contents incomplete!";
+				goto err;
+			}
 			importers.push_back(imp);
+			ostrm << "ok";
 			continue;
 		err:
 			delete(imp);
