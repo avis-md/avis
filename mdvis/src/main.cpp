@@ -131,13 +131,7 @@ int main(int argc, char **argv)
 	Effects::Init(0xffff);
 	MdChan::Init();
 
-	ParImporter* imp = new ParImporter();
-	imp->name = "Gromacs";
-	imp->sig = "gro";
-	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
-	imp->funcs.back().first.push_back(".gro");
-	imp->funcs.back().second = Gromacs::Read;
-	ParLoader::importers.push_back(imp);
+	ParLoader::Scan();
 
 	AnBrowse::Scan();
 	
@@ -156,9 +150,11 @@ int main(int argc, char **argv)
 	//MDVBin::Read(IO::path + "/ayuba2/000000.bin", false);
 	//MDVBin::ReadTrj(IO::path + "/ayuba2/");
 	string ss = IO::path + "/pbc.gro";
-	const char* c[1];
-	c[0] = &ss[0];
-	ParLoader::OnDropFile(1, &c[0]);
+	ParLoader::droppedFiles.resize(1, ss);
+	ParLoader::DoOpen();
+	ParLoader::droppedFiles[0] = IO::path + "/pbc.trr";
+	ParLoader::DoOpenAnim();
+	//ParLoader::OnDropFile(1, &c[0]);
 
 	//Protein::Refresh();
 	//ParGraphics::UpdateDrawLists();

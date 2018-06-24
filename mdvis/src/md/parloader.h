@@ -31,7 +31,7 @@ struct TrjInfo {
 
 struct ParImporter {
 	typedef bool(*loadsig)(ParInfo*);
-	typedef bool(*loadtrjsig)(ParInfo*);
+	typedef bool(*loadtrjsig)(TrjInfo*);
 	string name, sig;
 	DyLib* lib;
 	std::vector<std::pair<std::vector<string>, loadsig>> funcs;
@@ -40,7 +40,7 @@ struct ParImporter {
 
 class ParLoader {
 public:
-	static void Init();
+	static void Init(), Scan();
 
 	static int impId, funcId;
 	static ParImporter* customImp;

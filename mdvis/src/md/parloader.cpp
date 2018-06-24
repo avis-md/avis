@@ -23,12 +23,149 @@ void ParLoader::Init() {
 	ChokoLait::dropFuncs.push_back(OnDropFile);
 }
 
+#if defined(PLATFORM_WIN)
+#define OSFD "/win32/"
+#define LIBEXT ".dll"
+#elif defined(PLATFORM_LNX)
+#define OSFD "/linux/"
+#define LIBEXT ".so"
+#elif defined(PLATFORM_OSX)
+#define OSFD "/osx/"
+#define LIBEXT ".so"
+#endif
+
+string _RMSP(string s) {
+	string res;
+	res.reserve(s.size());
+	for (auto& c : s) {
+		if (c != ' ') res += c;
+	}
+	return res;
+}
+
+void ParLoader::Scan() {
+	string fd = IO::path + "/bin/importers/";
+	std::vector<string> fds;
+	IO::GetFolders(fd, &fds);
+	for (auto& f : fds) {
+		std::ifstream strm(fd + f + "/config.txt");
+		if (strm.is_open()) {
+			ParImporter* imp = new ParImporter();
+			string s, libname;
+			while (std::getline(strm, s)) {
+				auto lc = s.find_first_of('=');
+				if (lc != string::npos) {
+					auto tp = s.substr(0, lc);
+					auto vl = s.substr(lc + 1);
+					if (tp == "name") imp->name = vl;
+					else if (tp == "signature") imp->sig = vl;
+					else if (tp == "file") {
+						imp->lib = new DyLib(fd + f + OSFD + vl + LIBEXT);
+						if (!imp->lib) {
+							Debug::Warning("ParLoader", "Importer lib file not found!");
+							goto err;
+						}
+					}
+				}
+				else {
+					if (!imp->lib) {
+						Debug::Warning("ParLoader", "Importer lib file must be defined before configurations!");
+						goto err;
+					}
+					s = _RMSP(s);
+					auto lc = s.find('{');
+					if (lc != string::npos) {
+						auto tp = s.substr(0, lc);
+						if (tp == "configuration") {
+							std::getline(strm, s);
+							s = _RMSP(s);
+							std::pair<std::vector<string>, ParImporter::loadsig> pr;
+							int vlc = 0;
+							while (s != "}") {
+								auto lc = s.find_first_of('=');
+								if (lc == string::npos) continue;
+								auto tp = s.substr(0, lc);
+								auto vl = s.substr(lc + 1);
+								if (tp == "func") {
+									if (!(pr.second = (ParImporter::loadsig)imp->lib->GetSym(vl))) {
+										Debug::Warning("ParLoader", "Importer function \"" + vl + "\" not found!");
+										goto err;
+									}
+									vlc++;
+								}
+								else if (tp == "exts") {
+									auto ob = vl.find('[');
+									auto cb = vl.find(']');
+									pr.first = string_split(vl.substr(ob + 1, cb - ob - 1), ',');
+									vlc++;
+								}
+								std::getline(strm, s);
+								s = _RMSP(s);
+							}
+							if (vlc == 2) {
+								imp->funcs.push_back(pr);
+							}
+						}
+						else if (tp == "trajectory") {
+							std::getline(strm, s);
+							s = _RMSP(s);
+							std::pair<std::vector<string>, ParImporter::loadtrjsig> pr;
+							int vlc = 0;
+							while (s != "}") {
+								auto lc = s.find_first_of('=');
+								if (lc == string::npos) continue;
+								auto tp = s.substr(0, lc);
+								auto vl = s.substr(lc + 1);
+								if (tp == "func") {
+									if (!(pr.second = (ParImporter::loadtrjsig)imp->lib->GetSym(vl))) {
+										Debug::Warning("ParLoader", "Importer function \"" + vl + "\" not found!");
+										goto err;
+									}
+									vlc++;
+								}
+								else if (tp == "exts") {
+									auto ob = vl.find('[');
+									auto cb = vl.find(']');
+									pr.first = string_split(vl.substr(ob + 1, cb - ob - 1), ',');
+									vlc++;
+								}
+								std::getline(strm, s);
+								s = _RMSP(s);
+							}
+							if (vlc == 2) {
+								imp->trjFuncs.push_back(pr);
+							}
+						}
+					}
+				}
+			}
+			importers.push_back(imp);
+			continue;
+		err:
+			delete(imp);
+		}
+	}
+}
+
 bool ParLoader::DoOpen() {
-	ParInfo info;
+	ParInfo info = {};
 	info.path = droppedFiles[0].c_str();
 	info.nameSz = PAR_MAX_NAME_LEN;
 
-	if (impId > -1) importers[impId]->funcs[funcId].second(&info);
+	try {
+		if (impId > -1) {
+			if (!importers[impId]->funcs[funcId].second(&info)) {
+				if (!info.error[0])
+					Debug::Error("ParLoader", "Unspecified importer error!");
+				else
+					Debug::Error("ParLoader", "Importer error: " + string(info.error));
+			}
+		}
+	}
+	catch (char* c) {
+		Debug::Error("ParLoader", "Importer exception: " + string(c));
+		return false;
+	}
 
 	Particles::particleSz = info.num;
 	Particles::connSz = 0;
@@ -123,8 +260,38 @@ bool ParLoader::DoOpen() {
 }
 
 bool ParLoader::DoOpenAnim() {
+	auto& anm = Particles::anim;
+	anm.reading = true;
 
-	return false;
+	TrjInfo info = {};
+	info.first = droppedFiles[0].c_str();
+	info.parNum = Particles::particleSz;
+	info.maxFrames = maxframes;
+
+	if (impId > -1) importers[impId]->trjFuncs[funcId].second(&info);
+
+	if (!info.frames) return false;
+
+	anm.frameCount = info.frames;
+	anm.poss = new Vec3*[info.frames];
+	anm.poss[0] = new Vec3[info.frames * info.parNum];
+	anm.vels = new Vec3*[info.frames];
+	anm.vels[0] = new Vec3[info.frames * info.parNum];
+	for (uint16_t i = 0; i < info.frames; i++) {
+		anm.poss[i] = anm.poss[0] + info.parNum * i;
+		memcpy(anm.poss[i], info.poss[i], info.parNum * sizeof(Vec3));
+		delete[](info.poss[i]);
+		anm.poss[i] = anm.poss[0] + info.parNum * i;
+		if (info.vels) {
+			memcpy(anm.poss[i], info.poss[i], info.parNum * sizeof(Vec3));
+			delete[](info.poss[i]);
+		}
+	}
+	delete[](info.poss);
+	if (info.vels) delete[](info.vels);
+
+	anm.reading = false;
+	return true;
 }
 
 void ParLoader::DrawOpenDialog() {
