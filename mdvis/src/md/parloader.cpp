@@ -6,12 +6,12 @@
 #include "ui/icons.h"
 #include "utils/rawvector.h"
 
-int ParLoader::imp;
-string ParLoader::customImp;
+int ParLoader::impId, ParLoader::funcId;
+ParImporter* ParLoader::customImp;
 bool ParLoader::loadAsTrj = false, ParLoader::additive = false;
 int ParLoader::maxframes = 0;
 
-std::vector<std::pair<std::vector<string>, string>> ParLoader::importers;
+std::vector<ParImporter*> ParLoader::importers;
 
 bool ParLoader::showDialog = false;
 std::vector<string> ParLoader::droppedFiles;
@@ -23,12 +23,12 @@ void ParLoader::Init() {
 	ChokoLait::dropFuncs.push_back(OnDropFile);
 }
 
-bool ParLoader::DoOpen(const char* path) {
+bool ParLoader::DoOpen() {
 	ParInfo info;
-	info.path = path;
+	info.path = droppedFiles[0].c_str();
 	info.nameSz = PAR_MAX_NAME_LEN;
 
-	Gromacs::Read(&info);
+	if (impId > -1) importers[impId]->funcs[funcId].second(&info);
 
 	Particles::particleSz = info.num;
 	Particles::connSz = 0;
@@ -122,7 +122,7 @@ bool ParLoader::DoOpen(const char* path) {
 	return true;
 }
 
-bool ParLoader::OpenAnim(uint num, const char** paths) {
+bool ParLoader::DoOpenAnim() {
 
 	return false;
 }
@@ -156,7 +156,8 @@ void ParLoader::DrawOpenDialog() {
 	UI::Texture(woff + 383, hoff + 17, 16, 16, Icons::browse);
 	
 	UI::Label(woff + 2, hoff + 34, 12, "Importer", AnNode::font, white(), 326);
-	UI::Label(woff + 60, hoff + 34, 12, "Gromacs (.gro)", AnNode::font, white(0.5f), 326);
+	if (impId > -1)
+		UI::Label(woff + 60, hoff + 34, 12, importers[impId]->name + " (" + importers[impId]->sig + ")", AnNode::font, white(0.5f), 326);
 	if (Engine::Button(woff + 339, hoff + 34, 60, 16, white(1, 0.4f), _showImp ? "<<" : ">>", 12, AnNode::font, white(), true) == MOUSE_RELEASE) {
 		_showImp = !_showImp;
 	}
@@ -179,11 +180,12 @@ void ParLoader::DrawOpenDialog() {
 		showDialog = false;
 	}
 	if (Engine::Button(woff + 350, hoff + 283, 49, 16, white(0.4f), "Load", 12, AnNode::font, white(), true) == MOUSE_RELEASE) {
-		//
-		DoOpen(droppedFiles[0].c_str());
+		DoOpen();
 		showDialog = false;
 	}
 }
+
+#define EndsWith(s, s2) s.substr(sz - s2.size()) == s2
 
 bool ParLoader::OnDropFile(int i, const char** c) {
 	if (AnWeb::drawFull) return false;
@@ -192,8 +194,25 @@ bool ParLoader::OnDropFile(int i, const char** c) {
 		droppedFiles[i] = string(c[i]);
 	}
 	if (!Particles::particleSz) {
-		
+		impId = -1;
+		int id = 0;
+		auto sz = droppedFiles[0].size();
+		for (auto imp : importers) {
+			int id2 = 0;
+			for (auto& pr : imp->funcs) {
+				for (auto& s : pr.first) {
+					if (EndsWith(droppedFiles[0], s)) {
+						impId = id;
+						funcId = id2;
+						goto found;
+					}
+				}
+				id2++;
+			}
+			id++;
+		}
 	}
+	found:
 	showDialog = true;
 	return true;
 }

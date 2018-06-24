@@ -74,7 +74,41 @@ bool Gromacs::Read(ParInfo* info) {
 	return true;
 }
 
-void Gromacs::Read(const string& file, bool hasAnim) {
+bool Gromacs::ReadTrj(TrjInfo* info) {
+	int natoms = 0;
+	auto file = xdrfile_open(info->first, "rb");
+	if (!file) {
+		SETERR("Cannot open file!");
+		return false;
+	}
+
+	int step;
+	float t, lambda;
+	float* _ps;
+	std::vector<float*> poss;
+	bool ok;
+	do {
+		_ps = new float[info->parNum * 3];
+		ok = read_trr(file, &natoms, &step, &t, &lambda, 0, _ps, 0, 0);
+		if (!!ok) {
+			delete[](_ps);
+			break;
+		}
+		poss.push_back(_ps);
+		info->frames++;
+	} while (info->frames != info->maxFrames);
+	xdrfile_close(file);
+	info->poss = new float*[info->frames];
+	memcpy(info->poss, &poss[0], info->frames * sizeof(float));
+
+	if (!info->frames) {
+		SETERR("No frames contained in file!");
+		return false;
+	}
+	else return true;
+}
+
+void Gromacs::_Read(const string& file, bool hasAnim) {
 	Particles::Clear();
 
 	std::ifstream strm(file, std::ios::binary);
@@ -220,7 +254,7 @@ void Gromacs::Read(const string& file, bool hasAnim) {
 }
 
 
-bool Gromacs::ReadTrj(const string& path) {
+bool Gromacs::_ReadTrj(const string& path) {
 
 	int natoms = 0;
 	
@@ -249,34 +283,6 @@ bool Gromacs::ReadTrj(const string& path) {
 		}
 		if (!Particles::particles_Pos) {
 			Particles::particles_Pos = poss;
-			/*
-			auto cn = rawvector<Int2, uint>(Particles::particles_Conn, Particles::connSz, false);
-			Int2 lr = Particles::particles_Res[0];
-			for (uint i = 0; i < Particles::particleSz; i++) {
-				auto id1 = Particles::particles_Name[i * PAR_MAX_NAME_LEN];
-				auto& loc = Particles::particles_Res[i];
-				auto& tr = Particles::residueLists[loc[0]].residues[loc[1]];
-				if (loc != lr) {
-					lr = loc;
-					tr.offset_b = Particles::connSz;
-				}
-				for (uint j = 0; j < tr.cnt; j++) {
-					Vec3 dp = poss[tr.offset + j] - poss[i];
-					auto dst = glm::length2(dp);
-					if (dst < 0.0625) { //2.5A
-						auto id2 = Particles::particles_Name[j * PAR_MAX_NAME_LEN];
-						float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
-						if (dst < bst) {
-							cn.push(Int2(i, tr.offset + j));
-							tr.cnt_b++;
-						}
-					}
-				}
-			}
-			glBindBuffer(GL_ARRAY_BUFFER, Particles::connBuffer);
-			glBufferSubData(GL_ARRAY_BUFFER, Particles::connSz * 2 * sizeof(uint), 0, Particles::particles_Conn);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			*/
 		}
 		frm.push(poss);
 	}

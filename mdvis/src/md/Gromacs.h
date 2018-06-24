@@ -6,6 +6,8 @@
 class Gromacs {
 public:
 	static bool Read(ParInfo* info);
-	static void Read(const string& file, bool hasAnim);
-	static bool ReadTrj(const string& file); //short for trajectory(.trr)
+	static bool ReadTrj(TrjInfo* info);
+
+	static void _Read(const string& file, bool hasAnim);
+	static bool _ReadTrj(const string& file); //short for trajectory(.trr)
 };
