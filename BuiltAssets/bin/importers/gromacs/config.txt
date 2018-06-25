@@ -1,0 +1,13 @@
+name=Gromacs
+signature=gro
+file=gromacs
+
+configuration {
+    func=Read
+    exts=[.gro]
+}
+
+trajectory {
+    func=ReadTrj
+    exts=[.trr]
+}
