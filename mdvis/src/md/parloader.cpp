@@ -6,6 +6,8 @@
 #include "ui/icons.h"
 #include "utils/rawvector.h"
 
+#define EndsWith(s, s2) s.substr(sz - s2.size()) == s2
+
 int ParLoader::impId, ParLoader::funcId;
 ParImporter* ParLoader::customImp;
 bool ParLoader::loadAsTrj = false, ParLoader::additive = false;
@@ -314,10 +316,29 @@ void ParLoader::DrawOpenDialog() {
 		Engine::DrawQuad(woff + 400, hoff, _impPos, 300, white(0.8f, 0.1f));
 		Engine::PushStencil(woff + 400, hoff, _impPos, 300);
 		UI::Label(woff + 402, hoff, 12, "Choose Importer", white());
-		
+		uint i = 1;
+		for (auto& p : importers) {
+			if (Engine::Button(woff + 401, hoff + 17 * i, 298, 16, (impId == i - 1) ? Vec4(0.5f, 0.4f, 0.2f, 1) : white(0.4f), p->name, 12, white()) == MOUSE_RELEASE) {
+				impId = i - 1;
+				funcId = 0;
+				int id2 = 0;
+				auto sz = droppedFiles[0].size();
+				for (auto& pr : p->funcs) {
+					for (auto& s : pr.first) {
+						if (EndsWith(droppedFiles[0], s)) {
+							funcId = id2;
+							goto found;
+						}
+					}
+					id2++;
+				}
+			found:;
+			}
+			i++;
+		}
 		Engine::PopStencil();
 	}
-	_impPos = _showImp? min(_impPos + 800 * Time::delta, 100.0f) : max(_impPos - 800 * Time::delta, 0.0f);
+	_impPos = _showImp ? min(_impPos + 800 * Time::delta, 100.0f) : max(_impPos - 800 * Time::delta, 0.0f);
 
 	Engine::DrawQuad(woff, hoff, 400, 300, white(0.8f, 0.15f));
 	Engine::DrawQuad(woff, hoff, 400, 16, white(0.9f, 0.1f));
@@ -329,21 +350,36 @@ void ParLoader::DrawOpenDialog() {
 	}
 	UI::Label(woff + 62, hoff + 17, 12, nm, white(0.7f), 326);
 	UI::Texture(woff + 383, hoff + 17, 16, 16, Icons::browse);
-	
-	UI::Label(woff + 2, hoff + 34, 12, "Importer", white(), 326);
+
+	UI::Label(woff + 2, hoff + 17 * 2, 12, "Importer", white(), 326);
 	if (impId > -1)
 		UI::Label(woff + 60, hoff + 34, 12, importers[impId]->name + " (" + importers[impId]->sig + ")", white(0.5f), 326);
 	if (Engine::Button(woff + 339, hoff + 34, 60, 16, white(1, 0.4f), _showImp ? "<<" : ">>", 12, white(), true) == MOUSE_RELEASE) {
 		_showImp = !_showImp;
 	}
-	
+	UI::Label(woff + 2, hoff + 17 * 3, 12, "Module", white(), 326);
+	if (impId > -1) {
+		auto& ii = importers[impId];
+		uint i = 0;
+		if (loadAsTrj) {
+
+		}
+		else {
+			for (auto& f : ii->funcs) {
+				if (Engine::Button(woff + 60 + 50 * i, hoff + 17 * 3, 45, 16, (funcId == i)? Vec4(0.5f, 0.4f, 0.2f, 1) : white(0.4f), f.first[0], 12, white(), true) == MOUSE_RELEASE) {
+					funcId = i;
+				}
+				i++;
+			}
+		}
+	}
 	//if (Particles::particleSz) {
-		loadAsTrj = Engine::Toggle(woff + 1, hoff + 17 * 3, 16, Icons::checkbox, loadAsTrj, white(), ORIENT_HORIZONTAL);
-		UI::Label(woff + 30, hoff + 17 * 3, 12, "As Trajectory", white(), 326);
-		additive = Engine::Toggle(woff + 201, hoff + 17 * 3, 16, Icons::checkbox, additive, white(), ORIENT_HORIZONTAL);
-		UI::Label(woff + 230, hoff + 17 * 3, 12, "Additive", white(), 326);
+		loadAsTrj = Engine::Toggle(woff + 1, hoff + 17 * 4, 16, Icons::checkbox, loadAsTrj, white(), ORIENT_HORIZONTAL);
+		UI::Label(woff + 30, hoff + 17 * 4, 12, "As Trajectory", white(), 326);
+		additive = Engine::Toggle(woff + 201, hoff + 17 * 4, 16, Icons::checkbox, additive, white(), ORIENT_HORIZONTAL);
+		UI::Label(woff + 230, hoff + 17 * 4, 12, "Additive", white(), 326);
 	//}
-	UI::Label(woff + 2, hoff + 17 * 4, 12, "Options", white(), 326);
+	UI::Label(woff + 2, hoff + 17 * 5, 12, "Options", white(), 326);
 
 
 	string line = "";
@@ -359,8 +395,6 @@ void ParLoader::DrawOpenDialog() {
 		showDialog = false;
 	}
 }
-
-#define EndsWith(s, s2) s.substr(sz - s2.size()) == s2
 
 bool ParLoader::OnDropFile(int i, const char** c) {
 	if (AnWeb::drawFull) return false;

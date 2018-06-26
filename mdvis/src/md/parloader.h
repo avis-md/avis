@@ -22,7 +22,8 @@ struct TrjInfo {
 	const char* first; //IN
 	uint32_t parNum; //IN
 	uint16_t maxFrames; //IN
-	byte padding[5];
+	uint16_t frameSkip; //IN
+	byte padding[3];
 	uint16_t frames;
 	float** poss;
 	float** vels;
