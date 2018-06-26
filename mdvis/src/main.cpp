@@ -84,6 +84,23 @@ void paintfunc() {
 		auto id = ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y);
 		if (!!id) {
 			ParGraphics::hlIds.push_back(id);
+			if (Input::mouse0State == 1) {
+				if (Input::KeyHold(Key_LeftControl)) {
+					if (Input::KeyHold(Key_LeftShift)) {
+						auto f = std::find(ParGraphics::selIds.begin(), ParGraphics::selIds.end(), id);
+						if (f == ParGraphics::selIds.end()) ParGraphics::selIds.push_back(id);
+						else ParGraphics::selIds.erase(f);
+					}
+					else {
+						ParGraphics::selIds.resize(1);
+						ParGraphics::selIds[0] = id;
+						std::cout << "asdf";
+					}
+				}
+				else if (Input::dbclick)
+					ParGraphics::rotCenter = Particles::particles_Pos[id];
+			}
+
 			id--;
 			Engine::DrawQuad(Input::mousePos.x + 14, Input::mousePos.y + 2, 120, 60, white(0.8f, 0.1f));
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Particle " + std::to_string(id), white());
@@ -91,8 +108,10 @@ void paintfunc() {
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, &Particles::particles_Name[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
 			//UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, std::to_string(Particles::particles_Pos[id]), font, white());
 
-			if (Input::mouse0 && Input::dbclick) {
-				ParGraphics::rotCenter = Particles::particles_Pos[id];
+		}
+		else {
+			if ((Input::mouse0State == 1) && Input::KeyHold(Key_LeftControl)) {
+				ParGraphics::selIds.clear();
 			}
 		}
 	}
@@ -140,6 +159,18 @@ int main(int argc, char **argv)
 	auto l = lht->AddComponent<Light>();
 	ParGraphics::SetLight(l.get());
 
+	/*
+	ParImporter* imp = new ParImporter();
+	imp->name = "Gromacs";
+	imp->sig = "gro";
+	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
+	imp->funcs.back().first.push_back(".gro");
+	imp->funcs.back().second = Gromacs::Read;
+	imp->trjFuncs.push_back(std::pair<std::vector<string>, ParImporter::loadtrjsig>());
+	imp->trjFuncs.back().first.push_back(".trr");
+	imp->trjFuncs.back().second = Gromacs::ReadTrj;
+	ParLoader::importers.push_back(imp);
+	*/
 	//AnWeb::Load(IO::path + "/nodes/rdf.anl");
 	AnWeb::nodes.push_back(new Node_Recolor_All());
 	//AnWeb::nodes.push_back(new Node_AddBond());

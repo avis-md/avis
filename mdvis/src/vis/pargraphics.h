@@ -16,7 +16,7 @@ public:
 	static GLuint selHlProg, colProg;
 	static GLint selHlProgLocs[4], colProgLocs[5];
 
-	static std::vector<uint> hlIds;
+	static std::vector<uint> hlIds, selIds;
 	static std::vector<std::pair<uint, std::pair<uint, byte>>> drawLists, drawListsB;
 
 	static Vec3 rotCenter;

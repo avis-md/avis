@@ -9,6 +9,9 @@ const string ParMenu::menuNames[] = { "Particles", "Visualize", "Proteins", "Dis
 bool ParMenu::expanded = true;
 float ParMenu::expandPos = 150;
 
+uint ParMenu::selCnt;
+byte ParMenu::drawTypeAll, ParMenu::_drawTypeAll;
+
 void ParMenu::Draw() {
 	Engine::DrawQuad(0, 0, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
 	if (expanded) {
@@ -66,13 +69,29 @@ void ParMenu::Draw() {
 
 void ParMenu::Draw_List() {
 	if (Engine::Button(2, 2, 16, 16, Icons::select, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
-
+		SelAll();
 	}
 	if (Engine::Button(19, 2, 16, 16, Icons::deselect, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
-
+		SelClear();
 	}
 	if (Engine::Button(36, 2, 16, 16, Icons::flipselect, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
-
+		SelInv();
+	}
+	if (!!selCnt) {
+		if (Engine::Button(55, 2, 16, 16, Icons::OfDM(drawTypeAll), white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+			Popups::type = POPUP_TYPE::DRAWMODE;
+			Popups::pos = Vec2(55, 2);
+			_drawTypeAll = drawTypeAll;
+			Popups::data = &_drawTypeAll;
+		}
+		if ((Popups::type == POPUP_TYPE::DRAWMODE) && (_drawTypeAll != drawTypeAll)) {
+			drawTypeAll = _drawTypeAll;
+			for (uint i = 0; i < Particles::residueListSz; i++) {
+				auto& rli = Particles::residueLists[i];
+				if (rli.selected) rli.drawType = drawTypeAll;
+			}
+			ParGraphics::UpdateDrawLists();
+		}
 	}
 	Engine::DrawQuad(1, 18, expandPos - 2, Display::height - 37.0f, white(0.9f, 0.1f));
 	Engine::BeginStencil(0, 0, expandPos, Display::height - 18.0f);
@@ -80,11 +99,30 @@ void ParMenu::Draw_List() {
 	for (uint i = 0; i < Particles::residueListSz; i++) {
 		auto& rli = Particles::residueLists[i];
 		if (off > 0) {
-			Engine::DrawQuad(expandPos - 148, off, 146, 16, white(1, 0.3f));
+			Engine::DrawQuad(expandPos - 148, off, 146, 16, rli.selected? Vec4(0.45f, 0.3f, 0.1f, 1) : white(1, 0.3f));
 			if (Engine::Button(expandPos - 148, off, 16, 16, rli.expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) {
 				rli.expanded = !rli.expanded;
 			}
 			UI::Label(expandPos - 132, off, 12, rli.name, white(rli.visible ? 1 : 0.5f));
+			if (Engine::Button(expandPos - 130, off, 96, 16) == MOUSE_RELEASE) {
+				if (!Input::KeyHold(Key_LeftShift)) {
+					if (!(selCnt == 1 && rli.selected)) {
+						SelClear();
+						drawTypeAll = rli.drawType;
+						rli.selected = true;
+						selCnt = 1;
+					}
+					else {
+						rli.selected = false;
+						selCnt = 0;
+					}
+				}
+				else {
+					rli.selected = !rli.selected;
+					if (rli.selected && drawTypeAll != rli.drawType) drawTypeAll = 255;
+					selCnt += rli.selected ? 1 : -1;
+				}
+			}
 			if (Engine::Button(expandPos - 35, off, 16, 16, Icons::OfDM(rli.drawType), white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
 				Popups::type = POPUP_TYPE::DRAWMODE;
 				Popups::pos = Vec2(expandPos - 35, off);
@@ -120,9 +158,27 @@ void ParMenu::Draw_List() {
 				if (off >= Display::height)
 					goto loopout;
 				if (rj.expanded) {
+					auto& sell = ParGraphics::selIds;
 					for (uint k = 0; k < rj.cnt; k++) {
-						Engine::DrawQuad(expandPos - 138, off, 136, 16, white(1, 0.4f));
+						auto itr = std::find(sell.begin(), sell.end(), rj.offset + k + 1);
+						bool has = itr != sell.end();
+						Engine::DrawQuad(expandPos - 138, off, 136, 16, has? Vec4(0.3f, 0.5f, 0.3f, 1) : white(1, 0.4f));
 						UI::Label(expandPos - 136, off, 12, &Particles::particles_Name[(rj.offset + k)*PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
+						if (Engine::Button(expandPos - 138, off, 120, 16) == MOUSE_RELEASE) {
+							if (!Input::KeyHold(Key_LeftShift)) {
+								if (!(sell.size() == 1 && has)) {
+									sell.resize(1);
+									sell[0] = rj.offset + k + 1;
+								}
+								else {
+									sell.clear();
+								}
+							}
+							else {
+								if (has) sell.erase(itr);
+								else sell.push_back(rj.offset + k + 1);
+							}
+						}
 						Vec3& col = Particles::colorPallete[Particles::particles_Col[rj.offset + k]];
 						Engine::Button(expandPos - 18, off, 16, 16, Icons::circle, Vec4(col, 0.8f), Vec4(col, 1), Vec4(col, 0.5f));
 						off += 17;
@@ -139,4 +195,32 @@ loopout:
 
 void ParMenu::Draw_Vis() {
 	ParGraphics::DrawMenu();
+}
+
+void ParMenu::SelAll() {
+	drawTypeAll = Particles::residueLists[0].drawType;
+	for (uint i = 0; i < Particles::residueListSz; i++) {
+		auto& rli = Particles::residueLists[i];
+		rli.selected = true;
+		if (drawTypeAll != rli.drawType) drawTypeAll = 255;
+	}
+	selCnt = Particles::residueListSz;
+}
+
+void ParMenu::SelInv() {
+	drawTypeAll = Particles::residueLists[0].drawType;
+	for (uint i = 0; i < Particles::residueListSz; i++) {
+		auto& rli = Particles::residueLists[i];
+		rli.selected = !rli.selected;
+		if (rli.selected && drawTypeAll != rli.drawType) drawTypeAll = 255;
+	}
+	selCnt = Particles::residueListSz - selCnt;
+}
+
+void ParMenu::SelClear() {
+	for (uint i = 0; i < Particles::residueListSz; i++) {
+		auto& rli = Particles::residueLists[i];
+		rli.selected = false;
+	}
+	selCnt = 0;
 }

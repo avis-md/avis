@@ -184,6 +184,7 @@ bool ParLoader::DoOpen() {
 	Particles::particles_Col = new byte[info.num];
 	Particles::particles_Rad = new float[info.num];
 	Particles::particles_Res = new Int2[info.num];
+	ParGraphics::rotCenter = Particles::boundingBox * 0.5f;
 
 	auto rs = rawvector<ResidueList, uint>(Particles::residueLists, Particles::residueListSz);
 	auto rsv = rawvector<Residue, uint>(Particles::residueLists->residues, Particles::residueLists->residueSz);

@@ -19,7 +19,7 @@ GLint ParGraphics::reflProgLocs[] = {}, ParGraphics::parProgLocs[] = {}, ParGrap
 GLuint ParGraphics::selHlProg, ParGraphics::colProg;
 GLint ParGraphics::selHlProgLocs[] = {}, ParGraphics::colProgLocs[] = {};
 
-std::vector<uint> ParGraphics::hlIds;
+std::vector<uint> ParGraphics::hlIds, ParGraphics::selIds;
 std::vector<std::pair<uint, std::pair<uint, byte>>> ParGraphics::drawLists, ParGraphics::drawListsB;
 
 Vec3 ParGraphics::rotCenter = Vec3();
@@ -455,7 +455,7 @@ void ParGraphics::Reblit() {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	if (hlIds.size())
+	if (!!hlIds.size() || !!selIds.size())
 		BlitHl();
 }
 
@@ -496,18 +496,27 @@ void ParGraphics::BlitSky() {
 
 void ParGraphics::BlitHl() {
 	glUseProgram(selHlProg);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glUniform2f(selHlProgLocs[0], (float)Display::actualWidth, (float)Display::actualHeight);
-	glUniform1i(selHlProgLocs[1], hlIds[0]);
 	glUniform1i(selHlProgLocs[2], 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_idTex);
-	glUniform3f(selHlProgLocs[3], 1.0f, 1.0f, 0.0f);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	
 	glBindVertexArray(Camera::emptyVao);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	if (!!selIds.size()) {
+		glUniform3f(selHlProgLocs[3], 0.0f, 1.0f, 0.0f);
+		for (auto& i : selIds) {
+			glUniform1i(selHlProgLocs[1], i);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+	}
+	if (!!hlIds.size()) {
+		glUniform1i(selHlProgLocs[1], hlIds[0]);
+		glUniform3f(selHlProgLocs[3], 1.0f, 1.0f, 0.0f);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+
 	glBindVertexArray(0);
 	glUseProgram(0);
 }
@@ -614,20 +623,23 @@ void ParGraphics::DrawPopupDM() {
 	UI::Label(Popups::pos.x + 2, Popups::pos.y + 18, 12, "Atoms", white());
 	for (byte i = 0; i < 4; i++) {
 		if (Engine::Button(Popups::pos.x + 42 + 17 * i, Popups::pos.y + 18, 16, 16, (&Icons::dm_none)[i], (i == a)? yellow() : white(0.8f)) == MOUSE_RELEASE) {
+			if (dt == 255) dt = 0;
 			dt = (dt & 0xf0) | i;
 			if (!dt) dt = 0x10;
 			else if (i == 3) dt = i;
 		}
 	}
 	UI::Label(Popups::pos.x + 2, Popups::pos.y + 35, 12, "Bonds", white());
-	if (Engine::Button(Popups::pos.x + 42, Popups::pos.y + 35, 16, 16, Icons::dm_none, (!b)? yellow() : white(0.8f)) == MOUSE_RELEASE) {
-			dt &= 0x0f;
-			if (a == 0) dt = 1;
-		}
+	if (Engine::Button(Popups::pos.x + 42, Popups::pos.y + 35, 16, 16, Icons::dm_none, (!b) ? yellow() : white(0.8f)) == MOUSE_RELEASE) {
+		if (dt == 255) dt = 0;
+		dt &= 0x0f;
+		if (a == 0) dt = 1;
+	}
 	for (byte i = 0; i < 2; i++) {
 		if (Engine::Button(Popups::pos.x + 59 + 17 * i, Popups::pos.y + 35, 16, 16, (&Icons::dm_line)[i], ((i+1) == b)? yellow() : white(0.8f)) == MOUSE_RELEASE) {
+			if (dt == 255) dt = 0; 
 			dt = (dt & 0x0f) | (i << 4) + 0x10;
-			if (a == 3) dt = dt = (i << 4) + 0x12;
+			if (a == 3) dt = (i << 4) + 0x12;
 		}
 	}
 

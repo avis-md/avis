@@ -65,6 +65,6 @@ Texture* Icons::OfDM(byte b) {
 		case 0x12: return dm_lineball;
 		case 0x20: case 0x21: return dm_stick;
 		case 0x22: return dm_stickball;
-		default: return nullptr;
+		default: return dm_none;
 	}
 }

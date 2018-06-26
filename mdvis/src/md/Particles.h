@@ -13,10 +13,11 @@ struct Residue {
 	uint offset, offset_b;
 	ushort cnt, cnt_b;
 	byte type, drawType;
+	bool selected;
 };
 
 struct ResidueList { //residues with the same name
-	ResidueList() : visible(true), expanded(false), drawType(0x22) {}
+	ResidueList() : visible(true), expanded(false), drawType(0x22), selected(false) {}
 
 	~ResidueList() {
 		if (residues) std::free(residues);
@@ -28,6 +29,7 @@ struct ResidueList { //residues with the same name
 	Residue* residues = 0;
 	uint residueSz = 0;
 	byte drawType;
+	bool selected;
 };
 
 struct AnimData {
