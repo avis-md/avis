@@ -41,6 +41,14 @@ void rendFunc() {
 }
 
 void updateFunc() {
+	if (ParLoader::parDirty) {
+		ParLoader::parDirty = false;
+		Particles::UpdateBufs();
+		Particles::GenTexBufs();
+		Protein::Refresh();
+		ParGraphics::UpdateDrawLists();
+	}
+
 	ParGraphics::Update();
 
 	AnWeb::Update();
@@ -180,11 +188,12 @@ int main(int argc, char **argv)
 	//bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");
 	//MDVBin::Read(IO::path + "/ayuba2/000000.bin", false);
 	//MDVBin::ReadTrj(IO::path + "/ayuba2/");
-	string ss = IO::path + "/pbc.gro";
-	ParLoader::droppedFiles.resize(1, ss);
-	ParLoader::DoOpen();
-	ParLoader::droppedFiles[0] = IO::path + "/pbc.trr";
-	ParLoader::DoOpenAnim();
+	//string ss = IO::path + "/pbc.gro";
+	//ParLoader::droppedFiles.resize(1, ss);
+	//new std::thread(ParLoader::DoOpen);
+	//ParLoader::DoOpen();
+	//ParLoader::droppedFiles[0] = IO::path + "/pbc.trr";
+	//ParLoader::DoOpenAnim();
 	//ParLoader::OnDropFile(1, &c[0]);
 
 	//Protein::Refresh();

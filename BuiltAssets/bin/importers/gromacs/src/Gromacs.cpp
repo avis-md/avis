@@ -54,6 +54,7 @@ EXPORT bool Read(ParInfo* info) {
 	info->vel = new float[sz * 3];
 
 	for (uint i = 0; i < sz; i++) {
+		*info->progress = i * 1.0f / sz;
 		strm.getline(buf, 100);
 		if (strm.eof()) {
 			SETERR("File data is incomplete!");

@@ -6,6 +6,7 @@
 struct ParInfo {
 	const char* path; //IN
 	byte nameSz; //IN
+	float* progress; //IN
 	byte padding[6];
 	uint32_t num;
 	char* resname;
@@ -23,6 +24,7 @@ struct TrjInfo {
 	uint32_t parNum; //IN
 	uint16_t maxFrames; //IN
 	uint16_t frameSkip; //IN
+	float* progress; //IN
 	byte padding[3];
 	uint16_t frames;
 	float** poss;
@@ -50,16 +52,19 @@ public:
 
 	static std::vector<ParImporter*> importers;
 	
-	static bool showDialog;
+	static bool showDialog, busy, fault;
+	static bool parDirty, trjDirty;
+	static float loadProgress;
 	static std::vector<string> droppedFiles;
 
 	static bool _showImp;
 	static float _impPos, _impScr;
 
-	static bool DoOpen();
-	static bool DoOpenAnim();
+	static void DoOpen();
+	static void DoOpenAnim();
 
 	static void DrawOpenDialog();
 
 	static bool OnDropFile(int i, const char** c);
+	static void FindImpId(bool force = false);
 };

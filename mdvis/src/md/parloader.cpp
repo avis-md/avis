@@ -15,7 +15,9 @@ int ParLoader::maxframes = 0;
 
 std::vector<ParImporter*> ParLoader::importers;
 
-bool ParLoader::showDialog = false;
+bool ParLoader::showDialog = false, ParLoader::busy = false, ParLoader::fault = false;
+bool ParLoader::parDirty = false, ParLoader::trjDirty = false;
+float ParLoader::loadProgress = 0;
 std::vector<string> ParLoader::droppedFiles;
 
 bool ParLoader::_showImp = false;
@@ -156,10 +158,12 @@ void ParLoader::Scan() {
 	}
 }
 
-bool ParLoader::DoOpen() {
+void ParLoader::DoOpen() {
+	busy = true;
 	ParInfo info = {};
 	info.path = droppedFiles[0].c_str();
 	info.nameSz = PAR_MAX_NAME_LEN;
+	info.progress = &loadProgress;
 
 	try {
 		if (impId > -1) {
@@ -173,10 +177,10 @@ bool ParLoader::DoOpen() {
 	}
 	catch (char* c) {
 		Debug::Error("ParLoader", "Importer exception: " + string(c));
-		return false;
+		busy = false;
+		fault = true;
 	}
 
-	Particles::particleSz = info.num;
 	Particles::connSz = 0;
 	Particles::particles_ResName = info.resname;
 	Particles::particles_Name = info.name;
@@ -261,15 +265,14 @@ bool ParLoader::DoOpen() {
 
 		tr->cnt++;
 	}
-
-	Particles::UpdateBufs();
-	Particles::GenTexBufs();
-	Protein::Refresh();
-	ParGraphics::UpdateDrawLists();
-	return true;
+	Particles::particleSz = info.num;
+	busy = false;
+	fault = false;
+	ParLoader::parDirty = true;
 }
 
-bool ParLoader::DoOpenAnim() {
+void ParLoader::DoOpenAnim() {
+	busy = true;
 	auto& anm = Particles::anim;
 	anm.reading = true;
 
@@ -280,9 +283,11 @@ bool ParLoader::DoOpenAnim() {
 
 	if (impId > -1) importers[impId]->trjFuncs[funcId].second(&info);
 
-	if (!info.frames) return false;
+	if (!info.frames) {
+		busy = false;
+		fault = true;
+	}
 
-	anm.frameCount = info.frames;
 	anm.poss = new Vec3*[info.frames];
 	anm.poss[0] = new Vec3[info.frames * info.parNum];
 	anm.vels = new Vec3*[info.frames];
@@ -300,8 +305,11 @@ bool ParLoader::DoOpenAnim() {
 	delete[](info.poss);
 	if (info.vels) delete[](info.vels);
 
+	anm.frameCount = info.frames;
+
 	anm.reading = false;
-	return true;
+	busy = false;
+	fault = false;
 }
 
 void ParLoader::DrawOpenDialog() {
@@ -362,7 +370,12 @@ void ParLoader::DrawOpenDialog() {
 		auto& ii = importers[impId];
 		uint i = 0;
 		if (loadAsTrj) {
-
+			for (auto& f : ii->trjFuncs) {
+				if (Engine::Button(woff + 60 + 50 * i, hoff + 17 * 3, 45, 16, (funcId == i) ? Vec4(0.5f, 0.4f, 0.2f, 1) : white(0.4f), f.first[0], 12, white(), true) == MOUSE_RELEASE) {
+					funcId = i;
+				}
+				i++;
+			}
 		}
 		else {
 			for (auto& f : ii->funcs) {
@@ -374,7 +387,11 @@ void ParLoader::DrawOpenDialog() {
 		}
 	}
 	//if (Particles::particleSz) {
-		loadAsTrj = Engine::Toggle(woff + 1, hoff + 17 * 4, 16, Icons::checkbox, loadAsTrj, white(), ORIENT_HORIZONTAL);
+		auto l = Engine::Toggle(woff + 1, hoff + 17 * 4, 16, Icons::checkbox, loadAsTrj, white(), ORIENT_HORIZONTAL);
+		if (l != loadAsTrj) {
+			loadAsTrj = l;
+			FindImpId(true);
+		}
 		UI::Label(woff + 30, hoff + 17 * 4, 12, "As Trajectory", white(), 326);
 		additive = Engine::Toggle(woff + 201, hoff + 17 * 4, 16, Icons::checkbox, additive, white(), ORIENT_HORIZONTAL);
 		UI::Label(woff + 230, hoff + 17 * 4, 12, "Additive", white(), 326);
@@ -391,7 +408,14 @@ void ParLoader::DrawOpenDialog() {
 		showDialog = false;
 	}
 	if (Engine::Button(woff + 350, hoff + 283, 49, 16, white(0.4f), "Load", 12, white(), true) == MOUSE_RELEASE) {
-		DoOpen();
+		if (loadAsTrj) {
+			std::thread td(DoOpenAnim);
+			td.detach();
+		}
+		else {
+			std::thread td(DoOpen);
+			td.detach();
+		}
 		showDialog = false;
 	}
 }
@@ -402,10 +426,51 @@ bool ParLoader::OnDropFile(int i, const char** c) {
 	for (i--; i >= 0; i--) {
 		droppedFiles[i] = string(c[i]);
 	}
-	if (!Particles::particleSz) {
-		impId = -1;
-		int id = 0;
-		auto sz = droppedFiles[0].size();
+	loadAsTrj = !!Particles::particleSz;
+	FindImpId();
+	showDialog = true;
+	return true;
+}
+
+void ParLoader::FindImpId(bool force) {
+	impId = -1;
+	int id = 0;
+	auto sz = droppedFiles[0].size();
+	if (force) {
+		if (!loadAsTrj) {
+			for (auto imp : importers) {
+				int id2 = 0;
+				for (auto& pr : imp->funcs) {
+					for (auto& s : pr.first) {
+						if (EndsWith(droppedFiles[0], s)) {
+							impId = id;
+							funcId = id2;
+							return;
+						}
+					}
+					id2++;
+				}
+				id++;
+			}
+		}
+		else {
+			for (auto imp : importers) {
+				int id2 = 0;
+				for (auto& pr : imp->trjFuncs) {
+					for (auto& s : pr.first) {
+						if (EndsWith(droppedFiles[0], s)) {
+							impId = id;
+							funcId = id2;
+							return;
+						}
+					}
+					id2++;
+				}
+				id++;
+			}
+		}
+	}
+	else {
 		for (auto imp : importers) {
 			int id2 = 0;
 			for (auto& pr : imp->funcs) {
@@ -413,7 +478,20 @@ bool ParLoader::OnDropFile(int i, const char** c) {
 					if (EndsWith(droppedFiles[0], s)) {
 						impId = id;
 						funcId = id2;
-						goto found;
+						loadAsTrj = false;
+						return;
+					}
+				}
+				id2++;
+			}
+			id2 = 0;
+			for (auto& pr : imp->trjFuncs) {
+				for (auto& s : pr.first) {
+					if (EndsWith(droppedFiles[0], s)) {
+						impId = id;
+						funcId = id2;
+						loadAsTrj = true;
+						return;
 					}
 				}
 				id2++;
@@ -421,7 +499,4 @@ bool ParLoader::OnDropFile(int i, const char** c) {
 			id++;
 		}
 	}
-	found:
-	showDialog = true;
-	return true;
 }
