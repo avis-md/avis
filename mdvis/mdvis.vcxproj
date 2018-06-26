@@ -154,6 +154,7 @@
     <ClCompile Include="src\md\parloader.cpp" />
     <ClCompile Include="src\md\ParMenu.cpp" />
     <ClCompile Include="src\md\Particles.cpp" />
+    <ClCompile Include="src\md\pdb.cpp" />
     <ClCompile Include="src\md\Protein.cpp" />
     <ClCompile Include="src\ui\help.cpp" />
     <ClCompile Include="src\ui\popups.cpp" />
@@ -252,6 +253,7 @@
     <ClInclude Include="src\md\parloader.h" />
     <ClInclude Include="src\md\ParMenu.h" />
     <ClInclude Include="src\md\Particles.h" />
+    <ClInclude Include="src\md\pdb.h" />
     <ClInclude Include="src\md\Protein.h" />
     <ClInclude Include="src\ui\help.h" />
     <ClInclude Include="src\ui\popups.h" />

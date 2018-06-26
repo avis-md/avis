@@ -105,32 +105,25 @@ void Protein::Refresh() {
                         //if (_Has(conns[a], 'H')) {
                             _FOR(conns[a], 'C', b) {
                                 auto& cb = conns[b - rs.offset];
-                                uint b2 = _Has(cb, 'H');
-                                if (b2 < ~0U) {
+                                //uint b2 = _Has(cb, 'H');
+                                //if (b2 < ~0U) {
                                     _FOR(cb, 'C', c) {
                                         auto& cc = conns[c - rs.offset];
                                         uint c2 = _Has(cc, 'O');
                                         if (c2 < ~0U) {
                                             if (_CntOf(cc, 'C') == 1) {
                                                 ch[0] = a + rs.offset;
-                                                /*
-                                                for (auto ca : conns[a]) {
-                                                    if (ca >= rs.offset && ca != b) {
-                                                        ch[1] = ca;
-                                                        break;
-                                                    }
-                                                }
-                                                */
                                                 ch[2] = b;
                                                 //ch[3] = b2;
                                                 ch[4] = c;
+												std::cout << a + rs.offset << " " << b << " " << c << std::endl;
                                                 //ch[5] = c2;
                                                 ch[1] = ch[3] = ch[5] = 0;
                                                 goto found;
                                             }
                                         }
                                     }}
-                                }
+                                //}
                             }}
                         //}
                     }

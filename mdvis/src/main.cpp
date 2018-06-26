@@ -11,6 +11,7 @@
 #include "md/parloader.h"
 #include "md/Gromacs.h"
 #include "md/CDV.h"
+#include "md/pdb.h"
 #include "md/mdvbin.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
@@ -167,18 +168,15 @@ int main(int argc, char **argv)
 	auto l = lht->AddComponent<Light>();
 	ParGraphics::SetLight(l.get());
 
-	/*
+	
 	ParImporter* imp = new ParImporter();
-	imp->name = "Gromacs";
-	imp->sig = "gro";
+	imp->name = "Protein DataBank";
+	imp->sig = "pdb";
 	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
-	imp->funcs.back().first.push_back(".gro");
-	imp->funcs.back().second = Gromacs::Read;
-	imp->trjFuncs.push_back(std::pair<std::vector<string>, ParImporter::loadtrjsig>());
-	imp->trjFuncs.back().first.push_back(".trr");
-	imp->trjFuncs.back().second = Gromacs::ReadTrj;
+	imp->funcs.back().first.push_back(".pdb");
+	imp->funcs.back().second = PDB::Read;
 	ParLoader::importers.push_back(imp);
-	*/
+	
 	//AnWeb::Load(IO::path + "/nodes/rdf.anl");
 	AnWeb::nodes.push_back(new Node_Recolor_All());
 	//AnWeb::nodes.push_back(new Node_AddBond());
