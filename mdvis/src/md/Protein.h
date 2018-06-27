@@ -37,6 +37,8 @@ public:
     GLuint idBuf, idBufTex;
     byte chainReso, loopReso;
     
+	void ApplyChain();
+
     static byte proCnt;
     static Protein* pros;
 

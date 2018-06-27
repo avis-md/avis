@@ -18,6 +18,7 @@ std::vector<ParImporter*> ParLoader::importers;
 bool ParLoader::showDialog = false, ParLoader::busy = false, ParLoader::fault = false;
 bool ParLoader::parDirty = false, ParLoader::trjDirty = false;
 float ParLoader::loadProgress = 0;
+string ParLoader::loadName;
 std::vector<string> ParLoader::droppedFiles;
 
 bool ParLoader::_showImp = false;
@@ -164,6 +165,7 @@ void ParLoader::DoOpen() {
 	info.path = droppedFiles[0].c_str();
 	info.nameSz = PAR_MAX_NAME_LEN;
 	info.progress = &loadProgress;
+	loadName = "Reading file";
 
 	try {
 		if (impId > -1) {
@@ -204,8 +206,10 @@ void ParLoader::DoOpen() {
 
 	uint lastOff = 0, lastCnt = 0;
 
+	loadName = "Finding bonds";
 	for (uint i = 0; i < info.num; i++) {
-		auto id1 = info.name[i * PAR_MAX_NAME_LEN];
+		loadProgress = i * 1.0f / info.num;
+		auto id1 = info.type[i];//info.name[i * PAR_MAX_NAME_LEN];
 		auto& resId = info.resId[i];
 		uint64_t resNm = *((uint64_t*)(&info.resname[i * PAR_MAX_NAME_LEN])) & 0x000000ffffffffff;
 
@@ -239,15 +243,22 @@ void ParLoader::DoOpen() {
 			currResId = resId;
 		}
 		Vec3 vec = *((Vec3*)(&info.pos[i * 3]));
-		for (uint j = 0; j < lastCnt + tr->cnt; j++) {
+		int cnt = int(lastCnt + tr->cnt);
+		#pragma omp parallel for
+		for (int j = 0; j < cnt; j++) {
 			Vec3 dp = Particles::particles_Pos[lastOff + j] - vec;
-			auto dst = glm::length2(dp);
-			if (dst < 0.0625) { //2.5A
-				auto id2 = Particles::particles_Name[(lastOff + j) * PAR_MAX_NAME_LEN];
+
+			if (fabsf(dp.x) < 0.25f && fabsf(dp.y) < 0.25f && fabsf(dp.z) < 0.25f) {
+				//if (dst < 0.0625) { //2.5A
+				auto dst = glm::length2(dp);
+				uint32_t id2 = info.type[lastOff + j];//Particles::particles_Name[(lastOff + j) * PAR_MAX_NAME_LEN];
 				float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
 				if (dst < bst) {
-					cn.push(Int2(i, lastOff + j));
-					tr->cnt_b++;
+					#pragma omp critical
+					{
+						cn.push(Int2(i, lastOff + j));
+						tr->cnt_b++;
+					}
 				}
 			}
 		}

@@ -12,6 +12,7 @@
 #include "md/Gromacs.h"
 #include "md/CDV.h"
 #include "md/pdb.h"
+#include "md/XYZ.h"
 #include "md/mdvbin.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
@@ -177,6 +178,14 @@ int main(int argc, char **argv)
 	imp->funcs.back().second = PDB::Read;
 	ParLoader::importers.push_back(imp);
 	
+	imp = new ParImporter();
+	imp->name = "XYZ coords";
+	imp->sig = "xyz";
+	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
+	imp->funcs.back().first.push_back(".xyz");
+	imp->funcs.back().second = XYZ::Read;
+	ParLoader::importers.push_back(imp);
+
 	//AnWeb::Load(IO::path + "/nodes/rdf.anl");
 	AnWeb::nodes.push_back(new Node_Recolor_All());
 	//AnWeb::nodes.push_back(new Node_AddBond());

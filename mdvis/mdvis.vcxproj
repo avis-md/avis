@@ -65,6 +65,7 @@
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;CHOKO_LAIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -156,6 +157,7 @@
     <ClCompile Include="src\md\Particles.cpp" />
     <ClCompile Include="src\md\pdb.cpp" />
     <ClCompile Include="src\md\Protein.cpp" />
+    <ClCompile Include="src\md\XYZ.cpp" />
     <ClCompile Include="src\ui\help.cpp" />
     <ClCompile Include="src\ui\popups.cpp" />
     <ClCompile Include="src\utils\dylib.cpp" />
@@ -255,6 +257,7 @@
     <ClInclude Include="src\md\Particles.h" />
     <ClInclude Include="src\md\pdb.h" />
     <ClInclude Include="src\md\Protein.h" />
+    <ClInclude Include="src\md\XYZ.h" />
     <ClInclude Include="src\ui\help.h" />
     <ClInclude Include="src\ui\popups.h" />
     <ClInclude Include="src\utils\dylib.h" />

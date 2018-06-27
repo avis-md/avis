@@ -68,7 +68,8 @@ void Protein::Refresh() {
     if (pros) std::free(pros);
     auto proVec = rawvector<Protein, byte>(pros, proCnt);
     Protein* p = 0;
-    uint* ch;
+    uint* ch = 0;
+	bool isn = false;
     for (uint i = 0; i < Particles::residueListSz; i++) {
         auto& rl = Particles::residueLists[i];
         for (uint j = 0; j < rl.residueSz; j++) {
@@ -81,24 +82,43 @@ void Protein::Refresh() {
                     p->chain = (uint*)std::malloc(sizeof(uint) * 6);
                     ch = p->chain;
                     p->cnt = 1;
+					isn = true;
                 }
-                else {
-                    p->cnt++;
-                    p->chain = (uint*)std::realloc(p->chain, sizeof(uint) * 6 * p->cnt);
-                    ch = p->chain + (6 * (p->cnt-1));
-                }
+				else isn = false;
 
                 auto conns = std::vector<std::vector<uint>>(rs.cnt);
 
                 for (uint a = 0; a < rs.cnt; a++) conns[a] = std::vector<uint>();
-                
+
+				bool hascon = isn;
+				uint ls = ch[4];
                 for (uint k = 0; k < rs.cnt_b; k++) {
                     auto& cn = Particles::particles_Conn[rs.offset_b + k];
-                    if (cn[1] >= (int)rs.offset) {
-                        conns[cn[0] - rs.offset].push_back(cn[1]);
-                        conns[cn[1] - rs.offset].push_back(cn[0]);
-                    }
+					if (cn[1] >= (int)rs.offset) {
+						conns[cn[0] - rs.offset].push_back(cn[1]);
+						conns[cn[1] - rs.offset].push_back(cn[0]);
+					}
+					else if (cn[1] == ls)
+						hascon = true;
                 }
+
+				if (!isn) {
+					if (hascon) {
+						p->cnt++;
+						p->chain = (uint*)std::realloc(p->chain, sizeof(uint) * 6 * p->cnt);
+						ch = p->chain + (6 * (p->cnt - 1));
+					}
+					else {
+						p->ApplyChain();
+						proVec.push(Protein());
+						p = pros + (proCnt - 1);
+						p->first = Int2(i, j);
+						p->chain = (uint*)std::malloc(sizeof(uint) * 6);
+						ch = p->chain;
+						p->cnt = 1;
+						isn = true;
+					}
+				}
                 
                 for (uint a = 0; a < rs.cnt; a++) {
                     if (Particles::particles_Name[(a + rs.offset) * PAR_MAX_NAME_LEN] == 'N') {
@@ -116,8 +136,7 @@ void Protein::Refresh() {
                                                 ch[2] = b;
                                                 //ch[3] = b2;
                                                 ch[4] = c;
-												std::cout << a + rs.offset << " " << b << " " << c << std::endl;
-                                                //ch[5] = c2;
+												//ch[5] = c2;
                                                 ch[1] = ch[3] = ch[5] = 0;
                                                 goto found;
                                             }
@@ -133,51 +152,43 @@ void Protein::Refresh() {
             }
             else {
                 if (p) {
-                    /*
-                    std::vector<Vec3> pts(p->cnt * 3);
-                    for (uint i = 0; i < p->cnt * 3; i++)
-                        pts[i] = Particles::particles_Pos[p->chain[i]];
-                    std::vector<Vec3> res((p->cnt * 3 - 1) * 12 + 1);
-                    Spline::ToSpline(&pts[0], p->cnt * 3, 12, &res[0]);
-                    p->mesh = Solidify::Do(&res[0], (p->cnt * 3 - 1) * 12 + 1, 0.02f, 12);
-
-                    auto obj = SceneObject::New("Protein");
-                    Scene::active->AddObject(obj);
-                    obj->AddComponent<MeshFilter>()->mesh(p->mesh);
-                    obj->AddComponent<MeshRenderer>()->materials[0](mat);
-                    */
-
-                    //p->chainTangents = new Vec3[p->cnt * 3];
-                    //Solidify::GetTangents(p->chain, p->cnt, p->chainTangents);
-                    
-                    for (uint i = 0; i < p->cnt * 3; i++) {
-                        auto& p1 = Particles::particles_Pos[p->chain[i * 2]];
-                        for (uint j = 0; j < p->cnt * 3; i++) {
-                            if (j < (i - 3) || j > (i + 3)) {
-                                auto& p2 = Particles::particles_Pos[p->chain[j * 2]];
-                                if (glm::length2(p1 - p2) < 33) {
-                                    p->chain[i * 2 + 1] = j;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    glGenBuffers(1, &p->idBuf);
-                    glBindBuffer(GL_ARRAY_BUFFER, p->idBuf);
-                    glBufferData(GL_ARRAY_BUFFER, 6 * p->cnt * sizeof(uint), p->chain, GL_STATIC_DRAW);
-                    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-                    glGenTextures(1, &p->idBufTex);
-                    glBindTexture(GL_TEXTURE_BUFFER, p->idBufTex);
-                    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32UI, p->idBuf);
-                    glBindTexture(GL_TEXTURE_BUFFER, 0);
+					p->ApplyChain();
 
                     p = 0;
                 }
             }
         }
     }
+	if (p) {
+		p->ApplyChain();
+
+		p = 0;
+	}
+}
+
+void Protein::ApplyChain() {
+	for (uint i = 0; i < cnt * 3; i++) {
+		auto& p1 = Particles::particles_Pos[chain[i * 2]];
+		for (uint j = 0; j < cnt * 3; i++) {
+			if (j < (i - 3) || j >(i + 3)) {
+				auto& p2 = Particles::particles_Pos[chain[j * 2]];
+				if (glm::length2(p1 - p2) < 33) {
+					chain[i * 2 + 1] = j;
+					break;
+				}
+			}
+		}
+	}
+
+	glGenBuffers(1, &idBuf);
+	glBindBuffer(GL_ARRAY_BUFFER, idBuf);
+	glBufferData(GL_ARRAY_BUFFER, 6 * cnt * sizeof(uint), chain, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glGenTextures(1, &idBufTex);
+	glBindTexture(GL_TEXTURE_BUFFER, idBufTex);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32UI, idBuf);
+	glBindTexture(GL_TEXTURE_BUFFER, 0);
 }
 
 void Protein::Draw() {

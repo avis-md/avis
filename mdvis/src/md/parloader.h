@@ -55,6 +55,7 @@ public:
 	static bool showDialog, busy, fault;
 	static bool parDirty, trjDirty;
 	static float loadProgress;
+	static string loadName;
 	static std::vector<string> droppedFiles;
 
 	static bool _showImp;

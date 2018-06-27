@@ -46,7 +46,7 @@ bool CDV::Read(ParInfo* info) {
 			>> info->pos[id * 3 + 1]
 			>> info->pos[id * 3 + 2];
 	}
-	return false;
+	return true;
 }
 
 #define ISNUM(c) (c >= '0' && c <= '9')
