@@ -19,7 +19,7 @@ std::vector<ParImporter*> ParLoader::importers;
 
 bool ParLoader::showDialog = false, ParLoader::busy = false, ParLoader::fault = false;
 bool ParLoader::parDirty = false, ParLoader::trjDirty = false;
-float* ParLoader::loadProgress = 0;
+float* ParLoader::loadProgress = 0, *ParLoader::loadProgress2;
 string ParLoader::loadName;
 std::vector<string> ParLoader::droppedFiles;
 
@@ -167,11 +167,12 @@ void ParLoader::DoOpen() {
 	info.path = info.trajectory.first = droppedFiles[0].c_str();
 	info.nameSz = PAR_MAX_NAME_LEN;
 	loadProgress = &info.progress;
-	loadName = "Reading file";
+	loadProgress2 = &info.trajectory.progress;
+	loadName = "Reading file(s)";
 
 	//
-	info.trajectory.maxFrames = 10;
-	info.trajectory.frameSkip = 100;
+	info.trajectory.maxFrames = 100;
+	info.trajectory.frameSkip = 1;
 
 	try {
 		if (impId > -1) {
@@ -188,6 +189,8 @@ void ParLoader::DoOpen() {
 		busy = false;
 		fault = true;
 	}
+
+	*loadProgress2 = 0;
 
 	Particles::connSz = 0;
 	Particles::particles_ResName = info.resname;
@@ -216,21 +219,24 @@ void ParLoader::DoOpen() {
 
 	std::ifstream* strm = 0;
 
-	if (useConn && useConnCache && hasConnCache && !ovwConnCache) {
-		strm = new std::ifstream(droppedFiles[0] + ".conn", std::ios::binary);
-		char buf[100];
-		strm->getline(buf, 100, '\n');
-		strm->read((char*)(&Particles::connSz), 4);
-		Particles::particles_Conn = (Int2*)std::realloc(Particles::particles_Conn, Particles::connSz * sizeof(Int2));
-		strm->read((char*)Particles::particles_Conn, Particles::connSz * sizeof(Int2));
-		strm->read(buf, 2);
-		if (buf[0] != 'X' || buf[1] != 'X') {
-			useConnCache = false;
-			loadName = "Finding bonds";
+	if (useConn) {
+		if (useConnCache && hasConnCache && !ovwConnCache) {
+			strm = new std::ifstream(droppedFiles[0] + ".conn", std::ios::binary);
+			char buf[100];
+			strm->getline(buf, 100, '\n');
+			strm->read((char*)(&Particles::connSz), 4);
+			Particles::particles_Conn = (Int2*)std::realloc(Particles::particles_Conn, Particles::connSz * sizeof(Int2));
+			strm->read((char*)Particles::particles_Conn, Particles::connSz * sizeof(Int2));
+			strm->read(buf, 2);
+			if (buf[0] != 'X' || buf[1] != 'X') {
+				useConnCache = false;
+				loadName = "Finding bonds";
+			}
+			else loadName = "Reading bonds";
 		}
-		else loadName = "Reading bonds";
+		else loadName = "Finding bonds";
 	}
-	else loadName = "Finding bonds";
+	else loadName = "Post processing";
 	for (uint i = 0; i < info.num; i++) {
 		info.progress = i * 1.0f / info.num;
 		auto id1 = info.type[i];//info.name[i * PAR_MAX_NAME_LEN];
@@ -341,10 +347,10 @@ void ParLoader::DoOpen() {
 			anm.poss[i] = anm.poss[0] + info.num * i;
 			memcpy(anm.poss[i], trj.poss[i], info.num * sizeof(Vec3));
 			delete[](trj.poss[i]);
-			anm.poss[i] = anm.poss[0] + info.num * i;
+			anm.vels[i] = anm.vels[0] + info.num * i;
 			if (trj.vels) {
-				memcpy(anm.poss[i], trj.poss[i], info.num * sizeof(Vec3));
-				delete[](trj.poss[i]);
+				memcpy(anm.vels[i], trj.vels[i], info.num * sizeof(Vec3));
+				delete[](trj.vels[i]);
 			}
 		}
 		delete[](trj.poss);

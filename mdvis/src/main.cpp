@@ -160,7 +160,7 @@ int main(int argc, char **argv)
 	Effects::Init(0xffff);
 	MdChan::Init();
 
-	ParLoader::Scan();
+	//ParLoader::Scan();
 
 	AnBrowse::Scan();
 	
@@ -169,8 +169,15 @@ int main(int argc, char **argv)
 	auto l = lht->AddComponent<Light>();
 	ParGraphics::SetLight(l.get());
 
-	
 	ParImporter* imp = new ParImporter();
+	imp->name = "Gromacs";
+	imp->sig = "gro";
+	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
+	imp->funcs.back().first.push_back(".gro");
+	imp->funcs.back().second = Gromacs::Read;
+	ParLoader::importers.push_back(imp);
+	
+	imp = new ParImporter();
 	imp->name = "Protein DataBank";
 	imp->sig = "pdb";
 	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());

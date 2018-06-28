@@ -439,7 +439,13 @@ void ParGraphics::Reblit() {
 			if (ParLoader::busy) {
 				Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100, 6, white(0.8f, 0.2f));
 				Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100 * *ParLoader::loadProgress, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
-				UI::Label(Display::width * 0.5f - 48, Display::height * 0.6f + 10, 12, ParLoader::loadName);
+				float oy = 10;
+				if (ParLoader::loadProgress2 && *ParLoader::loadProgress2 > 0) {
+					Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f + 8, 100, 6, white(0.8f, 0.2f));
+					Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f + 8, 100 * *ParLoader::loadProgress2, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
+					oy = 18;
+				}
+				UI::Label(Display::width * 0.5f - 48, Display::height * 0.6f + oy, 12, ParLoader::loadName);
 			}
 			else {
 				UI::font->Align(ALIGN_TOPCENTER);

@@ -29,7 +29,7 @@ public:
 	
 	static bool showDialog, busy, fault;
 	static bool parDirty, trjDirty;
-	static float* loadProgress;
+	static float* loadProgress, *loadProgress2;
 	static string loadName;
 	static std::vector<string> droppedFiles;
 

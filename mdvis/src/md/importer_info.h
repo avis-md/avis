@@ -16,7 +16,7 @@ struct TrjInfo {
 	uint32_t parNum; //IN
 	uint16_t maxFrames; //IN
 	uint16_t frameSkip; //IN
-	float* progress;
+	float progress;
 	byte padding[3];
 	uint16_t frames;
 	float** poss;
