@@ -9,6 +9,7 @@ uint VisSystem::renderMs, VisSystem::uiMs;
 
 VIS_MOUSE_MODE VisSystem::mouseMode = VIS_MOUSE_MODE::ROTATE;
 
+float VisSystem::_defBondLength = 0.0225f; // 0.15
 std::unordered_map<uint, float> VisSystem::_bondLengths;
 std::unordered_map<ushort, Vec3> VisSystem::_type2Col;
 std::unordered_map<ushort, std::array<float, 2>> VisSystem::radii;

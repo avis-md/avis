@@ -8,6 +8,7 @@
 #define EXPORT extern "C"
 #endif
 typedef unsigned char byte;
+typedef unsigned int uint;
 #endif
 
 struct TrjInfo {
@@ -35,7 +36,13 @@ struct ParInfo {
 	uint16_t* resId;
 	float* pos;
 	float* vel; //OPT
+	struct ProSec{
+		enum TYPE { HELIX, SHEET } type;
+		uint16_t resSt, resEd;
+		byte helixPitch;
+	}* secStructs; //OPT
+	uint16_t secStructNum;
 	float bounds[6];
-	TrjInfo* trajectory; //OPT
-	char error[100];
+	TrjInfo trajectory; //OPT
+	char error[100]; //OPT
 };

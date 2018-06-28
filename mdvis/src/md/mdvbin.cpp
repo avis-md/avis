@@ -5,7 +5,37 @@
 
 #define RD(val) strm.read((char*)(&val), sizeof(val))
 
-void MDVBin::Read(const string& file, bool hasAnim) {
+bool MDVBin::Read(ParInfo* info) {
+	std::ifstream strm(info->path, std::ios::binary);
+	RD(info->num);
+	auto& sz = info->num;
+
+	info->resname = new char[sz * info->nameSz]{};
+	info->name = new char[sz * info->nameSz]{};
+	info->type = new uint16_t[sz];
+	info->resId = new uint16_t[sz];
+	info->pos = new float[sz * 3];
+	info->vel = new float[sz * 3];
+
+	for (uint i = 0; i < sz; i++) {
+		info->progress = i * 1.0f / sz;
+		RD(info->type[i]);
+		RD(info->pos[i * 3]);
+		RD(info->pos[i * 3 + 1]);
+		RD(info->pos[i * 3 + 2]);
+		RD(info->vel[i * 3]);
+		RD(info->vel[i * 3 + 1]);
+		RD(info->vel[i * 3 + 2]);
+	}
+
+	return true;
+}
+
+bool MDVBin::ReadTrj(TrjInfo* info) {
+	return false;
+}
+
+void MDVBin::_Read(const string& file, bool hasAnim) {
 	Particles::Clear();
 	glGenVertexArrays(1, &Particles::posVao);
 	glGenBuffers(1, &Particles::posBuffer);
@@ -81,7 +111,7 @@ void MDVBin::Read(const string& file, bool hasAnim) {
 }
 
 
-bool MDVBin::ReadTrj(const string& path) {
+bool MDVBin::_ReadTrj(const string& path) {
 	auto& anm = Particles::anim;
 	anm.reading = true;
 

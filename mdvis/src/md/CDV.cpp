@@ -21,7 +21,7 @@ bool CDV::Read(ParInfo* info) {
 	std::string s;
 	while (std::getline(strm, s)) {
 		pi = (uint32_t)std::stoi(string_split(s, ' ')[0]);
-		Particles::particleSz = std::max(sz, pi + 1);
+		sz = std::max(sz, pi + 1);
 	}
 
 	info->resname = new char[sz * info->nameSz]{};
@@ -47,6 +47,11 @@ bool CDV::Read(ParInfo* info) {
 			>> info->pos[id * 3 + 1]
 			>> info->pos[id * 3 + 2];
 	}
+
+	if (info->trajectory.maxFrames > 0) {
+		info->trajectory.parNum = sz;
+		ReadTrj(&info->trajectory);
+	}
 	return true;
 }
 
@@ -69,15 +74,15 @@ bool CDV::ReadTrj(TrjInfo* info) {
 			break;
 		}
 	}
-	int st = std::stoi(nm.substr(n2, n1 - n2 + 1));
-	auto nm1 = nmf.substr(0, ps + 1 + n2);
+	int st = std::stoi(nm.substr(n2 + 1, n1 - n2));
+	auto nm1 = nmf.substr(0, ps + 2 + n2);
 	auto nm2 = nm.substr(n1 + 1);
 	std::vector<float*> poss;
 	string s;
 	uint id, dm;
 	do {
 		std::stringstream sstrm;
-		sstrm << std::setw(n1 - n2 + 1) << std::setfill('0') << st;
+		sstrm << std::setw(n1 - n2) << std::setfill('0') << st;
 		std::ifstream strm(nm1 + sstrm.str() + nm2);
 		if (!strm.is_open()) break;
 		poss.push_back(new float[info->parNum * 3]);
@@ -85,13 +90,14 @@ bool CDV::ReadTrj(TrjInfo* info) {
 
 		std::getline(strm, s);
 		std::getline(strm, s);
-		for (uint j = 0; j < Particles::particleSz; j++) {
+		for (uint j = 0; j < info->parNum; j++) {
 			strm >> id >> dm;
 			strm >> ps[id * 3]
 				>> ps[id * 3 + 1]
 				>> ps[id * 3 + 2];
 		}
 
+		info->frames++;
 		st += info->frameSkip;
 	} while (info->frames != info->maxFrames);
 	info->poss = new float*[info->frames];

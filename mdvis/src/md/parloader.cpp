@@ -12,7 +12,7 @@ int ParLoader::impId, ParLoader::funcId;
 ParImporter* ParLoader::customImp;
 bool ParLoader::loadAsTrj = false, ParLoader::additive = false;
 int ParLoader::maxframes = 0;
-bool ParLoader::useConnCache, ParLoader::hasConnCache, ParLoader::oldConnCache, ParLoader::ovwConnCache;
+bool ParLoader::useConn, ParLoader::useConnCache, ParLoader::hasConnCache, ParLoader::oldConnCache, ParLoader::ovwConnCache;
 string ParLoader::connCachePath;
 
 std::vector<ParImporter*> ParLoader::importers;
@@ -164,10 +164,14 @@ void ParLoader::Scan() {
 void ParLoader::DoOpen() {
 	busy = true;
 	ParInfo info = {};
-	info.path = droppedFiles[0].c_str();
+	info.path = info.trajectory.first = droppedFiles[0].c_str();
 	info.nameSz = PAR_MAX_NAME_LEN;
 	loadProgress = &info.progress;
 	loadName = "Reading file";
+
+	//
+	info.trajectory.maxFrames = 10;
+	info.trajectory.frameSkip = 100;
 
 	try {
 		if (impId > -1) {
@@ -212,7 +216,7 @@ void ParLoader::DoOpen() {
 
 	std::ifstream* strm = 0;
 
-	if (useConnCache && hasConnCache && !ovwConnCache) {
+	if (useConn && useConnCache && hasConnCache && !ovwConnCache) {
 		strm = new std::ifstream(droppedFiles[0] + ".conn", std::ios::binary);
 		char buf[100];
 		strm->getline(buf, 100, '\n');
@@ -270,16 +274,16 @@ void ParLoader::DoOpen() {
 		}
 		Vec3 vec = *((Vec3*)(&info.pos[i * 3]));
 		int cnt = int(lastCnt + tr->cnt);
-		if (!useConnCache || !hasConnCache || ovwConnCache) {
+		if (useConn && (!useConnCache || !hasConnCache || ovwConnCache)) {
 #pragma omp parallel for
 			for (int j = 0; j < cnt; j++) {
 				Vec3 dp = Particles::particles_Pos[lastOff + j] - vec;
 
 				if (fabsf(dp.x) < 0.25f && fabsf(dp.y) < 0.25f && fabsf(dp.z) < 0.25f) {
-					//if (dst < 0.0625) { //2.5A
 					auto dst = glm::length2(dp);
 					uint32_t id2 = info.type[lastOff + j];//Particles::particles_Name[(lastOff + j) * PAR_MAX_NAME_LEN];
 					float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
+					if (!bst) bst = VisSystem::_defBondLength;
 					if (dst < bst) {
 #pragma omp critical
 						{
@@ -323,6 +327,33 @@ void ParLoader::DoOpen() {
 	}
 
 	Particles::particleSz = info.num;
+
+	if (info.trajectory.frames > 0) {
+		auto& trj = info.trajectory;
+		auto& anm = Particles::anim;
+		anm.reading = true;
+
+		anm.poss = new Vec3*[trj.frames];
+		anm.poss[0] = new Vec3[trj.frames * info.num];
+		anm.vels = new Vec3*[trj.frames];
+		anm.vels[0] = new Vec3[trj.frames * info.num];
+		for (uint16_t i = 0; i < trj.frames; i++) {
+			anm.poss[i] = anm.poss[0] + info.num * i;
+			memcpy(anm.poss[i], trj.poss[i], info.num * sizeof(Vec3));
+			delete[](trj.poss[i]);
+			anm.poss[i] = anm.poss[0] + info.num * i;
+			if (trj.vels) {
+				memcpy(anm.poss[i], trj.poss[i], info.num * sizeof(Vec3));
+				delete[](trj.poss[i]);
+			}
+		}
+		delete[](trj.poss);
+		if (trj.vels) delete[](trj.vels);
+
+		anm.frameCount = trj.frames;
+		anm.reading = false;
+	}
+
 	busy = false;
 	fault = false;
 	ParLoader::parDirty = true;
@@ -454,13 +485,17 @@ void ParLoader::DrawOpenDialog() {
 		UI::Label(woff + 230, hoff + 17 * 4, 12, "Additive", white(), 326);
 	//}
 	UI::Label(woff + 2, hoff + 17 * 5, 12, "Options", white(), 326);
-	useConnCache = Engine::Toggle(woff + 5, hoff + 17 * 6, 16, Icons::checkbox, useConnCache, white(), ORIENT_HORIZONTAL);
-	UI::Label(woff + 25, hoff + 17 * 6, 12, "Use Bond Cache", white(), 326);
-	if (useConnCache) {
-		UI::Label(woff + 5, hoff + 17 * 7, 12, hasConnCache ? "Cache found" + (string)(oldConnCache? "(outdated): " : ": ") + connCachePath : "No cache found", white(), 326);
-		if (hasConnCache) {
-			ovwConnCache = Engine::Toggle(woff + 300, hoff + 17 * 7, 16, Icons::checkbox, ovwConnCache, white(), ORIENT_HORIZONTAL);
-			UI::Label(woff + 320, hoff + 17 * 7, 12, "Overwrite", white(), 326);
+	useConn = Engine::Toggle(woff + 5, hoff + 17 * 6, 16, Icons::checkbox, useConn, white(), ORIENT_HORIZONTAL);
+	UI::Label(woff + 25, hoff + 17 * 6, 12, "Bonds", white(), 326);
+	if (useConn) {
+		useConnCache = Engine::Toggle(woff + 100, hoff + 17 * 6, 16, Icons::checkbox, useConnCache, white(), ORIENT_HORIZONTAL);
+		UI::Label(woff + 123, hoff + 17 * 6, 12, "Use Bond Cache", white(), 326);
+		if (useConnCache) {
+			UI::Label(woff + 5, hoff + 17 * 7, 12, hasConnCache ? "Cache found" + (string)(oldConnCache ? "(outdated): " : ": ") + connCachePath : "No cache found", white(), 326);
+			if (hasConnCache) {
+				ovwConnCache = Engine::Toggle(woff + 300, hoff + 17 * 7, 16, Icons::checkbox, ovwConnCache, white(), ORIENT_HORIZONTAL);
+				UI::Label(woff + 320, hoff + 17 * 7, 12, "Overwrite", white(), 326);
+			}
 		}
 	}
 
@@ -494,6 +529,7 @@ bool ParLoader::OnDropFile(int i, const char** c) {
 	loadAsTrj = !!Particles::particleSz;
 	FindImpId();
 
+	useConn = true;
 	hasConnCache = false;
 	string cpt = droppedFiles[0] + ".conn";
 	std::ifstream strm(cpt);

@@ -22,7 +22,7 @@ public:
 	static ParImporter* customImp;
 	static bool loadAsTrj, additive;
 	static int maxframes;
-	static bool useConnCache, hasConnCache, oldConnCache, ovwConnCache;
+	static bool useConn, useConnCache, hasConnCache, oldConnCache, ovwConnCache;
 	static string connCachePath;
 
 	static std::vector<ParImporter*> importers;

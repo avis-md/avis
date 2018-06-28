@@ -113,9 +113,9 @@ void paintfunc() {
 
 			id--;
 			Engine::DrawQuad(Input::mousePos.x + 14, Input::mousePos.y + 2, 120, 60, white(0.8f, 0.1f));
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Particle " + std::to_string(id), white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, &Particles::particles_ResName[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, &Particles::particles_Name[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
+			//UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Particle " + std::to_string(id), white());
+			//UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, &Particles::particles_ResName[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
+			//UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, &Particles::particles_Name[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
 			//UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, std::to_string(Particles::particles_Pos[id]), font, white());
 
 		}
@@ -186,11 +186,27 @@ int main(int argc, char **argv)
 	imp->funcs.back().second = XYZ::Read;
 	ParLoader::importers.push_back(imp);
 
+	imp = new ParImporter();
+	imp->name = "CDView";
+	imp->sig = "cdv";
+	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
+	imp->funcs.back().first.push_back(".cdv");
+	imp->funcs.back().second = CDV::Read;
+	ParLoader::importers.push_back(imp);
+
+	imp = new ParImporter();
+	imp->name = "binary";
+	imp->sig = "bin";
+	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
+	imp->funcs.back().first.push_back(".bin");
+	imp->funcs.back().second = MDVBin::Read;
+	ParLoader::importers.push_back(imp);
+
 	//AnWeb::Load(IO::path + "/nodes/rdf.anl");
 	AnWeb::nodes.push_back(new Node_Recolor_All());
-	//AnWeb::nodes.push_back(new Node_AddBond());
-	//CDV::Read(IO::path + "/ayuba/position000000.cdv", false);
-	//CDV::ReadTrj(IO::path + "/ayuba/position");
+	AnWeb::nodes.push_back(new Node_AddBond());
+	//CDV::_Read(IO::path + "/ayuba/position000000.cdv", false);
+	//CDV::_ReadTrj(IO::path + "/ayuba/position");
 	//Gromacs::Read(IO::path + "/pbc.gro", false);
 	//bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");
 	//MDVBin::Read(IO::path + "/ayuba2/000000.bin", false);

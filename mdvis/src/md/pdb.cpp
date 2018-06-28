@@ -6,12 +6,15 @@
 #include <algorithm>
 #include "pdb.h"
 
-bool ATM(char* c) {
-	const char* c2 = "ATOM  ";
-	for (int a = 0; a < 6; a++)
+bool OFST(char* c, const char* const c2) {
+	for (byte a = 0; a < 6; a++)
 		if (c[a] != c2[a]) return false;
 	return true;
 }
+
+#define ATM(c) OFST(c, "ATOM  ")
+#define HLX(c) OFST(c, "HELIX ")
+#define SHT(c) OFST(c, "SHEET ")
 
 char* NSP(char* f, char* l) {
 	while (f < l) {
@@ -38,11 +41,19 @@ bool PDB::Read(ParInfo* info) {
 		return false;
 	}
 
-	std::vector<char*> lines;
+	std::vector<char*> lines, helices, sheets;
 	char* cc = new char[150];
 	while (strm.getline(cc, 150)) {
 		if (ATM(cc)) {
 			lines.push_back(cc);
+			cc = new char[150];
+		}
+		else if (HLX(cc)) {
+			helices.push_back(cc);
+			cc = new char[150];
+		}
+		else if (SHT(cc)) {
+			sheets.push_back(cc);
 			cc = new char[150];
 		}
 	}
@@ -68,6 +79,21 @@ bool PDB::Read(ParInfo* info) {
 		info->pos[i * 3 + 2] = (float)atof(NSP(ln + 46, ln + 53)) * 0.1f;
 		if (*(ln + 76) == ' ') info->type[i] = (uint16_t)(*(ln + 77));
 		else info->type[i] = *((uint16_t*)(ln + 76));
+	}
+
+	info->secStructNum = helices.size() + sheets.size();
+	auto sc = info->secStructs = new ParInfo::ProSec[info->secStructNum];
+	for (auto& h : helices) {
+		sc->type = ParInfo::ProSec::HELIX;
+		sc->resSt = (uint16_t)atoi(NSP(h + 21, h + 24));
+		sc->resEd = (uint16_t)atoi(NSP(h + 33, h + 36));
+		sc++;
+	}
+	for (auto& s : sheets) {
+		sc->type = ParInfo::ProSec::SHEET;
+		sc->resSt = (uint16_t)atoi(NSP(s + 21, s + 24));
+		sc->resEd = (uint16_t)atoi(NSP(s + 33, s + 36));
+		sc++;
 	}
 
 	auto& bnd = info->bounds;
