@@ -1,3 +1,9 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <cmath>
+#include <algorithm>
 #include "pdb.h"
 
 bool ATM(char* c) {
@@ -49,8 +55,8 @@ bool PDB::Read(ParInfo* info) {
 	info->type = new uint16_t[sz];
 	info->pos = new float[sz * 3];
 
-	for (uint i = 0; i < sz; i++) {
-		*info->progress = i * 1.0f / sz;
+	for (unsigned int i = 0; i < sz; i++) {
+		info->progress = i * 1.0f / sz;
 		char* ln = lines[i];
 		char* n1 = NSP(ln + 12, ln + 15);
 		char* n2 = SP(n1, ln + 15);
@@ -64,6 +70,17 @@ bool PDB::Read(ParInfo* info) {
 		else info->type[i] = *((uint16_t*)(ln + 76));
 	}
 
-	strm >> info->bounds[0] >> info->bounds[1] >> info->bounds[2];
+	auto& bnd = info->bounds;
+	bnd[0] = bnd[1] = info->pos[0];
+	bnd[2] = bnd[3] = info->pos[1];
+	bnd[4] = bnd[5] = info->pos[2];
+	for (unsigned i = 1; i < sz; i++) {
+		bnd[0] = std::min(bnd[0], info->pos[i * 3]);
+		bnd[1] = std::max(bnd[1], info->pos[i * 3]);
+		bnd[2] = std::min(bnd[2], info->pos[i * 3 + 1]);
+		bnd[3] = std::max(bnd[3], info->pos[i * 3 + 1]);
+		bnd[4] = std::min(bnd[4], info->pos[i * 3 + 2]);
+		bnd[5] = std::max(bnd[5], info->pos[i * 3 + 2]);
+	}
 	return true;
 }

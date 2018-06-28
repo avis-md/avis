@@ -2,35 +2,8 @@
 #include "ChokoLait.h"
 #include "Particles.h"
 #include "utils/dylib.h"
-
-struct ParInfo {
-	const char* path; //IN
-	byte nameSz; //IN
-	float* progress; //IN
-	byte padding[6];
-	uint32_t num;
-	char* resname;
-	char* name;
-	uint16_t* type; //H\0 if hydrogen
-	uint16_t* resId;
-	float* pos;
-	float* vel;
-	float bounds[3];
-	char error[100];
-};
-
-struct TrjInfo {
-	const char* first; //IN
-	uint32_t parNum; //IN
-	uint16_t maxFrames; //IN
-	uint16_t frameSkip; //IN
-	float* progress; //IN
-	byte padding[3];
-	uint16_t frames;
-	float** poss;
-	float** vels;
-	char error[100];
-};
+#define NO_EXPORT_IMP
+#include "importer_info.h"
 
 struct ParImporter {
 	typedef bool(*loadsig)(ParInfo*);
@@ -56,7 +29,7 @@ public:
 	
 	static bool showDialog, busy, fault;
 	static bool parDirty, trjDirty;
-	static float loadProgress;
+	static float* loadProgress;
 	static string loadName;
 	static std::vector<string> droppedFiles;
 

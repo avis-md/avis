@@ -249,6 +249,7 @@
     <ClInclude Include="src\core\mvp.h" />
     <ClInclude Include="src\mdchan.h" />
     <ClInclude Include="src\md\CDV.h" />
+    <ClInclude Include="src\md\importer_info.h" />
     <ClInclude Include="src\md\mdvbin.h" />
     <ClInclude Include="src\md\Gromacs.h" />
     <ClInclude Include="src\makegen.h" />

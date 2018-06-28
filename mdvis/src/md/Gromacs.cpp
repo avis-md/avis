@@ -242,9 +242,9 @@ void Gromacs::_Read(const string& file, bool hasAnim) {
 	string bx;
 	std::getline(strm, bx);
 	auto spl = string_split(bx, ' ', true);
-	Particles::boundingBox.x = std::stof(spl[0]);
-	Particles::boundingBox.y = std::stof(spl[1]);
-	Particles::boundingBox.z = std::stof(spl[2]);
+	Particles::boundingBox[1] = std::stof(spl[0]);
+	Particles::boundingBox[3] = std::stof(spl[1]);
+	Particles::boundingBox[5] = std::stof(spl[2]);
 
 	Particles::UpdateBufs();
 

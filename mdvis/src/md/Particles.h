@@ -75,7 +75,7 @@ public:
 	static void IncFrame(bool loop);
 	static void SetFrame(uint frm);
 
-	static Vec3 boundingBox;
+	static float boundingBox[6];
 
 	static Vec3 colorPallete[256];
 	static ushort defColPallete[256];

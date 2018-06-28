@@ -438,7 +438,7 @@ void ParGraphics::Reblit() {
 			UI::Texture(Display::width * 0.5f - Display::height * 0.2f, Display::height * 0.4f, Display::height * 0.4f, Display::height * 0.2f, logo);
 			if (ParLoader::busy) {
 				Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100, 6, white(0.8f, 0.2f));
-				Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100 * ParLoader::loadProgress, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
+				Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100 * *ParLoader::loadProgress, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
 				UI::Label(Display::width * 0.5f - 48, Display::height * 0.6f + 10, 12, ParLoader::loadName);
 			}
 			else {

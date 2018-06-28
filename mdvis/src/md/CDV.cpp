@@ -38,7 +38,8 @@ bool CDV::Read(ParInfo* info) {
 	std::getline(strm, s);
 	std::getline(strm, s);
 
-	for (uint i = 0; i < Particles::particleSz; i++) {
+	for (uint i = 0; i < sz; i++) {
+		info->progress = i * 1.0f / sz;
 		strm >> id >> rd;
 		info->resId[i] = id;
 		info->type[id] = *((uint16_t*)"H");

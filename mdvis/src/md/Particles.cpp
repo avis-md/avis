@@ -17,7 +17,7 @@ std::vector<Particles::conn2info> Particles::particles_Conn2;
 
 AnimData Particles::anim;
 
-Vec3 Particles::boundingBox;
+float Particles::boundingBox[] = {};
 
 Vec3 Particles::colorPallete[] = {};
 ushort Particles::defColPallete[] = {};

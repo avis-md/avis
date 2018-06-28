@@ -19,7 +19,7 @@ std::vector<ParImporter*> ParLoader::importers;
 
 bool ParLoader::showDialog = false, ParLoader::busy = false, ParLoader::fault = false;
 bool ParLoader::parDirty = false, ParLoader::trjDirty = false;
-float ParLoader::loadProgress = 0;
+float* ParLoader::loadProgress = 0;
 string ParLoader::loadName;
 std::vector<string> ParLoader::droppedFiles;
 
@@ -166,7 +166,7 @@ void ParLoader::DoOpen() {
 	ParInfo info = {};
 	info.path = droppedFiles[0].c_str();
 	info.nameSz = PAR_MAX_NAME_LEN;
-	info.progress = &loadProgress;
+	loadProgress = &info.progress;
 	loadName = "Reading file";
 
 	try {
@@ -190,11 +190,13 @@ void ParLoader::DoOpen() {
 	Particles::particles_Name = info.name;
 	Particles::particles_Pos = (Vec3*)info.pos;
 	Particles::particles_Vel = (Vec3*)info.vel;
-	Particles::boundingBox = *((Vec3*)info.bounds);
+	memcpy(Particles::boundingBox, info.bounds, 6 * sizeof(float));
 	Particles::particles_Col = new byte[info.num];
 	Particles::particles_Rad = new float[info.num];
 	Particles::particles_Res = new Int2[info.num];
-	ParGraphics::rotCenter = Particles::boundingBox * 0.5f;
+	ParGraphics::rotCenter = Vec3(info.bounds[0] + info.bounds[1], 
+		info.bounds[2] + info.bounds[3], 
+		info.bounds[4] + info.bounds[5]) * 0.5f;
 
 	auto rs = rawvector<ResidueList, uint>(Particles::residueLists, Particles::residueListSz);
 	auto rsv = rawvector<Residue, uint>(Particles::residueLists->residues, Particles::residueLists->residueSz);
@@ -226,7 +228,7 @@ void ParLoader::DoOpen() {
 	}
 	else loadName = "Finding bonds";
 	for (uint i = 0; i < info.num; i++) {
-		loadProgress = i * 1.0f / info.num;
+		info.progress = i * 1.0f / info.num;
 		auto id1 = info.type[i];//info.name[i * PAR_MAX_NAME_LEN];
 		auto& resId = info.resId[i];
 		uint64_t resNm = *((uint64_t*)(&info.resname[i * PAR_MAX_NAME_LEN])) & 0x000000ffffffffff;
