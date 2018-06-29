@@ -93,6 +93,7 @@ void ParMenu::Draw_List() {
 			ParGraphics::UpdateDrawLists();
 		}
 	}
+	
 	Engine::DrawQuad(1, 18, expandPos - 2, Display::height - 37.0f, white(0.9f, 0.1f));
 	Engine::BeginStencil(0, 0, expandPos, Display::height - 18.0f);
 	float off = 20;

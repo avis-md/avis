@@ -113,6 +113,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\hdr.cpp" />
+    <ClCompile Include="src\live\livesyncer.cpp" />
+    <ClCompile Include="src\live\lj256.cpp" />
     <ClCompile Include="src\lodepng.cpp" />
     <ClCompile Include="src\asset\animation.cpp" />
     <ClCompile Include="src\asset\animclip.cpp" />
@@ -219,6 +221,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\hdr.h" />
+    <ClInclude Include="src\live\livesyncer.h" />
+    <ClInclude Include="src\live\lj256.h" />
+    <ClInclude Include="src\live\syncer_info.h" />
     <ClInclude Include="src\lodepng.h" />
     <ClInclude Include="src\AssetObjects.h" />
     <ClInclude Include="src\asset\animation.h" />

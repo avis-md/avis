@@ -199,8 +199,8 @@ void ChokoLait::Paint(emptyCallbackFunc rendFunc, emptyCallbackFunc paintFunc) {
 	UI::PreLoop();
 
 	glDisable(GL_DEPTH_TEST);
-	glDepthMask(false);
 	glEnable(GL_BLEND);
+	glDepthMask(true);
 
 	if (paintFunc) paintFunc();
 

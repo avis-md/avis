@@ -1,6 +1,6 @@
 #include "icons.h"
 
-Texture* Icons::expand, *Icons::collapse, *Icons::play, *Icons::playall,
+Texture* Icons::expand, *Icons::collapse, *Icons::play, *Icons::playall, *Icons::pause,
 *Icons::left, *Icons::right, *Icons::up, *Icons::down, *Icons::cross, *Icons::visible, *Icons::hidden, *Icons::circle,
 *Icons::select, *Icons::deselect, *Icons::flipselect,
 *Icons::toolRot, *Icons::toolMov, *Icons::toolSel,
@@ -20,6 +20,7 @@ void Icons::Init() {
 	TEXP(collapse);
 	TEX(play);
 	playall = TEXN(play2);
+	TEX(pause);
 	TEX(left);
 	TEX(right);
 	TEX(up);

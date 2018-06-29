@@ -442,7 +442,7 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 	//glClearBufferfv(GL_COLOR, 0, zero);
 
 	glDisable(GL_DEPTH_TEST);
-	glDepthMask(false);
+	//glDepthMask(false);
 	glEnable(GL_BLEND);
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_ONE, GL_ONE);

@@ -5,7 +5,7 @@ class Icons {
 public:
 	static void Init();
 
-	static Texture* expand, *collapse, *play, *playall,
+	static Texture* expand, *collapse, *play, *playall, *pause,
 		*left, *right, *up, *down, *cross, *visible, *hidden, *circle,
 		*select, *deselect, *flipselect,
 		*toolRot, *toolMov, *toolSel,
