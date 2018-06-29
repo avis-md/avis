@@ -20,6 +20,7 @@
 #include "utils/ssh.h"
 #include "web/nodes/node_gromacs.h"
 #include "mdchan.h"
+#include "live/livesyncer.h"
 
 bool __debug = false;
 
@@ -52,6 +53,7 @@ void updateFunc() {
 	}
 
 	ParGraphics::Update();
+	LiveSyncer::Update();
 
 	AnWeb::Update();
 
@@ -228,6 +230,9 @@ int main(int argc, char **argv)
 
 	//Protein::Refresh();
 	//ParGraphics::UpdateDrawLists();
+
+	//LiveSyncer::Init(0);
+	//LiveSyncer::Start();
 
 	Display::Resize(800, 600, false);
 

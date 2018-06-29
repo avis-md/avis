@@ -71,7 +71,7 @@ bool Gromacs::Read(ParInfo* info) {
 		info->pos[i * 3 + 2] = std::stof(string(buf + 36, 8));
 	}
 
-	strm >> info->bounds[0] >> info->bounds[1] >> info->bounds[2];
+	strm >> info->bounds[1] >> info->bounds[3] >> info->bounds[5];
 	return true;
 }
 
