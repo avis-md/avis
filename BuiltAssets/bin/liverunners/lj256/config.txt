@@ -1,0 +1,5 @@
+name=LJ256
+file=lj256
+
+init=Init
+loop=Loop
