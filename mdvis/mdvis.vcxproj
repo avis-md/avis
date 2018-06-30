@@ -166,6 +166,7 @@
     <ClCompile Include="src\utils\effects.cpp" />
     <ClCompile Include="src\utils\runcmd.cpp" />
     <ClCompile Include="src\utils\ssh.cpp" />
+    <ClCompile Include="src\vis\shadows.cpp" />
     <ClCompile Include="src\web\anbrowse.cpp" />
     <ClCompile Include="src\web\anconv.cpp" />
     <ClCompile Include="src\web\annode.cpp" />
@@ -270,6 +271,7 @@
     <ClInclude Include="src\utils\effects.h" />
     <ClInclude Include="src\utils\runcmd.h" />
     <ClInclude Include="src\utils\ssh.h" />
+    <ClInclude Include="src\vis\shadows.h" />
     <ClInclude Include="src\web\anbrowse.h" />
     <ClInclude Include="src\web\anconv.h" />
     <ClInclude Include="src\web\annode.h" />

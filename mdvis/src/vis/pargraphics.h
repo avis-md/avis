@@ -43,7 +43,8 @@ public:
 
 		static float glowThres, glowRad, glowStr;
 
-		static void Apply(), DrawMenu(float off);
+		static void Apply();
+		static float DrawMenu(float off);
 	};
 
 	static void Init(), UpdateDrawLists();

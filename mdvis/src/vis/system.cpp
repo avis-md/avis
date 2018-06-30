@@ -3,6 +3,7 @@
 #include "vis/pargraphics.h"
 #include "web/anweb.h"
 #include "ui/icons.h"
+#include "live/livesyncer.h"
 
 Vec4 VisSystem::accentColor = Vec4(1, 1, 1, 1);
 uint VisSystem::renderMs, VisSystem::uiMs;
@@ -79,16 +80,18 @@ void VisSystem::DrawBar() {
 	UI::Label(2, Display::height - 16.0f, 12, "Render: " + std::to_string(renderMs) + "ms  UI: " + std::to_string(uiMs) + "ms", white(0.5f));
 
 	if (!!Particles::anim.frameCount) {
-		if (!UI::editingText) {
-			if (Input::KeyDown(Key_RightArrow)) {
-				Particles::IncFrame(false);
+		if (!LiveSyncer::activeRunner) {
+			if (!UI::editingText) {
+				if (Input::KeyDown(Key_RightArrow)) {
+					Particles::IncFrame(false);
+				}
+				if (Input::KeyDown(Key_LeftArrow)) {
+					if (!!Particles::anim.activeFrame) Particles::SetFrame(Particles::anim.activeFrame - 1);
+				}
 			}
-			if (Input::KeyDown(Key_LeftArrow)) {
-				if (!!Particles::anim.activeFrame) Particles::SetFrame(Particles::anim.activeFrame - 1);
+			if ((!UI::editingText && Input::KeyDown(Key_Space)) || Engine::Button(150, Display::height - 17.0f, 16, 16, Icons::right, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+				ParGraphics::animate = !ParGraphics::animate;
 			}
-		}
-		if ((!UI::editingText && Input::KeyDown(Key_Space)) || Engine::Button(150, Display::height - 17.0f, 16, 16, Icons::right, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
-			ParGraphics::animate = !ParGraphics::animate;
 		}
 
 		float al = float(Particles::anim.activeFrame) / (Particles::anim.frameCount - 1);

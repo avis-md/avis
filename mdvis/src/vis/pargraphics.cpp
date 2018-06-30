@@ -8,6 +8,7 @@
 #include "utils/effects.h"
 #include "web/anweb.h"
 #include "mdchan.h"
+#include "shadows.h"
 
 Texture* ParGraphics::refl = nullptr, *ParGraphics::bg = nullptr, *ParGraphics::logo = nullptr;
 float ParGraphics::reflStr = 1, ParGraphics::reflStrDecay = 2, ParGraphics::rimOff = 0.5f, ParGraphics::rimStr = 1;
@@ -70,7 +71,7 @@ void ParGraphics::Eff::Apply() {
 	glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::width, Display::height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 }
 
-void ParGraphics::Eff::DrawMenu(float off) {
+float ParGraphics::Eff::DrawMenu(float off) {
 	auto& expandPos = ParMenu::expandPos;
 	
 	UI::Label(expandPos - 148, off, 12, "Effects", white());
@@ -88,7 +89,7 @@ void ParGraphics::Eff::DrawMenu(float off) {
 	ssaoStr = Engine::DrawSliderFill(expandPos - 80, off + 51, 76, 16, 0, 3, ssaoStr, white(1, 0.5f), white());
 	UI::Label(expandPos - 145, off + 68, 12, "Blur", white());
 	ssaoBlur = Engine::DrawSliderFill(expandPos - 80, off + 68, 76, 16, 0, 40, ssaoBlur, white(1, 0.5f), white());
-	
+	return off + 17 * 5 + 1;
 }
 
 
@@ -158,6 +159,8 @@ void ParGraphics::Init() {
 	Eff::ssaoRad = 0.015f;
 	Eff::ssaoStr = 1;
 	Eff::ssaoBlur = 6.5f;
+
+	Shadows::Init();
 }
 
 void ParGraphics::UpdateDrawLists() {
@@ -615,7 +618,9 @@ void ParGraphics::DrawMenu() {
 		}
 	}
 
-	Eff::DrawMenu(a2? 294.0f : 277.0f);
+	auto off = Eff::DrawMenu(a2? 294.0f : 277.0f);
+
+	Shadows::DrawMenu(off);
 
 	rotW = Clamp<float>(rotW, -90, 90);
 	rotZ = Repeat<float>(rotZ, 0, 360);

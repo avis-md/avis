@@ -159,6 +159,7 @@ void LiveSyncer::Init(uint _i) {
 	anm.reading = false;
 
 	ParLoader::parDirty = true;
+	status = IDLE;
 }
 
 void LiveSyncer::Start() {
@@ -214,7 +215,14 @@ void LiveSyncer::DrawSide() {
 		}
 		Engine::DrawQuad(Display::width - expandPos * 0.5f - 5, 41, 10, 10, red());
 		if (status == MENU) {
-			UI::Label(Display::width - expandPos + 2, 20, 12, "Select Module", white());
+			UI::Label(Display::width - expandPos + 2, 60, 12, "Select Module", white());
+			uint a = 0;
+			for (auto& r : runners) {
+				if (Engine::Button(Display::width - expandPos + 4, 77 + 17 * a, 170, 16, white(1, 0.6f), r->name, 12, white()) == MOUSE_RELEASE) {
+					Init(a);
+				}
+				a++;
+			}
 		}
 
 		if ((!UI::editingText && Input::KeyUp(Key_R)) || Engine::Button(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)

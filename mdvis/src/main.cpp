@@ -16,9 +16,9 @@
 #include "md/mdvbin.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
+#include "vis/shadows.h"
 #include "utils/effects.h"
 #include "utils/ssh.h"
-#include "web/nodes/node_gromacs.h"
 #include "mdchan.h"
 #include "live/livesyncer.h"
 
@@ -41,6 +41,16 @@ float zoomFade;
 
 void rendFunc() {
 	ParGraphics::Rerender();
+	if (!!Particles::particleSz && Shadows::show) {
+		Shadows::UpdateBox();
+		Mat4x4 _p = MVP::projection();
+		MVP::Switch(true);
+		MVP::Clear();
+		Shadows::Rerender();
+		MVP::Switch(true);
+		MVP::Clear();
+		MVP::Mul(_p);
+	}
 }
 
 void updateFunc() {
@@ -171,10 +181,10 @@ int main(int argc, char **argv)
 
 	AnBrowse::Scan();
 	
-	pSceneObject lht = SceneObject::New(Vec3());
-	Scene::AddObject(lht);
-	auto l = lht->AddComponent<Light>();
-	ParGraphics::SetLight(l.get());
+	//pSceneObject lht = SceneObject::New(Vec3());
+	//Scene::AddObject(lht);
+	//auto l = lht->AddComponent<Light>();
+	//ParGraphics::SetLight(l.get());
 
 	ParImporter* imp = new ParImporter();
 	imp->name = "Gromacs";
@@ -236,19 +246,14 @@ int main(int argc, char **argv)
 	//Protein::Refresh();
 	//ParGraphics::UpdateDrawLists();
 
-<<<<<<< HEAD
 	LiveRunner* runner = new LiveRunner();
 	runner->initNm = "Init";
 	runner->loopNm = "Loop";
 	runner->path = IO::path + "/bin/liverunners/lj256/win32/lj256.dll";
 	runner->name = "LJ256";
 	LiveSyncer::runners.push_back(runner);
-	LiveSyncer::Init(0);
-	LiveSyncer::Start();
-=======
 	//LiveSyncer::Init(0);
 	//LiveSyncer::Start();
->>>>>>> 04b52283bcf9892b41df03f8c49f1c4fe72a90ef
 
 	Display::Resize(800, 600, false);
 
