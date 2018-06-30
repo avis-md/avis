@@ -236,6 +236,12 @@ int main(int argc, char **argv)
 	//Protein::Refresh();
 	//ParGraphics::UpdateDrawLists();
 
+	LiveRunner* runner = new LiveRunner();
+	runner->initNm = "Init";
+	runner->loopNm = "Loop";
+	runner->path = IO::path + "/bin/liverunners/lj256/win32/lj256.dll";
+	runner->name = "LJ256";
+	LiveSyncer::runners.push_back(runner);
 	LiveSyncer::Init(0);
 	LiveSyncer::Start();
 

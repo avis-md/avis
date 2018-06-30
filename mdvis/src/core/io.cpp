@@ -249,6 +249,10 @@ string IO::InitPath() {
 	string path2 = cpath;
 	path2 = path2.substr(0, path2.find_last_of('\\') + 1);
 	std::replace(path2.begin(), path2.end(), '\\', '/');
+#elif defined(PLATFORM_LNX)
+	readlink("/proc/self/exe", cpath, 200);
+	string path2 = cpath;
+	path2 = path2.substr(0, path2.find_last_of('/') + 1);
 #else
 	getcwd(cpath, 199);
 	string path2 = cpath;

@@ -20,34 +20,27 @@ float LiveSyncer::expandPos;
 std::thread* LiveSyncer::runThread;
 
 void LiveSyncer::Init(uint _i) {
-	/*
-	r->lib = new DyLib(r->path);
+	auto& r = runners[_i];
 	if (!r->lib) {
-		runners.erase(runners.begin() + _i);
-		return;
+		r->lib = new DyLib(r->path);
+		if (!r->lib) {
+			runners.erase(runners.begin() + _i);
+			return;
+		}
+		r->initFunc = (LiveRunner::initSig)r->lib->GetSym(r->initNm);
+		r->loopFunc = (LiveRunner::loopSig)r->lib->GetSym(r->loopNm);
+		if (!r->initFunc || !r->loopFunc) {
+			runners.erase(runners.begin() + _i);
+			return;
+		}
 	}
-	r->initFunc = (LiveRunner::initSig)r->lib->GetSym(r->initNm);
-	r->loopFunc = (LiveRunner::loopSig)r->lib->GetSym(r->loopNm);
-	if (!r->initFunc || !r->loopFunc) {
-		runners.erase(runners.begin() + _i);
-		return;
-	}
-	info = {};
-	if (!r->initFunc(&info)) {
-		return;
-	}
-	*/
-	runners.push_back(new LiveRunner());
-	auto r = runners[0];
-	r->initFunc = LJ256::Init;
-	r->loopFunc = LJ256::Loop;
-	activeRunner = r;
 
 	info = {};
 	info.namesz = PAR_MAX_NAME_LEN;
 	if (!r->initFunc(&info)) {
 		return;
 	}
+	activeRunner = r;
 	
 	Particles::connSz = 0;
 	Particles::particles_ResName = info.resname;
@@ -86,7 +79,6 @@ void LiveSyncer::Init(uint _i) {
 			trs->name = string(info.resname + i * PAR_MAX_NAME_LEN, 5);
 			currResNm = resNm;
 		}
-		else std::cout << std::endl;
 
 		if (currResId != resId) {
 			if (!!i) {
@@ -170,6 +162,7 @@ void LiveSyncer::Init(uint _i) {
 }
 
 void LiveSyncer::Start() {
+	if (!activeRunner) return;
 	status = LOOP;
 	if (!runThread) runThread = new std::thread(DoRun);
 }
