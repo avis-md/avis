@@ -236,6 +236,7 @@ int main(int argc, char **argv)
 	//Protein::Refresh();
 	//ParGraphics::UpdateDrawLists();
 
+<<<<<<< HEAD
 	LiveRunner* runner = new LiveRunner();
 	runner->initNm = "Init";
 	runner->loopNm = "Loop";
@@ -244,6 +245,10 @@ int main(int argc, char **argv)
 	LiveSyncer::runners.push_back(runner);
 	LiveSyncer::Init(0);
 	LiveSyncer::Start();
+=======
+	//LiveSyncer::Init(0);
+	//LiveSyncer::Start();
+>>>>>>> 04b52283bcf9892b41df03f8c49f1c4fe72a90ef
 
 	Display::Resize(800, 600, false);
 
