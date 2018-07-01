@@ -420,13 +420,12 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 		glViewport(0, 0, d_w, d_h);
 
 		if (func) func();
-		DrawSceneObjectsOpaque(Scene::active->objects);
+		//DrawSceneObjectsOpaque(Scene::active->objects);
 		//MVP::Switch(false);
 		//MVP::Clear();
 
 		d_texs[0] = d_colTex;
 		glViewport(0, 0, Display::actualWidth, Display::actualHeight);
-		
 	}
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(false);

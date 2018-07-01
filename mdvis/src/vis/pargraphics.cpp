@@ -259,7 +259,7 @@ void ParGraphics::Update() {
 	}
 }
 
-void ParGraphics::Rerender() {
+void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 	if (!!Particles::particleSz) {
 		float csz = cos(-rotZ*deg2rad);
 		float snz = sin(-rotZ*deg2rad);
@@ -281,8 +281,6 @@ void ParGraphics::Rerender() {
 		}
 		auto _mv = MVP::modelview();
 		auto _p = MVP::projection();
-		auto _cpos = ChokoLait::mainCamera->object->transform.position();
-		auto _cfwd = ChokoLait::mainCamera->object->transform.forward();
 
 		auto ql = ChokoLait::mainCamera->quality;
 
@@ -291,7 +289,7 @@ void ParGraphics::Rerender() {
 		glUniformMatrix4fv(parProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
 		glUniform3f(parProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
 		glUniform3f(parProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-		glUniform2f(parProgLocs[4], Display::width * ql, Display::height * ql);
+		glUniform2f(parProgLocs[4], _w * ql, _h * ql);
 		glUniform1i(parProgLocs[5], 1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
@@ -329,7 +327,7 @@ void ParGraphics::Rerender() {
 				glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
 				glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
 				glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-				glUniform2f(parConProgLocs[4], Display::width * ql, Display::height * ql);
+				glUniform2f(parConProgLocs[4], _w * ql, _h * ql);
 				glUniform1i(parConProgLocs[5], 1);
 				glActiveTexture(GL_TEXTURE1);
 				glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
@@ -362,7 +360,7 @@ void ParGraphics::Rerender() {
 				glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
 				glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
 				glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-				glUniform2f(parConProgLocs[4], Display::width * ql, Display::height * ql);
+				glUniform2f(parConProgLocs[4], _w * ql, _h * ql);
 				glUniform1i(parConProgLocs[5], 1);
 				glActiveTexture(GL_TEXTURE1);
 				glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
@@ -474,6 +472,9 @@ void ParGraphics::Reblit() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	if (!!hlIds.size() || !!selIds.size())
 		BlitHl();
+	if (Shadows::show) {
+		Shadows::Reblit();
+	}
 }
 
 void ParGraphics::BlitSky() {

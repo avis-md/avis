@@ -40,7 +40,8 @@ pMesh splineMesh;
 float zoomFade;
 
 void rendFunc() {
-	ParGraphics::Rerender();
+	auto& cm = ChokoLait::mainCamera()->object->transform;
+	ParGraphics::Rerender(cm.position(), cm.forward(), Display::width, Display::height);
 	if (!!Particles::particleSz && Shadows::show) {
 		Shadows::UpdateBox();
 		Mat4x4 _p = MVP::projection();
