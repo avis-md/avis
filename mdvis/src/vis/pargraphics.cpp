@@ -99,35 +99,42 @@ void ParGraphics::Init() {
 	logo = new Texture(IO::path + "/res/logo.png", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	//reflProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText(IO::path + "/reflFrag.txt")))->pointer;
 	reflProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), IO::GetText(IO::path + "/reflFrag.txt"));
-	reflProgLocs[0] = glGetUniformLocation(reflProg, "_IP");
-	reflProgLocs[1] = glGetUniformLocation(reflProg, "screenSize");
-	reflProgLocs[2] = glGetUniformLocation(reflProg, "inColor");
-	reflProgLocs[3] = glGetUniformLocation(reflProg, "inNormal");
-	reflProgLocs[4] = glGetUniformLocation(reflProg, "inEmit");
-	reflProgLocs[5] = glGetUniformLocation(reflProg, "inDepth");
-	reflProgLocs[6] = glGetUniformLocation(reflProg, "inSky");
-	reflProgLocs[7] = glGetUniformLocation(reflProg, "skyStrength");
-	reflProgLocs[8] = glGetUniformLocation(reflProg, "skyStrDecay");
-	reflProgLocs[9] = glGetUniformLocation(reflProg, "rimOffset");
-	reflProgLocs[10] = glGetUniformLocation(reflProg, "rimStrength");
+#define LC(nm) reflProgLocs[i++] = glGetUniformLocation(reflProg, #nm)
+	uint i = 0;
+	LC(_IP);
+	LC(screenSize);
+	LC(inColor);
+	LC(inNormal);
+	LC(inEmit);
+	LC(inDepth);
+	LC(inSky);
+	LC(skyStrength);
+	LC(skyStrDecay);
+	LC(rimOffset);
+	LC(rimStrength);
 	
 	parProg = Shader::FromVF(IO::GetText(IO::path + "/parV.txt"), IO::GetText(IO::path + "/parF.txt"));
-	parProgLocs[0] = glGetUniformLocation(parProg, "_MV");
-	parProgLocs[1] = glGetUniformLocation(parProg, "_P");
-	parProgLocs[2] = glGetUniformLocation(parProg, "camPos");
-	parProgLocs[3] = glGetUniformLocation(parProg, "camFwd");
-	parProgLocs[4] = glGetUniformLocation(parProg, "screenSize");
-	parProgLocs[5] = glGetUniformLocation(parProg, "radTex");
-	parProgLocs[6] = glGetUniformLocation(parProg, "radScl");
+#define LC(nm) parProgLocs[i++] = glGetUniformLocation(parProg, #nm)
+	i = 0;
+	LC(_MV);
+	LC(_P);
+	LC(camPos);
+	LC(camFwd);
+	LC(orthoSz);
+	LC(screenSize);
+	LC(radTex);
+	LC(radScl);
 
 	parConProg = Shader::FromVF(IO::GetText(IO::path + "/parConV.txt"), IO::GetText(IO::path + "/parConF.txt"));
-	parConProgLocs[0] = glGetUniformLocation(parConProg, "_MV");
-	parConProgLocs[1] = glGetUniformLocation(parConProg, "_P");
-	parConProgLocs[2] = glGetUniformLocation(parConProg, "camPos");
-	parConProgLocs[3] = glGetUniformLocation(parConProg, "camFwd");
-	parConProgLocs[4] = glGetUniformLocation(parConProg, "screenSize");
-	parConProgLocs[5] = glGetUniformLocation(parConProg, "posTex");
-	parConProgLocs[6] = glGetUniformLocation(parConProg, "connTex");
+#define LC(nm) parConProgLocs[i++] = glGetUniformLocation(parConProg, #nm)
+	i = 0;
+	LC(_MV);
+	LC(_P);
+	LC(camPos);
+	LC(camFwd);
+	LC(screenSize);
+	LC(posTex);
+	LC(connTex);
 
 	parConLineProg = Shader::FromVF(IO::GetText(IO::path + "/parConV_line.txt"), IO::GetText(IO::path + "/parConF_line.txt"));
 	parConLineProgLocs[0] = glGetUniformLocation(parConLineProg, "_MV");
@@ -147,6 +154,8 @@ void ParGraphics::Init() {
 	colProgLocs[2] = glGetUniformLocation(colProg, "screenSize");
 	colProgLocs[3] = glGetUniformLocation(colProg, "id2col");
 	colProgLocs[4] = glGetUniformLocation(colProg, "colList");
+
+#undef LC
 
 	hlIds.resize(1);
 	ChokoLait::mainCamera->onBlit = Reblit;
@@ -274,33 +283,43 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		}
 		MVP::Translate(-rotCenter.x, -rotCenter.y, -rotCenter.z);
 
+		auto _mv = MVP::modelview();
+		auto _p = MVP::projection();
 		if (dragging) {
-			auto imvp = glm::inverse(MVP::projection() * MVP::modelview());
+			auto imvp = glm::inverse(_p * _mv);
 			scrX = imvp * Vec4(1, 0, 0, 0);
 			scrY = imvp * Vec4(0, 1, 0, 0);
 		}
-		auto _mv = MVP::modelview();
-		auto _p = MVP::projection();
 
 		auto ql = ChokoLait::mainCamera->quality;
+
+		float osz = -1;
+		if (ChokoLait::mainCamera->ortographic) {
+			Vec4 p1 = _p * Vec4(-1, 1, -1, 1);
+			p1 /= p1.w;
+			Vec4 p2 = _p * Vec4(1, 1, -1, 1);
+			p2 /= p2.w;
+			osz = glm::length(p2 - p1);
+		}
 
 		glUseProgram(parProg);
 		glUniformMatrix4fv(parProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
 		glUniformMatrix4fv(parProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
 		glUniform3f(parProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
 		glUniform3f(parProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-		glUniform2f(parProgLocs[4], _w * ql, _h * ql);
-		glUniform1i(parProgLocs[5], 1);
+		glUniform1f(parProgLocs[4], osz);
+		glUniform2f(parProgLocs[5], _w * ql, _h * ql);
+		glUniform1i(parProgLocs[6], 1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
 
 		glBindVertexArray(Particles::posVao);
 		for (auto& p : drawLists) {
 			//glPolygonMode(GL_FRONT_AND_BACK, (p.second.second == 0x0f) ? GL_POINT : GL_FILL);
-			if (p.second.second == 1) glUniform1f(parProgLocs[6], -1);
-			else if (p.second.second == 0x0f) glUniform1f(parProgLocs[6], 0);
-			else if (p.second.second == 2) glUniform1f(parProgLocs[6], 0.2f);
-			else glUniform1f(parProgLocs[6], 1);
+			if (p.second.second == 1) glUniform1f(parProgLocs[7], -1);
+			else if (p.second.second == 0x0f) glUniform1f(parProgLocs[7], 0);
+			else if (p.second.second == 2) glUniform1f(parProgLocs[7], 0.2f);
+			else glUniform1f(parProgLocs[7], 1);
 			glDrawArrays(GL_POINTS, p.first, p.second.first);
 		}
 

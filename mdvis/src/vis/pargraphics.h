@@ -11,7 +11,7 @@ public:
 	static Light* light;
 
 	static GLuint reflProg, parProg, parConProg, parConLineProg;
-	static GLint reflProgLocs[11], parProgLocs[7], parConProgLocs[7], parConLineProgLocs[5];
+	static GLint reflProgLocs[11], parProgLocs[10], parConProgLocs[7], parConLineProgLocs[5];
 
 	static GLuint selHlProg, colProg;
 	static GLint selHlProgLocs[4], colProgLocs[5];
