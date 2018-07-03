@@ -488,12 +488,12 @@ void ParGraphics::Reblit() {
 	
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glEnable(GL_BLEND);
+	//glBlendFunc(GL_ONE, GL_ONE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	if (Shadows::show)
+		Shadows::Reblit();
 	if (!!hlIds.size() || !!selIds.size())
 		BlitHl();
-	if (Shadows::show) {
-		Shadows::Reblit();
-	}
 }
 
 void ParGraphics::BlitSky() {

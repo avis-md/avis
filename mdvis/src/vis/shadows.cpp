@@ -7,8 +7,8 @@ Camera* Shadows::cam;
 
 bool Shadows::show = false;
 byte Shadows::quality = 2;
-Vec3 Shadows::pos, Shadows::cpos;
-float Shadows::str, Shadows::bias;
+Vec3 Shadows::pos, Shadows::cpos = Vec3(0, 0, -1);
+float Shadows::str, Shadows::bias = 0.05f;
 float Shadows::rw, Shadows::rz;
 Quat Shadows::rot;
 float Shadows::dst = 0.5f, Shadows::dst2 = 0;
@@ -63,6 +63,8 @@ void Shadows::Init() {
 	LOC(lDepth);
 	LOC(lBias);
 	LOC(lStrength);
+	LOC(lPos);
+	LOC(ldScl);
 	LOC(_LD);
 #undef LOC
 
@@ -70,10 +72,11 @@ void Shadows::Init() {
 	glGenTextures(1, &_dtex);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
 	glBindTexture(GL_TEXTURE_2D, _dtex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, _sz, _sz, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, 2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _dtex, 0);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 
 	//GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
 	//glDrawBuffers(3, DrawBuffers);
@@ -96,18 +99,22 @@ void Shadows::UpdateBox() {
 	const float z = 1;// dst * 2 - 1;
 	const Vec4 es[] = {
 		Vec4(-1,-1,-1,1), Vec4(-1,1,-1,1) , Vec4(1,-1,-1,1) , Vec4(1,1,-1,1),
-		Vec4(-1,-1,z,1), Vec4(-1,1,z,1) , Vec4(1,-1,z,1) , Vec4(1,1,z,1) };
+		Vec4(-1,-1,1,1), Vec4(-1,1,1,1) , Vec4(1,-1,1,1) , Vec4(1,1,1,1) };
 	Vec4 wps[8];
 	auto p = MVP::projection();
 	auto ip = glm::inverse(p);
-	pos = Vec3();
 	for (uint a = 0; a < 8; a++) {
 		wps[a] = ip * es[a];
 		wps[a] /= wps[a].w;
-		pos += *(Vec3*)&wps[a];
 	}
+	for (uint a = 4; a < 8; a++) {
+		wps[a] = Lerp(wps[a - 4], wps[a], dst);
+	}
+	/*
+	pos = Vec3();
+		//pos += *(Vec3*)&wps[a];
 	pos /= 8.0f;
-
+	*/
 	
 	for (uint a = 0; a < 8; a++) {
 		Vec4 rs = _p * wps[a];
@@ -126,10 +133,16 @@ void Shadows::UpdateBox() {
 	_p *= Mat4x4(1, 0, 0, 0, 0, csw, snw, 0, 0, -snw, csw, 0, 0, 0, 0, 1) * Mat4x4(csz, 0, -snz, 0, 0, 1, 0, 0, snz, 0, csz, 0, 0, 0, 0, 1);
 	_p *= Mat4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -pos.x, -pos.y, -pos.z, 1);
 	*/
-	_p = glm::ortho<float>(-1, 1, -1, 1, 0.01f, 500);//glm::ortho(box[0], box[1], box[2], box[3], box[4] - dst2, box[5]) * _p;
+	_p = glm::ortho<float>(-1, 1, -1, 1, 0.01f, 100);//glm::ortho(box[0], box[1], box[2], box[3], box[4] - dst2, box[5]) * _p;
 	_p *= Mat4x4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, -1.0f, 0, 0, 0, 0, 1);
 	//_p *= Mat4x4(1, 0, 0, 0, 0, csw, snw, 0, 0, -snw, csw, 0, 0, 0, 0, 1) * Mat4x4(csz, 0, -snz, 0, 0, 1, 0, 0, snz, 0, csz, 0, 0, 0, 0, 1);
 	_p *= Mat4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1);
+	//MVP::Push();
+	float csw = cos(rw*deg2rad);
+	float snw = sin(rw*deg2rad);
+	float csz = cos(-rz*deg2rad);
+	float snz = sin(-rz*deg2rad);
+	_p *= (Mat4x4(1, 0, 0, 0, 0, csz, snz, 0, 0, -snz, csz, 0, 0, 0, 0, 1) * Mat4x4(csw, 0, -snw, 0, 0, 1, 0, 0, snw, 0, csw, 0, 0, 0, 0, 1));
 	_ip = glm::inverse(_p);
 	Vec4 cc(0, 0, -1, 1);
 	cc = _ip * cc;
@@ -149,13 +162,7 @@ void Shadows::Rerender() {
 	MVP::Switch(true);
 	MVP::Clear();
 	MVP::Mul(_p);
-	MVP::Push();
-	float csw = cos(rw*deg2rad);
-	float snw = sin(rw*deg2rad);
-	float csz = cos(-rz*deg2rad);
-	float snz = sin(-rz*deg2rad);
-	MVP::Mul(Mat4x4(1, 0, 0, 0, 0, csz, snz, 0, 0, -snz, csz, 0, 0, 0, 0, 1) * Mat4x4(csw, 0, -snw, 0, 0, 1, 0, 0, snw, 0, csw, 0, 0, 0, 0, 1));
-	
+
 	MVP::Switch(false);
 	MVP::Clear();
 	glViewport(0, 0, _sz, _sz);
@@ -165,10 +172,10 @@ void Shadows::Rerender() {
 }
 
 void Shadows::Reblit() {
-	auto _p = MVP::projection();
+	auto _cp = MVP::projection();
 
 	glUseProgram(_prog);
-	glUniformMatrix4fv(_progLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
+	glUniformMatrix4fv(_progLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_cp)));
 	glUniform2f(_progLocs[1], (float)Display::actualWidth, (float)Display::actualHeight);
 	glUniform1i(_progLocs[2], 0);
 	glActiveTexture(GL_TEXTURE0);
@@ -179,9 +186,11 @@ void Shadows::Reblit() {
 	glUniform1i(_progLocs[4], 2);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, _dtex);
-	glUniform1f(_progLocs[5], bias);
+	glUniform1f(_progLocs[5], bias / 100);
 	glUniform1f(_progLocs[6], str);
-	glUniformMatrix4fv(_progLocs[7], 1, GL_FALSE, glm::value_ptr(_p));
+	glUniform3f(_progLocs[7], cpos.x, cpos.y, cpos.z);
+	glUniform1f(_progLocs[8], _sz / 2048.0f);
+	glUniformMatrix4fv(_progLocs[9], 1, GL_FALSE, glm::value_ptr(_p));
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -208,12 +217,14 @@ float Shadows::DrawMenu(float off) {
 	show = Engine::Toggle(expandPos - 20, off, 16, Icons::checkbox, show, white(), ORIENT_HORIZONTAL);
 	UI::Label(expandPos - 145, off + 17, 12, "Strength", white());
 	str = Engine::DrawSliderFill(expandPos - 80, off + 17, 76, 16, 0, 1, str, white(1, 0.5f), white());
-	UI::Label(expandPos - 145, off + 34, 12, "Angle x", white());
-	rw = Engine::DrawSliderFill(expandPos - 80, off + 34, 76, 16, 0, 360, rw, white(1, 0.5f), white());
-	UI::Label(expandPos - 145, off + 51, 12, "Angle y", white());
-	rz = Engine::DrawSliderFill(expandPos - 80, off + 51, 76, 16, -90, 90, rz, white(1, 0.5f), white());
-	UI::Label(expandPos - 145, off + 68, 12, "Distance", white());
-	dst = Engine::DrawSliderFill(expandPos - 80, off + 68, 76, 16, 0, 2, dst, white(1, 0.5f), white());
+	UI::Label(expandPos - 145, off + 34, 12, "Bias", white());
+	bias = Engine::DrawSliderFill(expandPos - 80, off + 34, 76, 16, 0, 1, bias, white(1, 0.5f), white());
+	UI::Label(expandPos - 145, off + 51, 12, "Angle x", white());
+	rw = Engine::DrawSliderFill(expandPos - 80, off + 51, 76, 16, 0, 360, rw, white(1, 0.5f), white());
+	UI::Label(expandPos - 145, off + 68, 12, "Angle y", white());
+	rz = Engine::DrawSliderFill(expandPos - 80, off + 68, 76, 16, -90, 90, rz, white(1, 0.5f), white());
+	UI::Label(expandPos - 145, off + 85, 12, "Distance", white());
+	dst = Engine::DrawSliderFill(expandPos - 80, off + 85, 76, 16, 0, 2, dst, white(1, 0.5f), white());
 
 #define DF(x) (_ ## x != x)
 	if (DF(str) || DF(rw) || DF(rz) || DF(dst)) {

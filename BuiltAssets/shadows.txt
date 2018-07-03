@@ -5,9 +5,11 @@ uniform vec2 screenSize;
 uniform sampler2D inNormal;
 uniform sampler2D inDepth;
 
-uniform sampler2D lDepth;
+uniform sampler2DShadow lDepth;
 uniform float lBias;
 uniform float lStrength;
+uniform vec3 lPos;
+uniform float ldScl;
 uniform mat4 _LD;
 
 out vec4 fragCol;
@@ -24,15 +26,13 @@ void main () {
 	vec4 cpos = _LD*wPos;
 	cpos /= cpos.w;
 	
-	float d1 = texture(lDepth, vec2(cpos.x*0.5 + 0.5, (cpos.y*0.5 + 0.5))).x;
-	float d2 = cpos.z*0.5 + 0.5;
-	float notShadow = clamp(ceil((d1 - d2) + lBias), 0, 1);
-	notShadow = mix(1, notShadow, lStrength);
-    //fragCol = vec4(notShadow, 0, 0, 1);2.0 * z_b - 1.0;
-    float zz = texture(lDepth, uv).x;
-    //zz = zz * 2 - 1;
-    float zNear = 0.01;
-    float zFar = 500;
-    //zz = 2.0 * zNear * zFar / (zFar + zNear - zz * (zFar - zNear));
-    fragCol = vec4(zz, floor(zz), 0, 1);
+	cpos.z = cpos.z * 0.5 + 0.5 - lBias;
+	//float d1 = texture(lDepth, vec3(cpos.x*0.5 + 0.5, (cpos.y*0.5 + 0.5)) * ldScl).x;
+	//float d2 = cpos.z*0.5 + 0.5;
+	float notShadow = texture(lDepth, vec3((cpos.x*0.5 + 0.5) * ldScl, (cpos.y*0.5 + 0.5) * ldScl, cpos.z));
+	//notShadow = min(notShadow, max(dot(nCol.xyz, normalize(lPos - wPos.xyz)), 0));
+	if (dot(nCol.xyz, normalize(lPos - wPos.xyz)) < 0) notShadow = 0;
+    //fragCol = vec4(vec3(1,1,1)*lStrength * (1-notShadow), 0);
+	fragCol = vec4(0, 0, 0, lStrength * (1-notShadow));
+	//fragCol = vec4(texture(lDepth, uv).x * 300, 0, 0, 1);
 }
