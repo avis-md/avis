@@ -96,7 +96,7 @@ float ParGraphics::Eff::DrawMenu(float off) {
 void ParGraphics::Init() {
 	refl = new Texture(IO::path + "/refl.png", true, TEX_FILTER_BILINEAR, 1, GL_REPEAT, GL_MIRRORED_REPEAT);
 	bg = new Texture(IO::path + "/res/bg.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
-	logo = new Texture(IO::path + "/res/logo.png", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
+	//logo = new Texture(IO::path + "/res/logo.png", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	//reflProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText(IO::path + "/reflFrag.txt")))->pointer;
 	reflProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), IO::GetText(IO::path + "/reflFrag.txt"));
 #define LC(nm) reflProgLocs[i++] = glGetUniformLocation(reflProg, #nm)
@@ -455,7 +455,7 @@ void ParGraphics::Reblit() {
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			UI::Texture(0, 0, (float)Display::width, (float)Display::height, bg, DRAWTEX_CROP);
 			MdChan::Draw(Vec2(Display::width * 0.5f, Display::height * 0.3f));
-			UI::Texture(Display::width * 0.5f - Display::height * 0.2f, Display::height * 0.4f, Display::height * 0.4f, Display::height * 0.2f, logo);
+			//UI::Texture(Display::width * 0.5f - Display::height * 0.2f, Display::height * 0.4f, Display::height * 0.4f, Display::height * 0.2f, logo);
 			if (ParLoader::busy) {
 				Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100, 6, white(0.8f, 0.2f));
 				Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100 * *ParLoader::loadProgress, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
