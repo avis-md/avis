@@ -1,0 +1,70 @@
+typedef struct {
+	int w;
+	int h;
+	float IP[16];
+} info_st;
+
+typedef struct {
+	float3 pos;
+	float3 dir;
+} ray_st;
+
+float Len2(float3 vec) {
+	return vec.x*vec.x + vec.y*vec.y + vec.z*vec.z;
+}
+
+float3 MatMul(float* mat, float3 vec) {
+	float3 res;
+	res.x = mat[0]*vec.x + mat[4]*vec.y + mat[8]*vec.z + mat[12];
+	res.y = mat[1]*vec.x + mat[5]*vec.y + mat[9]*vec.z + mat[13];
+	res.z = mat[2]*vec.x + mat[6]*vec.y + mat[10]*vec.z + mat[14];
+	float w = mat[3]*vec.x + mat[7]*vec.y + mat[11]*vec.z + mat[15];
+	return res / w;
+}
+
+float Int_Ball(ray_st ray, float3 ori, float rad) {
+	float3 L = ori - ray.pos;
+	float3 D = ray.dir;
+	float lL2 = Len2(L);
+	float lD2 = Len2(D);
+	float lL = sqrt(lL2);
+	L /= lL;
+	D /= sqrt(lD2);
+	float cs = dot(L, D);
+	float isr = lL2*cs*cs - lL2 + lD2;
+	if (isr < 0) return -1;
+	return lL*cs - sqrt(isr);
+}
+
+ray_st GetRay(info_st info, float2 uv) {
+	ray_st ray;
+	float3 pos;
+	pos.x = uv.x;
+	pos.y = uv.y;
+	pos.z = -1;
+	float3 pos2 = pos;
+	pos2.z = 1;
+	ray.pos = MatMul(info.IP, pos);
+	ray.dir = normalize(MatMul(info.IP, pos2) - pos);
+	return ray;
+}
+
+float4 GetCol(info_st info, float2 uv) {
+	ray_st ray = GetRay(info, uv);
+	float its = Int_Ball(ray, (float3)(0, 0, 1.0f), 0.5f);
+	
+	return (float4)(max(its/2, 0.f), 0, 0, 1);
+}
+
+__kernel void _main_(__global float* res, info_st info) {
+	size_t id = get_global_id(0);
+	float2 uv = (float2)((id % info.h + 0.5f)/info.w, (id / info.h + 0.5f)/info.w);
+	uv = uv * 2 - 1;
+	
+	float4 col = GetCol(info, uv);
+	
+	res[id * 4] = col.x;
+	res[id * 4 + 1] = col.y;
+	res[id * 4 + 2] = col.z;
+	res[id * 4 + 3] = col.w;
+}

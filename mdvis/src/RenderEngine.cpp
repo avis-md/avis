@@ -51,12 +51,13 @@ void _InitGBuffer(GLuint* d_fbo, GLuint* d_colfbo, GLuint* d_texs, GLuint* d_dep
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, *d_fbo);
 
 	// Create the gbuffer textures
-	glGenTextures(3, d_texs + 1);
+	glGenTextures(1, d_texs + 1);
 	glGenTextures(1, d_idTex);
 	glGenTextures(1, d_colTex);
 	glGenTextures(1, d_depthTex);
 	d_texs[0] = *d_idTex;
 
+	//id
 	glBindTexture(GL_TEXTURE_2D, *d_idTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, (int)w, (int)h, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *d_idTex, 0);
@@ -64,13 +65,12 @@ void _InitGBuffer(GLuint* d_fbo, GLuint* d_colfbo, GLuint* d_texs, GLuint* d_dep
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	for (uint i = 1; i < 4; i++) {
-		glBindTexture(GL_TEXTURE_2D, d_texs[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, (int)w, (int)h, 0, GL_RGBA, GL_FLOAT, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, d_texs[i], 0);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	}
+	//normal
+	glBindTexture(GL_TEXTURE_2D, d_texs[1]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, (int)w, (int)h, 0, GL_RGBA, GL_FLOAT, NULL);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, d_texs[1], 0);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	// depth
 	glBindTexture(GL_TEXTURE_2D, *d_depthTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, (int)w, (int)h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -78,16 +78,15 @@ void _InitGBuffer(GLuint* d_fbo, GLuint* d_colfbo, GLuint* d_texs, GLuint* d_dep
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-	glDrawBuffers(4, DrawBuffers);
-	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if (Status != GL_FRAMEBUFFER_COMPLETE) {
-		Debug::Error("Camera", "FB error 1:" + std::to_string(Status));
+	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, DrawBuffers);
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (status != GL_FRAMEBUFFER_COMPLETE) {
+		Debug::Error("Camera", "FB error 1:" + std::to_string(status));
 	}
 
 	// color
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, *d_colfbo);
-
 	glBindTexture(GL_TEXTURE_2D, *d_colTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int)w, (int)h, 0, GL_RGBA, GL_FLOAT, NULL);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *d_colTex, 0);
@@ -95,10 +94,9 @@ void _InitGBuffer(GLuint* d_fbo, GLuint* d_colfbo, GLuint* d_texs, GLuint* d_dep
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDrawBuffers(1, DrawBuffers);
-
-	Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if (Status != GL_FRAMEBUFFER_COMPLETE) {
-		Debug::Error("Camera", "FB error 2:" + std::to_string(Status));
+	status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (status != GL_FRAMEBUFFER_COMPLETE) {
+		Debug::Error("Camera", "FB error 2:" + std::to_string(status));
 	}
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
@@ -114,29 +112,29 @@ void Camera::GenGBuffer2() {
 
 		if (!!d_fbo2) {
 			glDeleteFramebuffers(1, &d_fbo2);
-			glDeleteTextures(4, d_texs2);
+			glDeleteTextures(2, d_texs2);
 		}
 		glGenFramebuffers(1, &d_fbo2);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_fbo2);
 
 		// Create the gbuffer textures
-		glGenTextures(4, d_texs2);
+		glGenTextures(2, d_texs2);
 		glGenTextures(1, &d_depthTex2);
 
+		//id
 		glBindTexture(GL_TEXTURE_2D, d_texs2[0]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, d_w2, d_h2, 0, GL_RED, GL_UNSIGNED_INT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, d_w2, d_h2, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, d_texs2[0], 0);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		for (uint i = 1; i < 4; i++) {
-			glBindTexture(GL_TEXTURE_2D, d_texs2[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, d_w2, d_h2, 0, GL_RGBA, GL_FLOAT, NULL);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, d_texs2[i], 0);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		}
+		//normal
+		glBindTexture(GL_TEXTURE_2D, d_texs2[1]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, d_w2, d_h2, 0, GL_RGBA, GL_FLOAT, NULL);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, d_texs2[1], 0);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		// depth
 		glBindTexture(GL_TEXTURE_2D, d_depthTex2);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, d_w2, d_h2, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -144,8 +142,8 @@ void Camera::GenGBuffer2() {
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glBindTexture(GL_TEXTURE_2D, 0);
-		GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-		glDrawBuffers(4, DrawBuffers);
+		GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, };
+		glDrawBuffers(2, DrawBuffers);
 		GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if (Status != GL_FRAMEBUFFER_COMPLETE) {
 			Debug::Error("Camera", "FB error 1:" + std::to_string(Status));
@@ -292,7 +290,7 @@ void Camera::InitGBuffer(uint w, uint h) {
 	for (byte i = 0; i < NUM_EXTRA_TEXS; i++) {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_tfbo[i]);
 		glBindTexture(GL_TEXTURE_2D, d_ttexs[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, (int)Display::width, (int)Display::height, 0, GL_RED, GL_UNSIGNED_INT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, (int)Display::width, (int)Display::height, 0, GL_RED, GL_UNSIGNED_INT, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, d_ttexs[i], 0);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -327,26 +325,7 @@ GLuint Camera::d_sLightRSMProgram = 0;
 GLuint Camera::d_sLightRSMFluxProgram = 0;
 GLuint Camera::d_reflQuadProgram = 0;
 GLint Camera::d_skyProgramLocs[9];
-std::unordered_map<string, GLuint> Camera::fetchTextures = std::unordered_map<string, GLuint>();
-std::vector<string> Camera::fetchTexturesUpdated = std::vector<string>();
 const string Camera::_gbufferNames[4] = {"Diffuse", "Normal", "Specular-Gloss", "Emission"};
-
-GLuint Camera::DoFetchTexture(string s) {
-	/*
-	if (s == "") {
-		ushort a = 0;
-		s = "temp_fetch_" + a;
-		while (fetchTextures[s] != 0)
-			s = "temp_fetch_" + (++a);
-	}
-	if (fetchTextures[s] == 0) {
-		glGenTextures(1, &fetchTextures[s]);
-		glBindTexture(GL_TEXTURE_2D, fetchTextures[s]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, Display::width, Display::height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	}
-	*/
-	return 0;
-}
 
 void Camera::Render(RenderTexture* target, renderFunc func) {
 	active = this;
@@ -357,7 +336,7 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 			glDeleteFramebuffers(1, &d_fbo);
 			glDeleteFramebuffers(1, &d_colfbo);
 			glDeleteFramebuffers(NUM_EXTRA_TEXS, d_tfbo);
-			glDeleteTextures(3, d_texs + 1);
+			glDeleteTextures(1, d_texs + 1);
 			glDeleteTextures(1, &d_idTex);
 			glDeleteTextures(1, &d_colTex);
 			glDeleteTextures(1, &d_depthTex);
@@ -396,16 +375,12 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 
 
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_colfbo);
-		//glClearBufferfv(GL_COLOR, 0, zero);
-		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_tfbo[1]);
-		//glClearBufferfv(GL_COLOR, 0, zero);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_fbo);
 		glClearBufferfv(GL_COLOR, 0, zero);
-		glClearBufferfv(GL_DEPTH, 0, &one);
 		glClearBufferfv(GL_COLOR, 1, zero);
-		glClearBufferfv(GL_COLOR, 2, zero);
-		glClearBufferfv(GL_COLOR, 3, zero);
+		glClearBufferfv(GL_DEPTH, 0, &one);
+		//glClearBufferfv(GL_COLOR, 2, zero);
+		//glClearBufferfv(GL_COLOR, 3, zero);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 		glDepthMask(true);
@@ -420,9 +395,6 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 		glViewport(0, 0, d_w, d_h);
 
 		if (func) func();
-		//DrawSceneObjectsOpaque(Scene::active->objects);
-		//MVP::Switch(false);
-		//MVP::Clear();
 
 		d_texs[0] = d_colTex;
 		glViewport(0, 0, Display::actualWidth, Display::actualHeight);
@@ -438,16 +410,12 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 	//return;
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, *d_tfbo);
-	//glClearBufferfv(GL_COLOR, 0, zero);
 
 	glDisable(GL_DEPTH_TEST);
-	//glDepthMask(false);
 	glEnable(GL_BLEND);
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_ONE, GL_ONE);
 
-	//RenderLights();
-	
 	if (onBlit) onBlit();
 	
 	if (useGBuffer2 && applyGBuffer2) {
@@ -460,8 +428,6 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 	}
 
 	Scene::dirty = false;
-	//_ApplyEmission(d_fbo, d_texs, (float)Display::width, (float)Display::height, 0);
-//#endif
 }
 
 void Camera::_RenderSky(Mat4x4 ip, GLuint d_texs[], GLuint d_depthTex, float w, float h) {
@@ -525,7 +491,7 @@ uint Camera::GetIdAt(uint x, uint y) {
 	uint pixel;
 	x = uint(x * quality);
 	y = uint(y * quality);
-	glReadPixels(x, d_h - y, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &pixel);
+	glReadPixels(x, d_h - y - 1, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &pixel);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	return pixel;
 }

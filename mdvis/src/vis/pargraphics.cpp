@@ -231,7 +231,7 @@ void ParGraphics::Update() {
 		Vec3 center0 = rotCenter;
 
 		if (Input::mouse0) {
-			if (Input::mouse0State == MOUSE_DOWN && VisSystem::InMainWin(Input::mousePos)) {
+			if (Input::mouse0State == MOUSE_HOLD && !dragging && VisSystem::InMainWin(Input::mouseDownPos)) {
 				dragging = true;
 				ChokoLait::mainCamera->applyGBuffer2 = true;
 			}
@@ -509,9 +509,6 @@ void ParGraphics::BlitSky() {
 	glUniform1i(reflProgLocs[3], 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, cam->d_texs[1]);
-	glUniform1i(reflProgLocs[4], 2);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, cam->d_texs[3]);
 	glUniform1i(reflProgLocs[5], 3);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, cam->d_depthTex);

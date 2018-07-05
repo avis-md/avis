@@ -1,5 +1,20 @@
 #include "help.h"
 
+const string _opn[] = {
+	"Open file via terminal",
+	"	Command line is: mdvis filename [args...]",
+	"	Args (default values are in brackets)",
+	"		-d[0/(1)]		Show the import dialog.",
+	"		-t[0/(1)]		Load trajectory if available.",
+	"		-T[filename]	Load trajectory file. If this value is specified, -t will be ignored.",
+	"		-f[int(0):int(1)]	Maximum number of frames:Number to skip between frames. If number is 0,",
+	"						all frames are read. Eg: -f3:2 to load frames 0, 2, and 4.",
+	"		-b[0/(1)]		Calculate bonds",
+	"		-c[0/(1)/2]		If bond cache is available, 0=ignore, 1=use, 2=recalculate and override.",
+	"						If no cache is available and value is NOT 0, cache will be generated.",
+	"						Default value will be 2 if molecular file is older than cache."
+};
+
 bool HelpMenu::show = false;
 float HelpMenu::alpha = 0;
 
@@ -17,6 +32,10 @@ void HelpMenu::Draw() {
 		UI::font->Align(ALIGN_TOPRIGHT);
 		UI::Label(Display::width - 5.0f, 5, 10, "version 0.01", white(0.7f));
 		UI::font->Align(ALIGN_TOPLEFT);
+
+		for (uint a = 0; a < 12; a++) {
+			UI::Label(20, 25 + 15 * a, 12, _opn[a], white());
+		}
 
 		UI::Label(10, Display::height - 16.0f, 12, "This program is under development. Please submit any bugs / suggestions to puakai95@keio.jp", white(0.7f));
 		UI::alpha = 1;

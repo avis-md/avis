@@ -72,7 +72,7 @@ void VisSystem::Init() {
 
 bool VisSystem::InMainWin(const Vec2& pos) {
 	if (AnWeb::drawFull) return false;
-	else return (pos.x > ParMenu::expandPos + 16) && (pos.x < Display::width - AnWeb::expandPos) && (pos.y < Display::height - 18);
+	else return (pos.x > ParMenu::expandPos + 16) && (pos.x < Display::width - ((!Particles::particleSz || LiveSyncer::activeRunner)? LiveSyncer::expandPos : AnWeb::expandPos)) && (pos.y < Display::height - 18);
 }
 
 void VisSystem::DrawBar() {

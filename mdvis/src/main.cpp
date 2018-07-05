@@ -21,6 +21,7 @@
 #include "utils/ssh.h"
 #include "mdchan.h"
 #include "live/livesyncer.h"
+#include "ocl/raytracer.h"
 
 bool __debug = false;
 
@@ -52,6 +53,7 @@ void rendFunc() {
 		MVP::Clear();
 		MVP::Mul(_p);
 	}
+	RayTracer::Render();
 }
 
 void updateFunc() {
@@ -107,10 +109,11 @@ void paintfunc() {
 	auto pos = Input::mousePos;
 
 	ParGraphics::hlIds.clear();
-	if (UI::_layerMax == 0 && !stealFocus && VisSystem::InMainWin(Input::mousePos)) {
+	if (!UI::_layerMax && !stealFocus && VisSystem::InMainWin(Input::mousePos) && !ParGraphics::dragging) {
 
 		auto id = ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y);
 		if (!!id) {
+			//std::cout << id << std::to_string(Input::mousePos) << std::endl;
 			ParGraphics::hlIds.push_back(id);
 			if (Input::mouse0State == 1) {
 				if (Input::KeyHold(Key_LeftControl)) {
@@ -145,6 +148,7 @@ void paintfunc() {
 	}
 
 	HelpMenu::Draw();
+	Engine::DrawQuad(200, 100, 400, 300, RayTracer::resTex);
 }
 
 int main(int argc, char **argv)
@@ -177,6 +181,7 @@ int main(int argc, char **argv)
 	AnNode::Init();
 	Effects::Init(0xffff);
 	MdChan::Init();
+	RayTracer::Init();
 
 	//ParLoader::Scan();
 

@@ -61,7 +61,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Anaconda\include;./src;./include/glew;./include/glfw;./include/glm;./include/jpeg;./include/freetype;./include/ffmpeg;./include/ssh2</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Intel\OpenCL\sdk\include;C:\Anaconda\include;./src;./include/glew;./include/glfw;./include/glm;./include/jpeg;./include/freetype;./include/ffmpeg;./include/ssh2</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;CHOKO_LAIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -70,7 +70,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Anaconda\libs\;.\lib\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Intel\OpenCL\sdk\lib\x86;C:\Anaconda\libs\;.\lib\</AdditionalLibraryDirectories>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <SubSystem>Console</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
@@ -160,6 +160,7 @@
     <ClCompile Include="src\md\pdb.cpp" />
     <ClCompile Include="src\md\Protein.cpp" />
     <ClCompile Include="src\md\XYZ.cpp" />
+    <ClCompile Include="src\ocl\raytracer.cpp" />
     <ClCompile Include="src\ui\help.cpp" />
     <ClCompile Include="src\ui\popups.cpp" />
     <ClCompile Include="src\utils\dialog.cpp" />
@@ -267,6 +268,7 @@
     <ClInclude Include="src\md\pdb.h" />
     <ClInclude Include="src\md\Protein.h" />
     <ClInclude Include="src\md\XYZ.h" />
+    <ClInclude Include="src\ocl\raytracer.h" />
     <ClInclude Include="src\ui\help.h" />
     <ClInclude Include="src\ui\popups.h" />
     <ClInclude Include="src\utils\dialog.h" />

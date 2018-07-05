@@ -67,11 +67,6 @@ public:
 	int _tarRT;
 	float quality, quality2;
 
-	static std::unordered_map<string, GLuint> fetchTextures;
-	static std::vector<string> fetchTexturesUpdated;
-	static GLuint DoFetchTexture(string s);
-	static void ClearFetchTextures();
-
 	static const string _gbufferNames[];
 
 	void ApplyGL();
