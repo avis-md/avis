@@ -89,3 +89,8 @@ void RayTracer::Render(){
 	//
 	//live = false;
 }
+
+void RayTracer::Draw() {
+	Engine::DrawQuad(200, 100, 400, 300, RayTracer::resTex);
+	UI::Label(202, 102, 12, "Samples: " + std::to_string(_cntt));
+}

@@ -148,7 +148,8 @@ void paintfunc() {
 	}
 
 	HelpMenu::Draw();
-	Engine::DrawQuad(200, 100, 400, 300, RayTracer::resTex);
+
+	RayTracer::Draw();
 }
 
 int main(int argc, char **argv)

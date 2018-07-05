@@ -22,6 +22,8 @@ public:
 	static void SetTex(uint w, uint h);
 	static void Render();
 
+	static void Draw();
+
 	static GLuint resTex;
 	
 	static cl_context _ctx;

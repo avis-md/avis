@@ -40,7 +40,7 @@ float3 MatMul(float* mat, float3 vec) {
 
 float2 BMT(float r1, float r2, float s) {
 	float2 res;
-	float R = min(log(r1), 1.0f);
+	float R = max(sqrt(-2*log((r1+0.04f)*0.962f)) / 2.5f, 0.0f);
 	float T = 2 * 3.14159f * r2;
 	float mul = pow(1 - s, 2.5f);
 	res.x = R * cos(T) * mul;
@@ -88,13 +88,14 @@ ray_st GetRay(info_st info, float2 uv) {
 
 float4 SkyAt(float3 dir) {
 	float dt = dot(dir, (float3)(-1, 1, -1));
-	float cs = acos(dir.y) / 3.14159f;
+	float cs = acos(min(max(dir.y, -0.99999f), 0.99999f)) / 3.14159f;
 	if (dt > 1.5f) return (float4)(2,2,2,2);
 	else return (float4)(0.5f, 0.5f + 0.7f * cs, 1.5f - 0.7f * cs, 1);
 }
 
 float4 Trace(ray_st ray, uint rnd) {
 	ray_st rays[5];
+    float str = 1;
 	rays[0] = ray;
 	float4 res = (float)(1,1,1,1);
 	for (int a = 0; a < 4; a++) {
@@ -116,9 +117,10 @@ float4 Trace(ray_st ray, uint rnd) {
 		if (its < 0) {
 			return res * SkyAt(ray.dir);
 		}
-		else res *= col;
+		else res *= col * str;
 		rays[a + 1] = Refl(ray, hitpos, hitnrm);
-		rays[a + 1].dir = Rot(rays[a + 1].dir, BMT(r1, r2, 0.8f));
+        rays[a + 1].dir = Rot(rays[a + 1].dir, BMT(r1, r2, 0.4f));
+        str *= 0.6f;
 	}
 	return (float)(0, 0, 0, 1);
 }
@@ -131,13 +133,22 @@ float4 GetCol(info_st info, float2 uv) {
 __kernel void _main_(__global float* res, info_st info) {
 	size_t id = get_global_id(0);
 	float2 uv = (float2)((id % info.w + 0.5f)/info.w, (id / info.w + 0.5f)/info.h);
-	uv = uv * 2 - 1;
+    
+    uv = uv * 2 - 1;
 	
 	info.rnd += id;
-	float4 col = GetCol(info, uv);
-	
+	float4 col = (0, 0, 0, 0);
+    for (int a = 0; a < 4; a++) {
+        info.rnd = Rand(info.rnd);
+        float r1 = (info.rnd % 1000) * 0.002f - 1.f;
+        info.rnd = Rand(info.rnd);
+        float r2 = (info.rnd % 1000) * 0.002f - 1.f;
+        col += GetCol(info, uv + (float2)(0.33f * r1 / info.w, 0.33f * r2 / info.h));
+    }
+    col /= 4;
+    
 	res[id * 4] = col.x;
 	res[id * 4 + 1] = col.y;
 	res[id * 4 + 2] = col.z;
-	res[id * 4 + 3] = col.w;
+	res[id * 4 + 3] = ceil(col.w);
 }
