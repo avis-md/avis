@@ -227,6 +227,8 @@ int main(int argc, char **argv)
 	imp->funcs.back().second = MDVBin::Read;
 	ParLoader::importers.push_back(imp);
 
+	ParLoader::exts = std::vector<string>({"*.gro", "*.pdb", "*.xyz", "*.cdv", "*.bin"});
+
 	//AnWeb::Load(IO::path + "/nodes/rdf.anl");
 	AnWeb::nodes.push_back(new Node_Recolor_All());
 	AnWeb::nodes.push_back(new Node_AddBond());

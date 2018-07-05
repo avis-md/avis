@@ -11,12 +11,12 @@ in float v2f_scl;
 
 uniform vec2 screenSize;
 
-layout (location=0) out vec4 outColor; //rgba
+layout (location=0) out uvec4 outColor; //rgba
 layout (location=1) out vec4 outNormal; //xyz []
 layout (location=2) out vec4 outSpec; //spec gloss
 layout (location=3) out vec4 outEmi; //emi occlu
 
-void Output(vec4 col, vec3 norm, vec3 spec, float gloss, vec4 emi) {
+void Output(uvec4 col, vec3 norm, vec3 spec, float gloss, vec4 emi) {
     outColor = col;
     outNormal.rgb = normalize(norm);
     outNormal.a = 0;
@@ -101,7 +101,7 @@ void main()
         ndc2 /= ndc2.w;
         gl_FragDepth = ndc2.z * 0.5 + 0.5;
         
-        Output(vec4(id, 0, 0, 0), pf - cf, vec3(0.3, 0.3, 0.3), 0.5, vec4(normalize(pf - cf), 0));
+        Output(uvec4(id, 0, 0, 0), pf - cf, vec3(0.3, 0.3, 0.3), 0.5, vec4(0, 0, 0, 0));
         //Output(vec4(v2f_id1, 0, 0, 0), pf - cf, vec3(0.3, 0.3, 0.3), 0.5, vec4(p23 * 100, 0, 0, 0));
 	}
 }

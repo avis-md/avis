@@ -162,10 +162,12 @@
     <ClCompile Include="src\md\XYZ.cpp" />
     <ClCompile Include="src\ui\help.cpp" />
     <ClCompile Include="src\ui\popups.cpp" />
+    <ClCompile Include="src\utils\dialog.cpp" />
     <ClCompile Include="src\utils\dylib.cpp" />
     <ClCompile Include="src\utils\effects.cpp" />
     <ClCompile Include="src\utils\runcmd.cpp" />
     <ClCompile Include="src\utils\ssh.cpp" />
+    <ClCompile Include="src\utils\tinyfiledialogs.c" />
     <ClCompile Include="src\vis\shadows.cpp" />
     <ClCompile Include="src\web\anbrowse.cpp" />
     <ClCompile Include="src\web\anconv.cpp" />
@@ -267,10 +269,12 @@
     <ClInclude Include="src\md\XYZ.h" />
     <ClInclude Include="src\ui\help.h" />
     <ClInclude Include="src\ui\popups.h" />
+    <ClInclude Include="src\utils\dialog.h" />
     <ClInclude Include="src\utils\dylib.h" />
     <ClInclude Include="src\utils\effects.h" />
     <ClInclude Include="src\utils\runcmd.h" />
     <ClInclude Include="src\utils\ssh.h" />
+    <ClInclude Include="src\utils\tinyfiledialogs.h" />
     <ClInclude Include="src\vis\shadows.h" />
     <ClInclude Include="src\web\anbrowse.h" />
     <ClInclude Include="src\web\anconv.h" />

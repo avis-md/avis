@@ -26,6 +26,7 @@ public:
 	static string connCachePath;
 
 	static std::vector<ParImporter*> importers;
+	static std::vector<string> exts;
 	
 	static bool showDialog, busy, fault;
 	static bool parDirty, trjDirty;
@@ -42,5 +43,6 @@ public:
 	static void DrawOpenDialog();
 
 	static bool OnDropFile(int i, const char** c);
+	static void OnOpenFile(const std::vector<string>& files);
 	static void FindImpId(bool force = false);
 };

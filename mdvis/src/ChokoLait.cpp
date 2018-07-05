@@ -63,6 +63,7 @@ void _dieded(int i) {
 #ifdef PLATFORM_WIN
 	MessageBox(glfwGetWin32Window(Display::window), "Beep Boop, I Crashed.\nSee Log.txt for details.", "!", MB_OK);
 #endif
+	throw "abort trap!";
 }
 
 void _sigfpe(int i) {
@@ -84,8 +85,7 @@ void ChokoLait::_InitVars() {
 
 	const string& path = IO::InitPath();
 	if (!IO::HasFile(path + "/defaultresources.bin")) {
-		std::cout << "Neccessary files not found in current directory!\n"
-		 << "If you are running from another directory, make sure to run mdvis.sh instead of mdvis directly!" << std::endl;
+		std::cout << "Neccessary files not found in current directory!" << std::endl;
 		exit(-1);
 	}
 

@@ -58,7 +58,7 @@ void _InitGBuffer(GLuint* d_fbo, GLuint* d_colfbo, GLuint* d_texs, GLuint* d_dep
 	d_texs[0] = *d_idTex;
 
 	glBindTexture(GL_TEXTURE_2D, *d_idTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, (int)w, (int)h, 0, GL_RED, GL_UNSIGNED_INT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, (int)w, (int)h, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *d_idTex, 0);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -522,12 +522,12 @@ void Camera::_RenderSky(Mat4x4 ip, GLuint d_texs[], GLuint d_depthTex, float w, 
 uint Camera::GetIdAt(uint x, uint y) {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, d_fbo);
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
-	float pixel;
+	uint pixel;
 	x = uint(x * quality);
 	y = uint(y * quality);
-	glReadPixels(x, d_h - y, 1, 1, GL_RED, GL_FLOAT, &pixel);
+	glReadPixels(x, d_h - y, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &pixel);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-	return (uint)floor(pixel);
+	return pixel;
 }
 
 

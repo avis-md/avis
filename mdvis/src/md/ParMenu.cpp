@@ -1,6 +1,8 @@
 #include "ParMenu.h"
 #include "md/Protein.h"
+#include "md/parloader.h"
 #include "vis/pargraphics.h"
+#include "utils/dialog.h"
 #include "ui/icons.h"
 #include "ui/popups.h"
 
@@ -17,7 +19,7 @@ void ParMenu::Draw() {
 	if (expanded) {
 		if (!Particles::particleSz) {
 			if (Engine::Button(expandPos - 110, Display::height * 0.4f - 40, 80, 80, Icons::openfile, white(0.4f)) == MOUSE_RELEASE) {
-
+				ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
 			}
 			UI::Label(expandPos - 140, Display::height * 0.4f + 62, 12, " Drag & Drop Files here", white());
 			UI::Label(expandPos - 140, Display::height * 0.4f + 75, 12, "or Click Button to Import", white());

@@ -16,6 +16,7 @@ bool ParLoader::useConn, ParLoader::useConnCache, ParLoader::hasConnCache, ParLo
 string ParLoader::connCachePath;
 
 std::vector<ParImporter*> ParLoader::importers;
+std::vector<string> ParLoader::exts;
 
 bool ParLoader::showDialog = false, ParLoader::busy = false, ParLoader::fault = false;
 bool ParLoader::parDirty = false, ParLoader::trjDirty = false;
@@ -54,6 +55,7 @@ void ParLoader::Scan() {
 	string fd = IO::path + "/bin/importers/";
 	std::vector<string> fds;
 	IO::GetFolders(fd, &fds);
+	exts.clear();
 	for (auto& f : fds) {
 		std::cout << "Import: " << f << std::endl;
 		std::ofstream ostrm(fd + f + "/import.log");
@@ -153,6 +155,9 @@ void ParLoader::Scan() {
 				goto err;
 			}
 			importers.push_back(imp);
+			for (auto& a : imp->funcs) {
+				exts.insert(exts.end(), a.first.begin(), a.first.end());
+			}
 			ostrm << "ok";
 			continue;
 		err:
@@ -528,10 +533,17 @@ void ParLoader::DrawOpenDialog() {
 
 bool ParLoader::OnDropFile(int i, const char** c) {
 	if (AnWeb::drawFull) return false;
-	droppedFiles.resize(i);
+	std::vector<string> fs(i);
 	for (i--; i >= 0; i--) {
-		droppedFiles[i] = string(c[i]);
+		fs[i] = string(c[i]);
 	}
+	OnOpenFile(fs);
+	return true;
+}
+
+void ParLoader::OnOpenFile(const std::vector<string>& files) {
+	if (!files.size()) return;
+	droppedFiles = files;
 	loadAsTrj = !!Particles::particleSz;
 	FindImpId();
 
@@ -555,7 +567,6 @@ bool ParLoader::OnDropFile(int i, const char** c) {
 	useConnCache = hasConnCache;
 
 	showDialog = true;
-	return true;
 }
 
 void ParLoader::FindImpId(bool force) {

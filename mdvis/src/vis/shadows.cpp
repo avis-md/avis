@@ -8,7 +8,7 @@ Camera* Shadows::cam;
 bool Shadows::show = false;
 byte Shadows::quality = 2;
 Vec3 Shadows::pos, Shadows::cpos = Vec3(0, 0, -1);
-float Shadows::str, Shadows::bias = 0.05f;
+float Shadows::str = 1, Shadows::bias = 0.05f;
 float Shadows::rw, Shadows::rz;
 Quat Shadows::rot;
 float Shadows::dst = 0.5f, Shadows::dst2 = 0;
@@ -96,6 +96,7 @@ void Shadows::Init() {
 }
 
 void Shadows::UpdateBox() {
+	/*
 	const float z = 1;// dst * 2 - 1;
 	const Vec4 es[] = {
 		Vec4(-1,-1,-1,1), Vec4(-1,1,-1,1) , Vec4(1,-1,-1,1) , Vec4(1,1,-1,1),
@@ -110,12 +111,10 @@ void Shadows::UpdateBox() {
 	for (uint a = 4; a < 8; a++) {
 		wps[a] = Lerp(wps[a - 4], wps[a], dst);
 	}
-	/*
 	pos = Vec3();
 		//pos += *(Vec3*)&wps[a];
 	pos /= 8.0f;
-	*/
-	
+	memset(box, 0, sizeof(float) * 6);
 	for (uint a = 0; a < 8; a++) {
 		Vec4 rs = _p * wps[a];
 		rs /= rs.w;
@@ -126,18 +125,10 @@ void Shadows::UpdateBox() {
 		box[4] = min(box[4], rs.z);
 		box[5] = max(box[5], rs.z);
 	}
-	/*
-	_p = glm::ortho(-1, 1, -1, 1, -1, 500);//glm::ortho(box[0], box[1], box[2], box[3], box[4] - dst2, box[5]) * _p;
-	_p *= Mat4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1);
-	_p *= Mat4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, pos.x, pos.y, pos.z, 1);
-	_p *= Mat4x4(1, 0, 0, 0, 0, csw, snw, 0, 0, -snw, csw, 0, 0, 0, 0, 1) * Mat4x4(csz, 0, -snz, 0, 0, 1, 0, 0, snz, 0, csz, 0, 0, 0, 0, 1);
-	_p *= Mat4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -pos.x, -pos.y, -pos.z, 1);
 	*/
 	_p = glm::ortho<float>(-1, 1, -1, 1, 0.01f, 100);//glm::ortho(box[0], box[1], box[2], box[3], box[4] - dst2, box[5]) * _p;
 	_p *= Mat4x4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, -1.0f, 0, 0, 0, 0, 1);
-	//_p *= Mat4x4(1, 0, 0, 0, 0, csw, snw, 0, 0, -snw, csw, 0, 0, 0, 0, 1) * Mat4x4(csz, 0, -snz, 0, 0, 1, 0, 0, snz, 0, csz, 0, 0, 0, 0, 1);
 	_p *= Mat4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1);
-	//MVP::Push();
 	float csw = cos(rw*deg2rad);
 	float snw = sin(rw*deg2rad);
 	float csz = cos(-rz*deg2rad);
@@ -206,7 +197,9 @@ float Shadows::DrawMenu(float off) {
 	UI::Label(expandPos - 148, off, 12, "Effects", white());
 
 #define SV(x) auto _ ## x = x
+	SV(show);
 	SV(str);
+	SV(bias);
 	SV(rw);
 	SV(rz);
 	SV(dst);
@@ -225,9 +218,8 @@ float Shadows::DrawMenu(float off) {
 	rz = Engine::DrawSliderFill(expandPos - 80, off + 68, 76, 16, -90, 90, rz, white(1, 0.5f), white());
 	UI::Label(expandPos - 145, off + 85, 12, "Distance", white());
 	dst = Engine::DrawSliderFill(expandPos - 80, off + 85, 76, 16, 0, 2, dst, white(1, 0.5f), white());
-
 #define DF(x) (_ ## x != x)
-	if (DF(str) || DF(rw) || DF(rz) || DF(dst)) {
+	if (DF(show) || DF(str) || DF(bias) || DF(rw) || DF(rz) || DF(dst)) {
 		Scene::dirty = true;
 	}
 
