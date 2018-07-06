@@ -39,7 +39,11 @@ bool RayTracer::Init(){
 	_bufr = clCreateBuffer(_ctx, CL_MEM_WRITE_ONLY, 200 * 150 * 4 * sizeof(cl_float), 0, 0);
 	clSetKernelArg(_kernel, 0, sizeof(_bufr), (void*)&_bufr);
 
+	info.str = 20;
+	info.mat.gloss = 1;
+
 	live = true;
+	return true;
 }
 
 void RayTracer::SetTex(uint w, uint h){
@@ -56,7 +60,7 @@ void RayTracer::Render(){
 
 	info.w = 200;
 	info.h = 150;
-	info.rand = (cl_int)(Random::Value() * 10000);
+	info.rand = (cl_int)rand();// (Random::Value() * 10000);
 	memcpy(info.IP, glm::value_ptr(glm::inverse(MVP::projection())), 16 * sizeof(float));
 	clSetKernelArg(_kernel, 1, sizeof(info), &info);
 	
@@ -67,22 +71,25 @@ void RayTracer::Render(){
 	cl_float* bufrp = (cl_float*)clEnqueueMapBuffer(_que, _bufr, CL_TRUE, CL_MAP_READ, 0, ws * 4 * sizeof(cl_float), 0, 0, 0, 0);
 	if (!_cntt) {
 		memcpy(_texx, bufrp, 200 * 150 * 4 * sizeof(float));
+		glBindTexture(GL_TEXTURE_2D, resTex);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, info.w, info.h, 0, GL_RGBA, GL_FLOAT, _texx);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	else {
 		for (uint a = 0; a < 200 * 150 * 4; a++) {
 			_texx[a] = (_texx[a] * _cntt + bufrp[a]) / (_cntt+1);
 		}
+		glBindTexture(GL_TEXTURE_2D, resTex);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 200, 150, GL_RGBA, GL_FLOAT, _texx);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	_cntt++;
 	
-	glBindTexture(GL_TEXTURE_2D, resTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, info.w, info.h, 0, GL_RGBA, GL_FLOAT, _texx);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	clEnqueueUnmapMemObject(_que, _bufr, bufrp, 0, 0, 0);
 
@@ -93,4 +100,35 @@ void RayTracer::Render(){
 void RayTracer::Draw() {
 	Engine::DrawQuad(200, 100, 400, 300, RayTracer::resTex);
 	UI::Label(202, 102, 12, "Samples: " + std::to_string(_cntt));
+	auto s = Engine::DrawSliderFill(210, 410, 200, 10, 0, 100, info.str, blue(), white());
+	if (s != info.str) {
+		info.str = s;
+		_cntt = 0;
+	}
+
+	auto& mt = info.mat;
+	UI::Label(210, 440, 12, "Specular");
+	auto o = Engine::DrawSliderFill(350, 440, 200, 10, 0, 1, mt.specular, blue(), white());
+	if (o != mt.specular) {
+		mt.specular = o;
+		_cntt = 0;
+	}
+	UI::Label(210, 460, 12, "Roughness (Diffuse)");
+	o = Engine::DrawSliderFill(350, 460, 200, 10, 0, 1, mt.rough, blue(), white());
+	if (o != mt.rough) {
+		mt.rough = o;
+		_cntt = 0;
+	}
+	UI::Label(210, 480, 12, "Gloss (Specular)");
+	o = Engine::DrawSliderFill(350, 480, 200, 10, 0, 1, mt.gloss, blue(), white());
+	if (o != mt.gloss) {
+		mt.gloss = o;
+		_cntt = 0;
+	}
+	UI::Label(210, 500, 12, "Metallic");
+	o = Engine::DrawSliderFill(350, 500, 200, 10, 0, 1, mt.metallic, blue(), white());
+	if (o != mt.metallic) {
+		mt.metallic = o;
+		_cntt = 0;
+	}
 }

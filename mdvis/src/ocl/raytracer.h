@@ -8,11 +8,19 @@
 
 class RayTracer {
 public:
+	struct mat_st {
+		cl_float rough;
+		cl_float specular;
+		cl_float gloss;
+		cl_float metallic;
+	};
 	static struct info_st {
 		cl_int w;
 		cl_int h;
 		cl_float IP[16];
 		cl_int rand;
+		cl_float str;
+		mat_st mat;
 	} info;
 
 	static bool Init();
