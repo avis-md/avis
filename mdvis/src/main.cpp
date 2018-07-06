@@ -53,7 +53,7 @@ void rendFunc() {
 		MVP::Clear();
 		MVP::Mul(_p);
 	}
-	RayTracer::Render();
+	if (RayTracer::resTex) RayTracer::Render();
 }
 
 void updateFunc() {
@@ -70,10 +70,16 @@ void updateFunc() {
 
 	AnWeb::Update();
 
-	if (!UI::editingText && !AnWeb::drawFull && Input::KeyDown(Key_F)) {
-		auto& o = ChokoLait::mainCamera->ortographic;
-		o = !o;
-		Scene::dirty = true;
+	if (!UI::editingText && !AnWeb::drawFull) {
+		if (Input::KeyDown(Key_F)) {
+			auto& o = ChokoLait::mainCamera->ortographic;
+			o = !o;
+			Scene::dirty = true;
+		}
+		if (Input::KeyDown(Key_X) && Input::KeyHold(Key_LeftShift)) {
+			RayTracer::SetScene();
+			RayTracer::Render();
+		}
 	}
 }
 
@@ -149,7 +155,10 @@ void paintfunc() {
 
 	HelpMenu::Draw();
 
-	RayTracer::Draw();
+	if (RayTracer::resTex) {
+		RayTracer::Draw();
+		Scene::dirty = true;
+	}
 }
 
 int main(int argc, char **argv)

@@ -20,6 +20,8 @@ public:
 		cl_float IP[16];
 		cl_int rand;
 		cl_float str;
+		cl_int bg_w;
+		cl_int bg_h;
 		mat_st mat;
 	} info;
 
@@ -27,6 +29,7 @@ public:
 	
 	static bool live;
 
+	static void SetScene();
 	static void SetTex(uint w, uint h);
 	static void Render();
 
