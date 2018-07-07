@@ -1,6 +1,10 @@
 #include "raytracer.h"
 #include "hdr.h"
 #include "md/Particles.h"
+#include <CL/cl_gl.h>
+#ifdef PLATFORM_LNX
+#include <GL/glx.h>
+#endif
 
 #define RESW 400
 #define RESH 300
@@ -22,7 +26,37 @@ bool RayTracer::Init(){
 	clGetPlatformIDs(1, &platform, 0);
 	cl_device_id device;
 	clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, 0);
-	_ctx = clCreateContext(0, 1, &device, 0, 0, 0);
+
+#ifdef PLATFORM_OSX
+	CGLContextObj kCGLContext = CGLGetCurrentContext();
+	CGLShareGroupObj kCGLShareGroup = CGLGetShareGroup(kCGLContext);
+	cl_context_properties props[] =
+	{
+		CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE, (cl_context_properties)kCGLShareGroup,
+		0
+	};
+	_ctx = clCreateContext(props, 0, 0, 0, 0, 0);
+#else
+#ifdef PLATFORM_WIN
+	cl_context_properties props[] =
+	{
+		CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(),
+		CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
+		CL_CONTEXT_PLATFORM, (cl_context_properties)platform,
+		0
+	};
+#else
+	cl_context_properties props[] =
+	{
+		CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(),
+		CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(),
+		CL_CONTEXT_PLATFORM, (cl_context_properties)platform,
+		0
+	};
+#endif
+	_ctx = clCreateContext(props, 1, &device, 0, 0, 0);
+#endif
+
 	_que = clCreateCommandQueue(_ctx, device, 0, 0);
 	
 	auto fl = IO::GetText(IO::path + "/ocl/test.txt");
@@ -57,7 +91,7 @@ bool RayTracer::Init(){
 }
 
 void RayTracer::SetScene() {
-	info.str = 3;
+	info.str = 2;
 	info.mat.specular = 0.2f;
 	info.mat.rough = 0.15f;
 	info.mat.gloss = 0.7f;
@@ -67,16 +101,24 @@ void RayTracer::SetScene() {
 		//clSetKernelArg(_kernel, 1, sizeof(info), &info);
 
 		int vl = 200;
-		_bls = clCreateBuffer(_ctx, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vl * sizeof(Vec3), Particles::particles_Pos, 0);
+		cl_int err = CL_SUCCESS;
+		//_bls = clCreateBuffer(_ctx, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vl * sizeof(Vec3), Particles::particles_Pos, &err);
+		_bls = clCreateFromGLBuffer(_ctx, CL_MEM_READ_ONLY, Particles::posBuffer, &err);
+		assert(err == CL_SUCCESS);
+		clEnqueueAcquireGLObjects(_que, 1, &_bls, 0, 0, 0);
 		clSetKernelArg(_kernel, 3, sizeof(_bls), (void*)&_bls);
 		clSetKernelArg(_kernel, 4, sizeof(cl_int), &vl);
 		
 		vl = 50;
 		if (!!Particles::connSz) {
-			_cns = clCreateBuffer(_ctx, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vl * 2 * sizeof(cl_int), Particles::particles_Conn, 0);
-			clSetKernelArg(_kernel, 5, sizeof(_cns), (void*)&_cns);
+			//_cns = clCreateBuffer(_ctx, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vl * 2 * sizeof(cl_int), Particles::particles_Conn, &err);
+			_cns = clCreateFromGLBuffer(_ctx, CL_MEM_READ_ONLY, Particles::connBuffer, &err);
+			clEnqueueAcquireGLObjects(_que, 1, &_cns, 0, 0, 0);
+			assert(err == CL_SUCCESS);
 		}
+		clSetKernelArg(_kernel, 5, sizeof(_cns), (void*)&_cns);
 		clSetKernelArg(_kernel, 6, sizeof(cl_int), &vl);
+		clFinish(_que);
 	}
 }
 

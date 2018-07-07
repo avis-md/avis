@@ -179,6 +179,7 @@ int main(int argc, char **argv)
 	if (icon.pixels) glfwSetWindowIcon(Display::window, 1, &icon);
 	delete[](icon.pixels);
 
+	RayTracer::Init();
 	SSH::Init();
 	Icons::Init();
 	VisSystem::Init();
@@ -191,7 +192,6 @@ int main(int argc, char **argv)
 	AnNode::Init();
 	Effects::Init(0xffff);
 	MdChan::Init();
-	RayTracer::Init();
 
 	//ParLoader::Scan();
 
