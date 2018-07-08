@@ -9,6 +9,7 @@
 #include "web/anweb.h"
 #include "mdchan.h"
 #include "shadows.h"
+#include "ocl/raytracer.h"
 
 Texture* ParGraphics::refl = nullptr, *ParGraphics::bg = nullptr, *ParGraphics::logo = nullptr;
 float ParGraphics::reflStr = 1, ParGraphics::reflStrDecay = 2, ParGraphics::rimOff = 0.5f, ParGraphics::rimStr = 1;
@@ -302,100 +303,102 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 			osz = glm::length(p2 - p1);
 		}
 
-		glUseProgram(parProg);
-		glUniformMatrix4fv(parProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
-		glUniformMatrix4fv(parProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
-		glUniform3f(parProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
-		glUniform3f(parProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-		glUniform1f(parProgLocs[4], osz);
-		glUniform2f(parProgLocs[5], _w * ql, _h * ql);
-		glUniform1i(parProgLocs[6], 1);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
+		if (!RayTracer::resTex) {
+			glUseProgram(parProg);
+			glUniformMatrix4fv(parProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+			glUniformMatrix4fv(parProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+			glUniform3f(parProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
+			glUniform3f(parProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
+			glUniform1f(parProgLocs[4], osz);
+			glUniform2f(parProgLocs[5], _w * ql, _h * ql);
+			glUniform1i(parProgLocs[6], 1);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
 
-		glBindVertexArray(Particles::posVao);
-		for (auto& p : drawLists) {
-			//glPolygonMode(GL_FRONT_AND_BACK, (p.second.second == 0x0f) ? GL_POINT : GL_FILL);
-			if (p.second.second == 1) glUniform1f(parProgLocs[7], -1);
-			else if (p.second.second == 0x0f) glUniform1f(parProgLocs[7], 0);
-			else if (p.second.second == 2) glUniform1f(parProgLocs[7], 0.2f);
-			else glUniform1f(parProgLocs[7], 1);
-			glDrawArrays(GL_POINTS, p.first, p.second.first);
-		}
-
-		glBindVertexArray(Camera::emptyVao);
-		for (auto& p : drawListsB) {
-			byte& tp = p.second.second;
-			if (tp == 1) {
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				glUseProgram(parConLineProg);
-				glUniformMatrix4fv(parConLineProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
-				glUniformMatrix4fv(parConLineProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
-				glUniform1i(parConLineProgLocs[2], 1);
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
-				glUniform1i(parConLineProgLocs[3], 2);
-				glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
-				glDrawArrays(GL_LINES, p.first * 2, p.second.first * 2);
-			}
-			else {
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glUseProgram(parConProg);
-				glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
-				glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
-				glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
-				glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-				glUniform2f(parConProgLocs[4], _w * ql, _h * ql);
-				glUniform1i(parConProgLocs[5], 1);
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
-				glUniform1i(parConProgLocs[6], 2);
-				glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
+			glBindVertexArray(Particles::posVao);
+			for (auto& p : drawLists) {
+				//glPolygonMode(GL_FRONT_AND_BACK, (p.second.second == 0x0f) ? GL_POINT : GL_FILL);
+				if (p.second.second == 1) glUniform1f(parProgLocs[7], -1);
+				else if (p.second.second == 0x0f) glUniform1f(parProgLocs[7], 0);
+				else if (p.second.second == 2) glUniform1f(parProgLocs[7], 0.2f);
+				else glUniform1f(parProgLocs[7], 1);
 				glDrawArrays(GL_POINTS, p.first, p.second.first);
 			}
-		}
-		for (auto& c2 : Particles::particles_Conn2) {
-			if (!c2.cnt) continue;
-			if (!c2.drawMode) {
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				glUseProgram(parConLineProg);
-				glUniformMatrix4fv(parConLineProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
-				glUniformMatrix4fv(parConLineProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
-				glUniform1i(parConLineProgLocs[2], 1);
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
-				glUniform1i(parConLineProgLocs[3], 2);
-				glActiveTexture(GL_TEXTURE2);
-				glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
-				glDrawArrays(GL_LINES, 0, c2.cnt * 2);
-			}
-			else {
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glUseProgram(parConProg);
-				glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
-				glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
-				glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
-				glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-				glUniform2f(parConProgLocs[4], _w * ql, _h * ql);
-				glUniform1i(parConProgLocs[5], 1);
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
-				glUniform1i(parConProgLocs[6], 2);
-				glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
-				glDrawArrays(GL_POINTS, 0, c2.cnt);
-			}
-		}
 
-		glBindVertexArray(0);
-		glUseProgram(0);
+			glBindVertexArray(Camera::emptyVao);
+			for (auto& p : drawListsB) {
+				byte& tp = p.second.second;
+				if (tp == 1) {
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					glUseProgram(parConLineProg);
+					glUniformMatrix4fv(parConLineProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+					glUniformMatrix4fv(parConLineProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+					glUniform1i(parConLineProgLocs[2], 1);
+					glActiveTexture(GL_TEXTURE1);
+					glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+					glUniform1i(parConLineProgLocs[3], 2);
+					glActiveTexture(GL_TEXTURE2);
+					glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
+					glDrawArrays(GL_LINES, p.first * 2, p.second.first * 2);
+				}
+				else {
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+					glUseProgram(parConProg);
+					glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+					glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+					glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
+					glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
+					glUniform2f(parConProgLocs[4], _w * ql, _h * ql);
+					glUniform1i(parConProgLocs[5], 1);
+					glActiveTexture(GL_TEXTURE1);
+					glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+					glUniform1i(parConProgLocs[6], 2);
+					glActiveTexture(GL_TEXTURE2);
+					glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
+					glDrawArrays(GL_POINTS, p.first, p.second.first);
+				}
+			}
+			for (auto& c2 : Particles::particles_Conn2) {
+				if (!c2.cnt) continue;
+				if (!c2.drawMode) {
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					glUseProgram(parConLineProg);
+					glUniformMatrix4fv(parConLineProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+					glUniformMatrix4fv(parConLineProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+					glUniform1i(parConLineProgLocs[2], 1);
+					glActiveTexture(GL_TEXTURE1);
+					glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+					glUniform1i(parConLineProgLocs[3], 2);
+					glActiveTexture(GL_TEXTURE2);
+					glActiveTexture(GL_TEXTURE2);
+					glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
+					glDrawArrays(GL_LINES, 0, c2.cnt * 2);
+				}
+				else {
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+					glUseProgram(parConProg);
+					glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+					glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+					glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
+					glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
+					glUniform2f(parConProgLocs[4], _w * ql, _h * ql);
+					glUniform1i(parConProgLocs[5], 1);
+					glActiveTexture(GL_TEXTURE1);
+					glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+					glUniform1i(parConProgLocs[6], 2);
+					glActiveTexture(GL_TEXTURE2);
+					glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
+					glDrawArrays(GL_POINTS, 0, c2.cnt);
+				}
+			}
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		Protein::Draw();
-		AnWeb::DrawScene();
+			glBindVertexArray(0);
+			glUseProgram(0);
+
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			Protein::Draw();
+			AnWeb::DrawScene();
+		}
 	}
 }
 
@@ -447,9 +450,14 @@ void ParGraphics::Reblit() {
 		float zero[] = { 0,0,0,0 };
 		glClearBufferfv(GL_COLOR, 0, zero);
 		if (!!Particles::particleSz) {
-			Recolor();
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->d_tfbo[0]);
-			BlitSky();
+			if (RayTracer::resTex) {
+				Engine::DrawQuad(0, 0, (float)Display::width, (float)Display::height, RayTracer::resTex);
+			}
+			else {
+				Recolor();
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->d_tfbo[0]);
+				BlitSky();
+			}
 		}
 		else {
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

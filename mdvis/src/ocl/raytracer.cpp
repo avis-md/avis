@@ -6,12 +6,14 @@
 #include <GL/glx.h>
 #endif
 
-#define RESW 400
-#define RESH 300
+#define RESW 800
+#define RESH 600
 
 RayTracer::info_st RayTracer::info = {};
 
 bool RayTracer::live = false;
+BVH::Node* RayTracer::bvh;
+uint RayTracer::bvhSz;
 
 GLuint RayTracer::resTex = 0;
 
@@ -92,15 +94,23 @@ bool RayTracer::Init(){
 
 void RayTracer::SetScene() {
 	info.str = 2;
-	info.mat.specular = 0.2f;
-	info.mat.rough = 0.15f;
-	info.mat.gloss = 0.7f;
+	info.mat.specular = 0.3f;
+	info.mat.rough = 0.2f;
+	info.mat.gloss = 0.85f;
 	//memcpy(info.IP, glm::value_ptr(glm::inverse(MVP::projection()*MVP::modelview())), 16 * sizeof(float));
 
 	if (!resTex) {
-		//clSetKernelArg(_kernel, 1, sizeof(info), &info);
-
-		int vl = 200;
+		std::cout << "Generating Bounds..." << std::endl;
+		BVH::Ball* objs = new BVH::Ball[Particles::particleSz];
+		for (uint a = 0; a < Particles::particleSz; a++) {
+			objs[a].orig = Particles::particles_Pos[a];
+			objs[a].rad = Particles::particles_Rad[a];
+		}
+		std::cout << "Generating BVH..." << std::endl;
+		BVH::Calc(objs, Particles::particleSz, bvh, bvhSz, BBox(0,0,0,0,0,0));
+		delete[](objs);
+		std::cout << "Settings kernel args..." << std::endl;
+		int vl = 10;
 		cl_int err = CL_SUCCESS;
 		//_bls = clCreateBuffer(_ctx, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vl * sizeof(Vec3), Particles::particles_Pos, &err);
 		_bls = clCreateFromGLBuffer(_ctx, CL_MEM_READ_ONLY, Particles::posBuffer, &err);
@@ -109,7 +119,7 @@ void RayTracer::SetScene() {
 		clSetKernelArg(_kernel, 3, sizeof(_bls), (void*)&_bls);
 		clSetKernelArg(_kernel, 4, sizeof(cl_int), &vl);
 		
-		vl = 50;
+		vl = 5;
 		if (!!Particles::connSz) {
 			//_cns = clCreateBuffer(_ctx, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vl * 2 * sizeof(cl_int), Particles::particles_Conn, &err);
 			_cns = clCreateFromGLBuffer(_ctx, CL_MEM_READ_ONLY, Particles::connBuffer, &err);
@@ -173,8 +183,19 @@ void RayTracer::Render(){
 	//live = false;
 }
 
+void RayTracer::Clear() {
+	clEnqueueReleaseGLObjects(_que, 1, &_bls, 0, 0, 0);
+	clEnqueueReleaseGLObjects(_que, 1, &_cns, 0, 0, 0);
+	clFinish(_que);
+	clReleaseMemObject(_bls);
+	clReleaseMemObject(_cns);
+	glDeleteTextures(1, &resTex);
+	resTex = 0;
+	_cntt = 0;
+}
+
 void RayTracer::Draw() {
-	Engine::DrawQuad(200, 100, 400, 300, RayTracer::resTex);
+	//Engine::DrawQuad(200, 100, 400, 300, RayTracer::resTex);
 	UI::Label(202, 102, 12, "Samples: " + std::to_string(_cntt), white());
 	auto s = Engine::DrawSliderFill(210, 410, 200, 10, 0, 5, info.str, blue(), white());
 	if (s != info.str) {

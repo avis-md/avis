@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine.h"
+#include "utils/BVH.h"
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl.h>
 #ifdef PLATFORM_WIN
@@ -28,10 +29,13 @@ public:
 	static bool Init();
 	
 	static bool live;
+	static BVH::Node* bvh;
+	static uint bvhSz;
 
 	static void SetScene();
 	static void SetTex(uint w, uint h);
 	static void Render();
+	static void Clear();
 
 	static void Draw();
 

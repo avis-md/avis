@@ -77,8 +77,13 @@ void updateFunc() {
 			Scene::dirty = true;
 		}
 		if (Input::KeyDown(Key_X) && Input::KeyHold(Key_LeftShift)) {
-			RayTracer::SetScene();
-			RayTracer::Render();
+			if (!RayTracer::resTex) {
+				RayTracer::SetScene();
+				RayTracer::Render();
+			}
+			else {
+				RayTracer::Clear();
+			}
 		}
 	}
 }

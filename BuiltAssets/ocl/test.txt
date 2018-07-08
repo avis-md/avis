@@ -231,25 +231,29 @@ float4 Trace(info_st info, ray_st ray, uint rnd, __global float* bg, __global fl
 	for (int a = 0; a < 4; a++) {
 		ray = rays[a];
 		float3 hitpos, hitnrm, hp, hn;
-		float4 col = (float4)(0.8f, 0.8f, 0.8f, 1);
+		float4 col = (float4)(1, 1, 1, 1);
         float its = -1;
         float its2;
         for (int a = 0; a < ballCnt; a++) {
-            its2 = Int_Ball(ray, (float3)(ballPoss[a*3], ballPoss[a*3+1], ballPoss[a*3+2]), 0.05f, &hp, &hn);
+            its2 = Int_Ball(ray, (float3)(ballPoss[a*3], ballPoss[a*3+1], ballPoss[a*3+2]), 0.035f, &hp, &hn);
             if ((its < 0) || ((its2 > 0) && (its2 < its))) {
                 its = its2;
                 hitpos = hp;
                 hitnrm = hn;
+                if (a % 3 == 1) col = (float4)(1, 0, 0, 1);
+                else if (a % 3 == 2) col = (float4)(0.2f, 0.2f, 0.2f, 1);
+                else col = (float4)(1, 1, 1, 1);
             }
         }
         for (int a = 0; a < connCnt; a++) {
             int i1 = connIds[a*2];
             int i2 = connIds[a*2+1];
-            its2 = Int_Tube(ray, (float3)(ballPoss[i1*3], ballPoss[i1*3+1], ballPoss[i1*3+2]), (float3)(ballPoss[i2*3], ballPoss[i2*3+1], ballPoss[i2*3+2]), 0.02f, &hp, &hn);
+            its2 = Int_Tube(ray, (float3)(ballPoss[i1*3], ballPoss[i1*3+1], ballPoss[i1*3+2]), (float3)(ballPoss[i2*3], ballPoss[i2*3+1], ballPoss[i2*3+2]), 0.01f, &hp, &hn);
             if ((its < 0) || ((its2 > 0) && (its2 < its))) {
                 its = its2;
                 hitpos = hp;
                 hitnrm = hn;
+                col = (float4)(1, 1, 1, 1);
             }
         }
         
