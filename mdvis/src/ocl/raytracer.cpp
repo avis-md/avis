@@ -8,9 +8,6 @@
 #include <GL/glx.h>
 #endif
 
-#define RESW 800
-#define RESH 600
-
 RayTracer::info_st RayTracer::info = {};
 
 bool RayTracer::live = false, RayTracer::expDirty = false;
@@ -18,6 +15,9 @@ BVH::Node* RayTracer::bvh;
 uint RayTracer::bvhSz;
 Mat4x4 RayTracer::IP;
 string RayTracer::bgName;
+float RayTracer::prvRes = 1;
+uint RayTracer::resw, RayTracer::resh;
+uint RayTracer::prvSmp = 50;
 
 GLuint RayTracer::resTex = 0;
 
@@ -82,8 +82,7 @@ bool RayTracer::Init(){
 	}
 	_kernel = clCreateKernel(prog, "_main_", 0);
 	
-	_bufr = clCreateBuffer(_ctx, CL_MEM_WRITE_ONLY, RESW * RESH * 4 * sizeof(cl_float), 0, 0);
-	clSetKernelArg(_kernel, 0, sizeof(_bufr), (void*)&_bufr);
+	CheckRes();
 	
 	SetBg(IO::path + "/res/refl.hdr");
 
@@ -140,6 +139,23 @@ void RayTracer::SetScene() {
 	}
 }
 
+uint _cntt = 0;
+std::vector<float> _texx;
+
+void RayTracer::CheckRes() {
+	uint w = (uint)(Display::width * prvRes);
+	uint h = (uint)(Display::height * prvRes);
+	if (w != resw || h != resh) {
+		info.w = resw = w;
+		info.h = resh = h;
+		clReleaseMemObject(_bufr);
+		_bufr = clCreateBuffer(_ctx, CL_MEM_WRITE_ONLY, resw * resh * 4 * sizeof(cl_float), 0, 0);
+		clSetKernelArg(_kernel, 0, sizeof(_bufr), (void*)&_bufr);
+		_cntt = 0;
+		_texx.resize(resw * resh * 4);
+	}
+}
+
 void RayTracer::SetTex(uint w, uint h){
 	
 }
@@ -161,9 +177,6 @@ void RayTracer::SetBg(string fl) {
 	clSetKernelArg(_kernel, 2, sizeof(_bg), (void*)&_bg);
 }
 
-uint _cntt = 0;
-float _texx[RESW*RESH*4];
-
 void RayTracer::Render() {
 	if (!live || !resTex) return;
 
@@ -172,10 +185,11 @@ void RayTracer::Render() {
 		_cntt = 0;
 	}
 
-	if (!_cntt) IP = glm::inverse(MVP::projection()*MVP::modelview());
+	CheckRes();
 
-	info.w = RESW;
-	info.h = RESH;
+	if (_cntt >= prvSmp) return;
+	else if (!_cntt) IP = glm::inverse(MVP::projection()*MVP::modelview());
+
 	memcpy(info.IP, glm::value_ptr(IP), 16 * sizeof(float));
 	clSetKernelArg(_kernel, 1, sizeof(info), &info);
 	
@@ -186,9 +200,9 @@ void RayTracer::Render() {
 
 	cl_float* bufrp = (cl_float*)clEnqueueMapBuffer(_que, _bufr, CL_TRUE, CL_MAP_READ, 0, ws * 4 * sizeof(cl_float), 0, 0, 0, 0);
 	if (!_cntt) {
-		memcpy(_texx, bufrp, RESW * RESH * 4 * sizeof(float));
+		memcpy(&_texx[0], bufrp, resw * resh * 4 * sizeof(float));
 		glBindTexture(GL_TEXTURE_2D, resTex);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, RESW, RESH, 0, GL_RGBA, GL_FLOAT, _texx);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, resw, resh, 0, GL_RGBA, GL_FLOAT, &_texx[0]);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1);
@@ -201,7 +215,7 @@ void RayTracer::Render() {
 			_texx[a] = (_texx[a] * _cntt + bufrp[a]) / (_cntt+1);
 		}
 		glBindTexture(GL_TEXTURE_2D, resTex);
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, RESW, RESH, GL_RGBA, GL_FLOAT, _texx);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, resw, resh, GL_RGBA, GL_FLOAT, &_texx[0]);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	_cntt++;
@@ -240,6 +254,16 @@ void RayTracer::DrawMenu() {
 		UI::Label(expandPos - 148, 17 * 2, 12, "Samples: " + std::to_string(_cntt), white(0.5f));
 		off += 17;
 	}
+
+	UI::Label(expandPos - 148, off, 12, "Preview", white());
+	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
+	off++;
+	UI::Label(expandPos - 147, off + 17, 12, "Quality", white());
+	prvRes = Engine::DrawSliderFill(expandPos - 80, off + 17, 78, 16, 0.1f, 1, prvRes, white(1, 0.5f), white());
+	UI::Label(expandPos - 147, off + 17 * 2, 12, "Samples", white());
+	prvSmp = TryParse(UI::EditText(expandPos - 80, off + 17 * 2, 78, 16, 12, white(1, 0.5f), std::to_string(prvSmp), true, white()), 0U);
+
+	off += 17 * 3 * 2;
 
 	UI::Label(expandPos - 148, off, 12, "Background", white());
 	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));

@@ -34,8 +34,12 @@ public:
 	static uint bvhSz;
 	static Mat4x4 IP;
 	static string bgName;
+	static float prvRes;
+	static uint resw, resh;
+	static uint prvSmp;
 
 	static void SetScene();
+	static void CheckRes();
 	static void SetTex(uint w, uint h), SetBg(string fl);
 	static void Render();
 	static void Clear();
