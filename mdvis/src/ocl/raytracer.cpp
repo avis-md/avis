@@ -1,6 +1,8 @@
 #include "raytracer.h"
 #include "hdr.h"
 #include "md/Particles.h"
+#include "md/ParMenu.h"
+#include "utils/dialog.h"
 #include <CL/cl_gl.h>
 #ifdef PLATFORM_LNX
 #include <GL/glx.h>
@@ -11,9 +13,11 @@
 
 RayTracer::info_st RayTracer::info = {};
 
-bool RayTracer::live = false;
+bool RayTracer::live = false, RayTracer::expDirty = false;
 BVH::Node* RayTracer::bvh;
 uint RayTracer::bvhSz;
+Mat4x4 RayTracer::IP;
+string RayTracer::bgName;
 
 GLuint RayTracer::resTex = 0;
 
@@ -21,7 +25,7 @@ cl_context RayTracer::_ctx;
 cl_command_queue RayTracer::_que;
 cl_kernel RayTracer::_kernel;
 
-cl_mem _bufr, _bg, _bls, _cns;
+cl_mem _bufr, _bg, _bls, _cns, _cls;
 
 bool RayTracer::Init(){
 	cl_platform_id platform;
@@ -80,23 +84,21 @@ bool RayTracer::Init(){
 	
 	_bufr = clCreateBuffer(_ctx, CL_MEM_WRITE_ONLY, RESW * RESH * 4 * sizeof(cl_float), 0, 0);
 	clSetKernelArg(_kernel, 0, sizeof(_bufr), (void*)&_bufr);
-
-	byte* d = hdr::read_hdr((IO::path + "/res/bigsight.hdr").c_str(), (uint*)&info.bg_w, (uint*)&info.bg_h);
-	auto dv = hdr::to_float(d, info.bg_w, info.bg_h);
-	delete[](d);
-
-	_bg = clCreateBuffer(_ctx, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, info.bg_w * info.bg_h * 3 * sizeof(cl_float), &dv[0], 0);
-	clSetKernelArg(_kernel, 2, sizeof(_bg), (void*)&_bg);
+	
+	SetBg(IO::path + "/res/refl.hdr");
 
 	live = true;
 	return true;
 }
 
 void RayTracer::SetScene() {
+	if (!live) return;
+
 	info.str = 2;
 	info.mat.specular = 0.3f;
 	info.mat.rough = 0.2f;
-	info.mat.gloss = 0.85f;
+	info.mat.gloss = 0.95f;
+	info.mat.ior = 1;
 	//memcpy(info.IP, glm::value_ptr(glm::inverse(MVP::projection()*MVP::modelview())), 16 * sizeof(float));
 
 	if (!resTex) {
@@ -110,7 +112,7 @@ void RayTracer::SetScene() {
 		BVH::Calc(objs, Particles::particleSz, bvh, bvhSz, BBox(0,0,0,0,0,0));
 		delete[](objs);
 		std::cout << "Settings kernel args..." << std::endl;
-		int vl = 10;
+		int vl = 20;
 		cl_int err = CL_SUCCESS;
 		//_bls = clCreateBuffer(_ctx, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vl * sizeof(Vec3), Particles::particles_Pos, &err);
 		_bls = clCreateFromGLBuffer(_ctx, CL_MEM_READ_ONLY, Particles::posBuffer, &err);
@@ -119,7 +121,7 @@ void RayTracer::SetScene() {
 		clSetKernelArg(_kernel, 3, sizeof(_bls), (void*)&_bls);
 		clSetKernelArg(_kernel, 4, sizeof(cl_int), &vl);
 		
-		vl = 5;
+		vl = min(17U, Particles::connSz);
 		if (!!Particles::connSz) {
 			//_cns = clCreateBuffer(_ctx, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vl * 2 * sizeof(cl_int), Particles::particles_Conn, &err);
 			_cns = clCreateFromGLBuffer(_ctx, CL_MEM_READ_ONLY, Particles::connBuffer, &err);
@@ -128,7 +130,13 @@ void RayTracer::SetScene() {
 		}
 		clSetKernelArg(_kernel, 5, sizeof(_cns), (void*)&_cns);
 		clSetKernelArg(_kernel, 6, sizeof(cl_int), &vl);
+		_cls = clCreateFromGLBuffer(_ctx, CL_MEM_READ_ONLY, Particles::colIdBuffer, &err);
+		clEnqueueAcquireGLObjects(_que, 1, &_cls, 0, 0, 0);
+		assert(err == CL_SUCCESS);
+		clSetKernelArg(_kernel, 7, sizeof(_cls), &_cls);
 		clFinish(_que);
+
+		glGenTextures(1, &resTex);
 	}
 }
 
@@ -136,17 +144,39 @@ void RayTracer::SetTex(uint w, uint h){
 	
 }
 
+void RayTracer::SetBg(string fl) {
+	byte* d = hdr::read_hdr(fl.c_str(), (uint*)&info.bg_w, (uint*)&info.bg_h);
+	if (!d) return;
+	std::vector<float> dv;
+	hdr::to_float(d, info.bg_w, info.bg_h, &dv);
+	delete[](d);
+
+#ifdef PLATFORM_WIN
+	std::replace(fl.begin(), fl.end(), '\\', '/');
+#endif
+	bgName = fl.substr(fl.find_last_of('/') + 1);
+
+	if (_bg) clReleaseMemObject(_bg);
+	_bg = clCreateBuffer(_ctx, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, info.bg_w * info.bg_h * 3 * sizeof(cl_float), &dv[0], 0);
+	clSetKernelArg(_kernel, 2, sizeof(_bg), (void*)&_bg);
+}
+
 uint _cntt = 0;
 float _texx[RESW*RESH*4];
 
-void RayTracer::Render(){
-	if (!live) return;
+void RayTracer::Render() {
+	if (!live || !resTex) return;
 
-	if (!resTex) glGenTextures(1, &resTex);
+	if (expDirty) {
+		expDirty = false;
+		_cntt = 0;
+	}
+
+	if (!_cntt) IP = glm::inverse(MVP::projection()*MVP::modelview());
 
 	info.w = RESW;
 	info.h = RESH;
-	memcpy(info.IP, glm::value_ptr(glm::inverse(MVP::projection()*MVP::modelview())), 16 * sizeof(float));
+	memcpy(info.IP, glm::value_ptr(IP), 16 * sizeof(float));
 	clSetKernelArg(_kernel, 1, sizeof(info), &info);
 	
 	size_t ws = info.w*info.h;
@@ -194,38 +224,49 @@ void RayTracer::Clear() {
 	_cntt = 0;
 }
 
-void RayTracer::Draw() {
-	//Engine::DrawQuad(200, 100, 400, 300, RayTracer::resTex);
-	UI::Label(202, 102, 12, "Samples: " + std::to_string(_cntt), white());
-	auto s = Engine::DrawSliderFill(210, 410, 200, 10, 0, 5, info.str, blue(), white());
-	if (s != info.str) {
-		info.str = s;
-		_cntt = 0;
+void RayTracer::DrawMenu() {
+#define SV(vl, b) auto b = vl; vl
+
+	auto& expandPos = ParMenu::expandPos;
+	auto& mt = info.mat;
+
+	if (Engine::Button(expandPos - 148, 2, 146, 16, resTex ? Vec4(0.4f, 0.2f, 0.2f, 1) : Vec4(0.2f, 0.4f, 0.2f, 1), resTex ? "Disable (Shift-X)" : "Enable (Shift-X)", 12, white(), true) == MOUSE_RELEASE) {
+		if (resTex) Clear();
+		else SetScene();
 	}
 
-	auto& mt = info.mat;
-	UI::Label(210, 440, 12, "Specular");
-	auto o = Engine::DrawSliderFill(350, 440, 200, 10, 0, 1, mt.specular, blue(), white());
-	if (o != mt.specular) {
-		mt.specular = o;
-		_cntt = 0;
+	float off = 17 * 2 + 1;
+	if (resTex) {
+		UI::Label(expandPos - 148, 17 * 2, 12, "Samples: " + std::to_string(_cntt), white(0.5f));
+		off += 17;
 	}
-	UI::Label(210, 460, 12, "Roughness (Diffuse)");
-	o = Engine::DrawSliderFill(350, 460, 200, 10, 0, 1, mt.rough, blue(), white());
-	if (o != mt.rough) {
-		mt.rough = o;
-		_cntt = 0;
+
+	UI::Label(expandPos - 148, off, 12, "Background", white());
+	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
+	off++;
+	UI::Label(expandPos - 147, off + 17, 12, "File", white());
+	if (Engine::Button(expandPos - 80, off + 17, 78, 16, white(1, 0.3f), bgName, 12, white(0.5f)) == MOUSE_RELEASE) {
+		std::vector<string> exts = {"*.hdr"};
+		auto res = Dialog::OpenFile(exts);
+		if (!!res.size()) {
+			SetBg(res[0]);
+			_cntt = 0;
+		}
 	}
-	UI::Label(210, 480, 12, "Gloss (Specular)");
-	o = Engine::DrawSliderFill(350, 480, 200, 10, 0, 1, mt.gloss, blue(), white());
-	if (o != mt.gloss) {
-		mt.gloss = o;
-		_cntt = 0;
-	}
-	UI::Label(210, 500, 12, "Metallic");
-	o = Engine::DrawSliderFill(350, 500, 200, 10, 0, 1, mt.metallic, blue(), white());
-	if (o != mt.metallic) {
-		mt.metallic = o;
+	UI::Label(expandPos - 147, off + 17 * 2, 12, "Strength", white());
+	SV(info.str, str) = Engine::DrawSliderFill(expandPos - 80, off + 17 * 2, 78, 16, 0, 5, info.str, white(1, 0.5f), white());
+
+	off += 17 * 3 + 2;
+
+	UI::Label(expandPos - 148, off, 12, "Material", white());
+	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
+	off++;
+	UI::Label(expandPos - 147, off + 17, 12, "Specular", white());
+	SV(mt.specular, spc) = Engine::DrawSliderFill(expandPos - 80, off + 17, 78, 16, 0, 1, mt.specular, white(1, 0.5f), white());
+	UI::Label(expandPos - 147, off + 17 * 2, 12, "Gloss", white());
+	SV(mt.gloss, gls) = Engine::DrawSliderFill(expandPos - 80, off + 17 * 2, 78, 16, 0, 1, mt.gloss, white(1, 0.5f), white());
+
+	if ((info.str != str) || (mt.specular != spc) || mt.gloss != gls) {
 		_cntt = 0;
 	}
 }

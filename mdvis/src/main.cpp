@@ -79,13 +79,15 @@ void updateFunc() {
 		if (Input::KeyDown(Key_X) && Input::KeyHold(Key_LeftShift)) {
 			if (!RayTracer::resTex) {
 				RayTracer::SetScene();
-				RayTracer::Render();
+				//RayTracer::Render();
 			}
 			else {
 				RayTracer::Clear();
 			}
 		}
 	}
+	if (Scene::dirty) RayTracer::expDirty = true;
+	else Scene::dirty = true;
 }
 
 void paintfunc() {
@@ -136,11 +138,10 @@ void paintfunc() {
 					else {
 						ParGraphics::selIds.resize(1);
 						ParGraphics::selIds[0] = id;
-						std::cout << "asdf";
 					}
 				}
 				else if (Input::dbclick)
-					ParGraphics::rotCenter = Particles::particles_Pos[id];
+					ParGraphics::rotCenter = Particles::particles_Pos[id - 1];
 			}
 
 			id--;
@@ -159,11 +160,6 @@ void paintfunc() {
 	}
 
 	HelpMenu::Draw();
-
-	if (RayTracer::resTex) {
-		RayTracer::Draw();
-		Scene::dirty = true;
-	}
 }
 
 int main(int argc, char **argv)

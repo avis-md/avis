@@ -14,6 +14,7 @@ public:
 		cl_float specular;
 		cl_float gloss;
 		cl_float metallic;
+		cl_float ior;
 	};
 	static struct info_st {
 		cl_int w;
@@ -28,16 +29,18 @@ public:
 
 	static bool Init();
 	
-	static bool live;
+	static bool live, expDirty;
 	static BVH::Node* bvh;
 	static uint bvhSz;
+	static Mat4x4 IP;
+	static string bgName;
 
 	static void SetScene();
-	static void SetTex(uint w, uint h);
+	static void SetTex(uint w, uint h), SetBg(string fl);
 	static void Render();
 	static void Clear();
 
-	static void Draw();
+	static void DrawMenu();
 
 	static GLuint resTex;
 	

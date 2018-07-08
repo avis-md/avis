@@ -585,7 +585,7 @@ void ParGraphics::DrawMenu() {
 	rimStr = Engine::DrawSliderFill(expandPos - 80, 88, 78, 16, 0, 5, rimStr, white(1, 0.5f), white());
 
 	UI::Label(expandPos - 148, 105, 12, "Camera", white());
-	Engine::DrawQuad(expandPos - 149, 121, 165, 140, white(0.9f, 0.1f));
+	Engine::DrawQuad(expandPos - 149, 121, 148, 140, white(0.9f, 0.1f));
 	UI::Label(expandPos - 147, 122, 12, "Target", white());
 	bool htr = (rotCenterTrackId < ~0);
 	auto rf = rotCenterTrackId;

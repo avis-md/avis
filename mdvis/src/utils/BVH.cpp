@@ -43,7 +43,7 @@ void BVH::Calc(Ball* objs, uint cnt, Node*& res, uint& resCnt, BBox box) {
 
 	Node* nd = res + 1;
 	uint ndl = 3;
-	uint resCnt = 1;
+	resCnt = 1;
 	while (!que.empty()) {
 		_calc_st& st = que.front();
 		if (st.idc < 3) {

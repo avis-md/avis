@@ -12,7 +12,8 @@ Background::Background(const string& path) : width(0), height(0), AssetObject(AS
 	byte* data2 = hdr::read_hdr(path.c_str(), &width, &height);
 	if (data2 == NULL)
 		return;
-	auto data = hdr::to_float(data2, width, height);
+	std::vector<float> data;
+	hdr::to_float(data2, width, height, &data);
 	delete[](data2);
 
 	uint width_1 = width, height_1 = height, width_2, height_2, mips = 0;
@@ -151,7 +152,8 @@ Background::Background(std::istream& strm, uint offset) : width(0), height(0), A
 
 	byte* data2 = new byte[width*height * 4];
 	strm.read((char*)data2, width*height * 4);
-	auto data = hdr::to_float(data2, width, height);
+	std::vector<float> data;
+	hdr::to_float(data2, width, height, &data);
 	delete[](data2);
 
 	uint width_1 = width, height_1 = height, width_2, height_2, mips = 0;

@@ -6,7 +6,7 @@ class ParMenu {
 public:
 
 	static int activeMenu;
-	static const string menuNames[4];
+	static const string menuNames[5];
 	static bool expanded;
 	static float expandPos;
 

@@ -5,9 +5,10 @@
 #include "utils/dialog.h"
 #include "ui/icons.h"
 #include "ui/popups.h"
+#include "ocl/raytracer.h"
 
 int ParMenu::activeMenu = 0;
-const string ParMenu::menuNames[] = { "Particles", "Visualize", "Proteins", "Display" };
+const string ParMenu::menuNames[] = { "Particles", "Visualize", "Proteins", "Display", "Raytrace" };
 bool ParMenu::expanded = true;
 float ParMenu::expandPos = 150;
 
@@ -35,10 +36,13 @@ void ParMenu::Draw() {
 			case 3:
 				Draw_Vis();
 				break;
+			case 4:
+				RayTracer::DrawMenu();
+				break;
 			}
 		}
 
-		for (uint i = 0; i < 4; i++) {
+		for (uint i = 0; i < 5; i++) {
 			if (i == activeMenu)
 				Engine::DrawQuad(expandPos, 81.0f * i, 17, 81, white(0.9f, 0.15f));
 			else
@@ -49,7 +53,7 @@ void ParMenu::Draw() {
 
 		Engine::RotateUI(90, Vec2(expandPos + 16, 0));
 		UI::font->Align(ALIGN_TOPCENTER);
-		for (uint i = 0; i < 4; i++) {
+		for (uint i = 0; i < 5; i++) {
 			UI::Label(expandPos + 56 + 81 * i, 0, 12, menuNames[i], white());
 		}
 		UI::font->Align(ALIGN_TOPLEFT);
