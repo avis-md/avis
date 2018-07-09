@@ -82,18 +82,20 @@ float ParGraphics::Eff::DrawMenu(float off) {
 	UI::Label(expandPos - 148, off, 12, "Effects", white());
 
 	off += 17;
-	Engine::DrawQuad(expandPos - 148, off, 146, 17 * 5, white(0.9f, 0.1f));
+	Engine::DrawQuad(expandPos - 148, off - 1, 147, 17 * 5 + 2, white(0.9f, 0.1f));
 	UI::Label(expandPos - 146, off, 12, "Ambient Occlusion", white());
-	useSSAO = Engine::Toggle(expandPos - 20, off, 16, Icons::checkbox, useSSAO, white(), ORIENT_HORIZONTAL);
-	UI::Label(expandPos - 145, off + 17, 12, "Samples", white());
-	ssaoSamples = TryParse(UI::EditText(expandPos - 80, off + 17, 76, 16, 12, white(1, 0.5f), std::to_string(ssaoSamples), true, white()), 0);
+	useSSAO = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, useSSAO, white(), ORIENT_HORIZONTAL);
+	ssaoSamples = (int)UI2::Slider(expandPos - 147, off + 17, 147, "Samples", 5, 100, ssaoSamples, std::to_string(ssaoSamples));
 	ssaoSamples = Clamp(ssaoSamples, 10, 100);
-	UI::Label(expandPos - 145, off + 34, 12, "Radius", white());
-	ssaoRad = Engine::DrawSliderFill(expandPos - 80, off + 34, 76, 16, 0.001f, 0.05f, ssaoRad, white(1, 0.5f), white());
-	UI::Label(expandPos - 145, off + 51, 12, "Strength", white());
-	ssaoStr = Engine::DrawSliderFill(expandPos - 80, off + 51, 76, 16, 0, 3, ssaoStr, white(1, 0.5f), white());
-	UI::Label(expandPos - 145, off + 68, 12, "Blur", white());
-	ssaoBlur = Engine::DrawSliderFill(expandPos - 80, off + 68, 76, 16, 0, 40, ssaoBlur, white(1, 0.5f), white());
+	//UI::Label(expandPos - 145, off + 34, 12, "Radius", white());
+	//ssaoRad = Engine::DrawSliderFill(expandPos - 80, off + 34, 76, 16, 0.001f, 0.05f, ssaoRad, white(1, 0.5f), white());
+	ssaoRad = UI2::Slider(expandPos - 147, off + 17 * 2, 147, "Radius", 0.001f, 0.05f, ssaoRad);
+	//UI::Label(expandPos - 145, off + 51, 12, "Strength", white());
+	//ssaoStr = Engine::DrawSliderFill(expandPos - 80, off + 51, 76, 16, 0, 3, ssaoStr, white(1, 0.5f), white());
+	ssaoStr = UI2::Slider(expandPos - 147, off + 17 * 3, 147, "Strength", 0, 3, ssaoStr);
+	//UI::Label(expandPos - 145, off + 68, 12, "Blur", white());
+	//ssaoBlur = Engine::DrawSliderFill(expandPos - 80, off + 68, 76, 16, 0, 40, ssaoBlur, white(1, 0.5f), white());
+	ssaoBlur = UI2::Slider(expandPos - 147, off + 17 * 4, 147, "Blur", 0, 40, ssaoBlur);
 	return off + 17 * 5 + 1;
 }
 
@@ -704,7 +706,9 @@ void ParGraphics::DrawMenu() {
 		off += 17;
 	}
 
-	Shadows::DrawMenu(off);
+	off = Eff::DrawMenu(off);
+
+	Shadows::DrawMenu(off + 1);
 
 	rotW = Clamp<float>(rotW, -90, 90);
 	rotZ = Repeat<float>(rotZ, 0, 360);

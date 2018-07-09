@@ -60,10 +60,10 @@ void BVH::Calc(Ball* objs, uint cnt, Node*& res, uint& resCnt, BBox box) {
 			}
 		}
 		else {
-			Ball& bl = objs[st.ids[0]];
-			nd->box.x0 = bl.orig.x - bl.rad; nd->box.x1 = bl.orig.x + bl.rad;
-			nd->box.y0 = bl.orig.y - bl.rad; nd->box.y1 = bl.orig.y + bl.rad;
-			nd->box.z0 = bl.orig.z - bl.rad; nd->box.z1 = bl.orig.z + bl.rad;
+			Ball* bl = objs + st.ids[0];
+			nd->box.x0 = bl->orig.x - bl->rad; nd->box.x1 = bl->orig.x + bl->rad;
+			nd->box.y0 = bl->orig.y - bl->rad; nd->box.y1 = bl->orig.y + bl->rad;
+			nd->box.z0 = bl->orig.z - bl->rad; nd->box.z1 = bl->orig.z + bl->rad;
 
 			byte ax2 = (st.axis + 1) % 3;
 			que.push(_calc_st(ax2));
@@ -76,35 +76,37 @@ void BVH::Calc(Ball* objs, uint cnt, Node*& res, uint& resCnt, BBox box) {
 			uint i2 = st.idc;
 			vc = new uint[i2];
 
-			if (resCnt == 78) {
+			if (resCnt == 5653) {
 				int i = 1;
 				i++;
 			}
 
-			float md2 = bl.orig[st.axis];//((st.axis == 0) ? bl.orig.x : ((st.axis == 1) ? bl.orig.y : bl.orig.z));
+			float md2 = bl->orig[st.axis];//((st.axis == 0) ? bl.orig.x : ((st.axis == 1) ? bl.orig.y : bl.orig.z));
 			for (int a = 1; a < st.idc; a++) {
-				bl = objs[st.ids[a]];
+				bl = objs + st.ids[a];
 #define MN(a, b) a = min(a, b)
 #define MX(a, b) a = max(a, b)
-				MN(nd->box.x0, bl.orig.x - bl.rad);
-				MN(nd->box.y0, bl.orig.y - bl.rad);
-				MN(nd->box.z0, bl.orig.z - bl.rad);
-				MX(nd->box.x1, bl.orig.x + bl.rad);
-				MX(nd->box.y1, bl.orig.y + bl.rad);
-				MX(nd->box.z1, bl.orig.z + bl.rad);
-				float orr = bl.orig[st.axis];
-				md2 += orr;
+				MN(nd->box.x0, bl->orig.x - bl->rad);
+				MN(nd->box.y0, bl->orig.y - bl->rad);
+				MN(nd->box.z0, bl->orig.z - bl->rad);
+				MX(nd->box.x1, bl->orig.x + bl->rad);
+				MX(nd->box.y1, bl->orig.y + bl->rad);
+				MX(nd->box.z1, bl->orig.z + bl->rad);
+				md2 += bl->orig[st.axis];
 			}
 			md2 /= st.idc;
 			//float md = ((st.axis == 0) ? nd->box.x0 + nd->box.x1 : ((st.axis == 1) ? nd->box.y0 + nd->box.y1 : nd->box.z0 + nd->box.z1)) / 2;
 			for (int a = 0; a < st.idc; a++) {
 				uint i = st.ids[a];
-				bl = objs[i];
-				float orr = bl.orig[st.axis];
+				bl = objs + i;
+				float orr = bl->orig[st.axis];
 				if (orr > md2) vc[--i2] = i;
 				else vc[i1++] = i;
 			}
-			if (i1 == 0 || i2 == st.idc) abort();
+			if (i1 == 0 || i2 == st.idc) {
+				i1 = st.idc/2;
+				i2 = st.idc - i1;
+			}
 			bk1.ids = &vc[0];
 			bk1.idc = i1;
 			bk2.ids = &vc[i2];

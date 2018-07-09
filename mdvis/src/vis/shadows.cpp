@@ -195,8 +195,6 @@ void Shadows::Reblit() {
 float Shadows::DrawMenu(float off) {
 	auto& expandPos = ParMenu::expandPos;
 
-	UI::Label(expandPos - 148, off, 12, "Effects", white());
-
 #define SV(x) auto _ ## x = x
 	SV(show);
 	SV(str);
@@ -204,10 +202,9 @@ float Shadows::DrawMenu(float off) {
 	SV(rw);
 	SV(rz);
 
-	off += 17;
-	Engine::DrawQuad(expandPos - 148, off, 146, 17 * 5, white(0.9f, 0.1f));
+	Engine::DrawQuad(expandPos - 148, off - 1, 147, 17 * 5 + 2, white(0.9f, 0.1f));
 	UI::Label(expandPos - 147, off, 12, "Shadows", white());
-	show = Engine::Toggle(expandPos - 20, off, 16, Icons::checkbox, show, white(), ORIENT_HORIZONTAL);
+	show = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, show, white(), ORIENT_HORIZONTAL);
 	//UI::Label(expandPos - 145, off + 17, 12, "Strength", white());
 	//str = Engine::DrawSliderFill(expandPos - 80, off + 17, 76, 16, 0, 1, str, white(1, 0.5f), white());
 	str = UI2::Slider(expandPos - 147, off + 17, 147, "Strength", 0, 5, str);

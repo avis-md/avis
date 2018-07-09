@@ -34,7 +34,7 @@ void ParMenu::Draw() {
 				Protein::DrawMenu();
 				break;
 			case 3:
-				Draw_Vis();
+				ParGraphics::DrawMenu();
 				break;
 			case 4:
 				RayTracer::DrawMenu();
@@ -198,10 +198,6 @@ void ParMenu::Draw_List() {
 	}
 loopout:
 	Engine::EndStencil();
-}
-
-void ParMenu::Draw_Vis() {
-	ParGraphics::DrawMenu();
 }
 
 void ParMenu::SelAll() {
