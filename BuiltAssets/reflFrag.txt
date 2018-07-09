@@ -10,9 +10,8 @@ uniform sampler2D inSky;
 uniform sampler2D inSkyE;
 uniform float skyStrength;
 uniform float skyStrDecay;
-
-uniform float rimOffset;
-uniform float rimStrength;
+uniform float specStr;
+uniform vec3 bgCol;
 
 out vec4 fragCol;
 
@@ -43,20 +42,17 @@ void main () {
     vec3 fwd = normalize(wPos.xyz - wPos2.xyz);
 
     if (z >= 1) {
-        fragCol = vec4(1, 1, 1, 1);
-        return;
+        fragCol.rgb = bgCol;
     }
-    if (length(nCol.xyz) == 0) {
-        fragCol = vec4(1, 1, 1, 1);
-        return;
+    else if (length(nCol.xyz) == 0) {
+        fragCol.rgb = bgCol;
     }
-
-    vec3 skycol = skyColAt(inSkyE, nCol.xyz).rgb;
-    vec3 refl = reflect(fwd, nCol.xyz);
-    vec3 skycol2 = skyColAt(inSky, refl.xyz).rgb;
-    float fres = pow(1-dot(-fwd, nCol.xyz), 5);
-    const float nspc = 0.8;
-    fragCol.rgb = mix(skycol * dCol.rgb, skycol2, (1 - ((1-fres) * nspc))) * skyStrength * (1 - skyStrDecay * zLinear);
-
+    else {
+        vec3 skycol = skyColAt(inSkyE, nCol.xyz).rgb;
+        vec3 refl = reflect(fwd, nCol.xyz);
+        vec3 skycol2 = skyColAt(inSky, refl.xyz).rgb;
+        float fres = pow(1-dot(-fwd, nCol.xyz), 5);
+        fragCol.rgb = mix(skycol * dCol.rgb, skycol2, (1 - ((1-fres) * (1-specStr)))) * skyStrength * (1 - skyStrDecay * zLinear);
+    }
     fragCol.a = 1;
 }
