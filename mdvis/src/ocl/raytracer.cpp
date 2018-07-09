@@ -3,6 +3,7 @@
 #include "md/Particles.h"
 #include "md/ParMenu.h"
 #include "utils/dialog.h"
+#include "vis/pargraphics.h"
 #include <CL/cl_gl.h>
 #ifdef PLATFORM_LNX
 #include <GL/glx.h>
@@ -25,7 +26,7 @@ cl_context RayTracer::_ctx;
 cl_command_queue RayTracer::_que;
 cl_kernel RayTracer::_kernel;
 
-cl_mem _bufr, _bg, _bls, _cns, _cls;
+cl_mem _bufr, _bg, _bls, _cns, _cls, _rds;
 
 bool RayTracer::Init(){
 	cl_platform_id platform;
@@ -100,10 +101,12 @@ void RayTracer::SetScene() {
 
 	if (!resTex) {
 		std::cout << "Generating Bounds..." << std::endl;
+		auto rads = new byte[Particles::particleSz]{};
+		ParGraphics::FillRad(rads);
 		BVH::Ball* objs = new BVH::Ball[Particles::particleSz];
 		for (uint a = 0; a < Particles::particleSz; a++) {
 			objs[a].orig = Particles::particles_Pos[a];
-			objs[a].rad = Particles::particles_Rad[a];
+			objs[a].rad = rads[a] * 0.1f / 127;
 		}
 		std::cout << "Generating BVH..." << std::endl;
 		BVH::Calc(objs, Particles::particleSz, bvh, bvhSz, BBox(0,0,0,0,0,0));
@@ -131,6 +134,10 @@ void RayTracer::SetScene() {
 		clEnqueueAcquireGLObjects(_que, 1, &_cls, 0, 0, 0);
 		assert(err == CL_SUCCESS);
 		clSetKernelArg(_kernel, 7, sizeof(_cls), &_cls);
+		_rds = clCreateBuffer(_ctx, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, Particles::particleSz * sizeof(cl_uchar), rads, &err);
+		assert(err == CL_SUCCESS);
+		delete[](rads);
+		clSetKernelArg(_kernel, 8, sizeof(_rds), &_rds);
 		clFinish(_que);
 
 		glGenTextures(1, &resTex);
@@ -220,17 +227,17 @@ void RayTracer::Render() {
 	
 
 	clEnqueueUnmapMemObject(_que, _bufr, bufrp, 0, 0, 0);
-
-	//
-	//live = false;
 }
 
 void RayTracer::Clear() {
 	clEnqueueReleaseGLObjects(_que, 1, &_bls, 0, 0, 0);
 	clEnqueueReleaseGLObjects(_que, 1, &_cns, 0, 0, 0);
+	clEnqueueReleaseGLObjects(_que, 1, &_cls, 0, 0, 0);
 	clFinish(_que);
 	clReleaseMemObject(_bls);
 	clReleaseMemObject(_cns);
+	clReleaseMemObject(_cls);
+	clReleaseMemObject(_rds);
 	glDeleteTextures(1, &resTex);
 	resTex = 0;
 	_cntt = 0;

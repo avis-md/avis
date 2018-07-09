@@ -52,6 +52,8 @@ public:
 	static void Init(), UpdateDrawLists();
 	static void SetLight(Light* l);
 
+	static void FillRad(byte* rads);
+
 	static void Update();
 
 	static void Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h);

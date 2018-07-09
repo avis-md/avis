@@ -255,6 +255,27 @@ void ParGraphics::SetLight(Light* l) {
 	l->maxDist = 20;
 }
 
+void ParGraphics::FillRad(byte* rads) {
+	for (auto& p : drawLists) {
+		float ml = 1;
+		switch (p.second.second) {
+		case 1:
+			for (uint a = p.first; a < p.first + p.second.first; a++) {
+				rads[a] = 255;
+			}
+			continue;
+		case 0x0f:
+			continue;
+		case 2:
+			ml = 0.2f; break;
+		default: break;
+		}
+		for (uint a = p.first; a < p.first + p.second.first; a++) {
+			rads[a] = (byte)(min(0.1f * ml * Particles::particles_Rad[a], 0.2f) * 255 / 0.2f);
+		}
+	}
+}
+
 void ParGraphics::Update() {
 	if (!Particles::particleSz)
 		Scene::dirty = true;
