@@ -95,8 +95,8 @@ void BVH::Calc(Ball* objs, uint cnt, Node*& res, uint& resCnt, BBox box) {
 				uint i = st.ids[a];
 				if (i > cnt) abort();
 				Ball& bl = objs[i];
-				float or = (st.axis == 0) ? bl.orig.x : ((st.axis == 1) ? bl.orig.y : bl.orig.z);
-				if (or > md) vc[--i2] = i;
+				float orr = (st.axis == 0) ? bl.orig.x : ((st.axis == 1) ? bl.orig.y : bl.orig.z);
+				if (orr > md) vc[--i2] = i;
 				else vc[i1++] = i;
 			}
 			if (i1 == 0 || i2 == st.idc) abort();

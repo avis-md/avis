@@ -28,7 +28,7 @@ void Shadows::Init() {
 		Debug::Error("Shadows Shader Compiler", "v! " + err);
 		abort();
 	}
-	if (!Shader::LoadShader(GL_FRAGMENT_SHADER, IO::GetText("D:/shadows.txt"), fragment_shader, &err)) {
+	if (!Shader::LoadShader(GL_FRAGMENT_SHADER, IO::GetText(IO::path + "/shadows.txt"), fragment_shader, &err)) {
 		Debug::Error("Shadows Shader Compiler", "f! " + err);
 		abort();
 	}

@@ -3,9 +3,16 @@
 #include "md/Particles.h"
 #include "md/ParMenu.h"
 #include "utils/dialog.h"
+#ifdef PLATFORM_OSX
+#include <OpenCL/cl_gl_ext.h>
+#include <OpenGL/CGLDevice.h>
+#include <OpenGL/CGLCurrent.h>
+#include <OpenCL/cl_gl.h>
+#else
 #include <CL/cl_gl.h>
 #ifdef PLATFORM_LNX
 #include <GL/glx.h>
+#endif
 #endif
 
 #define RESW 800
