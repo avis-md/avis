@@ -3,7 +3,8 @@
 
 enum class POPUP_TYPE : byte {
     NONE,
-    DRAWMODE
+    DRAWMODE,
+	COLORPICK
 };
 
 class Popups {

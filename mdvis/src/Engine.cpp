@@ -93,7 +93,7 @@ Font* Engine::defaultFont;
 std::vector<Rect> Engine::stencilRects;
 Rect* Engine::stencilRect = nullptr;
 
-GLuint _draw_quad_buffer;
+GLuint Engine::quadBuffer;
 
 void Engine::Init(string path) {
 	if (path != "") {
@@ -127,8 +127,8 @@ void Engine::Init(string path) {
 
 	uint d[6] = {0, 2, 1, 2, 3, 1};
 
-	glGenBuffers(1, &_draw_quad_buffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _draw_quad_buffer);
+	glGenBuffers(1, &quadBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(uint), d, GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -405,6 +405,7 @@ void Engine::DrawQuad(float x, float y, float w, float h, uint texture, Vec4 Vec
 	DrawQuad(x, y, w, h, texture, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0), false, Vec4);
 }
 void Engine::DrawQuad(float x, float y, float w, float h, Vec4 col) {
+	if (col.a == 0) return;
 	Vec3 quadPoss[4];
 	quadPoss[0].x = x;
 	quadPoss[0].y = y;
@@ -416,7 +417,6 @@ void Engine::DrawQuad(float x, float y, float w, float h, Vec4 col) {
 	quadPoss[3].y = y + h;
 	for (int y = 0; y < 4; y++) {
 		quadPoss[y].z = 1;
-		//Vec3 v = quadPoss[y];
 		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
 	}
 
@@ -425,7 +425,7 @@ void Engine::DrawQuad(float x, float y, float w, float h, Vec4 col) {
 	glUseProgram(Engine::defProgram);
 	glUniform4f(Engine::defColLoc, col.r, col.g, col.b, col.a * UI::alpha);
 	glBindVertexArray(UI::_vao);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _draw_quad_buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadBuffer);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -455,7 +455,7 @@ void Engine::DrawQuad(float x, float y, float w, float h, GLuint texture, Vec2 u
 	glUniform4f(single ? drawQuadLocsA[1] : drawQuadLocs[1], Vec4.r, Vec4.g, Vec4.b, Vec4.a * UI::alpha);
 	glUniform1f(single ? drawQuadLocsA[2] : drawQuadLocs[2], miplevel);
 	glBindVertexArray(UI::_vao);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _draw_quad_buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadBuffer);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);

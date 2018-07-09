@@ -83,7 +83,12 @@ bool RayTracer::Init(){
 	_kernel = clCreateKernel(prog, "_main_", 0);
 	
 	CheckRes();
-	
+
+	info.str = 2;
+	info.mat.specular = 0.3f;
+	info.mat.rough = 0.2f;
+	info.mat.gloss = 0.95f;
+	info.mat.ior = 1;
 	SetBg(IO::path + "/res/refl.hdr");
 
 	live = true;
@@ -92,13 +97,6 @@ bool RayTracer::Init(){
 
 void RayTracer::SetScene() {
 	if (!live) return;
-
-	info.str = 2;
-	info.mat.specular = 0.3f;
-	info.mat.rough = 0.2f;
-	info.mat.gloss = 0.95f;
-	info.mat.ior = 1;
-	//memcpy(info.IP, glm::value_ptr(glm::inverse(MVP::projection()*MVP::modelview())), 16 * sizeof(float));
 
 	if (!resTex) {
 		std::cout << "Generating Bounds..." << std::endl;

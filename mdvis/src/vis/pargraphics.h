@@ -5,13 +5,15 @@
 
 class ParGraphics {
 public:
-	static Texture* refl, *bg, *logo;
-	static float reflStr, reflStrDecay, rimOff, rimStr;
+	static Texture* bg, *logo;
+	static GLuint refl, reflE;
+	static float reflStr, reflStrDecay, specStr;
+	static Vec4 bgCol;
 
 	static Light* light;
 
 	static GLuint reflProg, parProg, parConProg, parConLineProg;
-	static GLint reflProgLocs[11], parProgLocs[10], parConProgLocs[7], parConLineProgLocs[5];
+	static GLint reflProgLocs[15], parProgLocs[10], parConProgLocs[7], parConLineProgLocs[5];
 
 	static GLuint selHlProg, colProg;
 	static GLint selHlProgLocs[4], colProgLocs[5];
