@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Editor.h"
 
 #ifdef PLATFORM_WIN
 #pragma comment(lib, "jpeg_win.lib")
@@ -211,89 +210,6 @@ Texture::Texture(const string& path, bool mipmap, TEX_FILTERING filter, byte ani
 	loaded = true;
 }
 
-Texture::Texture(int i, Editor* e) : AssetObject(ASSETTYPE_TEXTURE) {
-#ifdef IS_EDITOR
-	string path = e->projectFolder + "Assets\\" + e->normalAssets[ASSETTYPE_TEXTURE][i] + ".meta";
-	F2ISTREAM(strm, path);
-	if (strm.good()) {
-		byte chn;
-		GLenum rgb = GL_RGB, rgba = GL_RGBA;
-		byte* data;
-		TEX_TYPE t = _ReadStrm(this, strm, chn, rgb, rgba);
-		if (t == TEX_TYPE_UNDEF) {
-			Debug::Error("Texture", "Texture header wrong/missing!");
-			return;
-		}
-		if (t == TEX_TYPE_RENDERTEXTURE) {
-			((RenderTexture*)this)->Load(strm);
-			return;
-		}
-		data = new byte[chn*width*height];
-		strm.read((char*)data, chn*width*height);
-
-		uint mips = 0;
-		std::vector<RenderTexture*> rts = std::vector<RenderTexture*>();
-		std::vector<Vec2> szs = std::vector<Vec2>();
-		if (_mipmap && _blurmips) {
-			uint width_1 = width, height_1 = height, width_2, height_2;
-
-			Shader shd = Shader(Camera::d_blurProgram);
-			Material mat = Material(&shd);
-
-			rts.push_back(new RenderTexture(width, height, RT_FLAG_NONE, data, (chn == 3) ? GL_RGB : GL_RGBA));
-			szs.push_back(Vec2(width, height));
-
-			while (mips < 6 && height_1 > 16) {
-				width_2 = width_1 / 2;
-				height_2 = height_1 / 2;
-
-				mat.SetFloat("mul", 1 - mips*0.1f);
-				mat.SetFloat("mul", 1);
-				mat.SetVec2("screenSize", Vec2(width_2, height_2));
-				RenderTexture rx = RenderTexture(width_2, height_2, RT_FLAG_HDR);
-				mat.SetFloat("isY", 0);
-				RenderTexture::Blit(rts[mips], &rx, &mat);
-				rts.push_back(new RenderTexture(width_2, height_2, RT_FLAG_HDR));
-				mat.SetFloat("isY", 1);
-				RenderTexture::Blit(&rx, rts[mips + 1], &mat);
-
-				szs.push_back(Vec2(width_2, height_2));
-				width_1 = width_2 + 0;
-				height_1 = height_2 + 0;
-				mips++;
-			}
-		}
-
-		//GenECache(data, chn, rgb == GL_RGB, &rts);
-
-		glGenTextures(1, &pointer);
-		glBindTexture(GL_TEXTURE_2D, pointer);
-		if (chn == 3) glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, rgb, GL_UNSIGNED_BYTE, data);
-		else glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, rgba, GL_UNSIGNED_BYTE, data);
-		if (_mipmap) {
-			if (_blurmips) {
-				for (uint a = 1; a <= mips; a++) {
-					glBindFramebuffer(GL_READ_FRAMEBUFFER, rts[a]->d_fbo);
-					glCopyTexImage2D(GL_TEXTURE_2D, a, GL_RGBA, 0, 0, (GLsizei)szs[a].x, (GLsizei)szs[a].y, 0);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mips);
-					delete(rts[a]);
-				}
-
-			}
-			else glGenerateMipmap(GL_TEXTURE_2D);
-		}
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (_mipmap && (_filter == TEX_FILTER_TRILINEAR)) ? GL_LINEAR_MIPMAP_LINEAR : (_filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (_filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, _repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, _aniso);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		delete[](data);
-		loaded = true;
-	}
-#endif
-}
-
 Texture::Texture(std::istream& strm, uint offset) : AssetObject(ASSETTYPE_TEXTURE) {
 	if (strm.good()) {
 		strm.seekg(offset);
@@ -418,58 +334,6 @@ Texture::Texture(byte* mem) : AssetObject(ASSETTYPE_TEXTURE) {
 #endif
 }
 
-void Texture::GenECache(byte* b, byte chn, bool isrgb, std::vector<RenderTexture*>* rts) {
-	/*
-	width (uint)
-	height (uint)
-	filter (byte)
-	aniso (byte)
-	[mip repeat blurmip hasA isrgb, 000] (byte)
-	pixels (byte*w*h)
-	if blurmip:
-	mipcount (byte)
-	for mips [
-	width (uint)
-	height (uint)
-	pixels (byte*w*h)
-	]
-	*/
-#ifdef IS_EDITOR
-#define CPY(mem, sz) memcpy(_eCache + off, mem, sz); off += sz;
-	_eCacheSz = 3;
-	uint off = 1;
-	if (_blurmips) {
-		for (auto& a : *rts) _eCacheSz += 8 + a->width*a->height * 4;
-		_eCacheSz++;
-	}
-	else {
-		_eCacheSz += 8 + width*height*chn;
-	}
-	_eCache = (byte*)malloc(_eCacheSz);
-	*_eCache = 255;
-	CPY(&width, 4);
-	CPY(&height, 4);
-	CPY(&_filter, 1);
-	CPY(&_aniso, 1);
-	byte bb = (_mipmap << 7) | (_repeat << 6) | (_blurmips << 5) | (!(chn & 1) << 4) | (isrgb << 3);
-	CPY(&bb, 1);
-	CPY(b, width*height*chn);
-	if (_blurmips) {
-		byte s = (byte)rts->size();
-		CPY(&s, 1);
-		for (byte m = 1; m < s; m++) {
-			auto r = (*rts)[m];
-			auto px = r->pixels<byte>(chn == 4);
-			CPY(&r->width, 4);
-			CPY(&r->height, 4);
-			CPY(&px[0], r->width*r->height*chn);
-		}
-	}
-	assert(off == _eCacheSz + 1);
-#undef CPY
-#endif
-}
-
 TEX_TYPE Texture::_ReadStrm(Texture* tex, std::istream& strm, byte& chn, GLenum& rgb, GLenum& rgba) {
 	std::vector<char> hd(4);
 	strm.read((&hd[0]), 3);
@@ -503,95 +367,6 @@ TEX_TYPE Texture::_ReadStrm(Texture* tex, std::istream& strm, byte& chn, GLenum&
 	}
 	return TEX_TYPE_NORMAL;
 }
-
-//IMG [channels] [xxxx] [yyyy] [rgb=0, bgr=1] [aniso] [filter] [mipmap 0xf0 | repeat 0x0f] DATA [data]
-bool Texture::Parse(Editor* e, string path) {
-	byte ans = 5, flt = 2, mnr = 0xf0;
-	string sss = path.substr(path.find_last_of('.'), string::npos);
-	byte *data = nullptr;
-	std::vector<byte> dataV;
-	byte chn;
-	uint width, height;
-	GLenum rgb = GL_RGB, rgba = GL_RGBA;
-	if (sss == ".bmp") {
-		if (!LoadBMP(path, width, height, chn, &data)) {
-			std::cout << "load bmp failed! " << path << std::endl;
-			return false;
-		}
-		rgb = GL_BGR;
-		rgba = GL_BGRA;
-	}
-	else if (sss == ".jpg") {
-		if (!LoadJPEG(path, width, height, chn, &data)) {
-			std::cout << "load jpg failed! " << path << std::endl;
-			return false;
-		}
-	}
-	else if (sss == ".png") {
-		if (!LoadPNG(path, width, height, chn, dataV)) {
-			std::cout << "load png failed! " << path << std::endl;
-			return false;
-		}
-		data = &dataV[0];
-	}
-	else {
-		std::cout << "Image extension invalid! " << path << std::endl;
-		return false;
-	}
-	if (data == nullptr)
-		return false;
-	string ss(path + ".meta");
-	std::ifstream iStrm(ss, std::ios::in | std::ios::binary); //if exists, read old prefs
-	if (iStrm.is_open()) {
-		char* c = new char[16];
-		iStrm.read(c, 16);
-		if (c[0] == 'I' && c[1] == 'M' && c[2] == 'G') {
-			byte* cb = (byte*)c;
-			ans = cb[13];
-			flt = cb[14];
-			mnr = cb[15];
-		}
-		delete[](c);
-	}
-	iStrm.close();
-	std::ofstream str(ss, std::ios::out | std::ios::trunc | std::ios::binary);
-	str << "IMG";
-	str << chn;
-	_StreamWrite(&width, &str, 4);
-	_StreamWrite(&height, &str, 4);
-	str << (byte)((rgb == GL_RGB) ? 0 : 1);
-	str << ans << flt << mnr;
-	str << "DATA";
-	_StreamWrite(data, &str, width*height*chn);
-	str.close();
-	if (dataV.size() == 0) delete[](data);
-	return true;
-}
-
-#ifdef IS_EDITOR
-void Texture::_ApplyPrefs(const string& p) {
-	std::ifstream iStrm(p, std::ios::in | std::ios::binary | std::ios::ate);
-	if (iStrm.is_open()) {
-		uint sz((uint)iStrm.tellg());
-		std::vector<byte> data(sz);
-		iStrm.seekg(0);
-		iStrm.read((char*)(&data[0]), sz);
-		iStrm.close();
-
-		data[13] = _aniso;
-		data[14] = _filter;
-		data[15] = (_mipmap ? 0x80 : 0) | (_repeat ? 0x01 : 0) | (_blurmips ? 0 : 0x10);
-
-		remove(p.c_str());
-		std::ofstream strm(p, std::ios::out | std::ios::binary | std::ios::trunc);
-		if (strm.is_open()) {
-			strm.write((char*)(&data[0]), sz);
-			strm.close();
-			SetFileAttributes(p.c_str(), FILE_ATTRIBUTE_HIDDEN);
-		}
-	}
-}
-#endif
 
 bool Texture::DrawPreview(uint x, uint y, uint w, uint h) {
 	UI::Texture((float)x, (float)y, (float)w, (float)h, this, DRAWTEX_FIT);

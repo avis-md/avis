@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Editor.h"
 
 #ifndef DISABLE_AV_CODECS
 void AudioClip::_Init_ffmpeg(const string& path) {
@@ -85,37 +84,4 @@ void AudioClip::_Init_win(const string& path) {
 
 }
 
-#elif defined(PLATFORM_ADR)
-void AudioClip::_Init_adr(const string& path) {
-
-}
-#endif
-
-#ifdef IS_EDITOR
-AudioClip::AudioClip(uint i, Editor* e) : AssetObject(ASSETTYPE_AUDIOCLIP), channels(0) {
-	auto s = e->projectFolder + "Assets\\" + e->normalAssets[ASSETTYPE_AUDIOCLIP][i] + ".meta";
-	std::ifstream strm(s, std::ios::in | std::ios::binary);
-
-	_Strm2Val(strm, sampleRate);
-	_Strm2Val(strm, (byte&)channels);
-	_Strm2Val(strm, dataSize);
-	_data.resize(dataSize);
-	strm.read((char*)&_data[0], dataSize * sizeof(ushort));
-	length = (float)dataSize / channels / sampleRate;
-
-	for (uint a = 0; a < 256; a++) {
-		_eData[a] = (_data[(uint)floor(a * dataSize / 256.0f)] / 65535.0f) * 2.0f - 1.0f;
-		_eDataV[a] = Vec3((a / 256.0f) * 2.0f - 1.0f, _eData[a], 0);
-	}
-}
-
-bool AudioClip::Parse(string path) {
-	auto clip = AudioClip(path);
-	std::ofstream strm(path + ".meta", std::ios::out | std::ios::binary);
-	_StreamWrite(&clip.sampleRate, &strm, 4);
-	_StreamWrite(&clip.channels, &strm, 1);
-	_StreamWrite(&clip.dataSize, &strm, 4);
-	_StreamWrite(&clip._data[0], &strm, clip.dataSize * sizeof(ushort));
-	return true;
-}
 #endif

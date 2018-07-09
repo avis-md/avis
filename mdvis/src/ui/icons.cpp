@@ -8,7 +8,8 @@ Texture* Icons::expand, *Icons::collapse, *Icons::play, *Icons::playall, *Icons:
 *Icons::zoomIn, *Icons::zoomOut,
 *Icons::lang_c, *Icons::lang_py, *Icons::lang_ft, *Icons::lightning,
 *Icons::icon_anl, *Icons::log, *Icons::openfile,
-*Icons::dm_none, *Icons::dm_point, *Icons::dm_ball, *Icons::dm_vdw, *Icons::dm_line, *Icons::dm_stick, *Icons::dm_lineball, *Icons::dm_stickball;
+*Icons::dm_none, *Icons::dm_point, *Icons::dm_ball, *Icons::dm_vdw, *Icons::dm_line, *Icons::dm_stick, *Icons::dm_lineball, *Icons::dm_stickball,
+*Icons::colorwheel;
 
 #define TEXN(nm) new Texture(IO::path + "/res/" #nm ".png", false)
 #define TEX(nm) nm = new Texture(IO::path + "/res/" #nm ".png", false)
@@ -55,6 +56,7 @@ void Icons::Init() {
 	TEX(dm_stick);
 	TEX(dm_lineball);
 	TEX(dm_stickball);
+	TEX(colorwheel);
 }
 
 Texture* Icons::OfDM(byte b) {

@@ -9,12 +9,9 @@ public:
 	bool loaded;
 	unsigned int width, height;
 	GLuint pointer;
-	friend int main(int argc, char **argv);
-	friend class Editor;
 	friend class AssetManager;
 	_allowshared(Background);
 private:
-	Background(int i, Editor* editor);
 	Background(std::istream& strm, uint offset);
 	Background(byte*);
 	static bool Parse(string path);

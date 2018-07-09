@@ -31,9 +31,6 @@ public:
 	Transform& RotateAround(Vec3 a, float f);
 
 	friend class SceneObject;
-	friend class EB_Viewer;
-	friend class EB_Inspector;
-	friend struct Editor_PlaySyncer;
 	friend class Armature;
 	_allowshared(Transform);
 private:

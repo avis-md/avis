@@ -2,7 +2,11 @@
 #include "Engine.h"
 #include "utils/BVH.h"
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
+#ifdef PLATFORM_OSX
+#include <OpenCL/cl.h>
+#else
 #include <CL/cl.h>
+#endif
 #ifdef PLATFORM_WIN
 #pragma comment(lib, "OpenCL.lib")
 #endif

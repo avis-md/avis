@@ -181,8 +181,9 @@ int main(int argc, char **argv)
 	delete[](icon.pixels);
 
 	RayTracer::Init();
-	SSH::Init();
+	Color::Init();
 	Icons::Init();
+	SSH::Init();
 	VisSystem::Init();
 	Particles::Init();
 	ParLoader::Init();
@@ -194,14 +195,7 @@ int main(int argc, char **argv)
 	Effects::Init(0xffff);
 	MdChan::Init();
 
-	//ParLoader::Scan();
-
 	AnBrowse::Scan();
-	
-	//pSceneObject lht = SceneObject::New(Vec3());
-	//Scene::AddObject(lht);
-	//auto l = lht->AddComponent<Light>();
-	//ParGraphics::SetLight(l.get());
 
 	ParImporter* imp = new ParImporter();
 	imp->name = "Gromacs";
@@ -245,25 +239,8 @@ int main(int argc, char **argv)
 
 	ParLoader::exts = std::vector<string>({"*.gro", "*.pdb", "*.xyz", "*.cdv", "*.bin"});
 
-	//AnWeb::Load(IO::path + "/nodes/rdf.anl");
 	AnWeb::nodes.push_back(new Node_Recolor_All());
 	AnWeb::nodes.push_back(new Node_AddBond());
-	//CDV::_Read(IO::path + "/ayuba/position000000.cdv", false);
-	//CDV::_ReadTrj(IO::path + "/ayuba/position");
-	//Gromacs::Read(IO::path + "/pbc.gro", false);
-	//bool ok = Gromacs::ReadTrj(IO::path + "/pbc.trr");
-	//MDVBin::Read(IO::path + "/ayuba2/000000.bin", false);
-	//MDVBin::ReadTrj(IO::path + "/ayuba2/");
-	//string ss = IO::path + "/pbc.gro";
-	//ParLoader::droppedFiles.resize(1, ss);
-	//new std::thread(ParLoader::DoOpen);
-	//ParLoader::DoOpen();
-	//ParLoader::droppedFiles[0] = IO::path + "/pbc.trr";
-	//ParLoader::DoOpenAnim();
-	//ParLoader::OnDropFile(1, &c[0]);
-
-	//Protein::Refresh();
-	//ParGraphics::UpdateDrawLists();
 
 	LiveRunner* runner = new LiveRunner();
 	runner->initNm = "Init";
@@ -271,8 +248,6 @@ int main(int argc, char **argv)
 	runner->path = IO::path + "/bin/liverunners/lj256/win32/lj256.dll";
 	runner->name = "LJ256";
 	LiveSyncer::runners.push_back(runner);
-	//LiveSyncer::Init(0);
-	//LiveSyncer::Start();
 
 	Display::Resize(800, 600, false);
 

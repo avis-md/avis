@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Editor.h"
 
 Camera* Camera::active;
 

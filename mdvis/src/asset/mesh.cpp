@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Editor.h"
 
 #define F2ISTREAM(_varname, _pathname) std::ifstream _f2i_ifstream((_pathname).c_str(), std::ios::in | std::ios::binary); \
 std::istream _varname(_f2i_ifstream.rdbuf());
@@ -24,20 +23,6 @@ Mesh::Mesh(const std::vector<Vec3>& verts, const std::vector<Vec3>& norms, const
 	CalcTangents();
 	RecalculateBoundingBox();
 	InitVao();
-}
-
-Mesh::Mesh(Editor* e, int i) : AssetObject(ASSETTYPE_MESH) {
-	Mesh* m2 = _GetCache<Mesh>(type, i);
-	vertices = m2->vertices;
-	vertexCount = m2->vertexCount;
-	normals = m2->normals;
-	tangents = m2->tangents;
-	//bitangents = m2->bitangents;
-	triangles = m2->triangles;
-	triangleCount = m2->triangleCount;
-	boundingBox = m2->boundingBox;
-	loaded = m2->loaded;
-	if (loaded) InitVao();
 }
 
 Mesh::Mesh(std::istream& stream, uint offset) : AssetObject(ASSETTYPE_MESH), loaded(false), vertexCount(0), triangleCount(0), materialCount(0) {
@@ -474,119 +459,3 @@ void Mesh::InitVao() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
-
-#ifdef IS_EDITOR
-bool Mesh::ParseBlend(Editor* e, string s) {
-	SECURITY_ATTRIBUTES sa;
-	sa.nLength = sizeof(SECURITY_ATTRIBUTES);
-	sa.bInheritHandle = TRUE;
-	sa.lpSecurityDescriptor = NULL;
-	HANDLE stdOutR, stdOutW, stdInR, stdInW;
-	if (!CreatePipe(&stdInR, &stdInW, &sa, 0)) {
-		std::cout << "failed to create pipe for stdin!";
-		return false;
-	}
-	if (!SetHandleInformation(stdInW, HANDLE_FLAG_INHERIT, 0)) {
-		std::cout << "failed to set handle for stdin!";
-		return false;
-	}
-	if (!CreatePipe(&stdOutR, &stdOutW, &sa, 0)) {
-		std::cout << "failed to create pipe for stdout!";
-		return false;
-	}
-	if (!SetHandleInformation(stdOutR, HANDLE_FLAG_INHERIT, 0)) {
-		std::cout << "failed to set handle for stdout!";
-		return false;
-	}
-	STARTUPINFO startInfo;
-	PROCESS_INFORMATION processInfo;
-	ZeroMemory(&startInfo, sizeof(STARTUPINFO));
-	ZeroMemory(&processInfo, sizeof(PROCESS_INFORMATION));
-	startInfo.cb = sizeof(STARTUPINFO);
-	startInfo.hStdInput = stdInR;
-	startInfo.hStdOutput = stdOutW;
-	startInfo.dwFlags |= STARTF_USESTDHANDLES;
-
-	//create meta directory
-	string ss = s.substr(0, s.find_last_of('.'));
-	string sss = ss + "_blend";
-	if (!CreateDirectory(sss.c_str(), NULL)) {
-		for (string file : IO::GetFiles(sss))
-			DeleteFile(file.c_str());
-	}
-	SetFileAttributes(sss.c_str(), FILE_ATTRIBUTE_HIDDEN);
-	string ms(s + ".meta");
-	DeleteFile(ms.c_str());
-
-	bool failed = true;
-	string cmd1(e->_blenderInstallationPath.substr(0, 2) + "\n"); //root
-	string cmd2("cd " + e->_blenderInstallationPath.substr(0, e->_blenderInstallationPath.find_last_of("\\")) + "\n");
-	string cmd3("blender \"" + s + "\" --background --python \"" + e->dataPath + "\\Python\\blend_exporter.py\" -- \"" + s.substr(0, s.find_last_of('\\')) + "?" + ss.substr(ss.find_last_of('\\') + 1, string::npos) + "\"\n");
-	//outputs object list, and meshes in subdir
-	if (CreateProcess("C:\\Windows\\System32\\cmd.exe", 0, NULL, NULL, true, CREATE_NO_WINDOW, NULL, "D:\\TestProject2\\", &startInfo, &processInfo) != 0) {
-		std::cout << "executing Blender..." << std::endl;
-		bool bSuccess = false;
-		DWORD dwWrite;
-		bSuccess = WriteFile(stdInW, cmd1.c_str(), cmd1.size(), &dwWrite, NULL) != 0;
-		if (!bSuccess || dwWrite == 0) {
-			Debug::Error("Blender Parser", "can't get to drive root!");
-			return false;
-		}
-		bSuccess = WriteFile(stdInW, cmd2.c_str(), cmd2.size(), &dwWrite, NULL) != 0;
-		if (!bSuccess || dwWrite == 0) {
-			Debug::Error("Blender Parser", "can't get to blender dir!");
-			return false;
-		}
-		bSuccess = WriteFile(stdInW, cmd3.c_str(), cmd3.size(), &dwWrite, NULL) != 0;
-		if (!bSuccess || dwWrite == 0) {
-			Debug::Error("Blender Parser", "can't execute blender!");
-			return false;
-		}
-		DWORD w;
-		bool finish = false;
-		do {
-			w = WaitForSingleObject(processInfo.hProcess, DWORD(200));
-			DWORD dwRead;
-			CHAR chBuf[4096];
-			string out = "";
-			bSuccess = ReadFile(stdOutR, chBuf, 4096, &dwRead, NULL) != 0;
-			if (bSuccess && dwRead > 0) {
-				string s(chBuf, dwRead);
-				out += s;
-			}
-			for (uint r = 0; r < out.size();) {
-				int rr = out.find_first_of('\n', r);
-				if (rr == string::npos)
-					rr = out.size() - 1;
-				string sss = out.substr(r, rr - r);
-				std::cout << sss << std::endl;
-				r = rr + 1;
-				if (sss.size() > 1 && sss[0] == '!')
-					e->_Message("Blender", sss.substr(1, string::npos));
-				if (sss.size() > 12 && sss.substr(0, 12) == "Blender quit") {
-					TerminateProcess(processInfo.hProcess, 0);
-					failed = false;
-					finish = true;
-				}
-			}
-		} while (w == WAIT_TIMEOUT && !finish);
-		CloseHandle(processInfo.hProcess);
-		CloseHandle(processInfo.hThread);
-		if (failed)
-			return false;
-	}
-	else {
-		DWORD err = GetLastError();
-		std::cout << "Cannot start Blender! (Error code " << std::to_string(err) << ")" << std::endl;
-		CloseHandle(stdOutR);
-		CloseHandle(stdOutW);
-		CloseHandle(stdInR);
-		CloseHandle(stdInW);
-		return false;
-	}
-	CloseHandle(stdOutR);
-	CloseHandle(stdOutW);
-	SetFileAttributes(ms.c_str(), FILE_ATTRIBUTE_HIDDEN);
-	return true;
-}
-#endif

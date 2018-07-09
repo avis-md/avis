@@ -10,15 +10,8 @@ public:
 	std::vector<Material*> materials;
 	Mesh* mesh() { return _mesh; }
 	void mesh(Mesh*);
-	//void DrawEditor(EB_Viewer* ebv, GLuint shader = 0) override;
-#ifdef IS_EDITOR
-	void DrawInspector(Editor* e, Component* c, Vec4 v, uint& pos) override;
-	void Serialize(Editor* e, std::ofstream* stream) override {}
-	//void Refresh() override;
-	bool expandShapekeys = false;
-#endif
+	
 	friend class Engine;
-	friend class Editor;
 	friend class Camera;
 	friend void Deserialize(std::ifstream& stream, SceneObject* obj);
 	friend void LoadMeshMeta(std::vector<pSceneObject>& os, string& path);
@@ -29,7 +22,6 @@ protected:
 	std::vector<std::array<std::pair<ArmatureBone*, float>, 4>> weights;
 
 	void InitWeights();
-	void DrawEditor(EB_Viewer* ebv, GLuint shader = 0);
 	void DrawDeferred(GLuint shader = 0);
 
 	Mesh* _mesh = 0;

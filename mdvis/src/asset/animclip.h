@@ -32,12 +32,10 @@ public:
 	Interpolation interpolation;
 
 	void Eval(float t);
-
-	friend class Editor;
+	
 	friend class AssetManager;
 	_allowshared(AnimClip);
 protected:
-	AnimClip(Editor* e, int i);
 	AnimClip(std::ifstream& strm, uint offset);
 	AnimClip(string path);
 };

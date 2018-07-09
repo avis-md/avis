@@ -23,18 +23,10 @@ public:
 #endif
 
 	friend class Audio;
-	friend class Editor;
 	_allowshared(AudioClip);
 protected:
 	std::vector<ushort> _data;
 	uint dataSize, loadPtr;
-
-#ifdef IS_EDITOR
-
-	AudioClip(uint i, Editor* e);
-
-	static bool Parse(string path);
-#endif
 
 #ifdef FEATURE_AV_CODECS
 	AVFormatContext* formatCtx = 0;
@@ -50,7 +42,5 @@ private:
 #endif
 #if defined(PLATFORM_WIN)
 	void _Init_win(const string& path);
-#elif defined(PLATFORM_ADR)
-	void _Init_adr(const string& path);
 #endif
 };

@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Editor.h"
 
 SceneObject::SceneObject(Vec3 pos, Quat rot, Vec3 scale) : SceneObject("New Object", pos, rot, scale) {}
 SceneObject::SceneObject(string s, Vec3 pos, Quat rot, Vec3 scale) : _expanded(true), Object(s) {
@@ -108,11 +107,7 @@ void SceneObject::RemoveComponent(pComponent c) {
 			for (int aa = _components.size() - 1; aa >= 0; aa--) {
 				for (COMPONENT_TYPE t : _components[aa]->dependancies) {
 					if (t == c->componentType) {
-#ifdef IS_EDITOR
-						Editor::instance->_Warning("Component Deleter", "Cannot delete " + c->name + " because other components depend on it!");
-#else
 						Debug::Warning("SceneObject", "Cannot delete " + c->name + " because other components depend on it!");
-#endif
 						return;
 					}
 				}

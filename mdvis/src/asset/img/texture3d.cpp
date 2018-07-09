@@ -35,7 +35,3 @@ Texture3D::Texture3D(const string& path, TEX_FILTERING filter) : Texture3D() {
 	loaded = true;
 	delete[](data);
 }
-
-bool Texture3D::Parse(Editor* e, const string& path) {
-	return false;
-}

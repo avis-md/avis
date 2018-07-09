@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Editor.h"
 
 ArmatureBone::ArmatureBone(uint id, Vec3 pos, Quat rot, Vec3 scl, float lgh, bool conn, Transform* tr, ArmatureBone* par) :
 	id(id), restPosition(pos), restRotation(rot), restScale(scl), restMatrix(MatFunc::FromTRS(pos, rot, scl)),
@@ -181,57 +180,3 @@ void Armature::OnPreRender() {
 	Animate();
 	UpdateMats();
 }
-
-#ifdef IS_EDITOR
-
-void ArmatureBone::Draw(EB_Viewer* ebv) {
-	bool sel = (ebv->editor->selected == tr->object);
-	MVP::Push();
-	MVP::Mul(tr->localMatrix());
-	MVP::Push();
-	MVP::Scale(length, length, length);
-	glVertexPointer(3, GL_FLOAT, 0, &boneVecs[0]);
-	glLineWidth(1);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	if (sel) glColor4f(boneSelCol.r, boneSelCol.g, boneSelCol.b, 1);
-	else glColor4f(boneCol.r, boneCol.g, boneCol.b, 1);
-	glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, &boneIndices[0]);
-	MVP::Pop();
-
-	for (auto a : _children) a->Draw(ebv);
-	MVP::Pop();
-}
-
-void Armature::DrawEditor(EB_Viewer* ebv, GLuint shader) {
-	glEnableClientState(GL_VERTEX_ARRAY);
-	MVP::Push();
-	MVP::Mul(object->transform.localMatrix());
-	if (xray) {
-		glDepthFunc(GL_ALWAYS);
-		glDepthMask(false);
-	}
-	for (auto a : _bones) a->Draw(ebv);
-	glDepthFunc(GL_LEQUAL);
-	glDepthMask(true);
-	MVP::Pop();
-	glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-void Armature::DrawInspector(Editor* e, Component* c, Vec4 v, uint& pos) {
-	Armature* cam = (Armature*)c;
-	if (DrawComponentHeader(e, v, pos, this)) {
-		pos += 17;
-		UI::Label(v.r + 2, v.g + pos, 12, "Anim Scale", e->font, white());
-		try {
-			animationScale = std::stof(UI::EditText(v.r + v.b*0.3f, v.g + pos, v.b*0.7f - 1, 16, 12, grey2(), std::to_string(animationScale), e->font, true, nullptr, white()));
-		}
-		catch (std::logic_error e) {
-			animationScale = 1;
-		}
-		animationScale = max(animationScale, 0.0001f);
-		pos += 17;
-	}
-	else pos += 17;
-}
-
-#endif

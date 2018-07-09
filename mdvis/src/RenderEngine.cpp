@@ -1,14 +1,5 @@
 #include "Engine.h"
-#include "Editor.h"
 #include <random>
-
-void CheckGLOK() {
-	int err = glGetError();
-	if (err != GL_NO_ERROR) {
-		std::cout << std::hex << err << std::endl;
-		abort();
-	}
-}
 
 void Camera::DrawSceneObjectsOpaque(std::vector<pSceneObject> oo, GLuint shader) {
 	for (auto& sc : oo)
@@ -206,19 +197,12 @@ void RenderTexture::Blit(GLuint src, RenderTexture* dst, GLuint shd, string texN
 	glUniform1i(loc, 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, src);
-	//glEnableClientState(GL_VERTEX_ARRAY);
-	//glVertexPointer(2, GL_FLOAT, 0, &Camera::fullscreenVerts[0]);
 	glBindVertexArray(Camera::emptyVao);
-
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(0, 2, GL_FLOAT, GL_TRUE, 0, &Camera::fullscreenVerts[0]);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, &Camera::fullscreenIndices[0]);
 
 	glBindVertexArray(0);
-	//glDisableVertexAttribArray(0);
 	glUseProgram(0);
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -237,33 +221,17 @@ void RenderTexture::Blit(Texture* src, RenderTexture* dst, Material* mat, string
 	mat->SetTexture(texName, src);
 	Mat4x4 dm = Mat4x4();
 	mat->ApplyGL(dm, dm);
-
-	//glEnableClientState(GL_VERTEX_ARRAY);
-	//glVertexPointer(2, GL_FLOAT, 0, &Camera::fullscreenVerts[0]);
+	
 	glBindVertexArray(Camera::emptyVao);
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(0, 2, GL_FLOAT, GL_TRUE, 0, &Camera::fullscreenVerts[0]);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, &Camera::fullscreenIndices[0]);
 
 	glBindVertexArray(0);
-	//glDisableVertexAttribArray(0);
 	glUseProgram(0);
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
-
-/*
-std::vector<float> RenderTexture::pixels() {
-	std::vector<float> v = std::vector<float>(width*height * 3);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, d_fbo);
-	glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, &v[0]);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-	return v;
-}
-*/
 
 void RenderTexture::Load(string path) {
 	throw std::runtime_error("RT Load (s) not implemented");
@@ -447,12 +415,7 @@ void Camera::_RenderSky(Mat4x4 ip, GLuint d_texs[], GLuint d_depthTex, float w, 
 	GLint skyBrtLoc = d_skyProgramLocs[8];
 
 	glBindVertexArray(emptyVao);
-	//glEnableClientState(GL_VERTEX_ARRAY);
-	//glVertexPointer(2, GL_FLOAT, 0, fullscreenVerts);
 	glUseProgram(d_skyProgram);
-
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(0, 2, GL_FLOAT, GL_TRUE, 0, fullscreenVerts);
 
 	glUniformMatrix4fv(_IP, 1, GL_FALSE, glm::value_ptr(ip));
 
@@ -477,11 +440,7 @@ void Camera::_RenderSky(Mat4x4 ip, GLuint d_texs[], GLuint d_depthTex, float w, 
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, fullscreenIndices);
-
-	//glDisableVertexAttribArray(0);
 	glUseProgram(0);
-	//glDisableClientState(GL_VERTEX_ARRAY);
 	glBindVertexArray(0);
 }
 
@@ -610,12 +569,7 @@ void Camera::_DoDrawLight_Point(Light* l, Mat4x4& ip, GLuint d_fbo, GLuint d_tex
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tar);
 #define sloc l->paramLocs_Point
 	glBindVertexArray(Camera::emptyVao);
-	//glEnableClientState(GL_VERTEX_ARRAY);
-	//glVertexPointer(2, GL_FLOAT, 0, fullscreenVerts);
 	glUseProgram(d_pLightProgram);
-
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(0, 2, GL_FLOAT, GL_TRUE, 0, fullscreenVerts);
 
 	glUniformMatrix4fv(sloc[0], 1, GL_FALSE, glm::value_ptr(ip));
 
@@ -640,14 +594,6 @@ void Camera::_DoDrawLight_Point(Light* l, Mat4x4& ip, GLuint d_fbo, GLuint d_tex
 	glUniform1f(sloc[9], l->intensity);
 	glUniform1f(sloc[10], l->minDist);
 	glUniform1f(sloc[11], l->maxDist);
-	/*
-	if (l->cookie) {
-		glUniform1i(sloc[16], 5);
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, l->cookie->pointer);
-	}
-	glUniform1f(sloc[17], l->cookie ? l->cookieStrength : 0);
-	*/
 	glUniform1i(sloc[17], (int)l->falloff);
 
 	glUniform1f(sloc[18], l->hsvMap? 1.0f : 0.0f);
@@ -659,12 +605,9 @@ void Camera::_DoDrawLight_Point(Light* l, Mat4x4& ip, GLuint d_fbo, GLuint d_tex
 #undef sloc
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, fullscreenIndices);
 
 	glBindVertexArray(0);
-	//glDisableVertexAttribArray(0);
 	glUseProgram(0);
-	//glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void Camera::_DoDrawLight_Spot_Contact(Light* l, Mat4x4& p, GLuint d_depthTex, float w, float h, GLuint src, GLuint tar) {

@@ -22,7 +22,6 @@ public:
 
 	friend class Animation;
 	friend class Animator;
-	friend class EB_AnimEditor;
 protected:
 	Anim_State(Vec2 pos, bool blend = false) : name(blend ? "newBlendState" : "newState"), isBlend(blend), speed(1), length(0), time(0), _clip(-1), editorPos(pos), editorExpand(true) {}
 	bool isBlend;
@@ -54,13 +53,7 @@ protected:
 };
 
 class Animation : public AssetObject {
-
-	friend class EB_AnimEditor;
-	friend class Editor;
-	friend class SkinnedMeshRenderer;
-	friend class Animator;
-	_allowshared(Animation);
-protected:
+public:
 	Animation();
 	Animation(string s);
 	Animation(std::ifstream& stream, uint offset);

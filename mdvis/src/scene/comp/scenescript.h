@@ -31,33 +31,8 @@ public:
 	virtual void LateUpdate() {}
 	virtual void Paint() {}
 
-#ifdef IS_EDITOR
-	static std::vector<string> userClasses;
-
-	static bool Check(string s, Editor* e);
-	static void Parse(string s, Editor* e);
-	static SCR_VARTYPE String2Type(const string& s);
-	static ASSETTYPE String2Asset(const string& s);
-	static COMPONENT_TYPE String2Comp(const string& s);
-	static int String2Script(const string& s);
-#endif
-
-	//bool ReferencingObject(Object* o) override;
-	friend class Editor;
-	friend class EB_Viewer;
 	friend void Deserialize(std::ifstream& stream, SceneObject* obj);
 	_allowshared(SceneScript);
 protected:
 	SceneScript() : Component("", COMP_SCR, DRAWORDER_NONE) {}
-
-#ifdef IS_EDITOR
-	SceneScript(Editor* e, string s);
-	SceneScript(std::ifstream& strm, SceneObject* o);
-
-	ASSETID _script;
-	std::vector<std::pair<string, SCR_VARVALS>> _vals;
-
-	void DrawInspector(Editor* e, Component* c, Vec4 v, uint& pos) override; //we want c to be null if deleted
-	void Serialize(Editor* e, std::ofstream* stream) override;
-#endif
 };

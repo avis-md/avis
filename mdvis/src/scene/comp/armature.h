@@ -29,10 +29,6 @@ protected:
 	static const uint boneIndices[24];
 	static const Vec3 boneCol, boneSelCol;
 	std::vector<ArmatureBone*> _children;
-
-#ifdef IS_EDITOR
-	void Draw(EB_Viewer* ebv);
-#endif
 };
 class Armature : public Component {
 public:
@@ -46,21 +42,8 @@ public:
 	float animationScale = 1;
 	const std::vector<ArmatureBone*>& bones() { return _bones; }
 
-#ifdef IS_EDITOR
-	void DrawEditor(EB_Viewer* ebv, GLuint shader = 0) override;
-	void DrawInspector(Editor* e, Component* c, Vec4 v, uint& pos) override;
-	void Serialize(Editor* e, std::ofstream* stream) override {}
-#endif
-
 	virtual void OnPreRender() override;
 
-	friend int main(int argc, char **argv);
-	friend void Serialize(Editor* e, SceneObject* o, std::ofstream* stream);
-	friend void Deserialize(std::ifstream& stream, SceneObject* obj);
-	friend void LoadMeshMeta(std::vector<SceneObject*>& os, string& path);
-	friend class Editor;
-	friend class EB_Viewer;
-	friend class EB_Previewer;
 	friend class SkinnedMeshRenderer;
 	_allowshared(Armature);
 protected:

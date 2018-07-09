@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Editor.h"
 #include "hdr.h"
 #include <iomanip>
 #include <algorithm>
@@ -28,116 +27,7 @@ std::vector<size_t> AssetManager::dataECacheSzLocs = {};
 std::vector<std::pair<ASSETTYPE, ASSETID>> AssetManager::dataECacheIds = {};
 
 void AssetManager::Init(string dpath) {
-#if !defined(IS_EDITOR) && !defined(CHOKO_LAIT)
-	names.clear();
-	dataLocs.clear();
-	std::vector<std::ifstream*>().swap(streams);
-	if (_pipemode) {
-		dataECaches.emplace(ASSETTYPE_TEXTURE, std::vector<std::pair<byte*, uint>>());
-		dataECaches.emplace(ASSETTYPE_HDRI, std::vector<std::pair<byte*, uint>>());
-		dataECaches.emplace(ASSETTYPE_MESH, std::vector<std::pair<byte*, uint>>());
-		dataECaches.emplace(ASSETTYPE_MATERIAL, std::vector<std::pair<byte*, uint>>());
-		dataECaches.emplace(ASSETTYPE_SHADER, std::vector<std::pair<byte*, uint>>());
 
-		string pp = dpath + "0_";
-		Scene::strm = new std::ifstream(pp.c_str(), std::ios::in | std::ios::binary);
-		std::ifstream* strm = Scene::strm;
-		if (!strm->is_open()) {
-			Debug::Error("AssetManager", "Fatal: cannot open data file 0!");
-			abort();
-		}
-
-		ushort num;
-		ASSETTYPE type;
-		ushort id;
-		char c[100];
-		*strm >> c[0] >> c[1];
-		if (c[0] != 'D' || c[1] != '0') {
-			Debug::Error("AssetManager", "Fatal: file 0 has wrong signature!");
-			abort();
-		}
-		strm->getline(c, 100, char0);
-		string path(c);
-		_Strm2Val(*strm, num);
-		for (ushort a = 0; a < num; a++) {
-			_Strm2Val(*strm, type);
-			_Strm2Val(*strm, id);
-			strm->getline(c, 100, (char)0);
-			string nm = path + string(c);
-			strm->getline(c, 100, (char)0);
-			//std::cout << (int)type << ": " << nm << std::endl;
-			while (dataCaches[type].size() < id) {
-				dataCaches[type].push_back(nullptr);
-				names[type].push_back("");
-				dataELocs[type].push_back("");
-			}
-			dataCaches[type].push_back(nullptr);
-			names[type].push_back(c);
-			dataELocs[type].push_back(nm);
-
-			dataECacheIds.push_back(std::pair<ASSETTYPE, ASSETID>(type, id));
-			dataECaches[type].push_back(std::pair<byte*, uint>(nullptr, 0));
-			dataECacheLocs.push_back(0);
-			dataECacheSzLocs.push_back((size_t)(new uint(0)));
-		}
-	}
-	else {
-		string pp = dpath + "0";
-		Scene::strm = new std::ifstream(pp.c_str(), std::ios::in | std::ios::binary);
-		std::ifstream* strm = Scene::strm;
-		if (!strm->is_open()) {
-			Debug::Error("AssetManager", "Fatal: cannot open data file 0!");
-			abort();
-		}
-
-		byte numDat = 0, id;
-		ushort num;
-		ASSETTYPE type;
-		uint pos;
-		char c[100];
-		*strm >> c[0] >> c[1];
-		if (c[0] != 'D' || c[1] != '0') {
-			Debug::Error("AssetManager", "Fatal: file 0 has wrong signature!");
-			abort();
-		}
-		_Strm2Val(*strm, num);
-		for (ushort a = 0; a < num; a++) {
-			_Strm2Val(*strm, type);
-			_Strm2Val(*strm, id);
-			_Strm2Val(*strm, pos);
-			strm->getline(c, 100, (char)0);
-			//std::cout << (int)type << " " << (int)id << " " << pos << ": " << string(c) << std::endl;
-			numDat = max(numDat, id);
-			dataLocs[type].push_back(std::pair<byte, std::pair<uint, uint>>(id - 1, std::pair<uint, uint>(pos, 0)));
-			dataCaches[type].push_back(nullptr);
-			names[type].push_back(c);
-		}
-
-		for (int a = 0; a < numDat; a++) {
-			string pp = dpath + std::to_string(a + 1);
-			streams.push_back(new std::ifstream(pp.c_str(), std::ios::in | std::ios::binary));
-			if (streams[a]->is_open())
-				Debug::Message("AssetManager", "Streaming data" + std::to_string(a + 1));
-			else {
-				Debug::Error("AssetManager", "Fatal: Failed to open data" + std::to_string(a + 1) + "!");
-				abort();
-			}
-		}
-
-		for (auto& aa : dataLocs) {
-			ushort s = 0;
-			for (auto& bb : aa.second) {
-				streams[bb.first]->seekg(bb.second.first);
-				_Strm2Val(*streams[bb.first], bb.second.second);
-				Debug::Message("AssetManager", "Registered asset " + names[aa.first][s] + " (" + std::to_string(bb.second.second) + " bytes)");
-				streams[bb.first]->seekg(0);
-				s++;
-			}
-		}
-		//long long ppos = strm->tellg();
-	}
-	Scene::ReadD0();
-#endif
 }
 
 #ifndef IS_EDITOR

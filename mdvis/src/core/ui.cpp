@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Editor.h"
 
 bool UI::_isDrawingLoop = false;
 uintptr_t UI::_activeEditText[UI_MAX_EDIT_TEXT_FRAMES] = {};
@@ -181,56 +180,50 @@ string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, cons
 	if (isActive) {
 		auto al = font->alignment;
 		font->Align(ALIGN_MIDLEFT);
-#ifdef IS_EDITOR
-		if (Editor::onFocus) {
-#endif
-			if (!delayed) _editTextString = str;
-			if (!!_editTextCursorPos) _editTextCursorPos -= Input::KeyDown(Key_LeftArrow);
-			_editTextCursorPos += Input::KeyDown(Key_RightArrow);
-			_editTextCursorPos = Clamp<uint>(_editTextCursorPos, 0U, _editTextString.size());
-			if (!Input::KeyHold(Key_LeftShift) && (Input::KeyDown(Key_LeftArrow) || Input::KeyDown(Key_RightArrow))) {
-				_editTextCursorPos2 = _editTextCursorPos;
-				_editTextBlinkTime = 0;
-			}
-			auto ssz = Input::inputString.size();
-			if (ssz) {
-				if (_editTextCursorPos == _editTextCursorPos2) {
-					_editTextString = _editTextString.substr(0, _editTextCursorPos) + Input::inputString + _editTextString.substr(_editTextCursorPos);
-					_editTextCursorPos += ssz;
-					_editTextCursorPos2 += ssz;
-				}
-				else {
-					_editTextString = _editTextString.substr(0, min(_editTextCursorPos, _editTextCursorPos2)) + Input::inputString + _editTextString.substr(max(_editTextCursorPos, _editTextCursorPos2));
-					_editTextCursorPos = min(_editTextCursorPos, _editTextCursorPos2) + ssz;
-					_editTextCursorPos2 = _editTextCursorPos;
-				}
-				if (!delayed && changed) *changed = true;
-				_editTextBlinkTime = 0;
-			}
-			if (Input::KeyDown(Key_Backspace)) {
-				if (_editTextCursorPos == _editTextCursorPos2) {
-					_editTextString = _editTextString.substr(0, _editTextCursorPos - 1) + _editTextString.substr(_editTextCursorPos);
-					if (!!_editTextCursorPos) {
-						_editTextCursorPos--;
-						_editTextCursorPos2--;
-					}
-				}
-				else {
-					_editTextString = _editTextString.substr(0, min(_editTextCursorPos, _editTextCursorPos2)) + _editTextString.substr(max(_editTextCursorPos, _editTextCursorPos2));
-					_editTextCursorPos = min(_editTextCursorPos, _editTextCursorPos2);
-					_editTextCursorPos2 = _editTextCursorPos;
-				}
-				if (!delayed && changed) *changed = true;
-				_editTextBlinkTime = 0;
-			}
-			if (Input::KeyDown(Key_Delete) && _editTextCursorPos < _editTextString.size()) {
-				_editTextString = _editTextString.substr(0, _editTextCursorPos) + _editTextString.substr(_editTextCursorPos + 1);
-				if (!delayed && changed) *changed = true;
-				_editTextBlinkTime = 0;
-			}
-#ifdef IS_EDITOR
+		if (!delayed) _editTextString = str;
+		if (!!_editTextCursorPos) _editTextCursorPos -= Input::KeyDown(Key_LeftArrow);
+		_editTextCursorPos += Input::KeyDown(Key_RightArrow);
+		_editTextCursorPos = Clamp<uint>(_editTextCursorPos, 0U, _editTextString.size());
+		if (!Input::KeyHold(Key_LeftShift) && (Input::KeyDown(Key_LeftArrow) || Input::KeyDown(Key_RightArrow))) {
+			_editTextCursorPos2 = _editTextCursorPos;
+			_editTextBlinkTime = 0;
 		}
-#endif
+		auto ssz = Input::inputString.size();
+		if (ssz) {
+			if (_editTextCursorPos == _editTextCursorPos2) {
+				_editTextString = _editTextString.substr(0, _editTextCursorPos) + Input::inputString + _editTextString.substr(_editTextCursorPos);
+				_editTextCursorPos += ssz;
+				_editTextCursorPos2 += ssz;
+			}
+			else {
+				_editTextString = _editTextString.substr(0, min(_editTextCursorPos, _editTextCursorPos2)) + Input::inputString + _editTextString.substr(max(_editTextCursorPos, _editTextCursorPos2));
+				_editTextCursorPos = min(_editTextCursorPos, _editTextCursorPos2) + ssz;
+				_editTextCursorPos2 = _editTextCursorPos;
+			}
+			if (!delayed && changed) *changed = true;
+			_editTextBlinkTime = 0;
+		}
+		if (Input::KeyDown(Key_Backspace)) {
+			if (_editTextCursorPos == _editTextCursorPos2) {
+				_editTextString = _editTextString.substr(0, _editTextCursorPos - 1) + _editTextString.substr(_editTextCursorPos);
+				if (!!_editTextCursorPos) {
+					_editTextCursorPos--;
+					_editTextCursorPos2--;
+				}
+			}
+			else {
+				_editTextString = _editTextString.substr(0, min(_editTextCursorPos, _editTextCursorPos2)) + _editTextString.substr(max(_editTextCursorPos, _editTextCursorPos2));
+				_editTextCursorPos = min(_editTextCursorPos, _editTextCursorPos2);
+				_editTextCursorPos2 = _editTextCursorPos;
+			}
+			if (!delayed && changed) *changed = true;
+			_editTextBlinkTime = 0;
+		}
+		if (Input::KeyDown(Key_Delete) && _editTextCursorPos < _editTextString.size()) {
+			_editTextString = _editTextString.substr(0, _editTextCursorPos) + _editTextString.substr(_editTextCursorPos + 1);
+			if (!delayed && changed) *changed = true;
+			_editTextBlinkTime = 0;
+		}
 		Engine::DrawQuad(x, y, w, h, black());
 		Engine::DrawQuad(x + 1, y + 1, w - 2, h - 2, white());
 		UI::Label(x + 2, y + 0.4f*h, s, _editTextString);

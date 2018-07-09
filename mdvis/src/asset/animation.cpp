@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Editor.h"
 #include <algorithm>
 
 void AnimClip_Key::AddFrames(uint cnt, float* loc) {
@@ -28,8 +27,6 @@ Vec4 AnimClip_Key::Eval(float t) {
 //ANIM [curvecount 2] [framestart 2] [frameend 2] { [curvetype 1] name0 [uselerp 1] [framecount 2] { [pos vec2*] if uselerp([:before vec2*] [:after vec2*]) } }
 //vec2* -> x = time, y = n-dim value
 AnimClip::AnimClip(string p) : AssetObject(ASSETTYPE_ANIMCLIP) {
-	//string p = Editor::instance->projectFolder + "Assets\\" + path + ".animclip.meta";
-	//std::ifstream stream(p.c_str(), std::ios::in | std::ios::binary);
 	F2ISTREAM(stream, p);
 	if (!stream.good()) {
 		std::cout << "animclip file not found!" << std::endl;
@@ -106,46 +103,7 @@ Animation::Animation() : AssetObject(ASSETTYPE_ANIMATION), activeState(0), nextS
 }
 
 Animation::Animation(string p) : Animation() {
-	F2ISTREAM(stream, p);
-	if (!stream.good()) {
-		std::cout << "animator not found!" << std::endl;
-		return;
-	}
-	char* c = new char[4];
-	stream.read(c, 3);
-	c[3] = char0;
-	string ss(c);
-	if (ss != "ANT") {
-		std::cerr << "file not supported" << std::endl;
-		return;
-	}
-	byte stateCount, transCount;
-	_Strm2Val(stream, stateCount);
-	for (byte a = 0; a < stateCount; a++) {
-		Anim_State* state = new Anim_State();
-		_Strm2Val(stream, state->isBlend);
-		ASSETTYPE t;
-		if (!state->isBlend) {
-			_Strm2Asset(stream, Editor::instance, t, state->_clip);
-			state->SetClip(_GetCache<AnimClip>(ASSETTYPE_ANIMCLIP, state->_clip));
-		}
-		else {
-			byte bc;
-			_Strm2Val(stream, bc);
-			state->blendClips.resize(bc);
-			state->_blendClips.resize(bc);
-			for (byte c = 0; c < bc; c++) {
-				_Strm2Asset(stream, Editor::instance, t, state->_blendClips[c]);
-				state->blendClips[c] = _GetCache<AnimClip>(ASSETTYPE_ANIMCLIP, state->_blendClips[c]);
-			}
-		}
-		_Strm2Val(stream, state->speed);
-		_Strm2Val(stream, state->editorPos.x);
-		_Strm2Val(stream, state->editorPos.y);
-		states.push_back(state);
-	}
-	_Strm2Val(stream, transCount);
-
+	
 }
 
 int Animation::IdOf(const string& s) {
@@ -185,20 +143,6 @@ void Animator::OnPreLUpdate() {
 	animation->keynames = animation->states[0]->keynames;
 	animation->keyvals = animation->states[0]->keyvals;
 }
-
-#ifdef IS_EDITOR
-void Animator::DrawInspector(Editor* e, Component* c, Vec4 v, uint& pos) {
-	if (DrawComponentHeader(e, v, pos, this)) {
-		pos += 17;
-		UI::Label(v.r + 2, v.g + pos, 12, "Animation", e->font, white());
-		e->DrawAssetSelector(v.r + v.b*0.3f, v.g + pos, v.b*0.7f - 1, 16, grey1(), ASSETTYPE_ANIMATION, 12, e->font, &_animation, &_SetAnim, this);
-		//if (_animation != -1) {
-
-		//}
-	}
-	else pos += 17;
-}
-#endif
 
 void Animator::_SetAnim(void* v) {
 	Animator* r = (Animator*)v;

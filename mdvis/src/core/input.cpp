@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Editor.h"
 
 bool Input::mouse0 = false;
 bool Input::mouse1 = false;

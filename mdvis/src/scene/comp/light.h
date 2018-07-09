@@ -43,25 +43,14 @@ public:
 
 	void DrawShadowMap(GLuint tar = 0), BlitRSMFlux(), DrawRSM(Mat4x4& ip, Mat4x4& lp, float w, float h, GLuint gtexs[], GLuint gdepth);
 
-	friend int main(int argc, char **argv);
-	friend void Serialize(Editor* e, SceneObject* o, std::ofstream* stream);
-	friend void Deserialize(std::ifstream& stream, SceneObject* obj);
 	friend class Camera;
 	friend class Engine;
-	friend class EB_Viewer;
-	friend class EB_Previewer;
 	_allowshared(Light);
 protected:
 	Light(std::ifstream& stream, SceneObject* o, long pos = -1);
 	//Mat4x4 _shadowMatrix;
 	ASSETID _cookie = -1, _hsvMap = -1;
 	static void _SetCookie(void* v), _SetHsvMap(void* v);
-
-#ifdef IS_EDITOR
-	void DrawEditor(EB_Viewer* ebv, GLuint shader = 0) override;
-	void DrawInspector(Editor* e, Component* c, Vec4 v, uint& pos) override;
-	void Serialize(Editor* e, std::ofstream* stream) override;
-#endif
 
 	static void InitShadow(), InitRSM();
 	void CalcShadowMatrix();

@@ -60,20 +60,11 @@ public:
 
 	friend class MeshFilter;
 	friend class Scene;
-	friend class Editor;
-	friend struct Editor_PlaySyncer;
-
 	_allowshared(SceneObject);
 protected:
-	//set transform.object after construction
 	SceneObject(Vec3 pos, Quat rot = Quat(), Vec3 scale = Vec3(1, 1, 1));
 	SceneObject(string s = "New Object", Vec3 pos = Vec3(), Quat rot = Quat(), Vec3 scale = Vec3(1, 1, 1));
 	SceneObject(byte* data);
-	//static pSceneObject New(byte* data) {
-		//auto p = pSceneObject(new SceneObject(data));
-		//p->transform.Init(p, data + offsetof(SceneObject, transform));
-		//return pSceneObject();
-	//}
 
 	static pSceneObject _FromId(const std::vector<pSceneObject>& objs, ulong id);
 

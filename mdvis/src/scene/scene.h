@@ -13,8 +13,6 @@ public:
 	float fogDensity, fogSunSpread;
 	Vec4 fogColor, fogSunColor;
 	
-	friend class Editor;
-	friend class EB_Inspector;
 	friend class Scene;
 protected:
 	SceneSettings() : sky(nullptr), skyId(-1), skyStrength(1), skyBrightness(1) {
@@ -32,18 +30,6 @@ protected:
 class Scene {
 public:
 	Scene();
-
-#ifndef CHOKO_LAIT
-	//	Scene() : sceneName("newScene"), settings(), objects() {}
-	Scene(std::ifstream& stream, long pos);
-	~Scene() {}
-	static bool loaded() {
-		return active != nullptr;
-	}
-	int sceneId;
-
-	static void Load(uint i), Load(string name);
-#endif
 
 	string sceneName;
 
@@ -65,8 +51,6 @@ public:
 	static void DeleteObject(pSceneObject object);
 
 	friend int main(int argc, char **argv);
-	friend class Editor;
-	friend struct Editor_PlaySyncer;
 	friend class AssetManager;
 	friend class Component;
 
@@ -81,7 +65,4 @@ protected:
 	static void ReadD0();
 	static void Unload();
 	static void CleanDeadObjects();
-#ifdef IS_EDITOR
-	void Save(Editor* e);
-#endif
 };

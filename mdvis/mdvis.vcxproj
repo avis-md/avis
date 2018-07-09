@@ -145,8 +145,6 @@
     <ClCompile Include="src\core\mvp.cpp" />
     <ClCompile Include="src\core\time.cpp" />
     <ClCompile Include="src\core\ui.cpp" />
-    <ClCompile Include="src\Editor.cpp" />
-    <ClCompile Include="src\EditorShortcuts.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\mdchan.cpp" />
@@ -163,6 +161,7 @@
     <ClCompile Include="src\ocl\raytracer.cpp" />
     <ClCompile Include="src\ui\help.cpp" />
     <ClCompile Include="src\ui\popups.cpp" />
+    <ClCompile Include="src\ui\ui_ext.cpp" />
     <ClCompile Include="src\utils\BVH.cpp" />
     <ClCompile Include="src\utils\dialog.cpp" />
     <ClCompile Include="src\utils\dylib.cpp" />
@@ -209,7 +208,6 @@
     <ClCompile Include="src\utils\fft.cpp" />
     <ClCompile Include="src\utils\net.cpp" />
     <ClCompile Include="src\RenderEngine.cpp" />
-    <ClCompile Include="src\SceneObjects.cpp" />
     <ClCompile Include="src\Types.cpp" />
     <ClCompile Include="src\utils\plot.cpp" />
     <ClCompile Include="src\utils\precedurals.cpp" />
@@ -272,6 +270,7 @@
     <ClInclude Include="src\ocl\raytracer.h" />
     <ClInclude Include="src\ui\help.h" />
     <ClInclude Include="src\ui\popups.h" />
+    <ClInclude Include="src\ui\ui_ext.h" />
     <ClInclude Include="src\utils\BVH.h" />
     <ClInclude Include="src\utils\dialog.h" />
     <ClInclude Include="src\utils\dylib.h" />
@@ -308,7 +307,6 @@
     <ClInclude Include="src\scene\comp\meshrenderer.h" />
     <ClInclude Include="src\scene\comp\scenescript.h" />
     <ClInclude Include="src\scene\comp\skinnedmeshrenderer.h" />
-    <ClInclude Include="src\scene\texturerenderer.h" />
     <ClInclude Include="src\scene\scene.h" />
     <ClInclude Include="src\scene\sceneobject.h" />
     <ClInclude Include="src\scene\transform.h" />
@@ -319,7 +317,6 @@
     <ClInclude Include="src\core\time.h" />
     <ClInclude Include="src\core\ui.h" />
     <ClInclude Include="src\Defines.h" />
-    <ClInclude Include="src\Editor.h" />
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\utils\net.h" />
     <ClInclude Include="src\SceneObjects.h" />

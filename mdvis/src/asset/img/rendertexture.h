@@ -22,11 +22,8 @@ public:
 		return v;
 	}
 
-	//void Resize(uint w, uint h);
 	friend class Texture;
-	friend class Editor;
 	friend class Background;
-	friend int main(int argc, char **argv);
 	_allowshared(RenderTexture);
 protected:
 	GLuint d_fbo;

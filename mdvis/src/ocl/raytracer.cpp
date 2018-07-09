@@ -3,9 +3,18 @@
 #include "md/Particles.h"
 #include "md/ParMenu.h"
 #include "utils/dialog.h"
+#include "vis/pargraphics.h"
+#include "ui/ui_ext.h"
+#ifdef PLATFORM_OSX
+#include <OpenCL/cl_gl_ext.h>
+#include <OpenGL/CGLDevice.h>
+#include <OpenGL/CGLCurrent.h>
+#include <OpenCL/cl_gl.h>
+#else
 #include <CL/cl_gl.h>
 #ifdef PLATFORM_LNX
 #include <GL/glx.h>
+#endif
 #endif
 
 RayTracer::info_st RayTracer::info = {};
@@ -25,7 +34,7 @@ cl_context RayTracer::_ctx;
 cl_command_queue RayTracer::_que;
 cl_kernel RayTracer::_kernel;
 
-cl_mem _bufr, _bg, _bls, _cns, _cls;
+cl_mem _bufr, _bg, _bls, _cns, _cls, _rds;
 
 bool RayTracer::Init(){
 	cl_platform_id platform;
@@ -83,7 +92,12 @@ bool RayTracer::Init(){
 	_kernel = clCreateKernel(prog, "_main_", 0);
 	
 	CheckRes();
-	
+
+	info.str = 2;
+	info.mat.specular = 0.3f;
+	info.mat.rough = 0.2f;
+	info.mat.gloss = 0.95f;
+	info.mat.ior = 1;
 	SetBg(IO::path + "/res/refl.hdr");
 
 	live = true;
@@ -93,19 +107,14 @@ bool RayTracer::Init(){
 void RayTracer::SetScene() {
 	if (!live) return;
 
-	info.str = 2;
-	info.mat.specular = 0.3f;
-	info.mat.rough = 0.2f;
-	info.mat.gloss = 0.95f;
-	info.mat.ior = 1;
-	//memcpy(info.IP, glm::value_ptr(glm::inverse(MVP::projection()*MVP::modelview())), 16 * sizeof(float));
-
 	if (!resTex) {
 		std::cout << "Generating Bounds..." << std::endl;
+		auto rads = new byte[Particles::particleSz]{};
+		ParGraphics::FillRad(rads);
 		BVH::Ball* objs = new BVH::Ball[Particles::particleSz];
 		for (uint a = 0; a < Particles::particleSz; a++) {
 			objs[a].orig = Particles::particles_Pos[a];
-			objs[a].rad = Particles::particles_Rad[a];
+			objs[a].rad = rads[a] * 0.1f / 127;
 		}
 		std::cout << "Generating BVH..." << std::endl;
 		BVH::Calc(objs, Particles::particleSz, bvh, bvhSz, BBox(0,0,0,0,0,0));
@@ -133,6 +142,10 @@ void RayTracer::SetScene() {
 		clEnqueueAcquireGLObjects(_que, 1, &_cls, 0, 0, 0);
 		assert(err == CL_SUCCESS);
 		clSetKernelArg(_kernel, 7, sizeof(_cls), &_cls);
+		_rds = clCreateBuffer(_ctx, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, Particles::particleSz * sizeof(cl_uchar), rads, &err);
+		assert(err == CL_SUCCESS);
+		delete[](rads);
+		clSetKernelArg(_kernel, 8, sizeof(_rds), &_rds);
 		clFinish(_que);
 
 		glGenTextures(1, &resTex);
@@ -222,17 +235,17 @@ void RayTracer::Render() {
 	
 
 	clEnqueueUnmapMemObject(_que, _bufr, bufrp, 0, 0, 0);
-
-	//
-	//live = false;
 }
 
 void RayTracer::Clear() {
 	clEnqueueReleaseGLObjects(_que, 1, &_bls, 0, 0, 0);
 	clEnqueueReleaseGLObjects(_que, 1, &_cns, 0, 0, 0);
+	clEnqueueReleaseGLObjects(_que, 1, &_cls, 0, 0, 0);
 	clFinish(_que);
 	clReleaseMemObject(_bls);
 	clReleaseMemObject(_cns);
+	clReleaseMemObject(_cls);
+	clReleaseMemObject(_rds);
 	glDeleteTextures(1, &resTex);
 	resTex = 0;
 	_cntt = 0;
@@ -258,37 +271,27 @@ void RayTracer::DrawMenu() {
 	UI::Label(expandPos - 148, off, 12, "Preview", white());
 	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
 	off++;
-	UI::Label(expandPos - 147, off + 17, 12, "Quality", white());
-	prvRes = Engine::DrawSliderFill(expandPos - 80, off + 17, 78, 16, 0.1f, 1, prvRes, white(1, 0.5f), white());
-	UI::Label(expandPos - 147, off + 17 * 2, 12, "Samples", white());
-	prvSmp = TryParse(UI::EditText(expandPos - 80, off + 17 * 2, 78, 16, 12, white(1, 0.5f), std::to_string(prvSmp), true, white()), 0U);
+	prvRes = UI2::Slider(expandPos - 147, off + 17, 147, "Quality", 0.1f, 1, prvRes, std::to_string(int(prvRes * 100)) + "%");
+	prvSmp = TryParse(UI2::EditText(expandPos - 147, off + 17 * 2, 147, "Samples", std::to_string(prvSmp)), 50U);
 
 	off += 17 * 3 * 2;
 
 	UI::Label(expandPos - 148, off, 12, "Background", white());
 	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
 	off++;
-	UI::Label(expandPos - 147, off + 17, 12, "File", white());
-	if (Engine::Button(expandPos - 80, off + 17, 78, 16, white(1, 0.3f), bgName, 12, white(0.5f)) == MOUSE_RELEASE) {
-		std::vector<string> exts = {"*.hdr"};
-		auto res = Dialog::OpenFile(exts);
-		if (!!res.size()) {
-			SetBg(res[0]);
-			_cntt = 0;
-		}
-	}
-	UI::Label(expandPos - 147, off + 17 * 2, 12, "Strength", white());
-	SV(info.str, str) = Engine::DrawSliderFill(expandPos - 80, off + 17 * 2, 78, 16, 0, 5, info.str, white(1, 0.5f), white());
+	UI2::File(expandPos - 147, off + 17, 147, "File", bgName, [](std::vector<string> res) {
+		SetBg(res[0]);
+		_cntt = 0;
+	});
+	SV(info.str, str) = UI2::Slider(expandPos - 147, off + 17 * 2, 147, "Strength", 0, 5, info.str);
 
 	off += 17 * 3 + 2;
 
 	UI::Label(expandPos - 148, off, 12, "Material", white());
 	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
 	off++;
-	UI::Label(expandPos - 147, off + 17, 12, "Specular", white());
-	SV(mt.specular, spc) = Engine::DrawSliderFill(expandPos - 80, off + 17, 78, 16, 0, 1, mt.specular, white(1, 0.5f), white());
-	UI::Label(expandPos - 147, off + 17 * 2, 12, "Gloss", white());
-	SV(mt.gloss, gls) = Engine::DrawSliderFill(expandPos - 80, off + 17 * 2, 78, 16, 0, 1, mt.gloss, white(1, 0.5f), white());
+	SV(mt.specular, spc) = UI2::Slider(expandPos - 147, off + 17, 147, "Specular", 0, 1, mt.specular);
+	SV(mt.gloss, gls) = UI2::Slider(expandPos - 147, off + 17 * 2, 147, "Gloss", 0, 1, mt.gloss);
 
 	if ((info.str != str) || (mt.specular != spc) || mt.gloss != gls) {
 		_cntt = 0;

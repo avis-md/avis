@@ -23,14 +23,12 @@ public:
 
 	friend int main(int argc, char **argv);
 	friend class Engine;
-	friend class Editor;
 	friend class MeshFilter;
 	friend class MeshRenderer;
 	friend class SkinnedMeshRenderer;
 	friend class AssetManager;
 	_allowshared(Mesh);
 protected:
-	Mesh(Editor* e, int i);
 	Mesh(std::istream& strm, uint offset = 0);
 	Mesh(string path);
 	Mesh(byte* mem);
@@ -40,10 +38,6 @@ protected:
 	void InitVao();
 
 	GLuint vao, vbos[4];
-
-#ifdef IS_EDITOR
-	static bool ParseBlend(Editor* e, string s);
-#endif
 
 	std::vector<std::vector<int>> _matTriangles;
 	std::vector<GLuint> _matIndicesBuffers;

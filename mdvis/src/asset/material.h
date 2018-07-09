@@ -5,7 +5,6 @@ class MatVal_Tex {
 	friend class Material;
 	friend class MeshRenderer;
 	friend class SkinnedMeshRenderer;
-	friend void EBI_DrawAss_Mat(Vec4 v, Editor* editor, EB_Inspector* b, float &off);
 protected:
 	MatVal_Tex() : id(-1), tex(nullptr), defTex(0) {}
 	~MatVal_Tex() {}
@@ -40,9 +39,6 @@ public:
 	void SetVec2(GLint id, Vec2 val);
 
 	friend class Engine;
-	friend class Editor;
-	friend class EB_Browser;
-	friend class EB_Inspector;
 	friend class Mesh;
 	friend class MeshRenderer;
 	friend class SkinnedMeshRenderer;
@@ -50,8 +46,6 @@ public:
 	friend class AssetManager;
 	friend class Shader;
 	friend class RenderTexture;
-	friend int main(int argc, char **argv);
-	friend void EBI_DrawAss_Mat(Vec4 v, Editor* editor, EB_Inspector* b, float &off);
 	_allowshared(Material);
 protected:
 	Material(string s);

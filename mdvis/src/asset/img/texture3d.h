@@ -8,9 +8,6 @@ public:
 	bool loaded;
 	uint length;
 	GLuint pointer;
-
-	friend class Editor;
 protected:
 	Texture3D() : AssetObject(ASSETTYPE_TEXCUBE) {}
-	static bool Parse(Editor* e, const string& path);
 };
