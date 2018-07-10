@@ -202,7 +202,6 @@ float Shadows::DrawMenu(float off) {
 	SV(bias);
 	SV(rw);
 	SV(rz);
-	SV(dst);
 
 	off += 17;
 	Engine::DrawQuad(expandPos - 148, off, 146, 17 * 5, white(0.9f, 0.1f));
@@ -216,10 +215,8 @@ float Shadows::DrawMenu(float off) {
 	rw = Engine::DrawSliderFill(expandPos - 80, off + 51, 76, 16, 0, 360, rw, white(1, 0.5f), white());
 	UI::Label(expandPos - 145, off + 68, 12, "Angle y", white());
 	rz = Engine::DrawSliderFill(expandPos - 80, off + 68, 76, 16, -90, 90, rz, white(1, 0.5f), white());
-	UI::Label(expandPos - 145, off + 85, 12, "Distance", white());
-	dst = Engine::DrawSliderFill(expandPos - 80, off + 85, 76, 16, 0, 2, dst, white(1, 0.5f), white());
 #define DF(x) (_ ## x != x)
-	if (DF(show) || DF(str) || DF(bias) || DF(rw) || DF(rz) || DF(dst)) {
+	if (DF(show) || DF(str) || DF(bias) || DF(rw) || DF(rz)) {
 		Scene::dirty = true;
 	}
 

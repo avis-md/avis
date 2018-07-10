@@ -237,7 +237,14 @@ float4 SkyAt(float3 dir, info_st info, __global float* bg) {
     //return (float4)(sy + 0.5f, 0, 0, 1);
 }
 
-float4 Trace(info_st info, ray_st ray, uint rnd, __global float* bg, __global float* ballPoss, int ballCnt, __global int* connIds, int connCnt, __global uchar* ballIds) {
+float4 Trace(
+    info_st info, ray_st ray, uint rnd,
+    __global float* bg,
+    __global float* ballPoss, int ballCnt,
+    __global int* connIds, int connCnt,
+    __global uchar* ballIds,
+    __global uchar* ballRads
+) {
 	ray_st rays[5];
     float str = 1;
 	rays[0] = ray;
@@ -249,7 +256,7 @@ float4 Trace(info_st info, ray_st ray, uint rnd, __global float* bg, __global fl
         float its2 = -1;
         int thid = 0;
         for (int a = 0; a < ballCnt; a++) {
-            its2 = Int_Ball(ray, (float3)(ballPoss[a*3], ballPoss[a*3+1], ballPoss[a*3+2]), 0.035f, &hp, &hn);
+            its2 = Int_Ball(ray, (float3)(ballPoss[a*3], ballPoss[a*3+1], ballPoss[a*3+2]), ballRads[a] * 0.1f / 127, &hp, &hn);
             if ((its < 0) || ((its2 > 0) && (its2 < its))) {
                 its = its2;
                 hitpos = hp;
@@ -261,7 +268,7 @@ float4 Trace(info_st info, ray_st ray, uint rnd, __global float* bg, __global fl
             int i1 = connIds[a*2];
             int i2 = connIds[a*2+1];
             float ii = 0;
-            its2 = Int_Tube(ray, (float3)(ballPoss[i1*3], ballPoss[i1*3+1], ballPoss[i1*3+2]), (float3)(ballPoss[i2*3], ballPoss[i2*3+1], ballPoss[i2*3+2]), 0.01f, &hp, &hn, &ii);
+            its2 = Int_Tube(ray, (float3)(ballPoss[i1*3], ballPoss[i1*3+1], ballPoss[i1*3+2]), (float3)(ballPoss[i2*3], ballPoss[i2*3+1], ballPoss[i2*3+2]), 0.008f, &hp, &hn, &ii);
             if ((its < 0) || ((its2 > 0) && (its2 < its))) {
                 its = its2;
                 hitpos = hp;
@@ -310,11 +317,10 @@ __kernel void _main_(
     __global float* res,
     info_st info,
     __global float* bg,
-    __global float* ballPoss,
-    int ballCnt,
-    __global int* connIds,
-    int connCnt,
-    __global uchar* ballIds
+    __global float* ballPoss, int ballCnt,
+    __global int* connIds, int connCnt,
+    __global uchar* ballIds,
+    __global uchar* ballRads
 ){
 	float4 col = (float4)(0, 0, 0, 0);
     
@@ -330,7 +336,7 @@ __kernel void _main_(
         info.rnd = Rand(info.rnd);
         float r2 = (info.rnd % 1000) * 0.002f - 1.f;
         ray_st ray = GetRay(info, uv + (float2)(0.33f * r1 / info.w, 0.33f * r2 / info.h));
-        col += Trace(info, ray, info.rnd, bg, ballPoss, ballCnt, connIds, connCnt, ballIds);
+        col += Trace(info, ray, info.rnd, bg, ballPoss, ballCnt, connIds, connCnt, ballIds, ballRads);
     }
     col /= 4;
     

@@ -581,6 +581,7 @@ public:
 	static std::unordered_map<ASSETTYPE, std::vector<std::pair<byte, long>>, std::hash<byte>> dataPoss;
 	static std::unordered_map<ASSETTYPE, std::vector<void*>, std::hash<byte>> dataPossCache;
 
+	static GLuint quadBuffer;
 	static GLint drawQuadLocs[3], drawQuadLocsA[3], drawQuadLocsC[1];
 	static void ScanQuadParams();
 	static void DrawQuad(float x, float y, float w, float h, uint texture, float miplevel = 0);

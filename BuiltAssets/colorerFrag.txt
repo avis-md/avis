@@ -1,9 +1,10 @@
 #version 330
 
-uniform sampler2D idTex;
+uniform usampler2D idTex;
 uniform vec2 screenSize;
 uniform samplerBuffer id2col;
 uniform sampler2D colList;
+uniform int usegrad;
 
 layout (location = 0) out vec4 fragCol;
 
@@ -16,17 +17,15 @@ vec3 gradfill(float f) {
 }
 
 void main () {
-	float idf = floor(texture(idTex, gl_FragCoord.xy / screenSize).x);
-	int id = int(idf);
+	//float idf = floor(texture(idTex, gl_FragCoord.xy / screenSize).x);
+	//int id = int(idf);
+	int id = int(texture(idTex, gl_FragCoord.xy / screenSize).x);
 	if (id == 0) {
 		fragCol = vec4(0.5, 0.5, 0.5, 1);
 		return;
 	}
 	float cdf = texelFetch(id2col, id-1).r;
 	int cd = int(cdf * 255);
-	fragCol.rgb = gradfill(cd / 255.0);
-	//fragCol = texture(colList, vec2((mod(cd, 16) + 0.5) / 16.0, ((cd / 16) + 0.5) / 16.0));
-    //fragCol = texture(colList, vec2((cd + 0.5) / 16.0, 0.5 / 16.0));
-    fragCol.a = 1;
-	//fragCol = texture(colList, gl_FragCoord.xy / screenSize);
+	if (usegrad == 1) fragCol.rgb = gradfill(cd / 255.0);
+	else fragCol = texture(colList, vec2((mod(cd, 16) + 0.5) / 16.0, ((cd / 16) + 0.5) / 16.0));
 }

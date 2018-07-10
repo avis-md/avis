@@ -13,6 +13,9 @@ void Popups::Draw() {
         case POPUP_TYPE::DRAWMODE:
             ParGraphics::DrawPopupDM();
             break;
+		case POPUP_TYPE::COLORPICK:
+			Color::DrawPicker();
+			break;
         default:
             break;
     }

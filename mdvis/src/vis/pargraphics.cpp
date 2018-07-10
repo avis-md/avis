@@ -5,14 +5,18 @@
 #include "vis/system.h"
 #include "ui/icons.h"
 #include "ui/popups.h"
+#include "ui/ui_ext.h"
 #include "utils/effects.h"
 #include "web/anweb.h"
 #include "mdchan.h"
 #include "shadows.h"
+#include "hdr.h"
 #include "ocl/raytracer.h"
 
-Texture* ParGraphics::refl = nullptr, *ParGraphics::bg = nullptr, *ParGraphics::logo = nullptr;
-float ParGraphics::reflStr = 1, ParGraphics::reflStrDecay = 2, ParGraphics::rimOff = 0.5f, ParGraphics::rimStr = 1;
+Texture* ParGraphics::bg = nullptr, *ParGraphics::logo = nullptr;
+GLuint ParGraphics::refl, ParGraphics::reflE;
+float ParGraphics::reflStr = 2, ParGraphics::reflStrDecay = 2, ParGraphics::specStr = 0.2f;
+Vec4 ParGraphics::bgCol = Vec4(1, 1, 1, 1);
 
 Light* ParGraphics::light;
 
@@ -95,10 +99,43 @@ float ParGraphics::Eff::DrawMenu(float off) {
 
 
 void ParGraphics::Init() {
-	refl = new Texture(IO::path + "/refl.png", true, TEX_FILTER_BILINEAR, 1, GL_REPEAT, GL_MIRRORED_REPEAT);
+	uint _w, _h;
+	byte* d = hdr::read_hdr((IO::path + "/res/refl_spc.hdr").c_str(), &_w, &_h);
+	if (!d) {
+		Debug::Error("ParGraphics", "refl_spc.hdr missing!");
+		abort();
+	}
+	std::vector<float> dv;
+	hdr::to_float(d, _w, _h, &dv);
+	delete[](d);
+	glGenTextures(1, &refl);
+	glBindTexture(GL_TEXTURE_2D, refl);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, &dv[0]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	d = hdr::read_hdr((IO::path + "/res/refl_env.hdr").c_str(), &_w, &_h);
+	if (!d) {
+		Debug::Error("ParGraphics", "refl_env.hdr missing!");
+		abort();
+	}
+	hdr::to_float(d, _w, _h, &dv);
+	delete[](d);
+	glGenTextures(1, &reflE);
+	glBindTexture(GL_TEXTURE_2D, reflE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, &dv[0]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+
 	bg = new Texture(IO::path + "/res/bg.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
-	//logo = new Texture(IO::path + "/res/logo.png", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
-	//reflProg = (new Shader(DefaultResources::GetStr("lightPassVert.txt"), IO::GetText(IO::path + "/reflFrag.txt")))->pointer;
 	reflProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), IO::GetText(IO::path + "/reflFrag.txt"));
 #define LC(nm) reflProgLocs[i++] = glGetUniformLocation(reflProg, #nm)
 	uint i = 0;
@@ -109,10 +146,12 @@ void ParGraphics::Init() {
 	LC(inEmit);
 	LC(inDepth);
 	LC(inSky);
+	LC(inSkyE);
 	LC(skyStrength);
 	LC(skyStrDecay);
-	LC(rimOffset);
-	LC(rimStrength);
+	LC(specStr);
+	LC(bgCol);
+#undef LC
 	
 	parProg = Shader::FromVF(IO::GetText(IO::path + "/parV.txt"), IO::GetText(IO::path + "/parF.txt"));
 #define LC(nm) parProgLocs[i++] = glGetUniformLocation(parProg, #nm)
@@ -125,6 +164,7 @@ void ParGraphics::Init() {
 	LC(screenSize);
 	LC(radTex);
 	LC(radScl);
+#undef LC
 
 	parConProg = Shader::FromVF(IO::GetText(IO::path + "/parConV.txt"), IO::GetText(IO::path + "/parConF.txt"));
 #define LC(nm) parConProgLocs[i++] = glGetUniformLocation(parConProg, #nm)
@@ -136,6 +176,7 @@ void ParGraphics::Init() {
 	LC(screenSize);
 	LC(posTex);
 	LC(connTex);
+#undef LC
 
 	parConLineProg = Shader::FromVF(IO::GetText(IO::path + "/parConV_line.txt"), IO::GetText(IO::path + "/parConF_line.txt"));
 	parConLineProgLocs[0] = glGetUniformLocation(parConLineProg, "_MV");
@@ -156,7 +197,6 @@ void ParGraphics::Init() {
 	colProgLocs[3] = glGetUniformLocation(colProg, "id2col");
 	colProgLocs[4] = glGetUniformLocation(colProg, "colList");
 
-#undef LC
 
 	hlIds.resize(1);
 	ChokoLait::mainCamera->onBlit = Reblit;
@@ -218,6 +258,27 @@ void ParGraphics::SetLight(Light* l) {
 	l->maxDist = 20;
 }
 
+void ParGraphics::FillRad(byte* rads) {
+	for (auto& p : drawLists) {
+		float ml = 1;
+		switch (p.second.second) {
+		case 1:
+			for (uint a = p.first; a < p.first + p.second.first; a++) {
+				rads[a] = 255;
+			}
+			continue;
+		case 0x0f:
+			continue;
+		case 2:
+			ml = 0.2f; break;
+		default: break;
+		}
+		for (uint a = p.first; a < p.first + p.second.first; a++) {
+			rads[a] = (byte)(min(0.1f * ml * Particles::particles_Rad[a], 0.2f) * 255 / 0.2f);
+		}
+	}
+}
+
 void ParGraphics::Update() {
 	if (!Particles::particleSz)
 		Scene::dirty = true;
@@ -225,7 +286,7 @@ void ParGraphics::Update() {
 		Particles::IncFrame(true);
 		Scene::dirty = true;
 	}
-	if (!UI::editingText) {
+	if (!UI::editingText && !UI::_layerMax) {
 		float s0 = rotScale;
 		float rz0 = rotZ;
 		float rw0 = rotW;
@@ -522,11 +583,14 @@ void ParGraphics::BlitSky() {
 	glBindTexture(GL_TEXTURE_2D, cam->d_depthTex);
 	glUniform1i(reflProgLocs[6], 4);
 	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, refl->pointer);
-	glUniform1f(reflProgLocs[7], reflStr);
-	glUniform1f(reflProgLocs[8], reflStrDecay);
-	glUniform1f(reflProgLocs[9], rimOff);
-	glUniform1f(reflProgLocs[10], rimStr);
+	glBindTexture(GL_TEXTURE_2D, refl);
+	glUniform1i(reflProgLocs[7], 5);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, reflE);
+	glUniform1f(reflProgLocs[8], reflStr);
+	glUniform1f(reflProgLocs[9], reflStrDecay);
+	glUniform1f(reflProgLocs[10], specStr);
+	glUniform3f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -570,80 +634,74 @@ void ParGraphics::DrawMenu() {
 	Vec3 center0 = rotCenter;
 
 	auto& expandPos = ParMenu::expandPos;
-	UI::Label(expandPos - 148, 3, 12, "Ambient", white());
-	Engine::DrawQuad(expandPos - 149, 18, 148, 36, white(0.9f, 0.1f));
-	UI::Label(expandPos - 147, 20, 12, "Strength", white());
-	reflStr = Engine::DrawSliderFill(expandPos - 80, 19, 78, 16, 0, 2, reflStr, white(1, 0.5f), white());
-	UI::Label(expandPos - 147, 37, 12, "Falloff", white());
-	reflStrDecay = Engine::DrawSliderFill(expandPos - 80, 36, 78, 16, 0, 200, reflStrDecay, white(1, 0.5f), white());
-	
-	UI::Label(expandPos - 148, 54, 12, "Rim Light", white());
-	Engine::DrawQuad(expandPos - 149, 68, 148, 38, white(0.9f, 0.1f));
-	UI::Label(expandPos - 147, 71, 12, "Offset", white());
-	rimOff = Engine::DrawSliderFill(expandPos - 80, 69, 78, 16, 0, 1, rimOff, white(1, 0.5f), white());
-	UI::Label(expandPos - 147, 88, 12, "Strength", white());
-	rimStr = Engine::DrawSliderFill(expandPos - 80, 88, 78, 16, 0, 5, rimStr, white(1, 0.5f), white());
+	UI::Label(expandPos - 148, 3, 12, "Lighting", white());
+	Engine::DrawQuad(expandPos - 149, 20, 148, 17 * 4 + 2, white(0.9f, 0.1f));
+	reflStr = UI2::Slider(expandPos - 147, 21, 147, "Strength", 0, 5, reflStr);
+	reflStrDecay = UI2::Slider(expandPos - 147, 17 * 2 + 4, 147, "Falloff", 0, 50, reflStrDecay);
+	specStr = UI2::Slider(expandPos - 147, 17 * 3 + 4, 147, "Specular", 0, 1, specStr);
+	UI2::Color(expandPos - 147, 17 * 4 + 4, 147, "Background", bgCol);
 
-	UI::Label(expandPos - 148, 105, 12, "Camera", white());
-	Engine::DrawQuad(expandPos - 149, 121, 148, 140, white(0.9f, 0.1f));
-	UI::Label(expandPos - 147, 122, 12, "Target", white());
+	float off = 17 * 5 + 6;
+
+	UI::Label(expandPos - 148, off, 12, "Camera", white());
+	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 9 + 2, white(0.9f, 0.1f));
+	off += 18;
+	UI::Label(expandPos - 147, off, 12, "Target", white());
 	bool htr = (rotCenterTrackId < ~0);
 	auto rf = rotCenterTrackId;
-	rotCenterTrackId = TryParse(UI::EditText(expandPos - 80, 122, 62, 16, 12, white(1, 0.5f), htr? std::to_string(rotCenterTrackId) : "", true, white()), ~0U);
-	if (htr && Engine::Button(expandPos - 97, 122, 16, 16, red()) == MOUSE_RELEASE) {
+	rotCenterTrackId = TryParse(UI::EditText(expandPos - 80, off, 62, 16, 12, white(1, 0.5f), htr? std::to_string(rotCenterTrackId) : "", true, white()), ~0U);
+	if (htr && Engine::Button(expandPos - 97, off, 16, 16, red()) == MOUSE_RELEASE) {
 		rotCenterTrackId = -1;
 	}
-	if (Engine::Button(expandPos - 18, 122, 16, 16, white(1, 0.5f)) == MOUSE_RELEASE) {
+	if (Engine::Button(expandPos - 18, off, 16, 16, white(1, 0.5f)) == MOUSE_RELEASE) {
 		
 	}
-	UI::Label(expandPos - 147, 139, 12, "Center X", white());
-	UI::Label(expandPos - 147, 156, 12, "Center Y", white());
-	UI::Label(expandPos - 147, 173, 12, "Center Z", white());
-	rotCenter.x = TryParse(UI::EditText(expandPos - 80, 139, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotCenter.x), true, white(!htr ? 1 : 0.5f)), 0.0f);
-	rotCenter.y = TryParse(UI::EditText(expandPos - 80, 156, 78, 16, 12, Vec4(0.4f, 0.6f, 0.4f, 1), std::to_string(rotCenter.y), true, white(!htr ? 1 : 0.5f)), 0.0f);
-	rotCenter.z = TryParse(UI::EditText(expandPos - 80, 173, 78, 16, 12, Vec4(0.4f, 0.4f, 0.6f, 1), std::to_string(rotCenter.z), true, white(!htr ? 1 : 0.5f)), 0.0f);
-	
-	UI::Label(expandPos - 147, 191, 12, "Rotation W", white());
-	UI::Label(expandPos - 147, 208, 12, "Rotation Y", white());
-	rotW = TryParse(UI::EditText(expandPos - 80, 191, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotW), true, white()), 0.0f);
-	rotZ = TryParse(UI::EditText(expandPos - 80, 208, 78, 16, 12, Vec4(0.4f, 0.6f, 0.4f, 1), std::to_string(rotZ), true, white()), 0.0f);
-	
-	UI::Label(expandPos - 147, 226, 12, "Scale", white());
-	rotScale = TryParse(UI::EditText(expandPos - 80, 226, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotScale), true, white()), 0.0f);
+	rotCenter.x = TryParse(UI2::EditText(expandPos - 147, off + 17, 147, "Center X", std::to_string(rotCenter.x), !htr, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.0f);
+	rotCenter.y = TryParse(UI2::EditText(expandPos - 147, off + 17 * 2, 147, "Center Y", std::to_string(rotCenter.y), !htr, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
+	rotCenter.z = TryParse(UI2::EditText(expandPos - 147, off + 17 * 3, 147, "Center Z", std::to_string(rotCenter.z), !htr, Vec4(0.4f, 0.4f, 0.6f, 1)), 0.0f);
+
+	rotW = TryParse(UI2::EditText(expandPos - 147, off + 17 * 4, 147, "Rotation W", std::to_string(rotW), true, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.0f);
+	rotZ = TryParse(UI2::EditText(expandPos - 147, off + 17 * 5, 147, "Rotation Y", std::to_string(rotZ), true, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
+
+	rotScale = TryParse(UI2::EditText(expandPos - 147, off + 17 * 6, 147, "Scale", std::to_string(rotScale)), 0.0f);
 	rotScale = Clamp(rotScale, -6.0f, 2.0f);
 
-	UI::Label(expandPos - 147, 243, 12, "Quality", white());
+	//UI::Label(expandPos - 147, off + 17 * 7, 12, "Quality", white());
 	auto cm = ChokoLait::mainCamera.raw();
 	auto ql = cm->quality;
-	if (Engine::Button(expandPos - 97, 243, 16, 16, Icons::refresh) == MOUSE_RELEASE)
+	//ql = Engine::DrawSliderFill(expandPos - 80, off + 17 * 7, 78, 16, 0.25f, 1.5f, ql, white(1, 0.5f), white());
+	//UI::Label(expandPos - 78, off + 17 * 7, 12, std::to_string(int(ql * 100)) + "%", black(0.6f));
+	ql = UI2::Slider(expandPos - 147, off + 17 * 7, 147, "Quality", 0.25f, 1.5f, ql, std::to_string(int(ql * 100)) + "%");
+	if (Engine::Button(expandPos - 91, off + 17 * 7, 16, 16, Icons::refresh) == MOUSE_RELEASE)
 		ql = 1;
-	ql = Engine::DrawSliderFill(expandPos - 80, 243, 78, 16, 0.25f, 1.5f, ql, white(1, 0.5f), white());
-	UI::Label(expandPos - 78, 243, 12, std::to_string(int(ql * 100)) + "%", black(0.6f));
+
 	if (ql != cm->quality) {
 		cm->quality = ql;
 		Scene::dirty = true;
 	}
 	bool a2 = cm->useGBuffer2;
-	UI::Label(expandPos - 147, 260, 12, "Use Dynamic Quality", white());
-	a2 = Engine::Toggle(expandPos - 19, 260, 16, Icons::checkbox, a2, white(), ORIENT_HORIZONTAL);
+	UI::Label(expandPos - 147, off + 17 * 8, 12, "Use Dynamic Quality", white());
+	a2 = Engine::Toggle(expandPos - 19, off + 17 * 8, 16, Icons::checkbox, a2, white(), ORIENT_HORIZONTAL);
 	if (a2 != cm->useGBuffer2) {
 		cm->useGBuffer2 = a2;
 		if (a2) cm->GenGBuffer2();
 		Scene::dirty = true;
 	}
+
+	off += 17 * 9 + 3;
+
 	if (a2) {
-		Engine::DrawQuad(expandPos - 149, 277, 148, 18, white(0.9f, 0.1f));
-		UI::Label(expandPos - 147, 277, 12, "Quality 2", white());
+		Engine::DrawQuad(expandPos - 149, off - 2, 148, 18, white(0.9f, 0.1f));
+		UI::Label(expandPos - 147, off - 1, 12, "Quality 2", white());
 		ql = cm->quality2;
-		ql = Engine::DrawSliderFill(expandPos - 80, 277, 78, 16, 0.25f, 1, ql, white(1, 0.5f), white());
-		UI::Label(expandPos - 78, 277, 12, std::to_string(int(ql * 100)) + "%", black(0.6f));
+		ql = Engine::DrawSliderFill(expandPos - 80, off - 1, 78, 16, 0.25f, 1, ql, white(1, 0.5f), white());
+		UI::Label(expandPos - 78, off - 1, 12, std::to_string(int(ql * 100)) + "%", black(0.6f));
 		if (ql != cm->quality2) {
 			cm->quality2 = ql;
 			Scene::dirty = true;
 		}
+		off += 17;
 	}
-
-	auto off = Eff::DrawMenu(a2? 294.0f : 277.0f);
 
 	Shadows::DrawMenu(off);
 
@@ -687,7 +745,7 @@ void ParGraphics::DrawPopupDM() {
 		}
 	}
 
-	if (Input::mouse0 && !Engine::Button(Popups::pos.x, Popups::pos.y + 16, 111, 60)) {
+	if ((Input::mouse0State == 1) && !Engine::Button(Popups::pos.x, Popups::pos.y + 16, 111, 60)) {
 		Popups::type = POPUP_TYPE::NONE;
 	}
 	if (dto != dt) ParGraphics::UpdateDrawLists();
