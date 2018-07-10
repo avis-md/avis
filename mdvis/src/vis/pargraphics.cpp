@@ -638,7 +638,7 @@ void ParGraphics::DrawMenu() {
 	Engine::DrawQuad(expandPos - 149, 20, 148, 17 * 4 + 2, white(0.9f, 0.1f));
 	reflStr = UI2::Slider(expandPos - 147, 21, 147, "Strength", 0, 5, reflStr);
 	reflStrDecay = UI2::Slider(expandPos - 147, 17 * 2 + 4, 147, "Falloff", 0, 50, reflStrDecay);
-	specStr = UI2::Slider(expandPos - 147, 17 * 3 + 4, 147, "Specular", 0, 50, specStr);
+	specStr = UI2::Slider(expandPos - 147, 17 * 3 + 4, 147, "Specular", 0, 1, specStr);
 	UI2::Color(expandPos - 147, 17 * 4 + 4, 147, "Background", bgCol);
 
 	float off = 17 * 5 + 6;
@@ -657,8 +657,8 @@ void ParGraphics::DrawMenu() {
 		
 	}
 	rotCenter.x = TryParse(UI2::EditText(expandPos - 147, off + 17, 147, "Center X", std::to_string(rotCenter.x), !htr, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.0f);
-	rotCenter.y = TryParse(UI2::EditText(expandPos - 147, off + 17 * 2, 147, "Center Y", std::to_string(rotCenter.x), !htr, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
-	rotCenter.z = TryParse(UI2::EditText(expandPos - 147, off + 17 * 3, 147, "Center Z", std::to_string(rotCenter.x), !htr, Vec4(0.4f, 0.4f, 0.6f, 1)), 0.0f);
+	rotCenter.y = TryParse(UI2::EditText(expandPos - 147, off + 17 * 2, 147, "Center Y", std::to_string(rotCenter.y), !htr, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
+	rotCenter.z = TryParse(UI2::EditText(expandPos - 147, off + 17 * 3, 147, "Center Z", std::to_string(rotCenter.z), !htr, Vec4(0.4f, 0.4f, 0.6f, 1)), 0.0f);
 
 	rotW = TryParse(UI2::EditText(expandPos - 147, off + 17 * 4, 147, "Rotation W", std::to_string(rotW), true, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.0f);
 	rotZ = TryParse(UI2::EditText(expandPos - 147, off + 17 * 5, 147, "Rotation Y", std::to_string(rotZ), true, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
