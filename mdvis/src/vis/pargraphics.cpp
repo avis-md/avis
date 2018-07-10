@@ -637,14 +637,14 @@ void ParGraphics::DrawMenu() {
 	Vec3 center0 = rotCenter;
 
 	auto& expandPos = ParMenu::expandPos;
-	UI::Label(expandPos - 148, 3, 12, "Lighting", white());
-	Engine::DrawQuad(expandPos - 149, 20, 148, 17 * 4 + 2, white(0.9f, 0.1f));
-	reflStr = UI2::Slider(expandPos - 147, 21, 147, "Strength", 0, 5, reflStr);
-	reflStrDecay = UI2::Slider(expandPos - 147, 17 * 2 + 4, 147, "Falloff", 0, 50, reflStrDecay);
-	specStr = UI2::Slider(expandPos - 147, 17 * 3 + 4, 147, "Specular", 0, 1, specStr);
-	UI2::Color(expandPos - 147, 17 * 4 + 4, 147, "Background", bgCol);
+	UI::Label(expandPos - 148, 20, 12, "Lighting", white());
+	Engine::DrawQuad(expandPos - 149, 37, 148, 17 * 4 + 2, white(0.9f, 0.1f));
+	reflStr = UI2::Slider(expandPos - 147, 17 + 21, 147, "Strength", 0, 5, reflStr);
+	reflStrDecay = UI2::Slider(expandPos - 147, 17 * 2 + 21, 147, "Falloff", 0, 50, reflStrDecay);
+	specStr = UI2::Slider(expandPos - 147, 17 * 3 + 21, 147, "Specular", 0, 1, specStr);
+	UI2::Color(expandPos - 147, 17 * 4 + 21, 147, "Background", bgCol);
 
-	float off = 17 * 5 + 6;
+	float off = 17 * 5 + 23;
 
 	UI::Label(expandPos - 148, off, 12, "Camera", white());
 	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 9 + 2, white(0.9f, 0.1f));

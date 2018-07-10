@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine.h"
+#include "ui/popups.h"
 
 enum class VIS_MOUSE_MODE : byte {
 	ROTATE,
@@ -12,6 +13,10 @@ public:
 	static Vec4 accentColor;
 	static uint renderMs, uiMs;
 
+	static std::vector<MenuItem> menuItems[4];
+
+	static string message;
+
 	static VIS_MOUSE_MODE mouseMode;
 	
 	static float _defBondLength;
@@ -23,5 +28,5 @@ public:
 
 	static bool InMainWin(const Vec2& pos);
 
-	static void DrawBar();
+	static void DrawTitle(), DrawBar();
 };

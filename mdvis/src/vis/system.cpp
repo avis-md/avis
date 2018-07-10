@@ -8,6 +8,10 @@
 Vec4 VisSystem::accentColor = Vec4(1, 1, 1, 1);
 uint VisSystem::renderMs, VisSystem::uiMs;
 
+std::vector<MenuItem> VisSystem::menuItems[];
+
+string VisSystem::message = "Hello";
+
 VIS_MOUSE_MODE VisSystem::mouseMode = VIS_MOUSE_MODE::ROTATE;
 
 float VisSystem::_defBondLength = 0.0225f; // 0.15
@@ -68,11 +72,38 @@ void VisSystem::Init() {
 		}
 		strm.close();
 	}
+
+	auto& mi = menuItems[0];
+	mi.resize(5);
+	mi[0].label = "New";
+	mi[1].label = "Open";
+	mi[2].label = "Open Recent";
+	auto& mic = mi[2].child;
+	mic.resize(2);
+	mic[0].label = "boo";
+	mic[1].label = "foo";
+	mi[3].label = "Save";
+	mi[4].label = "Save As";
 }
 
 bool VisSystem::InMainWin(const Vec2& pos) {
 	if (AnWeb::drawFull) return false;
 	else return (pos.x > ParMenu::expandPos + 16) && (pos.x < Display::width - ((!Particles::particleSz || LiveSyncer::activeRunner)? LiveSyncer::expandPos : AnWeb::expandPos)) && (pos.y < Display::height - 18);
+}
+
+void VisSystem::DrawTitle() {
+	Engine::DrawQuad(0,0, (float)Display::width, 18, white(0.95f, 0.05f));
+	const string menu[] = {"File", "Edit", "Options", "Help"};
+	const uint menusp[] = {0, 30, 62, 115};
+	for (uint i = 0; i < 4; i++) {
+		UI::Label(5 + menusp[i], 1, 12, menu[i], white());
+	}
+	Engine::DrawQuad(Display::width * 0.6f, 1, Display::width * 0.3f, 16, white(1, 0.2f));
+	UI::Label(Display::width * 0.6f + 2, 1, 12, message, white(0.5f));
+
+	UI::font->Align(ALIGN_TOPRIGHT);
+	UI::Label(Display::width - 5.0f, 3, 10, "version 0.01", white(0.7f));
+	UI::font->Align(ALIGN_TOPLEFT);
 }
 
 void VisSystem::DrawBar() {

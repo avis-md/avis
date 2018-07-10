@@ -1,5 +1,6 @@
 #include "Particles.h"
 #include "web/anweb.h"
+#include "md/Protein.h"
 
 ResidueList* Particles::residueLists;
 uint Particles::residueListSz;
@@ -76,6 +77,7 @@ void Particles::Clear() {
 		glDeleteVertexArrays(1, &posVao);
 		glDeleteTextures(1, &posTexBuffer);
 		glDeleteTextures(1, &connTexBuffer);
+		Protein::Clear();
 	}
 }
 

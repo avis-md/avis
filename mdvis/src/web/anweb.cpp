@@ -240,26 +240,26 @@ void AnWeb::Draw() {
 
 void AnWeb::DrawSide() {
 #ifndef IS_ANSERVER
-	Engine::DrawQuad(Display::width - expandPos, 0.0f, 180.0f, Display::height - 18.0f, white(0.9f, 0.15f));
+	Engine::DrawQuad(Display::width - expandPos, 18, 180.0f, Display::height - 18.0f, white(0.9f, 0.15f));
 	if (expanded) {
 		float w = 180;
 		AnNode::width = w - 2;
-		UI::Label(Display::width - expandPos + 5, 1, 12, "Analysis", white());
+		UI::Label(Display::width - expandPos + 5, 20, 12, "Analysis", white());
 
-		if (Engine::Button(Display::width - expandPos + 109, 1, 70, 16, white(1, 0.4f), "Edit", 12, white(), true) == MOUSE_RELEASE)
+		if (Engine::Button(Display::width - expandPos + 109, 20, 70, 16, white(1, 0.4f), "Edit", 12, white(), true) == MOUSE_RELEASE)
 			drawFull = true;
 
-		if (Engine::Button(Display::width - expandPos + 1, 18, 70, 16, white(1, executing ? 0.2f : 0.4f), "Run", 12, white(), true) == MOUSE_RELEASE) {
+		if (Engine::Button(Display::width - expandPos + 1, 38, 70, 16, white(1, executing ? 0.2f : 0.4f), "Run", 12, white(), true) == MOUSE_RELEASE) {
 
 		}
-		if (Engine::Button(Display::width - expandPos + 72, 18, 107, 16, white(1, executing ? 0.2f : 0.4f), "Run All", 12, white(), true) == MOUSE_RELEASE) {
+		if (Engine::Button(Display::width - expandPos + 72, 38, 107, 16, white(1, executing ? 0.2f : 0.4f), "Run All", 12, white(), true) == MOUSE_RELEASE) {
 			AnWeb::Execute();
 		}
-		UI::Texture(Display::width - expandPos + 1, 18, 16, 16, Icons::play);
-		UI::Texture(Display::width - expandPos + 72, 18, 16, 16, Icons::playall);
+		UI::Texture(Display::width - expandPos + 1, 38, 16, 16, Icons::play);
+		UI::Texture(Display::width - expandPos + 72, 38, 16, 16, Icons::playall);
 
 		//Engine::BeginStencil(Display::width - w, 0, 150, Display::height);
-		Vec2 poss(Display::width - expandPos + 1, 35);
+		Vec2 poss(Display::width - expandPos + 1, 17 * 3 + 4);
 		for (auto n : nodes) {
 			n->pos = poss;
 			poss.y += n->DrawSide();

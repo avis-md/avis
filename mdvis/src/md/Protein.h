@@ -42,8 +42,7 @@ public:
     static byte proCnt;
     static Protein* pros;
 
-    static void Init();
-    static void Refresh();
+    static void Init(), Clear(), Refresh();
     static void Draw(), DrawMenu();
 
     static Shader* shad;

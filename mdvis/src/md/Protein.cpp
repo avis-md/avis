@@ -64,6 +64,12 @@ void Protein::Init() {
     shadLocs[6] = glGetUniformLocation(shad->pointer, "loopReso");
 }
 
+void Protein::Clear() {
+	std::free(pros);
+	pros = nullptr;
+	proCnt = 0;
+}
+
 void Protein::Refresh() {
     if (pros) std::free(pros);
     auto proVec = rawvector<Protein, byte>(pros, proCnt);
@@ -229,10 +235,10 @@ void Protein::DrawMenu() {
 		auto cr = pros->chainReso;
 		auto lr = pros->loopReso;
 
-		UI::Label(expandPos - 148, 3, 12, "Curve Reso", white());
-		cr = (byte)Engine::DrawSliderFill(expandPos - 80, 2, 78, 16, 2, 20, cr, white(1, 0.5f), white());
-		UI::Label(expandPos - 147, 20, 12, "Bevel Reso", white());
-		lr = (byte)Engine::DrawSliderFill(expandPos - 80, 19, 78, 16, 6, 20, lr, white(1, 0.5f), white());
+		UI::Label(expandPos - 148, 20, 12, "Curve Reso", white());
+		cr = (byte)Engine::DrawSliderFill(expandPos - 80, 20, 78, 16, 2, 20, cr, white(1, 0.5f), white());
+		UI::Label(expandPos - 147, 37, 12, "Bevel Reso", white());
+		lr = (byte)Engine::DrawSliderFill(expandPos - 80, 37, 78, 16, 6, 20, lr, white(1, 0.5f), white());
 
 		if (cr != pros->chainReso || lr != pros->loopReso) {
 			Scene::dirty = true;

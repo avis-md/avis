@@ -192,13 +192,13 @@ void LiveSyncer::Stop() {
 }
 
 void LiveSyncer::DrawSide() {
-	Engine::DrawQuad(Display::width - expandPos, 0.0f, 180.0f, Display::height - 18.0f, white(0.9f, 0.15f));
+	Engine::DrawQuad(Display::width - expandPos, 18, 180, Display::height - 36.0f, white(0.9f, 0.15f));
 	if (expanded) {
-		UI::Label(Display::width - expandPos + 5, 1, 12, "Live Run", white());
+		UI::Label(Display::width - expandPos + 5, 20, 12, "Live Run", white());
 
 		float nma = (status == MENU) ? 0.5f : 1;
 
-		if (Engine::Button(Display::width - expandPos + 5, 20, expandPos - 10, 16, white(nma, 0.6f)) == MOUSE_RELEASE) {
+		if (Engine::Button(Display::width - expandPos + 5, 38, expandPos - 10, 16, white(nma, 0.6f)) == MOUSE_RELEASE) {
 			if (status != MENU) {
 				if (status == LOOP) {
 					Pause();
@@ -208,17 +208,17 @@ void LiveSyncer::DrawSide() {
 				}
 			}
 		}
-		if (status == LOOP) UI::Texture(Display::width - expandPos * 0.5f - 8, 20, 16, 16, Icons::pause, yellow());
-		else UI::Texture(Display::width - expandPos * 0.5f - 8, 20, 16, 16, Icons::play);
-		if (Engine::Button(Display::width - expandPos + 5, 38, expandPos - 10, 16, Vec4(0.7f, 0.4f, 0.4f, nma)) == MOUSE_RELEASE) {
+		if (status == LOOP) UI::Texture(Display::width - expandPos * 0.5f - 8, 38, 16, 16, Icons::pause, yellow());
+		else UI::Texture(Display::width - expandPos * 0.5f - 8, 38, 16, 16, Icons::play);
+		if (Engine::Button(Display::width - expandPos + 5, 17 * 3 + 4, expandPos - 10, 16, Vec4(0.7f, 0.4f, 0.4f, nma)) == MOUSE_RELEASE) {
 			if (status > IDLE) Stop();
 		}
-		Engine::DrawQuad(Display::width - expandPos * 0.5f - 5, 41, 10, 10, red());
+		Engine::DrawQuad(Display::width - expandPos * 0.5f - 5, 17 * 3 + 4, 10, 10, red());
 		if (status == MENU) {
-			UI::Label(Display::width - expandPos + 2, 60, 12, "Select Module", white());
+			UI::Label(Display::width - expandPos + 2, 17 * 5 + 4, 12, "Select Module", white());
 			uint a = 0;
 			for (auto& r : runners) {
-				if (Engine::Button(Display::width - expandPos + 4, 77 + 17 * a, 170, 16, white(1, 0.6f), r->name, 12, white()) == MOUSE_RELEASE) {
+				if (Engine::Button(Display::width - expandPos + 4, 17 * 4 + 5 + 17 * a, 170, 16, white(1, 0.6f), r->name, 12, white()) == MOUSE_RELEASE) {
 					Init(a);
 				}
 				a++;

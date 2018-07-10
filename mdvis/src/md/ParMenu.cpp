@@ -16,7 +16,7 @@ uint ParMenu::selCnt;
 byte ParMenu::drawTypeAll, ParMenu::_drawTypeAll;
 
 void ParMenu::Draw() {
-	Engine::DrawQuad(0, 0, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
+	Engine::DrawQuad(0, 18, expandPos, Display::height - 36.0f, white(0.9f, 0.15f));
 	if (expanded) {
 		if (!Particles::particleSz) {
 			if (Engine::Button(expandPos - 110, Display::height * 0.4f - 40, 80, 80, Icons::openfile, white(0.4f)) == MOUSE_RELEASE) {
@@ -44,17 +44,17 @@ void ParMenu::Draw() {
 
 		for (uint i = 0; i < 5; i++) {
 			if (i == activeMenu)
-				Engine::DrawQuad(expandPos, 81.0f * i, 17, 81, white(0.9f, 0.15f));
+				Engine::DrawQuad(expandPos, 81.0f * i + 18, 17, 81, white(0.9f, 0.15f));
 			else
-				if (Engine::Button(expandPos, 81.0f * i, 16, 80, white(0.7f, 0.1f), white(1, 0.2f), white(1, 0.05f)) == MOUSE_RELEASE) {
+				if (Engine::Button(expandPos, 81.0f * i + 18, 16, 80, white(0.7f, 0.1f), white(1, 0.2f), white(1, 0.05f)) == MOUSE_RELEASE) {
 					activeMenu = i;
 				}
 		}
 
-		Engine::RotateUI(90, Vec2(expandPos + 16, 0));
+		Engine::RotateUI(90, Vec2(expandPos + 16, 18));
 		UI::font->Align(ALIGN_TOPCENTER);
 		for (uint i = 0; i < 5; i++) {
-			UI::Label(expandPos + 56 + 81 * i, 0, 12, menuNames[i], white());
+			UI::Label(expandPos + 56 + 81 * i, 18, 12, menuNames[i], white());
 		}
 		UI::font->Align(ALIGN_TOPLEFT);
 		Engine::ResetUIMatrix();
@@ -74,17 +74,17 @@ void ParMenu::Draw() {
 }
 
 void ParMenu::Draw_List() {
-	if (Engine::Button(2, 2, 16, 16, Icons::select, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+	if (Engine::Button(2, 20, 16, 16, Icons::select, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
 		SelAll();
 	}
-	if (Engine::Button(19, 2, 16, 16, Icons::deselect, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+	if (Engine::Button(19, 20, 16, 16, Icons::deselect, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
 		SelClear();
 	}
-	if (Engine::Button(36, 2, 16, 16, Icons::flipselect, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+	if (Engine::Button(36, 20, 16, 16, Icons::flipselect, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
 		SelInv();
 	}
 	if (!!selCnt) {
-		if (Engine::Button(55, 2, 16, 16, Icons::OfDM(drawTypeAll), white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+		if (Engine::Button(55, 20, 16, 16, Icons::OfDM(drawTypeAll), white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
 			Popups::type = POPUP_TYPE::DRAWMODE;
 			Popups::pos = Vec2(55, 2);
 			_drawTypeAll = drawTypeAll;
@@ -100,9 +100,9 @@ void ParMenu::Draw_List() {
 		}
 	}
 	
-	Engine::DrawQuad(1, 18, expandPos - 2, Display::height - 37.0f, white(0.9f, 0.1f));
-	Engine::BeginStencil(0, 0, expandPos, Display::height - 18.0f);
-	float off = 20;
+	Engine::DrawQuad(1, 36, expandPos - 2, Display::height - 37.0f, white(0.9f, 0.1f));
+	Engine::BeginStencil(0, 36, expandPos, Display::height - 54.0f);
+	float off = 38;
 	for (uint i = 0; i < Particles::residueListSz; i++) {
 		auto& rli = Particles::residueLists[i];
 		if (off > 0) {

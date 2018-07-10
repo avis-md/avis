@@ -116,6 +116,9 @@ void paintfunc() {
 	}
 	VisSystem::DrawBar();
 
+	if (!AnWeb::drawFull)
+		VisSystem::DrawTitle();
+
 	ParLoader::DrawOpenDialog();
 	Popups::Draw();
 

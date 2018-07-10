@@ -257,12 +257,12 @@ void RayTracer::DrawMenu() {
 	auto& expandPos = ParMenu::expandPos;
 	auto& mt = info.mat;
 
-	if (Engine::Button(expandPos - 148, 2, 146, 16, resTex ? Vec4(0.4f, 0.2f, 0.2f, 1) : Vec4(0.2f, 0.4f, 0.2f, 1), resTex ? "Disable (Shift-X)" : "Enable (Shift-X)", 12, white(), true) == MOUSE_RELEASE) {
+	if (Engine::Button(expandPos - 148, 20, 146, 16, resTex ? Vec4(0.4f, 0.2f, 0.2f, 1) : Vec4(0.2f, 0.4f, 0.2f, 1), resTex ? "Disable (Shift-X)" : "Enable (Shift-X)", 12, white(), true) == MOUSE_RELEASE) {
 		if (resTex) Clear();
 		else SetScene();
 	}
 
-	float off = 17 * 2 + 1;
+	float off = 17 * 3 + 1;
 	if (resTex) {
 		UI::Label(expandPos - 148, 17 * 2, 12, "Samples: " + std::to_string(_cntt), white(0.5f));
 		off += 17;

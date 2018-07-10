@@ -7,6 +7,12 @@ enum class POPUP_TYPE : byte {
 	COLORPICK
 };
 
+struct MenuItem {
+	GLuint icon;
+	string label;
+	std::vector<MenuItem> child;
+};
+
 class Popups {
 public:
     static POPUP_TYPE type;
