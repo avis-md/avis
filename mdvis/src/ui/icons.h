@@ -12,7 +12,7 @@ public:
 		*refresh, *checkbox, *browse,
 		*zoomIn, *zoomOut,
 		*lang_c, *lang_py, *lang_ft, *lightning,
-		*icon_anl, *log, *openfile,
+		*icon_anl, *log, *newfile, *openfile,
 		*dm_none,
 		*dm_point, *dm_ball, *dm_vdw,
 		*dm_line, *dm_stick,

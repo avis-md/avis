@@ -111,11 +111,11 @@ bool CDV::ReadTrj(TrjInfo* info) {
 
 void CDV::_Read(const string& file, bool hasAnim) {
 	Particles::Clear();
-	glGenVertexArrays(1, &Particles::posVao);
-	glGenBuffers(1, &Particles::posBuffer);
-	glGenBuffers(1, &Particles::connBuffer);
-	glGenBuffers(1, &Particles::colIdBuffer);
-	glGenBuffers(1, &Particles::radBuffer);
+	//glGenVertexArrays(1, &Particles::posVao);
+	//glGenBuffers(1, &Particles::posBuffer);
+	//glGenBuffers(1, &Particles::connBuffer);
+	//glGenBuffers(1, &Particles::colIdBuffer);
+	//glGenBuffers(1, &Particles::radBuffer);
 
     char buf[500] {};
     std::ifstream strm(file);
@@ -146,6 +146,8 @@ void CDV::_Read(const string& file, bool hasAnim) {
     Particles::residueLists->residues = new Residue();
     Particles::residueLists->residues->offset = 0;
     Particles::residueLists->residues->cnt = Particles::particleSz;
+	Particles::residueLists->residues->type = 255;
+	Particles::residueLists->residues->name = "CDV1";
 
 	if (!hasAnim) {
 		Particles::particles_Pos = new Vec3[Particles::particleSz]{};
@@ -174,7 +176,7 @@ void CDV::_Read(const string& file, bool hasAnim) {
 		Particles::particles_Res[id] = Int2(0, 0);
 		Particles::particles_Col[id] = (byte)(rand()%256);
 	}
-
+	/*
 	glBindBuffer(GL_ARRAY_BUFFER, Particles::posBuffer);
 	glBufferData(GL_ARRAY_BUFFER, Particles::particleSz * sizeof(Vec3), Particles::particles_Pos, GL_DYNAMIC_DRAW);
 
@@ -197,6 +199,8 @@ void CDV::_Read(const string& file, bool hasAnim) {
 	glBindVertexArray(0);
 	
 	Particles::GenTexBufs();
+	*/
+	ParLoader::parDirty = true;
 }
 
 

@@ -18,7 +18,7 @@ GLuint ParGraphics::refl, ParGraphics::reflE;
 float ParGraphics::reflStr = 2, ParGraphics::reflStrDecay = 2, ParGraphics::specStr = 0.2f;
 Vec4 ParGraphics::bgCol = Vec4(1, 1, 1, 1);
 
-Light* ParGraphics::light;
+bool ParGraphics::useGradCol = false;
 
 GLuint ParGraphics::reflProg, ParGraphics::parProg, ParGraphics::parConProg, ParGraphics::parConLineProg;
 GLint ParGraphics::reflProgLocs[] = {}, ParGraphics::parProgLocs[] = {}, ParGraphics::parConProgLocs[] = {}, ParGraphics::parConLineProgLocs[] = {};
@@ -199,6 +199,7 @@ void ParGraphics::Init() {
 	colProgLocs[2] = glGetUniformLocation(colProg, "screenSize");
 	colProgLocs[3] = glGetUniformLocation(colProg, "id2col");
 	colProgLocs[4] = glGetUniformLocation(colProg, "colList");
+	colProgLocs[5] = glGetUniformLocation(colProg, "usegrad");
 
 
 	hlIds.resize(1);
@@ -250,15 +251,6 @@ void ParGraphics::UpdateDrawLists() {
 		if (!!bcnt && !!(dt >> 4)) drawListsB.push_back(std::pair<uint, std::pair<uint, byte>>(rs.offset_b, std::pair<uint, byte>(bcnt, dt >> 4)));
 	}
 	Scene::dirty = true;
-}
-
-void ParGraphics::SetLight(Light* l) {
-	light = l;
-	l->lightType = LIGHTTYPE_DIRECTIONAL;
-	l->drawShadow = true;
-	l->shadowOnly = true;
-	l->shadowStrength = 1;
-	l->maxDist = 20;
 }
 
 void ParGraphics::FillRad(byte* rads) {
@@ -496,6 +488,7 @@ void ParGraphics::Recolor() {
 	glUniform1i(colProgLocs[4], 3);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
+	glUniform1i(colProgLocs[5], useGradCol? 1 : 0);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

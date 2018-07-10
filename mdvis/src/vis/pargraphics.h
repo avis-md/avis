@@ -9,14 +9,14 @@ public:
 	static GLuint refl, reflE;
 	static float reflStr, reflStrDecay, specStr;
 	static Vec4 bgCol;
-
-	static Light* light;
-
+	
+	static bool useGradCol;
+	
 	static GLuint reflProg, parProg, parConProg, parConLineProg;
 	static GLint reflProgLocs[15], parProgLocs[10], parConProgLocs[7], parConLineProgLocs[5];
 
 	static GLuint selHlProg, colProg;
-	static GLint selHlProgLocs[4], colProgLocs[5];
+	static GLint selHlProgLocs[4], colProgLocs[6];
 
 	static std::vector<uint> hlIds, selIds;
 	static std::vector<std::pair<uint, std::pair<uint, byte>>> drawLists, drawListsB;
@@ -50,7 +50,6 @@ public:
 	};
 
 	static void Init(), UpdateDrawLists();
-	static void SetLight(Light* l);
 
 	static void FillRad(byte* rads);
 

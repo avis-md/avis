@@ -30,6 +30,12 @@ void ParMenu::Draw() {
 			case 0:
 				Draw_List();
 				break;
+			case 1:
+				//
+				if (Engine::Button(expandPos - 147, 20, 144, 16, white(1, 0.5f), "Toggle grad", 12, white(), true) == MOUSE_RELEASE) {
+					ParGraphics::useGradCol = !ParGraphics::useGradCol;
+				}
+				break;
 			case 2:
 				Protein::DrawMenu();
 				break;

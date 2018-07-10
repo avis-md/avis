@@ -65,7 +65,8 @@ void Particles::UpdateColorTex() {
 
 void Particles::Clear() {
 	if (particles_Pos) {
-		delete[](residueLists);
+		free(residueLists);
+		//delete[](residueLists);
 		delete[](particles_Name);
 		delete[](particles_ResName);
 		delete[](particles_Pos);
@@ -77,7 +78,9 @@ void Particles::Clear() {
 		glDeleteVertexArrays(1, &posVao);
 		glDeleteTextures(1, &posTexBuffer);
 		glDeleteTextures(1, &connTexBuffer);
+		particleSz = 0;
 		Protein::Clear();
+		VisSystem::message = "Scene Cleared";
 	}
 }
 

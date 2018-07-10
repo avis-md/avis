@@ -206,6 +206,9 @@ int main(int argc, char **argv)
 	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
 	imp->funcs.back().first.push_back(".gro");
 	imp->funcs.back().second = Gromacs::Read;
+	imp->trjFuncs.push_back(std::pair<std::vector<std::string>, ParImporter::loadtrjsig>());
+	imp->trjFuncs.back().first.push_back(".trr");
+	imp->trjFuncs.back().second = Gromacs::ReadTrj;
 	ParLoader::importers.push_back(imp);
 	
 	imp = new ParImporter();
@@ -244,6 +247,9 @@ int main(int argc, char **argv)
 
 	AnWeb::nodes.push_back(new Node_Recolor_All());
 	AnWeb::nodes.push_back(new Node_AddBond());
+
+	//CDV::_Read(IO::path + "/ayuba/position000000.cdv", false);
+	//CDV::_ReadTrj(IO::path + "/ayuba/position");
 
 	LiveRunner* runner = new LiveRunner();
 	runner->initNm = "Init";

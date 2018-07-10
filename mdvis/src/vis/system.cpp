@@ -1,9 +1,11 @@
 #include "system.h"
 #include "md/ParMenu.h"
+#include "md/parloader.h"
 #include "vis/pargraphics.h"
 #include "web/anweb.h"
 #include "ui/icons.h"
 #include "live/livesyncer.h"
+#include "utils/dialog.h"
 
 Vec4 VisSystem::accentColor = Vec4(1, 1, 1, 1);
 uint VisSystem::renderMs, VisSystem::uiMs;
@@ -18,6 +20,10 @@ float VisSystem::_defBondLength = 0.0225f; // 0.15
 std::unordered_map<uint, float> VisSystem::_bondLengths;
 std::unordered_map<ushort, Vec3> VisSystem::_type2Col;
 std::unordered_map<ushort, std::array<float, 2>> VisSystem::radii;
+
+void _showopenfiledialog() {
+	ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
+}
 
 void VisSystem::Init() {
 	radii.clear();
@@ -75,15 +81,20 @@ void VisSystem::Init() {
 
 	auto& mi = menuItems[0];
 	mi.resize(5);
-	mi[0].label = "New";
-	mi[1].label = "Open";
-	mi[2].label = "Open Recent";
+	mi[0].Set(Icons::newfile, "New", Particles::Clear);
+	mi[1].Set(Icons::openfile, "Open", _showopenfiledialog);
+	mi[2].Set(0, "Open Recent", 0);
 	auto& mic = mi[2].child;
 	mic.resize(2);
-	mic[0].label = "boo";
-	mic[1].label = "foo";
-	mi[3].label = "Save";
-	mi[4].label = "Save As";
+	mic[0].Set(0, "boo", 0);
+	mic[1].Set(0, "foo", 0);
+	mi[3].Set(Icons::openfile, "Append", 0);
+	mi[4].Set(Icons::cross, "Dummy", 0);
+
+	auto& mi2 = menuItems[3];
+	mi2.resize(2);
+	mi2[0].Set(0, "Show Help", 0);
+	mi2[1].Set(0, "About", 0);
 }
 
 bool VisSystem::InMainWin(const Vec2& pos) {
@@ -94,9 +105,14 @@ bool VisSystem::InMainWin(const Vec2& pos) {
 void VisSystem::DrawTitle() {
 	Engine::DrawQuad(0,0, (float)Display::width, 18, white(0.95f, 0.05f));
 	const string menu[] = {"File", "Edit", "Options", "Help"};
-	const uint menusp[] = {0, 30, 62, 115};
+	const uint menusp[] = {0, 30, 62, 115, 150};
 	for (uint i = 0; i < 4; i++) {
-		UI::Label(5 + menusp[i], 1, 12, menu[i], white());
+		if (Engine::Button(2 + menusp[i], 1, menusp[i + 1] - menusp[i] - 1, 16, white(0), menu[i], 12, white(), true) == MOUSE_RELEASE) {
+			Popups::type = POPUP_TYPE::MENU;
+			Popups::pos = Vec2(2 + menusp[i], 17);
+			Popups::data = menuItems + i;
+		}
+		//UI::Label(5 + menusp[i], 1, 12, menu[i], white());
 	}
 	Engine::DrawQuad(Display::width * 0.6f, 1, Display::width * 0.3f, 16, white(1, 0.2f));
 	UI::Label(Display::width * 0.6f + 2, 1, 12, message, white(0.5f));

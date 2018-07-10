@@ -174,6 +174,11 @@ void ParLoader::DoOpen() {
 	loadProgress = &info.progress;
 	loadProgress2 = &info.trajectory.progress;
 	loadName = "Reading file(s)";
+	std::replace(droppedFiles[0].begin(), droppedFiles[0].end(), '\\', '/');
+	string nm = droppedFiles[0].substr(droppedFiles[0].find_last_of('/') + 1);
+	VisSystem::message = "Reading " + nm;
+
+	auto t = milliseconds();
 
 	//
 	info.trajectory.maxFrames = 100;
@@ -364,6 +369,8 @@ void ParLoader::DoOpen() {
 		anm.frameCount = trj.frames;
 		anm.reading = false;
 	}
+
+	VisSystem::message = "Loaded " + nm + " in " + std::to_string((milliseconds() - t)*0.001f).substr(0, 5) + "s";
 
 	busy = false;
 	fault = false;

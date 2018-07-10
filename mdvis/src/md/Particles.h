@@ -20,7 +20,7 @@ struct ResidueList { //residues with the same name
 	ResidueList() : visible(true), expanded(false), drawType(0x22), selected(false) {}
 
 	~ResidueList() {
-		if (residues) std::free(residues);
+		if (residues) free(residues);
 	}
 	
 	uint maxOff;
