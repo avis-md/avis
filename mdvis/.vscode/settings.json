@@ -54,6 +54,8 @@
         "atomic": "cpp",
         "system_error": "cpp",
         "fstream": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "variant": "cpp",
+        "strstream": "cpp"
     }
 }

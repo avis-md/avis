@@ -17,11 +17,7 @@ void Font::Init() {
 
 	string error;
 	GLuint vs, fs;
-#if defined(PLATFORM_ADR)
-	string frag = "#version 300 es\nin vec2 UV;\nuniform sampler2D sampler;\nuniform vec4 col;\nout vec4 color;void main(){\ncolor = vec4(1.0, 1.0, 1.0, texture(sampler, UV).r)*col;\n}";
-#else
 	string frag = "#version 330\nin vec2 UV;\nuniform sampler2D sampler;\nuniform vec4 col;\nout vec4 color;void main(){\ncolor = vec4(1, 1, 1, texture(sampler, UV).r)*col;\n}";
-#endif
 	if (!Shader::LoadShader(GL_VERTEX_SHADER, DefaultResources::GetStr("fontVert.txt"), vs, &error)) {
 		Debug::Error("Engine", "Fatal: Cannot init font shader(v)! " + error);
 		abort();
@@ -130,7 +126,6 @@ void Font::SizeVec(uint sz) {
 }
 
 GLuint Font::CreateGlyph(uint sz, bool recalc) {
-	//FT_Set_Char_Size(_face, 0, (FT_F26Dot6)(size * 64.0f), Display::dpi, 0); // set pixel size based on dpi
 	FT_Set_Pixel_Sizes(_face, 0, sz); // set pixel size directly
 	_glyphs.emplace(sz, 0);
 	glGenTextures(1, &_glyphs[sz]);

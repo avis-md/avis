@@ -2,6 +2,7 @@
 #include "pargraphics.h"
 #include "md/ParMenu.h"
 #include "ui/icons.h"
+#include "ui/ui_ext.h"
 
 Camera* Shadows::cam;
 
@@ -205,16 +206,20 @@ float Shadows::DrawMenu(float off) {
 
 	off += 17;
 	Engine::DrawQuad(expandPos - 148, off, 146, 17 * 5, white(0.9f, 0.1f));
-	UI::Label(expandPos - 146, off, 12, "Shadows", white());
+	UI::Label(expandPos - 147, off, 12, "Shadows", white());
 	show = Engine::Toggle(expandPos - 20, off, 16, Icons::checkbox, show, white(), ORIENT_HORIZONTAL);
-	UI::Label(expandPos - 145, off + 17, 12, "Strength", white());
-	str = Engine::DrawSliderFill(expandPos - 80, off + 17, 76, 16, 0, 1, str, white(1, 0.5f), white());
-	UI::Label(expandPos - 145, off + 34, 12, "Bias", white());
-	bias = Engine::DrawSliderFill(expandPos - 80, off + 34, 76, 16, 0, 1, bias, white(1, 0.5f), white());
-	UI::Label(expandPos - 145, off + 51, 12, "Angle x", white());
-	rw = Engine::DrawSliderFill(expandPos - 80, off + 51, 76, 16, 0, 360, rw, white(1, 0.5f), white());
-	UI::Label(expandPos - 145, off + 68, 12, "Angle y", white());
-	rz = Engine::DrawSliderFill(expandPos - 80, off + 68, 76, 16, -90, 90, rz, white(1, 0.5f), white());
+	//UI::Label(expandPos - 145, off + 17, 12, "Strength", white());
+	//str = Engine::DrawSliderFill(expandPos - 80, off + 17, 76, 16, 0, 1, str, white(1, 0.5f), white());
+	str = UI2::Slider(expandPos - 147, off + 17, 147, "Strength", 0, 5, str);
+	//UI::Label(expandPos - 145, off + 34, 12, "Bias", white());
+	//bias = Engine::DrawSliderFill(expandPos - 80, off + 34, 76, 16, 0, 1, bias, white(1, 0.5f), white());
+	bias = UI2::Slider(expandPos - 147, off + 17 * 2, 147, "Bias", 0, 1, bias);
+	//UI::Label(expandPos - 145, off + 51, 12, "Angle x", white());
+	//rw = Engine::DrawSliderFill(expandPos - 80, off + 51, 76, 16, 0, 360, rw, white(1, 0.5f), white());
+	rw = UI2::Slider(expandPos - 147, off + 17 * 3, 147, "Angle W", 0, 360, rw);
+	//UI::Label(expandPos - 145, off + 68, 12, "Angle y", white());
+	//rz = Engine::DrawSliderFill(expandPos - 80, off + 68, 76, 16, -90, 90, rz, white(1, 0.5f), white());
+	rz = UI2::Slider(expandPos - 147, off + 17 * 4, 147, "Angle Y", -90, 90, rz);
 #define DF(x) (_ ## x != x)
 	if (DF(show) || DF(str) || DF(bias) || DF(rw) || DF(rz)) {
 		Scene::dirty = true;

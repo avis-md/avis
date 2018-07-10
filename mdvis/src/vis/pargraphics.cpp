@@ -99,24 +99,29 @@ float ParGraphics::Eff::DrawMenu(float off) {
 
 
 void ParGraphics::Init() {
+	byte chn;
 	uint _w, _h;
+	std::vector<float> dv;
+	/*
 	byte* d = hdr::read_hdr((IO::path + "/res/refl_spc.hdr").c_str(), &_w, &_h);
 	if (!d) {
 		Debug::Error("ParGraphics", "refl_spc.hdr missing!");
 		abort();
 	}
-	std::vector<float> dv;
 	hdr::to_float(d, _w, _h, &dv);
-	delete[](d);
+	*/
+	byte* d = Texture::LoadPixels(IO::path + "/res/?.png", chn, _w, _h);
 	glGenTextures(1, &refl);
 	glBindTexture(GL_TEXTURE_2D, refl);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, &dv[0]);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, &dv[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, (chn==3)? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, d);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	delete[](d);
 	d = hdr::read_hdr((IO::path + "/res/refl_env.hdr").c_str(), &_w, &_h);
 	if (!d) {
 		Debug::Error("ParGraphics", "refl_env.hdr missing!");
@@ -649,8 +654,8 @@ void ParGraphics::DrawMenu() {
 	UI::Label(expandPos - 147, off, 12, "Target", white());
 	bool htr = (rotCenterTrackId < ~0);
 	auto rf = rotCenterTrackId;
-	rotCenterTrackId = TryParse(UI::EditText(expandPos - 80, off, 62, 16, 12, white(1, 0.5f), htr? std::to_string(rotCenterTrackId) : "", true, white()), ~0U);
-	if (htr && Engine::Button(expandPos - 97, off, 16, 16, red()) == MOUSE_RELEASE) {
+	rotCenterTrackId = TryParse(UI::EditText(expandPos - 74, off, 55, 16, 12, white(1, 0.5f), htr? std::to_string(rotCenterTrackId) : "", true, white()), ~0U);
+	if (htr && Engine::Button(expandPos - 91, off, 16, 16, red()) == MOUSE_RELEASE) {
 		rotCenterTrackId = -1;
 	}
 	if (Engine::Button(expandPos - 18, off, 16, 16, white(1, 0.5f)) == MOUSE_RELEASE) {

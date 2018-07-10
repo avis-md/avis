@@ -1,6 +1,7 @@
 #include "ui_ext.h"
 #include "icons.h"
 #include "popups.h"
+#include "utils/dialog.h"
 
 string UI2::EditText(float x, float y, uint w, const string& title, const string& val, bool enabled, Vec4 col) {
 	UI::Label(x, y, 12, title, white());
@@ -35,4 +36,16 @@ void UI2::Color(float x, float y, uint w, const string& title, Vec4& col) {
 		Popups::data = &col;
 	}
 	UI::Texture(x + w * 2 - 17, y, 16, 16, Icons::colorwheel);
+}
+
+void UI2::File(float x, float y, uint w, const string& title, const string& fl, std::function<void(std::vector<string>)> func) {
+	UI::Label(x, y, 12, "File", white());
+	w /= 2;
+	if (Engine::Button(x + w, y, w-1, 16, white(1, 0.3f), fl, 12, white(0.5f)) == MOUSE_RELEASE) {
+		std::vector<string> exts = {"*.hdr"};
+		auto res = Dialog::OpenFile(exts);
+		if (!!res.size()) {
+			func(res);
+		}
+	}
 }
