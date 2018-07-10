@@ -99,22 +99,18 @@ float ParGraphics::Eff::DrawMenu(float off) {
 
 
 void ParGraphics::Init() {
-	byte chn;
 	uint _w, _h;
 	std::vector<float> dv;
-	/*
 	byte* d = hdr::read_hdr((IO::path + "/res/refl_spc.hdr").c_str(), &_w, &_h);
 	if (!d) {
 		Debug::Error("ParGraphics", "refl_spc.hdr missing!");
 		abort();
 	}
 	hdr::to_float(d, _w, _h, &dv);
-	*/
-	byte* d = Texture::LoadPixels(IO::path + "/res/?.png", chn, _w, _h);
+	//byte* d = Texture::LoadPixels(IO::path + "/res/?.png", chn, _w, _h);
 	glGenTextures(1, &refl);
 	glBindTexture(GL_TEXTURE_2D, refl);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, &dv[0]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, (chn==3)? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, d);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, &dv[0]);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
