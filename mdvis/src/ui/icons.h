@@ -16,7 +16,8 @@ public:
 		*dm_none,
 		*dm_point, *dm_ball, *dm_vdw,
 		*dm_line, *dm_stick,
-		*dm_lineball, *dm_stickball;
+		*dm_lineball, *dm_stickball,
+		*colorwheel;
 	
 	static Texture* OfDM(byte b);
 };

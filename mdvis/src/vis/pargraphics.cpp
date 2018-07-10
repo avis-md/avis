@@ -5,6 +5,7 @@
 #include "vis/system.h"
 #include "ui/icons.h"
 #include "ui/popups.h"
+#include "ui/ui_ext.h"
 #include "utils/effects.h"
 #include "web/anweb.h"
 #include "mdchan.h"
@@ -150,6 +151,7 @@ void ParGraphics::Init() {
 	LC(skyStrDecay);
 	LC(specStr);
 	LC(bgCol);
+#undef LC
 	
 	parProg = Shader::FromVF(IO::GetText(IO::path + "/parV.txt"), IO::GetText(IO::path + "/parF.txt"));
 #define LC(nm) parProgLocs[i++] = glGetUniformLocation(parProg, #nm)
@@ -162,6 +164,7 @@ void ParGraphics::Init() {
 	LC(screenSize);
 	LC(radTex);
 	LC(radScl);
+#undef LC
 
 	parConProg = Shader::FromVF(IO::GetText(IO::path + "/parConV.txt"), IO::GetText(IO::path + "/parConF.txt"));
 #define LC(nm) parConProgLocs[i++] = glGetUniformLocation(parConProg, #nm)
@@ -173,6 +176,7 @@ void ParGraphics::Init() {
 	LC(screenSize);
 	LC(posTex);
 	LC(connTex);
+#undef LC
 
 	parConLineProg = Shader::FromVF(IO::GetText(IO::path + "/parConV_line.txt"), IO::GetText(IO::path + "/parConF_line.txt"));
 	parConLineProgLocs[0] = glGetUniformLocation(parConLineProg, "_MV");
@@ -193,7 +197,6 @@ void ParGraphics::Init() {
 	colProgLocs[3] = glGetUniformLocation(colProg, "id2col");
 	colProgLocs[4] = glGetUniformLocation(colProg, "colList");
 
-#undef LC
 
 	hlIds.resize(1);
 	ChokoLait::mainCamera->onBlit = Reblit;
@@ -633,18 +636,10 @@ void ParGraphics::DrawMenu() {
 	auto& expandPos = ParMenu::expandPos;
 	UI::Label(expandPos - 148, 3, 12, "Lighting", white());
 	Engine::DrawQuad(expandPos - 149, 20, 148, 17 * 4 + 2, white(0.9f, 0.1f));
-	UI::Label(expandPos - 147, 21, 12, "Strength", white());
-	reflStr = Engine::DrawSliderFill(expandPos - 80, 21, 78, 16, 0, 5, reflStr, white(1, 0.5f), white());
-	UI::Label(expandPos - 147, 17 * 2 + 4, 12, "Falloff", white());
-	reflStrDecay = Engine::DrawSliderFill(expandPos - 80, 17 * 2 + 4, 78, 16, 0, 50, reflStrDecay, white(1, 0.5f), white());
-	UI::Label(expandPos - 147, 17 * 3 + 4, 12, "Specular", white());
-	specStr = Engine::DrawSliderFill(expandPos - 80, 17 * 3 + 4, 78, 16, 0, 1, specStr, white(1, 0.5f), white());
-	UI::Label(expandPos - 147, 17 * 4 + 4, 12, "Background", white());
-	if (Engine::Button(expandPos - 80, 17 * 4 + 4, 78, 16, bgCol) == MOUSE_RELEASE) {
-		Popups::type = POPUP_TYPE::COLORPICK;
-		Popups::pos = Vec2(expandPos - 80, 17 * 5 + 3);
-		Popups::data = &bgCol;
-	}
+	reflStr = UI2::Slider(expandPos - 147, 21, 147, "Strength", 0, 5, reflStr);
+	reflStrDecay = UI2::Slider(expandPos - 147, 17 * 2 + 4, 147, "Falloff", 0, 50, reflStrDecay);
+	specStr = UI2::Slider(expandPos - 147, 17 * 3 + 4, 147, "Specular", 0, 50, specStr);
+	UI2::Color(expandPos - 147, 17 * 4 + 4, 147, "Background", bgCol);
 
 	float off = 17 * 5 + 6;
 
@@ -661,29 +656,25 @@ void ParGraphics::DrawMenu() {
 	if (Engine::Button(expandPos - 18, off, 16, 16, white(1, 0.5f)) == MOUSE_RELEASE) {
 		
 	}
-	UI::Label(expandPos - 147, off + 17, 12, "Center X", white());
-	UI::Label(expandPos - 147, off + 17 * 2, 12, "Center Y", white());
-	UI::Label(expandPos - 147, off + 17 * 3, 12, "Center Z", white());
-	rotCenter.x = TryParse(UI::EditText(expandPos - 80, off + 17, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotCenter.x), true, white(!htr ? 1 : 0.5f)), 0.0f);
-	rotCenter.y = TryParse(UI::EditText(expandPos - 80, off + 17 * 2, 78, 16, 12, Vec4(0.4f, 0.6f, 0.4f, 1), std::to_string(rotCenter.y), true, white(!htr ? 1 : 0.5f)), 0.0f);
-	rotCenter.z = TryParse(UI::EditText(expandPos - 80, off + 17 * 3, 78, 16, 12, Vec4(0.4f, 0.4f, 0.6f, 1), std::to_string(rotCenter.z), true, white(!htr ? 1 : 0.5f)), 0.0f);
-	
-	UI::Label(expandPos - 147, off + 17 * 4, 12, "Rotation W", white());
-	UI::Label(expandPos - 147, off + 17 * 5, 12, "Rotation Y", white());
-	rotW = TryParse(UI::EditText(expandPos - 80, off + 17 * 4, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotW), true, white()), 0.0f);
-	rotZ = TryParse(UI::EditText(expandPos - 80, off + 17 * 5, 78, 16, 12, Vec4(0.4f, 0.6f, 0.4f, 1), std::to_string(rotZ), true, white()), 0.0f);
-	
-	UI::Label(expandPos - 147, off + 17 * 6, 12, "Scale", white());
-	rotScale = TryParse(UI::EditText(expandPos - 80, off + 17 * 6, 78, 16, 12, Vec4(0.6f, 0.4f, 0.4f, 1), std::to_string(rotScale), true, white()), 0.0f);
+	rotCenter.x = TryParse(UI2::EditText(expandPos - 147, off + 17, 147, "Center X", std::to_string(rotCenter.x), !htr, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.0f);
+	rotCenter.y = TryParse(UI2::EditText(expandPos - 147, off + 17 * 2, 147, "Center Y", std::to_string(rotCenter.x), !htr, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
+	rotCenter.z = TryParse(UI2::EditText(expandPos - 147, off + 17 * 3, 147, "Center Z", std::to_string(rotCenter.x), !htr, Vec4(0.4f, 0.4f, 0.6f, 1)), 0.0f);
+
+	rotW = TryParse(UI2::EditText(expandPos - 147, off + 17 * 4, 147, "Rotation W", std::to_string(rotW), true, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.0f);
+	rotZ = TryParse(UI2::EditText(expandPos - 147, off + 17 * 5, 147, "Rotation Y", std::to_string(rotZ), true, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
+
+	rotScale = TryParse(UI2::EditText(expandPos - 147, off + 17 * 6, 147, "Scale", std::to_string(rotScale)), 0.0f);
 	rotScale = Clamp(rotScale, -6.0f, 2.0f);
 
-	UI::Label(expandPos - 147, off + 17 * 7, 12, "Quality", white());
+	//UI::Label(expandPos - 147, off + 17 * 7, 12, "Quality", white());
 	auto cm = ChokoLait::mainCamera.raw();
 	auto ql = cm->quality;
-	if (Engine::Button(expandPos - 97, off + 17 * 7, 16, 16, Icons::refresh) == MOUSE_RELEASE)
+	//ql = Engine::DrawSliderFill(expandPos - 80, off + 17 * 7, 78, 16, 0.25f, 1.5f, ql, white(1, 0.5f), white());
+	//UI::Label(expandPos - 78, off + 17 * 7, 12, std::to_string(int(ql * 100)) + "%", black(0.6f));
+	ql = UI2::Slider(expandPos - 147, off + 17 * 7, 147, "Quality", 0.25f, 1.5f, ql, std::to_string(int(ql * 100)) + "%");
+	if (Engine::Button(expandPos - 91, off + 17 * 7, 16, 16, Icons::refresh) == MOUSE_RELEASE)
 		ql = 1;
-	ql = Engine::DrawSliderFill(expandPos - 80, off + 17 * 7, 78, 16, 0.25f, 1.5f, ql, white(1, 0.5f), white());
-	UI::Label(expandPos - 78, off + 17 * 7, 12, std::to_string(int(ql * 100)) + "%", black(0.6f));
+
 	if (ql != cm->quality) {
 		cm->quality = ql;
 		Scene::dirty = true;
