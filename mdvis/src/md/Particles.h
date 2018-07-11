@@ -11,7 +11,7 @@ struct Residue {
 	bool visible, expanded;
 	string name;
 	uint offset, offset_b;
-	ushort cnt, cnt_b;
+	uint cnt, cnt_b;
 	byte type, drawType;
 	bool selected;
 };

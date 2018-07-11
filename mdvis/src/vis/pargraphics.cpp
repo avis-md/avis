@@ -283,7 +283,7 @@ void ParGraphics::Update() {
 		Particles::IncFrame(true);
 		Scene::dirty = true;
 	}
-	if (!UI::editingText && !UI::_layerMax) {
+	if (!!Particles::particleSz && !UI::editingText && !UI::_layerMax) {
 		float s0 = rotScale;
 		float rz0 = rotZ;
 		float rw0 = rotW;

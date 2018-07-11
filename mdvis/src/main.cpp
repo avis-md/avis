@@ -87,8 +87,10 @@ void updateFunc() {
 			}
 		}
 	}
-	if (Scene::dirty) RayTracer::expDirty = true;
-	else Scene::dirty = true;
+	if (RayTracer::resTex) {
+		if (Scene::dirty) RayTracer::expDirty = true;
+		else Scene::dirty = true;
+	}
 }
 
 void paintfunc() {
@@ -174,7 +176,7 @@ void paintfunc() {
 
 			id--;
 			Engine::DrawQuad(Input::mousePos.x + 14, Input::mousePos.y + 2, 120, 60, white(0.8f, 0.1f));
-			//UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Particle " + std::to_string(id), white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Particle " + std::to_string(id), white());
 			//UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, &Particles::particles_ResName[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
 			//UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, &Particles::particles_Name[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
 			//UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, std::to_string(Particles::particles_Pos[id]), font, white());
@@ -210,7 +212,6 @@ int main(int argc, char **argv) {
 
 	ChokoLait::Init(800, 800);
 	GLFWimage icon;
-	byte chn;
 	icon.pixels = Texture::LoadPixels(res::icon_png, res::icon_png_sz, (uint&)icon.width, (uint&)icon.height);
 	glfwSetWindowIcon(Display::window, 1, &icon);
 	delete[](icon.pixels);
@@ -280,8 +281,45 @@ int main(int argc, char **argv) {
 	AnWeb::nodes.push_back(new Node_Recolor_All());
 	AnWeb::nodes.push_back(new Node_AddBond());
 
+	ParLoader::useConn = false;
 	//CDV::_Read(IO::path + "/ayuba/position000000.cdv", false);
 	//CDV::_ReadTrj(IO::path + "/ayuba/position");
+	/*
+	Particles::particleSz = 10000000;
+	Particles::particles_Name = new char[Particles::particleSz * PAR_MAX_NAME_LEN]{};
+	Particles::particles_ResName = new char[Particles::particleSz * PAR_MAX_NAME_LEN]{};
+	Particles::residueLists = new ResidueList();
+	Particles::residueListSz = 1;
+	Particles::residueLists->residueSz = 1;
+	Particles::residueLists->residues = new Residue();
+	Particles::residueLists->residues->offset = 0;
+	Particles::residueLists->residues->cnt = Particles::particleSz;
+	Particles::residueLists->residues->offset_b = 0;
+	Particles::residueLists->residues->cnt_b = 0;
+	Particles::residueLists->residues->type = 255;
+	Particles::residueLists->residues->name = "TST";
+
+	Particles::particles_Pos = new Vec3[Particles::particleSz]{};
+	Particles::particles_Vel = new Vec3[Particles::particleSz]{};
+	Particles::particles_Col = new byte[Particles::particleSz]{};
+	Particles::particles_Rad = new float[Particles::particleSz]{};
+	Particles::particles_Res = new Int2[Particles::particleSz]{};
+
+	for (int a = 0; a < 500; a++) {
+		for (int b = 0; b < 200; b++) {
+			for (int c = 0; c < 100; c++) {
+				Particles::particles_Pos[a * 20000 + b * 100 + c] = Vec3(a-250,b-100,c-50) * 0.2f;
+				Particles::particles_Rad[a * 20000 + b * 100 + c] = 1;
+				Particles::particles_Res[a * 20000 + b * 100 + c] = Int2(0, 0);
+				Particles::particles_Col[a * 20000 + b * 100 + c] = (byte)(rand() % 256);
+			}
+		}
+	}
+	memset(Particles::boundingBox, 0, sizeof(float) * 6);
+
+	ParLoader::parDirty = true;
+	*/
+
 
 	LiveRunner* runner = new LiveRunner();
 	runner->initNm = "Init";

@@ -213,12 +213,12 @@ void LiveSyncer::DrawSide() {
 		if (Engine::Button(Display::width - expandPos + 5, 17 * 3 + 4, expandPos - 10, 16, Vec4(0.7f, 0.4f, 0.4f, nma)) == MOUSE_RELEASE) {
 			if (status > IDLE) Stop();
 		}
-		Engine::DrawQuad(Display::width - expandPos * 0.5f - 5, 17 * 3 + 4, 10, 10, red());
+		Engine::DrawQuad(Display::width - expandPos * 0.5f - 5, 17 * 3 + 7, 10, 10, red());
 		if (status == MENU) {
 			UI::Label(Display::width - expandPos + 2, 17 * 5 + 4, 12, "Select Module", white());
 			uint a = 0;
 			for (auto& r : runners) {
-				if (Engine::Button(Display::width - expandPos + 4, 17 * 4 + 5 + 17 * a, 170, 16, white(1, 0.6f), r->name, 12, white()) == MOUSE_RELEASE) {
+				if (Engine::Button(Display::width - expandPos + 4, 17 * 6 + 5 + 17 * a, 170, 16, white(1, 0.6f), r->name, 12, white()) == MOUSE_RELEASE) {
 					Init(a);
 				}
 				a++;
