@@ -22,6 +22,7 @@
 #include "mdchan.h"
 #include "live/livesyncer.h"
 #include "ocl/raytracer.h"
+#include "res/resdata.h"
 
 bool __debug = false;
 
@@ -189,8 +190,15 @@ void paintfunc() {
 	HelpMenu::Draw();
 }
 
-int main(int argc, char **argv)
-{
+#ifdef MAKE_RES
+#include "makeres.h"
+int main(int argc, char **argv) {
+	MakeRes::Do();
+	std::getline(std::cin, *(new string()));
+	return 0;
+#else
+int main(int argc, char **argv) {
+#endif
 	for (auto a = 0; a < argc; a++) {
 		if (argv[a][0] == '-') {
 			if (!strcmp(argv[a] + 1, "debug"))
@@ -203,8 +211,8 @@ int main(int argc, char **argv)
 	ChokoLait::Init(800, 800);
 	GLFWimage icon;
 	byte chn;
-	icon.pixels = Texture::LoadPixels(IO::path + "/res/icon.png", chn, (uint&)icon.width, (uint&)icon.height);
-	if (icon.pixels) glfwSetWindowIcon(Display::window, 1, &icon);
+	icon.pixels = Texture::LoadPixels(res::icon_png, res::icon_png_sz, (uint&)icon.width, (uint&)icon.height);
+	glfwSetWindowIcon(Display::window, 1, &icon);
 	delete[](icon.pixels);
 
 	RayTracer::Init();

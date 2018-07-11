@@ -1,4 +1,5 @@
 #include "icons.h"
+#include "res/resdata.h"
 
 Texture* Icons::expand, *Icons::collapse, *Icons::play, *Icons::playall, *Icons::pause,
 *Icons::left, *Icons::right, *Icons::up, *Icons::down, *Icons::cross, *Icons::visible, *Icons::hidden, *Icons::circle,
@@ -10,11 +11,17 @@ Texture* Icons::expand, *Icons::collapse, *Icons::play, *Icons::playall, *Icons:
 *Icons::icon_anl, *Icons::log, *Icons::newfile, *Icons::openfile,
 *Icons::dm_none, *Icons::dm_point, *Icons::dm_ball, *Icons::dm_vdw, *Icons::dm_line, *Icons::dm_stick, *Icons::dm_lineball, *Icons::dm_stickball,
 *Icons::colorwheel;
-
+/*
 #define TEXN(nm) new Texture(IO::path + "/res/" #nm ".png", false)
 #define TEX(nm) nm = new Texture(IO::path + "/res/" #nm ".png", false)
 #define TEXNP(nm) new Texture(IO::path + "/res/" #nm ".png", false, TEX_FILTER_POINT)
 #define TEXP(nm) nm = new Texture(IO::path + "/res/" #nm ".png", false, TEX_FILTER_POINT)
+*/
+
+#define TEXN(nm) new Texture(res:: ## nm ## _png, res:: ## nm ## _png_sz)
+#define TEX(nm) nm = new Texture(res:: ## nm ## _png, res:: ## nm ## _png_sz)
+#define TEXNP(nm) new Texture(res:: ## nm ## _png, res:: ## nm ## _png_sz, TEX_FILTER_POINT)
+#define TEXP(nm) nm = new Texture(res:: ## nm ## _png, res:: ## nm ## _png_sz, TEX_FILTER_POINT)
 
 void Icons::Init() {
 	TEXP(expand);

@@ -147,6 +147,7 @@
     <ClCompile Include="src\core\ui.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\makeres.cpp" />
     <ClCompile Include="src\mdchan.cpp" />
     <ClCompile Include="src\md\CDV.cpp" />
     <ClCompile Include="src\md\mdvbin.cpp" />
@@ -255,6 +256,7 @@
     <ClInclude Include="src\core\input.h" />
     <ClInclude Include="src\core\io.h" />
     <ClInclude Include="src\core\mvp.h" />
+    <ClInclude Include="src\makeres.h" />
     <ClInclude Include="src\mdchan.h" />
     <ClInclude Include="src\md\CDV.h" />
     <ClInclude Include="src\md\importer_info.h" />
@@ -268,6 +270,7 @@
     <ClInclude Include="src\md\Protein.h" />
     <ClInclude Include="src\md\XYZ.h" />
     <ClInclude Include="src\ocl\raytracer.h" />
+    <ClInclude Include="src\res\resdata.h" />
     <ClInclude Include="src\ui\help.h" />
     <ClInclude Include="src\ui\popups.h" />
     <ClInclude Include="src\ui\ui_ext.h" />

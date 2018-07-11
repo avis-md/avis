@@ -159,6 +159,20 @@ byte* Texture::LoadPixels(const string& path, byte& chn, uint& w, uint& h) {
 	return data;
 }
 
+byte* Texture::LoadPixels(const byte* data, const uint dataSz, uint& w, uint& h) {
+	std::vector<byte> dataV;
+	byte chn;
+	uint err = lodepng::decode(dataV, w, h, data, dataSz);
+	if (!!err) {
+		Debug::Error("PNG reader", "Read PNG error: " + string(lodepng_error_text(err)));
+		return nullptr;
+	}
+	InvertPNG(dataV, w, h);
+	byte* res = new byte[w * h * 4];
+	memcpy(res, &dataV[0], w*h * 4);
+	return res;
+}
+
 Texture::Texture(const string& path, bool mipmap, TEX_FILTERING filter, byte aniso, TEX_WRAPING warp) :
 	Texture(path, mipmap, filter, aniso, (warp == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT, (warp == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT) {}
 
@@ -207,6 +221,28 @@ Texture::Texture(const string& path, bool mipmap, TEX_FILTERING filter, byte ani
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapy);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	if (dataV.size() == 0) delete[](data);
+	loaded = true;
+}
+
+Texture::Texture(const byte* data, const uint dataSz, TEX_FILTERING filter, TEX_WRAPING wrap) : AssetObject(ASSETTYPE_TEXTURE) {
+	std::vector<byte> dataV;
+	byte chn;
+	uint err = lodepng::decode(dataV, width, height, data, dataSz);
+	if (!!err) {
+		Debug::Error("PNG reader", "Read PNG error: " + string(lodepng_error_text(err)));
+		return;
+	}
+	InvertPNG(dataV, width, height);
+
+	glGenTextures(1, &pointer);
+	glBindTexture(GL_TEXTURE_2D, pointer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &dataV[0]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (wrap == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (wrap == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+	glBindTexture(GL_TEXTURE_2D, 0);
 	loaded = true;
 }
 

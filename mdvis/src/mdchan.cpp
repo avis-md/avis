@@ -1,13 +1,14 @@
 #include "mdchan.h"
+#include "res/resdata.h"
 
 Texture* MdChan::texs[] = {};
 float MdChan::blink = 0, MdChan::t4 = 0, MdChan::t4d = 0;
 
 void MdChan::Init() {
-	texs[0] = new Texture(IO::path + "/res/mdc_hd1.png");
-	texs[1] = new Texture(IO::path + "/res/mdc_hd2.png");
-	texs[2] = new Texture(IO::path + "/res/mdc_leg.png", true, TEX_FILTER_BILINEAR, 0, TEX_WRAP_CLAMP);
-	texs[3] = new Texture(IO::path + "/res/mdc_t4p.png", true, TEX_FILTER_BILINEAR, 0, TEX_WRAP_CLAMP);
+	texs[0] = new Texture(res::mdc_hd1_png, res::mdc_hd1_png_sz);
+	texs[1] = new Texture(res::mdc_hd2_png, res::mdc_hd2_png_sz);
+	texs[2] = new Texture(res::mdc_leg_png, res::mdc_leg_png_sz, TEX_FILTER_BILINEAR, TEX_WRAP_CLAMP);
+	texs[3] = new Texture(res::mdc_t4p_png, res::mdc_t4p_png_sz, TEX_FILTER_BILINEAR, TEX_WRAP_CLAMP);
 	blink = Random::Range(0.5f, 2.5f);
 	t4 = Random::Range(0, 30.0f);
 }

@@ -2,6 +2,7 @@
 #include "anconv.h"
 #ifndef IS_ANSERVER
 #include "ui/icons.h"
+#include "res/resdata.h"
 #endif
 
 Texture* AnNode::tex_circle_open = nullptr, *AnNode::tex_circle_conn = nullptr;
@@ -9,8 +10,8 @@ float AnNode::width = 220;
 
 void AnNode::Init() {
 #ifndef IS_ANSERVER
-	tex_circle_open = new Texture(IO::path + "/res/node_open.png");
-	tex_circle_conn = new Texture(IO::path + "/res/node_conn.png");
+	tex_circle_open = new Texture(res::node_open_png, res::node_open_png_sz);
+	tex_circle_conn = new Texture(res::node_conn_png, res::node_conn_png_sz);
 
 	Node_Volume::Init();
 #endif

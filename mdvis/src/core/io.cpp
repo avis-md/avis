@@ -189,6 +189,18 @@ string IO::GetText(const string& path) {
 	return ss.str();
 }
 
+std::vector<byte> IO::GetBytes(const string& path) {
+	std::ifstream ifs(path, std::ios::binary | std::ios::ate);
+	auto pos = ifs.tellg();
+
+	std::vector<byte> res(pos);
+
+	ifs.seekg(0, std::ios::beg);
+	ifs.read((char*)&res[0], pos);
+
+	return res;
+}
+
 #ifndef PLATFORM_WIN
 #define _dup dup
 #define _dup2 dup2
