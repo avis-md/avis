@@ -258,7 +258,7 @@ void Camera::InitGBuffer(uint w, uint h) {
 	for (byte i = 0; i < NUM_EXTRA_TEXS; i++) {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_tfbo[i]);
 		glBindTexture(GL_TEXTURE_2D, d_ttexs[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, (int)Display::width, (int)Display::height, 0, GL_RED, GL_UNSIGNED_INT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, (int)Display::width, (int)Display::height, 0, GL_RGBA, GL_FLOAT, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, d_ttexs[i], 0);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

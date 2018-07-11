@@ -99,14 +99,14 @@ bool Gromacs::ReadTrj(TrjInfo* info) {
 		info->frames++;
 	} while (info->frames != info->maxFrames);
 	xdrfile_close(file);
-	info->poss = new float*[info->frames];
-	memcpy(info->poss, &poss[0], info->frames * sizeof(float));
 
 	if (!info->frames) {
 		SETERR("No frames contained in file!");
 		return false;
 	}
-	else return true;
+	info->poss = new float*[info->frames];
+	memcpy(info->poss, &poss[0], info->frames * sizeof(uintptr_t));
+	return true;
 }
 
 void Gromacs::_Read(const string& file, bool hasAnim) {

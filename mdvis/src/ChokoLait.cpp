@@ -236,12 +236,14 @@ void ChokoLait::MotionGL(GLFWwindow* window, double x, double y) {
 }
 
 void ChokoLait::ReshapeGL(GLFWwindow* window, int w, int h) {
-	Display::width = w;
-	Display::height = h;
+	Display::width = (int)(w * Display::dpiScl);
+	Display::height = (int)(h * Display::dpiScl);
 	glfwGetFramebufferSize(window, &w, &h);
 	glViewport(0, 0, w, h);
 	Display::actualWidth = w;
 	Display::actualHeight = h;
+
+	//Debug::Message("CL", std::to_string(Display::width) + " " + std::to_string(Display::height) + " : " + std::to_string(w) + " " + std::to_string(h));
 }
 
 void ChokoLait::DropGL(GLFWwindow* window, int w, const char** c) {

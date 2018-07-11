@@ -93,6 +93,30 @@ void updateFunc() {
 void paintfunc() {
 	bool stealFocus = false;
 
+	if (!Particles::particleSz) {
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		UI::Texture(0, 0, (float)Display::width, (float)Display::height, ParGraphics::bg, DRAWTEX_CROP);
+		MdChan::Draw(Vec2(Display::width * 0.5f, Display::height * 0.3f));
+		//UI::Texture(Display::width * 0.5f - Display::height * 0.2f, Display::height * 0.4f, Display::height * 0.4f, Display::height * 0.2f, logo);
+		if (ParLoader::busy) {
+			Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100, 6, white(0.8f, 0.2f));
+			Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100 * *ParLoader::loadProgress, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
+			float oy = 10;
+			if (ParLoader::loadProgress2 && *ParLoader::loadProgress2 > 0) {
+				Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f + 8, 100, 6, white(0.8f, 0.2f));
+				Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f + 8, 100 * *ParLoader::loadProgress2, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
+				oy = 18;
+			}
+			UI::Label(Display::width * 0.5f - 48, Display::height * 0.6f + oy, 12, ParLoader::loadName);
+		}
+		else {
+			UI::font->Align(ALIGN_TOPCENTER);
+			UI::Label(Display::width * 0.5f, Display::height * 0.6f, 12, "Press F1 for Help", white());
+			UI::Label(Display::width * 0.5f, Display::height * 0.6f + 14, 12, "Build: " __DATE__, white());
+			UI::font->Align(ALIGN_TOPLEFT);
+		}
+	}
+
 	if (AnWeb::drawFull)
 		AnWeb::Draw();
 	else {

@@ -72,8 +72,10 @@ void ParGraphics::Eff::Apply() {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->d_tfbo[cnt % 2]);
 	
+	glViewport(0, 0, Display::actualWidth, Display::actualHeight);
+
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
-	glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::width, Display::height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::actualWidth, Display::actualHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 }
 
 float ParGraphics::Eff::DrawMenu(float off) {
@@ -504,6 +506,7 @@ void ParGraphics::Reblit() {
 	auto cam = ChokoLait::mainCamera().get();
 	if (!AnWeb::drawFull || Scene::dirty) tfboDirty = true;
 	if (tfboDirty) {
+		//glViewport(0, 0, Display::width, Display::height);
 		float zero[] = { 0,0,0,0 };
 		glClearBufferfv(GL_COLOR, 0, zero);
 		if (!!Particles::particleSz) {
@@ -516,32 +519,8 @@ void ParGraphics::Reblit() {
 				BlitSky();
 			}
 		}
-		else {
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			UI::Texture(0, 0, (float)Display::width, (float)Display::height, bg, DRAWTEX_CROP);
-			MdChan::Draw(Vec2(Display::width * 0.5f, Display::height * 0.3f));
-			//UI::Texture(Display::width * 0.5f - Display::height * 0.2f, Display::height * 0.4f, Display::height * 0.4f, Display::height * 0.2f, logo);
-			if (ParLoader::busy) {
-				Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100, 6, white(0.8f, 0.2f));
-				Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100 * *ParLoader::loadProgress, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
-				float oy = 10;
-				if (ParLoader::loadProgress2 && *ParLoader::loadProgress2 > 0) {
-					Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f + 8, 100, 6, white(0.8f, 0.2f));
-					Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f + 8, 100 * *ParLoader::loadProgress2, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
-					oy = 18;
-				}
-				UI::Label(Display::width * 0.5f - 48, Display::height * 0.6f + oy, 12, ParLoader::loadName);
-			}
-			else {
-				UI::font->Align(ALIGN_TOPCENTER);
-				UI::Label(Display::width * 0.5f, Display::height * 0.6f, 12, "Press F1 for Help", white());
-				UI::Label(Display::width * 0.5f, Display::height * 0.6f + 14, 12, "Build: " __DATE__, white());
-				UI::font->Align(ALIGN_TOPLEFT);
-			}
-		}
 	}
 	//*
-	glViewport(0, 0, Display::actualWidth, Display::actualHeight);
 	//glBlendFunc(GL_ONE, GL_ZERO);
 	glDisable(GL_BLEND);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -567,7 +546,7 @@ void ParGraphics::BlitSky() {
 
 	glUseProgram(reflProg);
 	glUniformMatrix4fv(reflProgLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
-	glUniform2f(reflProgLocs[1], (float)Display::actualWidth, (float)Display::actualHeight);
+	glUniform2f(reflProgLocs[1], (float)Display::width, (float)Display::height);
 	glUniform1i(reflProgLocs[2], 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, cam->d_colTex);

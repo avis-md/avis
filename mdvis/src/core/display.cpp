@@ -6,6 +6,9 @@ int Display::actualWidth = 512;
 int Display::actualHeight = 512;
 glm::mat3 Display::uiMatrix = glm::mat3();
 bool Display::uiMatrixIsI = true;
+
+float Display::dpiScl = 1;
+
 NativeWindow* Display::window = nullptr;
 CURSORTYPE Display::cursorType;
 
