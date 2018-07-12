@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine.h"
+#include "ChokoLait.h"
 
 enum class EFF_TYPE {
 	BLUR,
@@ -23,7 +23,7 @@ public:
 
 protected:
     static GLuint blurProg, ssaoProg, ssaoProg2;
-    static GLint blurProgLocs[4], ssaoProgLocs[10], ssaoProg2Locs[4];
+    static GLint blurProgLocs[4], ssaoProgLocs[10], ssaoProg2Locs[5];
 	static GLuint noiseTex;
 
     static void _InitBlur(const string& vs), _InitSSAO(const string& vs);

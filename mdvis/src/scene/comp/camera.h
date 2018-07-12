@@ -18,7 +18,8 @@ public:
 	Vec4 clearColor;
 	float nearClip;
 	float farClip;
-	rRenderTexture targetRT;
+	GLuint target;
+	rRenderTexture targetRT; //oh well
 	std::vector<rCameraEffect> effects;
 
 	void Render(RenderTexture* target = nullptr, renderFunc func = nullptr);

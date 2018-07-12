@@ -13,7 +13,7 @@ public:
 	static Vec4 accentColor;
 	static uint renderMs, uiMs;
 
-	static std::vector<MenuItem> menuItems[4];
+	static std::vector<MenuItem> menuItems[10];
 
 	static string message;
 

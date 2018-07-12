@@ -17,6 +17,7 @@
 #include "vis/pargraphics.h"
 #include "vis/system.h"
 #include "vis/shadows.h"
+#include "vis/renderer.h"
 #include "utils/effects.h"
 #include "utils/ssh.h"
 #include "mdchan.h"
@@ -42,7 +43,7 @@ pMesh splineMesh;
 float zoomFade;
 
 void rendFunc() {
-	auto& cm = ChokoLait::mainCamera()->object->transform;
+	auto& cm = ChokoLait::mainCamera->object->transform;
 	ParGraphics::Rerender(cm.position(), cm.forward(), Display::width, Display::height);
 	if (!!Particles::particleSz && Shadows::show) {
 		Shadows::UpdateBox();
@@ -71,7 +72,7 @@ void updateFunc() {
 
 	AnWeb::Update();
 
-	if (!UI::editingText && !AnWeb::drawFull) {
+	if (!!Particles::particleSz && !UI::editingText && !AnWeb::drawFull) {
 		if (Input::KeyDown(Key_F)) {
 			auto& o = ChokoLait::mainCamera->ortographic;
 			o = !o;
@@ -85,6 +86,9 @@ void updateFunc() {
 			else {
 				RayTracer::Clear();
 			}
+		}
+		if (Input::KeyDown(Key_F5)) {
+			VisRenderer::ToImage();
 		}
 	}
 	if (RayTracer::resTex) {
@@ -189,6 +193,7 @@ void paintfunc() {
 		}
 	}
 
+	VisRenderer::Draw();
 	HelpMenu::Draw();
 }
 
@@ -276,7 +281,7 @@ int main(int argc, char **argv) {
 	imp->funcs.back().second = MDVBin::Read;
 	ParLoader::importers.push_back(imp);
 
-	ParLoader::exts = std::vector<string>({"*.gro", "*.pdb", "*.xyz", "*.cdv", "*.bin"});
+	ParLoader::exts = std::vector<string>({"*.gro", "*.trr", "*.pdb", "*.xyz", "*.cdv", "*.bin"});
 
 	AnWeb::nodes.push_back(new Node_Recolor_All());
 	AnWeb::nodes.push_back(new Node_AddBond());
@@ -284,42 +289,6 @@ int main(int argc, char **argv) {
 	ParLoader::useConn = false;
 	//CDV::_Read(IO::path + "/ayuba/position000000.cdv", false);
 	//CDV::_ReadTrj(IO::path + "/ayuba/position");
-	/*
-	Particles::particleSz = 10000000;
-	Particles::particles_Name = new char[Particles::particleSz * PAR_MAX_NAME_LEN]{};
-	Particles::particles_ResName = new char[Particles::particleSz * PAR_MAX_NAME_LEN]{};
-	Particles::residueLists = new ResidueList();
-	Particles::residueListSz = 1;
-	Particles::residueLists->residueSz = 1;
-	Particles::residueLists->residues = new Residue();
-	Particles::residueLists->residues->offset = 0;
-	Particles::residueLists->residues->cnt = Particles::particleSz;
-	Particles::residueLists->residues->offset_b = 0;
-	Particles::residueLists->residues->cnt_b = 0;
-	Particles::residueLists->residues->type = 255;
-	Particles::residueLists->residues->name = "TST";
-
-	Particles::particles_Pos = new Vec3[Particles::particleSz]{};
-	Particles::particles_Vel = new Vec3[Particles::particleSz]{};
-	Particles::particles_Col = new byte[Particles::particleSz]{};
-	Particles::particles_Rad = new float[Particles::particleSz]{};
-	Particles::particles_Res = new Int2[Particles::particleSz]{};
-
-	for (int a = 0; a < 500; a++) {
-		for (int b = 0; b < 200; b++) {
-			for (int c = 0; c < 100; c++) {
-				Particles::particles_Pos[a * 20000 + b * 100 + c] = Vec3(a-250,b-100,c-50) * 0.2f;
-				Particles::particles_Rad[a * 20000 + b * 100 + c] = 1;
-				Particles::particles_Res[a * 20000 + b * 100 + c] = Int2(0, 0);
-				Particles::particles_Col[a * 20000 + b * 100 + c] = (byte)(rand() % 256);
-			}
-		}
-	}
-	memset(Particles::boundingBox, 0, sizeof(float) * 6);
-
-	ParLoader::parDirty = true;
-	*/
-
 
 	LiveRunner* runner = new LiveRunner();
 	runner->initNm = "Init";

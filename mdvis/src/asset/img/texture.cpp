@@ -58,7 +58,7 @@ bool LoadJPEG(string fileN, uint &x, uint &y, byte& channels, byte** data)
 
 //slow!!
 void InvertPNG(std::vector<byte>& data, uint x, uint y) {
-	for (uint a = 0; a < y*0.5f; a++) {
+	for (uint a = 0; a < y/2; a++) {
 		for (uint b = 0; b < x; b++) {
 			for (uint c = 0; c < 4; c++) {
 				byte t = data[(a*x + b) * 4 + c];
@@ -171,6 +171,14 @@ byte* Texture::LoadPixels(const byte* data, const uint dataSz, uint& w, uint& h)
 	byte* res = new byte[w * h * 4];
 	memcpy(res, &dataV[0], w*h * 4);
 	return res;
+}
+
+void Texture::ToPNG(std::vector<byte>& data, uint w, uint h, const string& loc) {
+	std::vector<byte> res;
+	InvertPNG(data, w, h);
+	lodepng::encode(res, &data[0], w, h);
+	std::ofstream strm(loc, std::ios::binary);
+	strm.write((char*)&res[0], res.size());
 }
 
 Texture::Texture(const string& path, bool mipmap, TEX_FILTERING filter, byte aniso, TEX_WRAPING warp) :

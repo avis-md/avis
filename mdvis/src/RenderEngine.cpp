@@ -295,10 +295,10 @@ GLuint Camera::d_reflQuadProgram = 0;
 GLint Camera::d_skyProgramLocs[9];
 const string Camera::_gbufferNames[4] = {"Diffuse", "Normal", "Specular-Gloss", "Emission"};
 
-void Camera::Render(RenderTexture* target, renderFunc func) {
+void Camera::Render(RenderTexture* tar, renderFunc func) {
 	active = this;
-	uint t_w = (uint)roundf((target? target->width : Display::width) * quality);
-	uint t_h = (uint)roundf((target? target->height : Display::height) * quality);
+	uint t_w = (uint)roundf((tar ? tar->width : Display::width) * quality);
+	uint t_h = (uint)roundf((tar ? tar->height : Display::height) * quality);
 	if ((d_w != t_w) || (d_h != t_h)) {
 		if (!!d_fbo) {
 			glDeleteFramebuffers(1, &d_fbo);
@@ -385,6 +385,8 @@ void Camera::Render(RenderTexture* target, renderFunc func) {
 	glBlendFunc(GL_ONE, GL_ONE);
 
 	if (onBlit) onBlit();
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	
 	if (useGBuffer2 && applyGBuffer2) {
 		d_w = _d_w;

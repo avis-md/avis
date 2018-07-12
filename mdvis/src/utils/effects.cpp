@@ -77,8 +77,11 @@ byte Effects::SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLui
 	glUniform1i(ssaoProg2Locs[1], 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, tx3);
-	glUniform1f(ssaoProg2Locs[2], str);
-	glUniform2f(ssaoProg2Locs[3], (float)w, (float)h);
+	glUniform1i(ssaoProg2Locs[2], 2);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_depthTex);
+	glUniform1f(ssaoProg2Locs[3], str);
+	glUniform2f(ssaoProg2Locs[4], (float)w, (float)h);
 
 	glBindVertexArray(Camera::emptyVao);
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Camera::rectIdBuf);
@@ -120,8 +123,9 @@ void Effects::_InitSSAO(const string& vs) {
 	locs = ssaoProg2Locs;
 	gu(0, tex1);
 	gu(1, tex2);
-	gu(2, val);
-	gu(3, screenSize);
+	gu(2, depth);
+	gu(3, val);
+	gu(4, screenSize);
 
 	Vec3 noise[256];
 	for (uint i = 0; i < 256; i++) {

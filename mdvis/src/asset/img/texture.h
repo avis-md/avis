@@ -19,6 +19,8 @@ public:
 	static byte* LoadPixels(const string& path, byte& chn, uint& w, uint& h);
 	static byte* LoadPixels(const byte* data, const uint dataSz, uint& w, uint& h);
 
+	static void ToPNG(std::vector<byte>& data, uint w, uint h, const string& loc);
+
 	friend class AssetManager;
 	friend class RenderTexture;
 	_allowshared(Texture);

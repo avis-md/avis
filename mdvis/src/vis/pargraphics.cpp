@@ -69,7 +69,7 @@ void ParGraphics::Eff::Apply() {
 		if (AnWeb::drawFull) cnt += Effects::Blur(cam->d_tfbo[0], cam->d_tfbo[1], cam->d_ttexs[0], cam->d_ttexs[1], 1.0f, Display::width, Display::height);
 	}
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->target);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->d_tfbo[cnt % 2]);
 	
 	glViewport(0, 0, Display::actualWidth, Display::actualHeight);
@@ -565,7 +565,7 @@ void ParGraphics::BlitSky() {
 	glUniform1f(reflProgLocs[8], reflStr);
 	glUniform1f(reflProgLocs[9], reflStrDecay);
 	glUniform1f(reflProgLocs[10], specStr);
-	glUniform3f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b);
+	glUniform4f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

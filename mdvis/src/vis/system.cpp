@@ -2,6 +2,7 @@
 #include "md/ParMenu.h"
 #include "md/parloader.h"
 #include "vis/pargraphics.h"
+#include "vis/renderer.h"
 #include "web/anweb.h"
 #include "ui/icons.h"
 #include "live/livesyncer.h"
@@ -20,10 +21,6 @@ float VisSystem::_defBondLength = 0.0225f; // 0.15
 std::unordered_map<uint, float> VisSystem::_bondLengths;
 std::unordered_map<ushort, Vec3> VisSystem::_type2Col;
 std::unordered_map<ushort, std::array<float, 2>> VisSystem::radii;
-
-void _showopenfiledialog() {
-	ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
-}
 
 void VisSystem::Init() {
 	radii.clear();
@@ -82,7 +79,9 @@ void VisSystem::Init() {
 	auto& mi = menuItems[0];
 	mi.resize(5);
 	mi[0].Set(Icons::newfile, "New", Particles::Clear);
-	mi[1].Set(Icons::openfile, "Open", _showopenfiledialog);
+	mi[1].Set(Icons::openfile, "Open", []() {
+		ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
+	});
 	mi[2].Set(0, "Open Recent", 0);
 	auto& mic = mi[2].child;
 	mic.resize(2);
@@ -92,9 +91,19 @@ void VisSystem::Init() {
 	mi[4].Set(Icons::cross, "Dummy", 0);
 
 	auto& mi2 = menuItems[3];
-	mi2.resize(2);
-	mi2[0].Set(0, "Show Help", 0);
-	mi2[1].Set(0, "About", 0);
+	mi2.resize(5);
+	mi2[0].Set(0, "Image (GLSL)", []() {
+		VisRenderer::ToImage();
+	});
+	mi2[1].Set(0, "Image (Raytraced)", 0);
+	mi2[2].Set(0, "Movie (GLSL)", 0);
+	mi2[3].Set(0, "Movie (Raytraced)", 0);
+	mi2[4].Set(0, "Options", 0);
+
+	auto& mi3 = menuItems[4];
+	mi3.resize(2);
+	mi3[0].Set(0, "Show Help", 0);
+	mi3[1].Set(0, "About", 0);
 }
 
 bool VisSystem::InMainWin(const Vec2& pos) {
@@ -104,9 +113,9 @@ bool VisSystem::InMainWin(const Vec2& pos) {
 
 void VisSystem::DrawTitle() {
 	Engine::DrawQuad(0,0, (float)Display::width, 18, white(0.95f, 0.05f));
-	const string menu[] = {"File", "Edit", "Options", "Help"};
-	const uint menusp[] = {0, 30, 62, 115, 150};
-	for (uint i = 0; i < 4; i++) {
+	const string menu[] = {"File", "Edit", "Options", "Render", "Help"};
+	const uint menusp[] = {0, 30, 62, 115, 170, 210};
+	for (uint i = 0; i < 5; i++) {
 		if (Engine::Button(2 + menusp[i], 1, menusp[i + 1] - menusp[i] - 1, 16, white(0), menu[i], 12, white(), true) == MOUSE_RELEASE) {
 			Popups::type = POPUP_TYPE::MENU;
 			Popups::pos = Vec2(2 + menusp[i], 17);
