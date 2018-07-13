@@ -163,6 +163,7 @@
     <ClCompile Include="src\ui\help.cpp" />
     <ClCompile Include="src\ui\popups.cpp" />
     <ClCompile Include="src\ui\ui_ext.cpp" />
+    <ClCompile Include="src\utils\avi.cpp" />
     <ClCompile Include="src\utils\BVH.cpp" />
     <ClCompile Include="src\utils\dialog.cpp" />
     <ClCompile Include="src\utils\dylib.cpp" />
@@ -275,6 +276,7 @@
     <ClInclude Include="src\ui\help.h" />
     <ClInclude Include="src\ui\popups.h" />
     <ClInclude Include="src\ui\ui_ext.h" />
+    <ClInclude Include="src\utils\avi.h" />
     <ClInclude Include="src\utils\BVH.h" />
     <ClInclude Include="src\utils\dialog.h" />
     <ClInclude Include="src\utils\dylib.h" />
