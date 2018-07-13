@@ -212,7 +212,6 @@ int main(int argc, char **argv) {
 				__debug = true;
 		}
 	}
-
 	if (!__debug) Debug::suppress = 1;
 
 	ChokoLait::Init(800, 800);

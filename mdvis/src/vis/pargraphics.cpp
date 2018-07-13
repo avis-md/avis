@@ -12,6 +12,7 @@
 #include "shadows.h"
 #include "hdr.h"
 #include "ocl/raytracer.h"
+#include "res/shddata.h"
 
 Texture* ParGraphics::bg = nullptr, *ParGraphics::logo = nullptr;
 GLuint ParGraphics::refl, ParGraphics::reflE;
@@ -141,7 +142,7 @@ void ParGraphics::Init() {
 
 
 	bg = new Texture(IO::path + "/res/bg.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
-	reflProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), IO::GetText(IO::path + "/reflFrag.txt"));
+	reflProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), glsl::reflFrag);
 #define LC(nm) reflProgLocs[i++] = glGetUniformLocation(reflProg, #nm)
 	uint i = 0;
 	LC(_IP);
@@ -195,7 +196,7 @@ void ParGraphics::Init() {
 	selHlProgLocs[2] = glGetUniformLocation(selHlProg, "idTex");
 	selHlProgLocs[3] = glGetUniformLocation(selHlProg, "hlCol");
 
-	colProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), IO::GetText(IO::path + "/colorerFrag.txt"));
+	colProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), glsl::colererFrag);
 	colProgLocs[0] = glGetUniformLocation(colProg, "idTex");
 	colProgLocs[1] = glGetUniformLocation(colProg, "spTex");
 	colProgLocs[2] = glGetUniformLocation(colProg, "screenSize");
@@ -284,6 +285,10 @@ void ParGraphics::Update() {
 		Scene::dirty = true;
 	}
 	if (!!Particles::particleSz && !UI::editingText && !UI::_layerMax) {
+		rotW = Clamp<float>(rotW, -90, 90);
+		rotZ = Repeat<float>(rotZ, 0, 360);
+		rotScale = Clamp(rotScale, -6.0f, 2.0f);
+
 		float s0 = rotScale;
 		float rz0 = rotZ;
 		float rw0 = rotW;
@@ -298,10 +303,13 @@ void ParGraphics::Update() {
 				if ((VisSystem::mouseMode == VIS_MOUSE_MODE::ROTATE) && !Input::KeyHold(Key_LeftShift)) {
 					rotW -= 180 * Input::mouseDelta.y / Display::height;
 					rotZ += 180 * Input::mouseDelta.x / Display::width;
+					rotW = Clamp<float>(rotW, -90, 90);
+					rotZ = Repeat<float>(rotZ, 0, 360);
 				}
 				else if ((VisSystem::mouseMode == VIS_MOUSE_MODE::PAN) || (((VisSystem::mouseMode == VIS_MOUSE_MODE::ROTATE) && Input::KeyHold(Key_LeftShift)))) {
 					rotCenter -= 5.0f * scrX * (Input::mouseDelta.x / Display::width);
 					rotCenter += 5.0f * scrY * (Input::mouseDelta.y / Display::height);
+					rotScale = Clamp(rotScale, -6.0f, 2.0f);
 				}
 			}
 		}
@@ -639,7 +647,6 @@ void ParGraphics::DrawMenu() {
 	rotZ = TryParse(UI2::EditText(expandPos - 147, off + 17 * 5, 147, "Rotation Y", std::to_string(rotZ), true, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
 
 	rotScale = TryParse(UI2::EditText(expandPos - 147, off + 17 * 6, 147, "Scale", std::to_string(rotScale)), 0.0f);
-	rotScale = Clamp(rotScale, -6.0f, 2.0f);
 
 	//UI::Label(expandPos - 147, off + 17 * 7, 12, "Quality", white());
 	auto cm = ChokoLait::mainCamera.raw();
@@ -681,9 +688,6 @@ void ParGraphics::DrawMenu() {
 	off = Eff::DrawMenu(off);
 
 	Shadows::DrawMenu(off + 1);
-
-	rotW = Clamp<float>(rotW, -90, 90);
-	rotZ = Repeat<float>(rotZ, 0, 360);
 
 	if (rf != rotCenterTrackId || s0 != rotScale || rz0 != rotZ || rw0 != rotW || center0 != rotCenter) Scene::dirty = true;
 }

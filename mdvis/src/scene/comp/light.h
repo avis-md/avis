@@ -41,18 +41,15 @@ public:
 	LIGHT_FALLOFF falloff = LIGHT_FALLOFF_INVSQUARE;
 	Texture* hsvMap = 0;
 
-	void DrawShadowMap(GLuint tar = 0), BlitRSMFlux(), DrawRSM(Mat4x4& ip, Mat4x4& lp, float w, float h, GLuint gtexs[], GLuint gdepth);
+	void DrawShadowMap(GLuint tar = 0);
 
 	friend class Camera;
 	friend class Engine;
 	_allowshared(Light);
 protected:
 	Light(std::ifstream& stream, SceneObject* o, long pos = -1);
-	//Mat4x4 _shadowMatrix;
-	ASSETID _cookie = -1, _hsvMap = -1;
-	static void _SetCookie(void* v), _SetHsvMap(void* v);
 
-	static void InitShadow(), InitRSM();
+	static void InitShadow();
 	void CalcShadowMatrix();
 	static GLuint _shadowFbo, _shadowGITexs[3], _shadowMap;
 	static GLuint _shadowCubeFbos[6], _shadowCubeMap;
@@ -60,6 +57,4 @@ protected:
 	static RSM_RANDOM_BUFFER _rsmBuffer;
 
 	static std::vector<GLint> paramLocs_Point, paramLocs_Spot, paramLocs_SpotCS, paramLocs_SpotFluxer, paramLocs_SpotRSM; //make writing faster
-	static void ScanParams();
-	//static CubeMap* _shadowCube;
 };

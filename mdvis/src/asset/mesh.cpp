@@ -294,7 +294,6 @@ Mesh::Mesh(string p) : AssetObject(ASSETTYPE_MESH), loaded(false), vertexCount(0
 		RecalculateBoundingBox();
 		InitVao();
 
-		GenECache();
 		loaded = true;
 	}
 }
@@ -390,44 +389,6 @@ Mesh::Mesh(byte* mem) : AssetObject(ASSETTYPE_MESH), triangleCount(0), materialC
 #undef VCT
 	RecalculateBoundingBox();
 	loaded = true;
-#endif
-}
-
-void Mesh::GenECache() {
-	/*
-	vertexcount (uint)
-	materialcount (byte)
-	vertices[] (vec3)
-	normals[] (vec3)
-	tangents[] (vec3)
-	uv0[] (vec2)
-	uv1[] (vec2)
-	for each material[
-	trianglecount (uint)
-	triangles[] (uint*3)
-	]
-	*/
-#ifdef IS_EDITOR
-	if (_eCache) return;
-	_eCacheSz = sizeof(uint) + sizeof(byte) + sizeof(Vec3)*vertexCount * 3 + sizeof(Vec2)*vertexCount * 2 + sizeof(uint)*materialCount + sizeof(uint)*triangleCount * 3;
-	uint off = 1;
-	_eCache = (byte*)malloc(_eCacheSz + 1);
-	*_eCache = 255;
-#define CPY(pt, sz) memcpy(_eCache + off, pt, sz); off += sz;
-	CPY(&vertexCount, sizeof(uint));
-	CPY(&materialCount, sizeof(byte));
-	CPY(&vertices[0], sizeof(Vec3)*vertexCount);
-	CPY(&normals[0], sizeof(Vec3)*vertexCount);
-	CPY(&tangents[0], sizeof(Vec3)*vertexCount);
-	CPY(&uv0[0], sizeof(Vec2)*vertexCount);
-	CPY(&uv1[0], sizeof(Vec2)*vertexCount);
-	for (auto& aa : _matTriangles) {
-		uint ct = aa.size() / 3;
-		CPY(&ct, sizeof(uint));
-		CPY(&aa[0], sizeof(int) * 3 * ct);
-	}
-	assert(off == _eCacheSz + 1);
-#undef CPY
 #endif
 }
 

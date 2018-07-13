@@ -493,28 +493,6 @@ void Engine::DrawIndicesI(const Vec3* poss, const int* is, int length, float r, 
 	glDrawElements(GL_TRIANGLES, length, GL_UNSIGNED_INT, is);
 }
 
-void Engine::DrawMeshInstanced(Mesh* mesh, uint matId, Material* mat, uint count) {
-	if (!mesh || !mesh->loaded || !mat)
-		return;
-	//glEnableClientState(GL_VERTEX_ARRAY);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glEnable(GL_CULL_FACE);
-	//glVertexPointer(3, GL_FLOAT, 0, &(mesh->vertices[0]));
-	Mat4x4 m1 = MVP::modelview();
-	Mat4x4 m2 = MVP::projection();
-
-	glBindVertexArray(mesh->vao);
-	matId = min(mesh->materialCount-1, matId);
-	mat->ApplyGL(m1, m2);
-	
-	glDrawElementsInstanced(GL_TRIANGLES, mesh->_matTriangles[matId].size(), GL_UNSIGNED_INT, &(mesh->_matTriangles[matId][0]), count);
-
-	glUseProgram(0);
-	glBindVertexArray(0);
-	//glDisableClientState(GL_VERTEX_ARRAY);
-	glDisable(GL_CULL_FACE);
-}
-
 void Engine::DrawLine(Vec2 v1, Vec2 v2, Vec4 col, float width) {
 	DrawLine(Vec3(v1.x, v1.y, 1), Vec3(v2.x, v2.y, 1), col, width);
 }

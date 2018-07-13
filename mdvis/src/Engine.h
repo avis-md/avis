@@ -519,14 +519,9 @@ enum FFT_WINDOW : byte {
 #include "core/font.h"
 #include "core/input.h"
 #include "core/display.h"
-#include "core/audio.h"
 #include "core/ui.h"
 
 #include "utils/fft.h"
-#ifdef FEATURE_COMPUTE_SHADERS
-#include "asset/compute.h"
-#endif
-
 
 class Engine { //why do I have this class again?
 public:
@@ -585,7 +580,6 @@ public:
 	static void DrawCube(Vec3 pos, float dx, float dy, float dz, Vec4 col);
 	static void DrawIndices(const Vec3* poss, const int* is, int length, float r, float g, float b);
 	static void DrawIndicesI(const Vec3* poss, const int* is, int length, float r, float g, float b);
-	static void DrawMeshInstanced(Mesh* mesh, uint matId, Material* mat, uint count);
 
 	static ulong idCounter;
 	static std::vector<Camera*> sceneCameras;
@@ -602,7 +596,6 @@ public:
 	static Rect* stencilRect;
 };
 
-#include "AudioEngine.h"
 #include "AssetObjects.h"
 #include "SceneObjects.h"
 #include "SceneScriptResolver.h"

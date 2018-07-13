@@ -1,14 +1,5 @@
 #include "Engine.h"
 
-void Light::_SetCookie(void* v) {
-	Light* l = (Light*)v;
-	l->cookie = _GetCache<Texture>(ASSETTYPE_TEXTURE, l->_cookie);
-}
-void Light::_SetHsvMap(void* v) {
-	Light* l = (Light*)v;
-	l->hsvMap = _GetCache<Texture>(ASSETTYPE_TEXTURE, l->_hsvMap);
-}
-
 void Light::CalcShadowMatrix() {
 	auto IP = glm::inverse(MVP::projection());
 	auto LP = glm::inverse(QuatFunc::ToMatrix(object->transform.rotation()));
@@ -64,5 +55,4 @@ Light::Light(std::ifstream& stream, SceneObject* o, long pos) : Light() {
 	_Strm2Val(stream, color.g);
 	_Strm2Val(stream, color.b);
 	_Strm2Val(stream, color.a);
-	_cookie = -1;
 }

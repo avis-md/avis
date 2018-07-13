@@ -37,8 +37,6 @@ pComponent ComponentFromType(COMPONENT_TYPE t) {
 	switch (t) {
 	case COMP_CAM:
 		return std::make_shared<Camera>();
-	case COMP_MFT:
-		return std::make_shared<MeshFilter>();
 	default:
 		return nullptr;
 	}

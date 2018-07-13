@@ -21,12 +21,9 @@ public:
 
 	void RecalculateBoundingBox();
 
-	friend int main(int argc, char **argv);
 	friend class Engine;
 	friend class MeshFilter;
 	friend class MeshRenderer;
-	friend class SkinnedMeshRenderer;
-	friend class AssetManager;
 	_allowshared(Mesh);
 protected:
 	Mesh(std::istream& strm, uint offset = 0);
@@ -34,14 +31,10 @@ protected:
 	Mesh(byte* mem);
 
 	void CalcTangents();
-	void GenECache() override;
 	void InitVao();
 
 	GLuint vao, vbos[4];
 
 	std::vector<std::vector<int>> _matTriangles;
 	std::vector<GLuint> _matIndicesBuffers;
-	//void Draw(Material* mat);
-	//void Load();
-
 };

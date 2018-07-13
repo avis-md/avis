@@ -1,15 +1,16 @@
 #include "Engine.h"
 #include "ui/popups.h"
 #include "ui/icons.h"
+#include "res/shddata.h"
 
 GLuint Color::pickerProgH = 0;
 GLuint Color::pickerProgSV = 0;
 
 void Color::Init() {
-	std::vector<string> s2 = string_split(DefaultResources::GetStr("e_colorPickerSV.txt"), '$');
+	std::vector<string> s2 = string_split(glsl::colorPickerSV, '$');
 	Color::pickerProgSV = Shader::FromVF(s2[0], s2[1]);
 
-	s2 = string_split(DefaultResources::GetStr("e_colorPickerH.txt"), '$');
+	s2 = string_split(glsl::colorPickerH, '$');
 	Color::pickerProgH = Shader::FromVF(s2[0], s2[1]);
 }
 

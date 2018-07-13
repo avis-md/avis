@@ -8,7 +8,4 @@ public:
 
 	const ASSETTYPE type = ASSETTYPE_UNDEF;
 	bool _changed;
-	virtual void GenECache() {}
-
-	virtual bool DrawPreview(uint x, uint y, uint w, uint h) { return false; }
 };

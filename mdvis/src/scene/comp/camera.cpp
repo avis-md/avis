@@ -48,21 +48,21 @@ void Camera::ApplyGL() {
 	MVP::Translate(pos.x, pos.y, pos.z);
 }
 
-void Camera::GenShaderFromPath(const string& pathv, const string& pathf, GLuint* program) {
+void Camera::GenShaderFromPath(const char* vs, const char* fs, GLuint* program) {
 	GLuint vertex_shader;
 	std::string err;
-	if (!Shader::LoadShader(GL_VERTEX_SHADER, DefaultResources::GetStr(pathv), vertex_shader, &err)) {
-		Debug::Error("Cam Shader Compiler", pathv + "! " + err);
+	if (!Shader::LoadShader(GL_VERTEX_SHADER, vs, vertex_shader, &err)) {
+		Debug::Error("Cam Shader Compiler V", err);
 		abort();
 	}
-	GenShaderFromPath(vertex_shader, pathf, program);
+	GenShaderFromPath(vertex_shader, fs, program);
 }
 
-void Camera::GenShaderFromPath(GLuint vertex_shader, const string& path, GLuint* program) {
+void Camera::GenShaderFromPath(GLuint vertex_shader, const char* fs, GLuint* program) {
 	GLuint fragment_shader;
 	std::string err;
-	if (!Shader::LoadShader(GL_FRAGMENT_SHADER, DefaultResources::GetStr(path), fragment_shader, &err)) {
-		Debug::Error("Cam Shader Compiler", path + "! " + err);
+	if (!Shader::LoadShader(GL_FRAGMENT_SHADER, fs, fragment_shader, &err)) {
+		Debug::Error("Cam Shader Compiler F", err);
 		abort();
 	}
 
@@ -93,11 +93,11 @@ void Camera::InitShaders() {
 	GLuint vertex_shader;
 	string err = "";
 
-	//if (!Shader::LoadShader(GL_VERTEX_SHADER, DefaultResources::GetStr("lightPassVert.txt"), vertex_shader, &err)) {
 	if (!Shader::LoadShader(GL_VERTEX_SHADER, IO::GetText(IO::path + "/minVert.txt"), vertex_shader, &err)) {
 		Debug::Error("Cam Shader Compiler", "v! " + err);
 		abort();
 	}
+	/*
 	GenShaderFromPath(vertex_shader, "blurPassFrag.txt", &d_blurProgram);
 	GenShaderFromPath(vertex_shader, "blurPassFrag_Skybox.txt", &d_blurSBProgram);
 	GenShaderFromPath(vertex_shader, "lightPassFrag_Sky.txt", &d_skyProgram);
@@ -119,13 +119,11 @@ void Camera::InitShaders() {
 	d_skyProgramLocs[6] = glGetUniformLocation(d_skyProgram, "skyStrength");
 	d_skyProgramLocs[7] = glGetUniformLocation(d_skyProgram, "screenSize");
 	d_skyProgramLocs[8] = glGetUniformLocation(d_skyProgram, "skyStrengthB");
-
+	*/
 	glGenVertexArrays(1, &emptyVao);
 	
 	glGenBuffers(1, &rectIdBuf);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rectIdBuf);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(uint), fullscreenIndices, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	Light::ScanParams();
 }

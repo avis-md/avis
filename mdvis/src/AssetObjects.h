@@ -65,19 +65,9 @@ enum GBUFFERS : byte {
 
 #pragma endregion
 
-#include "asset/assetmanager.h"
-#include "asset/resources.h"
 #include "asset/assetobject.h"
 #include "asset/shader.h"
-#include "asset/material.h"
 #include "asset/mesh.h"
-#include "asset/animclip.h"
-#include "asset/animation.h"
-#include "asset/audioclip.h"
-#include "asset/img/texture.h"
-#include "asset/img/texture3d.h"
-#include "asset/img/videotexture.h"
-#include "asset/img/rendertexture.h"
-#include "asset/img/background.h"
-#include "asset/cubemap.h"
-#include "asset/cameffect.h"
+#include "asset/texture.h"
+#include "asset/texture3d.h"
+#include "asset/rendertexture.h"

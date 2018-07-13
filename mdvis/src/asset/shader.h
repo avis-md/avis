@@ -85,10 +85,6 @@ public:
 	//void Set(byte type, GLint id, void* val) { values[type][id] = val; }
 	//void* Get(byte type, GLint id) { return values[type][id]; }
 
-	//removes macros, insert include files
-#ifdef IS_EDITOR
-	static bool Parse(std::ifstream* text, string path);
-#endif
 	static bool LoadShader(GLenum shaderType, string source, GLuint& shader, string* err = nullptr);
 
 	static GLuint FromVF(const string& vert, const string& frag);

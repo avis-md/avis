@@ -22,7 +22,7 @@ public:
 	rRenderTexture targetRT; //oh well
 	std::vector<rCameraEffect> effects;
 
-	void Render(RenderTexture* target = nullptr, renderFunc func = nullptr);
+	void Render(RenderTexture* target = nullptr, onBlitFunc func = nullptr);
 
 	uint GetIdAt(uint x, uint y);
 	
@@ -53,13 +53,13 @@ public:
 	static void _DoDrawLight_Spot(Light* l, Mat4x4& ip, GLuint d_fbo, GLuint d_texs[], GLuint d_depthTex, GLuint ctar, GLuint c_tex, float w = (float)Display::width, float h = (float)Display::height, GLuint targetFbo = 0);
 	static void _DoDrawLight_Spot_Contact(Light* l, Mat4x4& p, GLuint d_depthTex, float w, float h, GLuint src, GLuint tar);
 	
-	static void GenShaderFromPath(const string& pathv, const string& pathf, GLuint* program);
-	static void GenShaderFromPath(GLuint vertex_shader, const string& path, GLuint* program);
+	static void GenShaderFromPath(const char* vs, const char* fs, GLuint* program);
+	static void GenShaderFromPath(GLuint vertex_shader, const char* fs, GLuint* program);
 
 	static GLuint rectIdBuf;
-	static GLuint d_probeMaskProgram, d_probeProgram, d_blurProgram, d_blurSBProgram, d_skyProgram, d_pLightProgram, d_sLightProgram, d_sLightCSProgram, d_sLightRSMProgram, d_sLightRSMFluxProgram;
-	static GLuint d_reflQuadProgram;
-	static GLint d_skyProgramLocs[];
+	//static GLuint d_probeMaskProgram, d_probeProgram, d_blurProgram, d_blurSBProgram, d_skyProgram, d_pLightProgram, d_sLightProgram, d_sLightCSProgram, d_sLightRSMProgram, d_sLightRSMFluxProgram;
+	//static GLuint d_reflQuadProgram;
+	//static GLint d_skyProgramLocs[];
 
 	static GLuint emptyVao;
 	static const float fullscreenVerts[];

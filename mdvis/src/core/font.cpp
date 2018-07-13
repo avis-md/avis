@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "res/shddata.h"
 
 FT_Library Font::_ftlib = nullptr;
 GLuint Font::fontProgram = 0;
@@ -16,12 +17,11 @@ void Font::Init() {
 
 	string error;
 	GLuint vs, fs;
-	string frag = "#version 330\nin vec2 UV;\nuniform sampler2D sampler;\nuniform vec4 col;\nout vec4 color;void main(){\ncolor = vec4(1, 1, 1, texture(sampler, UV).r)*col;\n}";
-	if (!Shader::LoadShader(GL_VERTEX_SHADER, DefaultResources::GetStr("fontVert.txt"), vs, &error)) {
+	if (!Shader::LoadShader(GL_VERTEX_SHADER, glsl::fontVert, vs, &error)) {
 		Debug::Error("Engine", "Fatal: Cannot init font shader(v)! " + error);
 		abort();
 	}
-	if (!Shader::LoadShader(GL_FRAGMENT_SHADER, frag, fs, &error)) {
+	if (!Shader::LoadShader(GL_FRAGMENT_SHADER, glsl::fontFrag, fs, &error)) {
 		Debug::Error("Engine", "Fatal: Cannot init font shader(f)! " + error);
 		abort();
 	}

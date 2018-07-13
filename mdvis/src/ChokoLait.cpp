@@ -90,7 +90,6 @@ void ChokoLait::_InitVars() {
 	}
 
 	Debug::Init(path);
-	DefaultResources::Init(path + "/defaultresources.bin");
 
 	if (!glfwInit()) {
 		Debug::Error("System", "Fatal: Cannot init glfw!");
