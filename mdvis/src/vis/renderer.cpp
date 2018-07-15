@@ -56,10 +56,12 @@ void VisRenderer::Draw() {
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 			status = READY;
 			resLerp = -1;
+			Scene::dirty = true;
 		}
 		if (Input::KeyDown(Key_Escape)) {
 			status = READY;
 			resLerp =-1;
+			Scene::dirty = true;
 		}
 	}
 }

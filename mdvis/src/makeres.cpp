@@ -7,8 +7,8 @@ void MakeRes::Do() {
 	char rs[] = "\\x00";
 	auto fls = IO::GetFiles(IO::path + "/res/", ".png");
 	auto sz = (IO::path + "/res").size();
-	std::ofstream strma(IO::path + "/res/src/resdata.h");
-	strma << "#pragma once\n";
+	std::ofstream strma(IO::path + "/res/src/resdata.h", std::ios::app);
+	//strma << "#pragma once\n";
 	for (auto& f : fls) {
 		std::cout << "writing " << f << std::endl;
 		auto bb = IO::GetBytes(IO::path + "/res/" + f);

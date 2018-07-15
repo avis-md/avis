@@ -2,6 +2,8 @@
 //#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 //#include <numpy/arrayobject.h>
 
+//#define MAKE_RES
+
 #include "ui/icons.h"
 #include "ui/popups.h"
 #include "ui/help.h"

@@ -49,3 +49,12 @@ void UI2::File(float x, float y, uint w, const string& title, const string& fl, 
 		}
 	}
 }
+
+MOUSE_STATUS UI2::Button2(float x, float y, float w, const string& s, Texture* tex, Vec4 col, Vec4 col2) {
+	auto ret = Engine::Button(x, y, w, 16, col);
+	UI::Texture(x + 1, y, 16, 16, tex, col2);
+	UI::font->alignment = ALIGN_TOPCENTER;
+	UI::Label(x + 9 + w/2, y, 12, s, col2);
+	UI::font->alignment = ALIGN_TOPLEFT;
+	return ret;
+}

@@ -5,10 +5,12 @@
 #include "utils/dialog.h"
 #include "ui/icons.h"
 #include "ui/popups.h"
+#include "ui/ui_ext.h"
 #include "ocl/raytracer.h"
 
 int ParMenu::activeMenu = 0;
-const string ParMenu::menuNames[] = { "Particles", "Visualize", "Proteins", "Display", "Raytrace" };
+int ParMenu::activeSubMenu[] = {};
+const string ParMenu::menuNames[] = { "Particles", "Graphics", "Render", ".", ".." };
 bool ParMenu::expanded = true;
 float ParMenu::expandPos = 150;
 
@@ -28,22 +30,31 @@ void ParMenu::Draw() {
 		else {
 			switch (activeMenu) {
 			case 0:
-				Draw_List();
+				if (!!Protein::proCnt) {
+					const Vec4 hl = Vec4(1, 0.8f, 0.2f, 1);
+					if (UI2::Button2(expandPos - 148, 20, 70, "Atoms", Icons::vis_atom, white(1, 0.3f), (!activeSubMenu[0]) ? hl : white(0.8f)) == MOUSE_RELEASE) {
+						activeSubMenu[0] = 0;
+					}
+					if (UI2::Button2(expandPos - 77, 20, 75, "Proteins", Icons::vis_prot, white(1, 0.3f), (!activeSubMenu[0]) ? white(0.8f) : hl) == MOUSE_RELEASE) {
+						activeSubMenu[0] = 1;
+					}
+					if (!activeSubMenu[0]) Draw_List(38);
+					else Protein::DrawMenu();
+				}
+				else Draw_List(20);
 				break;
 			case 1:
+				ParGraphics::DrawMenu();
+				break;
+			case 2:
+				RayTracer::DrawMenu();
+				break;
+			case 3:
+			case 4:
 				//
 				if (Engine::Button(expandPos - 147, 20, 144, 16, white(1, 0.5f), "Toggle grad", 12, white(), true) == MOUSE_RELEASE) {
 					ParGraphics::useGradCol = !ParGraphics::useGradCol;
 				}
-				break;
-			case 2:
-				Protein::DrawMenu();
-				break;
-			case 3:
-				ParGraphics::DrawMenu();
-				break;
-			case 4:
-				RayTracer::DrawMenu();
 				break;
 			}
 		}
@@ -79,20 +90,20 @@ void ParMenu::Draw() {
 	}
 }
 
-void ParMenu::Draw_List() {
-	if (Engine::Button(2, 20, 16, 16, Icons::select, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+void ParMenu::Draw_List(float off) {
+	if (Engine::Button(2, off, 16, 16, Icons::select, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
 		SelAll();
 	}
-	if (Engine::Button(19, 20, 16, 16, Icons::deselect, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+	if (Engine::Button(19, off, 16, 16, Icons::deselect, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
 		SelClear();
 	}
-	if (Engine::Button(36, 20, 16, 16, Icons::flipselect, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+	if (Engine::Button(36, off, 16, 16, Icons::flipselect, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
 		SelInv();
 	}
 	if (!!selCnt) {
-		if (Engine::Button(55, 20, 16, 16, Icons::OfDM(drawTypeAll), white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+		if (Engine::Button(55, off, 16, 16, Icons::OfDM(drawTypeAll), white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
 			Popups::type = POPUP_TYPE::DRAWMODE;
-			Popups::pos = Vec2(55, 2);
+			Popups::pos = Vec2(55, off);
 			_drawTypeAll = drawTypeAll;
 			Popups::data = &_drawTypeAll;
 		}
@@ -105,10 +116,10 @@ void ParMenu::Draw_List() {
 			ParGraphics::UpdateDrawLists();
 		}
 	}
-	
-	Engine::DrawQuad(1, 36, expandPos - 2, Display::height - 37.0f, white(0.9f, 0.1f));
-	Engine::BeginStencil(0, 36, expandPos, Display::height - 54.0f);
-	float off = 38;
+	off += 17;
+	//Engine::DrawQuad(1, off-1, expandPos - 2, Display::height - 37.0f, white(0.9f, 0.1f));
+	Engine::BeginStencil(0, off-1, expandPos, Display::height - 18 - off);
+	off = 38;
 	for (uint i = 0; i < Particles::residueListSz; i++) {
 		auto& rli = Particles::residueLists[i];
 		if (off > 0) {
@@ -182,9 +193,18 @@ void ParMenu::Draw_List() {
 								if (!(sell.size() == 1 && has)) {
 									sell.resize(1);
 									sell[0] = rj.offset + k + 1;
+									if (Input::dbclick) {
+										ParGraphics::rotCenter = Particles::particles_Pos[rj.offset + k];
+										Scene::dirty = true;
+									}
 								}
 								else {
-									sell.clear();
+									if (Input::dbclick) {
+										ParGraphics::rotCenter = Particles::particles_Pos[rj.offset + k];
+										Scene::dirty = true;
+									}
+									else
+										sell.clear();
 								}
 							}
 							else {

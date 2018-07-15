@@ -95,7 +95,7 @@ typedef struct _rifflist {
 //
 #define ckidMAINAVIHEADER FCC('avih')
 typedef struct _avimainheader {
-	FOURCC fcc;                    // 'avih'
+	const FOURCC fcc = FCC("avih");                    // 'avih'
 	const DWORD_T  cb = 0x38;                     // size of this structure -8
 	DWORD_T  dwMicroSecPerFrame;     // frame display rate (or 0L)
 	DWORD_T  dwMaxBytesPerSec;       // max. transfer rate
@@ -134,7 +134,7 @@ typedef struct _aviextheader {
 #define ckidSTREAMHEADER FCC('strh')
 #endif
 typedef struct _avistreamheader {
-	FOURCC fcc;          // 'strh'
+	const FOURCC fcc = ckidSTREAMHEADER;          // 'strh'
 	const DWORD_T  cb = 0x38;           // size of this structure - 8
 
 	FOURCC fccType;      // stream type codes
@@ -184,6 +184,7 @@ typedef struct _avistreamheader {
 // nothing for text streams
 // nothing for midi streams
 typedef struct {
+	const FOURCC fcc = ckidSTREAMFORMAT;          // 'strf'
 	const DWORD_T biSize = 0x28;
 	LONG_T  biWidth;
 	LONG_T  biHeight;

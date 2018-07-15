@@ -249,6 +249,7 @@ void RayTracer::Clear() {
 	glDeleteTextures(1, &resTex);
 	resTex = 0;
 	_cntt = 0;
+	Scene::dirty = true;
 }
 
 void RayTracer::DrawMenu() {

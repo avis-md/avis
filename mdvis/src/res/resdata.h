@@ -52,3 +52,5 @@
 #include "_res/visidden.h"
 #include "_res/zoomin.h"
 #include "_res/zoomout.h"
+#include "_res/vis_atom.h"
+#include "_res/vis_prot.h"

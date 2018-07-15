@@ -6,6 +6,7 @@ class ParMenu {
 public:
 
 	static int activeMenu;
+	static int activeSubMenu[5];
 	static const string menuNames[5];
 	static bool expanded;
 	static float expandPos;
@@ -13,6 +14,6 @@ public:
 	static uint selCnt;
 	static byte drawTypeAll, _drawTypeAll;
 
-	static void Draw(), Draw_List();
+	static void Draw(), Draw_List(float off);
 	static void SelClear(), SelInv(), SelAll();
 };
