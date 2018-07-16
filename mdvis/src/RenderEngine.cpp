@@ -260,17 +260,16 @@ GLuint Camera::d_sLightRSMFluxProgram = 0;
 GLuint Camera::d_reflQuadProgram = 0;
 GLint Camera::d_skyProgramLocs[9];
 */
-const string Camera::_gbufferNames[4] = {"Diffuse", "Normal", "Specular-Gloss", "Emission"};
-
 uint Camera::GetIdAt(uint x, uint y) {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, d_fbo);
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
-	uint pixel;
+	uint pixel[4];
 	x = uint(x * quality);
 	y = uint(y * quality);
-	glReadPixels(x, d_h - y - 1, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &pixel);
+	glReadPixels(x, d_h - y - 1, 1, 1, GL_RG_INTEGER, GL_UNSIGNED_INT, pixel);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-	return pixel;
+	if (pixel[0] != 0) return 0;
+	return pixel[0];
 }
 
 void Camera::Render(RenderTexture* tar, onBlitFunc func) {
@@ -377,7 +376,7 @@ void Camera::Render(RenderTexture* tar, onBlitFunc func) {
 
 	Scene::dirty = false;
 }
-
+/*
 void Camera::_ApplyEmission(GLuint d_fbo, GLuint d_texs[], float w, float h, GLuint targetFbo) {
 	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetFbo);
@@ -386,7 +385,7 @@ void Camera::_ApplyEmission(GLuint d_fbo, GLuint d_texs[], float w, float h, GLu
 	glReadBuffer(GL_COLOR_ATTACHMENT0 + GBUFFER_EMISSION_AO);
 	glBlitFramebuffer(0, 0, (int)w, (int)h, 0, 0, (int)w, (int)h, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 }
-
+*/
 GLuint Light::_shadowFbo = 0;
 GLuint Light::_shadowGITexs[] = {0, 0, 0};
 GLuint Light::_shadowMap = 0;

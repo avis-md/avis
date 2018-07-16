@@ -6,14 +6,15 @@
 #include "utils/solidify.h"
 #include "vis/pargraphics.h";
 #include "ui/icons.h"
+#include "res/shddata.h"
 
 //const byte signature[] = { 2, 'H', 0, 'C', 2, 'H', 0, 'C', 1, 'O', 0 };
 
 byte Protein::proCnt = 0;
 Protein* Protein::pros;
 
-Shader* Protein::shad;
-GLint Protein::shadLocs[];
+GLuint Protein::shad, Protein::colShad;
+GLint Protein::shadLocs[], Protein::colShadLocs[];
 
 byte AminoAcidType (const char* nm) {
 	uint32_t i = *(uint32_t*)nm;
@@ -55,14 +56,26 @@ byte _CntOf(const std::vector<uint>& c, char _c) {
 }
 
 void Protein::Init() {
-	shad = new Shader(IO::GetText(IO::path + "/prochainV.txt"), IO::GetText(IO::path + "/prochainF.txt"));
-    shadLocs[0] = glGetUniformLocation(shad->pointer, "_MV");
-    shadLocs[1] = glGetUniformLocation(shad->pointer, "_P");
-    shadLocs[2] = glGetUniformLocation(shad->pointer, "poss");
-    shadLocs[3] = glGetUniformLocation(shad->pointer, "ids");
-    shadLocs[4] = glGetUniformLocation(shad->pointer, "chainSz");
-    shadLocs[5] = glGetUniformLocation(shad->pointer, "chainReso");
-    shadLocs[6] = glGetUniformLocation(shad->pointer, "loopReso");
+	shad = Shader::FromVF(IO::GetText(IO::path + "/prochainV.txt"), IO::GetText(IO::path + "/prochainF.txt"));
+#define LC(nm) shadLocs[i++] = glGetUniformLocation(shad, #nm);
+	int i = 0;
+	LC(_MV);
+	LC(_P);
+	LC(poss);
+	LC(ids);
+	LC(chainSz);
+	LC(chainReso);
+	LC(loopReso);
+	LC(proId);
+#undef LC
+	colShad = Shader::FromVF(glsl::minVert, glsl::colererFragPro);
+	i = 0;
+#define LC(nm) colShadLocs[i++] = glGetUniformLocation(colShad, #nm);
+	LC(idTex);
+	LC(screenSize);
+	LC(proId);
+	LC(col);
+#undef LC
 }
 
 void Protein::Clear() {
@@ -171,6 +184,13 @@ void Protein::Refresh() {
 
 		p = 0;
 	}
+
+	if (!!proCnt) {
+		int c = max(proCnt-1, 1);
+		for (byte b = 0; b < proCnt; b++) {
+			pros[b].tint = Color::HueBaseCol((0.67f * b) / c);
+		}
+	}
 }
 
 void Protein::ApplyChain() {
@@ -206,7 +226,7 @@ void Protein::Draw() {
         auto& p = pros[b];
 		if (!p.visible) continue;
         
-        glUseProgram(shad->pointer);
+        glUseProgram(shad);
         glUniformMatrix4fv(shadLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
         glUniformMatrix4fv(shadLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
         glUniform1i(shadLocs[2], 1);
@@ -218,6 +238,7 @@ void Protein::Draw() {
         glUniform1i(shadLocs[4], p.cnt * 3);
         glUniform1i(shadLocs[5], p.chainReso);
         glUniform1i(shadLocs[6], p.loopReso);
+		glUniform1i(shadLocs[7], b);
 
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glBindVertexArray(Camera::emptyVao);
@@ -227,6 +248,29 @@ void Protein::Draw() {
         glBindVertexArray(0);
         glUseProgram(0);
     }
+}
+
+void Protein::Recolor() {
+	if (!proCnt) return;
+	auto cam = ChokoLait::mainCamera.raw();
+
+	glUseProgram(colShad);
+	glUniform1i(colShadLocs[0], 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, cam->d_idTex);
+	glUniform2f(colShadLocs[1], Display::width * cam->quality, Display::height * cam->quality);
+
+	for (byte b = 0; b < proCnt; b++) {
+		auto& p = pros[b];
+		glUniform1i(colShadLocs[2], b);
+		glUniform4f(colShadLocs[3], p.tint.r, p.tint.g, p.tint.b, 1);
+
+		glBindVertexArray(Camera::emptyVao);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+
+	glUseProgram(0);
+	glBindVertexArray(0);
 }
 
 void Protein::DrawMenu(float off) {

@@ -2,6 +2,7 @@
 
 #include "_shd/blurFrag.h"
 #include "_shd/colorerFrag.h"
+#include "_shd/colorerFragPro.h"
 #include "_shd/colorPickerVert.h"
 #include "_shd/colorPickerH.h"
 #include "_shd/colorPickerSV.h"

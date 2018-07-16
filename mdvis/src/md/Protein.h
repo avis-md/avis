@@ -46,8 +46,8 @@ public:
     static Protein* pros;
 
     static void Init(), Clear(), Refresh();
-    static void Draw(), DrawMenu(float off);
+    static void Draw(), Recolor(), DrawMenu(float off);
 
-    static Shader* shad;
-    static GLint shadLocs[7];
+    static GLuint shad, colShad;
+    static GLint shadLocs[10], colShadLocs[6];
 };

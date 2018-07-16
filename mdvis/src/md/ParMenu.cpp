@@ -16,6 +16,7 @@ float ParMenu::expandPos = 150;
 
 uint ParMenu::selCnt;
 byte ParMenu::drawTypeAll, ParMenu::_drawTypeAll;
+bool ParMenu::visibleAll;
 
 void ParMenu::Draw() {
 	Engine::DrawQuad(0, 18, expandPos, Display::height - 36.0f, white(0.9f, 0.15f));
@@ -114,6 +115,14 @@ void ParMenu::Draw_List(float off) {
 			}
 			ParGraphics::UpdateDrawLists();
 		}
+		if (Engine::Button(76, off, 16, 16, visibleAll ? Icons::visible : Icons::hidden, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
+			visibleAll = !visibleAll;
+			for (uint i = 0; i < Particles::residueListSz; i++) {
+				auto& rli = Particles::residueLists[i];
+				if (rli.selected) rli.visible = visibleAll;
+			}
+			ParGraphics::UpdateDrawLists();
+		}
 	}
 	off += 17;
 	//Engine::DrawQuad(1, off-1, expandPos - 2, Display::height - 37.0f, white(0.9f, 0.1f));
@@ -131,6 +140,7 @@ void ParMenu::Draw_List(float off) {
 					if (!(selCnt == 1 && rli.selected)) {
 						SelClear();
 						drawTypeAll = rli.drawType;
+						visibleAll = rli.visible;
 						rli.selected = true;
 						selCnt = 1;
 					}
@@ -142,6 +152,7 @@ void ParMenu::Draw_List(float off) {
 				else {
 					rli.selected = !rli.selected;
 					if (rli.selected && drawTypeAll != rli.drawType) drawTypeAll = 255;
+					visibleAll = rli.visible;
 					selCnt += rli.selected ? 1 : -1;
 				}
 			}
@@ -226,10 +237,12 @@ loopout:
 
 void ParMenu::SelAll() {
 	drawTypeAll = Particles::residueLists[0].drawType;
+	visibleAll = false;
 	for (uint i = 0; i < Particles::residueListSz; i++) {
 		auto& rli = Particles::residueLists[i];
 		rli.selected = true;
 		if (drawTypeAll != rli.drawType) drawTypeAll = 255;
+		if (rli.visible) visibleAll = true;
 	}
 	selCnt = Particles::residueListSz;
 }

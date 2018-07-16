@@ -33,26 +33,11 @@ public:
 	uint d_w, d_h, d_w2, d_h2, _d_w, _d_h, _w, _h;
 	bool useGBuffer2, applyGBuffer2;
 	void GenGBuffer2();
-	void LoadGBuffer2(), UnloadGBuffer2();
 
 	Camera(std::ifstream& stream, SceneObject* o, long pos = -1);
 
 	std::vector<ASSETID> _effects;
 
-	static void DrawSceneObjectsOpaque(std::vector<pSceneObject> oo, GLuint shader = 0);
-	static void DrawSceneObjectsOverlay(std::vector<pSceneObject> oo, GLuint shader = 0);
-	void RenderLights(GLuint targetFbo = 0);
-	void DumpBuffers();
-
-	//void _RenderProbesMask(std::vector<pSceneObject>& objs, Mat4x4 mat, std::vector<ReflectionProbe*>& probes), _RenderProbes(std::vector<ReflectionProbe*>& probes, Mat4x4 mat);
-	//void _DoRenderProbeMask(ReflectionProbe* p, Mat4x4& ip), _DoRenderProbe(ReflectionProbe* p, Mat4x4& ip);
-	static void _RenderSky(Mat4x4 ip, GLuint d_texs[], GLuint d_depthTex, float w = (float)Display::width, float h = (float)Display::height);
-	void _DrawLights(std::vector<pSceneObject>& oo, Mat4x4& ip, GLuint targetFbo = 0);
-	static void _ApplyEmission(GLuint d_fbo, GLuint d_texs[], float w = (float)Display::width, float h = (float)Display::height, GLuint targetFbo = 0);
-	static void _DoDrawLight_Point(Light* l, Mat4x4& ip, GLuint d_fbo, GLuint d_texs[], GLuint d_depthTex, GLuint ctar, GLuint c_tex, float w = (float)Display::width, float h = (float)Display::height, GLuint targetFbo = 0);
-	static void _DoDrawLight_Spot(Light* l, Mat4x4& ip, GLuint d_fbo, GLuint d_texs[], GLuint d_depthTex, GLuint ctar, GLuint c_tex, float w = (float)Display::width, float h = (float)Display::height, GLuint targetFbo = 0);
-	static void _DoDrawLight_Spot_Contact(Light* l, Mat4x4& p, GLuint d_depthTex, float w, float h, GLuint src, GLuint tar);
-	
 	static void GenShaderFromPath(const char* vs, const char* fs, GLuint* program);
 	static void GenShaderFromPath(GLuint vertex_shader, const char* fs, GLuint* program);
 
@@ -67,8 +52,6 @@ public:
 
 	int _tarRT;
 	float quality, quality2;
-
-	static const string _gbufferNames[];
 
 	void ApplyGL();
 

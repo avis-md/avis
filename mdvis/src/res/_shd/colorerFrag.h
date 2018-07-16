@@ -20,7 +20,7 @@ vec3 gradfill(float f) {
 
 void main () {
 	uvec4 tx = texture(idTex, gl_FragCoord.xy / screenSize);
-	if (tx.y == 1U) {
+	if (tx.y > 65535U) { //protein
 		float v = float(tx.x);
 		fragCol = vec4(gradfill(1 - (v / 65535)), 1);
 		return;

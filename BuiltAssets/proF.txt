@@ -19,5 +19,5 @@ void Output(vec4 col, vec3 norm, vec3 spec, float gloss, vec4 emi) {
 
 void main()
 {
-Output(vec4(1,0,0,0), v2f_normal.xyz, vec3(0.2, 0.2, 1), 1, vec4(v2f_normal.xyz, 0));
+	Output(vec4(v2f_id,1,0,0), v2f_normal.xyz, vec3(0.2, 0.2, 1), 1, vec4(0, 0, 0, 0));
 }

@@ -190,13 +190,13 @@ void ParGraphics::Init() {
 	parConLineProgLocs[2] = glGetUniformLocation(parConLineProg, "posTex");
 	parConLineProgLocs[3] = glGetUniformLocation(parConLineProg, "connTex");
 
-	selHlProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), IO::GetText(IO::path + "/selectorFrag.txt"));
+	selHlProg = Shader::FromVF(glsl::minVert, IO::GetText(IO::path + "/selectorFrag.txt"));
 	selHlProgLocs[0] = glGetUniformLocation(selHlProg, "screenSize");
 	selHlProgLocs[1] = glGetUniformLocation(selHlProg, "myId");
 	selHlProgLocs[2] = glGetUniformLocation(selHlProg, "idTex");
 	selHlProgLocs[3] = glGetUniformLocation(selHlProg, "hlCol");
 
-	colProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), glsl::colererFrag);
+	colProg = Shader::FromVF(glsl::minVert, glsl::colererFrag);
 	colProgLocs[0] = glGetUniformLocation(colProg, "idTex");
 	colProgLocs[1] = glGetUniformLocation(colProg, "spTex");
 	colProgLocs[2] = glGetUniformLocation(colProg, "screenSize");
@@ -507,6 +507,8 @@ void ParGraphics::Recolor() {
 
 	glUseProgram(0);
 	glBindVertexArray(0);
+
+	Protein::Recolor();
 	glViewport(0, 0, Display::actualWidth, Display::actualHeight);
 }
 

@@ -13,6 +13,7 @@ public:
 
 	static uint selCnt;
 	static byte drawTypeAll, _drawTypeAll;
+	static bool visibleAll;
 
 	static void Draw(), Draw_List(float off);
 	static void SelClear(), SelInv(), SelAll();

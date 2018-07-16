@@ -8,6 +8,7 @@ uniform int chainReso;
 uniform int loopReso;
 
 out vec3 v2f_normal;
+out float v2f_chpos;
 
 vec3 bezier(vec3 a, vec3 b, vec3 c, vec3 d, float t) {
     vec3 q = mix(a, b, t);
@@ -21,8 +22,8 @@ vec3 bezier(vec3 a, vec3 b, vec3 c, vec3 d, float t) {
 void main() {
     int loop = gl_VertexID / (6 * loopReso);
     int par = loop / chainReso;
-    vec3 p1 = texelFetch(poss, int(texelFetch(ids, int(par)*2).r)).rgb;
-    vec3 p2 = texelFetch(poss, int(texelFetch(ids, int(par + 1)*2).r)).rgb;
+    vec3 p1 = texelFetch(poss, int(texelFetch(ids, par*2).r)).rgb;
+    vec3 p2 = texelFetch(poss, int(texelFetch(ids, (par + 1)*2).r)).rgb;
     vec3 h1 = mix(p1, p2, 0.33);
     vec3 h2 = mix(p1, p2, 0.67);
     vec3 n1 = p2 - p1;
@@ -30,12 +31,12 @@ void main() {
 
     vec3 p1o = p1;
     if (par > 0) {
-        vec3 p0 = texelFetch(poss, int(texelFetch(ids, int(par - 1)*2).r)).rgb;
+        vec3 p0 = texelFetch(poss, int(texelFetch(ids, (par - 1)*2).r)).rgb;
         p1 = mix(p1, mix(p0, p2, 0.5), 0.33);
         n1 = p2 - p0;
     }
     if (par < chainSz - 2) {
-        vec3 p3 = texelFetch(poss, int(texelFetch(ids, int(par + 2)*2).r)).rgb;
+        vec3 p3 = texelFetch(poss, int(texelFetch(ids, (par + 2)*2).r)).rgb;
         p2 = mix(p2, mix(p1o, p3, 0.5), 0.33);
         n2 = p3 - p1o;
     }
@@ -74,5 +75,6 @@ void main() {
 
     vec3 pos = pos0 + 0.02 * (cos(s) * myTan + sin(s) * myTanB);
     gl_Position = _P * _MV * vec4(pos, 1);
-    v2f_normal = normalize(pos - pos0);
+	v2f_normal = (_MV*(vec4(pos, 0)-vec4(pos0, 0))).xyz;
+	v2f_chpos = float(loop) / ((chainSz-1)*chainReso);
 }
