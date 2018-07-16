@@ -412,7 +412,7 @@ void UI::Label(float x, float y, float s, string st, Vec4 col, float maxw, Font*
 	Label(x, y, s, &st[0], st.size(), col, maxw, font);
 }
 
-void UI::Label(float x, float y, float s, char* str, uint sz, Vec4 col, float maxw, Font* font) {
+void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, float maxw, Font* font) {
 	sz = min(sz, (uint)strlen(str));
 	if (s <= 0) return;
 	GLuint tex = font->glyph((uint)round(s));
@@ -421,7 +421,7 @@ void UI::Label(float x, float y, float s, char* str, uint sz, Vec4 col, float ma
 	if ((align & 15) > 0) {
 		float totalW = 0;
 		for (uint i = 0; i < sz * 4; i += 4) {
-			char& c = str[i / 4];
+			auto& c = str[i / 4];
 				totalW += font->o2s[c] * s;
 		}
 		x -= totalW * (align & 15) * 0.5f;
@@ -435,9 +435,9 @@ void UI::Label(float x, float y, float s, char* str, uint sz, Vec4 col, float ma
 	x = round(x);
 	float defx = x;
 	for (uint i = 0; i < sz * 4; i += 4) {
-		char& c = str[i / 4];
-		if (c == '\n')
-			c = ' ';
+		auto& c = str[i / 4];
+		//if (c == '\n')
+		//	c = ' ';
 
 		Vec3 off = -Vec3(font->off[c].x, font->off[c].y, 0)*s;
 		w = font->w2h[c] * s;

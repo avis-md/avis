@@ -1,4 +1,5 @@
 #include "raytracer.h"
+#include "oclcode.h"
 #include "hdr.h"
 #include "md/Particles.h"
 #include "md/ParMenu.h"
@@ -74,9 +75,7 @@ bool RayTracer::Init(){
 
 	_que = clCreateCommandQueue(_ctx, device, 0, 0);
 	
-	auto fl = IO::GetText(IO::path + "/ocl/test.txt");
-	const char* flc[] = { fl.c_str() };
-	cl_program prog = clCreateProgramWithSource(_ctx, 1, flc, 0, 0);
+	cl_program prog = clCreateProgramWithSource(_ctx, 1, &ocl::code, 0, 0);
 	cl_int err = clBuildProgram(prog, 1, &device, 0, 0, 0);
 
 	size_t lsz;

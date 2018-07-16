@@ -5,32 +5,16 @@
 #include <climits>
 #include <ctime>
 #include <cstdarg>
-#include "Defines.h"
-#include "SceneScriptResolver.h"
+#include "res/shddata.h"
 
 #ifdef PLATFORM_WIN
 #include <shellapi.h>
-#elif defined(PLATFORM_ADR)
-void glPolygonMode(GLenum a, GLenum b) {}
-#endif
-
-#ifndef IS_EDITOR
-bool _pipemode = false;
 #endif
 
 string ffmpeg_getmsg(int i) {
 	uint64_t e = -i;
 	return string((char*)&e);
 }
-
-Vec4 black(float f) { return Vec4(0, 0, 0, f); }
-Vec4 red(float f, float i) { return Vec4(i, 0, 0, f); }
-Vec4 green(float f, float i) { return Vec4(0, i, 0, f); }
-Vec4 blue(float f, float i) { return Vec4(0, 0, i, f); }
-Vec4 cyan(float f, float i) { return Vec4(i*0.09f, i*0.706f, i, f); }
-Vec4 yellow(float f, float i) { return Vec4(i, i, 0, f); }
-Vec4 white(float f, float i) { return Vec4(i, i, i, f); }
-
 
 #ifndef PLATFORM_WIN
 
@@ -101,20 +85,21 @@ void Engine::Init(string path) {
 			std::cout << "cannot load fallback texture!" << std::endl;
 	}
 	Engine::_mainThreadId = std::this_thread::get_id();
-
-	string vertcode = "#version 330 core\nlayout(location = 0) in vec3 pos;\nlayout(location = 1) in vec2 uv;\nout vec2 UV;\nvoid main(){ \ngl_Position.xyz = pos;\ngl_Position.w = 1.0;\nUV = uv;\n}";
-	string vertcodeW = "#version 330 core\nlayout(location = 0) in vec3 pos;\nlayout(location = 1) in vec2 uv;\nuniform mat4 MVP;\nout vec2 UV;\nvoid main(){ \ngl_Position = MVP * vec4(pos, 1);\ngl_Position /= gl_Position.w;\nUV = uv;\n}";
-	string fragcode = "#version 330 core\nin vec2 UV;\nuniform sampler2D sampler;\nuniform vec4 col;\nuniform float level;\nout vec4 color;void main(){\ncolor = textureLod(sampler, UV, level)*col;\n}"; //out vec3 Vec4;\n
-	string fragcode2 = "#version 330 core\nin vec2 UV;\nuniform sampler2D sampler;\nuniform vec4 col;\nuniform float level;\nout vec4 color;void main(){\ncolor = vec4(1, 1, 1, textureLod(sampler, UV, level).r)*col;\n}"; //out vec3 Vec4;\n
-	string fragcode3 = "#version 330 core\nin vec2 UV;\nuniform vec4 col;\nout vec4 color;void main(){\ncolor = col;\n}";
-	string fragcodeSky = "#version 330 core\nin vec2 UV;uniform sampler2D sampler;uniform vec2 dir;uniform float length;out vec4 color;void main(){float ay = asin((UV.y) / length);float l2 = length*cos(ay);float ax = asin((dir.x + UV.x) / l2);color = textureLod(sampler, vec2((dir.x + ax / 3.14159)*sin(dir.y + ay / 3.14159) + 0.5, (dir.y + ay / 3.14159)), 0);color.a = 1;}";
-
-	unlitProgram = Shader::FromVF(vertcode, fragcode);
-	unlitProgramA = Shader::FromVF(vertcode, fragcode2);
-	unlitProgramC = Shader::FromVF(vertcode, fragcode3);
+	
+	GLuint vs;
+	string err;
+	Shader::LoadShader(GL_VERTEX_SHADER, glsl::coreVert, vs, &err);
+	if (!vs) {
+		Debug::Error("Engine", "Cannot load coreVert shader!");
+	}
+	unlitProgram = Shader::FromF(vs, glsl::coreFrag);
+	unlitProgramA = Shader::FromF(vs, glsl::coreFrag2);
+	unlitProgramC = Shader::FromF(vs, glsl::coreFrag3);
 	defProgram = unlitProgramC;
-	defProgramW = Shader::FromVF(vertcodeW, fragcode3);
-	skyProgram = Shader::FromVF(vertcode, fragcodeSky);
+	defProgramW = Shader::FromVF(glsl::coreVertW, glsl::coreFrag3);
+	skyProgram = Shader::FromF(vs, glsl::coreFragSky);
+
+	glDeleteShader(vs);
 
 	Input::RegisterCallbacks();
 	Font::Init();
@@ -132,26 +117,7 @@ void Engine::Init(string path) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-std::vector<std::ifstream*> Engine::assetStreams = std::vector<std::ifstream*>();
-std::unordered_map<byte, std::vector<string>> Engine::assetData = std::unordered_map<byte, std::vector<string>>();
-//std::unordered_map<string, byte[]> Engine::assetDataLoaded = std::unordered_map<string, byte[]>();
-
 std::thread::id Engine::_mainThreadId = std::thread::id();
-
-bool Engine::LoadDatas(string path) {
-	std::ifstream* d0 = new std::ifstream(path + "\\data0");
-	assetStreams.push_back(d0);
-	if (!d0->is_open())
-		return false;
-	char header[2];
-	char levelCount;
-	(*d0) >> header[0] >> header[1] >> levelCount;
-	if (header[0] != 'D' || header[1] != '0' || levelCount <= 0)
-		return false;
-
-
-	return true;
-}
 
 void Engine::BeginStencil(float x, float y, float w, float h) {
 	glEnable(GL_DEPTH_TEST);
@@ -165,7 +131,6 @@ void Engine::BeginStencil(float x, float y, float w, float h) {
 	glStencilMask(0xFF); // draw stencil pattern
 	glClear(GL_STENCIL_BUFFER_BIT); // needs mask=0xFF
 	Engine::DrawQuad(x, y, w, h, white());
-	//Engine::DrawQuad(v.r, v.g, v.b, v.a, white());
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	glDepthMask(GL_TRUE);
 	glStencilMask(0x0);
@@ -349,7 +314,6 @@ void Engine::DrawProgressBar(float x, float y, float w, float h, float progress,
 
 void Engine::RotateUI(float aa, Vec2 point) {
 	float a = -3.1415926535f*aa / 180.0f;
-	//Display::uiMatrix = glm::mat3(1, 0, 0, 0, 1, 0, point2.x * 2 - 1, point2.y * 2 - 1, 1)*glm::mat3(cos(a), -sin(a), 0, sin(a), cos(a), 0, 0, 0, 1)*glm::mat3(1, 0, 0, 0, 1, 0, -point2.x * 2 + 1, -point2.y * 2 + 1, 1)*Display::uiMatrix;
 	Display::uiMatrix = glm::mat3(1, 0, 0, 0, 1, 0, point.x, point.y, 1)*glm::mat3(cos(a), -sin(a), 0, sin(a), cos(a), 0, 0, 0, 1)*glm::mat3(1, 0, 0, 0, 1, 0, -point.x, -point.y, 1)*Display::uiMatrix;
 	Display::uiMatrixIsI = false;
 }
@@ -460,7 +424,6 @@ void Engine::DrawCube(Vec3 pos, float dx, float dy, float dz, Vec4 Vec4) {
 	quadPoss[5] = pos + Vec3(dx, -dy, dz);
 	quadPoss[6] = pos + Vec3(-dx, dy, dz);
 	quadPoss[7] = pos + Vec3(dx, dy, dz);
-	//uint quadIndexes[24] = { 0, 1, 3, 2, 4, 5, 7, 6, 0, 2, 6, 4, 1, 3, 7, 5, 0, 1, 5, 4, 2, 3, 7, 6 };
 	static const uint quadIndexes[36] = {
 		0, 1, 2, 1, 3, 2,		4, 5, 6, 5, 7, 6, 
 		0, 2, 4, 2, 6, 4,		1, 3, 5, 3, 7, 5, 
@@ -476,21 +439,6 @@ void Engine::DrawCube(Vec3 pos, float dx, float dy, float dz, Vec4 Vec4) {
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, &quadIndexes[0]);
 	glBindVertexArray(0);
 	glUseProgram(0);
-}
-
-void Engine::DrawIndices(const Vec3* poss, const int* is, int length, float r, float g, float b) {
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, poss);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glColor4f(r, g, b, 1);
-	glDrawElements(GL_TRIANGLES, length, GL_UNSIGNED_INT, is);
-	glDisableClientState(GL_VERTEX_ARRAY);
-}
-void Engine::DrawIndicesI(const Vec3* poss, const int* is, int length, float r, float g, float b) {
-	glVertexPointer(3, GL_FLOAT, 0, poss);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glColor4f(r, g, b, 1);
-	glDrawElements(GL_TRIANGLES, length, GL_UNSIGNED_INT, is);
 }
 
 void Engine::DrawLine(Vec2 v1, Vec2 v2, Vec4 col, float width) {
@@ -663,11 +611,6 @@ void Engine::DrawCubeLinesW(float x0, float x1, float y0, float y1, float z0, fl
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-
-#pragma region Input
-
-#pragma endregion
-
 ulong Engine::idCounter = 0;
 ulong Engine::GetNewId() {
 	if (++idCounter >= ULONG_MAX) {
@@ -676,11 +619,6 @@ ulong Engine::GetNewId() {
 	}
 	return idCounter;
 }
-
-
-#pragma region Font
-
-#pragma endregion
 
 float BezierSolveApprox(Vec2& v1, Vec2& v2, Vec2& v3, Vec2& v4, float x, float acc = 0.5f) {
 	if (x < v1.x)

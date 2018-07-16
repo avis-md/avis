@@ -15,36 +15,7 @@ void Font::Init() {
 		std::runtime_error("Fatal: Initializing freetype failed!");
 	}
 
-	string error;
-	GLuint vs, fs;
-	if (!Shader::LoadShader(GL_VERTEX_SHADER, glsl::fontVert, vs, &error)) {
-		Debug::Error("Engine", "Fatal: Cannot init font shader(v)! " + error);
-		abort();
-	}
-	if (!Shader::LoadShader(GL_FRAGMENT_SHADER, glsl::fontFrag, fs, &error)) {
-		Debug::Error("Engine", "Fatal: Cannot init font shader(f)! " + error);
-		abort();
-	}
-	fontProgram = glCreateProgram();
-	glAttachShader(fontProgram, vs);
-	glAttachShader(fontProgram, fs);
-
-	int link_result = 0;
-	glLinkProgram(fontProgram);
-	glGetProgramiv(fontProgram, GL_LINK_STATUS, &link_result);
-	if (link_result == GL_FALSE)
-	{
-		int info_log_length = 0;
-		glGetProgramiv(fontProgram, GL_INFO_LOG_LENGTH, &info_log_length);
-		std::vector<char> program_log(info_log_length);
-		glGetProgramInfoLog(fontProgram, info_log_length, NULL, &program_log[0]);
-		std::cerr << "Font shader link error" << std::endl << &program_log[0] << std::endl;
-		abort();
-	}
-	glDetachShader(fontProgram, vs);
-	glDetachShader(fontProgram, fs);
-	glDeleteShader(vs);
-	glDeleteShader(fs);
+	fontProgram = Shader::FromVF(glsl::fontVert, glsl::fontFrag);
 
 	InitVao(500);
 }

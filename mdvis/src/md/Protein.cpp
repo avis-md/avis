@@ -3,8 +3,9 @@
 #include "utils/rawvector.h"
 #include "utils/spline.h"
 #include "utils/solidify.h"
-#include "vis/pargraphics.h"
 #include "utils/solidify.h"
+#include "vis/pargraphics.h";
+#include "ui/icons.h"
 
 //const byte signature[] = { 2, 'H', 0, 'C', 2, 'H', 0, 'C', 1, 'O', 0 };
 
@@ -198,11 +199,12 @@ void Protein::ApplyChain() {
 }
 
 void Protein::Draw() {
+	auto _mv = MVP::modelview();
+	auto _p = MVP::projection();
+
     for (byte b = 0; b < proCnt; b++) {
         auto& p = pros[b];
-
-        auto _mv = MVP::modelview();
-        auto _p = MVP::projection();
+		if (!p.visible) continue;
         
         glUseProgram(shad->pointer);
         glUniformMatrix4fv(shadLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
@@ -227,24 +229,46 @@ void Protein::Draw() {
     }
 }
 
-void Protein::DrawMenu() {
-	//
-	if (!!proCnt) {
-		auto& expandPos = ParMenu::expandPos;
-
-		auto cr = pros->chainReso;
-		auto lr = pros->loopReso;
-
-		UI::Label(expandPos - 148, 20, 12, "Curve Reso", white());
-		cr = (byte)Engine::DrawSliderFill(expandPos - 80, 20, 78, 16, 2, 20, cr, white(1, 0.5f), white());
-		UI::Label(expandPos - 147, 37, 12, "Bevel Reso", white());
-		lr = (byte)Engine::DrawSliderFill(expandPos - 80, 37, 78, 16, 6, 20, lr, white(1, 0.5f), white());
-
-		if (cr != pros->chainReso || lr != pros->loopReso) {
-			Scene::dirty = true;
-
-			pros->chainReso = cr;
-			pros->loopReso = lr;
+void Protein::DrawMenu(float off) {
+	auto exp = ParMenu::expandPos;
+	if (Engine::Button(2, off, 16, 16, Icons::select, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+	}
+	if (Engine::Button(19, off, 16, 16, Icons::deselect, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+	}
+	if (Engine::Button(36, off, 16, 16, Icons::flipselect, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+	}
+	off += 17;
+	for (uint i = 0; i < proCnt; i++) {
+		Protein& p = pros[i];
+		Engine::DrawQuad(exp - 148, off, 146, 16, white(1, 0.3f));
+		if (Engine::Button(exp - 148, off, 16, 16, p.expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) {
+			p.expanded = !p.expanded;
+		}
+		UI::Label(exp - 132, off, 12, std::to_string(i + 1), white(p.visible ? 1 : 0.5f));
+		if (Engine::Button(exp - 130, off, 96, 16) == MOUSE_RELEASE) {
+			
+		}
+		if (Engine::Button(exp - 18, off, 16, 16, p.visible ? Icons::visible : Icons::hidden) == MOUSE_RELEASE) {
+			p.visible = !p.visible;
+			ParGraphics::UpdateDrawLists();
+		}
+		off += 17;
+		if (p.expanded) {
+			int f2 = p.first.y;
+			uint a = 0;
+			for (int f1 = p.first.x; f1 < Particles::residueListSz; f1++) {
+				auto& rli = Particles::residueLists[f1];
+				while (f2 < rli.residueSz) {
+					Engine::DrawQuad(exp - 143, off, 146, 16, white(1, 0.4f));
+					UI::Label(exp - 141, off, 12, rli.name, white());
+					f2++;
+					off += 17;
+					a++;
+					if (a == p.cnt) goto pend;
+				}
+				f2 = 0;
+			}
+		pend:;
 		}
 	}
 }

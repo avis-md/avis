@@ -44,8 +44,8 @@ bool Popups::DoDrawMenu(std::vector<MenuItem>* mn, float x, float y) {
 			
 		}
 		if (st == MOUSE_RELEASE) {
-			if (i.callback) i.callback();
 			type = POPUP_TYPE::NONE;
+			if (i.callback) i.callback();
 		}
 	}
 	bool clk = (Input::mouse0State == 1) && !Engine::Button(x - 1, y, 122, 18 * sz + 3);

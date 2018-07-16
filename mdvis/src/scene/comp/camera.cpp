@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "res/shddata.h"
 
 Camera* Camera::active;
 
@@ -93,7 +94,7 @@ void Camera::InitShaders() {
 	GLuint vertex_shader;
 	string err = "";
 
-	if (!Shader::LoadShader(GL_VERTEX_SHADER, IO::GetText(IO::path + "/minVert.txt"), vertex_shader, &err)) {
+	if (!Shader::LoadShader(GL_VERTEX_SHADER, glsl::minVert, vertex_shader, &err)) {
 		Debug::Error("Cam Shader Compiler", "v! " + err);
 		abort();
 	}

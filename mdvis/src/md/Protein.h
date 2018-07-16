@@ -28,7 +28,7 @@ byte AminoAcidType(const char* nm);
 
 class Protein {
 public:
-    Protein() : cnt(0), chainReso(5), loopReso(12) {}
+    Protein() : cnt(0), chainReso(5), loopReso(12), expanded(false), visible(true) {}
 
     uint cnt;
     Int2 first;
@@ -36,14 +36,17 @@ public:
     pMesh mesh;
     GLuint idBuf, idBufTex;
     byte chainReso, loopReso;
-    
+	bool expanded, visible;
+	bool drawGrad;
+	Vec4 tint;
+
 	void ApplyChain();
 
     static byte proCnt;
     static Protein* pros;
 
     static void Init(), Clear(), Refresh();
-    static void Draw(), DrawMenu();
+    static void Draw(), DrawMenu(float off);
 
     static Shader* shad;
     static GLint shadLocs[7];

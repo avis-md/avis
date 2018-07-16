@@ -239,6 +239,7 @@
     <ClInclude Include="src\md\pdb.h" />
     <ClInclude Include="src\md\Protein.h" />
     <ClInclude Include="src\md\XYZ.h" />
+    <ClInclude Include="src\ocl\oclcode.h" />
     <ClInclude Include="src\ocl\raytracer.h" />
     <ClInclude Include="src\res\resdata.h" />
     <ClInclude Include="src\res\shddata.h" />

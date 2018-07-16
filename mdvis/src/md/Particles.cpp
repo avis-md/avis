@@ -73,12 +73,33 @@ void Particles::Clear() {
 		delete[](particles_Vel);
 		delete[](particles_Col);
 		delete[](particles_Conn);
+		/*
+		for (auto& c : particles_Conn2) {
+			delete[](c.ids);
+		}
+		*/
 		glDeleteBuffers(1, &posBuffer);
 		glDeleteBuffers(1, &connBuffer);
 		glDeleteVertexArrays(1, &posVao);
 		glDeleteTextures(1, &posTexBuffer);
 		glDeleteTextures(1, &connTexBuffer);
-		particleSz = 0;
+		residueListSz = particleSz = connSz = 0;
+
+		delete[](anim.poss[0]);
+		delete[](anim.vels[0]);
+		if (anim.conns) delete[](anim.conns[0]);
+		delete[](anim.poss);
+		delete[](anim.vels);
+		delete[](anim.conns);
+		/*
+		for (auto& c : anim.conns2) {
+			delete[](c.first);
+			delete[](c.second[0]);
+			delete[](c.second);
+		}
+		*/
+		anim.frameCount = anim.activeFrame = 0;
+
 		Protein::Clear();
 		VisSystem::message = "Scene Cleared";
 	}

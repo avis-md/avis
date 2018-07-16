@@ -1,11 +1,12 @@
 #include "effects.h"
+#include "res/shddata.h"
 
 GLuint Effects::blurProg, Effects::ssaoProg, Effects::ssaoProg2;
 GLint Effects::blurProgLocs[], Effects::ssaoProgLocs[], Effects::ssaoProg2Locs[];
 GLuint Effects::noiseTex;
 
 void Effects::Init(EFF_ENABLE_MASK mask) {
-	auto vs = IO::GetText(IO::path + "/minVert.txt");
+	auto vs = glsl::minVert;
 
 	if (!!(mask & EFF_ENABLE_BLUR))
 		_InitBlur(vs);

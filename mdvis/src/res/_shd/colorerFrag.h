@@ -1,5 +1,5 @@
 namespace glsl {
-    const char colererFrag[] = R"(
+	const char colererFrag[] = R"(
 #version 330
 
 uniform usampler2D idTex;
@@ -19,9 +19,13 @@ vec3 gradfill(float f) {
 }
 
 void main () {
-	//float idf = floor(texture(idTex, gl_FragCoord.xy / screenSize).x);
-	//int id = int(idf);
-	int id = int(texture(idTex, gl_FragCoord.xy / screenSize).x);
+	uvec4 tx = texture(idTex, gl_FragCoord.xy / screenSize);
+	if (tx.y == 1U) {
+		float v = float(tx.x);
+		fragCol = vec4(gradfill(1 - (v / 65535)), 1);
+		return;
+	}
+	int id = int(tx.x);
 	if (id == 0) {
 		fragCol = vec4(0.5, 0.5, 0.5, 1);
 		return;

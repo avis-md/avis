@@ -2,8 +2,9 @@
 #include "Engine.h"
 
 //shorthands
-Vec4 black(float f = 1);
-Vec4 red(float f = 1, float i = 1), green(float f = 1, float i = 1), blue(float f = 1, float i = 1), cyan(float f = 1, float i = 1), yellow(float f = 1, float i = 1), white(float f = 1, float i = 1);
+extern inline Vec4 black(float f = 1);
+extern inline Vec4 red(float f = 1, float i = 1), green(float f = 1, float i = 1), blue(float f = 1, float i = 1), cyan(float f = 1, float i = 1), yellow(float f = 1, float i = 1), white(float f = 1, float i = 1);
+extern inline Vec4 accent();
 
 class Color {
 public:

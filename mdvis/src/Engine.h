@@ -99,42 +99,6 @@
 #define GLFW_EXPOSE_NATIVE_WGL
 #include <GLFW/glfw3native.h>
 typedef GLFWwindow NativeWindow;
-#define LOGI(...)
-
-#elif defined(PLATFORM_ADR)
-#ifdef FEATURE_COMPUTE_SHADERS
-#include <GLES3\gl31.h>
-#else
-#include <GLES3\gl3.h>
-#endif
-//#include <GLES\gl.h>
-#include <GLES\glext.h>
-#include <GLES3\gl3ext.h>
-#include <android/input.h>
-#include <android/native_window.h>
-typedef void GLFWwindow;
-typedef unsigned int size_t;
-typedef ANativeWindow NativeWindow;
-#define NULL 0
-
-#include <android/log.h>
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "ChokoLait", __VA_ARGS__))
-
-//define some functions not available is OPENGL ES
-extern void glPolygonMode(GLenum a, GLenum b);
-#define GL_BGR GL_RGB
-#define GL_BGRA GL_RGBA
-#define GL_LINE 0U
-#define GL_FILL 0U
-
-#elif defined(PLATFORM_LNX) || defined(PLATFORM_OSX)
-#include "GL/glew.h"
-#include "GLFW/glfw3.h"
-//#define GLFW_EXPOSE_NATIVE_X11
-//#define GLFW_EXPOSE_NATIVE_GLX
-//#include "GLFW/glfw3native.h"
-//typedef void* NativeWindow;
-typedef GLFWwindow NativeWindow;
 #endif
 
 #include <complex>
@@ -154,34 +118,6 @@ typedef GLFWwindow NativeWindow;
 #include "glm/gtx/transform.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
-
-
-/* ffmpeg */
-#ifdef FEATURE_AV_CODECS
-#ifdef PLATFORM_WIN
-#pragma comment(lib, "ffmpeg_win.lib")
-#endif
-extern "C"
-{
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-}
-extern std::string ffmpeg_getmsg(int i);
-class ffmpeg_init {
-public:
-	ffmpeg_init() {
-		av_register_all();
-	};
-};
-#else
-class ffmpeg_init {};
-#endif
-#pragma endregion
-
-#ifndef IS_EDITOR
-extern bool _pipemode;
-#endif
 
 #pragma region Type Extensions
 
@@ -383,27 +319,6 @@ enum ASSETTYPE : byte {
 	ASSETTYPE_TEXTURE_REND = 0xa0
 };
 
-/*
-enum InputKey : byte {
-	Key_None = 0x00,
-	Key_Backspace = 0x08,
-	Key_Tab = 0x09,
-	Key_Enter = 0x0D,
-	Key_LeftShift = 0x10,
-	Key_LeftControl = 0x11,
-	Key_LeftAlt = 0x12,
-	Key_CapsLock = 0x14,
-	Key_Escape = 0x1B,
-	Key_Space = 0x20,
-	Key_LeftArrow = 0x25, Key_UpArrow, Key_RightArrow, Key_DownArrow,
-	Key_Delete = 0x2E,
-	Key_0 = 0x30, Key_1, Key_2, Key_3, Key_4, Key_5, Key_6, Key_7, Key_8, Key_9,
-	Key_A = 0x41, Key_B, Key_C, Key_D, Key_E, Key_F, Key_G, Key_H, Key_I, Key_J, Key_K, Key_L, Key_M, Key_N, Key_O, Key_P, Key_Q, Key_R, Key_S, Key_T, Key_U, Key_V, Key_W, Key_X, Key_Y, Key_Z,
-	Key_NumPad0 = 0x60, Key_NumPad1, Key_NumPad2, Key_NumPad3, Key_NumPad4, Key_NumPad5, Key_NumPad6, Key_NumPad7, Key_NumPad8, Key_NumPad9,
-	Key_NumPadMultiply, Key_NumPadAdd, Key_NumPadSeparator, Key_NumPadMinus, Key_NumPadDot, Key_NumPadDivide,
-	Key_Plus = 0xBB, Key_Comma, Key_Minus, Key_Dot
-};
-*/
 enum InputKey {
 	Key_None = 0,
 	Key_Space = 32,
@@ -566,10 +481,6 @@ public:
 
 	static Texture* fallbackTex;
 
-	static std::vector<std::ifstream> dataFiles;
-	static std::unordered_map<ASSETTYPE, std::vector<std::pair<byte, long>>, std::hash<byte>> dataPoss;
-	static std::unordered_map<ASSETTYPE, std::vector<void*>, std::hash<byte>> dataPossCache;
-
 	static GLuint quadBuffer;
 	static GLint drawQuadLocs[3], drawQuadLocsA[3], drawQuadLocsC[1];
 	static void ScanQuadParams();
@@ -578,19 +489,13 @@ public:
 	static void DrawQuad(float x, float y, float w, float h, Vec4 col);
 	static void DrawQuad(float x, float y, float w, float h, GLuint texture, Vec2 uv0, Vec2 uv1, Vec2 uv2, Vec2 uv3, bool single, Vec4 col, float miplevel = 0);
 	static void DrawCube(Vec3 pos, float dx, float dy, float dz, Vec4 col);
-	static void DrawIndices(const Vec3* poss, const int* is, int length, float r, float g, float b);
-	static void DrawIndicesI(const Vec3* poss, const int* is, int length, float r, float g, float b);
-
+	
 	static ulong idCounter;
 	static std::vector<Camera*> sceneCameras;
-	
-	static std::vector<std::ifstream*> assetStreams;
-	static std::unordered_map<byte, std::vector<string>> assetData;
 
 	static std::thread::id _mainThreadId;
 
 	static void Init(string path = "");
-	static bool LoadDatas(string path);
 
 	static std::vector<Rect> stencilRects;
 	static Rect* stencilRect;

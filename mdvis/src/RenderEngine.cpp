@@ -15,7 +15,7 @@ void _InitGBuffer(GLuint* d_fbo, GLuint* d_colfbo, GLuint* d_texs, GLuint* d_dep
 
 	//id
 	glBindTexture(GL_TEXTURE_2D, *d_idTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, (int)w, (int)h, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32UI, (int)w, (int)h, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *d_idTex, 0);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

@@ -3,15 +3,24 @@
 #include "ui/icons.h"
 #include "res/shddata.h"
 
+inline Vec4 black(float f) { return Vec4(0, 0, 0, f); }
+inline Vec4 red(float f, float i) { return Vec4(i, 0, 0, f); }
+inline Vec4 green(float f, float i) { return Vec4(0, i, 0, f); }
+inline Vec4 blue(float f, float i) { return Vec4(0, 0, i, f); }
+inline Vec4 cyan(float f, float i) { return Vec4(i*0.09f, i*0.706f, i, f); }
+inline Vec4 yellow(float f, float i) { return Vec4(i, i, 0, f); }
+inline Vec4 white(float f, float i) { return Vec4(i, i, i, f); }
+inline Vec4 accent() { return Vec4(1, 0.8f, 0.2f, 1); }
+
 GLuint Color::pickerProgH = 0;
 GLuint Color::pickerProgSV = 0;
 
 void Color::Init() {
-	std::vector<string> s2 = string_split(glsl::colorPickerSV, '$');
-	Color::pickerProgSV = Shader::FromVF(s2[0], s2[1]);
-
-	s2 = string_split(glsl::colorPickerH, '$');
-	Color::pickerProgH = Shader::FromVF(s2[0], s2[1]);
+	GLuint vs;
+	Shader::LoadShader(GL_VERTEX_SHADER, glsl::colorPickerVert, vs);
+	Color::pickerProgSV = Shader::FromF(vs, glsl::colorPickerSV);
+	Color::pickerProgH = Shader::FromF(vs, glsl::colorPickerH);
+	glDeleteShader(vs);
 }
 
 void Color::Hsv2Rgb(float h, float s, float v, byte& r, byte& g, byte& b) {

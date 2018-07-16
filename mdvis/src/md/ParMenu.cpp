@@ -31,15 +31,14 @@ void ParMenu::Draw() {
 			switch (activeMenu) {
 			case 0:
 				if (!!Protein::proCnt) {
-					const Vec4 hl = Vec4(1, 0.8f, 0.2f, 1);
-					if (UI2::Button2(expandPos - 148, 20, 70, "Atoms", Icons::vis_atom, white(1, 0.3f), (!activeSubMenu[0]) ? hl : white(0.8f)) == MOUSE_RELEASE) {
+					if (UI2::Button2(expandPos - 148, 20, 70, "Atoms", Icons::vis_atom, white(1, 0.3f), (!activeSubMenu[0]) ? accent() : white(0.8f)) == MOUSE_RELEASE) {
 						activeSubMenu[0] = 0;
 					}
-					if (UI2::Button2(expandPos - 77, 20, 75, "Proteins", Icons::vis_prot, white(1, 0.3f), (!activeSubMenu[0]) ? white(0.8f) : hl) == MOUSE_RELEASE) {
+					if (UI2::Button2(expandPos - 77, 20, 75, "Proteins", Icons::vis_prot, white(1, 0.3f), (!activeSubMenu[0]) ? white(0.8f) : accent()) == MOUSE_RELEASE) {
 						activeSubMenu[0] = 1;
 					}
 					if (!activeSubMenu[0]) Draw_List(38);
-					else Protein::DrawMenu();
+					else Protein::DrawMenu(38);
 				}
 				else Draw_List(20);
 				break;
@@ -118,11 +117,10 @@ void ParMenu::Draw_List(float off) {
 	}
 	off += 17;
 	//Engine::DrawQuad(1, off-1, expandPos - 2, Display::height - 37.0f, white(0.9f, 0.1f));
-	Engine::BeginStencil(0, off-1, expandPos, Display::height - 18 - off);
-	off = 38;
+	Engine::BeginStencil(0, off, expandPos, Display::height - 18 - off);
 	for (uint i = 0; i < Particles::residueListSz; i++) {
 		auto& rli = Particles::residueLists[i];
-		if (off > 0) {
+		//if (off > 0) {
 			Engine::DrawQuad(expandPos - 148, off, 146, 16, rli.selected? Vec4(0.45f, 0.3f, 0.1f, 1) : white(1, 0.3f));
 			if (Engine::Button(expandPos - 148, off, 16, 16, rli.expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) {
 				rli.expanded = !rli.expanded;
@@ -156,14 +154,14 @@ void ParMenu::Draw_List(float off) {
 				rli.visible = !rli.visible;
 				ParGraphics::UpdateDrawLists();
 			}
-		}
+		//}
 		off += 17;
 		if (off > Display::height)
 			goto loopout;
 		if (rli.expanded) {
 			for (uint j = 0; j < rli.residueSz; j++) {
 				auto& rj = rli.residues[j];
-				if (off > 0) {
+				//if (off > 0) {
 					Engine::DrawQuad(expandPos - 143, off, 141, 16, white(1, 0.35f));
 					if (Engine::Button(expandPos - 143, off, 16, 16, rj.expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) {
 						rj.expanded = !rj.expanded;
@@ -177,7 +175,7 @@ void ParMenu::Draw_List(float off) {
 					if (Engine::Button(expandPos - 18, off, 16, 16, rj.visible ? Icons::visible : Icons::hidden) == MOUSE_RELEASE) {
 						rj.visible = !rj.visible;
 					}
-				}
+				//}
 				off += 17;
 				if (off >= Display::height)
 					goto loopout;
