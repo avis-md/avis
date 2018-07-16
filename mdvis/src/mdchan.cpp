@@ -13,9 +13,8 @@ void MdChan::Init() {
 	t4 = Random::Range(0, 30.0f);
 }
 
-void MdChan::Draw(Vec2 pos) {
+void MdChan::Draw(Vec2 pos, float sz) {
 	pos.y += cosf(powf(fmodf(Time::time * 0.6f, 1.0f), 0.6f) * 2 * PI) * Display::height * 0.03f;
-	float sz = Display::height * 0.05f;
 	blink -= Time::delta;
 	if (blink < -0.1f) {
 		blink = Random::Range(0.5f, 2.5f);

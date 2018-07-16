@@ -73,24 +73,24 @@ void Particles::Clear() {
 		delete[](particles_Vel);
 		delete[](particles_Col);
 		delete[](particles_Conn);
+		particles_Pos = 0;
 		/*
 		for (auto& c : particles_Conn2) {
 			delete[](c.ids);
 		}
 		*/
-		glDeleteBuffers(1, &posBuffer);
-		glDeleteBuffers(1, &connBuffer);
-		glDeleteVertexArrays(1, &posVao);
-		glDeleteTextures(1, &posTexBuffer);
-		glDeleteTextures(1, &connTexBuffer);
 		residueListSz = particleSz = connSz = 0;
 
-		delete[](anim.poss[0]);
-		delete[](anim.vels[0]);
-		if (anim.conns) delete[](anim.conns[0]);
-		delete[](anim.poss);
-		delete[](anim.vels);
-		delete[](anim.conns);
+		if (anim.poss) {
+			delete[](anim.poss[0]);
+			delete[](anim.vels[0]);
+			delete[](anim.poss);
+			delete[](anim.vels);
+			if (anim.conns) {
+				delete[](anim.conns[0]);
+				delete[](anim.conns);
+			}
+		}
 		/*
 		for (auto& c : anim.conns2) {
 			delete[](c.first);

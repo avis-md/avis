@@ -1,5 +1,5 @@
 namespace glsl {
-    const char reflFrag[] = R"(
+	const char reflFrag[] = R"(
 #version 330
 
 uniform mat4 _IP;
@@ -42,7 +42,7 @@ void main () {
     vec4 wPos2 = _IP*vec4(uv.x*2-1, uv.y*2-1, -1, 1);
     wPos2 /= wPos2.w;
     vec3 fwd = normalize(wPos.xyz - wPos2.xyz);
-
+	
     if (z >= 1) {
         fragCol.rgb = bgCol;
     }

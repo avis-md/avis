@@ -186,9 +186,8 @@ void Protein::Refresh() {
 	}
 
 	if (!!proCnt) {
-		int c = max(proCnt-1, 1);
 		for (byte b = 0; b < proCnt; b++) {
-			pros[b].tint = Color::HueBaseCol((0.67f * b) / c);
+			pros[b].tint = Color::HueBaseCol(1 - (float(b) / proCnt));
 		}
 	}
 }
@@ -262,6 +261,7 @@ void Protein::Recolor() {
 
 	for (byte b = 0; b < proCnt; b++) {
 		auto& p = pros[b];
+		if (p.drawGrad) continue;
 		glUniform1i(colShadLocs[2], b);
 		glUniform4f(colShadLocs[3], p.tint.r, p.tint.g, p.tint.b, 1);
 
@@ -292,6 +292,10 @@ void Protein::DrawMenu(float off) {
 		if (Engine::Button(exp - 130, off, 96, 16) == MOUSE_RELEASE) {
 			
 		}
+		if (Engine::Button(exp - 34, off, 16, 16, p.drawGrad ? Icons::pro_grad : Icons::pro_col, p.drawGrad ? white(0.8f) : p.tint) == MOUSE_RELEASE) {
+			p.drawGrad ^= 1;
+			ParGraphics::UpdateDrawLists();
+		}
 		if (Engine::Button(exp - 18, off, 16, 16, p.visible ? Icons::visible : Icons::hidden) == MOUSE_RELEASE) {
 			p.visible = !p.visible;
 			ParGraphics::UpdateDrawLists();
@@ -303,7 +307,7 @@ void Protein::DrawMenu(float off) {
 			for (int f1 = p.first.x; f1 < Particles::residueListSz; f1++) {
 				auto& rli = Particles::residueLists[f1];
 				while (f2 < rli.residueSz) {
-					Engine::DrawQuad(exp - 143, off, 146, 16, white(1, 0.4f));
+					Engine::DrawQuad(exp - 143, off, 141, 16, white(1, 0.4f));
 					UI::Label(exp - 141, off, 12, rli.name, white());
 					f2++;
 					off += 17;

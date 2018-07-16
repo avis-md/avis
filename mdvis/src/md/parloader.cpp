@@ -2,6 +2,7 @@
 #include "Gromacs.h"
 #include "Protein.h"
 #include "vis/pargraphics.h"
+#include "md/ParMenu.h"
 #include "web/anweb.h"
 #include "ui/icons.h"
 #include "utils/rawvector.h"
@@ -371,10 +372,10 @@ void ParLoader::DoOpen() {
 	}
 
 	VisSystem::message = "Loaded " + nm + " in " + std::to_string((milliseconds() - t)*0.001f).substr(0, 5) + "s";
-
+	ParMenu::SaveRecents(droppedFiles[0]);
+	ParLoader::parDirty = true;
 	busy = false;
 	fault = false;
-	ParLoader::parDirty = true;
 }
 
 void ParLoader::DoOpenAnim() {
@@ -531,6 +532,7 @@ void ParLoader::DrawOpenDialog() {
 			td.detach();
 		}
 		else {
+			Particles::Clear();
 			std::thread td(DoOpen);
 			td.detach();
 		}

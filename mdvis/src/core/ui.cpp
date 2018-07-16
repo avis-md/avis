@@ -418,12 +418,16 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 	GLuint tex = font->glyph((uint)round(s));
 	font->SizeVec(sz);
 	byte align = (byte)font->alignment;
-	if ((align & 15) > 0) {
-		float totalW = 0;
-		for (uint i = 0; i < sz * 4; i += 4) {
-			auto& c = str[i / 4];
-				totalW += font->o2s[c] * s;
+	float totalW = 0;
+	for (uint i = 0; i < sz; i ++) {
+		auto& c = str[i];
+		totalW += font->o2s[c] * s;
+		if (maxw > 0 && totalW > maxw) {
+			sz = i;
+			break;
 		}
+	}
+	if ((align & 15) > 0) {
 		x -= totalW * (align & 15) * 0.5f;
 	}
 

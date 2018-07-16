@@ -120,9 +120,10 @@ void paintfunc() {
 		}
 		else {
 			UI::font->Align(ALIGN_TOPCENTER);
-			UI::Label(Display::width * 0.5f, Display::height * 0.6f, 12, "Press F1 for Help", white());
-			UI::Label(Display::width * 0.5f, Display::height * 0.6f + 14, 12, "Build: " __DATE__, white());
+			UI::Label(Display::width * 0.5f, Display::height * 0.55f, 12, "Press F1 for Help", white());
+			UI::Label(Display::width * 0.5f, Display::height * 0.55f + 14, 12, "Build: " __DATE__ "  " __TIME__, white());
 			UI::font->Align(ALIGN_TOPLEFT);
+			ParMenu::DrawRecents(Vec4(200, Display::height * 0.55f + 40, Display::width - 400, Display::height * 0.45f - 80));
 		}
 	}
 
@@ -196,6 +197,7 @@ void paintfunc() {
 	}
 
 	VisRenderer::Draw();
+	if (ParMenu::showSplash) ParMenu::DrawSplash();
 	HelpMenu::Draw();
 }
 
@@ -236,6 +238,7 @@ int main(int argc, char **argv) {
 	AnNode::Init();
 	Effects::Init(0xffff);
 	MdChan::Init();
+	ParMenu::LoadRecents();
 
 	AnBrowse::Scan();
 
