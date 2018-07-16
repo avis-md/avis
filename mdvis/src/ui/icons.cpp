@@ -13,10 +13,10 @@ Texture* Icons::expand, *Icons::collapse, *Icons::play, *Icons::playall, *Icons:
 *Icons::colorwheel,
 *Icons::vis_atom, *Icons::vis_prot;
 
-#define TEXN(nm) new Texture(res:: ## nm ## _png, res:: ## nm ## _png_sz)
-#define TEX(nm) nm = new Texture(res:: ## nm ## _png, res:: ## nm ## _png_sz)
-#define TEXNP(nm) new Texture(res:: ## nm ## _png, res:: ## nm ## _png_sz, TEX_FILTER_POINT)
-#define TEXP(nm) nm = new Texture(res:: ## nm ## _png, res:: ## nm ## _png_sz, TEX_FILTER_POINT)
+#define TEXN(nm) new Texture(res::nm ## _png, res::nm ## _png_sz)
+#define TEX(nm) nm = new Texture(res::nm ## _png, res::nm ## _png_sz)
+#define TEXNP(nm) new Texture(res::nm ## _png, res::nm ## _png_sz, TEX_FILTER_POINT)
+#define TEXP(nm) nm = new Texture(res::nm ## _png, res::nm ## _png_sz, TEX_FILTER_POINT)
 
 void Icons::Init() {
 	TEXP(expand);
