@@ -4,8 +4,9 @@
 #include "utils/spline.h"
 #include "utils/solidify.h"
 #include "utils/solidify.h"
-#include "vis/pargraphics.h";
+#include "vis/pargraphics.h"
 #include "ui/icons.h"
+#include "ui/ui_ext.h"
 #include "res/shddata.h"
 
 //const byte signature[] = { 2, 'H', 0, 'C', 2, 'H', 0, 'C', 1, 'O', 0 };
@@ -15,6 +16,8 @@ Protein* Protein::pros;
 
 GLuint Protein::shad, Protein::colShad;
 GLint Protein::shadLocs[], Protein::colShadLocs[];
+
+Protein::Protein() : cnt(0), chainReso(8), loopReso(20), expanded(false), visible(true), drawGrad(false) {}
 
 byte AminoAcidType (const char* nm) {
 	uint32_t i = *(uint32_t*)nm;
@@ -67,6 +70,7 @@ void Protein::Init() {
 	LC(chainReso);
 	LC(loopReso);
 	LC(proId);
+	LC(beziery);
 #undef LC
 	colShad = Shader::FromVF(glsl::minVert, glsl::colererFragPro);
 	i = 0;
@@ -238,6 +242,7 @@ void Protein::Draw() {
         glUniform1i(shadLocs[5], p.chainReso);
         glUniform1i(shadLocs[6], p.loopReso);
 		glUniform1i(shadLocs[7], b);
+		glUniform1f(shadLocs[8], p.smoothness);
 
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glBindVertexArray(Camera::emptyVao);
