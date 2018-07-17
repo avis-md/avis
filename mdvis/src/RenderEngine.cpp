@@ -263,12 +263,12 @@ GLint Camera::d_skyProgramLocs[9];
 uint Camera::GetIdAt(uint x, uint y) {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, d_fbo);
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
-	uint pixel[4];
+	uint pixel[2];
 	x = uint(x * quality);
 	y = uint(y * quality);
 	glReadPixels(x, d_h - y - 1, 1, 1, GL_RG_INTEGER, GL_UNSIGNED_INT, pixel);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-	if (pixel[0] != 0) return 0;
+	if (pixel[1] != 0) return 0;
 	return pixel[0];
 }
 

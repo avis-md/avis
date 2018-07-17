@@ -18,7 +18,7 @@ public:
 
 	static std::vector<string> recentFiles, recentFilesN;
 
-	static void Draw(), Draw_List(float off), DrawSplash();
+	static void Draw(), Draw_List(float off), DrawStart(), DrawSplash();
 	static void SelClear(), SelInv(), SelAll();
 
 	static void LoadRecents(), SaveRecents(const string& entry), DrawRecents(Vec4 rect);

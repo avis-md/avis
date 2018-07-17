@@ -188,17 +188,26 @@ void ParLoader::DoOpen() {
 	try {
 		if (impId > -1) {
 			if (!importers[impId]->funcs[funcId].second(&info)) {
-				if (!info.error[0])
+				if (!info.error[0]) {
 					Debug::Error("ParLoader", "Unspecified importer error!");
-				else
+					VisSystem::message = "Unspecified import error";
+				}
+				else {
 					Debug::Error("ParLoader", "Importer error: " + string(info.error));
+					VisSystem::message = info.error;
+				}
+				busy = false;
+				fault = true;
+				return;
 			}
 		}
 	}
 	catch (char* c) {
-		Debug::Error("ParLoader", "Importer exception: " + string(c));
+		Debug::Warning("ParLoader", "Importer exception: " + string(c));
+		VisSystem::message = "Importer threw " + string(c);
 		busy = false;
 		fault = true;
+		return;
 	}
 
 	*loadProgress2 = 0;
