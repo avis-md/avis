@@ -99,6 +99,14 @@
 #define GLFW_EXPOSE_NATIVE_WGL
 #include <GLFW/glfw3native.h>
 typedef GLFWwindow NativeWindow;
+#else
+#include "GL/glew.h"
+#include "GLFW/glfw3.h"
+//#define GLFW_EXPOSE_NATIVE_X11
+//#define GLFW_EXPOSE_NATIVE_GLX
+//#include "GLFW/glfw3native.h"
+//typedef void* NativeWindow;
+typedef GLFWwindow NativeWindow;
 #endif
 
 #include <complex>

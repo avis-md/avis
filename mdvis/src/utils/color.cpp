@@ -3,14 +3,14 @@
 #include "ui/icons.h"
 #include "res/shddata.h"
 
-inline Vec4 black(float f) { return Vec4(0, 0, 0, f); }
-inline Vec4 red(float f, float i) { return Vec4(i, 0, 0, f); }
-inline Vec4 green(float f, float i) { return Vec4(0, i, 0, f); }
-inline Vec4 blue(float f, float i) { return Vec4(0, 0, i, f); }
-inline Vec4 cyan(float f, float i) { return Vec4(i*0.09f, i*0.706f, i, f); }
-inline Vec4 yellow(float f, float i) { return Vec4(i, i, 0, f); }
-inline Vec4 white(float f, float i) { return Vec4(i, i, i, f); }
-inline Vec4 accent() { return Vec4(1, 0.8f, 0.2f, 1); }
+Vec4 black(float f) { return Vec4(0, 0, 0, f); }
+Vec4 red(float f, float i) { return Vec4(i, 0, 0, f); }
+Vec4 green(float f, float i) { return Vec4(0, i, 0, f); }
+Vec4 blue(float f, float i) { return Vec4(0, 0, i, f); }
+Vec4 cyan(float f, float i) { return Vec4(i*0.09f, i*0.706f, i, f); }
+Vec4 yellow(float f, float i) { return Vec4(i, i, 0, f); }
+Vec4 white(float f, float i) { return Vec4(i, i, i, f); }
+Vec4 accent() { return Vec4(1, 0.8f, 0.2f, 1); }
 
 GLuint Color::pickerProgH = 0;
 GLuint Color::pickerProgSV = 0;

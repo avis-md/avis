@@ -132,7 +132,7 @@ void VisSystem::DrawTitle() {
 	UI::Label(Display::width * 0.6f + 2, 1, 12, message, white(0.5f));
 
 	UI::font->Align(ALIGN_TOPRIGHT);
-	UI::Label(Display::width - 5.0f, 3, 10, __VERSION__, white(0.7f));
+	UI::Label(Display::width - 5.0f, 3, 10, __APPVERSION__, white(0.7f));
 	UI::font->Align(ALIGN_TOPLEFT);
 }
 

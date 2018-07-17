@@ -79,7 +79,7 @@ void Camera::GenGBuffer2() {
 
 		//id
 		glBindTexture(GL_TEXTURE_2D, d_texs2[0]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, d_w2, d_h2, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32UI, d_w2, d_h2, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, d_texs2[0], 0);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

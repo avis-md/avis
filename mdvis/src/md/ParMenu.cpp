@@ -268,7 +268,7 @@ void ParMenu::DrawSplash() {
 	Engine::DrawQuad(0, 0, Display::width, Display::height, black(0.7f));
 	UI::Texture(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, ParGraphics::splash);
 	UI::font->Align(ALIGN_TOPRIGHT);
-	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 120, 12, __VERSION__, white());
+	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 120, 12, __APPVERSION__, white());
 	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 104, 12, "Build: " __DATE__ "  " __TIME__, white());
 	UI::font->Align(ALIGN_TOPLEFT);
 	auto pos = Vec4(Display::width*0.5f - 20, Display::height*0.5f - 80, 215, 183);
@@ -361,7 +361,7 @@ void ParMenu::DrawRecents(Vec4 pos) {
 	UI::Label(pos.x + 2, pos.y + 1, 12, "Recent Files", white());
 	Engine::DrawQuad(pos.x, pos.y + 17, pos.z, pos.w - 17, white(0.7f, 0.05f));
 	for (uint i = 0; i < recentFiles.size(); i++) {
-		if (35 + 17 * i > pos.z) break;
+		if (35 + 17 * i > pos.w) break;
 		if (Engine::Button(pos.x + 5, pos.y + 20 + 17 * i, pos.z - 10, 16, white(0, 0.4f), recentFilesN[i], 12, white()) == MOUSE_RELEASE) {
 			ParLoader::OnOpenFile(std::vector<string>{ recentFiles[i] });
 		}
