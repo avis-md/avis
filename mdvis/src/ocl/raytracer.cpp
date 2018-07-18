@@ -294,6 +294,7 @@ void RayTracer::DrawMenu() {
 	SV(mt.gloss, gls) = UI2::Slider(expandPos - 147, off + 17 * 2, 147, "Gloss", 0, 1, mt.gloss);
 
 	if ((info.str != str) || (mt.specular != spc) || mt.gloss != gls) {
+		mt.rough = (1-mt.gloss)*0.5f;
 		_cntt = 0;
 	}
 }

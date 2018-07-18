@@ -11,7 +11,8 @@ Texture* Icons::expand, *Icons::collapse, *Icons::play, *Icons::playall, *Icons:
 *Icons::icon_anl, *Icons::log, *Icons::newfile, *Icons::openfile,
 *Icons::dm_none, *Icons::dm_point, *Icons::dm_ball, *Icons::dm_vdw, *Icons::dm_line, *Icons::dm_stick, *Icons::dm_lineball, *Icons::dm_stickball,
 *Icons::colorwheel,
-*Icons::vis_atom, *Icons::vis_prot;
+*Icons::vis_atom, *Icons::vis_prot,
+*Icons::pro_col, *Icons::pro_grad;
 
 #define TEXN(nm) new Texture(res::nm ## _png, res::nm ## _png_sz)
 #define TEX(nm) nm = new Texture(res::nm ## _png, res::nm ## _png_sz)
@@ -62,6 +63,8 @@ void Icons::Init() {
 	TEX(colorwheel);
 	TEX(vis_atom);
 	TEX(vis_prot);
+	TEX(pro_col);
+	TEX(pro_grad);
 }
 
 Texture* Icons::OfDM(byte b) {

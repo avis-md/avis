@@ -60,9 +60,9 @@ rCamera ChokoLait::mainCamera = rCamera();
 std::vector<dropFileFunc> ChokoLait::dropFuncs;
 
 void _dieded(int i) {
-#ifdef PLATFORM_WIN
-	MessageBox(glfwGetWin32Window(Display::window), "Beep Boop, I Crashed.\nSee Log.txt for details.", "!", MB_OK);
-#endif
+//#ifdef PLATFORM_WIN
+//	MessageBox(glfwGetWin32Window(Display::window), "Beep Boop, I Crashed.\nSee Log.txt for details.", "!", MB_OK);
+//#endif
 	throw "abort trap!";
 }
 

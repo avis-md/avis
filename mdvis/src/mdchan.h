@@ -8,5 +8,5 @@ public:
 
 	static void Init();
 
-	static void Draw(Vec2 pos);
+	static void Draw(Vec2 pos, float sz = Display::height * 0.05f);
 };

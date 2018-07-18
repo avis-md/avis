@@ -18,7 +18,8 @@ public:
 		*dm_line, *dm_stick,
 		*dm_lineball, *dm_stickball,
 		*colorwheel,
-		*vis_atom, *vis_prot;
+		*vis_atom, *vis_prot,
+		*pro_col, *pro_grad;
 	
 	static Texture* OfDM(byte b);
 };

@@ -7,16 +7,20 @@
 #include "ui/popups.h"
 #include "ui/ui_ext.h"
 #include "ocl/raytracer.h"
+#include "mdchan.h"
 
 int ParMenu::activeMenu = 0;
 int ParMenu::activeSubMenu[] = {};
 const string ParMenu::menuNames[] = { "Particles", "Graphics", "Render", ".", ".." };
 bool ParMenu::expanded = true;
 float ParMenu::expandPos = 150;
+bool ParMenu::showSplash = false;
 
 uint ParMenu::selCnt;
 byte ParMenu::drawTypeAll, ParMenu::_drawTypeAll;
 bool ParMenu::visibleAll;
+
+std::vector<string> ParMenu::recentFiles, ParMenu::recentFilesN;
 
 void ParMenu::Draw() {
 	Engine::DrawQuad(0, 18, expandPos, Display::height - 36.0f, white(0.9f, 0.15f));
@@ -71,7 +75,7 @@ void ParMenu::Draw() {
 		Engine::RotateUI(90, Vec2(expandPos + 16, 18));
 		UI::font->Align(ALIGN_TOPCENTER);
 		for (uint i = 0; i < 5; i++) {
-			UI::Label(expandPos + 56 + 81 * i, 18, 12, menuNames[i], white());
+			UI::Label(expandPos + 56 + 81 * i, 18, 12, menuNames[i], (i == activeMenu) ? accent() : white());
 		}
 		UI::font->Align(ALIGN_TOPLEFT);
 		Engine::ResetUIMatrix();
@@ -235,6 +239,59 @@ loopout:
 	Engine::EndStencil();
 }
 
+void ParMenu::DrawStart() {
+	UI::Texture(0, 0, (float)Display::width, (float)Display::height, ParGraphics::bg, DRAWTEX_CROP);
+	MdChan::Draw(Vec2(Display::width * 0.5f, Display::height * 0.3f));
+	//UI::Texture(Display::width * 0.5f - Display::height * 0.2f, Display::height * 0.4f, Display::height * 0.4f, Display::height * 0.2f, logo);
+	if (ParLoader::busy) {
+		Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100, 6, white(0.8f, 0.2f));
+		Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100 * *ParLoader::loadProgress, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
+		float oy = 10;
+		if (ParLoader::loadProgress2 && *ParLoader::loadProgress2 > 0) {
+			Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f + 8, 100, 6, white(0.8f, 0.2f));
+			Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f + 8, 100 * *ParLoader::loadProgress2, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
+			oy = 18;
+		}
+		UI::Label(Display::width * 0.5f - 48, Display::height * 0.6f + oy, 12, ParLoader::loadName);
+	}
+	else {
+		UI::font->Align(ALIGN_TOPCENTER);
+		UI::Label(Display::width * 0.5f, Display::height * 0.55f, 12, "Press F1 for Help", white());
+		UI::Label(Display::width * 0.5f, Display::height * 0.55f + 14, 12, "Build: " __DATE__ "  " __TIME__, white());
+		UI::font->Align(ALIGN_TOPLEFT);
+		ParMenu::DrawRecents(Vec4(200, Display::height * 0.55f + 40, Display::width - 400, Display::height * 0.45f - 80));
+	}
+}
+
+void ParMenu::DrawSplash() {
+	UI::IncLayer();
+	Engine::DrawQuad(0, 0, Display::width, Display::height, black(0.7f));
+	UI::Texture(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, ParGraphics::splash);
+	UI::font->Align(ALIGN_TOPRIGHT);
+	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 120, 12, __APPVERSION__, white());
+	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 104, 12, "Build: " __DATE__ "  " __TIME__, white());
+	UI::font->Align(ALIGN_TOPLEFT);
+	auto pos = Vec4(Display::width*0.5f - 20, Display::height*0.5f - 80, 215, 183);
+	if (!!recentFiles.size()) {
+		UI::Label(pos.x + 2, pos.y + 1, 12, "Recent Files", white());
+		Engine::DrawQuad(pos.x, pos.y + 17, pos.z, pos.w - 17, white(0.7f, 0.05f));
+		for (uint i = 0; i < recentFiles.size(); i++) {
+			if (35 + 17 * i > pos.z) break;
+			auto ms = Engine::Button(pos.x + 5, pos.y + 20 + 17 * i, pos.z - 10, 16, white(0, 0.4f), recentFilesN[i], 12, white());
+			if (ms == MOUSE_RELEASE) {
+				showSplash = false;
+				ParLoader::OnOpenFile(std::vector<string>{ recentFiles[i] });
+			}
+			if (ms & MOUSE_HOVER_FLAG) {
+				UI::Label(Display::width*0.5f - 190, pos.y + pos.w + 1, 12, recentFiles[i], white(0.7f));
+			}
+		}
+	}
+	if ((Input::KeyDown(Key_Escape) && UI::_layer == UI::_layerMax) || (Input::mouse0State == 1 && !Rect(Display::width*0.5f - 200, Display::height*0.5f - 150, 400, 300).Inside(Input::mousePos))) {
+		showSplash = false;
+	}
+}
+
 void ParMenu::SelAll() {
 	drawTypeAll = Particles::residueLists[0].drawType;
 	visibleAll = false;
@@ -263,4 +320,51 @@ void ParMenu::SelClear() {
 		rli.selected = false;
 	}
 	selCnt = 0;
+}
+
+void ParMenu::LoadRecents() {
+	recentFiles.clear();
+	recentFilesN.clear();
+	std::ifstream strm(IO::path + "/.recentfiles");
+	if (strm.is_open()) {
+		string s;
+		while (std::getline(strm, s, '\n')) {
+			if (!!s.size()) {
+				recentFiles.push_back(s);
+				recentFilesN.push_back(s.substr(s.find_last_of('/') + 1));
+			}
+		}
+	}
+}
+
+void ParMenu::SaveRecents(const string& entry) {
+	auto at = std::find(recentFiles.begin(), recentFiles.end(), entry);
+	if (at != recentFiles.end()) {
+		recentFiles.erase(at);
+		int loc = at - recentFiles.begin();
+		recentFilesN.erase(recentFilesN.begin() + loc);
+	}
+	else if (recentFiles.size() >= 10) {
+		recentFiles.pop_back();
+		recentFilesN.pop_back();
+	}
+	recentFiles.insert(recentFiles.begin(), entry);
+	recentFilesN.insert(recentFilesN.begin(), entry.substr(entry.find_last_of('/') + 1));
+	std::ofstream strm(IO::path + "/.recentfiles");
+	for (auto& s : recentFiles) {
+		strm << s << "\n";
+	}
+}
+
+void ParMenu::DrawRecents(Vec4 pos) {
+	if (!recentFiles.size()) return;
+	UI::Label(pos.x + 2, pos.y + 1, 12, "Recent Files", white());
+	Engine::DrawQuad(pos.x, pos.y + 17, pos.z, pos.w - 17, white(0.7f, 0.05f));
+	for (uint i = 0; i < recentFiles.size(); i++) {
+		if (35 + 17 * i > pos.w) break;
+		if (Engine::Button(pos.x + 5, pos.y + 20 + 17 * i, pos.z - 10, 16, white(0, 0.4f), recentFilesN[i], 12, white()) == MOUSE_RELEASE) {
+			ParLoader::OnOpenFile(std::vector<string>{ recentFiles[i] });
+		}
+		UI::Label(pos.x + pos.z * 0.3f, pos.y + 20 + 17 * i, 12, recentFiles[i], white(0.5f), pos.z * 0.7f - 5);
+	}
 }

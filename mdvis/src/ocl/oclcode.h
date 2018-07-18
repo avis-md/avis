@@ -26,27 +26,27 @@ typedef struct {
 	float3 dir;
 } ray_st;
 
-uint Rand(uint rnd) {
+static uint Rand(uint rnd) {
 	rnd ^= rnd << 13;
 	rnd ^= rnd >> 17;
 	rnd ^= rnd << 5;
 	return rnd;
 }
 
-float Randf(uint* r) {
+static float Randf(uint* r) {
 	*r = Rand(*r);
 	return 0.0001f*(*r % 10000);
 }
 
-float Len2(float3 vec) {
+static float Len2(float3 vec) {
 	return vec.x*vec.x + vec.y*vec.y + vec.z*vec.z;
 }
 
-float Len(float3 vec) {
+static float Len(float3 vec) {
     return sqrt(Len2(vec));
 }
 
-ray_st Refl(ray_st ray, float3 pos, float3 nrm) {
+static ray_st Refl(ray_st ray, float3 pos, float3 nrm) {
 	ray_st res;
 	res.pos = pos;
 	res.dir = ray.dir - 2 * dot(ray.dir, nrm) * nrm;
@@ -54,27 +54,7 @@ ray_st Refl(ray_st ray, float3 pos, float3 nrm) {
 	return res;
 }
 
-float3 Rot(float3 vec, float2 r) {
-	float3 t1 = (float3)(0, 0, 1);
-	float3 t2 = normalize(cross(vec, t1));
-	t1 = normalize(cross(t2, vec));
-	float pi = 3.14159f;
-	r.y *= 0.05f;//r.y = 1.0f;
-	float3 tn = t1*cos(r.x*2*pi) + t2*sin(r.x*2*pi);
-	return vec*cos(r.y*pi/2) + tn*sin(r.y*pi/2);
-}
-
-float2 BMT(float r1, float r2, float s) {
-	float2 res;
-	float R = max(sqrt(-2*log((r1+0.04f)*0.962f)) / 2.5f, 0.0f);
-	float T = 2 * 3.14159f * r2;
-	float mul = pow(1 - s, 2.5f);
-	res.x = R * cos(T) * mul;
-	res.y = R * sin(T) * mul;
-	return res;
-}
-
-float3 MatMul(float* mat, float3 vec) {
+static float3 MatMul(float* mat, float3 vec) {
 	float3 res;
 	res.x = mat[0]*vec.x + mat[4]*vec.y + mat[8]*vec.z + mat[12];
 	res.y = mat[1]*vec.x + mat[5]*vec.y + mat[9]*vec.z + mat[13];
@@ -83,7 +63,7 @@ float3 MatMul(float* mat, float3 vec) {
 	return res / w;
 }
 
-float2 LineNearest(float3 p1, float3 p2, float3 d1, float3 d2) {
+static float2 LineNearest(float3 p1, float3 p2, float3 d1, float3 d2) {
 	float dab = dot(d1, d2);
 	if (dab > 0.9999f || dab < -0.9999f) return (float2)(-100, -100);
 	
@@ -100,7 +80,7 @@ float2 LineNearest(float3 p1, float3 p2, float3 d1, float3 d2) {
 
 //------------------------------
 
-ray_st Diffuse(float3 pos, float3 nrm, uint* rnd) {
+static ray_st Diffuse(float3 pos, float3 nrm, uint* rnd) {
 	ray_st res;
 	res.pos = pos;
 	float r1 = Randf(rnd);
@@ -112,7 +92,8 @@ ray_st Diffuse(float3 pos, float3 nrm, uint* rnd) {
 	return res;
 }
 
-float OrenNayar(float3 eye, float3 nrm, float3 out, float rough) {
+/*
+static float OrenNayar(float3 eye, float3 nrm, float3 out, float rough) {
 	if (rough < 0.00001f) {
 		return dot(out, nrm);
 	}
@@ -131,8 +112,8 @@ float OrenNayar(float3 eye, float3 nrm, float3 out, float rough) {
 		return cs * (A + (B * max(0.f, cp) * sin(a) * tan(b)));
 	}
 }
-
-void Beckmann(float3* nrm, float rough, uint* rnd) {
+*/
+static void Beckmann(float3* nrm, float rough, uint* rnd) {
 	float a = rough * rough;
 	//float t1 = acos(sqrt(1/(1-a*log(1-Randf(rnd)))));
 	float t1 = atan(sqrt(-a*log(1-Randf(rnd))));
@@ -142,7 +123,7 @@ void Beckmann(float3* nrm, float rough, uint* rnd) {
 	*nrm = *nrm * cos(t1) + (n1 * cos(t2) + n2 * sin(t2)) * sin(t1);
 }
 
-float Int_Ball(ray_st ray, float3 loc, float rad, float3* pos, float3* nrm) {
+static float Int_Ball(ray_st ray, float3 loc, float rad, float3* pos, float3* nrm) {
 	float3 L = loc - ray.pos;
 	float3 D = ray.dir;
 	float lL2 = Len2(L);
@@ -160,7 +141,7 @@ float Int_Ball(ray_st ray, float3 loc, float rad, float3* pos, float3* nrm) {
 	return dst;
 }
 
-float Int_Tube(ray_st ray, float3 loc1, float3 loc2, float rad, float3* pos, float3* nrm, float* lrp) {
+static float Int_Tube(ray_st ray, float3 loc1, float3 loc2, float rad, float3* pos, float3* nrm, float* lrp) {
     float3 tdd = loc2-loc1;
     float tdl2 = Len2(tdd);
     float tdl = sqrt(tdl2);
@@ -213,7 +194,7 @@ float Int_Tube(ray_st ray, float3 loc1, float3 loc2, float rad, float3* pos, flo
     }
 }
 
-ray_st GetRay(info_st info, float2 uv) {
+static ray_st GetRay(info_st info, float2 uv) {
 	ray_st ray;
 	float3 pos;
 	pos.x = uv.x;
@@ -226,7 +207,7 @@ ray_st GetRay(info_st info, float2 uv) {
 	return ray;
 }
 
-float4 SkyAt(float3 dir, info_st info, __global float* bg) {
+static float4 SkyAt(float3 dir, info_st info, __global float* bg) {
     //return (float4)(1, 1, 1, 1);
 	float2 rf = -normalize((float2)(dir.x, dir.z));
 	float cx = acos(clamp(rf.x, -0.9999f, 0.9999f))/(3.14159f*2);
@@ -241,7 +222,7 @@ float4 SkyAt(float3 dir, info_st info, __global float* bg) {
     //return (float4)(sy + 0.5f, 0, 0, 1);
 }
 
-float4 Trace(
+static float4 Trace(
     info_st info, ray_st ray, uint rnd,
     __global float* bg,
     __global float* ballPoss, int ballCnt,

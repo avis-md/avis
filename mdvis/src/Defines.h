@@ -1,5 +1,7 @@
 #pragma once
 
+#define __APPVERSION__ "version 0.01"
+
 #if defined(__APPLE__)
 #ifndef PLATFORM_OSX
 #define PLATFORM_OSX

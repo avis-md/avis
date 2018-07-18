@@ -40,7 +40,7 @@ HEADERS += vis/pargraphics.h vis/system.h vis/shadows.h vis/renderer.h
 HEADERS += res/resdata.h res/shddata.h
 HEADERS += utils/color.h utils/effects.h utils/fft.h utils/ifaddrs.h utils/net.h utils/plot.h utils/precedurals.h utils/ptrext.h utils/random.h utils/rawvector.h utils/rect.h utils/serial.h utils/solidify.h utils/spline.h utils/stream.h utils/strext.h utils/xml.h utils/dialog.o utils/dylib.h utils/runcmd.h utils/ssh.h utils/BVH.h utils/tinyfiledialogs.h
 HEADERS += live/livesyncer.h live/lj256.h
-HEADERS += ocl/raytracer.h
+HEADERS += ocl/raytracer.h ocl/oclcode.h
 
 ../build/mdvis: $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)

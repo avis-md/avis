@@ -14,7 +14,7 @@
 #include "ocl/raytracer.h"
 #include "res/shddata.h"
 
-Texture* ParGraphics::bg = nullptr, *ParGraphics::logo = nullptr;
+Texture* ParGraphics::bg = nullptr, *ParGraphics::splash = nullptr, *ParGraphics::logo = nullptr;
 GLuint ParGraphics::refl, ParGraphics::reflE;
 float ParGraphics::reflStr = 2, ParGraphics::reflStrDecay = 2, ParGraphics::specStr = 0.2f;
 Vec4 ParGraphics::bgCol = Vec4(1, 1, 1, 1);
@@ -142,6 +142,7 @@ void ParGraphics::Init() {
 
 
 	bg = new Texture(IO::path + "/res/bg.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
+	splash = new Texture(IO::path + "/res/bg_splash.png", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	reflProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), glsl::reflFrag);
 #define LC(nm) reflProgLocs[i++] = glGetUniformLocation(reflProg, #nm)
 	uint i = 0;
@@ -575,7 +576,7 @@ void ParGraphics::BlitSky() {
 	glUniform1f(reflProgLocs[8], reflStr);
 	glUniform1f(reflProgLocs[9], reflStrDecay);
 	glUniform1f(reflProgLocs[10], specStr);
-	glUniform4f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
+	glUniform3f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

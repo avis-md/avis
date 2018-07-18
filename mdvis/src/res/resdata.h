@@ -54,3 +54,5 @@
 #include "_res/zoomout.h"
 #include "_res/vis_atom.h"
 #include "_res/vis_prot.h"
+#include "_res/pro_col.h"
+#include "_res/pro_grad.h"

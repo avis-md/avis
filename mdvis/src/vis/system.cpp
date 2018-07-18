@@ -5,6 +5,7 @@
 #include "vis/renderer.h"
 #include "web/anweb.h"
 #include "ui/icons.h"
+#include "ui/help.h"
 #include "live/livesyncer.h"
 #include "utils/dialog.h"
 
@@ -88,7 +89,10 @@ void VisSystem::Init() {
 	mic[0].Set(0, "boo", 0);
 	mic[1].Set(0, "foo", 0);
 	mi[3].Set(Icons::openfile, "Append", 0);
-	mi[4].Set(Icons::cross, "Dummy", 0);
+	mi[4].Set(Icons::vis_atom, "Splash Screen", []() {
+		if (!!Particles::particleSz)
+			ParMenu::showSplash = true;
+	});
 
 	auto& mi2 = menuItems[3];
 	mi2.resize(5);
@@ -101,9 +105,10 @@ void VisSystem::Init() {
 	mi2[4].Set(0, "Options", 0);
 
 	auto& mi3 = menuItems[4];
-	mi3.resize(2);
-	mi3[0].Set(0, "Show Help", 0);
-	mi3[1].Set(0, "About", 0);
+	mi3.resize(1);
+	mi3[0].Set(0, "Show Help", []() {
+		HelpMenu::show = true;
+	});
 }
 
 bool VisSystem::InMainWin(const Vec2& pos) {
@@ -127,7 +132,7 @@ void VisSystem::DrawTitle() {
 	UI::Label(Display::width * 0.6f + 2, 1, 12, message, white(0.5f));
 
 	UI::font->Align(ALIGN_TOPRIGHT);
-	UI::Label(Display::width - 5.0f, 3, 10, "version 0.01", white(0.7f));
+	UI::Label(Display::width - 5.0f, 3, 10, __APPVERSION__, white(0.7f));
 	UI::font->Align(ALIGN_TOPLEFT);
 }
 

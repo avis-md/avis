@@ -4,8 +4,9 @@
 #include "utils/spline.h"
 #include "utils/solidify.h"
 #include "utils/solidify.h"
-#include "vis/pargraphics.h";
+#include "vis/pargraphics.h"
 #include "ui/icons.h"
+#include "ui/ui_ext.h"
 #include "res/shddata.h"
 
 //const byte signature[] = { 2, 'H', 0, 'C', 2, 'H', 0, 'C', 1, 'O', 0 };
@@ -15,6 +16,8 @@ Protein* Protein::pros;
 
 GLuint Protein::shad, Protein::colShad;
 GLint Protein::shadLocs[], Protein::colShadLocs[];
+
+Protein::Protein() : cnt(0), chainReso(8), loopReso(20), expanded(false), visible(true), drawGrad(false) {}
 
 byte AminoAcidType (const char* nm) {
 	uint32_t i = *(uint32_t*)nm;
@@ -67,6 +70,7 @@ void Protein::Init() {
 	LC(chainReso);
 	LC(loopReso);
 	LC(proId);
+	LC(beziery);
 #undef LC
 	colShad = Shader::FromVF(glsl::minVert, glsl::colererFragPro);
 	i = 0;
@@ -186,9 +190,8 @@ void Protein::Refresh() {
 	}
 
 	if (!!proCnt) {
-		int c = max(proCnt-1, 1);
 		for (byte b = 0; b < proCnt; b++) {
-			pros[b].tint = Color::HueBaseCol((0.67f * b) / c);
+			pros[b].tint = Color::HueBaseCol(1 - (float(b) / proCnt));
 		}
 	}
 }
@@ -239,6 +242,7 @@ void Protein::Draw() {
         glUniform1i(shadLocs[5], p.chainReso);
         glUniform1i(shadLocs[6], p.loopReso);
 		glUniform1i(shadLocs[7], b);
+		glUniform1f(shadLocs[8], p.smoothness);
 
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glBindVertexArray(Camera::emptyVao);
@@ -262,6 +266,7 @@ void Protein::Recolor() {
 
 	for (byte b = 0; b < proCnt; b++) {
 		auto& p = pros[b];
+		if (p.drawGrad) continue;
 		glUniform1i(colShadLocs[2], b);
 		glUniform4f(colShadLocs[3], p.tint.r, p.tint.g, p.tint.b, 1);
 
@@ -292,6 +297,10 @@ void Protein::DrawMenu(float off) {
 		if (Engine::Button(exp - 130, off, 96, 16) == MOUSE_RELEASE) {
 			
 		}
+		if (Engine::Button(exp - 34, off, 16, 16, p.drawGrad ? Icons::pro_grad : Icons::pro_col, p.drawGrad ? white(0.8f) : p.tint) == MOUSE_RELEASE) {
+			p.drawGrad ^= 1;
+			ParGraphics::UpdateDrawLists();
+		}
 		if (Engine::Button(exp - 18, off, 16, 16, p.visible ? Icons::visible : Icons::hidden) == MOUSE_RELEASE) {
 			p.visible = !p.visible;
 			ParGraphics::UpdateDrawLists();
@@ -303,7 +312,7 @@ void Protein::DrawMenu(float off) {
 			for (int f1 = p.first.x; f1 < Particles::residueListSz; f1++) {
 				auto& rli = Particles::residueLists[f1];
 				while (f2 < rli.residueSz) {
-					Engine::DrawQuad(exp - 143, off, 146, 16, white(1, 0.4f));
+					Engine::DrawQuad(exp - 143, off, 141, 16, white(1, 0.4f));
 					UI::Label(exp - 141, off, 12, rli.name, white());
 					f2++;
 					off += 17;

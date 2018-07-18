@@ -79,7 +79,7 @@ void Camera::GenGBuffer2() {
 
 		//id
 		glBindTexture(GL_TEXTURE_2D, d_texs2[0]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, d_w2, d_h2, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32UI, d_w2, d_h2, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, d_texs2[0], 0);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -263,12 +263,12 @@ GLint Camera::d_skyProgramLocs[9];
 uint Camera::GetIdAt(uint x, uint y) {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, d_fbo);
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
-	uint pixel[4];
+	uint pixel[2];
 	x = uint(x * quality);
 	y = uint(y * quality);
 	glReadPixels(x, d_h - y - 1, 1, 1, GL_RG_INTEGER, GL_UNSIGNED_INT, pixel);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-	if (pixel[0] != 0) return 0;
+	if (pixel[1] != 0) return 0;
 	return pixel[0];
 }
 
