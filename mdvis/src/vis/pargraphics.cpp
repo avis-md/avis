@@ -355,8 +355,8 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		auto _p = MVP::projection();
 		if (dragging) {
 			auto imvp = glm::inverse(_p * _mv);
-			scrX = imvp * Vec4(1, 0, 0, 0);
-			scrY = imvp * Vec4(0, 1, 0, 0);
+			scrX = Vec3(imvp * Vec4(1, 0, 0, 0));
+			scrY = Vec3(imvp * Vec4(0, 1, 0, 0));
 		}
 
 		auto ql = ChokoLait::mainCamera->quality;

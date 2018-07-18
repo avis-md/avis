@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <cstring>
 #include <cmath>
 #include <algorithm>
 #include "pdb.h"

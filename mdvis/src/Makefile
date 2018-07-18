@@ -1,21 +1,24 @@
 OSFLAG :=
 LDFLAGS2 :=
 GLLIB :=
+LIBS2 :=
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	OSFLAG += -D PLATFORM_LNX
 	LDFLAGS2 += -Wl,-rpath='$$ORIGIN' -static-libstdc++
-	GLLIB += -lGL -lglfw3 -lGLEW -ljpeg -lfreetype
+	GLLIB += -ljpeg -lssh2 -lOpenCL `pkg-config --static --libs gl glew glfw3 freetype2` #-lGL -lglfw3 -lGLEW -ljpeg -lfreetype
 endif
 ifeq ($(UNAME_S),Darwin)
 	OSFLAG += -D PLATFORM_OSX
 	GLLIB += -framework OpenGL -framework OpenCL /usr/local/Cellar/glew/2.1.0/lib/libGLEW.a /usr/local/Cellar/jpeg/9c/lib/libjpeg.a /usr/local/Cellar/freetype/2.9.1/lib/libfreetype.a /usr/local/Cellar/libpng/1.6.34/lib/libpng.a -lbz2 -lglfw3 -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo
+	LIBS2 += /usr/local/Cellar/libssh2/1.8.0/lib/libssh2.a /usr/local/Cellar/openssl/1.0.2o_1/lib/libcrypto.a
 endif
 
+C = gcc
 CXX = g++
-CXXFLAGS = -O0 -g -std=c++11 -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ -I/usr/include/python2.7/ -I/usr/local/include/python2.7/ -I/usr/local/include/xdrfile/ -D CHOKO_LAIT $(OSFLAG) -ferror-limit=1
+CXXFLAGS = -O0 -g -std=c++11 -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ -I/usr/include/python2.7/ -I/usr/local/include/python2.7/ -D CHOKO_LAIT $(OSFLAG)
 LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
-LIBS = -L/usr/lib/python2.7 -L/usr/local/lib/python2.7 -lpthread -lm $(GLLIB) -lxdrfile -lz -lpython2.7 /usr/local/Cellar/libssh2/1.8.0/lib/libssh2.a /usr/local/Cellar/openssl/1.0.2o_1/lib/libcrypto.a
+LIBS = -L/usr/lib/python2.7 -L/usr/local/lib/python2.7 -lpthread -lm $(GLLIB) -lz -lpython2.7 $(LIBS2)
 
 OBJS = obj/hdr.o obj/lodepng.o obj/AudioEngine.o obj/ChokoLait.o obj/Engine.o obj/main.o obj/RenderEngine.o obj/Types.o obj/mdchan.o
 OBJS += obj/asset/mesh.o obj/asset/shader.o obj/asset/rendertexture.o obj/asset/texture.o obj/asset/texture3d.o
@@ -28,6 +31,7 @@ OBJS += obj/ui/popups.o obj/ui/icons.o obj/ui/help.o obj/ui/ui_ext.o
 OBJS += obj/vis/pargraphics.o obj/vis/system.o obj/vis/shadows.o obj/vis/renderer.o
 OBJS += obj/live/livesyncer.o live/lj256.o
 OBJS += obj/ocl/raytracer.o
+OBJS += obj/xdrfile/xdrfile.o obj/xdrfile/xdrfile_trr.o obj/xdrfile/xdrfile_xtc.o
 
 HEADERS = hdr.h lodepng.h AssetObjects.h AudioEngine.h ChokoLait.h Defines.h Engine.h SceneObjects.h SceneScriptResolver.h mdchan.h
 HEADERS += asset/mesh.h asset/shader.h asset/rendertexture.h asset/texture.h asset/texture3d.h
@@ -41,6 +45,7 @@ HEADERS += res/resdata.h res/shddata.h
 HEADERS += utils/color.h utils/effects.h utils/fft.h utils/ifaddrs.h utils/net.h utils/plot.h utils/precedurals.h utils/ptrext.h utils/random.h utils/rawvector.h utils/rect.h utils/serial.h utils/solidify.h utils/spline.h utils/stream.h utils/strext.h utils/xml.h utils/dialog.o utils/dylib.h utils/runcmd.h utils/ssh.h utils/BVH.h utils/tinyfiledialogs.h
 HEADERS += live/livesyncer.h live/lj256.h
 HEADERS += ocl/raytracer.h ocl/oclcode.h
+HEADERSX = xdrfile/xdrfile.h xdrfile/xdrfile_trr.h xdrfile/xdrfile_xtc.h
 
 ../build/mdvis: $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
@@ -48,6 +53,10 @@ HEADERS += ocl/raytracer.h ocl/oclcode.h
 obj/%.o: $(HEADERS)
 obj/%.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+obj/xdrfile/%.o: $(HEADERSX)
+obj/xdrfile/%.o: xdrfile/%.c
+	$(C) $(CXXFLAGS) -c $< -o $@
 
 obj/utils/tinyfiledialogs.o: utils/tinyfiledialogs.c
 	$(CXX) $(CXXFLAGS) -c $< -o $@

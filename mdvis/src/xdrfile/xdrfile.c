@@ -2,7 +2,7 @@
  *
  * $Id$
  *
- /* -*- mode: c; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*-
+ * -*- mode: c; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*-
  *
  * $Id$
  *
@@ -32,6 +32,10 @@
  */
 
 /* Get HAVE_RPC_XDR_H, F77_FUNC from config.h if available */
+#ifndef PLATFORM_WIN
+#define sprintf_s(a,b,c) sprintf(a,c)
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -217,7 +221,11 @@ xdrfile_open(const char *path, const char *mode)
   
 	if((xfp=(XDRFILE *)malloc(sizeof(XDRFILE)))==NULL)
 		return NULL;
+#ifdef PLATFORM_WIN
 	fopen_s(&xfp->fp, path, newmode);
+#else
+	xfp->fp = fopen(path, newmode);	
+#endif
 	if(!xfp->fp)
     {
 		free(xfp);

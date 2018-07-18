@@ -105,9 +105,9 @@ Transform& Transform::Rotate(Vec3 v, TransformSpace sp) {
 		Vec4 vx = im*Vec4(1, 0, 0, 0);
 		Vec4 vy = im*Vec4(0, 1, 0, 0);
 		Vec4 vz = im*Vec4(0, 0, 1, 0);
-		Quat qx = QuatFunc::FromAxisAngle(vx, v.x);
-		Quat qy = QuatFunc::FromAxisAngle(vy, v.y);
-		Quat qz = QuatFunc::FromAxisAngle(vz, v.z);
+		Quat qx = QuatFunc::FromAxisAngle(Vec3(vx), v.x);
+		Quat qy = QuatFunc::FromAxisAngle(Vec3(vy), v.y);
+		Quat qz = QuatFunc::FromAxisAngle(Vec3(vz), v.z);
 		_rotation = qx * qy * qz * _rotation;
 		_UpdateWEuler();
 		_W2LQuat();

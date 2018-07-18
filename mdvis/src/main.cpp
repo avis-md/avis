@@ -201,7 +201,7 @@ int main(int argc, char **argv) {
 	ChokoLait::Init(800, 800);
 	GLFWimage icon;
 	icon.pixels = Texture::LoadPixels(res::icon_png, res::icon_png_sz, (uint&)icon.width, (uint&)icon.height);
-	glfwSetWindowIcon(Display::window, 1, &icon);
+	//glfwSetWindowIcon(Display::window, 1, &icon);
 	delete[](icon.pixels);
 
 	RayTracer::Init();

@@ -14,7 +14,13 @@
 #else
 #include <CL/cl_gl.h>
 #ifdef PLATFORM_LNX
+#define Time Time_XII
+#define Font Font_XII
+#define Display Display_XII
 #include <GL/glx.h>
+#undef Time
+#undef Font
+#undef Display
 #endif
 #endif
 
@@ -38,8 +44,9 @@ cl_kernel RayTracer::_kernel;
 cl_mem _bufr, _bg, _bls, _cns, _cls, _rds;
 
 bool RayTracer::Init(){
-	cl_platform_id platform;
-	clGetPlatformIDs(1, &platform, 0);
+	cl_platform_id platform = 0;
+	auto res = clGetPlatformIDs(1, &platform, 0);
+	if ((res != CL_SUCCESS) || !platform) return false;	
 	cl_device_id device;
 	clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, 0);
 
