@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-alpha/dist/katex.min.css" integrity="sha384-BTL0nVi8DnMrNdMQZG1Ww6yasK9ZGnUxL1ZWukXQ7fygA1py52yPp9W4wrR00VML" crossorigin="anonymous">
+        <style>
+/*--------------------------------------------------------------------------------------------- * Copyright (c) Microsoft Corporation. All rights reserved. * Licensed under the MIT License. See License.txt in the project root for license information. *--------------------------------------------------------------------------------------------*/ body { font-family: "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback"; font-size: 14px; padding: 0 26px; line-height: 22px; word-wrap: break-word; } #code-csp-warning { position: fixed; top: 0; right: 0; color: white; margin: 16px; text-align: center; font-size: 12px; font-family: sans-serif; background-color:#444444; cursor: pointer; padding: 6px; box-shadow: 1px 1px 1px rgba(0,0,0,.25); } #code-csp-warning:hover { text-decoration: none; background-color:#007acc; box-shadow: 2px 2px 2px rgba(0,0,0,.25); } body.scrollBeyondLastLine { margin-bottom: calc(100vh - 22px); } body.showEditorSelection .code-line { position: relative; } body.showEditorSelection .code-active-line:before, body.showEditorSelection .code-line:hover:before { content: ""; display: block; position: absolute; top: 0; left: -12px; height: 100%; } body.showEditorSelection li.code-active-line:before, body.showEditorSelection li.code-line:hover:before { left: -30px; } .vscode-light.showEditorSelection .code-active-line:before { border-left: 3px solid rgba(0, 0, 0, 0.15); } .vscode-light.showEditorSelection .code-line:hover:before { border-left: 3px solid rgba(0, 0, 0, 0.40); } .vscode-light.showEditorSelection .code-line .code-line:hover:before { border-left: none; } .vscode-dark.showEditorSelection .code-active-line:before { border-left: 3px solid rgba(255, 255, 255, 0.4); } .vscode-dark.showEditorSelection .code-line:hover:before { border-left: 3px solid rgba(255, 255, 255, 0.60); } .vscode-dark.showEditorSelection .code-line .code-line:hover:before { border-left: none; } .vscode-high-contrast.showEditorSelection .code-active-line:before { border-left: 3px solid rgba(255, 160, 0, 0.7); } .vscode-high-contrast.showEditorSelection .code-line:hover:before { border-left: 3px solid rgba(255, 160, 0, 1); } .vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before { border-left: none; } img { max-width: 100%; max-height: 100%; } a { text-decoration: none; } a:hover { text-decoration: underline; } a:focus, input:focus, select:focus, textarea:focus { outline: 1px solid -webkit-focus-ring-color; outline-offset: -1px; } hr { border: 0; height: 2px; border-bottom: 2px solid; } h1 { padding-bottom: 0.3em; line-height: 1.2; border-bottom-width: 1px; border-bottom-style: solid; } h1, h2, h3 { font-weight: normal; } h1 code, h2 code, h3 code, h4 code, h5 code, h6 code { font-size: inherit; line-height: auto; } table { border-collapse: collapse; } table > thead > tr > th { text-align: left; border-bottom: 1px solid; } table > thead > tr > th, table > thead > tr > td, table > tbody > tr > th, table > tbody > tr > td { padding: 5px 10px; } table > tbody > tr + tr > td { border-top: 1px solid; } blockquote { margin: 0 7px 0 5px; padding: 0 16px 0 10px; border-left-width: 5px; border-left-style: solid; } code { font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback"; font-size: 14px; line-height: 19px; } body.wordWrap pre { white-space: pre-wrap; } .mac code { font-size: 12px; line-height: 18px; } pre:not(.hljs), pre.hljs code > div { padding: 16px; border-radius: 3px; overflow: auto; } /** Theming */ pre code { color: var(--vscode-editor-foreground); } .vscode-light pre:not(.hljs), .vscode-light code > div { background-color: rgba(220, 220, 220, 0.4); } .vscode-dark pre:not(.hljs), .vscode-dark code > div { background-color: rgba(10, 10, 10, 0.4); } .vscode-high-contrast pre:not(.hljs), .vscode-high-contrast code > div { background-color: rgb(0, 0, 0); } .vscode-high-contrast h1 { border-color: rgb(0, 0, 0); } .vscode-light table > thead > tr > th { border-color: rgba(0, 0, 0, 0.69); } .vscode-dark table > thead > tr > th { border-color: rgba(255, 255, 255, 0.69); } .vscode-light h1, .vscode-light hr, .vscode-light table > tbody > tr + tr > td { border-color: rgba(0, 0, 0, 0.18); } .vscode-dark h1, .vscode-dark hr, .vscode-dark table > tbody > tr + tr > td { border-color: rgba(255, 255, 255, 0.18); } 
+</style>
+<style>
+/* Tomorrow Theme */ /* http://jmblog.github.com/color-themes-for-google-code-highlightjs */ /* Original theme - https://github.com/chriskempson/tomorrow-theme */ /* Tomorrow Comment */ .hljs-comment, .hljs-quote { color: #8e908c; } /* Tomorrow Red */ .hljs-variable, .hljs-template-variable, .hljs-tag, .hljs-name, .hljs-selector-id, .hljs-selector-class, .hljs-regexp, .hljs-deletion { color: #c82829; } /* Tomorrow Orange */ .hljs-number, .hljs-built_in, .hljs-builtin-name, .hljs-literal, .hljs-type, .hljs-params, .hljs-meta, .hljs-link { color: #f5871f; } /* Tomorrow Yellow */ .hljs-attribute { color: #eab700; } /* Tomorrow Green */ .hljs-string, .hljs-symbol, .hljs-bullet, .hljs-addition { color: #718c00; } /* Tomorrow Blue */ .hljs-title, .hljs-section { color: #4271ae; } /* Tomorrow Purple */ .hljs-keyword, .hljs-selector-tag { color: #8959a8; } .hljs { display: block; overflow-x: auto; color: #4d4d4c; padding: 0.5em; } .hljs-emphasis { font-style: italic; } .hljs-strong { font-weight: bold; }
+</style>
+<style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'HelveticaNeue-Light', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+    </head>
+    <body>
+        <h1 id="a-name%22%22ainterface-guide"><a name=""></a>Interface Guide</h1>
+<h2 id="a-name%22menu%22amenu-bar"><a name="menu"></a>Menu bar</h2>
+<ul>
+<li><a href="#1cm">Context menu</a>
+<ul>
+<li><a href="#1fl">File</a></li>
+<li><a href="#1ed">Edit</a></li>
+<li><a href="#1op">Options</a></li>
+<li><a href="#1rn">Render</a></li>
+<li><a href="#1hl">Help</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="bottom-bar">Bottom bar</h2>
+<ul>
+<li><a href="#2an">Animation bar</a></li>
+</ul>
+<h2 id="inspector-tab">Inspector tab</h2>
+<ul>
+<li>
+<p><a href="#3pr">Particles</a></p>
+<ul>
+<li><a href="#3at">Atoms</a></li>
+<li><a href="#3pt">Proteins</a></li>
+</ul>
+</li>
+<li>
+<p><a href="#3gp">Graphics</a></p>
+</li>
+<li>
+<p>Render</p>
+</li>
+</ul>
+<h2 id="analysis-tab">Analysis tab</h2>
+<h2 id="live-run-tab">Live run tab</h2>
+<h1 id="details">Details</h1>
+<h2 id="a-name%221cm%22acontext-menu"><a name="1cm"></a>Context menu</h2>
+<h2 id="a-name%222bb%22abottom-bar"><a name="2bb"></a>Bottom bar</h2>
+<h2 id="a-name%223it%22ainspector-tab"><a name="3it"></a>Inspector tab</h2>
+<p>The inspector tab is the tab on the left.</p>
+<h3 id="a-name%223pr%22aparticles"><a name="3pr"></a>Particles</h3>
+<p>The particles tab lists the molecular information in the scene. When a protein is present, you can switch between atom view and protein view using the topmost buttons.</p>
+<h4 id="a-name%223at%22aatoms"><a name="3at"></a>Atoms</h4>
+<p>Atoms are grouped in order of Residues.</p>
+<img style="float: left;" src="./atoms.png"/>
+<div style="padding-left: 180px">
+<ol>
+<li>Select all residues</li>
+<li>Deselect all residues</li>
+<li>Flip select residues</li>
+<li>Change draw method of selected residue(s)</li>
+<li>Show/Hide selected residue(s)</li>
+<li>Change draw method of residue(s)</li>
+<li>Show/Hide residue(s)</li>
+<li>Residue name group</li>
+<li>Residue ID group</li>
+<li>Atom entry</li>
+<li>Change atom color</li>
+</ol>
+<p>Shift-click to select multiple residues. Selecting an atom will shade the atom in green. Double click to focus on the atom selected.</p>
+</div>
+<h4 id="a-name%223pt%22aproteins"><a name="3pt"></a>Proteins</h4>
+<img style="float: left;" src="./proteins.png"/>
+<div style="padding-left: 180px">
+<p>Proteins are grouped by chains.</p>
+<ol>
+<li>Select all proteins</li>
+<li>Deselect all proteins</li>
+<li>Flip select proteins</li>
+<li>Change draw method of selected protein(s)</li>
+<li>Show/Hide selected protein(s)</li>
+<li>Change draw method of protein(s)</li>
+<li>Show/Hide protein(s)</li>
+<li>Chain residue entry</li>
+</ol>
+</div>
+<h3 id="a-name%223gp%22agraphics"><a name="3gp"></a>Graphics</h3>
+<p>Graphics settings adjust how the scene is displayed.</p>
+<img style="float: left;" src="./graphics.png"/>
+<div style="padding-left: 180px">
+<p>Shading</p>
+<ul>
+<li>
+<p>Classic</p>
+<p>The scene is colored using Lambert and Blinn-Phong lighting. Slightly faster but lower quality.</p>
+</li>
+<li>
+<p>PBR</p>
+<p>The scene is colored using physically-based materials and environment maps. Higher quality but slightly slower.</p>
+</li>
+</ul>
+<h4 id="lighting">Lighting</h4>
+<pre><code>Strength: Strength of diffuse lighting (environment strength).
+
+Falloff: How much the light gets weaker when further away from the camera.
+
+Specular: The strength of reflection. For PBR, diffuse intensity = 1 - specular intensity.
+
+Background: Background color.
+</code></pre>
+<h4 id="camera">Camera</h4>
+<pre><code>Target: always focus on particle(s) during animations.
+
+Center X,Y,Z: Center of camera rotation.
+
+Rotation W, Y: Angle of camera.
+
+Scale: Zoom factor of camera.
+
+Quality: Draw quality of scene.
+
+Use Dynamic Quality: Use a different quality when camera is moving. Suitable for heavy scenes.
+
+Quality 2: Draw quality of scene when camera is moving.
+</code></pre>
+<h4 id="effects">Effects</h4>
+<pre><code>Ambient occlusion: Darken creases between near objects. Might slow down the scene substantially.
+
+Shadows (WIP): Directional shadows. Very heavy calculations as the scene is drawn 2 times.
+</code></pre>
+</div>
+<h2 id="a-name%224at%22aanalysis-tab"><a name="4at"></a>Analysis tab</h2>
+<h2 id="a-name%225lt%22alive-run-tab"><a name="5lt"></a>Live run tab</h2>
+
+    </body>
+    </html>

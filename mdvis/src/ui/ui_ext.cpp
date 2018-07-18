@@ -58,3 +58,14 @@ MOUSE_STATUS UI2::Button2(float x, float y, float w, const string& s, Texture* t
 	UI::font->alignment = ALIGN_TOPLEFT;
 	return ret;
 }
+
+void UI2::Dropdown(float x, float y, float w, const string& title, const Popups::DropdownItem& data) {
+	UI::Label(x, y, 12, title, white());
+	w /= 2;
+	if (Engine::Button(x + w, y, w - 1, 16, white(1, 0.3f), data.list[*data.target], 12, white()) == MOUSE_RELEASE) {
+		Popups::type = POPUP_TYPE::DROPDOWN;
+		Popups::pos = Vec2(x + w, y + 16);
+		Popups::pos2.x = w - 1;
+		Popups::data = (Popups::DropdownItem*)&data;
+	}
+}

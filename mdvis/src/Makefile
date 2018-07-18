@@ -56,7 +56,7 @@ obj/%.o: %.cpp
 
 obj/xdrfile/%.o: $(HEADERSX)
 obj/xdrfile/%.o: xdrfile/%.c
-	$(C) $(CXXFLAGS) -c $< -o $@
+	$(C) -g -c $< -o $@
 
 obj/utils/tinyfiledialogs.o: utils/tinyfiledialogs.c
 	$(CXX) $(CXXFLAGS) -c $< -o $@

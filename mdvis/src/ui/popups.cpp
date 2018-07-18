@@ -2,7 +2,7 @@
 #include "vis/pargraphics.h"
 
 POPUP_TYPE Popups::type = POPUP_TYPE::NONE;
-Vec2 Popups::pos = Vec2();
+Vec2 Popups::pos, Popups::pos2;
 void* Popups::data = 0;
 
 void Popups::Draw() {
@@ -19,6 +19,9 @@ void Popups::Draw() {
 	case POPUP_TYPE::COLORPICK:
 		Color::DrawPicker();
 		break;
+	case POPUP_TYPE::DROPDOWN:
+		DrawDropdown();
+		break;
     default:
         break;
     }
@@ -28,6 +31,22 @@ void Popups::DrawMenu() {
 	auto mn = (std::vector<MenuItem>*)data;
 	if (DoDrawMenu(mn, pos.x, pos.y)) {
 		type = POPUP_TYPE::NONE;
+	}
+}
+
+void Popups::DrawDropdown() {
+	auto dt = (DropdownItem*)data;
+	uint n = 0;
+	while (!!dt->list[n][0]) n++;
+	Engine::DrawQuad(pos.x-1, pos.y, pos2.x+2, 16*n + 1, black(0.7f));
+	for (uint a = 0; a < n; a++) {
+		if (Engine::Button(pos.x, pos.y + 16*a, pos2.x, 16, white(1, 0.2f), dt->list[a], 12, white()) == MOUSE_RELEASE) {
+			(*dt->target) = a;
+			Popups::type = POPUP_TYPE::NONE;
+		}
+	}
+	if ((Input::mouse0State == 1) && !Engine::Button(pos.x, pos.y, pos2.x, 16*n)) {
+		Popups::type = POPUP_TYPE::NONE;
 	}
 }
 

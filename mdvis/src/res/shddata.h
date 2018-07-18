@@ -18,5 +18,6 @@
 #include "_shd/minVert.h"
 #include "_shd/popupShadFrag.h"
 #include "_shd/reflFrag.h"
+#include "_shd/reflFragC.h"
 #include "_shd/voxelFrag.h"
 #include "_shd/voxelVert.h"

@@ -5,7 +5,8 @@ enum class POPUP_TYPE : byte {
     NONE,
 	MENU,
     DRAWMODE,
-	COLORPICK
+	COLORPICK,
+	DROPDOWN
 };
 
 struct MenuItem {
@@ -25,10 +26,17 @@ struct MenuItem {
 
 class Popups {
 public:
+	struct DropdownItem {
+		DropdownItem(uint* a, string* b) : target(a), list(b) {}
+
+		uint* target;
+		string* list;
+	};
+
     static POPUP_TYPE type;
-    static Vec2 pos;
+    static Vec2 pos, pos2;
     static void* data;
 
-    static void Draw(), DrawMenu();
+    static void Draw(), DrawMenu(), DrawDropdown();
 	static bool DoDrawMenu(std::vector<MenuItem>* mn, float x, float y);
 };

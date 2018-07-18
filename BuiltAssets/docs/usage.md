@@ -2,11 +2,11 @@
 
 ## [Interface Guide](usage/ui.html)
 
-- [Menu bar](usage/ui.html#menu)
-- [Bottom bar](usage/ui.html#bot)
-- [Inspector tab](usage/ui.html#tool)
-- [Analysis tab](usage/ui.html#anl)
-- [Live run tab](usage/ui.html#live)
+- [Menu bar](usage/ui.html#1cm)
+- [Bottom bar](usage/ui.html#2bb)
+- [Inspector tab](usage/ui.html#3it)
+- [Analysis tab](usage/ui.html#4at)
+- [Live run tab](usage/ui.html#5lt)
 
 ## [Opening file(s)](usage/io.html)
 

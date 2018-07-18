@@ -21,14 +21,18 @@ Vec4 ParGraphics::bgCol = Vec4(1, 1, 1, 1);
 
 bool ParGraphics::useGradCol = false;
 
-GLuint ParGraphics::reflProg, ParGraphics::parProg, ParGraphics::parConProg, ParGraphics::parConLineProg;
-GLint ParGraphics::reflProgLocs[] = {}, ParGraphics::parProgLocs[] = {}, ParGraphics::parConProgLocs[] = {}, ParGraphics::parConLineProgLocs[] = {};
+GLuint ParGraphics::reflProg, ParGraphics::reflCProg, ParGraphics::parProg, ParGraphics::parConProg, ParGraphics::parConLineProg;
+GLint ParGraphics::reflProgLocs[] = {}, ParGraphics::reflCProgLocs[] = {}, ParGraphics::parProgLocs[] = {}, ParGraphics::parConProgLocs[] = {}, ParGraphics::parConLineProgLocs[] = {};
 
 GLuint ParGraphics::selHlProg, ParGraphics::colProg;
 GLint ParGraphics::selHlProgLocs[] = {}, ParGraphics::colProgLocs[] = {};
 
 std::vector<uint> ParGraphics::hlIds, ParGraphics::selIds;
 std::vector<std::pair<uint, std::pair<uint, byte>>> ParGraphics::drawLists, ParGraphics::drawListsB;
+
+bool ParGraphics::usePBR = true;
+const string ParGraphics::_usePBRNms[] = {"Classic", "PBR", "\0"};
+const Popups::DropdownItem ParGraphics::_usePBRItems = Popups::DropdownItem((uint*)&ParGraphics::usePBR, (string*)&ParGraphics::_usePBRNms[0]);
 
 Vec3 ParGraphics::rotCenter = Vec3();
 uint ParGraphics::rotCenterTrackId = -1;
@@ -154,6 +158,20 @@ void ParGraphics::Init() {
 	LC(inDepth);
 	LC(inSky);
 	LC(inSkyE);
+	LC(skyStrength);
+	LC(skyStrDecay);
+	LC(specStr);
+	LC(bgCol);
+#undef LC
+
+	reflCProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), glsl::reflFragC);
+#define LC(nm) reflCProgLocs[i++] = glGetUniformLocation(reflCProg, #nm)
+	i = 0;
+	LC(_IP);
+	LC(screenSize);
+	LC(inColor);
+	LC(inNormal);
+	LC(inDepth);
 	LC(skyStrength);
 	LC(skyStrDecay);
 	LC(specStr);
@@ -555,6 +573,7 @@ void ParGraphics::BlitSky() {
 	auto _p = MVP::projection();
 	auto cam = ChokoLait::mainCamera().get();
 
+if (usePBR) {
 	glUseProgram(reflProg);
 	glUniformMatrix4fv(reflProgLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
 	glUniform2f(reflProgLocs[1], (float)Display::width, (float)Display::height);
@@ -577,7 +596,25 @@ void ParGraphics::BlitSky() {
 	glUniform1f(reflProgLocs[9], reflStrDecay);
 	glUniform1f(reflProgLocs[10], specStr);
 	glUniform3f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b);
-
+}
+else {
+	glUseProgram(reflCProg);
+	glUniformMatrix4fv(reflCProgLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
+	glUniform2f(reflCProgLocs[1], (float)Display::width, (float)Display::height);
+	glUniform1i(reflCProgLocs[2], 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, cam->d_colTex);
+	glUniform1i(reflCProgLocs[3], 1);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, cam->d_texs[1]);
+	glUniform1i(reflCProgLocs[4], 3);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, cam->d_depthTex);
+	glUniform1f(reflCProgLocs[5], reflStr);
+	glUniform1f(reflCProgLocs[6], reflStrDecay);
+	glUniform1f(reflCProgLocs[7], specStr);
+	glUniform3f(reflCProgLocs[8], bgCol.r, bgCol.g, bgCol.b);
+}
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glBindVertexArray(Camera::emptyVao);
@@ -620,14 +657,20 @@ void ParGraphics::DrawMenu() {
 	Vec3 center0 = rotCenter;
 
 	auto& expandPos = ParMenu::expandPos;
-	UI::Label(expandPos - 148, 20, 12, "Lighting", white());
-	Engine::DrawQuad(expandPos - 149, 37, 148, 17 * 4 + 2, white(0.9f, 0.1f));
-	reflStr = UI2::Slider(expandPos - 147, 17 + 21, 147, "Strength", 0, 5, reflStr);
-	reflStrDecay = UI2::Slider(expandPos - 147, 17 * 2 + 21, 147, "Falloff", 0, 50, reflStrDecay);
-	specStr = UI2::Slider(expandPos - 147, 17 * 3 + 21, 147, "Specular", 0, 1, specStr);
-	UI2::Color(expandPos - 147, 17 * 4 + 21, 147, "Background", bgCol);
 
-	float off = 17 * 5 + 23;
+	UI2::Dropdown(expandPos - 148, 20, 147, "Shading", _usePBRItems);
+
+	float off = 37;
+
+	UI::Label(expandPos - 148, off, 12, "Lighting", white());
+	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 4 + 2, white(0.9f, 0.1f));
+	off += 1;
+	reflStr = UI2::Slider(expandPos - 147, off + 17, 147, "Strength", 0, 5, reflStr);
+	reflStrDecay = UI2::Slider(expandPos - 147, off + 17 * 2, 147, "Falloff", 0, 50, reflStrDecay);
+	specStr = UI2::Slider(expandPos - 147, off + 17 * 3, 147, "Specular", 0, 1, specStr);
+	UI2::Color(expandPos - 147, off + 17 * 4, 147, "Background", bgCol);
+
+	off += 17 * 5 + 2;
 
 	UI::Label(expandPos - 148, off, 12, "Camera", white());
 	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 9 + 2, white(0.9f, 0.1f));
