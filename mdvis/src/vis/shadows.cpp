@@ -3,6 +3,7 @@
 #include "md/ParMenu.h"
 #include "ui/icons.h"
 #include "ui/ui_ext.h"
+#include "res/shddata.h"
 
 Camera* Shadows::cam;
 
@@ -23,37 +24,7 @@ GLint Shadows::_progLocs[] = {};
 void Shadows::Init() {
 	cam = ChokoLait::mainCamera().get();
 
-	GLuint vertex_shader, fragment_shader;
-	string err = "";
-	if (!Shader::LoadShader(GL_VERTEX_SHADER, IO::GetText(IO::path + "/minVert.txt"), vertex_shader, &err)) {
-		Debug::Error("Shadows Shader Compiler", "v! " + err);
-		abort();
-	}
-	if (!Shader::LoadShader(GL_FRAGMENT_SHADER, IO::GetText(IO::path + "/shadows.txt"), fragment_shader, &err)) {
-		Debug::Error("Shadows Shader Compiler", "f! " + err);
-		abort();
-	}
-	_prog = glCreateProgram();
-	glAttachShader(_prog, vertex_shader);
-	glAttachShader(_prog, fragment_shader);
-	glLinkProgram(_prog);
-	GLint link_result;
-	glGetProgramiv(_prog, GL_LINK_STATUS, &link_result);
-	if (link_result == GL_FALSE)
-	{
-		int info_log_length = 0;
-		glGetProgramiv(_prog, GL_INFO_LOG_LENGTH, &info_log_length);
-		std::vector<char> program_log(info_log_length);
-		glGetProgramInfoLog(_prog, info_log_length, NULL, &program_log[0]);
-		std::cout << "shadows shader error" << std::endl << &program_log[0] << std::endl;
-		glDeleteProgram(_prog);
-		_prog = 0;
-		abort();
-	}
-	glDetachShader(_prog, vertex_shader);
-	glDetachShader(_prog, fragment_shader);
-	glDeleteShader(vertex_shader);
-	glDeleteShader(fragment_shader);
+	_prog = Shader::FromVF(glsl::minVert, IO::GetText(IO::path + "/shadows.txt"));
 
 #define LOC(nm) _progLocs[i++] = glGetUniformLocation(_prog, #nm)
 	uint i = 0;

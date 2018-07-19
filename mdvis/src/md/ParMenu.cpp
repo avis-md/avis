@@ -14,7 +14,7 @@ int ParMenu::activeSubMenu[] = {};
 const string ParMenu::menuNames[] = { "Particles", "Graphics", "Render", ".", ".." };
 bool ParMenu::expanded = true;
 float ParMenu::expandPos = 150;
-bool ParMenu::showSplash = false;
+bool ParMenu::showSplash = true;
 
 uint ParMenu::selCnt;
 byte ParMenu::drawTypeAll, ParMenu::_drawTypeAll;
@@ -241,7 +241,7 @@ loopout:
 
 void ParMenu::DrawStart() {
 	UI::Texture(0, 0, (float)Display::width, (float)Display::height, ParGraphics::bg, DRAWTEX_CROP);
-	MdChan::Draw(Vec2(Display::width * 0.5f, Display::height * 0.3f));
+	//MdChan::Draw(Vec2(Display::width * 0.5f, Display::height * 0.3f));
 	//UI::Texture(Display::width * 0.5f - Display::height * 0.2f, Display::height * 0.4f, Display::height * 0.4f, Display::height * 0.2f, logo);
 	if (ParLoader::busy) {
 		Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100, 6, white(0.8f, 0.2f));
@@ -254,13 +254,13 @@ void ParMenu::DrawStart() {
 		}
 		UI::Label(Display::width * 0.5f - 48, Display::height * 0.6f + oy, 12, ParLoader::loadName);
 	}
-	else {
-		UI::font->Align(ALIGN_TOPCENTER);
-		UI::Label(Display::width * 0.5f, Display::height * 0.55f, 12, "Press F1 for Help", white());
-		UI::Label(Display::width * 0.5f, Display::height * 0.55f + 14, 12, "Build: " __DATE__ "  " __TIME__, white());
-		UI::font->Align(ALIGN_TOPLEFT);
-		ParMenu::DrawRecents(Vec4(200, Display::height * 0.55f + 40, Display::width - 400, Display::height * 0.45f - 80));
-	}
+	//else {
+		//UI::font->Align(ALIGN_TOPCENTER);
+		//UI::Label(Display::width * 0.5f, Display::height * 0.55f, 12, "Press F1 for Help", white());
+		//UI::Label(Display::width * 0.5f, Display::height * 0.55f + 14, 12, "Build: " __DATE__ "  " __TIME__, white());
+		//UI::font->Align(ALIGN_TOPLEFT);
+		//ParMenu::DrawRecents(Vec4(200, Display::height * 0.55f + 40, Display::width - 400, Display::height * 0.45f - 80));
+	//}
 }
 
 void ParMenu::DrawSplash() {
@@ -271,23 +271,37 @@ void ParMenu::DrawSplash() {
 	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 120, 12, __APPVERSION__, white());
 	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 104, 12, "Build: " __DATE__ "  " __TIME__, white());
 	UI::font->Align(ALIGN_TOPLEFT);
+
+	string sub = "";
+
+	auto ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63, 140, 50, white(0.3f), "Help", 12, white(), true);
+	if (ms & MOUSE_HOVER_FLAG) {
+		sub = "Displays the user manual in the browser";
+		if (ms == MOUSE_RELEASE) {
+			IO::OpenEx(IO::path + "/docs/index.html");
+		}
+	}
+
 	auto pos = Vec4(Display::width*0.5f - 20, Display::height*0.5f - 80, 215, 183);
 	if (!!recentFiles.size()) {
 		UI::Label(pos.x + 2, pos.y + 1, 12, "Recent Files", white());
 		Engine::DrawQuad(pos.x, pos.y + 17, pos.z, pos.w - 17, white(0.7f, 0.05f));
 		for (uint i = 0; i < recentFiles.size(); i++) {
 			if (35 + 17 * i > pos.z) break;
-			auto ms = Engine::Button(pos.x + 5, pos.y + 20 + 17 * i, pos.z - 10, 16, white(0, 0.4f), recentFilesN[i], 12, white());
-			if (ms == MOUSE_RELEASE) {
-				showSplash = false;
-				ParLoader::OnOpenFile(std::vector<string>{ recentFiles[i] });
-			}
+			ms = Engine::Button(pos.x + 5, pos.y + 20 + 17 * i, pos.z - 10, 16, white(0, 0.4f), recentFilesN[i], 12, white());
 			if (ms & MOUSE_HOVER_FLAG) {
-				UI::Label(Display::width*0.5f - 190, pos.y + pos.w + 1, 12, recentFiles[i], white(0.7f));
+				sub = recentFiles[i];
+				if (ms == MOUSE_RELEASE) {
+					showSplash = false;
+					ParLoader::OnOpenFile(std::vector<string>{ recentFiles[i] });
+				}
 			}
 		}
 	}
-	if ((Input::KeyDown(Key_Escape) && UI::_layer == UI::_layerMax) || (Input::mouse0State == 1 && !Rect(Display::width*0.5f - 200, Display::height*0.5f - 150, 400, 300).Inside(Input::mousePos))) {
+	if (sub.size()) {
+		UI::Label(Display::width*0.5f - 190, pos.y + pos.w + 1, 12, sub, white(0.7f));
+	}
+ 	if ((Input::KeyDown(Key_Escape) && UI::_layer == UI::_layerMax) || (Input::mouse0State == 1 && !Rect(Display::width*0.5f - 200, Display::height*0.5f - 150, 400, 300).Inside(Input::mousePos))) {
 		showSplash = false;
 	}
 }

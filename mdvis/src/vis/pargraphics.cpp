@@ -30,9 +30,9 @@ GLint ParGraphics::selHlProgLocs[] = {}, ParGraphics::colProgLocs[] = {};
 std::vector<uint> ParGraphics::hlIds, ParGraphics::selIds;
 std::vector<std::pair<uint, std::pair<uint, byte>>> ParGraphics::drawLists, ParGraphics::drawListsB;
 
-bool ParGraphics::usePBR = true;
+uint ParGraphics::usePBR = 1;
 const string ParGraphics::_usePBRNms[] = {"Classic", "PBR", "\0"};
-const Popups::DropdownItem ParGraphics::_usePBRItems = Popups::DropdownItem((uint*)&ParGraphics::usePBR, (string*)&ParGraphics::_usePBRNms[0]);
+const Popups::DropdownItem ParGraphics::_usePBRItems = Popups::DropdownItem(&ParGraphics::usePBR, (string*)&ParGraphics::_usePBRNms[0]);
 
 Vec3 ParGraphics::rotCenter = Vec3();
 uint ParGraphics::rotCenterTrackId = -1;
@@ -94,14 +94,8 @@ float ParGraphics::Eff::DrawMenu(float off) {
 	useSSAO = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, useSSAO, white(), ORIENT_HORIZONTAL);
 	ssaoSamples = (int)UI2::Slider(expandPos - 147, off + 17, 147, "Samples", 5, 100, ssaoSamples, std::to_string(ssaoSamples));
 	ssaoSamples = Clamp(ssaoSamples, 10, 100);
-	//UI::Label(expandPos - 145, off + 34, 12, "Radius", white());
-	//ssaoRad = Engine::DrawSliderFill(expandPos - 80, off + 34, 76, 16, 0.001f, 0.05f, ssaoRad, white(1, 0.5f), white());
 	ssaoRad = UI2::Slider(expandPos - 147, off + 17 * 2, 147, "Radius", 0.001f, 0.05f, ssaoRad);
-	//UI::Label(expandPos - 145, off + 51, 12, "Strength", white());
-	//ssaoStr = Engine::DrawSliderFill(expandPos - 80, off + 51, 76, 16, 0, 3, ssaoStr, white(1, 0.5f), white());
 	ssaoStr = UI2::Slider(expandPos - 147, off + 17 * 3, 147, "Strength", 0, 3, ssaoStr);
-	//UI::Label(expandPos - 145, off + 68, 12, "Blur", white());
-	//ssaoBlur = Engine::DrawSliderFill(expandPos - 80, off + 68, 76, 16, 0, 40, ssaoBlur, white(1, 0.5f), white());
 	ssaoBlur = UI2::Slider(expandPos - 147, off + 17 * 4, 147, "Blur", 0, 40, ssaoBlur);
 	return off + 17 * 5 + 1;
 }
@@ -147,7 +141,9 @@ void ParGraphics::Init() {
 
 	bg = new Texture(IO::path + "/res/bg.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	splash = new Texture(IO::path + "/res/bg_splash.png", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
-	reflProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), glsl::reflFrag);
+	GLuint mv;
+	Shader::LoadShader(GL_VERTEX_SHADER, glsl::minVert, mv);
+	reflProg = Shader::FromF(mv, glsl::reflFrag);
 #define LC(nm) reflProgLocs[i++] = glGetUniformLocation(reflProg, #nm)
 	uint i = 0;
 	LC(_IP);
@@ -164,7 +160,7 @@ void ParGraphics::Init() {
 	LC(bgCol);
 #undef LC
 
-	reflCProg = Shader::FromVF(IO::GetText(IO::path + "/minVert.txt"), glsl::reflFragC);
+	reflCProg = Shader::FromF(mv, glsl::reflFragC);
 #define LC(nm) reflCProgLocs[i++] = glGetUniformLocation(reflCProg, #nm)
 	i = 0;
 	LC(_IP);
@@ -209,13 +205,13 @@ void ParGraphics::Init() {
 	parConLineProgLocs[2] = glGetUniformLocation(parConLineProg, "posTex");
 	parConLineProgLocs[3] = glGetUniformLocation(parConLineProg, "connTex");
 
-	selHlProg = Shader::FromVF(glsl::minVert, IO::GetText(IO::path + "/selectorFrag.txt"));
+	selHlProg = Shader::FromF(mv, IO::GetText(IO::path + "/selectorFrag.txt"));
 	selHlProgLocs[0] = glGetUniformLocation(selHlProg, "screenSize");
 	selHlProgLocs[1] = glGetUniformLocation(selHlProg, "myId");
 	selHlProgLocs[2] = glGetUniformLocation(selHlProg, "idTex");
 	selHlProgLocs[3] = glGetUniformLocation(selHlProg, "hlCol");
 
-	colProg = Shader::FromVF(glsl::minVert, glsl::colererFrag);
+	colProg = Shader::FromF(mv, glsl::colererFrag);
 	colProgLocs[0] = glGetUniformLocation(colProg, "idTex");
 	colProgLocs[1] = glGetUniformLocation(colProg, "spTex");
 	colProgLocs[2] = glGetUniformLocation(colProg, "screenSize");
@@ -223,6 +219,7 @@ void ParGraphics::Init() {
 	colProgLocs[4] = glGetUniformLocation(colProg, "colList");
 	colProgLocs[5] = glGetUniformLocation(colProg, "usegrad");
 
+	glDeleteShader(mv);
 
 	hlIds.resize(1);
 	ChokoLait::mainCamera->onBlit = Reblit;
@@ -573,19 +570,25 @@ void ParGraphics::BlitSky() {
 	auto _p = MVP::projection();
 	auto cam = ChokoLait::mainCamera().get();
 
-if (usePBR) {
+if (!usePBR) {
+	glUseProgram(reflCProg);
+	glUniformMatrix4fv(reflCProgLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
+	glUniform2f(reflCProgLocs[1], (float)Display::width, (float)Display::height);
+	glUniform1i(reflCProgLocs[2], 0);
+	glUniform1i(reflCProgLocs[3], 1);
+	glUniform1i(reflCProgLocs[4], 3);
+	glUniform1f(reflCProgLocs[5], reflStr);
+	glUniform1f(reflCProgLocs[6], reflStrDecay);
+	glUniform1f(reflCProgLocs[7], specStr);
+	glUniform3f(reflCProgLocs[8], bgCol.r, bgCol.g, bgCol.b);
+}
+else {
 	glUseProgram(reflProg);
 	glUniformMatrix4fv(reflProgLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
 	glUniform2f(reflProgLocs[1], (float)Display::width, (float)Display::height);
 	glUniform1i(reflProgLocs[2], 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, cam->d_colTex);
 	glUniform1i(reflProgLocs[3], 1);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, cam->d_texs[1]);
 	glUniform1i(reflProgLocs[5], 3);
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, cam->d_depthTex);
 	glUniform1i(reflProgLocs[6], 4);
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, refl);
@@ -597,24 +600,12 @@ if (usePBR) {
 	glUniform1f(reflProgLocs[10], specStr);
 	glUniform3f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b);
 }
-else {
-	glUseProgram(reflCProg);
-	glUniformMatrix4fv(reflCProgLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
-	glUniform2f(reflCProgLocs[1], (float)Display::width, (float)Display::height);
-	glUniform1i(reflCProgLocs[2], 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, cam->d_colTex);
-	glUniform1i(reflCProgLocs[3], 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, cam->d_texs[1]);
-	glUniform1i(reflCProgLocs[4], 3);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, cam->d_depthTex);
-	glUniform1f(reflCProgLocs[5], reflStr);
-	glUniform1f(reflCProgLocs[6], reflStrDecay);
-	glUniform1f(reflCProgLocs[7], specStr);
-	glUniform3f(reflCProgLocs[8], bgCol.r, bgCol.g, bgCol.b);
-}
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glBindVertexArray(Camera::emptyVao);

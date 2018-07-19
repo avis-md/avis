@@ -25,6 +25,8 @@ public:
 	static void FlushStdio();
 	static void StopReadStdio();
 
+	static void OpenEx(string path);
+
 	static string path;
 
 	static string InitPath();

@@ -2,6 +2,8 @@
 
 #ifdef PLATFORM_WIN
 #include <io.h>
+#include <shellapi.h>
+#pragma comment(lib, "Shell32.lib")
 #else
 #include <sys/types.h>
 #include <dirent.h>
@@ -252,6 +254,25 @@ void IO::StopReadStdio() {
 	if (readstdiothread.joinable()) readstdiothread.join();
 	remove(p.c_str());
 	remove(p2.c_str());
+}
+
+void IO::OpenEx(string path) {
+	path = "\"" + path + "\"";
+#ifdef PLATFORM_WIN
+	ShellExecute(0, 0, &path[0], 0, 0, SW_SHOW);
+#else
+	auto res = fork();
+	if (!res) {
+		execv(
+#if defined(PLATFORM_LNX)
+		"xdg-open"
+#else
+		"open"
+#endif
+		, char*[] { &path[0], 0 });
+	}
+	else if (res == -1) return;
+#endif
 }
 
 string IO::InitPath() {

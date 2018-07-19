@@ -29,21 +29,6 @@
 
 bool __debug = false;
 
-float camz = 10;
-Vec3 center;
-float rw = 0, rz = 0;
-float repx, repy, repz;
-
-Gromacs* gro;
-Shader* shad, *shad2;
-GLuint emptyVao;
-
-bool drawMesh;
-
-pMesh splineMesh;
-
-float zoomFade;
-
 void rendFunc() {
 	auto& cm = ChokoLait::mainCamera->object->transform;
 	ParGraphics::Rerender(cm.position(), cm.forward(), Display::width, Display::height);
@@ -103,7 +88,7 @@ void paintfunc() {
 	bool stealFocus = false;
 
 	if (!Particles::particleSz) {
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		ParMenu::DrawStart();
 	}
 

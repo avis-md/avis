@@ -90,8 +90,7 @@ void VisSystem::Init() {
 	mic[1].Set(0, "foo", 0);
 	mi[3].Set(Icons::openfile, "Append", 0);
 	mi[4].Set(Icons::vis_atom, "Splash Screen", []() {
-		if (!!Particles::particleSz)
-			ParMenu::showSplash = true;
+		ParMenu::showSplash = true;
 	});
 
 	auto& mi2 = menuItems[3];
