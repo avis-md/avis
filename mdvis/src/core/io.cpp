@@ -257,21 +257,24 @@ void IO::StopReadStdio() {
 }
 
 void IO::OpenEx(string path) {
-	path = "\"" + path + "\"";
+	//path = "\"" + path + "\"";
 #ifdef PLATFORM_WIN
 	ShellExecute(0, 0, &path[0], 0, 0, SW_SHOW);
 #else
-	auto res = fork();
-	if (!res) {
-		execv(
+	//auto res = fork();
+	//if (!res) {
+	//	char* fs[] = { &path[0], 0 };
+		//execv(
 #if defined(PLATFORM_LNX)
 		"xdg-open"
+		system(("xdg-open " + path).c_str());
 #else
-		"open"
+		//execl("open", &path[0]);
+		system(("open " + path).c_str());
 #endif
-		, char*[] { &path[0], 0 });
-	}
-	else if (res == -1) return;
+		//, fs);
+	//}
+	//else if (res == -1) return;
 #endif
 }
 
