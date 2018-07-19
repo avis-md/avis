@@ -16,6 +16,7 @@
 #include "md/pdb.h"
 #include "md/XYZ.h"
 #include "md/mdvbin.h"
+#include "vis/cubemarcher.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
 #include "vis/shadows.h"
@@ -28,6 +29,9 @@
 #include "res/resdata.h"
 
 bool __debug = false;
+
+CubeMarcher* cm;
+Mat4x4 _mvp;
 
 void rendFunc() {
 	auto& cm = ChokoLait::mainCamera->object->transform;
@@ -43,6 +47,7 @@ void rendFunc() {
 		MVP::Mul(_p);
 	}
 	if (RayTracer::resTex) RayTracer::Render();
+	_mvp = MVP::projection() * MVP::modelview();
 }
 
 void updateFunc() {
@@ -164,6 +169,8 @@ void paintfunc() {
 	VisRenderer::Draw();
 	if (ParMenu::showSplash) ParMenu::DrawSplash();
 	HelpMenu::Draw();
+
+	cm->Draw(_mvp);
 }
 
 #ifdef MAKE_RES
@@ -193,6 +200,7 @@ int main(int argc, char **argv) {
 	Color::Init();
 	Icons::Init();
 	SSH::Init();
+	CubeMarcher::Init();
 	VisSystem::Init();
 	Particles::Init();
 	ParLoader::Init();
@@ -206,6 +214,8 @@ int main(int argc, char **argv) {
 	ParMenu::LoadRecents();
 
 	AnBrowse::Scan();
+
+	cm = new CubeMarcher(0);
 
 	ParImporter* imp = new ParImporter();
 	imp->name = "Gromacs";
@@ -291,5 +301,6 @@ int main(int argc, char **argv) {
 			lastMillis = m;
 		}
 	}
+	glfwDestroyWindow(Display::window);
 	//*/
 }

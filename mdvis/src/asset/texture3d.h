@@ -1,13 +1,14 @@
 #pragma once
-#include "AssetObjects.h"
+#include "Engine.h"
 
-class Texture3D : public AssetObject {
+class Texture3D {
 public:
-	Texture3D(const string& path, TEX_FILTERING filter = TEX_FILTER_TRILINEAR);
+	Texture3D(uint x, uint y, uint z, byte chn, byte* data = 0);
+
+	void SetPixels(byte* data), SetPixels(float* data);
 
 	bool loaded;
-	uint length;
+	byte chn;
+	uint width, height, depth;
 	GLuint pointer;
-protected:
-	Texture3D() : AssetObject(ASSETTYPE_TEXCUBE) {}
 };
