@@ -9,10 +9,14 @@ public:
 
 	void Draw(const Mat4x4& _mvp);
 
-	static GLuint prog;
-
 	Vec3 pos, scl;
 	Quat rot;
 
 	Texture3D* tex;
+
+private:
+	static const int32_t _lookupTable[256*16];
+	static GLuint lookupBuf, lookupTex;
+
+	static GLuint prog;
 };

@@ -1,14 +1,14 @@
 #version 330 core
 
 uniform ivec3 sz;
-uniform mat4 _MVP;
+
+out vec3 v2g_uvw;
 
 void main() {
 	int iz = gl_VertexID / (sz.x * sz.y);
 	int miz = int(mod(gl_VertexID, sz.x * sz.y));
 	int iy = miz / sz.x;
 	int ix = int(mod(miz, sz.x));
-	vec4 pos = vec4((ix+0.5)/sz.x*2-1, (iy+0.5)/sz.y*2-1, (iz+0.5)/sz.z*2-1, 1);
-	pos = _MVP * pos;
-	gl_Position = pos / pos.w;
+	v2g_uvw = vec3((ix+0.5)/sz.x, (iy+0.5)/sz.y, (iz+0.5)/sz.z);
+	gl_Position = vec4(0,0,0,0);
 }

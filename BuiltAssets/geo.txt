@@ -1,19 +1,60 @@
 #version 330 core
 layout(points) in;
-layout(line_strip, max_vertices = 5) out;
+layout(triangle_strip, max_vertices = 16) out;
+
+uniform mat4 _MVP;
+uniform sampler3D tex;
+uniform float thres;
+uniform ivec3 sz;
+uniform isamplerBuffer triTable;
+
+in vec3 v2g_uvw[1];
+
+float imix(float a, float b, float t) {
+	return (t-a)/(b-a);
+}
+
+const int edges[24] = {
+	0,1,1,2,2,3,0,3,
+	4,5,5,6,6,7,4,7,
+	0,4,1,5,2,6,3,7
+};
 
 void main() {
-	const float f = 0.05;
-	gl_Position = gl_in[0].gl_Position + vec4(-f,0,0,0);
-	EmitVertex();
-	gl_Position = gl_in[0].gl_Position + vec4(0,-f,0,0);
-	EmitVertex();
-	gl_Position = gl_in[0].gl_Position + vec4(f,0,0,0);
-	EmitVertex();
-	gl_Position = gl_in[0].gl_Position + vec4(0,f,0,0);
-	EmitVertex();
-	gl_Position = gl_in[0].gl_Position + vec4(-f,0,0,0);
-	EmitVertex();
+	vec3 dp = vec3(1.0/sz.x, 1.0/sz.y, 1.0/sz.z) * 0.5;
+	float f = texture(tex, v2g_uvw[0]).x;
+	vec3 _p = v2g_uvw[0];
+	vec4 pts[8] = {
+		vec4(_p.x-dp.x, _p.y-dp.y, _p.z-dp.z, 1),
+		vec4(_p.x+dp.x, _p.y-dp.y, _p.z-dp.z, 1),
+		vec4(_p.x+dp.x, _p.y+dp.y, _p.z-dp.z, 1),
+		vec4(_p.x-dp.x, _p.y+dp.y, _p.z-dp.z, 1),
+		vec4(_p.x-dp.x, _p.y-dp.y, _p.z+dp.z, 1),
+		vec4(_p.x+dp.x, _p.y-dp.y, _p.z+dp.z, 1),
+		vec4(_p.x+dp.x, _p.y+dp.y, _p.z+dp.z, 1),
+		vec4(_p.x-dp.x, _p.y+dp.y, _p.z+dp.z, 1)
+	};
+
+	float vals[8];
 	
+	for (int i = 0; i < 8; i++) {
+		vals[i] = texture(tex, pts[i].xyz).x;
+	}
+
+	int cid = 0;
+	for (int i = 0; i < 8; i++) {
+		if (vals[i] > thres) cid += 1 << i;
+	}
+	cid *= 16;
+
+	for (int i = 0; i < 15; i++) {
+		int eg = texelFetch(triTable, cid + i).r;
+		if (eg == -1) break;
+		int e1 = edges[eg*2];
+		int e2 = edges[eg*2 + 1];
+		gl_Position = _MVP*mix(pts[e1], pts[e2], imix(vals[e1], vals[e2], thres));
+		EmitVertex();
+	}
+
 	EndPrimitive();
 }
