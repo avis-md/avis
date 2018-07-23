@@ -76,8 +76,8 @@ void UI2::Switch(float x, float y, float w, const string& title, int c, string* 
 	w *= 0.67f;
 	float dw = w / c;
 	for (int a = 0; a < c; a++) {
-		if (Engine::Button(x + w * a, y, w - 1, 16, white(1, (a == i) ? 0.1f : 0.3f), nms[a], 12, white()) == MOUSE_RELEASE) {
-			i == a;
+		if (Engine::Button(x + dw * a, y, dw - 1, 16, white(1, (a == i) ? 0.1f : 0.3f), nms[a], 12, white(), true) == MOUSE_RELEASE) {
+			i = a;
 		}
 	}
 }

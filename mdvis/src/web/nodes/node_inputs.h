@@ -29,6 +29,9 @@ public:
 	enum class SELTYPE {
 		RSL, RES, PAR
 	} type;
+	string tv_resNm;
+	uint tv_resId;
+	uint tv_atomId;
 
 	Node_Inputs_SelPar();
 	void DrawHeader(float& off) override;

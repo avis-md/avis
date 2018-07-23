@@ -168,9 +168,10 @@ void UI::Texture(float x, float y, float w, float h, ::Texture* texture, Vec4 ti
 	}
 }
 
-string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, const string& str2, bool delayed, Vec4 fcol, bool* changed, Font* font, Vec4 hcol, Vec4 acol, bool ser) {
+string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, const string& str2, bool delayed, Vec4 fcol, bool* changed, string str22, Font* font, Vec4 hcol, Vec4 acol, bool ser) {
 	Engine::PushStencil(x, y, w, h);
 	string str = str2;
+	if (!str22.size()) str22 = str2;
 	_checkdraw;
 	GetEditTextId();
 	bool isActive = (UI::IsSameId(_activeEditText, _editingEditText) && (_activeEditTextId == _editingEditTextId));
@@ -270,7 +271,7 @@ string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, cons
 		}
 		return delayed ? str : _editTextString;
 	}
-	else if (Engine::Button(x, y, w, h, bcol, str, s, fcol) == MOUSE_RELEASE) {
+	else if (Engine::Button(x, y, w, h, bcol, str22, s, fcol) == MOUSE_RELEASE) {
 		memcpy(_editingEditText, _activeEditText, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
 		_editingEditTextId = _activeEditTextId;
 		_editTextCursorPos = str.size();

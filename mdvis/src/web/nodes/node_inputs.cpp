@@ -137,10 +137,26 @@ Node_Inputs_SelPar::Node_Inputs_SelPar() : Node_Inputs() {
 }
 
 void Node_Inputs_SelPar::DrawHeader(float& off) {
-	Engine::DrawQuad(pos.x, off, width, 34, white(0.7f, 0.25f));
-	string nms[] = { "Residues", "Residue", "Atom" };
-	UI2::Switch(pos.x, off, width, "type", 3, nms, (int&)type);
-	off += 34;
+	Engine::DrawQuad(pos.x, off, width, 35, white(0.7f, 0.25f));
+	string nms[] = { "ResNm", "ResID", "AtomID" };
+	string nmfs[] = { "Residue Name", "Residue ID", "Atom ID" };
+	UI2::Switch(pos.x + 2, off + 1, width - 2, "type", 3, nms, (int&)type);
+	UI::Label(pos.x + 2, off + 18, 12, nmfs[(int)type], white());
+	string tv2 = (type == SELTYPE::RSL)? tv_resNm : 
+		(type == SELTYPE::RES)? std::to_string(tv_resId) : 
+			std::to_string(tv_atomId);
+	string tv = (type == SELTYPE::RSL)? tv_resNm : 
+		(type == SELTYPE::RES)? std::to_string(tv_resId) + " (" + tv_resNm + ")" : 
+			std::to_string(tv_atomId) + " (" + string(Particles::particles_Name, PAR_MAX_NAME_LEN) + ")";
+	tv = UI::EditText(pos.x + width / 2, off + 18, width/2 - 18, 16, 12, white(1, 0.3f), tv, true, white(), 0, tv2);
+	if (Engine::Button(pos.x + width - 17, off + 18, 16, 16, white(1, 0.5f)) == MOUSE_RELEASE) {
+		Popups::type = (POPUP_TYPE)((int)POPUP_TYPE::RESNM + (int)type);
+		Popups::data = (type == SELTYPE::RSL)? (void*)&tv_resNm : (void*)((type == SELTYPE::RES)? &tv_resId : &tv_atomId);
+	}
+	if (type == SELTYPE::RSL) tv_resNm = tv;
+	else if (type == SELTYPE::RES) tv_resId = TryParse(tv, 0U);
+	else tv_atomId = TryParse(tv, 0U);
+	off += 35;
 }
 
 void Node_Inputs_SelPar::Execute() {

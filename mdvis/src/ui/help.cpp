@@ -20,8 +20,6 @@ const string _opn[] = {
 bool HelpMenu::show = false;
 float HelpMenu::alpha = 0;
 
-byte __no = 0;
-
 void HelpMenu::Draw() {
 	if (!UI::editingText) {
 		if (!show && Input::KeyDown(Key_F1)) show = true;
@@ -32,7 +30,7 @@ void HelpMenu::Draw() {
 		UI::alpha = alpha;
 
 		Engine::DrawQuad(0, 0, (float)Display::width, (float)Display::height, black(0.9f));
-		UI::Label(10, 5, 14, (__no < 2)? "HELP" : "HELP ME I'M TRAPPED INSIDE A HELP WINDOW", white());
+		UI::Label(10, 5, 14, "HELP (?)", white());
 		UI::font->Align(ALIGN_TOPRIGHT);
 		UI::Label(Display::width - 5.0f, 5, 10, "version 0.01", white(0.7f));
 		UI::font->Align(ALIGN_TOPLEFT);
@@ -41,20 +39,7 @@ void HelpMenu::Draw() {
 		//	UI::Label(20, 25 + 15 * a, 12, _opn[a], white());
 		//}
 
-		UI::Label(10, Display::height - 16.0f, 12, "This program is under development. Please submit any bugs / suggestions to puakai95@keio.jp", white(0.7f));
-		if ((__no < 2) && Engine::Button(Display::width - 152, Display::height - 18, 150, 16, (!__no)? white(1, 0.1f) : red(1, 0.2f), "Don't press me", 12, white(), true) == MOUSE_RELEASE) {
-			__no++;
-			if (__no == 2) {
-				delete(ParGraphics::bg);
-				ParGraphics::bg = new Texture(IO::path + "/res/bg2.jpg");
-
-				alpha = 0;
-				show = false;
-			}
-			else {
-				tinyfd_messageBox("Hey", "Please don't do that again.", "ok", "warning", 1);
-			}
-		}
+		UI::Label(10, Display::height - 16.0f, 12, "This program is under development.", white(0.7f));
 		UI::alpha = 1;
 	}
 	alpha = Clamp(alpha + (show? 1 : -1)*5*Time::delta, 0.0f, 1.0f);

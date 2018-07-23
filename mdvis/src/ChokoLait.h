@@ -7,16 +7,6 @@ See https://chokomancarr.github.io/ChokoLait/ for documentation and examples.
 */
 
 #include "Defines.h"
-/*
-#if defined(__ANDROID__)
-#define PLATFORM_ADR
-#elif defined(__APPLE__)
-#define PLATFORM_OSX
-#endif
-*/
-
-#define CHOKOLAIT_INIT_VARS ChokoLait __chokolait_instance;
-
 #include "Engine.h"
 
 typedef void(*emptyCallbackFunc)(void);
@@ -26,9 +16,6 @@ class ChokoLait {
 public:
 	ChokoLait() {
 		if (!initd) {
-#ifdef FEATURE_AV_CODECS
-			av_register_all();
-#endif
 			_InitVars();
 			initd = 1;
 		}

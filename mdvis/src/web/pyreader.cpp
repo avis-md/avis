@@ -1,5 +1,5 @@
 #include "anweb.h"
-#include <Python.h>
+#include "anscript.h"
 
 void PyReader::Init() {
 	if (IO::HasFile(IO::path + "/env.txt")) {

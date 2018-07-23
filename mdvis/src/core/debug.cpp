@@ -16,10 +16,14 @@ void Debug::Error(string c, string s) {
 	if (stream) *stream << "[e]" << c << ": " << s << std::endl;
 #ifdef PLATFORM_WIN
 	SetConsoleTextAttribute(winHandle, FOREGROUND_RED | FOREGROUND_INTENSITY);
+#else
+	std::cout << "\033[31m";
 #endif
 	std::cout << "[e]" << c << ": " << s << std::endl;
 #ifdef PLATFORM_WIN
 	SetConsoleTextAttribute(winHandle, winTextAttr);
+#else
+	std::cout << "\033[0m";
 #endif
 #ifdef PLATFORM_WIN
 	__debugbreak();
@@ -46,8 +50,10 @@ void Debug::Init(string s) {
 	stream = new std::ofstream(ss.c_str());
 	Message("Debug", "Log Initialized");
 
+#ifdef PLATFORM_WIN
 	winHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	GetConsoleScreenBufferInfo(winHandle, &info);
 	winTextAttr = info.wAttributes;
+#endif
 }

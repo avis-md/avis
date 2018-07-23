@@ -105,8 +105,9 @@ void VisSystem::Init() {
 
 	auto& mi3 = menuItems[4];
 	mi3.resize(1);
-	mi3[0].Set(0, "Show Help", []() {
-		HelpMenu::show = true;
+	mi3[0].Set(0, "User Manual", []() {
+		//HelpMenu::show = true;
+		IO::OpenEx(IO::path + "/docs/index.html");
 	});
 }
 

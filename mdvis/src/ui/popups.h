@@ -6,7 +6,10 @@ enum class POPUP_TYPE : byte {
 	MENU,
     DRAWMODE,
 	COLORPICK,
-	DROPDOWN
+	DROPDOWN,
+	RESNM,
+	RESID,
+	ATOMID
 };
 
 struct MenuItem {

@@ -95,21 +95,26 @@ void CVar::Write(std::ofstream& strm) {
 		_StreamWrite((int32_t*)value, &strm, 4);
 		break;
 	case AN_VARTYPE::LIST:
-		auto sz = dimVals.size();
-		_StreamWrite(&sz, &strm, 1);
-		int totalSz = 1;
-		for (uint a = 0; a < sz; a++) {
-			_StreamWrite((int32_t*)dimVals[a], &strm, 4);
-			totalSz *= *dimVals[a];
-		}
-		if (totalSz > 0) {
-			auto po = strm.tellp();
-			strm.write(*((char**)value), totalSz * sizeof(float));
-			ulong wt = (ulong)(strm.tellp() - po);
-			if (wt < totalSz * sizeof(float) || strm.bad()) {
-				Debug::Error("CVar", "not enough bytes written!");
+		{
+			int totalSz = 1;
+			auto sz = dimVals.size();
+			_StreamWrite(&sz, &strm, 1);
+			for (uint a = 0; a < sz; a++) {
+				_StreamWrite((int32_t*)dimVals[a], &strm, 4);
+				totalSz *= *dimVals[a];
+			}
+			if (totalSz > 0) {
+				auto po = strm.tellp();
+				strm.write(*((char**)value), totalSz * sizeof(float));
+				ulong wt = (ulong)(strm.tellp() - po);
+				if (wt < totalSz * sizeof(float) || strm.bad()) {
+					Debug::Error("CVar", "not enough bytes written!");
+				}
 			}
 		}
+		break;
+	default:
+		Debug::Warning("CVar", "write case not handled!");
 		break;
 	}
 }
@@ -126,23 +131,28 @@ void CVar::Read(std::ifstream& strm) {
 		_Strm2Val(strm, *((int32_t**)value));
 		break;
 	case AN_VARTYPE::LIST:
-		byte sz = 0;
-		_Strm2Val(strm, sz);
-		dimVals.resize(sz);
-		int totalSz = 1;
-		for (auto a = 0; a < sz; a++) {
-			dimVals[a] = new int();
-			_Strm2Val(strm, *((int32_t*)dimVals[a]));
-			totalSz *= *dimVals[a];
-		}
-		auto vec = new float[max(totalSz, 1)];
-		value = new float*(vec);
-		if (!!totalSz) {
-			strm.read((char*)vec, totalSz * sizeof(float));
-			if (strm.gcount() != totalSz * sizeof(float) || strm.bad()) {
-				Debug::Error("CVar", "not enough bytes read!");
+		{
+			byte sz = 0;
+			_Strm2Val(strm, sz);
+			dimVals.resize(sz);
+			int totalSz = 1;
+			for (auto a = 0; a < sz; a++) {
+				dimVals[a] = new int();
+				_Strm2Val(strm, *((int32_t*)dimVals[a]));
+				totalSz *= *dimVals[a];
+			}
+			auto vec = new float[max(totalSz, 1)];
+			value = new float*(vec);
+			if (!!totalSz) {
+				strm.read((char*)vec, totalSz * sizeof(float));
+				if (strm.gcount() != totalSz * sizeof(float) || strm.bad()) {
+					Debug::Error("CVar", "not enough bytes read!");
+				}
 			}
 		}
+		break;
+	default:
+		Debug::Warning("CVar", "read case not handled!");
 		break;
 	}
 }

@@ -20,6 +20,7 @@ public:
 
 	static void Draw(), Draw_List(float off), DrawStart(), DrawSplash();
 	static void SelClear(), SelInv(), SelAll();
+	static void DrawSelPopup();
 
 	static void LoadRecents(), SaveRecents(const string& entry), DrawRecents(Vec4 rect);
 };

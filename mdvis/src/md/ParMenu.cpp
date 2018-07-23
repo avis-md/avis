@@ -274,7 +274,7 @@ void ParMenu::DrawSplash() {
 
 	string sub = "";
 
-	auto ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63, 140, 50, white(0.3f), "Help", 12, white(), true);
+	auto ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63, 140, 50, white(0.3f), "Manual", 12, white(), true);
 	if (ms & MOUSE_HOVER_FLAG) {
 		sub = "Displays the user manual in the browser";
 		if (ms == MOUSE_RELEASE) {
@@ -334,6 +334,65 @@ void ParMenu::SelClear() {
 		rli.selected = false;
 	}
 	selCnt = 0;
+}
+
+void ParMenu::DrawSelPopup() {
+	Engine::DrawQuad(0, 20, 150, Display::height - 40, white(1, 0.1f));
+	UI::Label(2, 20, 12, "Select", white());
+	float off = 38;
+	Engine::BeginStencil(0, off, expandPos, Display::height - 18 - off);
+	for (uint i = 0; i < Particles::residueListSz; i++) {
+		auto& rli = Particles::residueLists[i];
+		Engine::DrawQuad(expandPos - 148, off, 146, 16, white(1, 0.3f));
+		//UI::Label(expandPos - 132, off, 12, rli.name, white());
+		if (Engine::Button(expandPos - 130, off, 128, 16, white(0), rli.name, 12, white()) == MOUSE_RELEASE && Popups::type == POPUP_TYPE::RESNM) {
+			*(string*)Popups::data = string(rli.name);
+			Popups::type = POPUP_TYPE::NONE;
+		}
+		if (Popups::type == POPUP_TYPE::RESID || Popups::type == POPUP_TYPE::ATOMID) {
+			if (Engine::Button(expandPos - 148, off, 16, 16, rli.expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) {
+				rli.expanded = !rli.expanded;
+			}
+			off += 17;
+			if (off > Display::height)
+				goto loopout;
+			if (rli.expanded) {
+				for (uint j = 0; j < rli.residueSz; j++) {
+					auto& rj = rli.residues[j];
+					Engine::DrawQuad(expandPos - 143, off, 141, 16, white(1, 0.35f));
+					if (Engine::Button(expandPos - 126, off, 124, 16, white(0), rj.name, 12, white()) == MOUSE_RELEASE && Popups::type == POPUP_TYPE::RESID) {
+						//*(uint*)Popups::data = ;
+						Popups::type = POPUP_TYPE::NONE;
+					}
+					if (Popups::type == POPUP_TYPE::ATOMID) {
+						if (Engine::Button(expandPos - 143, off, 16, 16, rj.expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) {
+							rj.expanded = !rj.expanded;
+						}
+						off += 17;
+						if (off >= Display::height)
+							goto loopout;
+						if (rj.expanded) {
+							for (uint k = 0; k < rj.cnt; k++) {
+								Engine::DrawQuad(expandPos - 138, off, 136, 16, white(1, 0.4f));
+								UI::Label(expandPos - 136, off, 12, &Particles::particles_Name[(rj.offset + k)*PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
+								if (Engine::Button(expandPos - 138, off, 120, 16) == MOUSE_RELEASE) {
+									*(uint*)Popups::data = rj.offset + k;
+									Popups::type = POPUP_TYPE::NONE;
+								}
+								off += 17;
+								if (off >= Display::height)
+									goto loopout;
+							}
+						}
+					}
+					else off += 17;
+				}
+			}
+		}
+		else off += 17;
+	}
+loopout:
+	Engine::EndStencil();
 }
 
 void ParMenu::LoadRecents() {

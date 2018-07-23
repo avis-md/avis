@@ -15,7 +15,8 @@
         {
             "label": "remake",
             "type": "shell",
-            "command": "cd src && make clean && make"
+            "command": "cd src && make clean && make",
+            "problemMatcher": []
         }
     ]
 }

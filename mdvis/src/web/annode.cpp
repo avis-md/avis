@@ -370,6 +370,9 @@ PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 			for (int j = 0; j < outputV[i].dim; j++)
 				conV[i].dimVals[j] = new int();
 			break;
+		default:
+			Debug::Warning("PyNode", "case not handled!");
+			break;
 		}
 	}
 }
@@ -409,6 +412,9 @@ void PyNode::Execute() {
 			delete[]((float*)conV[i].value);
 			conV[i].value = AnConv::FromPy(outputV[i].value, conV[i].dimVals.size(), &conV[i].dimVals[0]);
 			break;
+		default:
+			Debug::Warning("AnVar", "exec case not handled!");
+			break;
 		}
 	}
 }
@@ -436,7 +442,8 @@ void CNode::Execute() {
 	for (uint i = 0; i < script->invars.size(); i++) {
 		if (inputR[i].first) {
 			auto& cv = inputR[i].first->conV[inputR[i].second];
-			switch (scr->_invars[i].type) {
+			auto& mv = scr->_invars[i];
+			switch (mv.type) {
 			case AN_VARTYPE::INT:
 				script->Set(i, *((int*)cv.value));
 				break;
@@ -444,12 +451,14 @@ void CNode::Execute() {
 				script->Set(i, *((float*)cv.value));
 				break;
 			case AN_VARTYPE::LIST:
-				auto& mv = scr->_invars[i];
 				*((float**)mv.value) = *((float**)cv.value);
 				
 				for (uint j = 0; j < mv.dimVals.size(); j++) {
 					*mv.dimVals[j] = *cv.dimVals[j];
 				}
+				break;
+			default:
+				Debug::Warning("CNode", "var not handled!");
 				break;
 			}
 		}

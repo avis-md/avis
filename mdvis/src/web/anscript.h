@@ -1,6 +1,10 @@
 #pragma once
 #include "Engine.h"
+#ifdef PLATFORM_WIN
 #include <Python.h>
+#else
+#include <python2.7/Python.h>
+#endif
 #ifndef IS_ANSERVER
 #include "utils/dylib.h"
 #endif

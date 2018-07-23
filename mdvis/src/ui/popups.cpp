@@ -1,5 +1,6 @@
 #include "popups.h"
 #include "vis/pargraphics.h"
+#include "md/ParMenu.h"
 
 POPUP_TYPE Popups::type = POPUP_TYPE::NONE;
 Vec2 Popups::pos, Popups::pos2;
@@ -22,7 +23,14 @@ void Popups::Draw() {
 	case POPUP_TYPE::DROPDOWN:
 		DrawDropdown();
 		break;
+	case POPUP_TYPE::RESNM:
+	case POPUP_TYPE::RESID:
+	case POPUP_TYPE::ATOMID:
+		ParMenu::DrawSelPopup();
+		break;
     default:
+		Debug::Warning("Popup", "case not handled: " + std::to_string((int)type) + "!");
+		type = POPUP_TYPE::NONE;
         break;
     }
 }
