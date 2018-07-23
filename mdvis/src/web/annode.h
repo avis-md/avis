@@ -36,12 +36,13 @@ public:
 	std::vector<std::pair<AnNode*, uint>> inputR, outputR;
 	std::vector<union AnVarBase> inputVDef;
 	std::vector<CVar> conV;
-		
+	
 	static void Init();
 
 	bool Select();
 	virtual Vec2 DrawConn();
 	virtual void Draw();
+	virtual void DrawHeader(float& off) {}
 	virtual float DrawSide();
 	float DrawLog(float off);
 	virtual void DrawScene() {}

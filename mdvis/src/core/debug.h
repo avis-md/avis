@@ -21,5 +21,6 @@ protected:
 private:
 #ifdef PLATFORM_WIN
 	static HANDLE winHandle;
+	static WORD winTextAttr;
 #endif
 };

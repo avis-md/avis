@@ -1,6 +1,7 @@
 #include "../anweb.h"
 #ifndef IS_ANSERVER
 #include "md/Particles.h"
+#include "ui/ui_ext.h"
 #endif
 
 Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
@@ -46,8 +47,10 @@ void Node_Inputs::Draw() {
 	this->pos = pos;
 	Engine::DrawQuad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
 	UI::Label(pos.x + 2, pos.y + 1, 12, title, white());
-	Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.7f, 0.25f));
-	float y = pos.y + 20;
+	float y = pos.y + 16;
+	DrawHeader(y);
+	Engine::DrawQuad(pos.x, y, width, 3.0f + 17 * cnt, white(0.7f, 0.25f));
+	y += 4;
 	for (int i = 0; i < cnt; i++, y += 17) {
 		if (!AnWeb::selConnNode || ((!AnWeb::selConnIdIsOut) && (AnWeb::selConnNode != this))) {
 			if (Engine::Button(pos.x + width - 5, y + 3, 10, 10, outputR[i].first ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
@@ -115,12 +118,31 @@ void Node_Inputs::LoadIn(const string& path) {
 
 Node_Inputs_ActPar::Node_Inputs_ActPar() : Node_Inputs() {
 	title = "Selected Particles";
-	script->name = ".insel";
+	script->name = ".inact";
 
 	for (uint i = 0; i < 4; i++)
 		conV[i].dimVals[0] = new int(0);
 }
 
 void Node_Inputs_ActPar::Execute() {
+
+}
+
+Node_Inputs_SelPar::Node_Inputs_SelPar() : Node_Inputs() {
+	title = "Particles of";
+	script->name = ".insel";
+
+	for (uint i = 0; i < 4; i++)
+		conV[i].dimVals[0] = new int(0);
+}
+
+void Node_Inputs_SelPar::DrawHeader(float& off) {
+	Engine::DrawQuad(pos.x, off, width, 34, white(0.7f, 0.25f));
+	string nms[] = { "Residues", "Residue", "Atom" };
+	UI2::Switch(pos.x, off, width, "type", 3, nms, (int&)type);
+	off += 34;
+}
+
+void Node_Inputs_SelPar::Execute() {
 
 }

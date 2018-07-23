@@ -14,7 +14,10 @@ enum class AN_SCRTYPE : byte {
 enum class AN_VARTYPE : byte {
 	INT,
 	FLOAT,
-	LIST
+	LIST,
+	ID_RSL,
+	ID_RES,
+	ID_PAR,
 };
 
 class AnScript {

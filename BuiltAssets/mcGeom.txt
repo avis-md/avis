@@ -2,13 +2,18 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 16) out;
 
-uniform mat4 _MVP;
+uniform mat4 _MV, _P;
 uniform sampler3D tex;
+uniform sampler3D ctex;
 uniform float thres;
 uniform ivec3 sz;
 uniform isamplerBuffer triTable;
 
 in vec3 v2g_uvw[1];
+out vec3 v2f_spos;
+
+out vec3 v2f_nrm;
+out vec3 v2f_col;
 
 float imix(float a, float b, float t) {
 	return (t-a)/(b-a);
@@ -52,7 +57,22 @@ void main() {
 		if (eg == -1) break;
 		int e1 = edges[eg*2];
 		int e2 = edges[eg*2 + 1];
-		gl_Position = _MVP*mix(pts[e1], pts[e2], imix(vals[e1], vals[e2], thres));
+		float lc = imix(vals[e1], vals[e2], thres);
+		vec4 lpos = mix(pts[e1], pts[e2], lc);
+		
+		float grx = texture(tex, lpos.xyz + vec3(dp.x, 0, 0)).x
+			- texture(tex, lpos.xyz - vec3(dp.x, 0, 0)).x;
+		float gry = texture(tex, lpos.xyz + vec3(0, dp.y, 0)).x
+			- texture(tex, lpos.xyz - vec3(0, dp.y, 0)).x;
+		float grz = texture(tex, lpos.xyz + vec3(0, 0, dp.z)).x
+			- texture(tex, lpos.xyz - vec3(0, 0, dp.z)).x;
+		
+		v2f_nrm = (_MV*vec4(normalize(vec3(grx, gry, grz)), 0)).xyz;
+		v2f_col = mix(vec3(0,0,1), vec3(1,0,0), texture(ctex, lpos.xyz).x);
+		
+		lpos.xyz = lpos.xyz * 0.4 - vec3(1,1,1) * 0.2;
+		gl_Position = _P*_MV*lpos;
+		v2f_spos = gl_Position.xyz / gl_Position.w;
 		EmitVertex();
 	}
 

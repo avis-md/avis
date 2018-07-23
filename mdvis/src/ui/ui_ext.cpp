@@ -69,3 +69,15 @@ void UI2::Dropdown(float x, float y, float w, const string& title, const Popups:
 		Popups::data = (Popups::DropdownItem*)&data;
 	}
 }
+
+void UI2::Switch(float x, float y, float w, const string& title, int c, string* nms, int& i) {
+	UI::Label(x, y, 12, title, white());
+	x += w/3;
+	w *= 0.67f;
+	float dw = w / c;
+	for (int a = 0; a < c; a++) {
+		if (Engine::Button(x + w * a, y, w - 1, 16, white(1, (a == i) ? 0.1f : 0.3f), nms[a], 12, white()) == MOUSE_RELEASE) {
+			i == a;
+		}
+	}
+}

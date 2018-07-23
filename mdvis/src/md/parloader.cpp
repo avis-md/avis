@@ -19,7 +19,7 @@ string ParLoader::connCachePath;
 std::vector<ParImporter*> ParLoader::importers;
 std::vector<string> ParLoader::exts;
 
-bool ParLoader::showDialog = false, ParLoader::busy = false, ParLoader::fault = false;
+bool ParLoader::showDialog = false, ParLoader::busy = false, ParLoader::fault = false, ParLoader::directLoad = false;
 bool ParLoader::parDirty = false, ParLoader::trjDirty = false;
 float* ParLoader::loadProgress = 0, *ParLoader::loadProgress2;
 string ParLoader::loadName;
@@ -583,8 +583,20 @@ void ParLoader::OnOpenFile(const std::vector<string>& files) {
 
 
 	useConnCache = hasConnCache;
-
-	showDialog = true;
+	if (directLoad) {
+		directLoad = false;
+		ParMenu::showSplash = false;
+		if (loadAsTrj) {
+			std::thread td(DoOpenAnim);
+			td.detach();
+		}
+		else {
+			Particles::Clear();
+			std::thread td(DoOpen);
+			td.detach();
+		}
+	}
+	else showDialog = true;
 }
 
 void ParLoader::FindImpId(bool force) {

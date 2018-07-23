@@ -31,7 +31,7 @@
 bool __debug = false;
 
 CubeMarcher* cm;
-Mat4x4 _mvp;
+Mat4x4 _mv, _p;
 
 void rendFunc() {
 	auto& cm = ChokoLait::mainCamera->object->transform;
@@ -47,7 +47,8 @@ void rendFunc() {
 		MVP::Mul(_p);
 	}
 	if (RayTracer::resTex) RayTracer::Render();
-	_mvp = MVP::projection() * MVP::modelview();
+	_mv = MVP::modelview();
+	_p = MVP::projection();
 }
 
 void updateFunc() {
@@ -170,7 +171,7 @@ void paintfunc() {
 	if (ParMenu::showSplash) ParMenu::DrawSplash();
 	HelpMenu::Draw();
 
-	cm->Draw(_mvp);
+	//cm->Draw(_mv, _p);
 }
 
 #ifdef MAKE_RES
@@ -182,10 +183,14 @@ int main(int argc, char **argv) {
 #else
 int main(int argc, char **argv) {
 #endif
-	for (auto a = 0; a < argc; a++) {
+	std::vector<string> fls;
+	for (auto a = 1; a < argc; a++) {
 		if (argv[a][0] == '-') {
 			if (!strcmp(argv[a] + 1, "debug"))
 				__debug = true;
+		}
+		else {
+			fls.push_back(argv[a]);
 		}
 	}
 	if (!__debug) Debug::suppress = 1;
@@ -215,7 +220,7 @@ int main(int argc, char **argv) {
 
 	AnBrowse::Scan();
 
-	cm = new CubeMarcher(0);
+	//cm = new CubeMarcher(0);
 
 	ParImporter* imp = new ParImporter();
 	imp->name = "Gromacs";
@@ -261,13 +266,19 @@ int main(int argc, char **argv) {
 	ParLoader::importers.push_back(imp);
 
 	ParLoader::exts = std::vector<string>({"*.gro", "*.trr", "*.pdb", "*.xyz", "*.cdv", "*.bin"});
+	if (fls.size()) {
+		ParLoader::directLoad = true;
+		ParLoader::OnOpenFile(fls);
+	}
 
+	AnWeb::nodes.push_back(new Node_Inputs_SelPar());
 	AnWeb::nodes.push_back(new Node_Recolor_All());
 	AnWeb::nodes.push_back(new Node_AddBond());
 
-	ParLoader::useConn = false;
+	//ParLoader::useConn = false;
 	//CDV::_Read(IO::path + "/ayuba/position000000.cdv", false);
 	//CDV::_ReadTrj(IO::path + "/ayuba/position");
+
 
 	LiveRunner* runner = new LiveRunner();
 	runner->initNm = "Init";

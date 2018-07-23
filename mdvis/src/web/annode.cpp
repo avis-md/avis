@@ -80,8 +80,9 @@ void AnNode::Draw() {
 	UI::Label(pos.x + 18, pos.y + 1, 12, title, white());
 	DrawToolbar();
 	if (expanded) {
-		Engine::DrawQuad(pos.x, pos.y + 16.0f, width, 3.0f + 17 * cnt, white(0.7f, 0.25f));
 		float y = pos.y + 18;
+		DrawHeader(y);
+		Engine::DrawQuad(pos.x, y - 2, width, 3.0f + 17 * cnt, white(0.7f, 0.25f));
 		for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 			if (!AnWeb::selConnNode || (AnWeb::selConnIdIsOut && AnWeb::selConnNode != this)) {
 				if (Engine::Button(pos.x - 5, y + 3, 10, 10, inputR[i].first ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {

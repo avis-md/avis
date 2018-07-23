@@ -23,3 +23,14 @@ public:
 	Node_Inputs_ActPar();
 	void Execute() override;
 };
+
+class Node_Inputs_SelPar : public Node_Inputs {
+public:
+	enum class SELTYPE {
+		RSL, RES, PAR
+	} type;
+
+	Node_Inputs_SelPar();
+	void DrawHeader(float& off) override;
+	void Execute() override;
+};

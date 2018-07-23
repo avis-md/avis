@@ -1,35 +1,70 @@
+#include "ChokoLait.h"
 #include "cubemarcher.h"
 #include "res/shddata.h"
 
 GLuint CubeMarcher::lookupBuf, CubeMarcher::lookupTex;
 GLuint CubeMarcher::prog = 0;
 
+const uint _sz = 64;
+const uint _res = 64;
+Texture3D* _ctex;
+
 CubeMarcher::CubeMarcher(Texture3D* tex) : tex(tex) {
-	float ff[32 * 32 * 32];
-	byte bb[32 * 32 * 32];
-	for (byte a = 0; a < 32; a++) {
-		for (byte b = 0; b < 32; b++) {
-			for (byte c = 0; c < 32; c++) {
-				float a2 = powf(a - 12, 2);
+	float* ff = new float[_sz * _sz * _sz];
+	float* cff = new float[_sz * _sz * _sz];
+	byte* bb = new byte[_sz * _sz * _sz];
+	byte* cbb = new byte[_sz * _sz * _sz];
+	for (byte a = 0; a < _sz; a++) {
+		for (byte b = 0; b < _sz; b++) {
+			for (byte c = 0; c < _sz; c++) {
+				float a2 = powf(a - (_sz - 1.0f) / 2, 2);
+				float b2 = powf(b - (_sz - 1.0f) / 2, 2);
+				float c2 = powf(c - (_sz - 1.0f) / 2, 2);
+				ff[a * _sz * _sz + b * _sz + c] = (expf(-16 * sqrtf(a2 + b2 + c2) / _sz));
+				cff[a * _sz * _sz + b * _sz + c] = (expf(-16 * sqrtf(a2 + b2 + c2) / _sz));
+			}
+		}
+	}
+	for (byte a = 0; a < _sz; a++) {
+		for (byte b = 0; b < _sz; b++) {
+			for (byte c = 0; c < _sz; c++) {
+				float a2 = powf(a - 3 * (_sz - 1.0f) / 4, 2);
+				float b2 = powf(b - (_sz - 1.0f) / 2, 2);
+				float c2 = powf(c - (_sz - 1.0f) / 2, 2);
+				ff[a * _sz * _sz + b * _sz + c] += (expf(-32 * sqrtf(a2 + b2 + c2) / _sz));
+				cff[a * _sz * _sz + b * _sz + c] -= (expf(-32 * sqrtf(a2 + b2 + c2) / _sz));
+			}
+		}
+	}
+	for (byte a = 0; a < _sz; a++) {
+		for (byte b = 0; b < _sz; b++) {
+			for (byte c = 0; c < _sz; c++) {
+				float a2 = powf(a - (_sz - 1.0f) / 2, 2);
+				float b2 = powf(b - (_sz - 1.0f) / 2, 2);
+				float c2 = powf(c - 3 * (_sz - 1.0f) / 4, 2);
+				ff[a * _sz * _sz + b * _sz + c] += (expf(-32 * sqrtf(a2 + b2 + c2) / _sz));
+				cff[a * _sz * _sz + b * _sz + c] -= (expf(-32 * sqrtf(a2 + b2 + c2) / _sz));
+			}
+		}
+	}
+	for (byte a = 0; a < _sz; a++) {
+		for (byte b = 0; b < _sz; b++) {
+			for (byte c = 0; c < _sz; c++) {
+				float a2 = powf(a - 16, 2);
 				float b2 = powf(b - 16, 2);
-				float c2 = powf(c - 16, 2);
-				ff[a * 32 * 32 + b * 32 + c] = (byte)(expf(-sqrtf(a2 + b2 + c2)/3) * 255);
+				float c2 = powf(c - 8, 2);
+				bb[a * _sz * _sz + b * _sz + c] = (byte)min(ff[a * _sz * _sz + b * _sz + c] * 500, 254.99f);
+				cbb[a * _sz * _sz + b * _sz + c] = (byte)Clamp(cff[a * _sz * _sz + b * _sz + c] * 6400 + 127, 0.0f, 254.99f);
 			}
 		}
 	}
 
-	for (byte a = 0; a < 32; a++) {
-		for (byte b = 0; b < 32; b++) {
-			for (byte c = 0; c < 32; c++) {
-				float a2 = powf(a - 24, 2);
-				float b2 = powf(b - 16, 2);
-				float c2 = powf(c - 16, 2);
-				bb[a * 32 * 32 + b * 32 + c] = (byte)(ff[a * 32 * 32 + b * 32 + c] + (expf(-sqrtf(a2 + b2 + c2) / 5) * 255));
-			}
-		}
-	}
-
-	this->tex = new Texture3D(32, 32, 32, 1, bb);
+	this->tex = new Texture3D(_sz, _sz, _sz, 1, bb);
+	_ctex = new Texture3D(_sz, _sz, _sz, 1, cbb);
+	delete[](ff);
+	delete[](cff);
+	delete[](bb);
+	delete[](cbb);
 }
 
 void CubeMarcher::Init() {
@@ -39,10 +74,10 @@ void CubeMarcher::Init() {
 	if (!Shader::LoadShader(GL_VERTEX_SHADER, IO::GetText(IO::path + "/mcVert.txt"), vertex_shader, &err)) {
 		Debug::Error("Shader Compiler", "Vert error: " + err);
 	}
-	if (!Shader::LoadShader(GL_GEOMETRY_SHADER, IO::GetText(IO::path + "/geo.txt"), geometry_shader, &err)) {
+	if (!Shader::LoadShader(GL_GEOMETRY_SHADER, IO::GetText(IO::path + "/mcGeom.txt"), geometry_shader, &err)) {
 		Debug::Error("Shader Compiler", "Geom error: " + err);
 	}
-	if (!Shader::LoadShader(GL_FRAGMENT_SHADER, glsl::coreFrag3, fragment_shader, &err)) {
+	if (!Shader::LoadShader(GL_FRAGMENT_SHADER, IO::GetText(IO::path + "/mcFrag.txt"), fragment_shader, &err)) {
 		Debug::Error("Shader Compiler", "Frag error: " + err);
 	}
 
@@ -84,27 +119,38 @@ void CubeMarcher::Init() {
 
 float _thress = 0.5f;
 
-void CubeMarcher::Draw(const Mat4x4& _mvp) {
+void CubeMarcher::Draw(const Mat4x4& _mv, const Mat4x4& _p) {
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glUseProgram(prog);
 	glBindVertexArray(Camera::emptyVao);
 	auto sz = glGetUniformLocation(prog, "sz");
-	auto mvp = glGetUniformLocation(prog, "_MVP");
+	auto mv = glGetUniformLocation(prog, "_MV");
+	auto p = glGetUniformLocation(prog, "_P");
 	auto tx = glGetUniformLocation(prog, "tex");
+	auto ctx = glGetUniformLocation(prog, "ctex");
 	auto trs = glGetUniformLocation(prog, "thres");
 	auto tbl = glGetUniformLocation(prog, "triTable");
+	auto dph = glGetUniformLocation(prog, "depthTex");
 	auto cl = glGetUniformLocation(prog, "col");
-	glUniform3i(sz, 32, 32, 32);
+	glUniform3i(sz, _res, _res, _res);
 	glUniform1i(tx, 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_3D, tex->pointer);
-	glUniformMatrix4fv(mvp, 1, GL_FALSE, glm::value_ptr(_mvp));
+	glUniform1i(ctx, 5);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_3D, _ctex->pointer);
+	glUniformMatrix4fv(mv, 1, GL_FALSE, glm::value_ptr(_mv));
+	glUniformMatrix4fv(p, 1, GL_FALSE, glm::value_ptr(_p));
 	glUniform1f(trs, _thress);
 	glUniform1i(tbl, 2);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_BUFFER, lookupTex);
+	glUniform1i(dph, 3);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_depthTex);
 	glUniform4f(cl, 1, 0, 0, 1);
-	glDrawArrays(GL_POINTS, 0, 32*32*32);
+	glDrawArrays(GL_POINTS, 0, _res*_res*_res);
 	glBindVertexArray(0);
 	glUseProgram(0);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -112,7 +158,7 @@ void CubeMarcher::Draw(const Mat4x4& _mvp) {
 	_thress = Engine::DrawSliderFill(200, 200, 150, 16, 0, 1, _thress, blue(), white());
 }
 
-const int32_t CubeMarcher::_lookupTable[] = {
+int32_t CubeMarcher::_lookupTable[] = {
 	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 	0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 	0, 1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,

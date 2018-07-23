@@ -28,7 +28,7 @@ public:
 	static std::vector<ParImporter*> importers;
 	static std::vector<string> exts;
 	
-	static bool showDialog, busy, fault;
+	static bool showDialog, busy, fault, directLoad;
 	static bool parDirty, trjDirty;
 	static float* loadProgress, *loadProgress2;
 	static string loadName;
