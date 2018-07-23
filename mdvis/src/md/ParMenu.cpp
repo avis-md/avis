@@ -274,20 +274,37 @@ void ParMenu::DrawSplash() {
 
 	string sub = "";
 
-	auto ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63, 140, 50, white(0.3f), "Manual", 12, white(), true);
+	auto ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63, 140, 54, white(0.3f), "User Manual", 12, white(), true);
 	if (ms & MOUSE_HOVER_FLAG) {
 		sub = "Displays the user manual in the browser";
 		if (ms == MOUSE_RELEASE) {
 			IO::OpenEx(IO::path + "/docs/index.html");
 		}
 	}
+	ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63 + 56, 140, 54, white(0.3f), "Report A Problem", 12, white(), true);
+	if (ms & MOUSE_HOVER_FLAG) {
+		sub = "Opens the problem reporter form (Google Forms)";
+		if (ms == MOUSE_RELEASE) {
+			IO::OpenEx("https://goo.gl/forms/U1hhBUHuo2CyiDEn1");
+		}
+	}
+	ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63 + 112, 140, 54, white(0.3f), "Request A Feature", 12, white(), true);
+	if (ms & MOUSE_HOVER_FLAG) {
+		sub = "Opens the feature request form (Google Forms)";
+		if (ms == MOUSE_RELEASE) {
+			IO::OpenEx("https://goo.gl/forms/2SUhPlWFRBQuSg4D2");
+		}
+	}
 
 	auto pos = Vec4(Display::width*0.5f - 20, Display::height*0.5f - 80, 215, 183);
 	if (!!recentFiles.size()) {
 		UI::Label(pos.x + 2, pos.y + 1, 12, "Recent Files", white());
+		if (Engine::Button(pos.x + pos.z - 70, pos.y, 70, 16, white(1, 0.3f), "Browse", 12, white(), true) == MOUSE_RELEASE) {
+			ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
+		}
 		Engine::DrawQuad(pos.x, pos.y + 17, pos.z, pos.w - 17, white(0.7f, 0.05f));
 		for (uint i = 0; i < recentFiles.size(); i++) {
-			if (35 + 17 * i > pos.z) break;
+			if (35 + 17 * i > pos.w) break;
 			ms = Engine::Button(pos.x + 5, pos.y + 20 + 17 * i, pos.z - 10, 16, white(0, 0.4f), recentFilesN[i], 12, white());
 			if (ms & MOUSE_HOVER_FLAG) {
 				sub = recentFiles[i];
@@ -339,6 +356,10 @@ void ParMenu::SelClear() {
 void ParMenu::DrawSelPopup() {
 	Engine::DrawQuad(0, 20, 150, Display::height - 40, white(1, 0.1f));
 	UI::Label(2, 20, 12, "Select", white());
+	if (Engine::Button(100, 20, 49, 16, white(1, 0.4f), "Cancel", 12, white(), true) == MOUSE_RELEASE) {
+		Popups::type = POPUP_TYPE::NONE;
+		return;
+	}
 	float off = 38;
 	Engine::BeginStencil(0, off, expandPos, Display::height - 18 - off);
 	for (uint i = 0; i < Particles::residueListSz; i++) {

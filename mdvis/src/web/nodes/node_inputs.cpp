@@ -142,10 +142,10 @@ void Node_Inputs_SelPar::DrawHeader(float& off) {
 	string nmfs[] = { "Residue Name", "Residue ID", "Atom ID" };
 	UI2::Switch(pos.x + 2, off + 1, width - 2, "type", 3, nms, (int&)type);
 	UI::Label(pos.x + 2, off + 18, 12, nmfs[(int)type], white());
-	string tv2 = (type == SELTYPE::RSL)? tv_resNm : 
+	string tv = (type == SELTYPE::RSL)? tv_resNm : 
 		(type == SELTYPE::RES)? std::to_string(tv_resId) : 
 			std::to_string(tv_atomId);
-	string tv = (type == SELTYPE::RSL)? tv_resNm : 
+	string tv2 = (type == SELTYPE::RSL)? tv_resNm : 
 		(type == SELTYPE::RES)? std::to_string(tv_resId) + " (" + tv_resNm + ")" : 
 			std::to_string(tv_atomId) + " (" + string(Particles::particles_Name, PAR_MAX_NAME_LEN) + ")";
 	tv = UI::EditText(pos.x + width / 2, off + 18, width/2 - 18, 16, 12, white(1, 0.3f), tv, true, white(), 0, tv2);

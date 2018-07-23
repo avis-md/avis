@@ -136,31 +136,33 @@ void Engine::BeginStencil(float x, float y, float w, float h) {
 	glStencilMask(0x0);
 	glStencilFunc(GL_EQUAL, 1, 0xFF);
 
+	if (!stencilRect) stencilRects.resize(1, Rect(x, y, w, h));
 	stencilRect = new Rect(x, y, w, h);
-	stencilRects.resize(1, *stencilRect);
 }
 
 void Engine::PushStencil(float x, float y, float w, float h) {
 	if (!stencilRect) BeginStencil(x, y, w, h);
 	else {
 		stencilRects.push_back(Rect(x, y, w, h));
-		Rect rt = Rect(0, 0, (float)Display::width, (float)Display::height);
-		for (auto& r : stencilRects)
-			rt = rt.Intersection(r);
-		EndStencil();
+		Rect rt = stencilRects[0];
+		for (size_t a = 1, ssz = stencilRects.size(); a < ssz; a++)
+			rt = rt.Intersection(stencilRects[a]);
+		delete(stencilRect);
 		BeginStencil(rt.x, rt.y, rt.w, rt.h);
 	}
 }
 
 void Engine::PopStencil() {
 	stencilRects.pop_back();
-	EndStencil();
-	if (!!stencilRects.size()) {
-		Rect rt = Rect(0, 0, (float)Display::width, (float)Display::height);
-		for (auto& r : stencilRects)
-			rt = rt.Intersection(r);
+	auto ssz = stencilRects.size();
+	if (!!ssz) {
+		Rect rt = stencilRects[0];
+		for (size_t a = 1; a < ssz; a++)
+			rt = rt.Intersection(stencilRects[a]);
+		delete(stencilRect);
 		BeginStencil(rt.x, rt.y, rt.w, rt.h);
 	}
+	else EndStencil();
 }
 
 void Engine::EndStencil() {

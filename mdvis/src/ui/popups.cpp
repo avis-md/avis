@@ -10,6 +10,11 @@ void Popups::Draw() {
     if (type == POPUP_TYPE::NONE) return;
     UI::IncLayer();
 
+	if (Input::KeyDown(Key_Escape)) {
+		type = POPUP_TYPE::NONE;
+		return;
+	}
+
     switch (type) {
 	case POPUP_TYPE::MENU:
 		DrawMenu();
