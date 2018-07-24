@@ -336,6 +336,7 @@ void Protein::DrawMenu(float off) {
 		}
 		if (Engine::Button(exp - 18, off, 16, 16, p.visible ? Icons::visible : Icons::hidden) == MOUSE_RELEASE) {
 			p.visible = !p.visible;
+			Scene::dirty = true;
 		}
 		off += 17;
 		if (p.expanded) {

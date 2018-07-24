@@ -563,6 +563,7 @@ void ParLoader::OnOpenFile(const std::vector<string>& files) {
 	if (!files.size()) return;
 	droppedFiles = files;
 	loadAsTrj = !!Particles::particleSz;
+	ParMenu::showSplash = false;
 	FindImpId();
 
 	useConn = true;
