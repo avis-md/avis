@@ -7,6 +7,7 @@
 #include "ui/icons.h"
 #include "ui/help.h"
 #include "ui/ui_ext.h"
+#include "res/resdata.h"
 #include "live/livesyncer.h"
 #include "utils/dialog.h"
 
@@ -145,7 +146,7 @@ void VisSystem::DrawTitle() {
 	}
 	Engine::DrawQuad(Display::width * 0.6f, 1, Display::width * 0.3f, 16, white(1, 0.2f));
 	UI::Label(Display::width * 0.6f + 2, 1, 12, message, (!messageSev) ? white(0.5f) : ((messageSev==1)? yellow(0.8f) : red(0.8f)));
-	if (Engine::Button(Display::width * 0.9f - 16, 1, 16, 16, white(1, 0.4f)) == MOUSE_RELEASE) {
+	if (Engine::Button(Display::width * 0.9f - 16, 1, 16, 16, Icons::details, white(0.8f)) == MOUSE_RELEASE) {
 		Popups::type = POPUP_TYPE::SYSMSG;
 	}
 

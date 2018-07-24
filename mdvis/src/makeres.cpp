@@ -4,7 +4,7 @@
 
 void MakeRes::Do() {
 	const char* hx = "0123456789ABCDEF";
-	char rs[] = "\\x00";
+	char chs[3];
 	auto fls = IO::GetFiles(IO::path + "/res/", ".png");
 	auto sz = (IO::path + "/res").size();
 	std::ofstream strma(IO::path + "/res/src/resdata.h", std::ios::app);
@@ -15,13 +15,12 @@ void MakeRes::Do() {
 		f = f.substr(0, f.size() - 4);
 		std::ofstream strm(IO::path + "/res/src/_res/" + f + ".h");
 		strm << "namespace res {\nconst unsigned int " << f << "_png_sz = " + std::to_string(bb.size()) + ";\n"
-			<< "const unsigned char " << f << "_png[] = \"";
-		for (auto& b : bb) {
-			rs[2] = hx[b >> 4];
-			rs[3] = hx[b & 15];
-			strm.write(rs, 4);
+			<< "const unsigned char " << f << "_png[] = {";
+		for (size_t a = 0, s = bb.size(); a < s; a++) {
+			strm << std::to_string(bb[a]);
+			if (a < s-1) strm << ",";
 		}
-		strm << "\";\n}";
+		strm << "};\n}";
 		strma << "\n#include \"_res/" << f << ".h\"";
 	}
 }

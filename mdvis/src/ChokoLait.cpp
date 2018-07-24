@@ -60,16 +60,16 @@ rCamera ChokoLait::mainCamera = rCamera();
 std::vector<dropFileFunc> ChokoLait::dropFuncs;
 
 void _dieded(int i) {
-//#ifdef PLATFORM_WIN
-//	MessageBox(glfwGetWin32Window(Display::window), "Beep Boop, I Crashed.\nSee Log.txt for details.", "!", MB_OK);
-//#endif
+	Debug::Error("System", "Abort trap!");
 	throw "abort trap!";
 }
 
 void _sigfpe(int i) {
+	Debug::Error("System", "FP exception!");
 	throw "floating-point exception!";
 }
 void _sigseg(int i) {
+	Debug::Error("System", "Segmentation fault!");
 	throw "segmentation error!";
 }
 

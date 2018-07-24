@@ -3,6 +3,7 @@
 #include "md/Protein.h"
 #include "md/parloader.h"
 #include "vis/system.h"
+#include "res/resdata.h"
 #include "ui/icons.h"
 #include "ui/popups.h"
 #include "ui/ui_ext.h"
@@ -140,7 +141,7 @@ void ParGraphics::Init() {
 
 
 	bg = new Texture(IO::path + "/res/bg.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
-	splash = new Texture(IO::path + "/res/bg_splash.png", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
+	splash = new Texture(res::bg_splash_png, res::bg_splash_png_sz);
 	GLuint mv;
 	Shader::LoadShader(GL_VERTEX_SHADER, glsl::minVert, mv);
 	reflProg = Shader::FromF(mv, glsl::reflFrag);

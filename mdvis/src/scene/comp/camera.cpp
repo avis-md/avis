@@ -18,22 +18,6 @@ Camera::Camera(std::ifstream& stream, SceneObject* o, long pos) : Camera() {
 }
 
 void Camera::ApplyGL() {
-	/*
-	switch (clearType) {
-	case CAM_CLEAR_COLOR:
-		glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glClearDepthf(1);
-		glClear(GL_DEPTH_BUFFER_BIT);
-		break;
-	case CAM_CLEAR_DEPTH:
-		glClearDepthf(1);
-		glClear(GL_DEPTH_BUFFER_BIT);
-		break;
-	default:
-		break;
-	}*/
-
 	MVP::Switch(true);
 	MVP::Clear();
 	Quat q = glm::inverse(object->transform.rotation());
@@ -47,46 +31,6 @@ void Camera::ApplyGL() {
 	MVP::Mul(QuatFunc::ToMatrix(q));
 	Vec3 pos = -object->transform.position();
 	MVP::Translate(pos.x, pos.y, pos.z);
-}
-
-void Camera::GenShaderFromPath(const char* vs, const char* fs, GLuint* program) {
-	GLuint vertex_shader;
-	std::string err;
-	if (!Shader::LoadShader(GL_VERTEX_SHADER, vs, vertex_shader, &err)) {
-		Debug::Error("Cam Shader Compiler V", err);
-		abort();
-	}
-	GenShaderFromPath(vertex_shader, fs, program);
-}
-
-void Camera::GenShaderFromPath(GLuint vertex_shader, const char* fs, GLuint* program) {
-	GLuint fragment_shader;
-	std::string err;
-	if (!Shader::LoadShader(GL_FRAGMENT_SHADER, fs, fragment_shader, &err)) {
-		Debug::Error("Cam Shader Compiler F", err);
-		abort();
-	}
-
-	*program = glCreateProgram();
-	glAttachShader(*program, vertex_shader);
-	glAttachShader(*program, fragment_shader);
-	glLinkProgram(*program);
-	GLint link_result;
-	glGetProgramiv(*program, GL_LINK_STATUS, &link_result);
-	if (link_result == GL_FALSE)
-	{
-		int info_log_length = 0;
-		glGetProgramiv(*program, GL_INFO_LOG_LENGTH, &info_log_length);
-		std::vector<char> program_log(info_log_length);
-		glGetProgramInfoLog(*program, info_log_length, NULL, &program_log[0]);
-		std::cout << "cam shader error" << std::endl << &program_log[0] << std::endl;
-		glDeleteProgram(*program);
-		*program = 0;
-		abort();
-	}
-	glDetachShader(*program, vertex_shader);
-	glDetachShader(*program, fragment_shader);
-	glDeleteShader(fragment_shader);
 }
 
 void Camera::InitShaders() {

@@ -445,7 +445,6 @@ void Light::InitShadow() {
 void Light::DrawShadowMap(GLuint tar) {
 	if (_shadowFbo == 0) {
 		Debug::Error("RenderShadow", "Fatal: Fbo not set up!");
-		abort();
 	}
 	glViewport(0, 0, 1024, 1024);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, tar);

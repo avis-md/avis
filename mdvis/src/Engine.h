@@ -438,7 +438,6 @@ enum FFT_WINDOW : byte {
 #include "utils/ptrext.h"
 #include "utils/precedurals.h"
 #include "utils/stream.h"
-#include "utils/serial.h"
 
 #include "core/font.h"
 #include "core/input.h"

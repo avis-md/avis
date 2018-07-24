@@ -26,12 +26,12 @@ bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
 
 void AnWeb::Insert(AnScript* scr, Vec2 pos) {
 	AnNode* nd;
-	//if (scr->type == AN_SCRTYPE::PYTHON)
-		//nd = new PyNode((PyScript*)scr);
 	if (scr->type == AN_SCRTYPE::PYTHON)
 		nd = new PyNode((PyScript*)scr);
-	else
-		abort();
+	else {
+		Debug::Error("AnWeb::Insert", "Invalid type!");
+		return;
+	}
 	Insert(nd, pos);
 }
 
@@ -142,7 +142,7 @@ void AnWeb::Draw() {
 	if (Input::mouse0State == MOUSE_UP) {
 		if (selScript) {
 			if (iter >= 0) {
-				AnNode* pn;
+				AnNode* pn = 0;
 				if ((uintptr_t)selScript > 1) {
 					switch (selScript->type) {
 					case AN_SCRTYPE::PYTHON:
@@ -152,7 +152,8 @@ void AnWeb::Draw() {
 						pn = new CNode((CScript*)selScript);
 						break;
 					default:
-						abort();
+						Debug::Error("AnWeb::Draw", "Unhandled script type: " + std::to_string((int)selScript->type));
+						break;
 					}
 				}
 				else {
@@ -164,7 +165,8 @@ void AnWeb::Draw() {
 						pn = new Node_Volume();
 						break;
 					default:
-						abort();
+						Debug::Error("AnWeb::Draw", "Unhandled node type: " + std::to_string((int)selSpNode));
+						return;
 					}
 				}
 				if (iterTile) {
@@ -427,7 +429,9 @@ void AnWeb::Load(const string& s) {
 			else if (nm == ".Vol") nodes[a] = new Node_Volume();
 			else if (nm == ".Plot") nodes[a] = new Node_Plot();
 			else if (nm == ".ingro") nodes[a] = new Node_Gromacs();
-			else abort();
+			else {
+				Debug::Warning("AnWeb::Load", "Unknown node name: " + nm);
+			}
 			break;
 		case 1:
 			nodes[a] = new CNode(CScript::allScrs[nm]);
@@ -436,7 +440,8 @@ void AnWeb::Load(const string& s) {
 			nodes[a] = new PyNode(PyScript::allScrs[nm]);
 			break;
 		default:
-			abort();
+			Debug::Warning("AnWeb::Load", "Unknown node type: " + std::to_string((int)t));
+			break;
 		}
 		nodes[a]->Load(strm);
 		nodes[a]->id = a;
