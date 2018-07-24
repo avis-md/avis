@@ -224,7 +224,6 @@ void IO::OpenEx(string path) {
 	//	char* fs[] = { &path[0], 0 };
 		//execv(
 #if defined(PLATFORM_LNX)
-		"xdg-open"
 		system(("xdg-open " + path).c_str());
 #else
 		//execl("open", &path[0]);

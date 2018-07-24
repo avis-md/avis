@@ -19,17 +19,17 @@ float imix(float a, float b, float t) {
 	return (t-a)/(b-a);
 }
 
-const int edges[24] = {
-	0,1,1,2,2,3,0,3,
-	4,5,5,6,6,7,4,7,
-	0,4,1,5,2,6,3,7
-};
 
 void main() {
+	int edges[24] = int[24](
+		0,1,1,2,2,3,0,3,
+		4,5,5,6,6,7,4,7,
+		0,4,1,5,2,6,3,7
+	);
 	vec3 dp = vec3(1.0/sz.x, 1.0/sz.y, 1.0/sz.z) * 0.5;
 	float f = texture(tex, v2g_uvw[0]).x;
 	vec3 _p = v2g_uvw[0];
-	vec4 pts[8] = {
+	vec4 pts[8] = vec4[8](
 		vec4(_p.x-dp.x, _p.y-dp.y, _p.z-dp.z, 1),
 		vec4(_p.x+dp.x, _p.y-dp.y, _p.z-dp.z, 1),
 		vec4(_p.x+dp.x, _p.y+dp.y, _p.z-dp.z, 1),
@@ -38,7 +38,7 @@ void main() {
 		vec4(_p.x+dp.x, _p.y-dp.y, _p.z+dp.z, 1),
 		vec4(_p.x+dp.x, _p.y+dp.y, _p.z+dp.z, 1),
 		vec4(_p.x-dp.x, _p.y+dp.y, _p.z+dp.z, 1)
-	};
+	);
 
 	float vals[8];
 	
