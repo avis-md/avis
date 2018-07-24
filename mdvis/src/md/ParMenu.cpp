@@ -22,6 +22,8 @@ bool ParMenu::visibleAll;
 
 std::vector<string> ParMenu::recentFiles, ParMenu::recentFilesN;
 
+float _off = 0;
+
 void ParMenu::Draw() {
 	Engine::DrawQuad(0, 18, expandPos, Display::height - 36.0f, white(0.9f, 0.15f));
 	if (expanded) {
@@ -131,6 +133,11 @@ void ParMenu::Draw_List(float off) {
 	off += 17;
 	//Engine::DrawQuad(1, off-1, expandPos - 2, Display::height - 37.0f, white(0.9f, 0.1f));
 	Engine::BeginStencil(0, off, expandPos, Display::height - 18 - off);
+	if (Rect(0, off, expandPos, Display::height - 18 - off).Inside(Input::mousePos)) {
+		_off -= Input::mouseScroll * 20;
+	}
+	off -= _off;
+	float mof = off;
 	for (uint i = 0; i < Particles::residueListSz; i++) {
 		auto& rli = Particles::residueLists[i];
 		//if (off > 0) {
@@ -299,21 +306,31 @@ void ParMenu::DrawSplash() {
 	auto pos = Vec4(Display::width*0.5f - 20, Display::height*0.5f - 80, 215, 183);
 	if (!!recentFiles.size()) {
 		UI::Label(pos.x + 2, pos.y + 1, 12, "Recent Files", white());
-		if (Engine::Button(pos.x + pos.z - 70, pos.y, 70, 16, white(1, 0.3f), "Browse", 12, white(), true) == MOUSE_RELEASE) {
-			ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
-		}
 		Engine::DrawQuad(pos.x, pos.y + 17, pos.z, pos.w - 17, white(0.7f, 0.05f));
 		for (uint i = 0; i < recentFiles.size(); i++) {
 			if (35 + 17 * i > pos.w) break;
 			ms = Engine::Button(pos.x + 5, pos.y + 20 + 17 * i, pos.z - 10, 16, white(0, 0.4f), recentFilesN[i], 12, white());
 			if (ms & MOUSE_HOVER_FLAG) {
 				sub = recentFiles[i];
-				if (ms == MOUSE_RELEASE) {
+				if (Engine::Button(pos.x + pos.z - 21, pos.y + 20 + 17 * i, 16, 16, Icons::cross, red()) == MOUSE_RELEASE) {
+					RemoveRecent(i);
+					break;
+				}
+				else if (ms == MOUSE_RELEASE) {
+					if (!IO::HasFile(recentFiles[i])) {
+						RemoveRecent(i);
+						VisSystem::SetMsg("File does not exist!", 1);
+						break;
+					}
 					showSplash = false;
 					ParLoader::OnOpenFile(std::vector<string>{ recentFiles[i] });
 				}
 			}
 		}
+	}
+	else UI::Label(pos.x + 2, pos.y + 1, 12, "No Recent Files", white());
+	if (Engine::Button(pos.x + pos.z - 70, pos.y, 70, 16, white(1, 0.3f), "Browse", 12, white(), true) == MOUSE_RELEASE) {
+		ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
 	}
 	if (sub.size()) {
 		UI::Label(Display::width*0.5f - 190, pos.y + pos.w + 1, 12, sub, white(0.7f));
@@ -460,5 +477,14 @@ void ParMenu::DrawRecents(Vec4 pos) {
 			ParLoader::OnOpenFile(std::vector<string>{ recentFiles[i] });
 		}
 		UI::Label(pos.x + pos.z * 0.3f, pos.y + 20 + 17 * i, 12, recentFiles[i], white(0.5f), pos.z * 0.7f - 5);
+	}
+}
+
+void ParMenu::RemoveRecent(uint i) {
+	recentFiles.erase(recentFiles.begin() + i);
+	recentFilesN.erase(recentFilesN.begin() + i);
+	std::ofstream strm(IO::path + "/.recentfiles");
+	for (auto& s : recentFiles) {
+		strm << s << "\n";
 	}
 }

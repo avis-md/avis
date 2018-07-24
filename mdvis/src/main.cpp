@@ -3,6 +3,7 @@
 //#include <numpy/arrayobject.h>
 
 //#define MAKE_RES
+//#define AYB
 
 #include "ui/icons.h"
 #include "ui/popups.h"
@@ -300,10 +301,12 @@ int main(int argc, char **argv) {
 	AnWeb::nodes.push_back(new Node_Recolor_All());
 	AnWeb::nodes.push_back(new Node_AddBond());
 
-	//ParLoader::useConn = false;
-	//CDV::_Read(IO::path + "/ayuba/position000000.cdv", false);
-	//CDV::_ReadTrj(IO::path + "/ayuba/position");
-
+#ifdef AYB
+	ParLoader::useConn = false;
+	ParMenu::showSplash = false;
+	CDV::_Read(IO::path + "/ayuba/position000000.cdv", false);
+	CDV::_ReadTrj(IO::path + "/ayuba/position");
+#endif
 
 	LiveRunner* runner = new LiveRunner();
 	runner->initNm = "Init";

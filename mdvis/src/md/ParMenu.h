@@ -22,5 +22,5 @@ public:
 	static void SelClear(), SelInv(), SelAll();
 	static void DrawSelPopup();
 
-	static void LoadRecents(), SaveRecents(const string& entry), DrawRecents(Vec4 rect);
+	static void LoadRecents(), SaveRecents(const string& entry), DrawRecents(Vec4 rect), RemoveRecent(uint i);
 };
