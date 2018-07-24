@@ -14,10 +14,6 @@ public:
 	static bool HasFile(string szPath);
 	static string ReadFile(const string& path);
 	static void HideInput(bool hide);
-#if defined(PLATFORM_WIN)
-	static std::vector<string> GetRegistryKeys(HKEY key);
-	static std::vector<std::pair<string, string>> GetRegistryKeyValues(HKEY hKey, DWORD numValues = 5);
-#endif
 	static string GetText(const string& path);
 	static std::vector<byte> GetBytes(const string& path);
 

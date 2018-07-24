@@ -1,5 +1,6 @@
 #pragma once
 
+#include "_res/help_text.h"
 #include "_res/browse.h"
 #include "_res/checkbox.h"
 #include "_res/circle.h"

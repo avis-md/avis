@@ -33,6 +33,9 @@ void Popups::Draw() {
 	case POPUP_TYPE::ATOMID:
 		ParMenu::DrawSelPopup();
 		break;
+	case POPUP_TYPE::SYSMSG:
+		VisSystem::DrawMsgPopup();
+		break;
     default:
 		Debug::Warning("Popup", "case not handled: " + std::to_string((int)type) + "!");
 		type = POPUP_TYPE::NONE;

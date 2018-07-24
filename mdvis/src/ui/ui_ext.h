@@ -7,6 +7,7 @@
 
 class UI2 {
 public:
+	static void LabelMul(float x, float y, float sz, const string& s);
 	static string EditText(float x, float y, uint w, const string& title, const string& val, bool enabled = true, Vec4 col = white(1, 0.5f));
 	static float Slider(float x, float y, uint w, const string& title, float a, float b, float t);
 	static float Slider(float x, float y, uint w, const string& title, float a, float b, float t, const string& lbl);

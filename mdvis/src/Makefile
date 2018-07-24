@@ -59,7 +59,7 @@ obj/xdrfile/%.o: xdrfile/%.c
 	$(C) -g -c $< -o $@
 
 obj/utils/tinyfiledialogs.o: utils/tinyfiledialogs.c
-	$(C) $(CXXFLAGS) -c $< -o $@
+	$(C) -g -c $< -o $@
 
 clean:
 	find ./obj -name '*.o' -exec rm {} \;

@@ -101,7 +101,6 @@ void Particles::Clear() {
 		anim.frameCount = anim.activeFrame = 0;
 
 		Protein::Clear();
-		VisSystem::message = "Scene Cleared";
 	}
 }
 

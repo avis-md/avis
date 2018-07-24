@@ -55,9 +55,10 @@ void updateFunc() {
 	if (ParLoader::parDirty) {
 		ParLoader::parDirty = false;
 		Particles::UpdateBufs();
-		Particles::GenTexBufs();
-		Protein::Refresh();
-		ParGraphics::UpdateDrawLists();
+		if (Protein::Refresh()) {
+			Particles::GenTexBufs();
+			ParGraphics::UpdateDrawLists();
+		}
 	}
 
 	ParGraphics::Update();
@@ -184,10 +185,34 @@ int main(int argc, char **argv) {
 int main(int argc, char **argv) {
 #endif
 	std::vector<string> fls;
+	bool _s = false, _x = false;
+	string _xs = "";
 	for (auto a = 1; a < argc; a++) {
 		if (argv[a][0] == '-') {
-			if (!strcmp(argv[a] + 1, "debug"))
-				__debug = true;
+			if (argv[a][1] == '-') {
+				argv[a] += 2;
+#define ISS(str) (!strcmp(argv[a], #str))
+				if ISS(debug)
+					__debug = true;
+				else if ISS(help) {
+					std::cout << res::helpText;
+					return 0;
+				}
+				else {
+					std::cout << "Unknown switch " << argv[a]-2 << ". Type --help for usage guide.";
+					return -1;
+				}
+			}
+			else {
+				argv[a] ++;
+				if ISS(s)
+					_s = true;
+				else {
+					std::cout << "Unknown option " << argv[a]-1 << ". Type --help for usage guide.";
+					return -2;
+				}
+#undef ISS
+			}
 		}
 		else {
 			fls.push_back(argv[a]);
@@ -267,7 +292,7 @@ int main(int argc, char **argv) {
 
 	ParLoader::exts = std::vector<string>({"*.gro", "*.trr", "*.pdb", "*.xyz", "*.cdv", "*.bin"});
 	if (fls.size()) {
-		ParLoader::directLoad = true;
+		ParLoader::directLoad = _s;
 		ParLoader::OnOpenFile(fls);
 	}
 

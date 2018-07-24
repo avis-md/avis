@@ -46,7 +46,8 @@ public:
     static byte proCnt;
     static Protein* pros;
 
-    static void Init(), Clear(), Refresh();
+    static void Init(), Clear();
+    static bool Refresh();
     static void Draw(), Recolor(), DrawMenu(float off);
 
     static GLuint shad, colShad;

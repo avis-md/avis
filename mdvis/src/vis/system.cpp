@@ -6,6 +6,7 @@
 #include "web/anweb.h"
 #include "ui/icons.h"
 #include "ui/help.h"
+#include "ui/ui_ext.h"
 #include "live/livesyncer.h"
 #include "utils/dialog.h"
 
@@ -15,6 +16,20 @@ uint VisSystem::renderMs, VisSystem::uiMs;
 std::vector<MenuItem> VisSystem::menuItems[];
 
 string VisSystem::message = "Hello";
+string VisSystem::message2 = "";
+bool VisSystem::hasMessage2 = false;
+byte VisSystem::messageSev = 0;
+
+void VisSystem::SetMsg(const string& msg, byte sev, const string& msg2) {
+	message = msg;
+	message2 = msg2;
+	hasMessage2 = !!msg2.size();
+	messageSev = sev;
+
+	if (hasMessage2 && sev == 2) {
+		Popups::type = POPUP_TYPE::SYSMSG;
+	}
+}
 
 VIS_MOUSE_MODE VisSystem::mouseMode = VIS_MOUSE_MODE::ROTATE;
 
@@ -129,7 +144,10 @@ void VisSystem::DrawTitle() {
 		//UI::Label(5 + menusp[i], 1, 12, menu[i], white());
 	}
 	Engine::DrawQuad(Display::width * 0.6f, 1, Display::width * 0.3f, 16, white(1, 0.2f));
-	UI::Label(Display::width * 0.6f + 2, 1, 12, message, white(0.5f));
+	UI::Label(Display::width * 0.6f + 2, 1, 12, message, (!messageSev) ? white(0.5f) : ((messageSev==1)? yellow(0.8f) : red(0.8f)));
+	if (Engine::Button(Display::width * 0.9f - 16, 1, 16, 16, white(1, 0.4f)) == MOUSE_RELEASE) {
+		Popups::type = POPUP_TYPE::SYSMSG;
+	}
 
 	UI::font->Align(ALIGN_TOPRIGHT);
 	UI::Label(Display::width - 5.0f, 3, 10, __APPVERSION__, white(0.7f));
@@ -179,4 +197,19 @@ void VisSystem::DrawBar() {
 			mouseMode = (VIS_MOUSE_MODE)b;
 		}
 	}
+}
+
+void VisSystem::DrawMsgPopup() {
+	UI::IncLayer();
+	Engine::DrawQuad(0, 0, Display::width, Display::height, black(0.7f));
+	
+	Engine::DrawQuad(Display::width * 0.5f - 200, Display::height * 0.5f - 50, 400, 100, white(0.95f, 0.15f));
+
+ 	if ((Engine::Button(Display::width * 0.5f + 120, Display::height * 0.5f + 33, 79, 16, white(1, 0.4f), "Close", 12, white(), true) == MOUSE_RELEASE) ||
+		(Input::KeyDown(Key_Escape) && UI::_layer == UI::_layerMax) || 
+		(Input::mouse0State == 1 && !Rect(Display::width*0.5f - 200, Display::height*0.5f - 50, 400, 100).Inside(Input::mousePos))) {
+		Popups::type = POPUP_TYPE::NONE;
+	}
+
+	UI2::LabelMul(Display::width * 0.5f - 195, Display::height * 0.5f - 45, 12, message2);
 }

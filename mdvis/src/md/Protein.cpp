@@ -1,5 +1,6 @@
 #include "Protein.h"
 #include "md/ParMenu.h"
+#include "md/parloader.h"
 #include "utils/rawvector.h"
 #include "utils/spline.h"
 #include "utils/solidify.h"
@@ -88,7 +89,7 @@ void Protein::Clear() {
 	proCnt = 0;
 }
 
-void Protein::Refresh() {
+bool Protein::Refresh() {
     if (pros) std::free(pros);
     auto proVec = rawvector<Protein, byte>(pros, proCnt);
     Protein* p = 0;
@@ -144,17 +145,25 @@ void Protein::Refresh() {
 					}
 				}
                 
-                for (uint a = 0; a < rs.cnt; a++) {
+				int mxf = 0;
+                string msg2 = "Amino chain not found for residue ";
+				msg2 += string(&rl.name[0]);
+				msg2 += " (" + rs.name + ")\n";
+				for (uint a = 0; a < rs.cnt; a++) {
                     if (Particles::particles_Name[(a + rs.offset) * PAR_MAX_NAME_LEN] == 'N') {
+						mxf = 1;
                         //if (_Has(conns[a], 'H')) {
                             _FOR(conns[a], 'C', b) {
+								mxf = 2;
                                 auto& cb = conns[b - rs.offset];
                                 //uint b2 = _Has(cb, 'H');
                                 //if (b2 < ~0U) {
                                     _FOR(cb, 'C', c) {
+										mxf = 3;
                                         auto& cc = conns[c - rs.offset];
                                         uint c2 = _Has(cc, 'O');
                                         if (c2 < ~0U) {
+											mxf = 4;
                                             if (_CntOf(cc, 'C') == 1) {
                                                 ch[0] = a + rs.offset;
                                                 ch[2] = b;
@@ -171,7 +180,22 @@ void Protein::Refresh() {
                         //}
                     }
                 }
-                Debug::Error("Protein", "Cannot find amino chain!");
+                //Debug::Error("Protein", "Cannot find amino chain!");
+				ParLoader::fault = true;
+				if (mxf == 0)
+					msg2 += "Cannot find N atom";
+				else if (mxf == 1)
+					msg2 += "Cannot find 1st C atom";
+				else if (mxf == 2)
+					msg2 += "Cannot find 2nd C atom";
+				else if (mxf == 3)
+					msg2 += "Cannot find O atom attached to 2nd C atom";
+				else if (mxf == 4)
+					msg2 += "2nd C atom has more than 1 C atom attached";
+				msg2 += "\nChain signature is N-C1-C2=O";
+				VisSystem::SetMsg("Protein amino chain error!", 2, msg2);
+				Particles::Clear();
+				return false;
                 found:;
             }
             else {
@@ -194,6 +218,7 @@ void Protein::Refresh() {
 			pros[b].tint = Color::HueBaseCol(1 - (float(b) / proCnt));
 		}
 	}
+	return true;
 }
 
 void Protein::ApplyChain() {
@@ -224,7 +249,7 @@ void Protein::ApplyChain() {
 void Protein::Draw() {
 	auto _mv = MVP::modelview();
 	auto _p = MVP::projection();
-
+	glEnable(GL_CULL_FACE);
     for (byte b = 0; b < proCnt; b++) {
         auto& p = pros[b];
 		if (!p.visible) continue;
@@ -252,6 +277,7 @@ void Protein::Draw() {
         glBindVertexArray(0);
         glUseProgram(0);
     }
+	glDisable(GL_CULL_FACE);
 }
 
 void Protein::Recolor() {
@@ -297,13 +323,19 @@ void Protein::DrawMenu(float off) {
 		if (Engine::Button(exp - 130, off, 96, 16) == MOUSE_RELEASE) {
 			
 		}
-		if (Engine::Button(exp - 34, off, 16, 16, p.drawGrad ? Icons::pro_grad : Icons::pro_col, p.drawGrad ? white(0.8f) : p.tint) == MOUSE_RELEASE) {
-			p.drawGrad ^= 1;
-			ParGraphics::UpdateDrawLists();
+		if (Engine::Button(exp - 50, off, 16, 16, Icons::pro_col, p.tint * (p.drawGrad ? 0.4f : 0.8f)) == MOUSE_RELEASE) {
+			if (p.drawGrad) p.drawGrad = false;
+			else {
+				Popups::type = POPUP_TYPE::COLORPICK;
+				Popups::pos = Vec2(exp - 50, off + 17);
+				Popups::data = &p.tint;
+			}
+		}
+		if (Engine::Button(exp - 34, off, 16, 16, Icons::pro_grad, white(p.drawGrad ? 0.8f : 0.4f)) == MOUSE_RELEASE) {
+			p.drawGrad = true;
 		}
 		if (Engine::Button(exp - 18, off, 16, 16, p.visible ? Icons::visible : Icons::hidden) == MOUSE_RELEASE) {
 			p.visible = !p.visible;
-			ParGraphics::UpdateDrawLists();
 		}
 		off += 17;
 		if (p.expanded) {

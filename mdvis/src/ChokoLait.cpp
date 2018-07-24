@@ -84,10 +84,6 @@ void ChokoLait::_InitVars() {
 	signal(SIGSEGV, &_sigseg);
 
 	const string& path = IO::InitPath();
-	if (!IO::HasFile(path + "/defaultresources.bin")) {
-		std::cout << "Neccessary files not found in current directory!" << std::endl;
-		exit(-1);
-	}
 
 	Debug::Init(path);
 

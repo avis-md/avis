@@ -10,6 +10,9 @@
 #include <sys/stat.h>
 #include <termios.h>
 #include <unistd.h>
+#ifdef PLATFORM_OSX
+#include <mach-o/dyld.h>
+#endif
 #endif
 
 string IO::path = IO::InitPath();
@@ -139,51 +142,6 @@ void IO::HideInput(bool hide) {
 #endif
 }
 
-#ifdef PLATFORM_WIN
-std::vector<string> IO::GetRegistryKeys(HKEY key) {
-	TCHAR    achKey[255];
-	TCHAR    achClass[MAX_PATH] = TEXT("");
-	DWORD    cchClassName = MAX_PATH;
-	DWORD	 size;
-	std::vector<string> res;
-
-	if (RegQueryInfoKey(key, achClass, &cchClassName, NULL, &size, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == ERROR_SUCCESS) {
-		DWORD cbName = 255;
-		for (uint i = 0; i < size; i++) {
-			if (RegEnumKeyEx(key, i, achKey, &cbName, NULL, NULL, NULL, NULL) == ERROR_SUCCESS) {
-				res.push_back(achKey);
-			}
-		}
-	}
-	return res;
-}
-
-std::vector<std::pair<string, string>> IO::GetRegistryKeyValues(HKEY hKey, DWORD numValues) {
-	std::vector<std::pair<string, string>> vals;
-	for (DWORD i = 0; i < numValues; i++)
-	{
-		char valueName[201];
-		DWORD valNameLen = 200;
-		DWORD dataType;
-		byte data[501];
-		DWORD dataSize = 500;
-
-		auto val = RegEnumValue(hKey,
-			i,
-			valueName,
-			&valNameLen,
-			NULL,
-			&dataType,
-			data, &dataSize);
-
-		if (!!val) break;
-		vals.push_back(std::pair<string, string>(string(valueName), string((char*)data)));
-	}
-
-	return vals;
-}
-#endif
-
 string IO::GetText(const string& path) {
 	std::ifstream strm(path);
 	std::stringstream ss;
@@ -290,8 +248,10 @@ string IO::InitPath() {
 	string path2 = cpath;
 	path2 = path2.substr(0, path2.find_last_of('/') + 1);
 #else
-	getcwd(cpath, 199);
-	string path2 = cpath;
+	uint32_t sz = sizeof(cpath);
+	_NSGetExecutablePath(cpath, &sz);
+	string path2 = realpath(cpath, 0);
+	path2 = path2.substr(0, path2.find_last_of('/') + 1);
 #endif
 	path = path2;
 	Debug::Message("IO", "Path set to " + path);

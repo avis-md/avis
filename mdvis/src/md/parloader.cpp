@@ -177,7 +177,7 @@ void ParLoader::DoOpen() {
 	loadName = "Reading file(s)";
 	std::replace(droppedFiles[0].begin(), droppedFiles[0].end(), '\\', '/');
 	string nm = droppedFiles[0].substr(droppedFiles[0].find_last_of('/') + 1);
-	VisSystem::message = "Reading " + nm;
+	VisSystem::SetMsg("Reading " + nm);
 
 	auto t = milliseconds();
 
@@ -190,11 +190,11 @@ void ParLoader::DoOpen() {
 			if (!importers[impId]->funcs[funcId].second(&info)) {
 				if (!info.error[0]) {
 					Debug::Error("ParLoader", "Unspecified importer error!");
-					VisSystem::message = "Unspecified import error";
+					VisSystem::SetMsg("Unspecified import error", 2);
 				}
 				else {
 					Debug::Error("ParLoader", "Importer error: " + string(info.error));
-					VisSystem::message = info.error;
+					VisSystem::SetMsg(info.error, 2);
 				}
 				busy = false;
 				fault = true;
@@ -204,7 +204,7 @@ void ParLoader::DoOpen() {
 	}
 	catch (char* c) {
 		Debug::Warning("ParLoader", "Importer exception: " + string(c));
-		VisSystem::message = "Importer threw " + string(c);
+		VisSystem::SetMsg("Importer threw " + string(c), 2);
 		busy = false;
 		fault = true;
 		return;
@@ -380,7 +380,7 @@ void ParLoader::DoOpen() {
 		anm.reading = false;
 	}
 
-	VisSystem::message = "Loaded " + nm + " in " + std::to_string((milliseconds() - t)*0.001f).substr(0, 5) + "s";
+	VisSystem::SetMsg("Loaded " + nm + " in " + std::to_string((milliseconds() - t)*0.001f).substr(0, 5) + "s");
 	ParMenu::SaveRecents(droppedFiles[0]);
 	ParLoader::parDirty = true;
 	busy = false;

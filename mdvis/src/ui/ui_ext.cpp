@@ -3,6 +3,13 @@
 #include "popups.h"
 #include "utils/dialog.h"
 
+void UI2::LabelMul(float x, float y, float sz, const string& s) {
+	auto ss = string_split(s, '\n');
+	for (auto a = 0; a < ss.size(); a++) {
+		UI::Label(x, y + sz * 1.2f * a, sz, ss[a], white());
+	}
+}
+
 string UI2::EditText(float x, float y, uint w, const string& title, const string& val, bool enabled, Vec4 col) {
 	UI::Label(x, y, 12, title, white());
 	w /= 2;

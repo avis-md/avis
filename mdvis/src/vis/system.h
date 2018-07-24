@@ -15,7 +15,11 @@ public:
 
 	static std::vector<MenuItem> menuItems[10];
 
-	static string message;
+	static string message, message2;
+	static bool hasMessage2;
+	static byte messageSev;
+
+	static void SetMsg(const string& msg, byte sev = 0, const string& msg2 = "");
 
 	static VIS_MOUSE_MODE mouseMode;
 	
@@ -28,5 +32,5 @@ public:
 
 	static bool InMainWin(const Vec2& pos);
 
-	static void DrawTitle(), DrawBar();
+	static void DrawTitle(), DrawBar(), DrawMsgPopup();
 };
