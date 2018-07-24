@@ -17,6 +17,7 @@
 #include "md/pdb.h"
 #include "md/XYZ.h"
 #include "md/mdvbin.h"
+#include "md/lammps.h"
 #include "vis/cubemarcher.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
@@ -291,7 +292,15 @@ int main(int argc, char **argv) {
 	imp->funcs.back().second = MDVBin::Read;
 	ParLoader::importers.push_back(imp);
 
-	ParLoader::exts = std::vector<string>({"*.gro", "*.trr", "*.pdb", "*.xyz", "*.cdv", "*.bin"});
+	imp = new ParImporter();
+	imp->name = "lammps";
+	imp->sig = "lmps";
+	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
+	imp->funcs.back().first.push_back(".atom");
+	imp->funcs.back().second = Lammps::Read;
+	ParLoader::importers.push_back(imp);
+
+	ParLoader::exts = std::vector<string>({"*.gro", "*.trr", "*.pdb", "*.xyz", "*.cdv", "*.bin", "*.atom"});
 	if (fls.size()) {
 		ParLoader::directLoad = _s;
 		ParLoader::OnOpenFile(fls);
