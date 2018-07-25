@@ -45,7 +45,7 @@ bool PDB::Read(ParInfo* info) {
 	std::vector<char*> lines, helices, sheets;
 	char* cc = new char[150];
 	while (strm.getline(cc, 150)) {
-		if (ATM(cc)) {
+		if (ATM(cc) && (cc[13] != ' ')) {
 			lines.push_back(cc);
 			cc = new char[150];
 		}
@@ -80,6 +80,7 @@ bool PDB::Read(ParInfo* info) {
 		info->pos[i * 3 + 2] = (float)atof(NSP(ln + 46, ln + 53)) * 0.1f;
 		if (*(ln + 76) == ' ') info->type[i] = (uint16_t)(*(ln + 77));
 		else info->type[i] = *((uint16_t*)(ln + 76));
+		info->type[i] &= 0x00ff;
 	}
 
 	info->secStructNum = helices.size() + sheets.size();
