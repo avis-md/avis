@@ -7,6 +7,8 @@
 Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	DmScript* scr = (DmScript*)script;
 	script->name = ".in";
+	script->desc = "Particle data for current frame";
+	script->descLines = 1;
 	
 	title = "All Particles";
 	titleCol = Vec3(0.3f, 0.3f, 0.5f);
@@ -47,6 +49,7 @@ void Node_Inputs::Draw() {
 	this->pos = pos;
 	Engine::DrawQuad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
 	UI::Label(pos.x + 2, pos.y + 1, 12, title, white());
+	DrawToolbar();
 	float y = pos.y + 16;
 	DrawHeader(y);
 	Engine::DrawQuad(pos.x, y, width, 3.0f + 17 * cnt, white(0.7f, 0.25f));
@@ -119,6 +122,8 @@ void Node_Inputs::LoadIn(const string& path) {
 Node_Inputs_ActPar::Node_Inputs_ActPar() : Node_Inputs() {
 	title = "Selected Particles";
 	script->name = ".inact";
+	script->desc = "Particle data for all frames";
+	script->descLines = 1;
 
 	for (uint i = 0; i < 4; i++)
 		conV[i].dimVals[0] = new int(0);
@@ -131,12 +136,15 @@ void Node_Inputs_ActPar::Execute() {
 Node_Inputs_SelPar::Node_Inputs_SelPar() : Node_Inputs() {
 	title = "Particles of";
 	script->name = ".insel";
+	script->desc = "Particle data of Name/ID";
+	script->descLines = 1;
 
 	for (uint i = 0; i < 4; i++)
 		conV[i].dimVals[0] = new int(0);
 }
 
 void Node_Inputs_SelPar::DrawHeader(float& off) {
+	AnNode::DrawHeader(off);
 	Engine::DrawQuad(pos.x, off, width, 35, white(0.7f, 0.25f));
 	string nms[] = { "ResNm", "ResID", "AtomID" };
 	string nmfs[] = { "Residue Name", "Residue ID", "Atom ID" };

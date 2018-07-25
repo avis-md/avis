@@ -2,6 +2,7 @@
 #include "anconv.h"
 #ifndef IS_ANSERVER
 #include "ui/icons.h"
+#include "ui/ui_ext.h"
 #include "res/resdata.h"
 #endif
 
@@ -30,46 +31,16 @@ bool AnNode::Select() {
 Vec2 AnNode::DrawConn() {
 #ifndef IS_ANSERVER
 	auto cnt = (script->invars.size() + script->outvars.size());
-	float y = pos.y + 18;
+	float hy = GetHeaderSz();
+	float y = pos.y + 18 + hy;
 	for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 		if (inputR[i].first) Engine::DrawLine(Vec2(pos.x, expanded ? y + 8 : pos.y + 8), Vec2(inputR[i].first->pos.x + inputR[i].first->width, inputR[i].first->expanded ? inputR[i].first->pos.y + 20 + 8 + (inputR[i].second + inputR[i].first->inputR.size()) * 17 : inputR[i].first->pos.y + 8), white(), 2);
 	}
-	if (expanded) return Vec2(width, 19 + 17 * cnt + DrawLog(19.0f + 17 * cnt));
+	if (expanded) return Vec2(width, 19 + 17 * cnt + DrawLog(19.0f + 17 * cnt) + hy);
 	else return Vec2(width, 16 + DrawLog(16));
 #else
 	return Vec2();
 #endif
-}
-
-float AnNode::DrawLog(float off) {
-	auto sz = this->log.size();
-	if (!sz) return 0;
-	auto sz2 = min<int>(sz, 10);
-	if (logExpanded) {
-		Engine::DrawQuad(pos.x, pos.y + off, width, 15.0f * sz2 + 2, black(0.9f));
-		for (int i = 0; i < sz2; i++) {
-			auto& l = log[i + logOffset];
-			Vec4 col = (!l.first) ? white() : ((l.first == 1) ? yellow() : red());
-			UI::Label(pos.x + 4, pos.y + off + 1 + 15 * i, 12, l.second, col);
-		}
-		if (sz > 10) {
-			float mw = 115;
-			float of = logOffset * mw / sz;
-			float w = 10 * mw / sz;
-			Engine::DrawQuad(pos.x + width - 3, pos.y + off + 1 + of, 2, w, white(0.3f));
-			if (Engine::Button(pos.x + width - 17, pos.y + off + 150 - 33, 16, 16, Icons::up, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
-				logOffset = max<int>(logOffset - 10, 0);
-			}
-			if (Engine::Button(pos.x + width - 17, pos.y + off + 150 - 16, 16, 16, Icons::down, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
-				logOffset = min<int>(logOffset + 10, sz - 10);
-			}
-		}
-		return 15 * sz2 + 2.0f;
-	}
-	else {
-		Engine::DrawQuad(pos.x, pos.y + off, width, 2, black(0.9f));
-		return 2;
-	}
 }
 
 void AnNode::Draw() {
@@ -159,6 +130,20 @@ void AnNode::Draw() {
 #endif
 }
 
+float AnNode::GetHeaderSz() {
+	return showDesc? (3.0f + 17 * script->descLines) : 0;
+}
+
+void AnNode::DrawHeader(float& off) {
+	if (showDesc) {
+		Engine::DrawQuad(pos.x, off, width, 3.0f + 17 * script->descLines, white(0.7f, 0.25f));
+		UI::alpha = 0.7f;
+		UI2::LabelMul(pos.x + 2, off + 1, 12, script->desc);
+		UI::alpha = 1;
+		off += 3.0f + 17 * script->descLines;
+	}
+}
+
 float AnNode::DrawSide() {
 #ifndef IS_ANSERVER
 	auto cnt = (script->invars.size());
@@ -206,16 +191,46 @@ float AnNode::DrawSide() {
 #endif
 }
 
+float AnNode::DrawLog(float off) {
+	auto sz = this->log.size();
+	if (!sz) return 0;
+	auto sz2 = min<int>(sz, 10);
+	if (logExpanded) {
+		Engine::DrawQuad(pos.x, pos.y + off, width, 15.0f * sz2 + 2, black(0.9f));
+		for (int i = 0; i < sz2; i++) {
+			auto& l = log[i + logOffset];
+			Vec4 col = (!l.first) ? white() : ((l.first == 1) ? yellow() : red());
+			UI::Label(pos.x + 4, pos.y + off + 1 + 15 * i, 12, l.second, col);
+		}
+		if (sz > 10) {
+			float mw = 115;
+			float of = logOffset * mw / sz;
+			float w = 10 * mw / sz;
+			Engine::DrawQuad(pos.x + width - 3, pos.y + off + 1 + of, 2, w, white(0.3f));
+			if (Engine::Button(pos.x + width - 17, pos.y + off + 150 - 33, 16, 16, Icons::up, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+				logOffset = max<int>(logOffset - 10, 0);
+			}
+			if (Engine::Button(pos.x + width - 17, pos.y + off + 150 - 16, 16, 16, Icons::down, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+				logOffset = min<int>(logOffset + 10, sz - 10);
+			}
+		}
+		return 15 * sz2 + 2.0f;
+	}
+	else {
+		Engine::DrawQuad(pos.x, pos.y + off, width, 2, black(0.9f));
+		return 2;
+	}
+}
+
 void AnNode::DrawToolbar() {
 #ifndef IS_ANSERVER
 	if (this->log.size() && Engine::Button(pos.x + width - 67, pos.y, 16, 16, Icons::log, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
 		logExpanded = !logExpanded;
 	}
-	if (Engine::Button(pos.x + width - 50, pos.y, 16, 16, Icons::left, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
-		op = ANNODE_OP::LEFT;
-	}
-	if (Engine::Button(pos.x + width - 33, pos.y, 16, 16, Icons::right, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
-		op = ANNODE_OP::RIGHT;
+	if (!!script->descLines) {
+		if (Engine::Button(pos.x + width - 33, pos.y, 16, 16, Icons::details, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
+			showDesc = !showDesc;
+		}
 	}
 	if (Engine::Button(pos.x + width - 16, pos.y, 16, 16, Icons::cross, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
 		op = ANNODE_OP::REMOVE;

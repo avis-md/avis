@@ -23,7 +23,7 @@ public:
 	string title;
 	Vec3 titleCol = Vec3(0.35f, 0.35f, 0.35f);
 
-	bool expanded = true;
+	bool expanded = true, showDesc = false;
 	bool canTile = false;
 	bool executing = false;
 	ANNODE_OP op;
@@ -42,7 +42,8 @@ public:
 	bool Select();
 	virtual Vec2 DrawConn();
 	virtual void Draw();
-	virtual void DrawHeader(float& off) {}
+	virtual float GetHeaderSz();
+	virtual void DrawHeader(float& off);
 	virtual float DrawSide();
 	float DrawLog(float off);
 	virtual void DrawScene() {}

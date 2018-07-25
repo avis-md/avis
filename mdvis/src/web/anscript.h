@@ -31,6 +31,9 @@ public:
 	std::vector<std::pair<string, string>> invars, outvars;
 	void* progress = 0;
 
+	string desc = "";
+	int descLines = 0;
+
 	virtual string Exec() = 0;
 	virtual void Set(uint i, int v) = 0, Set(uint i, float v) = 0, Set(uint i, void* v) = 0;
 	virtual void* Get(uint i) = 0;
