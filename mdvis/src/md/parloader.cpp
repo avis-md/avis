@@ -189,11 +189,11 @@ void ParLoader::DoOpen() {
 		if (impId > -1) {
 			if (!importers[impId]->funcs[funcId].second(&info)) {
 				if (!info.error[0]) {
-					Debug::Error("ParLoader", "Unspecified importer error!");
+					Debug::Warning("ParLoader", "Unspecified importer error!");
 					VisSystem::SetMsg("Unspecified import error", 2);
 				}
 				else {
-					Debug::Error("ParLoader", "Importer error: " + string(info.error));
+					Debug::Warning("ParLoader", "Importer error: " + string(info.error));
 					VisSystem::SetMsg(info.error, 2);
 				}
 				busy = false;
