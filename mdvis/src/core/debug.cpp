@@ -39,7 +39,6 @@ void Debug::Error(string c, string s) {
 #ifdef PLATFORM_WIN
 	__debugbreak();
 #endif
-	abort();
 }
 
 uint Debug::StackTrace(uint count, void** frames) {

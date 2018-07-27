@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mdvis", "mdvis\mdvis.vcxproj", "{2D5660BE-613F-4BAA-9DE4-D0373AB81D84}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "findpy", "findpy\findpy.vcxproj", "{C6869F60-3C13-49B1-A983-74407CE256A7}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -21,15 +19,6 @@ Global
 		{2D5660BE-613F-4BAA-9DE4-D0373AB81D84}.Release|Win32.ActiveCfg = Release|Win32
 		{2D5660BE-613F-4BAA-9DE4-D0373AB81D84}.Release|Win32.Build.0 = Release|Win32
 		{2D5660BE-613F-4BAA-9DE4-D0373AB81D84}.Release|x64.ActiveCfg = Release|Win32
-		{C6869F60-3C13-49B1-A983-74407CE256A7}.Debug|Win32.ActiveCfg = Release|Win32
-		{C6869F60-3C13-49B1-A983-74407CE256A7}.Debug|Win32.Build.0 = Release|Win32
-		{C6869F60-3C13-49B1-A983-74407CE256A7}.Debug|x64.ActiveCfg = Release|x64
-		{C6869F60-3C13-49B1-A983-74407CE256A7}.Debug|x64.Build.0 = Release|x64
-		{C6869F60-3C13-49B1-A983-74407CE256A7}.Debug|x64.Deploy.0 = Release|x64
-		{C6869F60-3C13-49B1-A983-74407CE256A7}.Release|Win32.ActiveCfg = Release|Win32
-		{C6869F60-3C13-49B1-A983-74407CE256A7}.Release|Win32.Build.0 = Release|Win32
-		{C6869F60-3C13-49B1-A983-74407CE256A7}.Release|x64.ActiveCfg = Release|x64
-		{C6869F60-3C13-49B1-A983-74407CE256A7}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

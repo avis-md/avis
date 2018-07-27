@@ -186,169 +186,177 @@ int main(int argc, char **argv) {
 #else
 int main(int argc, char **argv) {
 #endif
-	std::vector<string> fls;
-	bool _s = false, _x = false;
-	string _xs = "";
-	for (auto a = 1; a < argc; a++) {
-		if (argv[a][0] == '-') {
-			if (argv[a][1] == '-') {
-				argv[a] += 2;
+	try {
+		std::vector<string> fls;
+		bool _s = false, _x = false;
+		string _xs = "";
+		for (auto a = 1; a < argc; a++) {
+			if (argv[a][0] == '-') {
+				if (argv[a][1] == '-') {
+					argv[a] += 2;
 #define ISS(str) (!strcmp(argv[a], #str))
-				if ISS(debug)
-					__debug = true;
-				else if ISS(help) {
-					std::cout << res::helpText;
-					return 0;
+					if ISS(debug)
+						__debug = true;
+					else if ISS(help) {
+						std::cout << res::helpText;
+						return 0;
+					}
+					else {
+						std::cout << "Unknown switch " << argv[a] - 2 << ". Type --help for usage guide.";
+						return -1;
+					}
 				}
 				else {
-					std::cout << "Unknown switch " << argv[a]-2 << ". Type --help for usage guide.";
-					return -1;
+					argv[a] ++;
+					if ISS(s)
+						_s = true;
+					else {
+						std::cout << "Unknown option " << argv[a] - 1 << ". Type --help for usage guide.";
+						return -2;
+					}
+#undef ISS
 				}
 			}
 			else {
-				argv[a] ++;
-				if ISS(s)
-					_s = true;
-				else {
-					std::cout << "Unknown option " << argv[a]-1 << ". Type --help for usage guide.";
-					return -2;
-				}
-#undef ISS
+				fls.push_back(argv[a]);
 			}
 		}
-		else {
-			fls.push_back(argv[a]);
+		if (!__debug) Debug::suppress = 1;
+		ChokoLait::Init(800, 800);
+		//GLFWimage icon;
+		//icon.pixels = Texture::LoadPixels(res::icon_png, res::icon_png_sz, (uint&)icon.width, (uint&)icon.height);
+		//glfwSetWindowIcon(Display::window, 1, &icon);
+		//delete[](icon.pixels);
+
+		VisSystem::InitEnv();
+		CReader::Init();
+		PyReader::Init();
+		RayTracer::Init();
+		Color::Init();
+		Icons::Init();
+		SSH::Init();
+		CubeMarcher::Init();
+		VisSystem::Init();
+		Particles::Init();
+		ParLoader::Init();
+		ParGraphics::Init();
+		Protein::Init();
+		AnWeb::Init();
+		AnNode::Init();
+		Effects::Init(0xffff);
+		ParMenu::LoadRecents();
+
+		AnBrowse::Scan();
+
+		//cm = new CubeMarcher(0);
+
+		ParImporter* imp = new ParImporter();
+		imp->name = "Gromacs";
+		imp->sig = "gro";
+		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
+		imp->funcs.back().first.push_back(".gro");
+		imp->funcs.back().second = Gromacs::Read;
+		imp->trjFuncs.push_back(std::pair<std::vector<std::string>, ParImporter::loadtrjsig>());
+		imp->trjFuncs.back().first.push_back(".trr");
+		imp->trjFuncs.back().second = Gromacs::ReadTrj;
+		ParLoader::importers.push_back(imp);
+
+		imp = new ParImporter();
+		imp->name = "Protein DataBank";
+		imp->sig = "pdb";
+		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
+		imp->funcs.back().first.push_back(".pdb");
+		imp->funcs.back().second = PDB::Read;
+		ParLoader::importers.push_back(imp);
+
+		imp = new ParImporter();
+		imp->name = "XYZ coords";
+		imp->sig = "xyz";
+		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
+		imp->funcs.back().first.push_back(".xyz");
+		imp->funcs.back().second = XYZ::Read;
+		ParLoader::importers.push_back(imp);
+
+		imp = new ParImporter();
+		imp->name = "CDView";
+		imp->sig = "cdv";
+		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
+		imp->funcs.back().first.push_back(".cdv");
+		imp->funcs.back().second = CDV::Read;
+		ParLoader::importers.push_back(imp);
+
+		imp = new ParImporter();
+		imp->name = "binary";
+		imp->sig = "bin";
+		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
+		imp->funcs.back().first.push_back(".bin");
+		imp->funcs.back().second = MDVBin::Read;
+		ParLoader::importers.push_back(imp);
+
+		imp = new ParImporter();
+		imp->name = "lammps";
+		imp->sig = "lmps";
+		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
+		imp->funcs.back().first.push_back(".atom");
+		imp->funcs.back().second = Lammps::Read;
+		ParLoader::importers.push_back(imp);
+
+		ParLoader::exts = std::vector<string>({ "*.gro", "*.trr", "*.pdb", "*.xyz", "*.cdv", "*.bin", "*.atom" });
+		if (fls.size()) {
+			ParLoader::directLoad = _s;
+			ParLoader::OnOpenFile(fls);
 		}
-	}
-	if (!__debug) Debug::suppress = 1;
-	ChokoLait::Init(800, 800);
-	//GLFWimage icon;
-	//icon.pixels = Texture::LoadPixels(res::icon_png, res::icon_png_sz, (uint&)icon.width, (uint&)icon.height);
-	//glfwSetWindowIcon(Display::window, 1, &icon);
-	//delete[](icon.pixels);
 
-	VisSystem::InitEnv();
-	CReader::Init();
-	PyReader::Init();
-	RayTracer::Init();
-	Color::Init();
-	Icons::Init();
-	SSH::Init();
-	CubeMarcher::Init();
-	VisSystem::Init();
-	Particles::Init();
-	ParLoader::Init();
-	ParGraphics::Init();
-	Protein::Init();
-	AnWeb::Init();
-	AnNode::Init();
-	Effects::Init(0xffff);
-	ParMenu::LoadRecents();
-
-	AnBrowse::Scan();
-
-	//cm = new CubeMarcher(0);
-
-	ParImporter* imp = new ParImporter();
-	imp->name = "Gromacs";
-	imp->sig = "gro";
-	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
-	imp->funcs.back().first.push_back(".gro");
-	imp->funcs.back().second = Gromacs::Read;
-	imp->trjFuncs.push_back(std::pair<std::vector<std::string>, ParImporter::loadtrjsig>());
-	imp->trjFuncs.back().first.push_back(".trr");
-	imp->trjFuncs.back().second = Gromacs::ReadTrj;
-	ParLoader::importers.push_back(imp);
-	
-	imp = new ParImporter();
-	imp->name = "Protein DataBank";
-	imp->sig = "pdb";
-	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
-	imp->funcs.back().first.push_back(".pdb");
-	imp->funcs.back().second = PDB::Read;
-	ParLoader::importers.push_back(imp);
-	
-	imp = new ParImporter();
-	imp->name = "XYZ coords";
-	imp->sig = "xyz";
-	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
-	imp->funcs.back().first.push_back(".xyz");
-	imp->funcs.back().second = XYZ::Read;
-	ParLoader::importers.push_back(imp);
-
-	imp = new ParImporter();
-	imp->name = "CDView";
-	imp->sig = "cdv";
-	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
-	imp->funcs.back().first.push_back(".cdv");
-	imp->funcs.back().second = CDV::Read;
-	ParLoader::importers.push_back(imp);
-
-	imp = new ParImporter();
-	imp->name = "binary";
-	imp->sig = "bin";
-	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
-	imp->funcs.back().first.push_back(".bin");
-	imp->funcs.back().second = MDVBin::Read;
-	ParLoader::importers.push_back(imp);
-
-	imp = new ParImporter();
-	imp->name = "lammps";
-	imp->sig = "lmps";
-	imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
-	imp->funcs.back().first.push_back(".atom");
-	imp->funcs.back().second = Lammps::Read;
-	ParLoader::importers.push_back(imp);
-
-	ParLoader::exts = std::vector<string>({"*.gro", "*.trr", "*.pdb", "*.xyz", "*.cdv", "*.bin", "*.atom"});
-	if (fls.size()) {
-		ParLoader::directLoad = _s;
-		ParLoader::OnOpenFile(fls);
-	}
-
-	AnWeb::nodes.push_back(new Node_Inputs_SelPar());
-	AnWeb::nodes.push_back(new Node_Recolor_All());
-	AnWeb::nodes.push_back(new Node_AddBond());
+		AnWeb::nodes.push_back(new Node_Inputs_SelPar());
+		AnWeb::nodes.push_back(new Node_Recolor_All());
+		AnWeb::nodes.push_back(new Node_AddBond());
 
 #ifdef AYB
-	ParLoader::useConn = false;
-	ParMenu::showSplash = false;
-	CDV::_Read(IO::path + "/ayuba/position000000.cdv", false);
-	CDV::_ReadTrj(IO::path + "/ayuba/position");
+		ParLoader::useConn = false;
+		ParMenu::showSplash = false;
+		CDV::_Read(IO::path + "/ayuba/position000000.cdv", false);
+		CDV::_ReadTrj(IO::path + "/ayuba/position");
 #endif
 
-	LiveRunner* runner = new LiveRunner();
-	runner->initNm = "Init";
-	runner->loopNm = "Loop";
-	runner->path = IO::path + "/bin/liverunners/lj256/win32/lj256.dll";
-	runner->name = "LJ256";
-	LiveSyncer::runners.push_back(runner);
+		LiveRunner* runner = new LiveRunner();
+		runner->initNm = "Init";
+		runner->loopNm = "Loop";
+		runner->path = IO::path + "/bin/liverunners/lj256/win32/lj256.dll";
+		runner->name = "LJ256";
+		LiveSyncer::runners.push_back(runner);
 
-	Display::Resize(800, 600, false);
+		Display::Resize(800, 600, false);
 
-	auto lastMillis = Time::millis;
-	bool dirty = false;
-	
-	ChokoLait::mainCamera->object->transform.localPosition(Vec3(0, 0, -1));
-	ChokoLait::mainCamera->quality = 1;
-	ChokoLait::mainCamera->quality2 = 1;
+		auto lastMillis = Time::millis;
+		bool dirty = false;
 
-	glfwShowWindow(Display::window);
+		ChokoLait::mainCamera->object->transform.localPosition(Vec3(0, 0, -1));
+		ChokoLait::mainCamera->quality = 1;
+		ChokoLait::mainCamera->quality2 = 1;
 
-	while (ChokoLait::alive()) {
-		if (!Display::width || !Display::height)
-			glfwPollEvents();
-		else {
-			ChokoLait::Update(updateFunc);
-			dirty = Scene::dirty;
-			ChokoLait::Paint(rendFunc, paintfunc);
-			auto m = Time::millis;
-			VisSystem::uiMs = (uint)(m - lastMillis);
-			if (dirty)
-				VisSystem::renderMs = VisSystem::uiMs;
-			lastMillis = m;
+		glfwShowWindow(Display::window);
+
+		while (ChokoLait::alive()) {
+			if (!Display::width || !Display::height)
+				glfwPollEvents();
+			else {
+				ChokoLait::Update(updateFunc);
+				dirty = Scene::dirty;
+				ChokoLait::Paint(rendFunc, paintfunc);
+				auto m = Time::millis;
+				VisSystem::uiMs = (uint)(m - lastMillis);
+				if (dirty)
+					VisSystem::renderMs = VisSystem::uiMs;
+				lastMillis = m;
+			}
 		}
+		glfwDestroyWindow(Display::window);
+		//*/
 	}
-	glfwDestroyWindow(Display::window);
-	//*/
+	catch (...) {
+		std::cout << "Press enter to exit..." << std::endl;
+		string s;
+		std::getline(std::cin, s);
+		return -1;
+	}
 }

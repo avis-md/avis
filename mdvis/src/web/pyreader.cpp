@@ -4,29 +4,14 @@
 
 void PyReader::Init() {
 	_putenv_s("PYTHONPATH", VisSystem::envs["PYENV"].c_str());
-	int exitCode = 0;
-#ifdef PLATFORM_WIN
-	SECURITY_ATTRIBUTES sa = {};
-	PROCESS_INFORMATION pi = {};
-	STARTUPINFO si = {};
-	si.cb = sizeof(si);
-	BOOL ok = CreateProcess((IO::path + "/findpy.exe").c_str(), NULL, &sa, NULL, 0, NULL, NULL, IO::path.c_str(), &si, &pi);
-	if (ok) {
-		WaitForSingleObject(pi.hProcess, INFINITE);
-		GetExitCodeProcess(pi.hProcess, (LPDWORD)&exitCode);
-	}
-#else
-
-#endif
-	if (!exitCode) {
+	try {
 		Py_Initialize();
 		PyObject *sys_path = PySys_GetObject((char*)"path");
 		auto path = IO::path + "/nodes/";
 		std::replace(path.begin(), path.end(), '\\', '/');
 		PyList_Append(sys_path, PyUnicode_FromString(path.c_str()));
 		AnWeb::hasPy = true;
-	}
-	else {
+	} catch (char* c) {
 		string env = "";
 #ifdef PLATFORM_WIN
 		char* buf;
@@ -39,7 +24,7 @@ void PyReader::Init() {
 #else
 		env = getenv("PYTHONPATH");
 #endif
-		Debug::Warning("Python", "Cannot find python! PYTHONPATH env is: " + env);
+		Debug::Warning("Python", "Cannot initialize python! PYTHONPATH env is: " + env);
 		AnWeb::hasPy = false;
 	}
 }
@@ -51,26 +36,27 @@ bool PyReader::Read(string path, PyScript** _scr) { //"path/to/script[no .py]"
 	std::replace(mdn.begin(), mdn.end(), '/', '.');
 	//auto pName = PyUnicode_FromString(path.c_str());
 	//scr->pModule = PyImport_Import(pName);
-	scr->pModule = PyImport_ImportModule(mdn.c_str());
-	//Py_DECREF(pName);
-	if (!scr->pModule) {
-		Debug::Warning("PyReader", "Failed to read python file " + path + "!");
-		PyErr_Print();
-		delete(scr);
-		*_scr = nullptr;
-		return false;
+	if (AnWeb::hasPy) {
+		scr->pModule = PyImport_ImportModule(mdn.c_str());
+		//Py_DECREF(pName);
+		if (!scr->pModule) {
+			Debug::Warning("PyReader", "Failed to read python file " + path + "!");
+			PyErr_Print();
+			delete(scr);
+			*_scr = nullptr;
+			return false;
+		}
+		scr->pFunc = PyObject_GetAttrString(scr->pModule, "Execute");
+		if (!scr->pFunc || !PyCallable_Check(scr->pFunc)) {
+			Debug::Warning("PyReader", "Failed to find \"Execute\" function in " + path + "!");
+			Py_XDECREF(scr->pFunc);
+			Py_DECREF(scr->pModule);
+			delete(scr);
+			*_scr = nullptr;
+			return false;
+		}
+		Py_INCREF(scr->pFunc);
 	}
-	scr->pFunc = PyObject_GetAttrString(scr->pModule, "Execute");
-	if (!scr->pFunc || !PyCallable_Check(scr->pFunc)) {
-		Debug::Warning("PyReader", "Failed to find \"Execute\" function in " + path + "!");
-		Py_XDECREF(scr->pFunc);
-		Py_DECREF(scr->pModule);
-		delete(scr);
-		*_scr = nullptr;
-		return false;
-	}
-	Py_INCREF(scr->pFunc);
-
 	//extract io variables
 	std::ifstream strm(IO::path + "/nodes/" + path + ".py");
 	string ln;
@@ -106,7 +92,7 @@ bool PyReader::Read(string path, PyScript** _scr) { //"path/to/script[no .py]"
 				scr->_invars[i].name = ss2;
 				scr->invars.push_back(std::pair<string, string>(scr->_invars[i].name, scr->_invars[i].typeName));
 			}
-			scr->pArgs = PyTuple_New(sz);
+			scr->pArgs = (AnWeb::hasPy)? PyTuple_New(sz) : nullptr;
 		}
 		else if (ln2 == "#out") {
 			scr->_outvars.push_back(PyVar());
@@ -119,7 +105,8 @@ bool PyReader::Read(string path, PyScript** _scr) { //"path/to/script[no .py]"
 			std::getline(strm, ln);
 			bk.name = ln.substr(0, ln.find_first_of(' '));
 			scr->outvars.push_back(std::pair<string, string>(bk.name, bk.typeName));
-			scr->pRets.push_back(PyObject_GetAttrString(scr->pModule, bk.name.c_str()));
+			if (AnWeb::hasPy) scr->pRets.push_back(PyObject_GetAttrString(scr->pModule, bk.name.c_str()));
+			else scr->pRets.push_back(nullptr);
 		}
 	}
 
