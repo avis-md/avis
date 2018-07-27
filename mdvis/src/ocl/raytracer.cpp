@@ -24,6 +24,8 @@
 #endif
 #endif
 
+//#define OCL_DIRTY
+
 RayTracer::info_st RayTracer::info = {};
 
 bool RayTracer::live = false, RayTracer::expDirty = false;
@@ -46,7 +48,10 @@ cl_mem _bufr, _bg, _bls, _cns, _cls, _rds;
 bool RayTracer::Init(){
 	cl_platform_id platform = 0;
 	auto res = clGetPlatformIDs(1, &platform, 0);
-	if ((res != CL_SUCCESS) || !platform) return false;	
+	if ((res != CL_SUCCESS) || !platform) {
+		Debug::Message("RayTracer", "OpenCL context not found!");
+		return false;
+	}
 	cl_device_id device;
 	clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, 0);
 
@@ -82,18 +87,44 @@ bool RayTracer::Init(){
 
 	_que = clCreateCommandQueue(_ctx, device, 0, 0);
 	
-	cl_program prog = clCreateProgramWithSource(_ctx, 1, &ocl::code, 0, 0);
-	cl_int err = clBuildProgram(prog, 1, &device, 0, 0, 0);
-
-	size_t lsz;
-	clGetProgramBuildInfo(prog, device, CL_PROGRAM_BUILD_LOG, 0, 0, &lsz);
-	char* log = new char[lsz];
-	clGetProgramBuildInfo(prog, device, CL_PROGRAM_BUILD_LOG, lsz, log, 0);
-	std::cout << log << std::endl;
-	delete[](log);
+	cl_program prog = 0;
+	cl_int err;
+#ifndef OCL_DIRTY
+	if (IO::HasFile(IO::path + "/ocl_bin")) {
+		auto bin = IO::GetBytes(IO::path + "/ocl_bin");
+		auto sz = bin.size();
+		auto dt = &bin[0];
+		prog = clCreateProgramWithBinary(_ctx, 1, &device, &sz, (const byte**)&dt, NULL, &err);
+		err = clBuildProgram(prog, 1, &device, 0, 0, 0);
+	}
+	else
+#endif
+		err = -1;
 	if (err != CL_SUCCESS) {
-		Debug::Error("RayTracer", "program error: " + std::to_string(err));
-		return false;
+		Debug::Message("OpenCL", "Building program for first use...");
+		prog = clCreateProgramWithSource(_ctx, 1, &ocl::code, 0, 0);
+		err = clBuildProgram(prog, 1, &device, 0, 0, 0);
+
+		size_t lsz;
+		clGetProgramBuildInfo(prog, device, CL_PROGRAM_BUILD_LOG, 0, 0, &lsz);
+		char* log = new char[lsz];
+		clGetProgramBuildInfo(prog, device, CL_PROGRAM_BUILD_LOG, lsz, log, 0);
+		std::cout << log << std::endl;
+		delete[](log);
+		if (err != CL_SUCCESS) {
+			Debug::Warning("RayTracer", "program error: " + std::to_string(err));
+			OHNO(OpenCL, "ocl::code wrong");
+			return false;
+		}
+
+		size_t sz;
+		clGetProgramInfo(prog, CL_PROGRAM_BINARY_SIZES, sizeof(size_t), &sz, NULL);
+		char* bin[] = { new char[sz] };
+		clGetProgramInfo(prog, CL_PROGRAM_BINARIES, sizeof(uintptr_t), bin, NULL);
+		std::ofstream ostrm(IO::path + "/ocl_bin", std::ios::binary);
+		ostrm.write(bin[0], sz);
+		ostrm.close();
+		delete[](bin[0]);
 	}
 	_kernel = clCreateKernel(prog, "_main_", 0);
 	
@@ -182,8 +213,8 @@ void RayTracer::SetTex(uint w, uint h){
 void RayTracer::SetBg(string fl) {
 	byte* d = hdr::read_hdr(fl.c_str(), (uint*)&info.bg_w, (uint*)&info.bg_h);
 	if (!d) return;
-	std::vector<float> dv;
-	hdr::to_float(d, info.bg_w, info.bg_h, &dv);
+	float* dv = new float[info.bg_w*info.bg_h*3];
+	hdr::to_float(d, info.bg_w, info.bg_h, dv);
 	delete[](d);
 
 #ifdef PLATFORM_WIN
@@ -192,8 +223,10 @@ void RayTracer::SetBg(string fl) {
 	bgName = fl.substr(fl.find_last_of('/') + 1);
 
 	if (_bg) clReleaseMemObject(_bg);
-	_bg = clCreateBuffer(_ctx, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, info.bg_w * info.bg_h * 3 * sizeof(cl_float), &dv[0], 0);
+	_bg = clCreateBuffer(_ctx, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, info.bg_w * info.bg_h * 3 * sizeof(cl_float), dv, 0);
 	clSetKernelArg(_kernel, 2, sizeof(_bg), (void*)&_bg);
+
+	delete[](dv);
 }
 
 void RayTracer::Render() {

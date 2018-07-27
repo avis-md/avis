@@ -253,7 +253,7 @@ string IO::InitPath() {
 	path2 = path2.substr(0, path2.find_last_of('/') + 1);
 #endif
 	path = path2;
-	Debug::Message("IO", "Path set to " + path);
+	//Debug::Message("IO", "Path set to " + path);
 	return path2;
 }
 

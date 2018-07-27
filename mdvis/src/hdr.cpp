@@ -39,6 +39,8 @@
 
 \****************************************************************************/
 
+//Modified with parallelization
+
 #include "Engine.h"
 #include "hdr.h"
 #include <math.h>
@@ -247,41 +249,18 @@ unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int
         }
     }
 
-    /* convert rgbe to IEEE floats
-     * (ref "Real Pixels" by Greg Ward, Graphics Gems II) 
-    image = (float *)malloc((*w) * (*h) * 3 * sizeof(float));
-    for (i=0; i<(*w)*(*h); i++) {
-        unsigned char exponent = imagergbe[i*4+3];
-        if (exponent == 0) {
-            image[i*3+0] = 0.0f;
-            image[i*3+1] = 0.0f;
-            image[i*3+2] = 0.0f;
-        }
-        else {
-            float v = (1.0f/256.0f) * pow(2, (float)(exponent-128));
-            image[i*3+0] = (imagergbe[i*4+0] + 0.5f) * v;
-            image[i*3+1] = (imagergbe[i*4+1] + 0.5f) * v;
-            image[i*3+2] = (imagergbe[i*4+2] + 0.5f) * v;
-        }
-    }
-    free(imagergbe);
-
-    *dataformat = GL_RGB;
-    *datatype   = GL_FLOAT;
-	*/
-
     return imagergbe;
 }
 
-void hdr::to_float(unsigned char imagergbe[], int w, int h, std::vector<float>* res) {
-	res->resize(w * h * 3, 0);
-	for (int i = 0; i < w*h; i++) {
+void hdr::to_float(unsigned char imagergbe[], int w, int h, float* res) {
+#pragma omp parallel for
+	for (int i = w*h; i >= 0; i--) {
 		unsigned char exponent = imagergbe[i * 4 + 3];
 		if (exponent != 0) {
 			double v = (1.0f / 256.0f) * pow(2, (float)(exponent - 128));
-			(*res)[i * 3 + 0] = (float)((imagergbe[i * 4 + 0] + 0.5f) * v);
-			(*res)[i * 3 + 1] = (float)((imagergbe[i * 4 + 1] + 0.5f) * v);
-			(*res)[i * 3 + 2] = (float)((imagergbe[i * 4 + 2] + 0.5f) * v);
+			res[i * 3 + 0] = (float)((imagergbe[i * 4 + 0] + 0.5f) * v);
+			res[i * 3 + 1] = (float)((imagergbe[i * 4 + 1] + 0.5f) * v);
+			res[i * 3 + 2] = (float)((imagergbe[i * 4 + 2] + 0.5f) * v);
 		}
 	}
 }

@@ -21,10 +21,10 @@ string ffmpeg_getmsg(int i) {
 void fopen_s(FILE** f, const char* c, const char* m) {
 	*f = fopen(c, m);
 }
-void _putenv_s(string nm, const char* loc) {
-	string s = ((nm) + "=" + string(loc));
-	putenv(&s[0]);
-}
+//void _putenv_s(string nm, const char* loc) {
+//	string s = ((nm) + "=" + string(loc));
+//	putenv(&s[0]);
+//}
 
 #endif
 

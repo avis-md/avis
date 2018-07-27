@@ -1,14 +1,15 @@
 #include "anweb.h"
+#include "vis/system.h"
 #ifndef IS_ANSERVER
 #include "utils/runcmd.h"
 #endif
 
-#ifdef PLATFORM_WIN
-string CReader::vcbatPath = "C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\bin\\vcvars32.bat";
-#endif
+string CReader::vcbatPath = "";
 
 void CReader::Init() {
-	
+#ifdef PLATFORM_WIN
+	vcbatPath = VisSystem::envs["VCBAT"];
+#endif
 }
 
 string _rm_spaces(string s) {
@@ -27,7 +28,7 @@ bool CReader::Read(string path, CScript** _scr) {
 	auto ls = fp.find_last_of('/');
 	string nm = fp.substr(ls + 1);
 	string fp2 = fp.substr(0, ls + 1) + "__ccache__/";
-   
+    
 	auto s = IO::GetText(fp + ".cpp");
 
 #ifndef IS_ANSERVER
@@ -49,7 +50,7 @@ bool CReader::Read(string path, CScript** _scr) {
 		s = "\
 #define VARIN extern \"C\"" + dlx + "\n\
 #define VAROUT VARIN\n\
-#define ENTRY VARIN\n\
+#define ENTRY VARIN void\n\
 #define VECSZ(...)\n\
 #define VECVAR VARIN\n\
 #define PROGRS VARIN\n\
@@ -59,33 +60,32 @@ bool CReader::Read(string path, CScript** _scr) {
 		ostrm.close();
 
 #ifdef PLATFORM_WIN
-		const string cl = "cl /nologo /c -Od /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
-		const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".dll\" \"" + fp2 + nm + ".obj\"";
-		RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " && " + lk);
+		if (!!vcbatPath.size()) {
 #else
-		const string cmd = "g++ -std=c++11 -shared -O0 -fPIC -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\"";
-		std::cout << cmd << std::endl;
-		RunCmd::Run(cmd);
+		if (0) {
 #endif
+			const string cl = "cl /nologo /c -Od /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
+			const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".so\" \"" + fp2 + nm + ".obj\"";
+			RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " && " + lk);
+		}
+		else {
+			const string cmd = "g++ -std=c++11 -shared -O0 -fPIC -lm -o \"" + fp2 + nm + ".so\" \""	+ fp + "_temp__.cpp\"";
+			std::cout << cmd << std::endl;
+			RunCmd::Run(cmd);
+		}
 		const string ss = fp + "_temp__.cpp";
 		remove(&ss[0]);
 
 	}
-	else {
-		std::cout << "skipping " << nm << std::endl;
-	}
+	//else {
+	//	std::cout << "skipping " << nm << std::endl;
+	//}
 
 #endif
 
 	auto scr = *_scr = new CScript();
 	scr->name = path;
-	scr->lib = new DyLib(fp2 + nm + 
-#ifdef PLATFORM_WIN
-	".dll"
-#else
-	".so"
-#endif
-	);
+	scr->lib = new DyLib(fp2 + nm + ".so");
 	if (!scr->lib) {
 		Debug::Warning("CReader", "Failed to load script into memory!");
 		return false;
@@ -96,6 +96,9 @@ bool CReader::Read(string path, CScript** _scr) {
 		return false;
 	}
 
+	const char* tpnms[] = { "float*", "short*", "int*" };
+	const char tpaps[] = { 'f', 's', 'i' };
+	const int tpszs[] = { 6, 6, 4 };
 	std::ifstream strm(fp + ".cpp");
 	string ln;
 	std::vector<std::pair<string, int*>> vecvars;
@@ -116,14 +119,22 @@ bool CReader::Read(string path, CScript** _scr) {
 			CVar* bk = 0;
 			if (vec > 0) {
 				auto s2 = _rm_spaces(ln.substr(6));
-				if (s2.substr(0, 6) != "float*") {
-					Debug::Warning("CReader", "list VARIN must be float*!");
+				byte tp = 255;
+				for (byte b = 0; b < 3; b++) {
+					if (s2.substr(0, tpszs[b]) == tpnms[b]) {
+						tp = b;
+						break;
+					}
+				}
+				if (tp == 255) {
+					Debug::Warning("CReader", "unsupported type for list!");
 					return false;
 				}
 				scr->_invars.push_back(vr);
 				bk = &scr->_invars.back();
+				bk->name = s2.substr(tpszs[tp], s2.find_first_of('=') - tpszs[tp]).substr(0, ln.find_first_of(';'));
 				bk->type = AN_VARTYPE::LIST;
-				bk->name = s2.substr(6, s2.find_first_of('=') - 6).substr(0, ln.find_first_of(';'));
+				bk->typeName[6] = tpaps[tp];
 				int ii = 0;
 				for (auto& a : bk->dimNames) {
 					if (!!a[0]) vecvarLocs.push_back(std::pair<string, int**>(a, &bk->dimVals[ii]));
@@ -156,16 +167,22 @@ bool CReader::Read(string path, CScript** _scr) {
 			CVar* bk = 0;
 			if (vec > 0) {
 				auto s2 = _rm_spaces(ln.substr(6));
-				bool isf = s2.substr(0, 6) == "float*";
-				if (!isf && s2.substr(0, 4) != "int*") {
+				byte tp = 255;
+				for (byte b = 0; b < 3; b++) {
+					if (s2.substr(0, tpszs[b]) == tpnms[b]) {
+						tp = b;
+						break;
+					}
+				}
+				if (tp == 255) {
 					Debug::Warning("CReader", "unsupported type for list!");
 					return false;
 				}
 				scr->_outvars.push_back(vr);
 				bk = &scr->_outvars.back();
-				bk->name = s2.substr(isf ? 6 : 4, s2.find_first_of('=') - (isf ? 6 : 4)).substr(0, ln.find_first_of(';'));
+				bk->name = s2.substr(tpszs[tp], s2.find_first_of('=') - tpszs[tp]).substr(0, ln.find_first_of(';'));
 				bk->type = AN_VARTYPE::LIST;
-				if (!isf) bk->typeName = "i" + bk->typeName;
+				bk->typeName[6] = tpaps[tp];
 				int ii = 0;
 				for (auto& a : bk->dimNames) {
 					if (!!a[0]) vecvarLocs.push_back(std::pair<string, int**>(a, &bk->dimVals[ii]));
@@ -234,7 +251,7 @@ bool CReader::Read(string path, CScript** _scr) {
 			auto ss = string_split(ln, ',', true);
 			vec = ss.size();
 			vr = CVar();
-			vr.typeName = "list(" + std::to_string(vec) + ")";
+			vr.typeName = "list(" + std::to_string(vec) + " )";
 			vr.dimNames.resize(vec);
 			vr.dimVals.resize(vec);
 			int i = 0;

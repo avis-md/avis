@@ -14,16 +14,18 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	titleCol = Vec3(0.3f, 0.3f, 0.5f);
 	canTile = true;
 	auto v = std::pair<string, string>();
-	v.second = "list(2)";
-	outputR.resize(4);
-	scr->outvars.resize(4, v);
+	v.second = "list(2f)";
+	outputR.resize(5);
+	scr->outvars.resize(5, v);
 	scr->outvars[0].first = "positions";
 	scr->outvars[1].first = "velocities";
-	scr->outvars[2].first = "positions (all)";
-	scr->outvars[3].first = "velocities (all)";
-	scr->outvars[2].second = scr->outvars[3].second = "list(3)";
+	scr->outvars[2].first = "types";
+	scr->outvars[2].second = "list(1s)";
+	scr->outvars[3].first = "positions (all)";
+	scr->outvars[4].first = "velocities (all)";
+	scr->outvars[3].second = scr->outvars[4].second = "list(3f)";
 
-	conV.resize(4);
+	conV.resize(5);
 	auto& poss = conV[0];
 	poss.dimVals.resize(2);
 	poss.type = AN_VARTYPE::LIST;
@@ -31,16 +33,26 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	poss.dimVals[0] = (int*)&Particles::particleSz;
 #endif
 	poss.dimVals[1] = new int(3);
-	
 	conV[1] = conV[2] = poss;
-	auto& posa = conV[2];
+	
+	auto& post = conV[2];
+	post.dimVals.resize(1);
+#ifndef IS_ANSERVER
+	post.dimVals[0] = (int*)&Particles::particleSz;
+#endif
+
+	auto& posa = conV[3];
 	posa.dimVals.resize(3);
 	posa.dimVals[2] = posa.dimVals[1];
 	posa.dimVals[1] = posa.dimVals[0];
 #ifndef IS_ANSERVER
 	posa.dimVals[0] = (int*)&Particles::anim.frameCount;
 #endif
-	conV[3] = conV[2];
+	conV[4] = conV[3];
+}
+
+Vec2 Node_Inputs::DrawConn(){
+	return Vec2(width, 19 + 17 * 4 + GetHeaderSz());
 }
 
 void Node_Inputs::Draw() {
@@ -90,8 +102,9 @@ void Node_Inputs::Execute() {
 #ifndef IS_ANSERVER
 	conV[0].value = &Particles::particles_Pos;
 	conV[1].value = &Particles::particles_Vel;
-	conV[2].value = Particles::anim.poss;
-	conV[3].value = Particles::anim.vels;
+	conV[2].value = &Particles::particles_Typ;
+	conV[3].value = Particles::anim.poss;
+	conV[4].value = Particles::anim.vels;
 #endif
 }
 

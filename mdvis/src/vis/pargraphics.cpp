@@ -104,17 +104,17 @@ float ParGraphics::Eff::DrawMenu(float off) {
 
 void ParGraphics::Init() {
 	uint _w, _h;
-	std::vector<float> dv;
 	byte* d = hdr::read_hdr((IO::path + "/res/refl_spc.hdr").c_str(), &_w, &_h);
+	float* dv = new float[_w*_h*3];
 	if (!d) {
 		Debug::Error("ParGraphics", "refl_spc.hdr missing!");
 		abort();
 	}
-	hdr::to_float(d, _w, _h, &dv);
+	hdr::to_float(d, _w, _h, dv);
 	//byte* d = Texture::LoadPixels(IO::path + "/res/?.png", chn, _w, _h);
 	glGenTextures(1, &refl);
 	glBindTexture(GL_TEXTURE_2D, refl);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, &dv[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
@@ -127,17 +127,20 @@ void ParGraphics::Init() {
 		Debug::Error("ParGraphics", "refl_env.hdr missing!");
 		abort();
 	}
-	hdr::to_float(d, _w, _h, &dv);
+	delete[](dv);
+	dv = new float[_w*_h * 3];
+	hdr::to_float(d, _w, _h, dv);
 	delete[](d);
 	glGenTextures(1, &reflE);
 	glBindTexture(GL_TEXTURE_2D, reflE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, &dv[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	delete[](dv);
 
 
 	bg = new Texture(IO::path + "/res/bg.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
@@ -201,24 +204,33 @@ void ParGraphics::Init() {
 #undef LC
 
 	parConLineProg = Shader::FromVF(IO::GetText(IO::path + "/parConV_line.txt"), IO::GetText(IO::path + "/parConF_line.txt"));
-	parConLineProgLocs[0] = glGetUniformLocation(parConLineProg, "_MV");
-	parConLineProgLocs[1] = glGetUniformLocation(parConLineProg, "_P");
-	parConLineProgLocs[2] = glGetUniformLocation(parConLineProg, "posTex");
-	parConLineProgLocs[3] = glGetUniformLocation(parConLineProg, "connTex");
+#define LC(nm) parConLineProgLocs[i++] = glGetUniformLocation(parConLineProg, #nm)
+	i = 0;
+	LC(_MV);
+	LC(_P);
+	LC(posTex);
+	LC(connTex);
+#undef LC
 
 	selHlProg = Shader::FromF(mv, IO::GetText(IO::path + "/selectorFrag.txt"));
-	selHlProgLocs[0] = glGetUniformLocation(selHlProg, "screenSize");
-	selHlProgLocs[1] = glGetUniformLocation(selHlProg, "myId");
-	selHlProgLocs[2] = glGetUniformLocation(selHlProg, "idTex");
-	selHlProgLocs[3] = glGetUniformLocation(selHlProg, "hlCol");
+#define LC(nm) selHlProgLocs[i++] = glGetUniformLocation(selHlProg, #nm)
+	i = 0;
+	LC(screenSize);
+	LC(myId);
+	LC(idTex);
+	LC(hlCol);
+#undef LC
 
 	colProg = Shader::FromF(mv, glsl::colererFrag);
-	colProgLocs[0] = glGetUniformLocation(colProg, "idTex");
-	colProgLocs[1] = glGetUniformLocation(colProg, "spTex");
-	colProgLocs[2] = glGetUniformLocation(colProg, "screenSize");
-	colProgLocs[3] = glGetUniformLocation(colProg, "id2col");
-	colProgLocs[4] = glGetUniformLocation(colProg, "colList");
-	colProgLocs[5] = glGetUniformLocation(colProg, "usegrad");
+#define LC(nm) colProgLocs[i++] = glGetUniformLocation(colProg, #nm)
+	i = 0;
+	LC(idTex);
+	LC(spTex);
+	LC(screenSize);
+	LC(id2col);
+	LC(colList);
+	LC(usegrad);
+#undef LC
 
 	glDeleteShader(mv);
 

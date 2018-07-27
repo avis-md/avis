@@ -15,13 +15,13 @@ byte AnWeb::selSpNode = 0;
 string AnWeb::activeFile;
 std::vector<AnNode*> AnWeb::nodes;
 
-bool AnWeb::drawFull = false, AnWeb::expanded = true, AnWeb::executing = false;
+bool AnWeb::drawFull = false, AnWeb::expanded = true, AnWeb::executing = false, AnWeb::apply = false;
 float AnWeb::maxScroll, AnWeb::scrollPos = 0, AnWeb::expandPos = 0;
 
 std::thread* AnWeb::execThread = nullptr;
 AnNode* AnWeb::execNode = nullptr;
 
-bool AnWeb::hasPy = true, AnWeb::hasC = true, AnWeb::hasFt = false;
+bool AnWeb::hasPy = false, AnWeb::hasC = true, AnWeb::hasFt = false;
 bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
 
 void AnWeb::Insert(AnScript* scr, Vec2 pos) {
@@ -60,8 +60,13 @@ void AnWeb::Update() {
 		//	}
 		//}
 	}
-	if (!executing && execThread) {
+	if (!executing && execThread) { //do I need this?
 		if (execThread->joinable()) execThread->join();
+	}
+	if (apply) {
+		apply = false;
+		Particles::UpdateConBufs2();
+		OnAnimFrame();
 	}
 #endif
 }
@@ -327,6 +332,7 @@ void AnWeb::DoExecute() {
 	IO::StopReadStdio();
 	execNode = nullptr;
 	executing = false;
+	apply = true;
 }
 
 void AnWeb::OnExecLog(string s, bool e) {
@@ -356,6 +362,7 @@ void AnWeb::DoExecute_Srv() {
 	LoadOut();
 	AnOps::message = "finished";
 	executing = false;
+	apply = true;
 #endif
 }
 

@@ -64,7 +64,7 @@
       <AdditionalIncludeDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include;C:\Intel\OpenCL\sdk\include;C:\Anaconda\include;./src;./include/glew;./include/glfw;./include/glm;./include/jpeg;./include/freetype;./include/ffmpeg;./include/ssh2</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;CHOKO_LAIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
@@ -92,7 +92,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\Anaconda\include;./src;./include/glew;./include/glfw;./include/glm;./include/jpeg;./include/freetype;./include/ffmpeg</AdditionalIncludeDirectories>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;CHOKO_LAIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -138,6 +138,7 @@
     <ClCompile Include="src\makeres.cpp" />
     <ClCompile Include="src\mdchan.cpp" />
     <ClCompile Include="src\md\CDV.cpp" />
+    <ClCompile Include="src\md\lammps.cpp" />
     <ClCompile Include="src\md\mdvbin.cpp" />
     <ClCompile Include="src\md\Gromacs.cpp" />
     <ClCompile Include="src\makegen.cpp" />
@@ -230,6 +231,7 @@
     <ClInclude Include="src\mdchan.h" />
     <ClInclude Include="src\md\CDV.h" />
     <ClInclude Include="src\md\importer_info.h" />
+    <ClInclude Include="src\md\lammps.h" />
     <ClInclude Include="src\md\mdvbin.h" />
     <ClInclude Include="src\md\Gromacs.h" />
     <ClInclude Include="src\makegen.h" />

@@ -10,8 +10,8 @@ Node_AddBond::Node_AddBond() : AnNode(new DmScript()) {
 	canTile = false;
 	inputR.resize(2);
 	script->name = ".ABnd";
-	script->invars.push_back(std::pair<string, string>("pair counts", "ilist(1)"));
-	script->invars.push_back(std::pair<string, string>("bonds", "ilist(1)"));
+	script->invars.push_back(std::pair<string, string>("pair counts", "list(1i)"));
+	script->invars.push_back(std::pair<string, string>("bonds", "list(1i)"));
 
 	Particles::anim.conns2.resize(1);
 	Particles::particles_Conn2.resize(1);

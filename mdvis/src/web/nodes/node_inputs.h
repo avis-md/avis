@@ -5,9 +5,7 @@ class Node_Inputs : public AnNode {
 public:
 	Node_Inputs();
 
-	Vec2 DrawConn() override {
-		return Vec2(width, 19 + 17 * 4);
-	}
+	Vec2 DrawConn() override;
 	void Draw() override;
 	float DrawSide() override { return 0; }
 	void Execute() override;

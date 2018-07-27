@@ -9,8 +9,19 @@ void Debug::Message(string c, string s) {
 }
 void Debug::Warning(string c, string s) {
 	if (stream) *stream << "[w]" << c << ": " << s << std::endl;
-	if (suppress <= 1)
+	if (suppress <= 1) {
+#ifdef PLATFORM_WIN
+		SetConsoleTextAttribute(winHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+#else
+		std::cout << "\033[33m";
+#endif
 		std::cout << "[w]" << c << ": " << s << std::endl;
+#ifdef PLATFORM_WIN
+		SetConsoleTextAttribute(winHandle, winTextAttr);
+#else
+		std::cout << "\033[0m";
+#endif
+	}
 }
 void Debug::Error(string c, string s) {
 	if (stream) *stream << "[e]" << c << ": " << s << std::endl;

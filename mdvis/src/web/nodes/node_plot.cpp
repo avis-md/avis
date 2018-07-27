@@ -9,7 +9,7 @@ Node_Plot::Node_Plot() : AnNode(new DmScript()) {
 	canTile = true;
 	inputR.resize(1);
 	script->name = ".Plot";
-	script->invars.push_back(std::pair<string, string>("array", "list(1)"));
+	script->invars.push_back(std::pair<string, string>("array", "list(1f)"));
 }
 
 void Node_Plot::Draw() {

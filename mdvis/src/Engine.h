@@ -1,20 +1,13 @@
 #pragma once
-
-#define _ITERATOR_DEBUG_LEVEL 0
-
 #include "Defines.h"
-
-#ifdef CHOKO_LAIT
-#define LAIT_STATIC static
-#else
-#define LAIT_STATIC
-#endif
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
 #define STRINGMRGDO(a,b) a ## b
 #define STRINGMRG(a,b) STRINGMRGDO(a,b)
+
+#define OHNO(nm, msg) Debug::Warning(#nm, "Something unexpected happened!. Please contact the developer!\n  Tell the monkey this: " msg)
 
 #pragma region includes
 /* OS-specific headers */
@@ -23,7 +16,6 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#ifndef IS_EDITOR
 //disables windows.h features
 #define NOGDICAPMASKS     ;// CC_*, LC_*, PC_*, CP_*, TC_*, RC_
 #define NOVIRTUALKEYCODES ;// VK_*
@@ -35,22 +27,16 @@
 #define NOKEYSTATES       ;// MK_*
 #define NOSYSCOMMANDS     ;// SC_*
 #define NORASTEROPS       ;// Binary and Tertiary raster ops
-//#define NOSHOWWINDOW      ;// SW_*
 #define OEMRESOURCE       ;// OEM Resource values
 #define NOATOM            ;// Atom Manager routines
 #define NOCLIPBOARD       ;// Clipboard routines
 #define NOCOLOR           ;// Screen colors
-//#define NOCTLMGR          ;// Control and Dialog routines
 #define NODRAWTEXT        ;// DrawText() and DT_*
-//#define NOGDI             ;// All GDI defines and routines
 #define NOKERNEL          ;// All KERNEL defines and routines
-//#define NOUSER            ;// All USER defines and routines
 #define NONLS             ;// All NLS defines and routines
-//#define NOMB              ;// MB_* and MessageBox()
 #define NOMEMMGR          ;// GMEM_*, LMEM_*, GHND, LHND, associated routines
 #define NOMETAFILE        ;// typedef METAFILEPICT
 #define NOMINMAX          ;// Macros min(a,b) and max(a,b)
-//#define NOMSG             ;// typedef MSG and associated routines
 #define NOOPENFILE        ;// OpenFile(), OemToAnsi, AnsiToOem, and OF_*
 #define NOSCROLL          ;// SB_* and scrolling routines
 #define NOSERVICE         ;// All Service Controller routines, SERVICE_ equates, etc.
@@ -64,9 +50,7 @@
 #define NOPROFILER        ;// Profiler interface.
 #define NODEFERWINDOWPOS  ;// DeferWindowPos routines
 #define NOMCX             ;// Modem Configuration Extensions
-
 #define NOBITMAP
-#endif
 
 #include <Windows.h>
 #include <WinSock2.h>
@@ -180,7 +164,8 @@ public:
 #ifndef PLATFORM_WIN
 void fopen_s(FILE** f, const char* c, const char* m);
 #define sscanf_s sscanf
-void _putenv_s(string nm, const char* loc);
+//void _putenv_s(string nm, const char* loc);
+#define _putenv_s(nm, loc) setenv(nm, loc, 1)
 #endif
 
 #define F2ISTREAM(_varname, _pathname) std::ifstream _f2i_ifstream((_pathname).c_str(), std::ios::in | std::ios::binary); \

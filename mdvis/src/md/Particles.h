@@ -55,6 +55,7 @@ public:
 
 	static char* particles_Name, *particles_ResName; //10 chars per name
 	static Vec3* particles_Pos, *particles_Vel;
+	static short* particles_Typ;
 	static byte* particles_Col;
 	static Int2* particles_Conn;
 	static float* particles_Rad;

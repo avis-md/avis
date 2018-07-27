@@ -39,6 +39,8 @@ std::unordered_map<uint, float> VisSystem::_bondLengths;
 std::unordered_map<ushort, Vec3> VisSystem::_type2Col;
 std::unordered_map<ushort, std::array<float, 2>> VisSystem::radii;
 
+std::unordered_map<string, string> VisSystem::envs;
+
 void VisSystem::Init() {
 	radii.clear();
 	std::ifstream strm(IO::path + "/radii.txt");
@@ -125,6 +127,21 @@ void VisSystem::Init() {
 		//HelpMenu::show = true;
 		IO::OpenEx(IO::path + "/docs/index.html");
 	});
+}
+
+void VisSystem::InitEnv() {
+	envs.clear();
+	std::ifstream strm(IO::path + "/env.txt");
+	if (strm.is_open()) {
+		string s;
+		while (std::getline(strm, s)) {
+			if (!s.size() || s[0] == '!') continue;
+			auto lc = s.find_first_of('=');
+			if (lc != string::npos) {
+				envs.emplace(s.substr(0, lc), s.substr(lc + 1));
+			}
+		}
+	}
 }
 
 bool VisSystem::InMainWin(const Vec2& pos) {

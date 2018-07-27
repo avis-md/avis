@@ -34,9 +34,10 @@ Vec2 AnNode::DrawConn() {
 	float hy = GetHeaderSz();
 	float y = pos.y + 18 + hy;
 	for (uint i = 0; i < script->invars.size(); i++, y += 17) {
-		if (inputR[i].first) Engine::DrawLine(Vec2(pos.x, expanded ? y + 8 : pos.y + 8), Vec2(inputR[i].first->pos.x + inputR[i].first->width, inputR[i].first->expanded ? inputR[i].first->pos.y + 20 + 8 + (inputR[i].second + inputR[i].first->inputR.size()) * 17 : inputR[i].first->pos.y + 8), white(), 2);
+		auto& ri = inputR[i];
+		if (ri.first) Engine::DrawLine(Vec2(pos.x, expanded ? y + 8 : pos.y + 8), Vec2(ri.first->pos.x + ri.first->width, ri.first->expanded ? ri.first->pos.y + 28 + ri.first->GetHeaderSz() + (ri.second + ri.first->inputR.size()) * 17 : ri.first->pos.y + 8), white(), 2);
 	}
-	if (expanded) return Vec2(width, 19 + 17 * cnt + DrawLog(19.0f + 17 * cnt) + hy);
+	if (expanded) return Vec2(width, 19 + 17 * cnt + DrawLog(19.0f + 17 * cnt) + hy + GetHeaderSz());
 	else return Vec2(width, 16 + DrawLog(16));
 #else
 	return Vec2();
@@ -131,16 +132,16 @@ void AnNode::Draw() {
 }
 
 float AnNode::GetHeaderSz() {
-	return showDesc? (3.0f + 17 * script->descLines) : 0;
+	return showDesc? (17 * script->descLines) : 0;
 }
 
 void AnNode::DrawHeader(float& off) {
 	if (showDesc) {
-		Engine::DrawQuad(pos.x, off, width, 3.0f + 17 * script->descLines, white(0.7f, 0.25f));
+		Engine::DrawQuad(pos.x, off, width, 17 * script->descLines, white(0.7f, 0.25f));
 		UI::alpha = 0.7f;
 		UI2::LabelMul(pos.x + 2, off + 1, 12, script->desc);
 		UI::alpha = 1;
-		off += 3.0f + 17 * script->descLines;
+		off += 17 * script->descLines;
 	}
 }
 

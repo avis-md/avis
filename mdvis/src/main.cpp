@@ -221,13 +221,15 @@ int main(int argc, char **argv) {
 		}
 	}
 	if (!__debug) Debug::suppress = 1;
-
 	ChokoLait::Init(800, 800);
-	GLFWimage icon;
-	icon.pixels = Texture::LoadPixels(res::icon_png, res::icon_png_sz, (uint&)icon.width, (uint&)icon.height);
+	//GLFWimage icon;
+	//icon.pixels = Texture::LoadPixels(res::icon_png, res::icon_png_sz, (uint&)icon.width, (uint&)icon.height);
 	//glfwSetWindowIcon(Display::window, 1, &icon);
-	delete[](icon.pixels);
+	//delete[](icon.pixels);
 
+	VisSystem::InitEnv();
+	CReader::Init();
+	PyReader::Init();
 	RayTracer::Init();
 	Color::Init();
 	Icons::Init();
@@ -238,11 +240,9 @@ int main(int argc, char **argv) {
 	ParLoader::Init();
 	ParGraphics::Init();
 	Protein::Init();
-	PyReader::Init();
 	AnWeb::Init();
 	AnNode::Init();
 	Effects::Init(0xffff);
-	MdChan::Init();
 	ParMenu::LoadRecents();
 
 	AnBrowse::Scan();

@@ -9,6 +9,7 @@ uint Particles::connSz;
 
 char* Particles::particles_Name, *Particles::particles_ResName;
 Vec3* Particles::particles_Pos, *Particles::particles_Vel;
+short* Particles::particles_Typ;
 byte* Particles::particles_Col;
 Int2* Particles::particles_Conn;
 float* Particles::particles_Rad;
@@ -71,6 +72,7 @@ void Particles::Clear() {
 		delete[](particles_ResName);
 		delete[](particles_Pos);
 		delete[](particles_Vel);
+		delete[](particles_Typ);
 		delete[](particles_Col);
 		delete[](particles_Conn);
 		particles_Pos = 0;

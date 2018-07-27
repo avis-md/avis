@@ -28,7 +28,9 @@ public:
 	static std::unordered_map<ushort, Vec3> _type2Col;
 	static std::unordered_map<ushort, std::array<float, 2>> radii;
 
-	static void Init();
+	static std::unordered_map<string, string> envs;
+
+	static void Init(), InitEnv();
 
 	static bool InMainWin(const Vec2& pos);
 

@@ -217,6 +217,7 @@ void ParLoader::DoOpen() {
 	Particles::particles_Name = info.name;
 	Particles::particles_Pos = (Vec3*)info.pos;
 	Particles::particles_Vel = (Vec3*)info.vel;
+	Particles::particles_Typ = (short*)info.type;
 	memcpy(Particles::boundingBox, info.bounds, 6 * sizeof(float));
 	Particles::particles_Col = new byte[info.num];
 	Particles::particles_Rad = new float[info.num];
@@ -354,9 +355,9 @@ void ParLoader::DoOpen() {
 
 	Particles::particleSz = info.num;
 
+	auto& anm = Particles::anim;
 	if (info.trajectory.frames > 0) {
 		auto& trj = info.trajectory;
-		auto& anm = Particles::anim;
 		anm.reading = true;
 
 		anm.poss = new Vec3*[trj.frames];
@@ -377,6 +378,15 @@ void ParLoader::DoOpen() {
 		if (trj.vels) delete[](trj.vels);
 
 		anm.frameCount = trj.frames;
+		anm.reading = false;
+	}
+	else {
+		anm.reading = true;
+		anm.poss = new Vec3*[1];
+		anm.poss[0] = (Vec3*)info.pos;
+		anm.vels = new Vec3*[1];
+		anm.vels[0] = (Vec3*)info.vel;
+		anm.frameCount = 1;
 		anm.reading = false;
 	}
 

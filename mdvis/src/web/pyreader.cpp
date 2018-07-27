@@ -1,16 +1,47 @@
 #include "anweb.h"
 #include "anscript.h"
+#include "vis/system.h"
 
 void PyReader::Init() {
-	if (IO::HasFile(IO::path + "/env.txt")) {
-		auto pth = IO::GetText(IO::path + "/env.txt");
-		_putenv_s("PYTHONPATH", pth.c_str());
+	_putenv_s("PYTHONPATH", VisSystem::envs["PYENV"].c_str());
+	int exitCode = 0;
+#ifdef PLATFORM_WIN
+	SECURITY_ATTRIBUTES sa = {};
+	PROCESS_INFORMATION pi = {};
+	STARTUPINFO si = {};
+	si.cb = sizeof(si);
+	BOOL ok = CreateProcess((IO::path + "/findpy.exe").c_str(), NULL, &sa, NULL, 0, NULL, NULL, IO::path.c_str(), &si, &pi);
+	if (ok) {
+		WaitForSingleObject(pi.hProcess, INFINITE);
+		GetExitCodeProcess(pi.hProcess, (LPDWORD)&exitCode);
 	}
-	Py_Initialize();
-	PyObject *sys_path = PySys_GetObject((char*)"path");
-	auto path = IO::path + "/nodes/";
-	std::replace(path.begin(), path.end(), '\\', '/');
-	PyList_Append(sys_path, PyUnicode_FromString(path.c_str()));
+#else
+
+#endif
+	if (!exitCode) {
+		Py_Initialize();
+		PyObject *sys_path = PySys_GetObject((char*)"path");
+		auto path = IO::path + "/nodes/";
+		std::replace(path.begin(), path.end(), '\\', '/');
+		PyList_Append(sys_path, PyUnicode_FromString(path.c_str()));
+		AnWeb::hasPy = true;
+	}
+	else {
+		string env = "";
+#ifdef PLATFORM_WIN
+		char* buf;
+		size_t sz = 0;
+		if (_dupenv_s(&buf, &sz, "EnvVarName") == 0 && buf)
+		{
+			env = buf;
+			free(buf);
+		}
+#else
+		env = getenv("PYTHONPATH");
+#endif
+		Debug::Warning("Python", "Cannot find python! PYTHONPATH env is: " + env);
+		AnWeb::hasPy = false;
+	}
 }
 
 bool PyReader::Read(string path, PyScript** _scr) { //"path/to/script[no .py]"

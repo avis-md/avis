@@ -23,7 +23,7 @@ public:
 	static string activeFile;
 	static std::vector<AnNode*> nodes;
 
-	static bool drawFull, expanded, executing;
+	static bool drawFull, expanded, executing, apply;
 	static float maxScroll, scrollPos, expandPos;
 
 	static std::thread* execThread;
