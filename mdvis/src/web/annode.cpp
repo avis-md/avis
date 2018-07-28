@@ -425,8 +425,8 @@ void PyNode::Execute() {
 			*(float*)conV[i].value = PyFloat_AsDouble(outputV[i].value);
 			break;
 		case AN_VARTYPE::LIST:
-			delete[]((float*)conV[i].value);
-			conV[i].value = AnConv::FromPy(outputV[i].value, conV[i].dimVals.size(), &conV[i].dimVals[0]);
+			//delete[]((float*)conV[i].value);
+			//conV[i].value = AnConv::FromPy(outputV[i].value, conV[i].dimVals.size(), &conV[i].dimVals[0]);
 			break;
 		default:
 			Debug::Warning("AnVar", "exec case not handled!");

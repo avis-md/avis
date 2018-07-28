@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine.h"
 #ifdef PLATFORM_WIN
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <Python.h>
 #else
 #include <python2.7/Python.h>
@@ -68,8 +69,8 @@ public:
 	void Set(uint i, int v) override, Set(uint i, float v) override, Set(uint i, void* v) override;
 	void* Get(uint i) override;
 
-	PyObject* pModule, *pFunc, *pArgs;
-	std::vector<PyObject*> pRets;
+	PyObject* pModule, *pFunc, *pArgl;
+	std::vector<PyObject*> pArgs, pRets;
 
 	static std::unordered_map<string, PyScript*> allScrs;
 };

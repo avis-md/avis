@@ -1,5 +1,6 @@
 #include "anweb.h"
 #include "anscript.h"
+#include "anconv.h"
 #include "vis/system.h"
 
 void PyReader::Init() {
@@ -86,13 +87,18 @@ bool PyReader::Read(string path, PyScript** _scr) { //"path/to/script[no .py]"
 				Debug::Warning("PyReader::ParseType", "input function args count not consistent!");
 				return false;
 			}
+			scr->pArgl = (AnWeb::hasPy) ? PyTuple_New(sz) : nullptr;
+			scr->pArgs.resize(sz, 0);
 			for (uint i = 0; i < sz; i++) {
 				auto ns = ss[i].find_first_not_of(' ');
 				auto ss2 = (ns == string::npos) ? ss[i] : ss[i].substr(ns);
+				auto tn = scr->_invars[i].typeName;
 				scr->_invars[i].name = ss2;
-				scr->invars.push_back(std::pair<string, string>(scr->_invars[i].name, scr->_invars[i].typeName));
+				scr->invars.push_back(std::pair<string, string>(scr->_invars[i].name, tn));
+				if (*((int32_t*)&tn[0]) == *((int32_t*)"list")) {
+					scr->pArgs[i] = AnConv::PyArr(1, tn[6]);
+				}
 			}
-			scr->pArgs = (AnWeb::hasPy)? PyTuple_New(sz) : nullptr;
 		}
 		else if (ln2 == "#out") {
 			scr->_outvars.push_back(PyVar());
@@ -125,8 +131,7 @@ bool PyReader::ParseType(string s, PyVar* var) {
 	else if (s.substr(0, 5) == "float") var->type = AN_VARTYPE::FLOAT;
 	else if (s.substr(0, 4) == "list") {
 		var->type = AN_VARTYPE::LIST;
-		s = s.substr(5, s.find(')') - 5);
-		var->dim = std::stoi(s);
+		var->dim = s[5] - '1' + 1;
 	}
 	else return false;
 	return true;

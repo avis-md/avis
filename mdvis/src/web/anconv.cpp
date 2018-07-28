@@ -1,31 +1,43 @@
 #include "anconv.h"
+#include <numpy/arrayobject.h>
 
-uint AnConv::FromPy_Sz(PyObject* o, int** sz, int dim) {
-	**sz = PyList_Size(o);
-	if (dim > 0) {
-		auto o2 = PyList_GetItem(o, 0);
-		return **sz * FromPy_Sz(o2, sz + 1, dim - 1);
+PyObject* AnConv::PyArr(int nd, char tp) {
+	if (!AnWeb::hasPy) return nullptr;
+	assert(nd <= 10);
+	int zs[10]{};
+	int tn = NPY_FLOAT;
+	int sz = 4;
+	switch (tp) {
+	case 'i':
+		tn = NPY_INT;
+		sz = sizeof(int);
+		break;
+	case 's':
+		tn = NPY_SHORT;
+		sz = 2;
+		break;
+	default: break;
 	}
-	else return **sz;
+	return PyArray_New(&PyArray_Type, nd, zs, tn, nullptr, nullptr, sz, 0, nullptr);
 }
 
-void AnConv::FromPy_Do(PyObject* o, int** sz, int d, float* v) {
-	for (Py_ssize_t a = 0; a < **sz; a++) {
-		auto o2 = PyList_GetItem(o, a);
-		if (d > 0)
-			FromPy_Do(o2, sz + 1, d - 1, v);
-		else
-			*(v++) = (float)PyFloat_AsDouble(o2);
+void* AnConv::FromPy(PyObject* o, int dim, int* szs) {
+	if (!AnWeb::hasPy) return nullptr;
+	auto ao = (PyArrayObject*)o;
+	auto nd = PyArray_NDIM(ao);
+	if (nd != dim) {
+		Debug::Warning("Py2C", "wrong array dim! expected " + std::to_string(dim) + ", got " + std::to_string(nd) + "!");
+		return 0;
 	}
+	auto shp = PyArray_SHAPE(ao);
+	memcpy(szs, shp, sizeof(int)*nd);
+	return PyArray_DATA(ao);
 }
 
-float* AnConv::FromPy(PyObject* o, int dim, int** szs) {
-	uint sz = FromPy_Sz(o, szs, dim-1);
-	float* res = new float[sz];
-	FromPy_Do(o, szs, dim-1, res);
-	return res;
-}
-
-PyObject* AnConv::ToPy(float* v, int dim, int* szs) {
-	return nullptr;
+bool AnConv::ToPy(void* v, PyObject* obj, int dim, int* szs) {
+	if (!AnWeb::hasPy) return false;
+	PyArray_Dims dims;
+	dims.ptr = szs;
+	dims.len = dim;
+	PyArray_Resize((PyArrayObject*)obj, &dims, 1, NPY_CORDER);
 }

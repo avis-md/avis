@@ -61,7 +61,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include;C:\Intel\OpenCL\sdk\include;C:\Anaconda\include;./src;./include/glew;./include/glfw;./include/glm;./include/jpeg;./include/freetype;./include/ffmpeg;./include/ssh2</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include;C:\Intel\OpenCL\sdk\include;C:\Anaconda\include;C:\Anaconda\Lib\site-packages\numpy\core\include;./src;./include/glew;./include/glfw;./include/glm;./include/jpeg;./include/freetype;./include/ffmpeg;./include/ssh2</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;%(PreprocessorDefinitions)</PreprocessorDefinitions>

@@ -12,7 +12,6 @@ void Font::Init() {
 	int err = FT_Init_FreeType(&_ftlib);
 	if (err != FT_Err_Ok) {
 		Debug::Error("Font", "Fatal: Initializing freetype failed!");
-		std::runtime_error("Fatal: Initializing freetype failed!");
 	}
 
 	fontProgram = Shader::FromVF(glsl::fontVert, glsl::fontFrag);
@@ -21,10 +20,6 @@ void Font::Init() {
 }
 
 void Font::InitVao(uint sz) {
-#ifdef IS_EDITOR
-	if (PopupSelector::drawing)
-		glfwMakeContextCurrent(PopupSelector::mainWindow);
-#endif
 	vaoSz = sz;
 	if (!!vao) {
 		glDeleteVertexArrays(1, &vao);
@@ -56,14 +51,9 @@ void Font::InitVao(uint sz) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idbuf);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sz * 6 * sizeof(uint), nullptr, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-#ifdef IS_EDITOR
-	if (PopupSelector::drawing)
-		glfwMakeContextCurrent(PopupSelector::window);
-#endif
 }
 
 Font::Font(const string& path, ALIGNMENT align) : vecSize(0), alignment(align) {
-	Debug::Message("Font", "opening font at " + path);
 	auto err = FT_New_Face(_ftlib, path.c_str(), 0, &_face);
 	if (err != FT_Err_Ok) {
 		Debug::Warning("Font", "Failed to load font! " + std::to_string(err));
@@ -81,17 +71,19 @@ void Font::SizeVec(uint sz) {
 	if (vecSize >= sz) return;
 	poss.resize(sz * 4 + 1);
 	cs.resize(sz * 4);
+	uvs.resize(sz * 4);
+	ids.resize(sz * 6);
 	for (; vecSize < sz; vecSize++) {
-		uvs.push_back(Vec2(0, 1));
-		uvs.push_back(Vec2(1, 1));
-		uvs.push_back(Vec2(0, 0));
-		uvs.push_back(Vec2(1, 0));
-		ids.push_back(4 * vecSize);
-		ids.push_back(4 * vecSize + 1);
-		ids.push_back(4 * vecSize + 2);
-		ids.push_back(4 * vecSize + 1);
-		ids.push_back(4 * vecSize + 3);
-		ids.push_back(4 * vecSize + 2);
+		uvs[vecSize * 4] = Vec2(0, 1);
+		uvs[vecSize * 4 + 1] = Vec2(1, 1);
+		uvs[vecSize * 4 + 2] = Vec2(0, 0);
+		uvs[vecSize * 4 + 3] = Vec2(1, 0);
+		ids[vecSize * 6] = 4 * vecSize;
+		ids[vecSize * 6 + 1] = 4 * vecSize + 1;
+		ids[vecSize * 6 + 2] = 4 * vecSize + 2;
+		ids[vecSize * 6 + 3] = 4 * vecSize + 1;
+		ids[vecSize * 6 + 4] = 4 * vecSize + 3;
+		ids[vecSize * 6 + 5] = 4 * vecSize + 2;
 	}
 }
 

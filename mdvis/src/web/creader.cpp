@@ -9,6 +9,7 @@ string CReader::vcbatPath = "";
 void CReader::Init() {
 #ifdef PLATFORM_WIN
 	vcbatPath = VisSystem::envs["VCBAT"];
+	AnWeb::hasC = !!vcbatPath.size();
 #endif
 }
 
@@ -37,7 +38,7 @@ bool CReader::Read(string path, CScript** _scr) {
 	struct stat stt;
 	stat((fp + ".cpp").c_str(), &stt);
 	auto mt = stt.st_mtime;
-	stat((fp2 + nm + ".obj").c_str(), &stt);
+	stat((fp2 + nm + ".so").c_str(), &stt);
 	auto ot = stt.st_mtime;
 
 	if (mt > ot) {
@@ -50,7 +51,7 @@ bool CReader::Read(string path, CScript** _scr) {
 		s = "\
 #define VARIN extern \"C\"" + dlx + "\n\
 #define VAROUT VARIN\n\
-#define ENTRY VARIN void\n\
+#define ENTRY VARIN void __cdecl\n\
 #define VECSZ(...)\n\
 #define VECVAR VARIN\n\
 #define PROGRS VARIN\n\
@@ -61,18 +62,19 @@ bool CReader::Read(string path, CScript** _scr) {
 
 #ifdef PLATFORM_WIN
 		if (!!vcbatPath.size()) {
-#else
-		if (0) {
-#endif
+		//if (0) {
 			const string cl = "cl /nologo /c -Od /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
 			const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".so\" \"" + fp2 + nm + ".obj\"";
 			RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " && " + lk);
 		}
-		else {
+#else
+		//}
+		//else {
 			const string cmd = "g++ -std=c++11 -shared -O0 -fPIC -lm -o \"" + fp2 + nm + ".so\" \""	+ fp + "_temp__.cpp\"";
 			std::cout << cmd << std::endl;
 			RunCmd::Run(cmd);
-		}
+		//}
+#endif
 		const string ss = fp + "_temp__.cpp";
 		remove(&ss[0]);
 
@@ -85,15 +87,19 @@ bool CReader::Read(string path, CScript** _scr) {
 
 	auto scr = *_scr = new CScript();
 	scr->name = path;
-	scr->lib = new DyLib(fp2 + nm + ".so");
-	if (!scr->lib) {
-		Debug::Warning("CReader", "Failed to load script into memory!");
-		return false;
-	}
-	scr->funcLoc = (CScript::emptyFunc)scr->lib->GetSym("Execute");
-	if (!scr->funcLoc) {
-		Debug::Warning("CReader", "Failed to load function Execute into memory!");
-		return false;
+
+	if (AnWeb::hasC) {
+		scr->lib = new DyLib(fp2 + nm + ".so");
+		if (!scr->lib) {
+			Debug::Warning("CReader", "Failed to load script into memory!");
+			return false;
+		}
+		scr->funcLoc = (CScript::emptyFunc)scr->lib->GetSym("Execute");
+		if (!scr->funcLoc) {
+			auto err = GetLastError();
+			Debug::Warning("CReader", "Failed to load function Execute into memory! " + std::to_string(err));
+			return false;
+		}
 	}
 
 	const char* tpnms[] = { "float*", "short*", "int*" };
@@ -152,10 +158,12 @@ bool CReader::Read(string path, CScript** _scr) {
 				bk->name = ss[2].substr(0, ln.find_first_of('=')).substr(0, ln.find_first_of(';'));
 			}
 			scr->invars.push_back(std::pair<string, string>(bk->name, bk->typeName));
-			bk->value = scr->lib->GetSym(bk->name);
-			if (!bk->value) {
-				Debug::Warning("CReader", "cannot find \"" + bk->name + "\" from memory!");
-				return false;
+			if (scr->lib) {
+				bk->value = scr->lib->GetSym(bk->name);
+				if (!bk->value) {
+					Debug::Warning("CReader", "cannot find \"" + bk->name + "\" from memory!");
+					return false;
+				}
 			}
 		}
 		else if (lln2 == TL("VAROUT")) {
@@ -200,7 +208,7 @@ bool CReader::Read(string path, CScript** _scr) {
 				bk->name = ss[2].substr(0, ln.find_first_of('=')).substr(0, ln.find_first_of(';'));
 			}
 			scr->outvars.push_back(std::pair<string, string>(bk->name, bk->typeName));
-			bk->value = scr->lib->GetSym(bk->name);
+			bk->value = (AnWeb::hasC) ? scr->lib->GetSym(bk->name) : nullptr;
 			if (!bk->value) {
 				Debug::Warning("CReader", "cannot find \"" + bk->name + "\" from memory!");
 				return false;
@@ -216,12 +224,16 @@ bool CReader::Read(string path, CScript** _scr) {
 				Debug::Warning("CReader", "is \"" + ln + "\" an int type?");
 			}
 			auto nm = ss[2].substr(0, ln.find_first_of('=')).substr(0, ln.find_first_of(';'));
-			void* loc = scr->lib->GetSym(nm);
-			if (!loc) {
-				Debug::Warning("CReader", "cannot find \"" + nm + "\" from memory!");
-				return false;
+			if (scr->lib) {
+				void* loc = scr->lib->GetSym(nm);
+				if (!loc) {
+					Debug::Warning("CReader", "cannot find \"" + nm + "\" from memory!");
+					return false;
+				}
+				vecvars.push_back(std::pair<string, int*>(nm, (int*)loc));
 			}
-			vecvars.push_back(std::pair<string, int*>(nm, (int*)loc));
+			else
+				vecvars.push_back(std::pair<string, int*>(nm, nullptr));
 		}
 		else if (lln2 == TL("PROGRS")) {
 			auto ss = string_split(ln, ' ', true);
@@ -234,7 +246,7 @@ bool CReader::Read(string path, CScript** _scr) {
 				return false;
 			}
 			auto nm = ss[2].substr(0, ln.find_first_of('=')).substr(0, ln.find_first_of(';'));
-			scr->progress = scr->lib->GetSym(nm);
+			scr->progress = (AnWeb::hasC) ? scr->lib->GetSym(nm) : nullptr;
 			if (!scr->progress) {
 				Debug::Warning("CReader", "cannot find \"" + nm + "\" from memory!");
 				return false;
