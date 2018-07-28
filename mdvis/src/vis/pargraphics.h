@@ -10,6 +10,10 @@ public:
 	static float reflStr, reflStrDecay, specStr;
 	static Vec4 bgCol;
 	
+	static int reflId, _reflId;
+	static std::vector<string> reflNms;
+	static Popups::DropdownItem reflItms;
+
 	static bool useGradCol;
 	
 	static GLuint reflProg, reflCProg, parProg, parConProg, parConLineProg;

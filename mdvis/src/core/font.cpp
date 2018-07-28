@@ -92,7 +92,7 @@ GLuint Font::CreateGlyph(uint sz, bool recalc) {
 	_glyphs.emplace(sz, 0);
 	glGenTextures(1, &_glyphs[sz]);
 	glBindTexture(GL_TEXTURE_2D, _glyphs[sz]);
-	glTexStorage2D(GL_TEXTURE_2D, 1, GL_R8, (sz + 1) * 16, (sz + 1) * 16);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_R8, (sz + 2) * 16, (sz + 2) * 16);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -107,7 +107,7 @@ GLuint Font::CreateGlyph(uint sz, bool recalc) {
 		if (FT_Load_Char(_face, a, FT_LOAD_RENDER) != FT_Err_Ok) continue;
 		byte x = a % 16, y = a / 16;
 		FT_Bitmap bmp = _face->glyph->bitmap;
-		glTexSubImage2D(GL_TEXTURE_2D, 0, (sz + 1) * x + 1, (sz + 1) * y, bmp.width, bmp.rows, GL_RED, GL_UNSIGNED_BYTE, bmp.buffer);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, (sz + 2) * x + 1, (sz + 2) * y + 1, bmp.width, bmp.rows, GL_RED, GL_UNSIGNED_BYTE, bmp.buffer);
 		if (recalc) {
 			if (bmp.width == 0) {
 				w2h[a] = 0;

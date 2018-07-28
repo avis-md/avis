@@ -20,6 +20,10 @@ GLuint ParGraphics::refl, ParGraphics::reflE;
 float ParGraphics::reflStr = 2, ParGraphics::reflStrDecay = 2, ParGraphics::specStr = 0.2f;
 Vec4 ParGraphics::bgCol = Vec4(1, 1, 1, 1);
 
+int ParGraphics::reflId = 0, ParGraphics::_reflId = -1;
+std::vector<string> ParGraphics::reflNms;
+Popups::DropdownItem ParGraphics::reflItms((uint*)&reflId, nullptr);
+
 bool ParGraphics::useGradCol = false;
 
 GLuint ParGraphics::reflProg, ParGraphics::reflCProg, ParGraphics::parProg, ParGraphics::parConProg, ParGraphics::parConLineProg;
@@ -103,45 +107,19 @@ float ParGraphics::Eff::DrawMenu(float off) {
 
 
 void ParGraphics::Init() {
-	uint _w, _h;
-	byte* d = hdr::read_hdr((IO::path + "/res/refl_spc.hdr").c_str(), &_w, &_h);
-	float* dv = new float[_w*_h*3];
-	if (!d) {
-		Debug::Error("ParGraphics", "refl_spc.hdr missing!");
-		abort();
+	std::ifstream strm(IO::path + "/backgrounds/default");
+	strm >> reflId;
+	strm.close();
+	std::vector<string> fds;
+	IO::GetFolders(IO::path + "/backgrounds/", &fds);
+	for (auto& fd : fds) {
+		if (IO::HasFile(IO::path + "/backgrounds/" + fd + "/diffuse.hdr") &&
+			IO::HasFile(IO::path + "/backgrounds/" + fd + "/specular.hdr")) {
+			reflNms.push_back(fd);
+		}
 	}
-	hdr::to_float(d, _w, _h, dv);
-	//byte* d = Texture::LoadPixels(IO::path + "/res/?.png", chn, _w, _h);
-	glGenTextures(1, &refl);
-	glBindTexture(GL_TEXTURE_2D, refl);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	delete[](d);
-	d = hdr::read_hdr((IO::path + "/res/refl_env.hdr").c_str(), &_w, &_h);
-	if (!d) {
-		Debug::Error("ParGraphics", "refl_env.hdr missing!");
-		abort();
-	}
-	delete[](dv);
-	dv = new float[_w*_h * 3];
-	hdr::to_float(d, _w, _h, dv);
-	delete[](d);
-	glGenTextures(1, &reflE);
-	glBindTexture(GL_TEXTURE_2D, reflE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	delete[](dv);
-
+	reflNms.push_back("\0");
+	reflItms.list = &reflNms[0];
 
 	bg = new Texture(IO::path + "/res/bg.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	splash = new Texture(res::bg_splash_png, res::bg_splash_png_sz);
@@ -361,6 +339,49 @@ void ParGraphics::Update() {
 			}
 		}
 		if (s0 != rotScale || rz0 != rotZ || rw0 != rotW || center0 != rotCenter) Scene::dirty = true;
+
+		if (reflId != _reflId) {
+			_reflId = reflId;
+			auto& pth = IO::path + "/backgrounds/" + reflNms[reflId] + "/";
+			if (!!refl) {
+				glDeleteTextures(1, &refl);
+				glDeleteTextures(1, &reflE);
+			}
+			uint _w, _h;
+			byte* d = hdr::read_hdr((pth + "specular.hdr").c_str(), &_w, &_h);
+			float* dv = new float[_w*_h * 3];
+			if (d) {
+				hdr::to_float(d, _w, _h, dv);
+				//byte* d = Texture::LoadPixels(IO::path + "/res/?.png", chn, _w, _h);
+				glGenTextures(1, &refl);
+				glBindTexture(GL_TEXTURE_2D, refl);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+				glBindTexture(GL_TEXTURE_2D, 0);
+				delete[](d);
+				delete[](dv);
+			}
+			d = hdr::read_hdr((pth + "/diffuse.hdr").c_str(), &_w, &_h);
+			if (d) {
+				dv = new float[_w*_h * 3];
+				hdr::to_float(d, _w, _h, dv);
+				delete[](d);
+				glGenTextures(1, &reflE);
+				glBindTexture(GL_TEXTURE_2D, reflE);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+				glBindTexture(GL_TEXTURE_2D, 0);
+				delete[](dv);
+			}
+		}
 	}
 }
 
@@ -669,10 +690,14 @@ void ParGraphics::DrawMenu() {
 	UI::Label(expandPos - 148, off, 12, "Lighting", white());
 	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 4 + 2, white(0.9f, 0.1f));
 	off += 1;
+	if (!!_usePBRItems.target) {
+		UI2::Dropdown(expandPos - 147, off + 17, 146, "Sky", reflItms);
+		off += 17;
+	}
 	reflStr = UI2::Slider(expandPos - 147, off + 17, 147, "Strength", 0, 5, reflStr);
 	reflStrDecay = UI2::Slider(expandPos - 147, off + 17 * 2, 147, "Falloff", 0, 50, reflStrDecay);
 	specStr = UI2::Slider(expandPos - 147, off + 17 * 3, 147, "Specular", 0, 1, specStr);
-	UI2::Color(expandPos - 147, off + 17 * 4, 147, "Background", bgCol);
+	UI2::Color(expandPos - 147, off + 17 * 4, 145, "Background", bgCol);
 
 	off += 17 * 5 + 2;
 

@@ -9,23 +9,10 @@
 
 #ifdef PLATFORM_WIN
 #include <shellapi.h>
-#endif
-
-string ffmpeg_getmsg(int i) {
-	uint64_t e = -i;
-	return string((char*)&e);
-}
-
-#ifndef PLATFORM_WIN
-
+#else
 void fopen_s(FILE** f, const char* c, const char* m) {
 	*f = fopen(c, m);
 }
-//void _putenv_s(string nm, const char* loc) {
-//	string s = ((nm) + "=" + string(loc));
-//	putenv(&s[0]);
-//}
-
 #endif
 
 float Dw(float f) {
@@ -207,7 +194,7 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4,
 		DrawQuad(x, y, w, h, inside ? pressVec4 : normalVec4);
 		break;
 	}
-	return inside ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
+	return (inside && (UI::_layer == UI::_layerMax)) ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
 }
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Texture* texture, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, float uvx, float uvy, float uvw, float uvh) {
 	if (!UI::focused || (UI::_layer < UI::_layerMax) || (Input::mouse0State != 0 && !Rect(x, y, w, h).Inside(Input::mouseDownPos))) {
@@ -229,7 +216,7 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Texture* texture
 		DrawQuad(x, y, w, h, (texture->loaded) ? texture->pointer : Engine::fallbackTex->pointer, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh), false, inside ? pressVec4 : normalVec4);
 		break;
 	}
-	return inside ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
+	return (inside && (UI::_layer == UI::_layerMax)) ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
 }
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, string label, float labelSize, Font* labelFont, Vec4 labelVec4, bool labelCenter) {
 	MOUSE_STATUS b = Button(x, y, w, h, normalVec4, highlightVec4, pressVec4);
@@ -264,7 +251,7 @@ float Engine::DrawSliderFill(float x, float y, float w, float h, float min, floa
 	val = Clamp(val, min, max);
 	float v = val, vv = (val - min)/(max-min);
 	if (Rect(x, y, w, h).Inside(Input::mouseDownPos)) {
-		if (Input::mouse0) {
+		if (Input::mouse0 && (UI::_layer == UI::_layerMax)) {
 			vv = Clamp((Input::mousePos.x - (x+1)) / (w-2), 0.0f, 1.0f);
 			v = vv*(max - min) + min;
 			DrawQuad(x + 1, y + 1, (w - 2)*vv, h - 2, foreground*white(1, 0.4f));
@@ -279,7 +266,7 @@ float Engine::DrawSliderFillY(float x, float y, float w, float h, float min, flo
 	val = Clamp(val, min, max);
 	float v = val, vv = (val - min) / (max - min);
 	if (Rect(x, y, w, h).Inside(Input::mouseDownPos)) {
-		if (Input::mouse0) {
+		if (Input::mouse0 && (UI::_layer == UI::_layerMax)) {
 			vv = Clamp((Input::mousePos.y - (y + 1)) / (h - 2), 0.0f, 1.0f);
 			v = vv*(max - min) + min;
 			DrawQuad(x + 1, y + 1 + (h-2)*(1-vv), w - 2, (h - 2)*vv, foreground*white(1, 0.4f));
@@ -295,7 +282,7 @@ Vec2 Engine::DrawSliderFill2D(float x, float y, float w, float h, Vec2 min, Vec2
 	val = clamp(val, min, max);
 	Vec2 v = val, vv = (val - min) / (max - min);
 	if (Rect(x, y, w, h).Inside(Input::mouseDownPos)) {
-		if (Input::mouse0) {
+		if (Input::mouse0 && (UI::_layer == UI::_layerMax)) {
 			vv = Clamp<Vec2>((Input::mousePos - Vec2(x + 1, y + 1)) / Vec2(w - 2, h - 2), Vec2(0, 0), Vec2(1, 1));
 			vv.y = 1 - vv.y;
 			v = vv*(max - min) + min;

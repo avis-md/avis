@@ -10,7 +10,7 @@ void main(){
 	gl_Position.xyz = pos*2 - vec3(1,1,0);
 	gl_Position.w = 1;
 	vec2 uv1 = vec2(mod(c, 16), floor(c/16));
-	UV = (uv1 + uv*0.95)/16;
+	UV = (uv1 + uv)/16;
 }
 )";
 }

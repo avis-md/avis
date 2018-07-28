@@ -446,10 +446,10 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 
 		Vec3 off = -Vec3(font->off[c].x, font->off[c].y, 0)*s;
 		w = font->w2h[c] * s;
-		font->poss[i] = AU(Vec3(x, y - s, 1) + off)*ds;
-		font->poss[i + 1] = AU(Vec3(x + s, y - s, 1) + off)*ds;
-		font->poss[i + 2] = AU(Vec3(x, y, 1) + off)*ds;
-		font->poss[i + 3] = AU(Vec3(x + s, y, 1) + off)*ds;
+		font->poss[i] = AU(Vec3(x - 1, y - s - 1, 1) + off)*ds;
+		font->poss[i + 1] = AU(Vec3(x + s + 1, y - s - 1, 1) + off)*ds;
+		font->poss[i + 2] = AU(Vec3(x - 1, y + 1, 1) + off)*ds;
+		font->poss[i + 3] = AU(Vec3(x + s + 1, y + 1, 1) + off)*ds;
 		font->cs[i] = c;
 		font->cs[i + 1] = c;
 		font->cs[i + 2] = c;

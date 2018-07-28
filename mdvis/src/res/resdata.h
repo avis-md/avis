@@ -18,6 +18,7 @@
 #include "_res/dm_vdw.h"
 #include "_res/down.h"
 #include "_res/dropdown.h"
+#include "_res/dropdown2.h"
 #include "_res/expand.h"
 #include "_res/flipselect.h"
 #include "_res/hidden.h"

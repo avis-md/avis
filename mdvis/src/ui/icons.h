@@ -9,7 +9,7 @@ public:
 		*left, *right, *up, *down, *cross, *visible, *hidden, *circle,
 		*select, *deselect, *flipselect,
 		*toolRot, *toolMov, *toolSel,
-		*refresh, *checkbox, *browse,
+		*refresh, *checkbox, *browse, *dropdown2,
 		*zoomIn, *zoomOut,
 		*lang_c, *lang_py, *lang_ft, *lightning,
 		*icon_anl, *log, *newfile, *openfile,

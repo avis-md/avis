@@ -75,6 +75,7 @@ void UI2::Dropdown(float x, float y, float w, const string& title, const Popups:
 		Popups::pos2.x = w - 1;
 		Popups::data = (Popups::DropdownItem*)&data;
 	}
+	UI::Texture(x + w * 2 - 16, y, 16, 16, Icons::dropdown2);
 }
 
 void UI2::Switch(float x, float y, float w, const string& title, int c, string* nms, int& i) {
