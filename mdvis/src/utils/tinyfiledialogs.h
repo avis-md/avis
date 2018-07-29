@@ -107,7 +107,7 @@ extern int tinyfd_verbose; /* 0 (default) or 1 : on unix, prints the command lin
 
 #ifdef _WIN32
 /* for UTF-16 use the functions at the end of this files */
-extern int tinyfd_winUtf8; /* 0 (default MBCS) or 1 (UTF-8)*/
+extern int tinyfd_winUtf8; /* 0 (MBCS) or 1 (default UTF-8)*/ //edit: changed UTF-8 to default
 /* on windows string char can be 0:MBCS or 1:UTF-8
 unless your code is really prepared for UTF-8 on windows, leave this on MBSC.
 Or you can use the UTF-16 (wchar) prototypes at the end of ths file.*/

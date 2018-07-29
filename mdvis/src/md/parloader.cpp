@@ -578,6 +578,7 @@ void ParLoader::OnOpenFile(const std::vector<string>& files) {
 
 	useConn = true;
 	hasConnCache = false;
+
 	string cpt = droppedFiles[0] + ".conn";
 	std::ifstream strm(cpt);
 	if (strm.is_open()) {

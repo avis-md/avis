@@ -13,27 +13,29 @@ class Font {
 public:
 	Font(const string& path, ALIGNMENT align = ALIGN_TOPLEFT);
 	bool loaded = false;
-	//bool useSubpixel; //glyphs are rgba if true, else r (does it look good in games?)
-	GLuint glyph(uint size) { if (_glyphs.count(size) == 1) return _glyphs[size]; else return CreateGlyph(size); }
+	GLuint glyph(uint size) { if (_glyphs.count(size) == 1) return _glyphs[size][0]; else return CreateGlyph(size); }
 
 	ALIGNMENT alignment;
 
 	Font* Align(ALIGNMENT a);
 
+	static uint utf2unc(char* c);
+
 	friend class Engine;
 	friend class UI;
-#ifdef IS_EDITOR
-	friend class PopupSelector;
-#endif
 protected:
 	static FT_Library _ftlib;
 	static void Init(), InitVao(uint sz);
 	FT_Face _face;
 	static GLuint fontProgram;
 
-	float w2h[256];
-	float o2s[256];
-	Vec2 off[256];
+	struct _params {
+		float w2h[256];
+		float o2s[256];
+		Vec2 off[256];
+	};
+
+	std::unordered_map <uint, _params> params;
 
 	uint vecSize;
 	std::vector<Vec3> poss;
@@ -45,6 +47,6 @@ protected:
 	static uint vaoSz;
 	static GLuint vao, vbos[3], idbuf;
 
-	std::unordered_map<uint, GLuint> _glyphs; //each glyph size is fontSize*16
-	GLuint CreateGlyph(uint size, bool recalcW2h = false);
+	std::unordered_map<uint, std::unordered_map<uint, GLuint>> _glyphs; //each glyph size is fontSize*16
+	GLuint CreateGlyph(uint size, uint mask = 0, bool recalcW2h = false);
 };

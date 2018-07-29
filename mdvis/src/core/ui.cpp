@@ -422,7 +422,7 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 	float totalW = 0;
 	for (uint i = 0; i < sz; i ++) {
 		auto& c = str[i];
-		totalW += font->o2s[c] * s;
+		totalW += font->params[0].o2s[c] * s;
 		if (maxw > 0 && totalW > maxw) {
 			sz = i;
 			break;
@@ -444,8 +444,8 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 		//if (c == '\n')
 		//	c = ' ';
 
-		Vec3 off = -Vec3(font->off[c].x, font->off[c].y, 0)*s;
-		w = font->w2h[c] * s;
+		Vec3 off = -Vec3(font->params[0].off[c].x, font->params[0].off[c].y, 0)*s;
+		w = font->params[0].w2h[c] * s;
 		font->poss[i] = AU(Vec3(x - 1, y - s - 1, 1) + off)*ds;
 		font->poss[i + 1] = AU(Vec3(x + s + 1, y - s - 1, 1) + off)*ds;
 		font->poss[i + 2] = AU(Vec3(x - 1, y + 1, 1) + off)*ds;
@@ -460,7 +460,7 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 			y -= s * 1.3f;
 		}
 		else {
-			x += font->o2s[c] * s;
+			x += font->params[0].o2s[c] * s;
 		}
 	}
 	font->poss[sz * 4] = Vec3(x, 0, 0)*ds;
