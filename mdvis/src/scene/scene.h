@@ -56,9 +56,6 @@ public:
 
 protected:
 	static std::ifstream* strm;
-	//#ifndef IS_EDITOR
-	static std::vector<string> sceneEPaths;
-	//#endif
 	static std::vector<string> sceneNames;
 	static std::vector<long> scenePoss;
 

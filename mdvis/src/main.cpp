@@ -1,4 +1,4 @@
-#include "ChokoLait.h"
+﻿#include "ChokoLait.h"
 //#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 //#include <numpy/arrayobject.h>
 
@@ -173,6 +173,8 @@ void paintfunc() {
 	VisRenderer::Draw();
 	if (ParMenu::showSplash) ParMenu::DrawSplash();
 	HelpMenu::Draw();
+
+	UI::Label(200, 200, 20, u8"Unicode対応テスト", green());
 
 	//cm->Draw(_mv, _p);
 }

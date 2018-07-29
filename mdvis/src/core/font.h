@@ -13,13 +13,13 @@ class Font {
 public:
 	Font(const string& path, ALIGNMENT align = ALIGN_TOPLEFT);
 	bool loaded = false;
-	GLuint glyph(uint size) { if (_glyphs.count(size) == 1) return _glyphs[size][0]; else return CreateGlyph(size); }
+	GLuint glyph(uint size, uint mask);
 
 	ALIGNMENT alignment;
 
 	Font* Align(ALIGNMENT a);
 
-	static uint utf2unc(char* c);
+	static uint utf2unc(char*& c);
 
 	friend class Engine;
 	friend class UI;
@@ -28,6 +28,7 @@ protected:
 	static void Init(), InitVao(uint sz);
 	FT_Face _face;
 	static GLuint fontProgram;
+	static GLint fontProgLocs[5];
 
 	struct _params {
 		float w2h[256];
@@ -41,12 +42,12 @@ protected:
 	std::vector<Vec3> poss;
 	std::vector<Vec2> uvs;
 	std::vector<uint> ids;
-	std::vector<float> cs;
+	std::vector<uint> cs;
 	void SizeVec(uint sz);
 
 	static uint vaoSz;
 	static GLuint vao, vbos[3], idbuf;
 
 	std::unordered_map<uint, std::unordered_map<uint, GLuint>> _glyphs; //each glyph size is fontSize*16
-	GLuint CreateGlyph(uint size, uint mask = 0, bool recalcW2h = false);
+	GLuint CreateGlyph(uint size, uint mask = 0);
 };

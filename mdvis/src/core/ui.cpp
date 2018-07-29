@@ -31,7 +31,7 @@ void UI::Init() {
 
 	InitVao();
 
-	font = new Font(IO::path + "/res/font.ttf");
+	font = new Font(IO::path + "/res/am.otf");
 }
 
 void UI::InitVao() {
@@ -66,9 +66,6 @@ void UI::SetVao(uint sz, void* verts, void* uvs) {
 		glDeleteVertexArrays(1, &_vao);
 		_vboSz = sz;
 		InitVao();
-#ifdef IS_EDITOR
-		PopupSelector::InitVao();
-#endif
 	}
 	//auto e = glGetError();
 	glBindBuffer(GL_ARRAY_BUFFER, _vboV);
@@ -414,17 +411,28 @@ void UI::Label(float x, float y, float s, string st, Vec4 col, float maxw, Font*
 }
 
 void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, float maxw, Font* font) {
+	uint si = (uint)round(s);
 	sz = min(sz, (uint)strlen(str));
 	if (s <= 0) return;
-	GLuint tex = font->glyph((uint)round(s));
 	font->SizeVec(sz);
 	byte align = (byte)font->alignment;
 	float totalW = 0;
-	for (uint i = 0; i < sz; i ++) {
-		auto& c = str[i];
-		totalW += font->params[0].o2s[c] * s;
+	std::vector<uint> ucs(sz), mks;
+	uint usz = 0;
+	char* cc = (char*)str;
+	while (!!*cc) {
+		auto mk = ucs[usz++] = Font::utf2unc(cc);
+		mk &= 0xff00;
+		if (std::find(mks.begin(), mks.end(), mk) == mks.end()) {
+			mks.push_back(mk);
+			font->glyph(si, mk);
+		}
+	}
+	for (uint i = 0; i < usz; i++) {
+		auto& c = ucs[i];
+		totalW += font->params[c & 0xff00].o2s[c & 0x00ff] * s;
 		if (maxw > 0 && totalW > maxw) {
-			sz = i;
+			usz = i;
 			break;
 		}
 	}
@@ -439,62 +447,64 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 	Vec3 ds = Vec3(1.0f / Display::width, 1.0f / Display::height, 0.5f);
 	x = round(x);
 	float defx = x;
-	for (uint i = 0; i < sz * 4; i += 4) {
-		auto& c = str[i / 4];
+	for (uint i = 0; i < usz * 4; i += 4) {
+		auto& c = ucs[i / 4];
+		auto m = c & 0xff00;
+		auto cc = c & 0x00ff;
+		auto& prm = font->params[m];
 		//if (c == '\n')
 		//	c = ' ';
 
-		Vec3 off = -Vec3(font->params[0].off[c].x, font->params[0].off[c].y, 0)*s;
-		w = font->params[0].w2h[c] * s;
+		Vec3 off = -Vec3(prm.off[cc].x, prm.off[cc].y, 0)*s;
+		w = prm.w2h[cc] * s;
 		font->poss[i] = AU(Vec3(x - 1, y - s - 1, 1) + off)*ds;
 		font->poss[i + 1] = AU(Vec3(x + s + 1, y - s - 1, 1) + off)*ds;
 		font->poss[i + 2] = AU(Vec3(x - 1, y + 1, 1) + off)*ds;
 		font->poss[i + 3] = AU(Vec3(x + s + 1, y + 1, 1) + off)*ds;
-		font->cs[i] = c;
-		font->cs[i + 1] = c;
-		font->cs[i + 2] = c;
-		font->cs[i + 3] = c;
+		font->cs[i] = font->cs[i + 1] = font->cs[i + 2] = font->cs[i + 3] = c;
 
 		if (c == '\n') {
 			x = defx;
 			y -= s * 1.3f;
 		}
 		else {
-			x += font->params[0].o2s[c] * s;
+			x += prm.o2s[cc] * s;
 		}
 	}
-	font->poss[sz * 4] = Vec3(x, 0, 0)*ds;
+	font->poss[usz * 4] = Vec3(x, 0, 0)*ds;
 
-	if (sz * 4 > Font::vaoSz) {
-		Font::InitVao(sz * 4);
-#ifdef IS_EDITOR
-		PopupSelector::InitVaoF();
-#endif
+	if (usz * 4 > Font::vaoSz) {
+		Font::InitVao(usz * 4);
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, Font::vbos[0]);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sz * 4 * sizeof(Vec3), &font->poss[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, usz * 4 * sizeof(Vec3), &font->poss[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, Font::vbos[1]);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sz * 4 * sizeof(Vec2), &font->uvs[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, usz * 4 * sizeof(Vec2), &font->uvs[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, Font::vbos[2]);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sz * 4 * sizeof(float), &font->cs[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, usz * 4 * sizeof(int), &font->cs[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Font::idbuf);
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sz * 6 * sizeof(uint), &font->ids[0]);
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, usz * 6 * sizeof(uint), &font->ids[0]);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	glUseProgram(font->fontProgram);
-	GLint baseColLoc = glGetUniformLocation(font->fontProgram, "col");
-	glUniform4f(baseColLoc, col.r, col.g, col.b, col.a * alpha);
-	GLint baseImageLoc = glGetUniformLocation(font->fontProgram, "sampler");
-	glUniform1i(baseImageLoc, 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex);
+	glUniform4f(font->fontProgLocs[0], col.r, col.g, col.b, col.a * alpha);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBindVertexArray(Font::vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Font::idbuf);
-	glDrawElements(GL_TRIANGLES, 6 * sz, GL_UNSIGNED_INT, 0);
+
+	glUniform1i(font->fontProgLocs[1], 0);
+
+	for (auto m : mks) {
+		GLuint tex = font->glyph(si, m);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		glUniform1i(font->fontProgLocs[2], m);
+
+		glDrawElements(GL_TRIANGLES, 6 * usz, GL_UNSIGNED_INT, 0);
+	}
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);

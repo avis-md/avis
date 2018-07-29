@@ -368,28 +368,7 @@ void Mesh::CalcTangents() {
 }
 
 Mesh::Mesh(byte* mem) : AssetObject(ASSETTYPE_MESH), triangleCount(0), materialCount(0) {
-#ifndef IS_EDITOR
-#define RD(tar, sz) memcpy(tar, mem, sz); mem += sz;
-#define VCT(typ, sz) std::vector<typ>((typ*)mem, (typ*)(mem + sizeof(typ)*sz)); mem += sizeof(typ)*sz;
-	RD(&vertexCount, sizeof(uint));
-	RD(&materialCount, sizeof(byte));
-	vertices = VCT(Vec3, vertexCount);
-	normals = VCT(Vec3, vertexCount);
-	tangents = VCT(Vec3, vertexCount);
-	uv0 = VCT(Vec2, vertexCount);
-	uv1 = VCT(Vec2, vertexCount);
-	for (byte mt = 0; mt < materialCount; mt++) {
-		uint ct = 0;
-		RD(&ct, sizeof(uint));
-		triangleCount += ct;
-		_matTriangles.push_back(std::vector<int>((int*)mem, (int*)(mem + sizeof(int) * 3 * ct)));
-		mem += sizeof(int) * 3 * ct;
-	}
-#undef RD
-#undef VCT
-	RecalculateBoundingBox();
-	loaded = true;
-#endif
+
 }
 
 void Mesh::InitVao() {

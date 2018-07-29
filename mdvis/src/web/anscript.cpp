@@ -23,9 +23,9 @@ string PyScript::Exec() {
 	for (uint i = 0; i < invars.size(); ++i) {
 		auto& val = _invars[i].value;
 		Py_INCREF(val);
-		PyTuple_SetItem(pArgs, i, val);
+		PyTuple_SetItem(pArgl, i, val);
 	}
-	auto res = PyObject_CallObject(pFunc, pArgs);
+	auto res = PyObject_CallObject(pFunc, pArgl);
 	if (res) Py_DECREF(res);
 	else {
 		PyErr_Print();

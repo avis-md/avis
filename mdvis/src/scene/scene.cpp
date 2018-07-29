@@ -4,9 +4,6 @@ bool Scene::dirty = false;
 
 Scene* Scene::active = nullptr;
 std::ifstream* Scene::strm = nullptr;
-#ifndef IS_EDITOR
-std::vector<string> Scene::sceneEPaths = {};
-#endif
 std::vector<string> Scene::sceneNames = {};
 std::vector<long> Scene::scenePoss = {};
 
