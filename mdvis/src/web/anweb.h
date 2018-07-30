@@ -6,11 +6,35 @@
 #include "pyreader.h"
 #include "creader.h"
 
-enum AN_NODE_MISC {
-	PLOT,
-	VOLUME
+enum class AN_NODE_IN : byte {
+	NUM0 = 0,
+	SELPAR,
+	NUM
 };
-const string AN_NODE_MISC_NAMES[] = { "Plot graph", "Volume output" };
+const string AN_NODE_INS[] = { "Sel'd Particles" };
+
+enum class AN_NODE_MOD {
+	NUM0 = 0x20,
+	RECOL,
+	RECOLA,
+	NUM
+};
+const string AN_NODE_MODS[] = { "Recolor", "Recolor All" };
+
+enum class AN_NODE_GEN {
+	NUM0 = 0x40,
+	BOND,
+	VOL,
+	NUM
+};
+const string AN_NODE_GENS[] = { "Add Bonds", "Add Volume" };
+
+enum class AN_NODE_MISC {
+	NUM0 = 0x60,
+	PLOT,
+	NUM
+};
+const string AN_NODE_MISCS[] = { "Plot graph" };
 
 class AnWeb {
 public:

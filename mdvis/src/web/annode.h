@@ -15,6 +15,8 @@ union AnVarBase {
 
 class AnNode {
 public:
+	virtual ~AnNode() {}
+	
 	AnScript* script;
 	bool selected;
 	Vec2 pos;
@@ -59,7 +61,7 @@ public:
 	virtual void OnAnimFrame() {}
 protected:
 	AnNode(AnScript* scr);
-	
+
 	static Texture* tex_circle_open, *tex_circle_conn;
 };
 

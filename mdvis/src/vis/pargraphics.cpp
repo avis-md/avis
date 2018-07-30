@@ -42,6 +42,7 @@ const Popups::DropdownItem ParGraphics::_usePBRItems = Popups::DropdownItem(&Par
 Vec3 ParGraphics::rotCenter = Vec3();
 uint ParGraphics::rotCenterTrackId = -1;
 float ParGraphics::rotW = 0, ParGraphics::rotZ = 0;
+float ParGraphics::rotWs = 0, ParGraphics::rotZs = 0;
 float ParGraphics::rotScale = 1;
 
 float ParGraphics::zoomFade = 0;
@@ -49,6 +50,7 @@ float ParGraphics::zoomFade = 0;
 Vec3 ParGraphics::scrX, ParGraphics::scrY;
 
 bool ParGraphics::dragging = false;
+byte ParGraphics::dragMode = 0;
 
 bool ParGraphics::animate = false, ParGraphics::seek = false;
 bool ParGraphics::tfboDirty = true;
@@ -128,86 +130,51 @@ void ParGraphics::Init() {
 	reflProg = Shader::FromF(mv, glsl::reflFrag);
 #define LC(nm) reflProgLocs[i++] = glGetUniformLocation(reflProg, #nm)
 	uint i = 0;
-	LC(_IP);
-	LC(screenSize);
-	LC(inColor);
-	LC(inNormal);
-	LC(inEmit);
-	LC(inDepth);
-	LC(inSky);
-	LC(inSkyE);
-	LC(skyStrength);
-	LC(skyStrDecay);
-	LC(specStr);
-	LC(bgCol);
+	LC(_IP); LC(screenSize); LC(inColor); LC(inNormal);
+	LC(inEmit); LC(inDepth); LC(inSky); LC(inSkyE);
+	LC(skyStrength); LC(skyStrDecay); LC(specStr); LC(bgCol);
 #undef LC
 
 	reflCProg = Shader::FromF(mv, glsl::reflFragC);
 #define LC(nm) reflCProgLocs[i++] = glGetUniformLocation(reflCProg, #nm)
 	i = 0;
-	LC(_IP);
-	LC(screenSize);
-	LC(inColor);
-	LC(inNormal);
-	LC(inDepth);
-	LC(skyStrength);
-	LC(skyStrDecay);
-	LC(specStr);
-	LC(bgCol);
+	LC(_IP); LC(screenSize); LC(inColor);
+	LC(inNormal); LC(inDepth); LC(skyStrength);
+	LC(skyStrDecay); LC(specStr); LC(bgCol);
 #undef LC
 	
 	parProg = Shader::FromVF(IO::GetText(IO::path + "/parV.txt"), IO::GetText(IO::path + "/parF.txt"));
 #define LC(nm) parProgLocs[i++] = glGetUniformLocation(parProg, #nm)
 	i = 0;
-	LC(_MV);
-	LC(_P);
-	LC(camPos);
-	LC(camFwd);
-	LC(orthoSz);
-	LC(screenSize);
-	LC(radTex);
-	LC(radScl);
+	LC(_MV); LC(_P); LC(camPos);
+	LC(camFwd); LC(orthoSz); LC(screenSize);
+	LC(radTex); LC(radScl);
 #undef LC
 
 	parConProg = Shader::FromVF(IO::GetText(IO::path + "/parConV.txt"), IO::GetText(IO::path + "/parConF.txt"));
 #define LC(nm) parConProgLocs[i++] = glGetUniformLocation(parConProg, #nm)
 	i = 0;
-	LC(_MV);
-	LC(_P);
-	LC(camPos);
-	LC(camFwd);
-	LC(screenSize);
-	LC(posTex);
-	LC(connTex);
+	LC(_MV); LC(_P); LC(camPos); LC(camFwd);
+	LC(screenSize); LC(posTex); LC(connTex);
 #undef LC
 
 	parConLineProg = Shader::FromVF(IO::GetText(IO::path + "/parConV_line.txt"), IO::GetText(IO::path + "/parConF_line.txt"));
 #define LC(nm) parConLineProgLocs[i++] = glGetUniformLocation(parConLineProg, #nm)
 	i = 0;
-	LC(_MV);
-	LC(_P);
-	LC(posTex);
-	LC(connTex);
+	LC(_MV); LC(_P); LC(posTex); LC(connTex);
 #undef LC
 
 	selHlProg = Shader::FromF(mv, IO::GetText(IO::path + "/selectorFrag.txt"));
 #define LC(nm) selHlProgLocs[i++] = glGetUniformLocation(selHlProg, #nm)
 	i = 0;
-	LC(screenSize);
-	LC(myId);
-	LC(idTex);
-	LC(hlCol);
+	LC(screenSize); LC(myId); LC(idTex); LC(hlCol);
 #undef LC
 
 	colProg = Shader::FromF(mv, glsl::colererFrag);
 #define LC(nm) colProgLocs[i++] = glGetUniformLocation(colProg, #nm)
 	i = 0;
-	LC(idTex);
-	LC(spTex);
-	LC(screenSize);
-	LC(id2col);
-	LC(colList);
-	LC(usegrad);
+	LC(idTex); LC(spTex); LC(screenSize);
+	LC(id2col); LC(colList); LC(usegrad);
 #undef LC
 
 	glDeleteShader(mv);
@@ -302,18 +269,31 @@ void ParGraphics::Update() {
 		Vec3 center0 = rotCenter;
 
 		if (Input::mouse0) {
-			if (Input::mouse0State == MOUSE_HOLD && !dragging && VisSystem::InMainWin(Input::mouseDownPos)) {
+			if (Input::mouse0State == MOUSE_DOWN) {
+				if (Input::KeyHold(Key_LeftShift)) dragMode = 2;
+				else dragMode = 0;
+			}
+			else if (Input::mouse0State == MOUSE_HOLD && !dragging && VisSystem::InMainWin(Input::mouseDownPos)) {
 				dragging = true;
 				ChokoLait::mainCamera->applyGBuffer2 = true;
 			}
 			else if (dragging) {
-				if ((VisSystem::mouseMode == VIS_MOUSE_MODE::ROTATE) && !Input::KeyHold(Key_LeftShift)) {
+				if ((VisSystem::mouseMode == VIS_MOUSE_MODE::ROTATE) && (dragMode != 2)) {
+					rotW = rotWs;
+					rotZ = rotZs;
 					rotW -= 180 * Input::mouseDelta.y / Display::height;
 					rotZ += 180 * Input::mouseDelta.x / Display::width;
 					rotW = Clamp<float>(rotW, -90, 90);
 					rotZ = Repeat<float>(rotZ, 0, 360);
+					rotWs = rotW;
+					rotZs = rotZ;
+					if (Input::KeyHold(Key_LeftShift)) {
+						const float dth = 22.5f;
+						rotW = dth * round(rotW / dth);
+						rotZ = dth * round(rotZ / dth);
+					}
 				}
-				else if ((VisSystem::mouseMode == VIS_MOUSE_MODE::PAN) || (((VisSystem::mouseMode == VIS_MOUSE_MODE::ROTATE) && Input::KeyHold(Key_LeftShift)))) {
+				else if ((VisSystem::mouseMode == VIS_MOUSE_MODE::PAN) || (((VisSystem::mouseMode == VIS_MOUSE_MODE::ROTATE) && (dragMode == 2)))) {
 					rotCenter -= 5.0f * scrX * (Input::mouseDelta.x / Display::width);
 					rotCenter += 5.0f * scrY * (Input::mouseDelta.y / Display::height);
 					rotScale = Clamp(rotScale, -6.0f, 2.0f);
@@ -321,7 +301,11 @@ void ParGraphics::Update() {
 			}
 		}
 		else {
-			dragging = false;
+			if (dragging) {
+				dragging = false;
+				rotWs = rotW;
+				rotZs = rotZ;
+			}
 			if (ChokoLait::mainCamera->applyGBuffer2) {
 				ChokoLait::mainCamera->applyGBuffer2 = false;
 				Scene::dirty = true;
@@ -604,36 +588,36 @@ void ParGraphics::BlitSky() {
 	auto _p = MVP::projection();
 	auto cam = ChokoLait::mainCamera().get();
 
-if (!usePBR) {
-	glUseProgram(reflCProg);
-	glUniformMatrix4fv(reflCProgLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
-	glUniform2f(reflCProgLocs[1], (float)Display::width, (float)Display::height);
-	glUniform1i(reflCProgLocs[2], 0);
-	glUniform1i(reflCProgLocs[3], 1);
-	glUniform1i(reflCProgLocs[4], 3);
-	glUniform1f(reflCProgLocs[5], reflStr);
-	glUniform1f(reflCProgLocs[6], reflStrDecay);
-	glUniform1f(reflCProgLocs[7], specStr);
-	glUniform3f(reflCProgLocs[8], bgCol.r, bgCol.g, bgCol.b);
-}
-else {
-	glUseProgram(reflProg);
-	glUniformMatrix4fv(reflProgLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
-	glUniform2f(reflProgLocs[1], (float)Display::width, (float)Display::height);
-	glUniform1i(reflProgLocs[2], 0);
-	glUniform1i(reflProgLocs[3], 1);
-	glUniform1i(reflProgLocs[5], 3);
-	glUniform1i(reflProgLocs[6], 4);
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, refl);
-	glUniform1i(reflProgLocs[7], 5);
-	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, reflE);
-	glUniform1f(reflProgLocs[8], reflStr);
-	glUniform1f(reflProgLocs[9], reflStrDecay);
-	glUniform1f(reflProgLocs[10], specStr);
-	glUniform3f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b);
-}
+	if (!usePBR) {
+		glUseProgram(reflCProg);
+		glUniformMatrix4fv(reflCProgLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
+		glUniform2f(reflCProgLocs[1], (float)Display::width, (float)Display::height);
+		glUniform1i(reflCProgLocs[2], 0);
+		glUniform1i(reflCProgLocs[3], 1);
+		glUniform1i(reflCProgLocs[4], 3);
+		glUniform1f(reflCProgLocs[5], reflStr);
+		glUniform1f(reflCProgLocs[6], reflStrDecay);
+		glUniform1f(reflCProgLocs[7], specStr);
+		glUniform3f(reflCProgLocs[8], bgCol.r, bgCol.g, bgCol.b);
+	}
+	else {
+		glUseProgram(reflProg);
+		glUniformMatrix4fv(reflProgLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
+		glUniform2f(reflProgLocs[1], (float)Display::width, (float)Display::height);
+		glUniform1i(reflProgLocs[2], 0);
+		glUniform1i(reflProgLocs[3], 1);
+		glUniform1i(reflProgLocs[5], 3);
+		glUniform1i(reflProgLocs[6], 4);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, refl);
+		glUniform1i(reflProgLocs[7], 5);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, reflE);
+		glUniform1f(reflProgLocs[8], reflStr);
+		glUniform1f(reflProgLocs[9], reflStrDecay);
+		glUniform1f(reflProgLocs[10], specStr);
+		glUniform3f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b);
+	}
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, cam->d_colTex);
 	glActiveTexture(GL_TEXTURE1);
@@ -688,16 +672,17 @@ void ParGraphics::DrawMenu() {
 	float off = 37;
 
 	UI::Label(expandPos - 148, off, 12, "Lighting", white());
-	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 4 + 2, white(0.9f, 0.1f));
-	off += 1;
-	if (!!_usePBRItems.target) {
+	if (usePBR && !!_usePBRItems.target) {
+		Engine::DrawQuad(expandPos - 149, off + 17, 148, 17, white(0.9f, 0.1f));
+		off += 1;
 		UI2::Dropdown(expandPos - 147, off + 17, 146, "Sky", reflItms);
 		off += 17;
 	}
+	Engine::DrawQuad(expandPos - 149, off + 16, 148, 17 * 4 + 2, white(0.9f, 0.1f));
 	reflStr = UI2::Slider(expandPos - 147, off + 17, 147, "Strength", 0, 5, reflStr);
 	reflStrDecay = UI2::Slider(expandPos - 147, off + 17 * 2, 147, "Falloff", 0, 50, reflStrDecay);
 	specStr = UI2::Slider(expandPos - 147, off + 17 * 3, 147, "Specular", 0, 1, specStr);
-	UI2::Color(expandPos - 147, off + 17 * 4, 145, "Background", bgCol);
+	UI2::Color(expandPos - 147, off + 17 * 4, 147, "Background", bgCol);
 
 	off += 17 * 5 + 2;
 

@@ -1,11 +1,6 @@
 #pragma once
 #include "Engine.h"
-#ifdef PLATFORM_WIN
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <Python.h>
-#else
-#include <python2.7/Python.h>
-#endif
 #ifndef IS_ANSERVER
 #include "utils/dylib.h"
 #endif

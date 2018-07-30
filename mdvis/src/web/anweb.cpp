@@ -162,17 +162,22 @@ void AnWeb::Draw() {
 					}
 				}
 				else {
+#define SW(nm, scr) case (byte)AN_NODE_ ## nm: pn = new scr(); break
 					switch (selSpNode) {
-					case AN_NODE_MISC::PLOT:
-						pn = new Node_Plot();
-						break;
-					case AN_NODE_MISC::VOLUME:
-						pn = new Node_Volume();
-						break;
+						SW(IN::SELPAR, Node_Inputs_SelPar);
+
+						SW(MOD::RECOL, Node_Recolor);
+						SW(MOD::RECOLA, Node_Recolor_All);
+
+						SW(GEN::BOND, Node_AddBond);
+						SW(GEN::VOL, Node_Volume);
+
+						SW(MISC::PLOT, Node_Plot);
 					default:
 						Debug::Error("AnWeb::Draw", "Unhandled node type: " + std::to_string((int)selSpNode));
 						return;
 					}
+#undef SW
 				}
 				if (iterTile) {
 					if (iterTileTop) nodes[iter + 1]->canTile = true;

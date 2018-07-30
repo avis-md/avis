@@ -14,6 +14,7 @@ bool OFST(char* c, const char* const c2) {
 }
 
 #define ATM(c) OFST(c, "ATOM  ")
+#define HTM(c) OFST(c, "HETATM")
 #define HLX(c) OFST(c, "HELIX ")
 #define SHT(c) OFST(c, "SHEET ")
 
@@ -45,7 +46,7 @@ bool PDB::Read(ParInfo* info) {
 	std::vector<char*> lines, helices, sheets;
 	char* cc = new char[150];
 	while (strm.getline(cc, 150)) {
-		if (ATM(cc) && (cc[13] != ' ')) {
+		if ((ATM(cc) || HTM(cc)) && (cc[13] != ' ')) {
 			lines.push_back(cc);
 			cc = new char[150];
 		}

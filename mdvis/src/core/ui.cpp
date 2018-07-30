@@ -465,7 +465,7 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 				font->poss[i + 2] = font->poss[i + 3] = Vec3(-1, -1, 0);
 			font->cs[i] = font->cs[i + 1] = font->cs[i + 2] = font->cs[i + 3] = 0;
 			x = defx;
-			y -= s * 1.3f;
+			y = round(y - s * 1.3f);
 		}
 		else {
 			font->poss[i] = AU(Vec3(x - 1, y - s - 1, 1) + off)*ds;
@@ -474,6 +474,8 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 			font->poss[i + 3] = AU(Vec3(x + s + 1, y + 1, 1) + off)*ds;
 			font->cs[i] = font->cs[i + 1] = font->cs[i + 2] = font->cs[i + 3] = c;
 			x += prm.o2s[cc];
+			if (c == ' ' || c == '\t')
+				x = round(x);
 		}
 	}
 	font->poss[usz * 4] = Vec3(x, 0, 0)*ds;

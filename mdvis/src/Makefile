@@ -16,9 +16,9 @@ endif
 
 C = gcc
 CXX = g++
-CXXFLAGS = -O0 -g -std=c++11 -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ -I/usr/local/lib/python3.6/site-packages/numpy/core/include $(shell python-config --include) $(OSFLAG)
+CXXFLAGS = -O0 -g -std=c++11 -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ -I/usr/local/lib/python3.6/site-packages/numpy/core/include $(shell python3-config --include) $(OSFLAG)
 LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
-LIBS = $(shell python-config --ldflags) -lpthread -lm $(GLLIB) -lz -lpython2.7 $(LIBS2)
+LIBS = $(shell python3-config --ldflags) -lpthread -lm $(GLLIB) -lz -lpython2.7 $(LIBS2)
 
 OBJS = obj/hdr.o obj/lodepng.o obj/AudioEngine.o obj/ChokoLait.o obj/Engine.o obj/main.o obj/RenderEngine.o obj/Types.o obj/mdchan.o
 OBJS += obj/asset/mesh.o obj/asset/shader.o obj/asset/rendertexture.o obj/asset/texture.o obj/asset/texture3d.o

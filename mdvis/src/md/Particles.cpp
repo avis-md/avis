@@ -70,8 +70,8 @@ void Particles::Clear() {
 		//delete[](residueLists);
 		delete[](particles_Name);
 		delete[](particles_ResName);
-		delete[](particles_Pos);
-		delete[](particles_Vel);
+		//delete[](particles_Pos);
+		//delete[](particles_Vel);
 		delete[](particles_Typ);
 		delete[](particles_Col);
 		delete[](particles_Conn);

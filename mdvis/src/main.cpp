@@ -1,6 +1,4 @@
 ﻿#include "ChokoLait.h"
-//#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-//#include <numpy/arrayobject.h>
 
 //#define MAKE_RES
 //#define AYB
@@ -304,10 +302,6 @@ int main(int argc, char **argv) {
 			ParLoader::directLoad = _s;
 			ParLoader::OnOpenFile(fls);
 		}
-
-		AnWeb::nodes.push_back(new Node_Inputs_SelPar());
-		AnWeb::nodes.push_back(new Node_Recolor_All());
-		AnWeb::nodes.push_back(new Node_AddBond());
 
 #ifdef AYB
 		ParLoader::useConn = false;

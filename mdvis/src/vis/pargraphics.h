@@ -32,11 +32,13 @@ public:
 	static Vec3 rotCenter;
 	static uint rotCenterTrackId;
 	static float rotW, rotZ;
+	static float rotWs, rotZs;
 	static float rotScale;
 
 	static float zoomFade;
 
 	static bool dragging;
+	static byte dragMode;
 	static Vec3 scrX, scrY;
 
 	static bool animate, seek;
