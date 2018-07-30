@@ -31,12 +31,11 @@ protected:
 	static GLint fontProgLocs[5];
 
 	struct _params {
-		float w2h[256];
 		float o2s[256];
 		Vec2 off[256];
 	};
 
-	std::unordered_map <uint, _params> params;
+	std::unordered_map<uint, std::unordered_map<uint, _params>> params;
 
 	uint vecSize;
 	std::vector<Vec3> poss;

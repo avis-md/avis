@@ -70,6 +70,7 @@ void IO::GetFolders(const string& folder, std::vector<string>* names, bool hidde
 	}
 #else
 	DIR* dir = opendir(&folder[0]);
+	if (!dir) return;
 	struct dirent* ep;
 	while ((ep = readdir(dir))) {
 		string nm(ep->d_name);

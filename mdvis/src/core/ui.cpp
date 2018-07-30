@@ -31,7 +31,11 @@ void UI::Init() {
 
 	InitVao();
 
-	font = new Font(IO::path + "/res/am.otf");
+	font = new Font(IO::path + "/res/font.ttf");
+	if (!font) {
+		Debug::Warning("UI", "failed to open default font!");
+	}
+	//font->glyph(30, 0);
 }
 
 void UI::InitVao() {
@@ -430,7 +434,7 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 	}
 	for (uint i = 0; i < usz; i++) {
 		auto& c = ucs[i];
-		totalW += font->params[c & 0xff00].o2s[c & 0x00ff] * s;
+		totalW += font->params[s][c & 0xff00].o2s[c & 0x00ff];
 		if (maxw > 0 && totalW > maxw) {
 			usz = i;
 			break;
@@ -443,7 +447,6 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 	y -= (1 - (0.5f * (align >> 4))) * s;
 
 	y = Display::height - y;
-	float w = 0;
 	Vec3 ds = Vec3(1.0f / Display::width, 1.0f / Display::height, 0.5f);
 	x = round(x);
 	float defx = x;
@@ -451,24 +454,26 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 		auto& c = ucs[i / 4];
 		auto m = c & 0xff00;
 		auto cc = c & 0x00ff;
-		auto& prm = font->params[m];
+		auto& prm = font->params[s][m];
 		//if (c == '\n')
 		//	c = ' ';
 
-		Vec3 off = -Vec3(prm.off[cc].x, prm.off[cc].y, 0)*s;
-		w = prm.w2h[cc] * s;
-		font->poss[i] = AU(Vec3(x - 1, y - s - 1, 1) + off)*ds;
-		font->poss[i + 1] = AU(Vec3(x + s + 1, y - s - 1, 1) + off)*ds;
-		font->poss[i + 2] = AU(Vec3(x - 1, y + 1, 1) + off)*ds;
-		font->poss[i + 3] = AU(Vec3(x + s + 1, y + 1, 1) + off)*ds;
-		font->cs[i] = font->cs[i + 1] = font->cs[i + 2] = font->cs[i + 3] = c;
+		Vec3 off = Vec3(prm.off[cc].x, -prm.off[cc].y, 0);
 
 		if (c == '\n') {
+			font->poss[i] = font->poss[i + 1] =
+				font->poss[i + 2] = font->poss[i + 3] = Vec3(-1, -1, 0);
+			font->cs[i] = font->cs[i + 1] = font->cs[i + 2] = font->cs[i + 3] = 0;
 			x = defx;
 			y -= s * 1.3f;
 		}
 		else {
-			x += prm.o2s[cc] * s;
+			font->poss[i] = AU(Vec3(x - 1, y - s - 1, 1) + off)*ds;
+			font->poss[i + 1] = AU(Vec3(x + s + 1, y - s - 1, 1) + off)*ds;
+			font->poss[i + 2] = AU(Vec3(x - 1, y + 1, 1) + off)*ds;
+			font->poss[i + 3] = AU(Vec3(x + s + 1, y + 1, 1) + off)*ds;
+			font->cs[i] = font->cs[i + 1] = font->cs[i + 2] = font->cs[i + 3] = c;
+			x += prm.o2s[cc];
 		}
 	}
 	font->poss[usz * 4] = Vec3(x, 0, 0)*ds;

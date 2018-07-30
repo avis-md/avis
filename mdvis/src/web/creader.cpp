@@ -96,8 +96,13 @@ bool CReader::Read(string path, CScript** _scr) {
 		}
 		scr->funcLoc = (CScript::emptyFunc)scr->lib->GetSym("Execute");
 		if (!scr->funcLoc) {
-			auto err = GetLastError();
-			Debug::Warning("CReader", "Failed to load function Execute into memory! " + std::to_string(err));
+			string err = 
+#ifdef PLATFORM_WIN
+				std::to_string(GetLastError());
+#else
+				"";//dlerror();
+#endif
+			Debug::Warning("CReader", "Failed to load function Execute into memory! " + err);
 			return false;
 		}
 	}

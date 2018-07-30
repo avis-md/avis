@@ -342,7 +342,7 @@ void ParGraphics::Update() {
 
 		if (reflId != _reflId) {
 			_reflId = reflId;
-			auto& pth = IO::path + "/backgrounds/" + reflNms[reflId] + "/";
+			auto pth = IO::path + "/backgrounds/" + reflNms[reflId] + "/";
 			if (!!refl) {
 				glDeleteTextures(1, &refl);
 				glDeleteTextures(1, &reflE);

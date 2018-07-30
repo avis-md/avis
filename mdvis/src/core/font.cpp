@@ -115,33 +115,27 @@ GLuint Font::CreateGlyph(uint sz, uint mask) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	bool recalc = (params.count(mask) == 0);
-	auto& pr = params[mask];
+	bool recalc = (params.count(sz) == 0) || (params[sz].count(mask) == 0);
+	auto& pr = params[sz][mask];
 	for (ushort a = 0; a < 256; a++) {
-		if (recalc) {
-			pr.w2h[a] = 0;
-			pr.o2s[a] = 0;
-		}
 		if (FT_Load_Char(_face, mask + a, FT_LOAD_RENDER) != FT_Err_Ok) continue;
 		byte x = a % 16, y = a / 16;
 		FT_Bitmap bmp = _face->glyph->bitmap;
 		glTexSubImage2D(GL_TEXTURE_2D, 0, (sz + 2) * x + 1, (sz + 2) * y + 1, bmp.width, bmp.rows, GL_RED, GL_UNSIGNED_BYTE, bmp.buffer);
 		if (recalc) {
 			if (bmp.width == 0) {
-				pr.w2h[a] = 0;
 				pr.o2s[a] = 0;
 			}
 			else {
-				pr.w2h[a] = (float)(bmp.width) / bmp.rows;
-				pr.o2s[a] = _face->glyph->metrics.horiAdvance / sz / 64.0f;
+				pr.o2s[a] = _face->glyph->advance.x >> 6;//_face->glyph->metrics.horiAdvance / sz / 64.0f;
 			}
-			pr.off[a] = Vec2((float)(_face->glyph->bitmap_left) / sz, 1 - ((float)(_face->glyph->bitmap_top) / sz));
+			pr.off[a] = Vec2(_face->glyph->bitmap_left, sz - _face->glyph->bitmap_top);
 		}
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
-	if (recalc) {
-		pr.o2s[' '] = 0.3f;
-		pr.o2s['\t'] = 0.9f;
+	if (recalc && !mask) {
+		pr.o2s[' '] = sz * 0.3f;
+		pr.o2s['\t'] = sz * 0.9f;
 	}
 	return _glyphs[sz][mask];
 }

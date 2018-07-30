@@ -173,10 +173,6 @@ void paintfunc() {
 	VisRenderer::Draw();
 	if (ParMenu::showSplash) ParMenu::DrawSplash();
 	HelpMenu::Draw();
-
-	UI::Label(200, 200, 20, u8"Unicode対応テスト", green());
-
-	//cm->Draw(_mv, _p);
 }
 
 #ifdef MAKE_RES

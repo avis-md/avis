@@ -1,10 +1,11 @@
 #include "anconv.h"
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 
 PyObject* AnConv::PyArr(int nd, char tp) {
 	if (!AnWeb::hasPy) return nullptr;
 	assert(nd <= 10);
-	int zs[10]{};
+	npy_intp zs[10]{};
 	int tn = NPY_FLOAT;
 	int sz = 4;
 	switch (tp) {
@@ -37,7 +38,7 @@ void* AnConv::FromPy(PyObject* o, int dim, int* szs) {
 bool AnConv::ToPy(void* v, PyObject* obj, int dim, int* szs) {
 	if (!AnWeb::hasPy) return false;
 	PyArray_Dims dims;
-	dims.ptr = szs;
+	dims.ptr = (long*)szs;
 	dims.len = dim;
 	PyArray_Resize((PyArrayObject*)obj, &dims, 1, NPY_CORDER);
 }
