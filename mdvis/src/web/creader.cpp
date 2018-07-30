@@ -4,6 +4,8 @@
 #include "utils/runcmd.h"
 #endif
 
+//#define _GEN_DEBUG
+
 string CReader::vcbatPath = "";
 
 void CReader::Init() {
@@ -63,8 +65,16 @@ bool CReader::Read(string path, CScript** _scr) {
 #ifdef PLATFORM_WIN
 		if (!!vcbatPath.size()) {
 		//if (0) {
-			const string cl = "cl /nologo /c -Od /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
-			const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".so\" \"" + fp2 + nm + ".obj\"";
+			const string cl = "cl /nologo /c -Od "
+#ifdef _GEN_DEBUG
+				"/Zi"
+#endif
+				" /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
+			const string lk = "link /nologo /dll "
+#ifdef _GEN_DEBUG
+				"/debug /pdb:\"" + fp2 + nm + ".pdb\" "
+#endif
+				"/out:\"" + fp2 + nm + ".so\" \"" + fp2 + nm + ".obj\"";
 			RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " && " + lk);
 		}
 #else

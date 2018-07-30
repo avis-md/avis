@@ -6,12 +6,15 @@ uintptr_t UI::_lastEditText[UI_MAX_EDIT_TEXT_FRAMES] = {};
 uintptr_t UI::_editingEditText[UI_MAX_EDIT_TEXT_FRAMES] = {};
 ushort UI::_activeEditTextId = 0;
 ushort UI::_editingEditTextId = 0;
-Font* UI::font;
+
+Font* UI::font, *UI::font2;
+
 bool UI::focused = true, UI::editingText = false;
 uint UI::_editTextCursorPos = 0;
 uint UI::_editTextCursorPos2 = 0;
 string UI::_editTextString = "";
 float UI::_editTextBlinkTime = 0;
+
 UI::Style UI::_defaultStyle = {};
 float UI::alpha = 1;
 
@@ -32,10 +35,13 @@ void UI::Init() {
 	InitVao();
 
 	font = new Font(IO::path + "/res/font.ttf");
+	font2 = new Font(IO::path + "/res/font2.ttf");
 	if (!font) {
-		Debug::Warning("UI", "failed to open default font!");
+		Debug::Warning("UI", "failed to open default font (/res/font.ttf)!");
+		if (font2) font = font2;
+		else Debug::Warning("UI", "failed to open alternate font (/res/font2.ttf)!");
 	}
-	//font->glyph(30, 0);
+	else if (!font2) font2 = font;
 }
 
 void UI::InitVao() {
@@ -114,12 +120,6 @@ void UI::PreLoop() {
 	_layer = 0;
 }
 
-#define _checkdraw assert(UI::CanDraw() && "UI functions can only be called from the Overlay function!");
-
-bool UI::CanDraw() {
-	return (std::this_thread::get_id() == Engine::_mainThreadId);
-}
-
 void UI::Texture(float x, float y, float w, float h, ::Texture* texture, DRAWTEX_SCALING scl, float miplevel) {
 	UI::Texture(x, y, w, h, texture, white(), scl, miplevel);
 }
@@ -127,7 +127,6 @@ void UI::Texture(float x, float y, float w, float h, ::Texture* texture, float a
 	UI::Texture(x, y, w, h, texture, white(alpha), scl, miplevel);
 }
 void UI::Texture(float x, float y, float w, float h, ::Texture* texture, Vec4 tint, DRAWTEX_SCALING scl, float miplevel) {
-	_checkdraw;
 	GLuint tex = (texture->loaded) ? texture->pointer : Engine::fallbackTex->pointer;
 	if (!texture->tiled) {
 		if (scl == DRAWTEX_STRETCH)
@@ -173,7 +172,6 @@ string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, cons
 	Engine::PushStencil(x, y, w, h);
 	string str = str2;
 	if (!str22.size()) str22 = str2;
-	_checkdraw;
 	GetEditTextId();
 	bool isActive = (UI::IsSameId(_activeEditText, _editingEditText) && (_activeEditTextId == _editingEditTextId));
 
@@ -288,7 +286,6 @@ string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, cons
 string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, const string& str2, char repl, bool delayed, Vec4 fcol, bool* changed, Font* font, Vec4 hcol, Vec4 acol, bool ser) {
 	string str = str2;
 	string pstr = "";
-	_checkdraw;
 	GetEditTextId();
 	bool isActive = (UI::IsSameId(_activeEditText, _editingEditText) && (_activeEditTextId == _editingEditTextId));
 
@@ -429,12 +426,14 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 		mk &= 0xff00;
 		if (std::find(mks.begin(), mks.end(), mk) == mks.end()) {
 			mks.push_back(mk);
-			font->glyph(si, mk);
+			if (!mk) font->glyph(si, 0);
+			else font2->glyph(si, mk);
 		}
 	}
 	for (uint i = 0; i < usz; i++) {
 		auto& c = ucs[i];
-		totalW += font->params[s][c & 0xff00].o2s[c & 0x00ff];
+		if (c < 0x0100) totalW += font->params[s][0].o2s[c & 0x00ff];
+		else totalW += font2->params[s][c & 0xff00].o2s[c & 0x00ff];
 		if (maxw > 0 && totalW > maxw) {
 			usz = i;
 			break;
@@ -454,7 +453,7 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 		auto& c = ucs[i / 4];
 		auto m = c & 0xff00;
 		auto cc = c & 0x00ff;
-		auto& prm = font->params[s][m];
+		auto& prm = (!m) ? font->params[s][0] : font2->params[s][m];
 		//if (c == '\n')
 		//	c = ' ';
 
@@ -495,20 +494,20 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, usz * 6 * sizeof(uint), &font->ids[0]);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	glUseProgram(font->fontProgram);
-	glUniform4f(font->fontProgLocs[0], col.r, col.g, col.b, col.a * alpha);
+	glUseProgram(Font::fontProgram);
+	glUniform4f(Font::fontProgLocs[0], col.r, col.g, col.b, col.a * alpha);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBindVertexArray(Font::vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Font::idbuf);
 
-	glUniform1i(font->fontProgLocs[1], 0);
+	glUniform1i(Font::fontProgLocs[1], 0);
 
 	for (auto m : mks) {
-		GLuint tex = font->glyph(si, m);
+		GLuint tex = (!m) ? font->glyph(si, 0) : font2->glyph(si, m);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, tex);
-		glUniform1i(font->fontProgLocs[2], m);
+		glUniform1i(Font::fontProgLocs[2], m);
 
 		glDrawElements(GL_TRIANGLES, 6 * usz, GL_UNSIGNED_INT, 0);
 	}

@@ -1,4 +1,6 @@
 #include "Engine.h"
+#include <locale>
+#include <codecvt>
 
 #ifdef PLATFORM_WIN
 #include <io.h>
@@ -58,14 +60,14 @@ void IO::GetFolders(const string& folder, std::vector<string>* names, bool hidde
 	names->clear();
 #ifdef PLATFORM_WIN
 	string search_path = folder + "/*";
-	WIN32_FIND_DATA fd;
-	HANDLE hFind = ::FindFirstFile(search_path.c_str(), &fd);
+	WIN32_FIND_DATAW fd;
+	HANDLE hFind = FindFirstFileW(_tow(search_path).c_str(), &fd);
 	if (hFind != INVALID_HANDLE_VALUE) {
 		do {
 			if ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && (hidden || !(fd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)) && (fd.cFileName[0] != '.')) {
-				names->push_back(fd.cFileName);
+				names->push_back(_frw(fd.cFileName));
 			}
-		} while (::FindNextFile(hFind, &fd));
+		} while (::FindNextFileW(hFind, &fd));
 		::FindClose(hFind);
 	}
 #else
@@ -83,7 +85,7 @@ void IO::GetFolders(const string& folder, std::vector<string>* names, bool hidde
 
 bool IO::HasDirectory(string szPath) {
 #ifdef PLATFORM_WIN
-	DWORD dwAttrib = GetFileAttributes(&szPath[0]);
+	DWORD dwAttrib = GetFileAttributesW(_tow(szPath).c_str());
 	return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 #else
 	struct stat st;
@@ -95,7 +97,7 @@ void IO::MakeDirectory(string szPath) {
 #ifdef PLATFORM_WIN
 	SECURITY_ATTRIBUTES sa = {};
 	sa.nLength = sizeof(sa);
-	CreateDirectory(&szPath[0], &sa);
+	CreateDirectoryW(_tow(szPath).c_str(), &sa);
 #else
 	mkdir(&szPath[0], 0777);
 #endif
@@ -103,8 +105,8 @@ void IO::MakeDirectory(string szPath) {
 
 bool IO::HasFile(string szPath) {
 #ifdef PLATFORM_WIN
-	DWORD dwAttrib = GetFileAttributes(&szPath[0]);
-	return (dwAttrib != INVALID_FILE_ATTRIBUTES);// && (dwAttrib & FILE_ATTRIBUTE_NORMAL));
+	DWORD dwAttrib = GetFileAttributesW(_tow(szPath).c_str());
+	return (dwAttrib != INVALID_FILE_ATTRIBUTES);
 #else
 	return (access(&szPath[0], F_OK ) != -1);
 #endif
@@ -218,7 +220,7 @@ void IO::StopReadStdio() {
 void IO::OpenEx(string path) {
 	//path = "\"" + path + "\"";
 #ifdef PLATFORM_WIN
-	ShellExecute(0, 0, &path[0], 0, 0, SW_SHOW);
+	ShellExecuteW(0, 0, _tow(path).c_str(), 0, 0, SW_SHOW);
 #else
 	//auto res = fork();
 	//if (!res) {
@@ -256,6 +258,14 @@ string IO::InitPath() {
 	path = path2;
 	//Debug::Message("IO", "Path set to " + path);
 	return path2;
+}
+
+std::wstring IO::_tow(const string& s) {
+	return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>{}.from_bytes(s);
+}
+
+string IO::_frw(const std::wstring& s) {
+	return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>{}.to_bytes(s);
 }
 
 void IO::DoReadStdio(stdioCallback cb) {

@@ -65,8 +65,9 @@ void AnWeb::Update() {
 	}
 	if (apply) {
 		apply = false;
-		Particles::UpdateConBufs2();
-		OnAnimFrame();
+		auto frm = Particles::anim.activeFrame;
+		Particles::anim.activeFrame = -1;
+		Particles::SetFrame(frm);
 	}
 #endif
 }

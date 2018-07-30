@@ -11,6 +11,17 @@ typedef unsigned char byte;
 typedef unsigned int uint;
 #endif
 
+#ifdef _WIN32
+#include <string>
+#include <locale>
+#include <codecvt>
+inline std::wstring PATH(const std::string& s) {
+	return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>{}.from_bytes(s);
+}
+#else
+#define PATH(s) s
+#endif
+
 struct TrjInfo {
 	const char* first; //IN
 	uint32_t parNum; //IN

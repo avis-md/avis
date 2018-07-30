@@ -16,7 +16,7 @@ uint _find_char_not_of(char* first, char* last, char c) {
 #define SETERR(msg) memcpy(info->error, msg, sizeof(msg))
 
 bool Gromacs::Read(ParInfo* info) {
-	std::ifstream strm(info->path, std::ios::binary);
+	std::ifstream strm(PATH(info->path), std::ios::binary);
 	if (!strm.is_open()) {
 		SETERR("Cannot open file!");
 		return false;
@@ -63,12 +63,14 @@ bool Gromacs::Read(ParInfo* info) {
 		n0 = _find_char_not_of(buf + 10, buf + 15, ' ');
 		memcpy(info->name + i * info->nameSz, buf + 10 + n0, 5 - n0);
 		info->type[i] = (uint16_t)buf[10 + n0];
-		info->vel[i * 3] = std::stof(string(buf + 44, 8));
-		info->vel[i * 3 + 1] = std::stof(string(buf + 52, 8));
-		info->vel[i * 3 + 2] = std::stof(string(buf + 60, 8));
 		info->pos[i * 3] = std::stof(string(buf + 20, 8));
 		info->pos[i * 3 + 1] = std::stof(string(buf + 28, 8));
 		info->pos[i * 3 + 2] = std::stof(string(buf + 36, 8));
+		if (!!buf[50]) {
+			info->vel[i * 3] = std::stof(string(buf + 44, 8));
+			info->vel[i * 3 + 1] = std::stof(string(buf + 52, 8));
+			info->vel[i * 3 + 2] = std::stof(string(buf + 60, 8));
+		}
 	}
 
 	strm >> info->bounds[1] >> info->bounds[3] >> info->bounds[5];

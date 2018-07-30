@@ -38,7 +38,7 @@ void* AnConv::FromPy(PyObject* o, int dim, int* szs) {
 bool AnConv::ToPy(void* v, PyObject* obj, int dim, int* szs) {
 	if (!AnWeb::hasPy) return false;
 	PyArray_Dims dims;
-	dims.ptr = (long*)szs;
+	dims.ptr = (npy_intp*)szs;
 	dims.len = dim;
 	PyArray_Resize((PyArrayObject*)obj, &dims, 1, NPY_CORDER);
 }

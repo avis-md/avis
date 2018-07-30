@@ -47,17 +47,19 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	posa.dimVals[1] = posa.dimVals[0];
 #ifndef IS_ANSERVER
 	posa.dimVals[0] = (int*)&Particles::anim.frameCount;
+	posa.dimVals[1] = (int*)&Particles::particleSz;
+	posa.dimVals[2] = poss.dimVals[1];
 #endif
 	conV[4] = conV[3];
 }
 
 Vec2 Node_Inputs::DrawConn(){
-	return Vec2(width, 19 + 17 * 4 + GetHeaderSz());
+	return Vec2(width, 19 + 17 * 5 + GetHeaderSz());
 }
 
 void Node_Inputs::Draw() {
 #ifndef IS_ANSERVER
-	auto cnt = 4;
+	auto cnt = 5;
 	this->pos = pos;
 	Engine::DrawQuad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
 	UI::Label(pos.x + 2, pos.y + 1, 12, title, white());

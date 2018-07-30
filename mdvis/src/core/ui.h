@@ -15,8 +15,6 @@ public:
 	static string EditText(float x, float y, float w, float h, float s, Vec4 bcol, const string& str, bool delayed = false, Vec4 fcol = black(), bool* changed = nullptr, string str2 = "", Font* fnt = font, Vec4 hcol = Vec4(0, 120.0f / 255, 215.0f / 255, 1), Vec4 acol = white(), bool ser = true);
 	static string EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, const string& str, char repl, bool delayed = false, Vec4 fcol = black(), bool* changed = nullptr, Font* fnt = font, Vec4 hcol = Vec4(0, 120.0f / 255, 215.0f / 255, 1), Vec4 acol = white(), bool ser = true);
 
-	static bool CanDraw();
-
 	static bool _isDrawingLoop;
 	static void PreLoop();
 	static uintptr_t _activeEditText[UI_MAX_EDIT_TEXT_FRAMES], _lastEditText[UI_MAX_EDIT_TEXT_FRAMES], _editingEditText[UI_MAX_EDIT_TEXT_FRAMES];
@@ -40,7 +38,7 @@ public:
 		int fontSize;
 	};
 
-	static Font* font;
+	static Font* font, *font2;
 
 	static bool focused, editingText;
 	static uint _editTextCursorPos, _editTextCursorPos2;

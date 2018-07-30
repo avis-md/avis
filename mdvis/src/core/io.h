@@ -26,6 +26,8 @@ public:
 	static string path;
 
 	static string InitPath();
+	static std::wstring _tow(const string& s);
+	static std::string _frw(const std::wstring& s);
 	
 private:
 	static std::thread readstdiothread;
