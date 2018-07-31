@@ -44,7 +44,7 @@ void AnWeb::Insert(AnNode* node, Vec2 pos) {
 
 void AnWeb::Init() {
 	Insert(new Node_Inputs());
-	Insert(new Node_Inputs_ActPar());
+	//Insert(new Node_Inputs_ActPar());
 
 	ChokoLait::focusFuncs.push_back(CheckChanges);
 }

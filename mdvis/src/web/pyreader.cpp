@@ -127,7 +127,7 @@ void PyReader::Refresh(PyScript* scr) {
 	if (mt > scr->chgtime) {
 		Debug::Message("CReader", "Reloading " + scr->path + ".py");
 		scr->Clear();
-		Read(scr->path, scr);
+		scr->ok = Read(scr->path, scr);
 	}
 }
 

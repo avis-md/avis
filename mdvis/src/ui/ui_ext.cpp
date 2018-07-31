@@ -6,7 +6,7 @@
 void UI2::LabelMul(float x, float y, float sz, const string& s) {
 	auto ss = string_split(s, '\n');
 	for (auto a = 0; a < ss.size(); a++) {
-		UI::Label(x, y + sz * 1.2f * a, sz, ss[a], white());
+		UI::Label(x, round(y + sz * 1.2f * a), sz, ss[a], white());
 	}
 }
 

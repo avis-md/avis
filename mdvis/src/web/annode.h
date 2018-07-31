@@ -57,7 +57,7 @@ public:
 	virtual void LoadIn(const string& path) {};
 	virtual void SaveOut(const string& path);
 	virtual void LoadOut(const string& path);
-	void SaveConn(), ClearConn(), Reconn();
+	virtual void SaveConn(), ClearConn(), Reconn();
 
 	virtual void OnAnimFrame() {}
 protected:
@@ -92,4 +92,5 @@ public:
 	std::vector<void*> inputV, outputV;
 
 	void Execute() override;
+	void Reconn() override;
 };

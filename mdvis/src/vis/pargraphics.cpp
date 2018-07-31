@@ -43,7 +43,7 @@ Vec3 ParGraphics::rotCenter = Vec3();
 uint ParGraphics::rotCenterTrackId = -1;
 float ParGraphics::rotW = 0, ParGraphics::rotZ = 0;
 float ParGraphics::rotWs = 0, ParGraphics::rotZs = 0;
-float ParGraphics::rotScale = 1;
+float ParGraphics::rotScale = 0;
 
 float ParGraphics::zoomFade = 0;
 
@@ -181,10 +181,6 @@ void ParGraphics::Init() {
 
 	hlIds.resize(1);
 	ChokoLait::mainCamera->onBlit = Reblit;
-
-	rotCenter = Vec3();//4, 4, 4);
-	rotZ = 90;
-	rotScale = 0;
 
 	Eff::ssaoSamples = 20;
 	Eff::ssaoRad = 0.015f;

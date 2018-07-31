@@ -60,7 +60,8 @@
         "set": "cpp",
         "typeindex": "cpp",
         "__string": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "cmath": "cpp"
     },
     "python.linting.pylintEnabled": false
 }

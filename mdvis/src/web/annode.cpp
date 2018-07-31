@@ -37,7 +37,7 @@ Vec2 AnNode::DrawConn() {
 		auto& ri = inputR[i];
 		if (ri.first) Engine::DrawLine(Vec2(pos.x, expanded ? y + 8 : pos.y + 8), Vec2(ri.first->pos.x + ri.first->width, ri.first->expanded ? ri.first->pos.y + 28 + ri.first->GetHeaderSz() + (ri.second + ri.first->inputR.size()) * 17 : ri.first->pos.y + 8), white(), 2);
 	}
-	if (expanded) return Vec2(width, 19 + 17 * cnt + DrawLog(19.0f + 17 * cnt) + hy + GetHeaderSz());
+	if (expanded) return Vec2(width, 19 + 17 * cnt + DrawLog(19.0f + 17 * cnt) + hy);
 	else return Vec2(width, 16 + DrawLog(16));
 #else
 	return Vec2();
@@ -49,12 +49,13 @@ void AnNode::Draw() {
 	auto cnt = (script->invars.size() + script->outvars.size());
 	Engine::DrawQuad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
-	UI::Label(pos.x + 18, pos.y + 1, 12, title, white());
+	UI::Label(pos.x + 18, pos.y + 1, 12, title, script->ok? white() : red());
 	DrawToolbar();
 	if (expanded) {
-		float y = pos.y + 18;
+		float y = pos.y + 16;
 		DrawHeader(y);
-		Engine::DrawQuad(pos.x, y - 2, width, 3.0f + 17 * cnt, white(0.7f, 0.25f));
+		Engine::DrawQuad(pos.x, y, width, 3.0f + 17 * cnt, white(0.7f, 0.25f));
+		y += 2;
 		for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 			if (!AnWeb::selConnNode || (AnWeb::selConnIdIsOut && AnWeb::selConnNode != this)) {
 				if (Engine::Button(pos.x - 5, y + 3, 10, 10, inputR[i].first ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
@@ -139,7 +140,7 @@ void AnNode::DrawHeader(float& off) {
 	if (showDesc) {
 		Engine::DrawQuad(pos.x, off, width, 17 * script->descLines, white(0.7f, 0.25f));
 		UI::alpha = 0.7f;
-		UI2::LabelMul(pos.x + 2, off + 1, 12, script->desc);
+		UI2::LabelMul(pos.x + 5, off + 1, 12, script->desc);
 		UI::alpha = 1;
 		off += 17 * script->descLines;
 	}
@@ -381,10 +382,10 @@ void AnNode::ClearConn() {
 	inputR.resize(script->invars.size(), std::pair<AnNode*, uint>());
 	outputR.clear();
 	outputR.resize(script->outvars.size(), std::pair<AnNode*, uint>());
+	conV.resize(outputR.size());
 }
 
 void AnNode::Reconn() {
-	conV.resize(outputR.size());
 	for (auto& cn : _connInfo) {
 		for (size_t a = 0, sz = inputR.size(); a < sz; a++) {
 			if (script->invars[a].first == cn.mynm) {
@@ -483,7 +484,6 @@ void PyNode::Execute() {
 	}
 }
 
-
 CNode::CNode(CScript* scr) : AnNode(scr) {
 	if (!scr) return;
 	title += " (c++)";
@@ -542,4 +542,21 @@ void CNode::Execute() {
 	}
 
 	script->Exec();
+}
+
+void CNode::Reconn() {
+	AnNode::Reconn();
+	auto scr = (CScript*)script;
+	inputV.resize(scr->invars.size());
+	outputV.resize(scr->outvars.size());
+	inputVDef.resize(scr->invars.size());
+	for (uint i = 0; i < scr->invars.size(); i++) {
+		inputV[i] = scr->_invars[i].value;
+		if (scr->_invars[i].type == AN_VARTYPE::FLOAT) inputVDef[i].f = 0;
+		else inputVDef[i].i = 0;
+	}
+	for (uint i = 0; i < scr->outvars.size(); i++) {
+		outputV[i] = scr->_outvars[i].value;
+		conV[i] = scr->_outvars[i];
+	}
 }

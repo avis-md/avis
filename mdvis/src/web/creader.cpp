@@ -130,8 +130,14 @@ bool CReader::Read(string path, CScript* scr) {
 	std::vector<std::pair<string, int**>> vecvarLocs;
 	int vec = 0;
 	CVar vr;
+	bool fst = true;
 	while (!strm.eof()) {
 		std::getline(strm, ln);
+		while (ln[0] == '/' && ln[1] == '/' && ln[2] == '/') {
+			scr->desc += ln.substr(3) + "\n";
+			scr->descLines++;
+			std::getline(strm, ln);
+		}
 		string ln2 = ln.substr(0, 6);
 		long long lln2 = *((long long*)&ln2[0]) & 0x0000ffffffffffff;
 #define TL(s) (*((long long*)s) & 0x0000ffffffffffff)
@@ -325,7 +331,7 @@ void CReader::Refresh(CScript* scr) {
 	if (mt > scr->chgtime) {
 		Debug::Message("CReader", "Reloading " + scr->path + ".cpp");
 		scr->Clear();
-		Read(scr->path, scr);
+		scr->ok = Read(scr->path, scr);
 	}
 }
 
