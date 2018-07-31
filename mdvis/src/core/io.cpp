@@ -164,6 +164,13 @@ std::vector<byte> IO::GetBytes(const string& path) {
 	return res;
 }
 
+int IO::ModTime(const string& s) {
+	struct stat stt;
+	auto rt = stat(s.c_str(), &stt);
+	if (!!rt) return -1;
+	return stt.st_mtime;
+}
+
 #ifndef PLATFORM_WIN
 #define _dup dup
 #define _dup2 dup2

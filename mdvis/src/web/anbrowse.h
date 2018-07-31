@@ -19,8 +19,9 @@ public:
 	static bool mscFdExpanded[5];
 
 	static void Scan(), DoScan(Folder* f, const string& path, const string& incPath);
-	static void Draw(), DoDraw(Folder* f, float& off, uint layer);
+	static void Refresh(), DoRefresh(Folder* f);
 
+	static void Draw(), DoDraw(Folder* f, float& off, uint layer);
 	static void PreC(bool f), PreFt(bool f);
 	static void DoPreC(const string& path, bool f), DoPreFt();
 };

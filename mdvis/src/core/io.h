@@ -9,13 +9,15 @@ class IO {
 public:
 	static std::vector<string> GetFiles(const string& path, string ext = "");
 	static void GetFolders(const string& path, std::vector<string>* names, bool hidden = false);
-	static bool HasDirectory(string szPath);
-	static void MakeDirectory(string szPath);
-	static bool HasFile(string szPath);
+	static bool HasDirectory(string path);
+	static void MakeDirectory(string path);
+	static bool HasFile(string path);
 	static string ReadFile(const string& path);
 	static void HideInput(bool hide);
 	static string GetText(const string& path);
 	static std::vector<byte> GetBytes(const string& path);
+
+	static int ModTime(const string& path);
 
 	static void StartReadStdio(string path, stdioCallback callback);
 	static void FlushStdio();

@@ -360,6 +360,53 @@ void AnNode::LoadOut(const string& path) {
 	}
 }
 
+void AnNode::SaveConn() {
+	auto sz = inputR.size();
+	_connInfo.resize(sz);
+	for (size_t a = 0; a < sz; a++) {
+		ConnInfo& cn = _connInfo[a];
+		cn.mynm = script->invars[a].first;
+		cn.mytp = script->invars[a].second;
+		auto ra = inputR[a].first;
+		cn.cond = cn.tar = ra;
+		if (cn.cond) {
+			cn.tarnm = ra->script->outvars[inputR[a].second].first;
+			cn.tartp = ra->script->outvars[inputR[a].second].second;
+		}
+	}
+}
+
+void AnNode::ClearConn() {
+	inputR.clear();
+	inputR.resize(script->invars.size(), std::pair<AnNode*, uint>());
+	outputR.clear();
+	outputR.resize(script->outvars.size(), std::pair<AnNode*, uint>());
+}
+
+void AnNode::Reconn() {
+	conV.resize(outputR.size());
+	for (auto& cn : _connInfo) {
+		for (size_t a = 0, sz = inputR.size(); a < sz; a++) {
+			if (script->invars[a].first == cn.mynm) {
+				if (script->invars[a].second == cn.mytp) {
+					if (cn.cond) {
+						auto& ra = cn.tar;
+						for (size_t b = 0, sz2 = ra->outputR.size(); b < sz2; b++) {
+							if (ra->script->outvars[b].first == cn.tarnm) {
+								if (ra->script->outvars[b].second == cn.tartp) {
+									ra->ConnectTo(b, this, a);
+									break;
+								}
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
+	}
+}
+
 
 PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 	if (!scr) return;
@@ -385,6 +432,7 @@ PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 			conV[i].dimVals.resize(outputV[i].dim);
 			for (int j = 0; j < outputV[i].dim; j++)
 				conV[i].dimVals[j] = new int();
+			conV[i].value = new uintptr_t();
 			break;
 		default:
 			Debug::Warning("PyNode", "case not handled!");
@@ -422,11 +470,11 @@ void PyNode::Execute() {
 			*(float*)conV[i].value = PyFloat_AsDouble(outputV[i].value);
 			break;
 		case AN_VARTYPE::INT:
-			*(float*)conV[i].value = PyFloat_AsDouble(outputV[i].value);
+			//*(float*)conV[i].value = PyFloat_AsDouble(outputV[i].value);
+			*(int*)conV[i].value = PyLong_AsLong(outputV[i].value);
 			break;
 		case AN_VARTYPE::LIST:
-			//delete[]((float*)conV[i].value);
-			//conV[i].value = AnConv::FromPy(outputV[i].value, conV[i].dimVals.size(), &conV[i].dimVals[0]);
+			*(void**)conV[i].value = AnConv::FromPy(outputV[i].value, conV[i].dimVals.size(), &conV[i].dimVals[0]);
 			break;
 		default:
 			Debug::Warning("AnVar", "exec case not handled!");

@@ -22,7 +22,7 @@ PyObject* AnConv::PyArr(int nd, char tp) {
 	return PyArray_New(&PyArray_Type, nd, zs, tn, nullptr, nullptr, sz, 0, nullptr);
 }
 
-void* AnConv::FromPy(PyObject* o, int dim, int* szs) {
+void* AnConv::FromPy(PyObject* o, int dim, int** szs) {
 	if (!AnWeb::hasPy) return nullptr;
 	auto ao = (PyArrayObject*)o;
 	auto nd = PyArray_NDIM(ao);
@@ -31,7 +31,9 @@ void* AnConv::FromPy(PyObject* o, int dim, int* szs) {
 		return 0;
 	}
 	auto shp = PyArray_SHAPE(ao);
-	memcpy(szs, shp, sizeof(int)*nd);
+	for (int a = 0; a < nd; a++)
+		*(szs[a]) = shp[a];
+	auto tp = PyArray_TYPE(ao);
 	return PyArray_DATA(ao);
 }
 

@@ -9,7 +9,7 @@ void PyReader::Init() {
 		Py_Initialize();
 		PyObject *sys_path = PySys_GetObject((char*)"path");
 		auto path = IO::path + "/nodes/";
-		std::replace(path.begin(), path.end(), '\\', '/');
+		//std::replace(path.begin(), path.end(), '\\', '/');
 		PyList_Append(sys_path, PyUnicode_FromString(path.c_str()));
 		AnWeb::hasPy = true;
 	} catch (char* c) {
@@ -30,30 +30,26 @@ void PyReader::Init() {
 	}
 }
 
-bool PyReader::Read(string path, PyScript** _scr) { //"path/to/script[no .py]"
-	auto scr = *_scr = new PyScript();
-	scr->name = path;
-	string mdn = path;
+bool PyReader::Read(string path, PyScript* scr) { //"path/to/script[no .py]"
+	string mdn = scr->name = path;
 	std::replace(mdn.begin(), mdn.end(), '/', '.');
+	scr->chgtime = IO::ModTime(IO::path + "/nodes/" + scr->path + ".py");
 	//auto pName = PyUnicode_FromString(path.c_str());
 	//scr->pModule = PyImport_Import(pName);
 	if (AnWeb::hasPy) {
-		scr->pModule = PyImport_ImportModule(mdn.c_str());
+		auto mdl = scr->pModule ? PyImport_ReloadModule(scr->pModule) : PyImport_ImportModule(mdn.c_str());
 		//Py_DECREF(pName);
-		if (!scr->pModule) {
+		if (!mdl) {
 			Debug::Warning("PyReader", "Failed to read python file " + path + "!");
 			PyErr_Print();
-			delete(scr);
-			*_scr = nullptr;
 			return false;
 		}
+		scr->pModule = mdl;
 		scr->pFunc = PyObject_GetAttrString(scr->pModule, "Execute");
 		if (!scr->pFunc || !PyCallable_Check(scr->pFunc)) {
 			Debug::Warning("PyReader", "Failed to find \"Execute\" function in " + path + "!");
 			Py_XDECREF(scr->pFunc);
 			Py_DECREF(scr->pModule);
-			delete(scr);
-			*_scr = nullptr;
 			return false;
 		}
 		Py_INCREF(scr->pFunc);
@@ -96,7 +92,7 @@ bool PyReader::Read(string path, PyScript** _scr) { //"path/to/script[no .py]"
 				scr->_invars[i].name = ss2;
 				scr->invars.push_back(std::pair<string, string>(scr->_invars[i].name, tn));
 				if (*((int32_t*)&tn[0]) == *((int32_t*)"list")) {
-					scr->pArgs[i] = AnConv::PyArr(1, tn[6]);
+					//scr->pArgs[i] = AnConv::PyArr(1, tn[6]);
 				}
 			}
 		}
@@ -124,6 +120,15 @@ bool PyReader::Read(string path, PyScript** _scr) { //"path/to/script[no .py]"
 	}
 
 	return true;
+}
+
+void PyReader::Refresh(PyScript* scr) {
+	auto mt = IO::ModTime(IO::path + "/nodes/" + scr->path + ".py");
+	if (mt > scr->chgtime) {
+		Debug::Message("CReader", "Reloading " + scr->path + ".py");
+		scr->Clear();
+		Read(scr->path, scr);
+	}
 }
 
 bool PyReader::ParseType(string s, PyVar* var) {

@@ -59,6 +59,8 @@
         "strstream": "cpp",
         "set": "cpp",
         "typeindex": "cpp",
-        "__string": "cpp"
-    }
+        "__string": "cpp",
+        "optional": "cpp"
+    },
+    "python.linting.pylintEnabled": false
 }

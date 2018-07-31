@@ -22,14 +22,17 @@ enum class AN_VARTYPE : byte {
 
 class AnScript {
 public:
-	string name;
+	string name, path, libpath;
+	int chgtime;
 	AN_SCRTYPE type;
 	std::vector<std::pair<string, string>> invars, outvars;
 	void* progress = 0;
 
 	string desc = "";
 	int descLines = 0;
+	bool ok = false;
 
+	virtual void Clear();
 	virtual string Exec() = 0;
 	virtual void Set(uint i, int v) = 0, Set(uint i, float v) = 0, Set(uint i, void* v) = 0;
 	virtual void* Get(uint i) = 0;
@@ -41,6 +44,7 @@ class DmScript : public AnScript {
 public:
 	DmScript() : AnScript(AN_SCRTYPE::NONE) {}
 
+	void Clear() override {}
 	string Exec() override { return ""; }
 	void Set(uint i, int v) override, Set(uint i, float v) override, Set(uint i, void* v) override;
 	void* Get(uint i) override;
@@ -56,10 +60,11 @@ public:
 
 class PyScript : public AnScript {
 public:
-	PyScript() : AnScript(AN_SCRTYPE::PYTHON) {}
+	PyScript() : AnScript(AN_SCRTYPE::PYTHON), pModule(nullptr) {}
 
 	std::vector<PyVar> _invars, _outvars;
 	
+	void Clear() override;
 	string Exec() override;
 	void Set(uint i, int v) override, Set(uint i, float v) override, Set(uint i, void* v) override;
 	void* Get(uint i) override;
@@ -91,6 +96,7 @@ public:
 
 	std::vector<CVar> _invars, _outvars;
 
+	void Clear() override;
 	string Exec() override;
 	void Set(uint i, int v) override, Set(uint i, float v) override, Set(uint i, void* v) override;
 	void* Get(uint i) override;

@@ -25,7 +25,7 @@ string _rm_spaces(string s) {
 	return ss;
 }
 
-bool CReader::Read(string path, CScript** _scr) {
+bool CReader::Read(string path, CScript* scr) {
 	string fp = IO::path + "/nodes/" + path;
 	std::replace(fp.begin(), fp.end(), '\\', '/');
 	auto ls = fp.find_last_of('/');
@@ -37,13 +37,11 @@ bool CReader::Read(string path, CScript** _scr) {
 #ifndef IS_ANSERVER
 	if (!IO::HasDirectory(fp2)) IO::MakeDirectory(fp2);
 
-	struct stat stt;
-	stat((fp + ".cpp").c_str(), &stt);
-	auto mt = stt.st_mtime;
-	stat((fp2 + nm + ".so").c_str(), &stt);
-	auto ot = stt.st_mtime;
+	auto mt = scr->chgtime = IO::ModTime(fp + ".cpp");
+	if (mt < 0) return false;
+	auto ot = IO::ModTime(fp2 + nm + ".so");
 
-	if (mt > ot) {
+	if (mt >= ot) {
 
 #ifdef PLATFORM_WIN
 		const string dlx = " __declspec(dllexport)";
@@ -80,7 +78,13 @@ bool CReader::Read(string path, CScript** _scr) {
 #else
 		//}
 		//else {
-			const string cmd = "g++ -std=c++11 -shared -O0 -fPIC -lm -o \"" + fp2 + nm + ".so\" \""	+ fp + "_temp__.cpp\"";
+			const string cmd = "g++ -std=c++11 -shared -O0 -fPIC "
+#ifdef PLATFORM_OSX
+			"-Xpreprocessor -fopenmp -lomp"
+#else
+			"-fopenmp -fno-gnu-unique"
+#endif
+			" -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\"";
 			std::cout << cmd << std::endl;
 			RunCmd::Run(cmd);
 		//}
@@ -95,11 +99,11 @@ bool CReader::Read(string path, CScript** _scr) {
 
 #endif
 
-	auto scr = *_scr = new CScript();
 	scr->name = path;
 
 	if (AnWeb::hasC) {
-		scr->lib = new DyLib(fp2 + nm + ".so");
+		scr->libpath = fp2 + nm + ".so";
+		scr->lib = new DyLib(scr->libpath);
 		if (!scr->lib) {
 			Debug::Warning("CReader", "Failed to load script into memory!");
 			return false;
@@ -314,6 +318,15 @@ bool CReader::Read(string path, CScript** _scr) {
 	CScript::allScrs.emplace(path, scr);
 
 	return true;
+}
+
+void CReader::Refresh(CScript* scr) {
+	auto mt = IO::ModTime(IO::path + "/nodes/" + scr->path + ".cpp");
+	if (mt > scr->chgtime) {
+		Debug::Message("CReader", "Reloading " + scr->path + ".cpp");
+		scr->Clear();
+		Read(scr->path, scr);
+	}
 }
 
 bool CReader::ParseType(string s, CVar* var) {

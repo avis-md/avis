@@ -4,6 +4,7 @@
 class DyLib {
 public:
 	DyLib(string nm);
+	~DyLib();
 
 	void* GetSym(string nm);
 

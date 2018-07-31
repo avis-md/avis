@@ -24,8 +24,10 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 	for (auto f : ff) {
 		auto nm = f.substr(f.find_last_of('/') + 1);
 		if (nm.substr(0, 2) == "__") continue;
-		fo->scripts.push_back(nullptr);
-		PyReader::Read(incPath + nm.substr(0, nm.size() - 3), (PyScript**)&fo->scripts.back());
+		fo->scripts.push_back(new PyScript());
+		auto scr = fo->scripts.back();
+		scr->path = incPath + nm.substr(0, nm.size() - 3);
+		scr->ok = PyReader::Read(scr->path, (PyScript*)scr);
 	}
 
 	ff = IO::GetFiles(path, ".cpp");
@@ -34,8 +36,10 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 
 	for (auto f : ff) {
 		auto nm = f.substr(f.find_last_of('/') + 1);
-		fo->scripts.push_back(nullptr);
-		CReader::Read(incPath + nm.substr(0, nm.size() - 4), (CScript**)&fo->scripts.back());
+		fo->scripts.push_back(new CScript());
+		auto scr = fo->scripts.back();
+		scr->path = incPath + nm.substr(0, nm.size() - 4);
+		scr->ok = CReader::Read(scr->path, (CScript*)scr);
 	}
 
 	std::vector<string> fd;
@@ -53,6 +57,29 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 
 void AnBrowse::Scan() {
 	DoScan(&folder, IO::path + "/nodes", "");
+}
+
+void AnBrowse::DoRefresh(Folder* fd) {
+	for (auto s : fd->scripts) {
+		switch (s->type) {
+		case AN_SCRTYPE::C:
+			CReader::Refresh((CScript*)s);
+			break;
+		case AN_SCRTYPE::PYTHON:
+			PyReader::Refresh((PyScript*)s);
+			break;
+		default:
+
+			break;
+		}
+	}
+	for (auto& f : fd->subfolders) {
+		DoRefresh(&f);
+	}
+}
+
+void AnBrowse::Refresh() {
+	DoRefresh(&folder);
 }
 
 void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {

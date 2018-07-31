@@ -58,6 +58,7 @@ GLFWwindow* ChokoLait::window = nullptr;
 int ChokoLait::initd = 0;
 rCamera ChokoLait::mainCamera = rCamera();
 std::vector<dropFileFunc> ChokoLait::dropFuncs;
+std::vector<emptyCallbackFunc> ChokoLait::focusFuncs;
 
 void _dieded(int i) {
 	Debug::Error("System", "Abort trap!");
@@ -162,6 +163,7 @@ void ChokoLait::Init(int scrW, int scrH) {
 		glfwSetScrollCallback(window, MouseScrGL);
 		glfwSetCursorEnterCallback(window, MouseEnterGL);
 		glfwSetDropCallback(window, DropGL);
+		glfwSetWindowFocusCallback(window, FocusGL);
 
 		glClearColor(0, 0, 0, 1.0f);
 		glEnable(GL_PROGRAM_POINT_SIZE);
@@ -242,7 +244,16 @@ void ChokoLait::ReshapeGL(GLFWwindow* window, int w, int h) {
 }
 
 void ChokoLait::DropGL(GLFWwindow* window, int w, const char** c) {
-	for (auto& a : dropFuncs)
+	for (auto& a : dropFuncs) {
 		if (a(w, c))
 			break;
+	}
+}
+
+void ChokoLait::FocusGL(GLFWwindow* window, int focus) {
+	if (!!focus) {
+		for (auto& a : focusFuncs) {
+			a();
+		}
+	}
 }

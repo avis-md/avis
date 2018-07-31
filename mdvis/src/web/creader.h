@@ -6,7 +6,8 @@ class CReader {
 public:
 	static void Init();
 
-	static bool Read(string path, CScript** scr);
+	static bool Read(string path, CScript* scr);
+	static void Refresh(CScript* scr);
 
 protected:
 	static string vcbatPath;

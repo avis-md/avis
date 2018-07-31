@@ -1,5 +1,13 @@
 #include "anweb.h"
 
+void AnScript::Clear() {
+	invars.clear();
+	outvars.clear();
+	desc = "";
+	descLines = 0;
+	ok = false;
+}
+
 void DmScript::Set(uint i, int v) {
 	
 }
@@ -19,17 +27,34 @@ void* DmScript::Get(uint i) {
 
 std::unordered_map<string, PyScript*> PyScript::allScrs;
 
+void PyScript::Clear() {
+	AnScript::Clear();
+	_invars.clear();
+	_outvars.clear();
+	if (AnWeb::hasPy) {
+		Py_DECREF(pArgl);
+		for (auto& i : _invars) {
+			if (i.value) Py_DECREF(i.value);
+		}
+		for (auto& r : pRets) {
+			if (r) Py_DECREF(r);
+		}
+	}
+}
+
 string PyScript::Exec() {
-	for (uint i = 0; i < invars.size(); ++i) {
+	uint i = 0;
+	for (; i < invars.size(); ++i) {
 		auto& val = _invars[i].value;
 		Py_INCREF(val);
 		PyTuple_SetItem(pArgl, i, val);
 	}
-	auto res = PyObject_CallObject(pFunc, pArgl);
+	auto res = PyObject_CallObject(pFunc, (!!i) ? pArgl : 0);
 	if (res) Py_DECREF(res);
 	else {
 		PyErr_Print();
-		__debugbreak();
+		Debug::Warning("PyScript", "Failed to execute script!");
+		return "";
 	}
 	for (uint i = 0; i < outvars.size(); i++) {
 		Py_DECREF(pRets[i]);
@@ -159,6 +184,16 @@ void CVar::Read(std::ifstream& strm) {
 
 
 std::unordered_map<string, CScript*> CScript::allScrs;
+
+void CScript::Clear() {
+	AnScript::Clear();
+	_invars.clear();
+	_outvars.clear();
+	if (AnWeb::hasC) {
+		DyLib::ForceUnload(lib, libpath);
+		delete(lib);
+	}
+}
 
 string CScript::Exec() {
 	funcLoc();

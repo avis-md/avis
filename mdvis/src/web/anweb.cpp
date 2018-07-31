@@ -6,13 +6,15 @@
 #include "vis/pargraphics.h"
 #endif
 
+#define NO_REDIR_LOG
+
 AnNode* AnWeb::selConnNode = nullptr;
 uint AnWeb::selConnId = 0;
 bool AnWeb::selConnIdIsOut = false, AnWeb::selPreClear = false;
 AnScript* AnWeb::selScript = nullptr;
 byte AnWeb::selSpNode = 0;
 
-string AnWeb::activeFile;
+string AnWeb::activeFile = "";
 std::vector<AnNode*> AnWeb::nodes;
 
 bool AnWeb::drawFull = false, AnWeb::expanded = true, AnWeb::executing = false, AnWeb::apply = false;
@@ -43,6 +45,8 @@ void AnWeb::Insert(AnNode* node, Vec2 pos) {
 void AnWeb::Init() {
 	Insert(new Node_Inputs());
 	Insert(new Node_Inputs_ActPar());
+
+	ChokoLait::focusFuncs.push_back(CheckChanges);
 }
 
 void AnWeb::Update() {
@@ -319,7 +323,9 @@ void AnWeb::Execute() {
 }
 
 void AnWeb::DoExecute() {
+#ifndef NO_REDIR_LOG
 	IO::StartReadStdio(IO::path + "/nodes/__tmpstd", OnExecLog);
+#endif
 	for (auto n : nodes) {
 		n->log.clear();
 	}
@@ -333,9 +339,13 @@ void AnWeb::DoExecute() {
 			n->log.push_back(std::pair<byte, string>(2, string(e)));
 		}
 		n->executing = false;
+#ifndef NO_REDIR_LOG
 		IO::FlushStdio();
 	}
 	IO::StopReadStdio();
+#else
+	}
+#endif
 	execNode = nullptr;
 	executing = false;
 	apply = true;
@@ -477,6 +487,31 @@ void AnWeb::LoadOut() {
 	string path = IO::path + "/nodes/__tmp__/out/";
 	for (auto n : nodes) {
 		n->LoadOut(path);
+	}
+}
+
+void AnWeb::CheckChanges() {
+	SaveConn();
+	AnBrowse::Refresh();
+	ClearConn();
+	Reconn();
+}
+
+void AnWeb::SaveConn() {
+	for (auto n : nodes) {
+		n->SaveConn();
+	}
+}
+
+void AnWeb::ClearConn() {
+	for (auto n : nodes) {
+		n->ClearConn();
+	}
+}
+
+void AnWeb::Reconn() {
+	for (auto n : nodes) {
+		n->Reconn();
 	}
 }
 

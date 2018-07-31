@@ -62,6 +62,8 @@ public:
 	static void Execute(), DoExecute(), DoExecute_Srv();
 	static void Save(const string& s), SaveIn(), SaveOut();
 	static void Load(const string& s), LoadIn(), LoadOut();
+	static void CheckChanges();
+	static void SaveConn(), ClearConn(), Reconn();
 	static void OnExecLog(string s, bool e);
 
 	static void OnAnimFrame();

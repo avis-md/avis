@@ -24,6 +24,7 @@ public:
 	static rCamera mainCamera;
 
 	static std::vector<dropFileFunc> dropFuncs;
+	static std::vector<emptyCallbackFunc> focusFuncs;
 
 	static void Init(int scrW, int scrH);
 
@@ -45,4 +46,5 @@ protected:
 	static void MotionGL(GLFWwindow* window, double x, double y);
 	static void ReshapeGL(GLFWwindow* window, int w, int h);
 	static void DropGL(GLFWwindow* window, int n, const char** fs);
+	static void FocusGL(GLFWwindow* window, int focus);
 };

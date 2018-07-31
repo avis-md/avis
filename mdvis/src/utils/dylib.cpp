@@ -11,6 +11,24 @@ DyLib::DyLib(string s) {
 #endif
 }
 
+DyLib::~DyLib() {
+#ifdef PLATFORM_WIN
+	FreeLibrary((HMODULE)lib);
+#else
+	dlclose(lib);
+#endif
+}
+
+void DyLib::ForceUnload(DyLib* lib, string path) {
+#ifndef PLATFORM_WIN
+	for (;;) {
+		dlclose(lib->lib);
+		if (!dlopen(path.c_str(), RTLD_LAZY | RTLD_NOLOAD))
+			break;
+	}
+#endif
+}
+
 void* DyLib::GetSym(string s) {
 #ifdef PLATFORM_WIN
 	return GetProcAddress((HMODULE)lib, &s[0]);

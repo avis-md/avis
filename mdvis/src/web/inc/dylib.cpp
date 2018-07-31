@@ -11,6 +11,14 @@ DyLib::DyLib(string s) {
 #endif
 }
 
+DyLib::~DyLib() {
+#ifdef PLATFORM_WIN
+	FreeLibrary((HMODULE)lib);
+#else
+	dlclose(lib);
+#endif
+}
+
 void* DyLib::GetSym(string s) {
 #ifdef PLATFORM_WIN
 	return GetProcAddress((HMODULE)lib, &s[0]);

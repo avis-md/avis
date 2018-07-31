@@ -57,10 +57,21 @@ public:
 	virtual void LoadIn(const string& path) {};
 	virtual void SaveOut(const string& path);
 	virtual void LoadOut(const string& path);
+	void SaveConn(), ClearConn(), Reconn();
 
 	virtual void OnAnimFrame() {}
 protected:
 	AnNode(AnScript* scr);
+
+	struct ConnInfo {
+		bool cond;
+		string mynm;
+		string mytp;
+		AnNode* tar;
+		string tarnm;
+		string tartp;
+	};
+	std::vector<ConnInfo> _connInfo;
 
 	static Texture* tex_circle_open, *tex_circle_conn;
 };
