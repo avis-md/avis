@@ -7,6 +7,7 @@
 #include "ui/icons.h"
 #include "ui/popups.h"
 #include "ui/ui_ext.h"
+#include "ui/localizer.h"
 #include "utils/effects.h"
 #include "web/anweb.h"
 #include "mdchan.h"
@@ -39,7 +40,7 @@ std::vector<uint> ParGraphics::hlIds, ParGraphics::selIds;
 std::vector<std::pair<uint, std::pair<uint, byte>>> ParGraphics::drawLists, ParGraphics::drawListsB;
 
 uint ParGraphics::usePBR = 1;
-const string ParGraphics::_usePBRNms[] = {"Classic", "PBR", "\0"};
+string ParGraphics::_usePBRNms[] = {"", "", "\0"};
 const Popups::DropdownItem ParGraphics::_usePBRItems = Popups::DropdownItem(&ParGraphics::usePBR, (string*)&ParGraphics::_usePBRNms[0]);
 
 Vec3 ParGraphics::rotCenter = Vec3();
@@ -96,11 +97,11 @@ void ParGraphics::Eff::Apply() {
 float ParGraphics::Eff::DrawMenu(float off) {
 	auto& expandPos = ParMenu::expandPos;
 	
-	UI::Label(expandPos - 148, off, 12, "Effects", white());
+	UI::Label(expandPos - 148, off, 12, _("Effects"), white());
 
 	off += 17;
 	Engine::DrawQuad(expandPos - 148, off - 1, 147, 17 * 5 + 2, white(0.9f, 0.1f));
-	UI::Label(expandPos - 146, off, 12, "Ambient Occlusion", white());
+	UI::Label(expandPos - 146, off, 12, _("Ambient Occlusion"), white());
 	useSSAO = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, useSSAO, white(), ORIENT_HORIZONTAL);
 	ssaoSamples = (int)UI2::Slider(expandPos - 147, off + 17, 147, "Samples", 5, 100, ssaoSamples, std::to_string(ssaoSamples));
 	ssaoSamples = Clamp(ssaoSamples, 10, 100);
@@ -112,6 +113,8 @@ float ParGraphics::Eff::DrawMenu(float off) {
 
 
 void ParGraphics::Init() {
+	_usePBRNms[0] = _("Classic");
+	_usePBRNms[1] = _("PBR");
 	std::ifstream strm(IO::path + "/backgrounds/default");
 	strm >> reflId;
 	strm.close();

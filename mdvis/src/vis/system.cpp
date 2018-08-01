@@ -39,7 +39,7 @@ std::unordered_map<uint, float> VisSystem::_bondLengths;
 std::unordered_map<ushort, Vec3> VisSystem::_type2Col;
 std::unordered_map<ushort, std::array<float, 2>> VisSystem::radii;
 
-std::unordered_map<string, string> VisSystem::envs;
+std::unordered_map<string, string> VisSystem::envs, VisSystem::prefs;
 
 void VisSystem::Init() {
 	radii.clear();
@@ -148,6 +148,19 @@ void VisSystem::InitEnv() {
 			auto lc = s.find_first_of('=');
 			if (lc != string::npos) {
 				envs.emplace(s.substr(0, lc), s.substr(lc + 1));
+			}
+		}
+	}
+	strm.close();
+	prefs.clear();
+	strm.open(IO::path + "/preferences.txt");
+	if (strm.is_open()) {
+		string s;
+		while (std::getline(strm, s)) {
+			if (!s.size() || s[0] == '#') continue;
+			auto lc = s.find_first_of('=');
+			if (lc != string::npos) {
+				prefs.emplace(s.substr(0, lc), s.substr(lc + 1));
 			}
 		}
 	}

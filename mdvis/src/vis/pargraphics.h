@@ -29,7 +29,7 @@ public:
 	static std::vector<std::pair<uint, std::pair<uint, byte>>> drawLists, drawListsB;
 
 	static uint usePBR;
-	static const string _usePBRNms[3];
+	static string _usePBRNms[3];
 	static const Popups::DropdownItem _usePBRItems;
 
 	static Vec3 rotCenter;

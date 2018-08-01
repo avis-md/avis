@@ -3,6 +3,7 @@
 #include "md/parloader.h"
 #include "vis/pargraphics.h"
 #include "utils/dialog.h"
+#include "ui/localizer.h"
 #include "ui/icons.h"
 #include "ui/popups.h"
 #include "ui/ui_ext.h"
@@ -11,7 +12,7 @@
 
 int ParMenu::activeMenu = 0;
 int ParMenu::activeSubMenu[] = {};
-const string ParMenu::menuNames[] = { "Particles", "Colors", "Graphics", "Render", "." };
+string ParMenu::menuNames[];
 bool ParMenu::expanded = true;
 float ParMenu::expandPos = 150;
 bool ParMenu::showSplash = true;
@@ -24,6 +25,14 @@ std::vector<string> ParMenu::recentFiles, ParMenu::recentFilesN;
 
 float _off = 0;
 
+void ParMenu::Init() {
+	menuNames[0] = _("Particles");
+	menuNames[1] = _("Colors");
+	menuNames[2] = _("Graphics");
+	menuNames[3] = _("Render");
+	menuNames[4] = ".";
+}
+
 void ParMenu::Draw() {
 	Engine::DrawQuad(0, 18, expandPos, Display::height - 36.0f, white(0.9f, 0.15f));
 	if (expanded) {
@@ -31,17 +40,17 @@ void ParMenu::Draw() {
 			if (Engine::Button(expandPos - 110, Display::height * 0.4f - 40, 80, 80, Icons::openfile, white(0.4f)) == MOUSE_RELEASE) {
 				ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
 			}
-			UI::Label(expandPos - 140, Display::height * 0.4f + 62, 12, " Drag & Drop Files here", white());
-			UI::Label(expandPos - 140, Display::height * 0.4f + 75, 12, "or Click Button to Import", white());
+			UI::Label(expandPos - 140, Display::height * 0.4f + 62, 12, _(" Drag & Drop Files here"), white());
+			UI::Label(expandPos - 140, Display::height * 0.4f + 75, 12, _("or Click Button to Import"), white());
 		}
 		else {
 			switch (activeMenu) {
 			case 0:
 				if (!!Protein::proCnt) {
-					if (UI2::Button2(expandPos - 148, 20, 70, "Atoms", Icons::vis_atom, white(1, 0.3f), (!activeSubMenu[0]) ? accent() : white(0.8f)) == MOUSE_RELEASE) {
+					if (UI2::Button2(expandPos - 148, 20, 70, _("Atoms"), Icons::vis_atom, white(1, 0.3f), (!activeSubMenu[0]) ? accent() : white(0.8f)) == MOUSE_RELEASE) {
 						activeSubMenu[0] = 0;
 					}
-					if (UI2::Button2(expandPos - 77, 20, 75, "Proteins", Icons::vis_prot, white(1, 0.3f), (!activeSubMenu[0]) ? white(0.8f) : accent()) == MOUSE_RELEASE) {
+					if (UI2::Button2(expandPos - 77, 20, 75, _("Proteins"), Icons::vis_prot, white(1, 0.3f), (!activeSubMenu[0]) ? white(0.8f) : accent()) == MOUSE_RELEASE) {
 						activeSubMenu[0] = 1;
 					}
 					if (!activeSubMenu[0]) Draw_List(38);
@@ -89,7 +98,7 @@ void ParMenu::Draw() {
 		if ((!UI::editingText && Input::KeyUp(Key_T)) || Engine::Button(expandPos, Display::height - 34.0f, 115, 16, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(expandPos, Display::height - 34.0f, 16, 16, Icons::expand);
-		UI::Label(expandPos + 18, Display::height - 33.0f, 12, "Toolbar (T)", white());
+		UI::Label(expandPos + 18, Display::height - 33.0f, 12, _("Toolbar (T)"), white());
 		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.0f, 150.0f);
 	}
 }
@@ -133,6 +142,7 @@ void ParMenu::Draw_List(float off) {
 	Engine::BeginStencil(0, off, expandPos, Display::height - 18 - off);
 	if (Rect(0, off, expandPos, Display::height - 18 - off).Inside(Input::mousePos)) {
 		_off -= Input::mouseScroll * 20;
+		_off = min(_off, 0.0f);
 	}
 	off -= _off;
 	float mof = off;
@@ -279,21 +289,21 @@ void ParMenu::DrawSplash() {
 
 	string sub = "";
 
-	auto ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63, 140, 54, white(0.3f), "User Manual", 12, white(), true);
+	auto ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63, 140, 54, white(0.3f), _("User Manual"), 12, white(), true);
 	if (ms & MOUSE_HOVER_FLAG) {
 		sub = "Displays the user manual in the browser";
 		if (ms == MOUSE_RELEASE) {
 			IO::OpenEx(IO::path + "/docs/index.html");
 		}
 	}
-	ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63 + 56, 140, 54, white(0.3f), "Report A Problem", 12, white(), true);
+	ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63 + 56, 140, 54, white(0.3f), _("Report A Problem"), 12, white(), true);
 	if (ms & MOUSE_HOVER_FLAG) {
 		sub = "Opens the problem reporter form (Google Forms)";
 		if (ms == MOUSE_RELEASE) {
 			IO::OpenEx("https://goo.gl/forms/U1hhBUHuo2CyiDEn1");
 		}
 	}
-	ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63 + 112, 140, 54, white(0.3f), "Request A Feature", 12, white(), true);
+	ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63 + 112, 140, 54, white(0.3f), _("Request A Feature"), 12, white(), true);
 	if (ms & MOUSE_HOVER_FLAG) {
 		sub = "Opens the feature request form (Google Forms)";
 		if (ms == MOUSE_RELEASE) {
@@ -303,7 +313,7 @@ void ParMenu::DrawSplash() {
 
 	auto pos = Vec4(Display::width*0.5f - 20, Display::height*0.5f - 80, 215, 183);
 	if (!!recentFiles.size()) {
-		UI::Label(pos.x + 2, pos.y + 1, 12, "Recent Files", white());
+		UI::Label(pos.x + 2, pos.y + 1, 12, _("Recent Files"), white());
 		Engine::DrawQuad(pos.x, pos.y + 17, pos.z, pos.w - 17, white(0.7f, 0.05f));
 		for (uint i = 0; i < recentFiles.size(); i++) {
 			if (35 + 17 * i > pos.w) break;
@@ -326,8 +336,8 @@ void ParMenu::DrawSplash() {
 			}
 		}
 	}
-	else UI::Label(pos.x + 2, pos.y + 1, 12, "No Recent Files", white());
-	if (Engine::Button(pos.x + pos.z - 70, pos.y, 70, 16, white(1, 0.3f), "Browse", 12, white(), true) == MOUSE_RELEASE) {
+	else UI::Label(pos.x + 2, pos.y + 1, 12, _("No Recent Files"), white());
+	if (Engine::Button(pos.x + pos.z - 70, pos.y, 70, 16, white(1, 0.3f), _("Browse"), 12, white(), true) == MOUSE_RELEASE) {
 		ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
 	}
 	if (sub.size()) {

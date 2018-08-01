@@ -7,7 +7,7 @@ public:
 
 	static int activeMenu;
 	static int activeSubMenu[5];
-	static const string menuNames[5];
+	static string menuNames[5];
 	static bool expanded;
 	static float expandPos;
 	static bool showSplash;
@@ -18,6 +18,7 @@ public:
 
 	static std::vector<string> recentFiles, recentFilesN;
 
+	static void Init();
 	static void Draw(), Draw_List(float off), DrawStart(), DrawSplash();
 	static void SelClear(), SelInv(), SelAll();
 	static void DrawSelPopup();

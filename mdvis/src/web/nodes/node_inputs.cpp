@@ -7,8 +7,8 @@
 Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	DmScript* scr = (DmScript*)script;
 	script->name = ".in";
-	script->desc = "Particle coordinates and trajectory";
-	script->descLines = 1;
+	script->desc = "Particle coordinates and trajectory\n日本語はそのうち消えます。";
+	script->descLines = 2;
 	
 	title = "All Particles";
 	titleCol = Vec3(0.3f, 0.3f, 0.5f);
@@ -17,14 +17,14 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	v.second = "list(2f)";
 	outputR.resize(6);
 	scr->outvars.resize(6, v);
-	scr->outvars[0].first = "count";
+	scr->outvars[0].first = "count 分子数";
 	scr->outvars[0].second = "int";
-	scr->outvars[1].first = "positions";
-	scr->outvars[2].first = "velocities";
-	scr->outvars[3].first = "types";
+	scr->outvars[1].first = "positions 現在の座標";
+	scr->outvars[2].first = "velocities 現在の速度";
+	scr->outvars[3].first = "types 分子種";
 	scr->outvars[3].second = "list(1s)";
-	scr->outvars[4].first = "positions (all)";
-	scr->outvars[5].first = "velocities (all)";
+	scr->outvars[4].first = "positions (all) 全フレームの座標";
+	scr->outvars[5].first = "velocities (all) 全フレームの速度";
 	scr->outvars[4].second = scr->outvars[5].second = "list(3f)";
 	
 	conV.resize(6);
@@ -45,7 +45,9 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 #endif
 	poss.dimVals[1] = new int(3);
 	conV[2] = poss;
+#ifndef IS_ANSERVER
 	conV[2].value = &Particles::particles_Vel;
+#endif
 	
 	auto& post = conV[3];
 	post.dimVals.resize(1);
@@ -62,60 +64,15 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	posa.dimVals[0] = (int*)&Particles::anim.frameCount;
 	posa.dimVals[1] = (int*)&Particles::particleSz;
 	posa.dimVals[2] = poss.dimVals[1];
-	posa.value = Particles::anim.poss;
 #endif
 	conV[5] = conV[4];
-	conV[5].value = Particles::anim.vels;
-}
-
-Vec2 Node_Inputs::DrawConn(){
-	return Vec2(width, 19 + 17 * 5 + GetHeaderSz());
-}
-
-void Node_Inputs::Draw() {
-#ifndef IS_ANSERVER
-	auto cnt = 5;
-	this->pos = pos;
-	Engine::DrawQuad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
-	UI::Label(pos.x + 2, pos.y + 1, 12, title, white());
-	DrawToolbar();
-	float y = pos.y + 16;
-	DrawHeader(y);
-	Engine::DrawQuad(pos.x, y, width, 3.0f + 17 * cnt, white(0.7f, 0.25f));
-	y += 4;
-	for (int i = 0; i < cnt; i++, y += 17) {
-		if (!AnWeb::selConnNode || ((!AnWeb::selConnIdIsOut) && (AnWeb::selConnNode != this))) {
-			if (Engine::Button(pos.x + width - 5, y + 3, 10, 10, outputR[i].first ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
-				if (!AnWeb::selConnNode) {
-					AnWeb::selConnNode = this;
-					AnWeb::selConnId = i;
-					AnWeb::selConnIdIsOut = true;
-					AnWeb::selPreClear = false;
-				}
-				else {
-					ConnectTo(i, AnWeb::selConnNode, AnWeb::selConnId);
-					AnWeb::selConnNode = nullptr;
-				}
-			}
-		}
-		else if (AnWeb::selConnNode == this && AnWeb::selConnId == i && AnWeb::selConnIdIsOut) {
-			Engine::DrawLine(Vec2(pos.x + width, y + 8), Input::mousePos, white(), 1);
-			UI::Texture(pos.x + width - 5, y + 3, 10, 10, outputR[i].first ? tex_circle_conn : tex_circle_open);
-		}
-		else {
-			UI::Texture(pos.x + width - 5, y + 3, 10, 10, outputR[i].first ? tex_circle_conn : tex_circle_open, red(0.3f));
-		}
-
-		//UI::Texture(pos.x + width - 5, y + 3, 10, 10, outputR[i] ? tex_circle_conn : tex_circle_open);
-		UI::font->Align(ALIGN_TOPRIGHT);
-		UI::Label(pos.x + width - 10, y, 12, script->outvars[i].first, white());
-		UI::font->Align(ALIGN_TOPLEFT);
-		UI::Label(pos.x + 2, y, 12, script->outvars[i].second, white(0.3f), width * 0.67f - 6);
-	}
-#endif
 }
 
 void Node_Inputs::Execute() {
+#ifndef IS_ANSERVER
+	conV[4].value = Particles::anim.poss;
+	conV[5].value = Particles::anim.vels;
+#endif
 }
 
 void Node_Inputs::SaveIn(const string& path) {

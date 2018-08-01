@@ -1,0 +1,10 @@
+# System config and properties
+# There must not be any spaces in each statement.
+
+# System language locale
+# Translation files should be in locale/## folder
+SYS_LOCALE=JP
+
+# Enables instant-reload of scripts when they are modified.
+# Might be a source for instability.
+ANL_INSTANT_RELOAD=true

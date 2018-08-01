@@ -16,7 +16,7 @@ endif
 
 C = gcc
 CXX = g++
-CXXFLAGS = -O0 -g -std=c++11 -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ -I/usr/local/lib/python3.6/site-packages/numpy/core/include $(shell python3-config --include) $(OSFLAG)
+CXXFLAGS = -O0 -g -std=c++11 -fbracket-depth=512 -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ -I/usr/local/lib/python3.6/site-packages/numpy/core/include $(shell python3-config --include) $(OSFLAG)
 LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
 LIBS = $(shell python3-config --ldflags) -lpthread -lm $(GLLIB) -lz -lpython2.7 $(LIBS2)
 
@@ -27,7 +27,7 @@ OBJS += obj/md/Protein.o obj/md/Gromacs.o obj/md/CDV.o obj/md/ParMenu.o obj/md/P
 OBJS += obj/web/anbrowse.o obj/web/anconv.o obj/web/annode.o obj/web/anops.o obj/web/anscript.o obj/web/anweb.o obj/web/creader.o obj/web/pyreader.o obj/web/nodes/node_inputs.o obj/web/nodes/node_plot.o obj/web/nodes/node_volume.o obj/web/nodes/node_gromacs.o obj/web/nodes/node_recolor.o obj/web/nodes/node_addbond.o
 OBJS += obj/scene/object.o obj/scene/scene.o obj/scene/sceneobject.o obj/scene/transform.o obj/scene/comp/camera.o obj/scene/comp/component.o
 OBJS += obj/utils/ssh.o obj/utils/color.o obj/utils/effects.o obj/utils/fft.o obj/utils/net.o obj/utils/plot.o obj/utils/precedurals.o obj/utils/random.o obj/utils/rect.o obj/utils/solidify.o obj/utils/spline.o obj/utils/stream.o obj/utils/strext.o obj/utils/xml.o obj/utils/dialog.o obj/utils/dylib.o obj/utils/runcmd.o obj/utils/BVH.o obj/utils/tinyfiledialogs.o
-OBJS += obj/ui/popups.o obj/ui/icons.o obj/ui/help.o obj/ui/ui_ext.o
+OBJS += obj/ui/popups.o obj/ui/icons.o obj/ui/help.o obj/ui/ui_ext.o obj/ui/localizer.o
 OBJS += obj/vis/pargraphics.o obj/vis/system.o obj/vis/shadows.o obj/vis/renderer.o obj/vis/cubemarcher.o
 OBJS += obj/live/livesyncer.o live/lj256.o
 OBJS += obj/ocl/raytracer.o
@@ -39,7 +39,7 @@ HEADERS += core/bbox.h core/debug.h core/display.h core/font.h core/input.h core
 HEADERS += md/Protein.h md/Gromacs.h md/CDV.h md/ParMenu.h md/Particles.h md/mdvbin.h md/parloader.h md/XYZ.h md/pdb.h md/lammps.h
 HEADERS += web/anbrowse.h web/anconv.h web/annode.h web/anscript.h web/anops.h web/anweb.h web/creader.h web/pyreader.h web/nodes/node_inputs.h web/nodes/node_plot.h web/nodes/node_volume.h web/nodes/node_gromacs.h web/nodes/node_recolor.h web/nodes/node_addbond.h
 HEADERS += scene/object.h scene/scene.h scene/sceneobject.h scene/transform.h scene/comp/camera.h scene/comp/component.h scene/comp/light.h scene/comp/voxelrenderer.h
-HEADERS += ui/popups.h ui/icons.h ui/help.h ui/ui_ext.h
+HEADERS += ui/popups.h ui/icons.h ui/help.h ui/ui_ext.h ui/localizer.h
 HEADERS += vis/pargraphics.h vis/system.h vis/shadows.h vis/renderer.h vis/cubemarcher.h
 HEADERS += res/resdata.h res/shddata.h
 HEADERS += utils/color.h utils/effects.h utils/fft.h utils/ifaddrs.h utils/net.h utils/plot.h utils/precedurals.h utils/ptrext.h utils/random.h utils/rawvector.h utils/rect.h utils/solidify.h utils/spline.h utils/stream.h utils/strext.h utils/xml.h utils/dialog.o utils/dylib.h utils/runcmd.h utils/ssh.h utils/BVH.h utils/tinyfiledialogs.h

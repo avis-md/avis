@@ -1,0 +1,76 @@
+81310424
+< Drag & Drop Files here
+>
+
+251599487
+<Classic
+>
+
+269159563
+<PBR
+>
+
+347276419
+<Browse
+>
+
+441767764
+<Report A Problem
+>
+
+860305863
+<Graphics
+>
+
+959881691
+<Request A Feature
+>
+
+1249401784
+<Recent Files
+>
+
+1496531036
+<Particles
+>
+
+1824619073
+<User Manual
+>
+
+2381777335
+<Toolbar (T)
+>
+
+2393842642
+<or Click Button to Import
+>
+
+2418196642
+<Effects
+>
+
+2430356943
+<Render
+>
+
+2705837639
+<Proteins
+>
+
+3962531119
+<No Recent Files
+>
+
+4087223699
+<Atoms
+>
+
+4237822132
+<Colors
+>
+
+4246068929
+<Ambient Occlusion
+>
+

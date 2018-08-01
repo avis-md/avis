@@ -1,8 +1,10 @@
 ﻿#include "ChokoLait.h"
 
 //#define MAKE_RES
+//#define MAKE_LOCL
 //#define AYB
 
+#include "ui/localizer.h"
 #include "ui/icons.h"
 #include "ui/popups.h"
 #include "ui/help.h"
@@ -219,12 +221,19 @@ int main(int argc, char **argv) {
 		}
 		if (!__debug) Debug::suppress = 1;
 		ChokoLait::Init(800, 800);
+
+#ifdef MAKE_LOCL
+		Localizer::MakeMap("../src");
+		return 0;
+#else
+		VisSystem::InitEnv();
+		Localizer::Init(VisSystem::prefs["SYS_LOCALE"]);
+#endif
 		//GLFWimage icon;
 		//icon.pixels = Texture::LoadPixels(res::icon_png, res::icon_png_sz, (uint&)icon.width, (uint&)icon.height);
 		//glfwSetWindowIcon(Display::window, 1, &icon);
 		//delete[](icon.pixels);
 
-		VisSystem::InitEnv();
 		CReader::Init();
 		PyReader::Init();
 		RayTracer::Init();
@@ -234,6 +243,7 @@ int main(int argc, char **argv) {
 		CubeMarcher::Init();
 		VisSystem::Init();
 		Particles::Init();
+		ParMenu::Init();
 		ParLoader::Init();
 		ParGraphics::Init();
 		Protein::Init();

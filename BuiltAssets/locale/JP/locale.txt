@@ -1,0 +1,76 @@
+81310424
+< Drag & Drop Files here
+> ファイルドロップで
+
+251599487
+<Classic
+>クラシック
+
+269159563
+<PBR
+>PBR
+
+347276419
+<Browse
+>参照
+
+441767764
+<Report A Problem
+>バグ報告
+
+860305863
+<Graphics
+>グラフィック
+
+959881691
+<Request A Feature
+>機能要求
+
+1249401784
+<Recent Files
+>最近使ったファイル
+
+1496531036
+<Particles
+>分子
+
+1824619073
+<User Manual
+>マニュアル
+
+2381777335
+<Toolbar (T)
+>ツールバー
+
+2393842642
+<or Click Button to Import
+>インポートできます
+
+2418196642
+<Effects
+>効果
+
+2430356943
+<Render
+>レンダー
+
+2705837639
+<Proteins
+>蛋白質
+
+3962531119
+<No Recent Files
+>最近使ったファイルはありません
+
+4087223699
+<Atoms
+>分子
+
+4237822132
+<Colors
+>着色
+
+4246068929
+<Ambient Occlusion
+>SSAO
+
