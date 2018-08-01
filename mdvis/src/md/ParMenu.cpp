@@ -11,7 +11,7 @@
 
 int ParMenu::activeMenu = 0;
 int ParMenu::activeSubMenu[] = {};
-const string ParMenu::menuNames[] = { "Particles", "Graphics", "Render", ".", ".." };
+const string ParMenu::menuNames[] = { "Particles", "Colors", "Graphics", "Render", "." };
 bool ParMenu::expanded = true;
 float ParMenu::expandPos = 150;
 bool ParMenu::showSplash = true;
@@ -50,17 +50,15 @@ void ParMenu::Draw() {
 				else Draw_List(20);
 				break;
 			case 1:
-				ParGraphics::DrawMenu();
+				ParGraphics::DrawColMenu();
 				break;
 			case 2:
-				RayTracer::DrawMenu();
+				ParGraphics::DrawMenu();
 				break;
 			case 3:
+				RayTracer::DrawMenu();
+				break;
 			case 4:
-				//
-				if (Engine::Button(expandPos - 147, 20, 144, 16, white(1, 0.5f), "Toggle grad", 12, white(), true) == MOUSE_RELEASE) {
-					ParGraphics::useGradCol = !ParGraphics::useGradCol;
-				}
 				break;
 			}
 		}

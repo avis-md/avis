@@ -42,7 +42,7 @@ void UI2::Color(float x, float y, uint w, const string& title, Vec4& col) {
 		Popups::pos = Vec2(x + w, y + 16);
 		Popups::data = &col;
 	}
-	UI::Texture(x + w * 2 - 17, y, 16, 16, Icons::colorwheel);
+	UI::Texture(x + w * 2 - 18, y, 16, 16, Icons::colorwheel);
 }
 
 void UI2::File(float x, float y, uint w, const string& title, const string& fl, std::function<void(std::vector<string>)> func) {
@@ -77,6 +77,12 @@ void UI2::Dropdown(float x, float y, float w, const string& title, const Popups:
 	}
 	UI::Texture(x + w * 2 - 16, y, 16, 16, Icons::dropdown2);
 }
+
+void UI2::Toggle(float x, float y, float w, const string& title, bool& val) {
+	UI::Label(x, y, 12, title, white());
+	val = Engine::Toggle(x + w - 16, y, 16, Icons::checkbox, val, white(), ORIENT_HORIZONTAL);
+}
+
 void UI2::Switch(float x, float y, float w, const string& title, int c, string* nms, int& i) {
 	UI::Label(x, y, 12, title, white());
 	x += w/3;

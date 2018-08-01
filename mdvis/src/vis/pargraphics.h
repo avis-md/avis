@@ -15,6 +15,9 @@ public:
 	static Popups::DropdownItem reflItms;
 
 	static bool useGradCol;
+	static Vec4 gradCols[3];
+	static bool useConCol;
+	static Vec4 conCol;
 	
 	static GLuint reflProg, reflCProg, parProg, parConProg, parConLineProg;
 	static GLint reflProgLocs[15], reflCProgLocs[10], parProgLocs[10], parConProgLocs[7], parConLineProgLocs[5];
@@ -73,6 +76,7 @@ public:
 	//gbuffers to screen
 	static void Reblit();
 
+	static void DrawColMenu();
 	static void DrawMenu();
 	static void DrawPopupDM();
 

@@ -25,6 +25,9 @@ std::vector<string> ParGraphics::reflNms;
 Popups::DropdownItem ParGraphics::reflItms((uint*)&reflId, nullptr);
 
 bool ParGraphics::useGradCol = false;
+Vec4 ParGraphics::gradCols[] = { blue(), green(), red() };
+bool ParGraphics::useConCol;
+Vec4 ParGraphics::conCol = white();
 
 GLuint ParGraphics::reflProg, ParGraphics::reflCProg, ParGraphics::parProg, ParGraphics::parConProg, ParGraphics::parConLineProg;
 GLint ParGraphics::reflProgLocs[] = {}, ParGraphics::reflCProgLocs[] = {}, ParGraphics::parProgLocs[] = {}, ParGraphics::parConProgLocs[] = {}, ParGraphics::parConLineProgLocs[] = {};
@@ -175,6 +178,7 @@ void ParGraphics::Init() {
 	i = 0;
 	LC(idTex); LC(spTex); LC(screenSize);
 	LC(id2col); LC(colList); LC(usegrad);
+	LC(gradcols);
 #undef LC
 
 	glDeleteShader(mv);
@@ -529,6 +533,7 @@ void ParGraphics::Recolor() {
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 	glUniform1i(colProgLocs[5], useGradCol? 1 : 0);
+	glUniform4fv(colProgLocs[6], 3, &gradCols[0][0]);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -653,6 +658,47 @@ void ParGraphics::BlitHl() {
 
 	glBindVertexArray(0);
 	glUseProgram(0);
+}
+
+void ParGraphics::DrawColMenu() {
+	auto& exps = ParMenu::expandPos;
+	float off = 20;
+	UI2::Toggle(exps - 148, off, 147, "Gradient Fill", useGradCol);
+	off += 19;
+	if (useGradCol) {
+		Engine::DrawQuad(exps - 115, off + 8, 16, 17*5 - 16, yellow());
+		for (int a = 0; a < 3; a++) {
+			const string ii[] = { "0.0", "0.5", "1.0" };
+			UI2::Color(exps - 140, off + 34 * (2 - a), 138, ii[a], gradCols[a]);
+			UI::Texture(exps - 95, off + 34 * a, 16, 16, Icons::left, white(1, 0.4f));
+		}
+		off += 17 * 5 + 2;
+	}
+	else {
+		Engine::DrawQuad(exps - 148, off, 147, Display::height*0.5f - off, white(0.9f, 0.1f));
+		Engine::PushStencil(exps - 148, off + 1, 147, Display::height*0.5f - off - 2);
+		off++;
+		for (int x = 0; x < 256; x++) {
+			string nm = (x < Particles::defColPalleteSz) ? string((char*)&Particles::defColPallete[x], 2) : std::to_string(x);
+			Vec3& col = Particles::colorPallete[x];
+			Vec4& colt = Particles::_colorPallete[x];
+			UI2::Color(exps - 145, off, 143, nm, colt);
+			if (col != Vec3(colt)) {
+				col = colt;
+				Particles::UpdateColorTex();
+			}
+			off += 17;
+		}
+		off += 2;
+		Engine::PopStencil();
+	}
+	UI2::Toggle(exps - 148, off, 147, "Custom Bond Colors", useConCol);
+	if (useConCol) {
+		UI2::Color(exps - 147, off + 17, 146, "Bond Color", conCol);
+		off += 35;
+	}
+	else off += 18;
+
 }
 
 void ParGraphics::DrawMenu() {

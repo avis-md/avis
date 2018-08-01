@@ -15,5 +15,6 @@ public:
 	static void File(float x, float y, uint w, const string& title, const string& fl, std::function<void(std::vector<string>)> func);
 	static MOUSE_STATUS Button2(float x, float y, float w, const string& s, Texture* tex, Vec4 col = white(1, 0.4f), Vec4 col2 = white());
 	static void Dropdown(float x, float y, float w, const string& title, const Popups::DropdownItem& data);
+	static void Toggle(float x, float y, float w, const string& title, bool& val);
 	static void Switch(float x, float y, float w, const string& title, int c, string* nms, int& i);
 };

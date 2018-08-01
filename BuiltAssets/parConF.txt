@@ -71,7 +71,7 @@ void main()
         discard;
     }
     else {
-        float p232 = r*r - pow(lp12, 2);
+        float p232 = r*r - lp12*lp12;
 		float p23 = sqrt(p232);
         vec3 d1 = cross(td, normalize(p2 - p1));
         
@@ -80,16 +80,22 @@ void main()
             d1 = normalize(cross(td, td1));
         }
         
-        float phi = dot(fwd, d1);
-        if (phi < 0) phi = dot(fwd, -d1);
+		float rtd = dot(fwd, td);
+		float phi = 1;
+		if (rtd < 0.9999 && rtd > -0.9999) {
+			phi = dot(fwd, d1);
+			if (phi < 0) phi *= -1;
+		}
         float lf = p23 / phi;
         
         vec3 pf = p2 - fwd * lf;
         
-        float l3f = sqrt(lf * lf - p232);
+		float l3f2 = lf * lf - p232;
+        float l3f = 0;
+		if (l3f2 > 0) sqrt(l3f2);
         
         vec3 td2 = td;
-        if (dot(td2, fwd) > 0) td2 = -td2;
+        if (dot(td2, fwd) > 0) td2 *= -1;
         vec3 cf = p1 + td2 * l3f;
         
         float lc = length(cf - v2f_wpos1);

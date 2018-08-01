@@ -101,6 +101,7 @@ typedef GLFWwindow NativeWindow;
 #include <vector>
 #include <algorithm>
 #include <stack>
+#include <map>
 #include <unordered_map>
 #include <array>
 #include <memory>

@@ -7,15 +7,13 @@ uniform vec2 screenSize;
 uniform samplerBuffer id2col;
 uniform sampler2D colList;
 uniform int usegrad;
+uniform vec4 gradcols[3];
 
 layout (location = 0) out vec4 fragCol;
 
 vec3 gradfill(float f) {
-	vec3 v;
-	v.b = clamp(2 - 4 * f, 0, 1);
-	v.g = clamp(2 - abs(2 - 4 * f), 0, 1);
-	v.r = clamp(4 * f - 2, 0, 1);
-	return v;
+	if (f < 0.5) return mix(gradcols[0], gradcols[1], f*2).rgb;
+	else return mix(gradcols[1], gradcols[2], f*2-1).rgb;
 }
 
 void main () {

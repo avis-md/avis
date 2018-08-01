@@ -412,9 +412,9 @@ void UI::Label(float x, float y, float s, string st, Vec4 col, float maxw, Font*
 }
 
 void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, float maxw, Font* font) {
+	if (!s || !str[0]) return;
 	uint si = (uint)round(s);
 	sz = min(sz, (uint)strlen(str));
-	if (s <= 0) return;
 	font->SizeVec(sz);
 	byte align = (byte)font->alignment;
 	float totalW = 0;

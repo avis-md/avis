@@ -80,6 +80,7 @@ public:
 
 	static Vec3 colorPallete[256];
 	static ushort defColPallete[256];
+	static Vec4 _colorPallete[256];
 	static byte defColPalleteSz;
 	static GLuint colorPalleteTex;
 	static bool palleteDirty;

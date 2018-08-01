@@ -23,6 +23,7 @@ float Particles::boundingBox[] = {};
 
 Vec3 Particles::colorPallete[] = {};
 ushort Particles::defColPallete[] = {};
+Vec4 Particles::_colorPallete[] = {};
 byte Particles::defColPalleteSz = 0;
 GLuint Particles::colorPalleteTex;
 bool Particles::palleteDirty = false;

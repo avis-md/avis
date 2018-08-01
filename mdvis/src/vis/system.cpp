@@ -79,7 +79,7 @@ void VisSystem::Init() {
 	_type2Col.clear();
 	if (strm.is_open()) {
 		string s;
-		Vec3 col;
+		Vec4 col;
 		while (!strm.eof()) {
 			std::getline(strm, s);
 			auto p = string_split(s, ' ', true);
@@ -88,11 +88,20 @@ void VisSystem::Init() {
 			col.x = std::stof(p[1]);
 			col.y = std::stof(p[2]);
 			col.z = std::stof(p[3]);
+			col.a = 1;
 			_type2Col.emplace(i, col);
-			Particles::colorPallete[Particles::defColPalleteSz] = col;
+			Particles::colorPallete[Particles::defColPalleteSz] = 
+				Particles::_colorPallete[Particles::defColPalleteSz] = col;
 			Particles::defColPallete[Particles::defColPalleteSz++] = i;
 		}
 		strm.close();
+	}
+	for (int a = Particles::defColPalleteSz; a < 256; a++) {
+		byte colb[3];
+		Color::Hsv2Rgb(a * 0.66f / 255, 1, 1, colb[0], colb[1], colb[2]);
+		Particles::colorPallete[a] =
+			Particles::_colorPallete[a] = 
+				Vec4(colb[0], colb[1], colb[2], 255) / 255.0f;
 	}
 
 	auto& mi = menuItems[0];
