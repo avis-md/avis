@@ -35,8 +35,9 @@ ENTRY Execute() {
 		progress = i * 1.0f / fcnt;
 		bndSzs[i] = 0;
 		float* pos = poss + pcnt * i * 3;
+#pragma omp parallel for
 		for (int m = 0; m < pcnt; m++) {
-			progress += 1.0f / (fcnt * pcnt);
+			//progress += 1.0f / (fcnt * pcnt);
 			if (!ISA(typs[m], "H")) continue;
 			float* pm = pos + m * 3;
 			for (int n = 0; n < pcnt; n++) {
@@ -48,15 +49,19 @@ ENTRY Execute() {
 				float dz = pn[2]-pm[2];
 				if (fabsf(dx) < thres && fabsf(dy) < thres && fabsf(dz) < thres) {
 					if ((dx*dx+dy*dy+dz*dz) < thres2) {
-						bndSzs[i]++;
-						vcons.push_back(m);
-						vcons.push_back(n);
+#pragma omp critical
+						{
+							bndSzs[i]++;
+							vcons.push_back(m);
+							vcons.push_back(n);
+						}
 					}
 				}
 			}
 		}
 	}
 	ccnt = vcons.size();
-	if (!bonds) bonds = new int[ccnt];
+	if (bonds) delete[](bonds);
+	bonds = new int[ccnt];
 	memcpy(bonds, &vcons[0], ccnt * sizeof(int));
 }
