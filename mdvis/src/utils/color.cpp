@@ -12,14 +12,17 @@ Vec4 yellow(float f, float i) { return Vec4(i, i, 0, f); }
 Vec4 white(float f, float i) { return Vec4(i, i, i, f); }
 Vec4 accent() { return Vec4(1, 0.8f, 0.2f, 1); }
 
-GLuint Color::pickerProgH = 0;
-GLuint Color::pickerProgSV = 0;
+GLuint Color::pickerProgH, Color::pickerProgH2, Color::pickerProgSV;
+GLint Color::pickerProgH2Locs[], Color::pickerProgSVLocs[];
 
 void Color::Init() {
 	GLuint vs;
 	Shader::LoadShader(GL_VERTEX_SHADER, glsl::colorPickerVert, vs);
-	Color::pickerProgSV = Shader::FromF(vs, glsl::colorPickerSV);
-	Color::pickerProgH = Shader::FromF(vs, glsl::colorPickerH);
+	pickerProgH = Shader::FromF(vs, glsl::colorPickerH);
+	pickerProgH2 = Shader::FromF(vs, glsl::colorPickerH2);
+	pickerProgH2Locs[0] = glGetUniformLocation(pickerProgH2, "gradcols");
+	pickerProgSV = Shader::FromF(vs, glsl::colorPickerSV);
+	pickerProgSVLocs[0] = glGetUniformLocation(pickerProgSV, "col");
 	glDeleteShader(vs);
 }
 
@@ -142,8 +145,7 @@ void Color::DrawSV(float x, float y, float w, float h, float hue) {
 
 	glUseProgram(pickerProgSV);
 	Vec4 bc = HueBaseCol(hue);
-	GLint baseColLoc = glGetUniformLocation(pickerProgSV, "col");
-	glUniform3f(baseColLoc, bc.r, bc.g, bc.b);
+	glUniform3f(pickerProgSVLocs[0], bc.r, bc.g, bc.b);
 
 	glBindVertexArray(UI::_vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Engine::quadBuffer);
@@ -170,8 +172,34 @@ void Color::DrawH(float x, float y, float w, float h) {
 	}
 
 	UI::SetVao(4, quadPoss);
-
 	glUseProgram(pickerProgH);
+	glBindVertexArray(UI::_vao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Engine::quadBuffer);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
+void Color::DrawH2(float x, float y, float w, float h, Vec4* grad) {
+	Vec3 quadPoss[4];
+	Vec2 quadUvs[4]{ Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0) };
+	quadPoss[0].x = x;
+	quadPoss[0].y = y;
+	quadPoss[1].x = x + w;
+	quadPoss[1].y = y;
+	quadPoss[2].x = x;
+	quadPoss[2].y = y + h;
+	quadPoss[3].x = x + w;
+	quadPoss[3].y = y + h;
+	for (int y = 0; y < 4; y++) {
+		quadPoss[y].z = 1;
+		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
+	}
+
+	UI::SetVao(4, quadPoss);
+	glUseProgram(pickerProgH2);
+	glUniform4fv(pickerProgH2Locs[0], 3, &grad[0][0]);
 	glBindVertexArray(UI::_vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Engine::quadBuffer);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

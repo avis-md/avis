@@ -12,8 +12,9 @@ uniform vec4 gradcols[3];
 layout (location = 0) out vec4 fragCol;
 
 vec3 gradfill(float f) {
-	if (f < 0.5) return mix(gradcols[0], gradcols[1], f*2).rgb;
-	else return mix(gradcols[1], gradcols[2], f*2-1).rgb;
+	return (gradcols[0].rgb * clamp(2 - 4 * f, 0, 1)
+		+ gradcols[1].rgb * clamp(2 - abs(2 - 4 * f), 0, 1)
+		+ gradcols[2].rgb * clamp(4 * f - 2, 0, 1));
 }
 
 void main () {
@@ -32,6 +33,7 @@ void main () {
 	int cd = int(cdf * 255);
 	if (usegrad == 1) fragCol.rgb = gradfill(cd / 255.0);
 	else fragCol = texture(colList, vec2((mod(cd, 16) + 0.5) / 16.0, ((cd / 16) + 0.5) / 16.0));
+	fragCol.a = 1;
 }
 )";
 }

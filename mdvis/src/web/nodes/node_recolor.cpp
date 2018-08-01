@@ -7,7 +7,7 @@ Node_Recolor::Node_Recolor() : AnNode(new DmScript()) {
     canTile = false;
 	inputR.resize(1);
 	script->name = ".Recol";
-	script->invars.push_back(std::pair<string, string>("grad", "list(1)"));
+	script->invars.push_back(std::pair<string, string>("grad", "list(1f)"));
 }
 
 void Node_Recolor::Execute() {
@@ -18,7 +18,7 @@ void Node_Recolor::Execute() {
 
 	float* src = *((float**)cv.value);
 	for (auto a = 0; a < sz; a++) {
-        Particles::particles_Col[a] = (byte)roundf(255 * src[a]);
+        Particles::particles_Col[a] = (byte)Clamp<float>(roundf(255 * src[a]), 0, 255);
     }
     Particles::palleteDirty = true;
 }
@@ -29,7 +29,7 @@ void Node_Recolor::LoadOut(const string& path) {
 
 Node_Recolor_All::Node_Recolor_All() {
 	script->name = ".RecolA";
-	script->invars[0].second = "list(2)";
+	script->invars[0].second = "list(2f)";
 }
 
 void Node_Recolor_All::Execute() {

@@ -5,6 +5,7 @@
 #include "_shd/colorerFragPro.h"
 #include "_shd/colorPickerVert.h"
 #include "_shd/colorPickerH.h"
+#include "_shd/colorPickerH2.h"
 #include "_shd/colorPickerSV.h"
 #include "_shd/coreVert.h"
 #include "_shd/coreVertW.h"

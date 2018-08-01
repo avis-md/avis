@@ -3,7 +3,6 @@ namespace glsl {
 	const char colorPickerH[] = R"(
 #version 330 core
 in vec2 UV;
-uniform vec3 col;
 out vec4 color;
 void main(){
 	float hue = 6 - UV.y*6;

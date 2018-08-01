@@ -181,7 +181,7 @@ void ParGraphics::Init() {
 	LC(gradcols);
 #undef LC
 
-	glDeleteShader(mv);
+	glDeleteShader(mv); 
 
 	hlIds.resize(1);
 	ChokoLait::mainCamera->onBlit = Reblit;
@@ -666,7 +666,7 @@ void ParGraphics::DrawColMenu() {
 	UI2::Toggle(exps - 148, off, 147, "Gradient Fill", useGradCol);
 	off += 19;
 	if (useGradCol) {
-		Engine::DrawQuad(exps - 115, off + 8, 16, 17*5 - 16, yellow());
+		Color::DrawH2(exps - 115, off + 8, 16, 17*5 - 16, gradCols);
 		for (int a = 0; a < 3; a++) {
 			const string ii[] = { "0.0", "0.5", "1.0" };
 			UI2::Color(exps - 140, off + 34 * (2 - a), 138, ii[a], gradCols[a]);

@@ -10,7 +10,8 @@ class Color {
 public:
 	static void Init();
 
-	static GLuint pickerProgH, pickerProgSV;
+	static GLuint pickerProgH, pickerProgH2, pickerProgSV;
+	static GLint pickerProgH2Locs[5], pickerProgSVLocs[5];
 
 	static void Rgb2Hsv(byte r, byte g, byte b, float& h, float& s, float& v), Hsv2Rgb(float h, float s, float v, byte& r, byte& g, byte& b);
 	static Vec3 Rgb2Hsv(Vec4 col);
@@ -20,4 +21,5 @@ public:
 
 	static void DrawSV(float x, float y, float w, float h, float hue);
 	static void DrawH(float x, float y, float w, float h);
+	static void DrawH2(float x, float y, float w, float h, Vec4* grad);
 };

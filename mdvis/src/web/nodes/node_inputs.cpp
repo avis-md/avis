@@ -7,7 +7,7 @@
 Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	DmScript* scr = (DmScript*)script;
 	script->name = ".in";
-	script->desc = "Particle data for current frame";
+	script->desc = "Particle coordinates and trajectory";
 	script->descLines = 1;
 	
 	title = "All Particles";
@@ -15,33 +15,46 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	canTile = true;
 	auto v = std::pair<string, string>();
 	v.second = "list(2f)";
-	outputR.resize(5);
-	scr->outvars.resize(5, v);
-	scr->outvars[0].first = "positions";
-	scr->outvars[1].first = "velocities";
-	scr->outvars[2].first = "types";
-	scr->outvars[2].second = "list(1s)";
-	scr->outvars[3].first = "positions (all)";
-	scr->outvars[4].first = "velocities (all)";
-	scr->outvars[3].second = scr->outvars[4].second = "list(3f)";
+	outputR.resize(6);
+	scr->outvars.resize(6, v);
+	scr->outvars[0].first = "count";
+	scr->outvars[0].second = "int";
+	scr->outvars[1].first = "positions";
+	scr->outvars[2].first = "velocities";
+	scr->outvars[3].first = "types";
+	scr->outvars[3].second = "list(1s)";
+	scr->outvars[4].first = "positions (all)";
+	scr->outvars[5].first = "velocities (all)";
+	scr->outvars[4].second = scr->outvars[5].second = "list(3f)";
+	
+	conV.resize(6);
+	
+	auto& posc = conV[0];
+	posc.name = "asdf";
+	posc.type = AN_VARTYPE::INT;
+#ifndef IS_ANSERVER
+	posc.value = &Particles::particleSz;
+#endif
 
-	conV.resize(5);
-	auto& poss = conV[0];
+	auto& poss = conV[1];
 	poss.dimVals.resize(2);
 	poss.type = AN_VARTYPE::LIST;
 #ifndef IS_ANSERVER
 	poss.dimVals[0] = (int*)&Particles::particleSz;
+	poss.value = &Particles::particles_Pos;
 #endif
 	poss.dimVals[1] = new int(3);
-	conV[1] = conV[2] = poss;
+	conV[2] = poss;
+	conV[2].value = &Particles::particles_Vel;
 	
-	auto& post = conV[2];
+	auto& post = conV[3];
 	post.dimVals.resize(1);
 #ifndef IS_ANSERVER
 	post.dimVals[0] = (int*)&Particles::particleSz;
+	post.value = &Particles::particles_Typ;
 #endif
 
-	auto& posa = conV[3];
+	auto& posa = conV[4];
 	posa.dimVals.resize(3);
 	posa.dimVals[2] = posa.dimVals[1];
 	posa.dimVals[1] = posa.dimVals[0];
@@ -49,8 +62,10 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	posa.dimVals[0] = (int*)&Particles::anim.frameCount;
 	posa.dimVals[1] = (int*)&Particles::particleSz;
 	posa.dimVals[2] = poss.dimVals[1];
+	posa.value = Particles::anim.poss;
 #endif
-	conV[4] = conV[3];
+	conV[5] = conV[4];
+	conV[5].value = Particles::anim.vels;
 }
 
 Vec2 Node_Inputs::DrawConn(){
@@ -101,13 +116,6 @@ void Node_Inputs::Draw() {
 }
 
 void Node_Inputs::Execute() {
-#ifndef IS_ANSERVER
-	conV[0].value = &Particles::particles_Pos;
-	conV[1].value = &Particles::particles_Vel;
-	conV[2].value = &Particles::particles_Typ;
-	conV[3].value = Particles::anim.poss;
-	conV[4].value = Particles::anim.vels;
-#endif
 }
 
 void Node_Inputs::SaveIn(const string& path) {

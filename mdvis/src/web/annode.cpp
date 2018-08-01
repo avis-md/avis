@@ -446,7 +446,19 @@ void PyNode::Execute() {
 	auto scr = (PyScript*)script;
 	for (uint i = 0; i < script->invars.size(); i++) {
 		if (inputR[i].first) {
-			scr->_invars[i].value = ((PyNode*)inputR[i].first)->outputV[inputR[i].second].value;
+			//scr->_invars[i].value = ((PyNode*)inputR[i].first)->outputV[inputR[i].second].value;
+			auto val = inputR[i].first->conV[inputR[i].second].value;
+			switch (scr->_invars[i].type) {
+			case AN_VARTYPE::INT:
+				script->Set(i, *((int*)val));
+				break;
+			case AN_VARTYPE::FLOAT:
+				script->Set(i, *((float*)val));
+				break;
+			default:
+				Debug::Error("PyNode", "Value not handled!");
+				break;
+			}
 		}
 		else {
 			switch (scr->_invars[i].type) {
