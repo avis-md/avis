@@ -475,19 +475,6 @@ void ParMenu::SaveRecents(const string& entry) {
 	}
 }
 
-void ParMenu::DrawRecents(Vec4 pos) {
-	if (!recentFiles.size()) return;
-	UI::Label(pos.x + 2, pos.y + 1, 12, "Recent Files", white());
-	Engine::DrawQuad(pos.x, pos.y + 17, pos.z, pos.w - 17, white(0.7f, 0.05f));
-	for (uint i = 0; i < recentFiles.size(); i++) {
-		if (35 + 17 * i > pos.w) break;
-		if (Engine::Button(pos.x + 5, pos.y + 20 + 17 * i, pos.z - 10, 16, white(0, 0.4f), recentFilesN[i], 12, white()) == MOUSE_RELEASE) {
-			ParLoader::OnOpenFile(std::vector<string>{ recentFiles[i] });
-		}
-		UI::Label(pos.x + pos.z * 0.3f, pos.y + 20 + 17 * i, 12, recentFiles[i], white(0.5f), pos.z * 0.7f - 5);
-	}
-}
-
 void ParMenu::RemoveRecent(uint i) {
 	recentFiles.erase(recentFiles.begin() + i);
 	recentFilesN.erase(recentFilesN.begin() + i);

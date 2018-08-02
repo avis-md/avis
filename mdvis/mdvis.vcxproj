@@ -150,6 +150,7 @@
     <ClCompile Include="src\md\XYZ.cpp" />
     <ClCompile Include="src\ocl\raytracer.cpp" />
     <ClCompile Include="src\ui\help.cpp" />
+    <ClCompile Include="src\ui\localizer.cpp" />
     <ClCompile Include="src\ui\popups.cpp" />
     <ClCompile Include="src\ui\ui_ext.cpp" />
     <ClCompile Include="src\utils\avi.cpp" />
@@ -246,6 +247,7 @@
     <ClInclude Include="src\res\resdata.h" />
     <ClInclude Include="src\res\shddata.h" />
     <ClInclude Include="src\ui\help.h" />
+    <ClInclude Include="src\ui\localizer.h" />
     <ClInclude Include="src\ui\popups.h" />
     <ClInclude Include="src\ui\ui_ext.h" />
     <ClInclude Include="src\utils\avi.h" />

@@ -25,7 +25,6 @@
 #include "vis/renderer.h"
 #include "utils/effects.h"
 #include "utils/ssh.h"
-#include "mdchan.h"
 #include "live/livesyncer.h"
 #include "ocl/raytracer.h"
 #include "res/resdata.h"
@@ -223,7 +222,12 @@ int main(int argc, char **argv) {
 		ChokoLait::Init(800, 800);
 
 #ifdef MAKE_LOCL
-		Localizer::MakeMap("../src");
+		Localizer::MakeMap(
+#ifdef PLATFORM_WIN
+			"../mdvis/src");
+#else
+			"../src");
+#endif
 		return 0;
 #else
 		VisSystem::InitEnv();

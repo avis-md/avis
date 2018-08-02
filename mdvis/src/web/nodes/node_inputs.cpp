@@ -7,7 +7,7 @@
 Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	DmScript* scr = (DmScript*)script;
 	script->name = ".in";
-	script->desc = "Particle coordinates and trajectory\n日本語はそのうち消えます。";
+	script->desc = "Particle coordinates and trajectory";
 	script->descLines = 2;
 	
 	title = "All Particles";
@@ -17,14 +17,14 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript()) {
 	v.second = "list(2f)";
 	outputR.resize(6);
 	scr->outvars.resize(6, v);
-	scr->outvars[0].first = "count 分子数";
+	scr->outvars[0].first = "count";
 	scr->outvars[0].second = "int";
-	scr->outvars[1].first = "positions 現在の座標";
-	scr->outvars[2].first = "velocities 現在の速度";
-	scr->outvars[3].first = "types 分子種";
+	scr->outvars[1].first = "positions";
+	scr->outvars[2].first = "velocities";
+	scr->outvars[3].first = "types";
 	scr->outvars[3].second = "list(1s)";
-	scr->outvars[4].first = "positions (all) 全フレームの座標";
-	scr->outvars[5].first = "velocities (all) 全フレームの速度";
+	scr->outvars[4].first = "positions (all)";
+	scr->outvars[5].first = "velocities (all)";
 	scr->outvars[4].second = scr->outvars[5].second = "list(3f)";
 	
 	conV.resize(6);
