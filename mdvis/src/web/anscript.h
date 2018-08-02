@@ -42,8 +42,9 @@ protected:
 
 class DmScript : public AnScript {
 public:
-	DmScript() : AnScript(AN_SCRTYPE::NONE) {
+	DmScript(string nm) : AnScript(AN_SCRTYPE::NONE) {
 		ok = true;
+		name = nm;
 	}
 
 	void Clear() override {}

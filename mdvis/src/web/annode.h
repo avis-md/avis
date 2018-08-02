@@ -25,10 +25,12 @@ public:
 	string title;
 	Vec3 titleCol = Vec3(0.35f, 0.35f, 0.35f);
 
-	bool expanded = true, showDesc = false;
+	bool expanded = true;
+	bool showDesc = false, showSett = false;
 	bool canTile = false;
 	bool executing = false;
 	ANNODE_OP op;
+	int settSz = 0;
 
 	bool logExpanded = true;
 	byte logMask = 7;
@@ -46,6 +48,7 @@ public:
 	virtual void Draw();
 	virtual float GetHeaderSz();
 	virtual void DrawHeader(float& off);
+	virtual void DrawSettings(float& off) {}
 	virtual float DrawSide();
 	float DrawLog(float off);
 	virtual void DrawScene() {}
@@ -59,6 +62,7 @@ public:
 	virtual void LoadOut(const string& path);
 	virtual void SaveConn(), ClearConn(), Reconn();
 
+	virtual void OnSceneUpdate() {}
 	virtual void OnAnimFrame() {}
 protected:
 	AnNode(AnScript* scr);

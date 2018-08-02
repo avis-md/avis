@@ -169,6 +169,8 @@ void AnWeb::Draw() {
 				else {
 #define SW(nm, scr) case (byte)AN_NODE_ ## nm: pn = new scr(); break
 					switch (selSpNode) {
+						SW(SCN::OCAM, Node_Camera_Out);
+
 						SW(IN::SELPAR, Node_Inputs_SelPar);
 
 						SW(MOD::RECOL, Node_Recolor);
@@ -512,6 +514,12 @@ void AnWeb::ClearConn() {
 void AnWeb::Reconn() {
 	for (auto n : nodes) {
 		n->Reconn();
+	}
+}
+
+void AnWeb::OnSceneUpdate() {
+	for (auto n : nodes) {
+		n->OnSceneUpdate();
 	}
 }
 

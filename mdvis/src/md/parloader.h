@@ -21,6 +21,7 @@ public:
 	static int impId, funcId;
 	static ParImporter* customImp;
 	static bool loadAsTrj, additive;
+	static uint frameskip;
 	static int maxframes;
 	static bool useConn, useConnCache, hasConnCache, oldConnCache, ovwConnCache;
 	static string connCachePath;
@@ -45,4 +46,5 @@ public:
 	static bool OnDropFile(int i, const char** c);
 	static void OnOpenFile(const std::vector<string>& files);
 	static void FindImpId(bool force = false);
+	static uint FindNextOff(string path);
 };

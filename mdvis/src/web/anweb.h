@@ -6,6 +6,13 @@
 #include "pyreader.h"
 #include "creader.h"
 
+enum class AN_NODE_SCN : byte {
+	NUM0 = 0x80,
+	OCAM,
+	NUM	
+};
+const string AN_NODE_SCNS[] = { "Camera (Set)" };
+
 enum class AN_NODE_IN : byte {
 	NUM0 = 0,
 	SELPAR,
@@ -66,13 +73,15 @@ public:
 	static void SaveConn(), ClearConn(), Reconn();
 	static void OnExecLog(string s, bool e);
 
+	static void OnSceneUpdate();
 	static void OnAnimFrame();
 };
 
 #include "anbrowse.h"
+#include "nodes/node_addbond.h"
+#include "nodes/node_camera.h"
+#include "nodes/node_gromacs.h"
 #include "nodes/node_inputs.h"
 #include "nodes/node_plot.h"
-#include "nodes/node_volume.h"
-#include "nodes/node_gromacs.h"
 #include "nodes/node_recolor.h"
-#include "nodes/node_addbond.h"
+#include "nodes/node_volume.h"

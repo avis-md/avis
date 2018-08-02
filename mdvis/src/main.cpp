@@ -2,7 +2,6 @@
 
 //#define MAKE_RES
 //#define MAKE_LOCL
-//#define AYB
 
 #include "ui/localizer.h"
 #include "ui/icons.h"
@@ -50,6 +49,7 @@ void rendFunc() {
 	if (RayTracer::resTex) RayTracer::Render();
 	_mv = MVP::modelview();
 	_p = MVP::projection();
+	AnWeb::OnSceneUpdate();
 }
 
 void updateFunc() {

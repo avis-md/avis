@@ -133,7 +133,7 @@ void AnNode::Draw() {
 }
 
 float AnNode::GetHeaderSz() {
-	return showDesc? (17 * script->descLines) : 0;
+	return (showDesc? (17 * script->descLines) : 0) + (showSett? settSz : 0);
 }
 
 void AnNode::DrawHeader(float& off) {
@@ -143,6 +143,9 @@ void AnNode::DrawHeader(float& off) {
 		UI2::LabelMul(pos.x + 5, off + 1, 12, script->desc);
 		UI::alpha = 1;
 		off += 17 * script->descLines;
+	}
+	if (showSett) {
+		DrawSettings(off);
 	}
 }
 
@@ -163,8 +166,9 @@ float AnNode::DrawSide() {
 			Engine::DrawQuad(pos.x, pos.y + 16, width * 0.1f, 2, red());
 	}
 	if (expanded) {
-		Engine::DrawQuad(pos.x, pos.y + (executing? 18 : 16), width, 2.0f + 17 * cnt, white(0.7f, 0.25f));
-		float y = pos.y + 18;
+		float y = pos.y + (executing? 18 : 16);
+		DrawHeader(y);
+		Engine::DrawQuad(pos.x, y, width, 2.0f + 17 * cnt, white(0.7f, 0.25f));
 		for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 			UI::Label(pos.x + 2, y, 12, script->invars[i].first, white());
 			if (!inputR[i].first) {

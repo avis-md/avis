@@ -1,4 +1,5 @@
 #include "anweb.h"
+#include "ui/localizer.h"
 #ifndef IS_ANSERVER
 #include "ui/icons.h"
 #include "utils/runcmd.h"
@@ -8,7 +9,7 @@
    #define stat _stat
 #endif
 
-AnBrowse::Folder AnBrowse::folder = Folder("Custom");
+AnBrowse::Folder AnBrowse::folder = AnBrowse::Folder("");
 bool AnBrowse::expanded = true;
 bool AnBrowse::mscFdExpanded[] = {};
 float AnBrowse::expandPos = 0;
@@ -56,6 +57,7 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 }
 
 void AnBrowse::Scan() {
+	folder = Folder(_("Custom"));
 	DoScan(&folder, IO::path + "/nodes", "");
 }
 
@@ -130,16 +132,24 @@ void AnBrowse::Draw() {
 #define MSC1(n, nm) Engine::DrawQuad(2, f, 150.0f, 16.0f, white(1, 0.3f)); \
 		if (Engine::Button(2, f, 16.0f, 16.0f, mscFdExpanded[n] ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) \
 			mscFdExpanded[n] = !mscFdExpanded[n]; \
-		UI::Label(22, f + 1, 12.0f, #nm, white()); \
-		f += 17;
+		UI::Label(22, f + 1, 12.0f, nm, white()); \
+		f += 17; \
+		if (mscFdExpanded[n])
 #define MSC2() if (Engine::Button(7, f, 150.0f, 16.0f, white(1, 0.35f)) == MOUSE_RELEASE) { \
 					AnWeb::selScript = (AnScript*)1; \
 					AnWeb::selSpNode = a; \
 				} \
 				UI::Texture(7, f, 16.0f, 16.0f, Icons::lightning);
 
-		MSC1(0, Inputs)
-		if (mscFdExpanded[0]) {
+		MSC1(0, "Scene IO") {
+			for (byte a = BT(SCN::NUM0) + 1; a < BT(SCN::NUM); a++) {
+				MSC2()
+				UI::Label(27, f + 1, 12.0f, AN_NODE_SCNS[a - BT(SCN::NUM0) - 1], white());
+				f += 17;
+			}
+		}
+
+		MSC1(1, _("Inputs")) {
 			for (byte a = BT(IN::NUM0) + 1; a < BT(IN::NUM); a++) {
 				MSC2()
 				UI::Label(27, f + 1, 12.0f, AN_NODE_INS[a - BT(IN::NUM0) - 1], white());
@@ -147,8 +157,7 @@ void AnBrowse::Draw() {
 			}
 		}
 
-		MSC1(1, Modifiers)
-		if (mscFdExpanded[1]) {
+		MSC1(2, _("Modifiers")) {
 			for (byte a = BT(MOD::NUM0) + 1; a < BT(MOD::NUM); a++) {
 				MSC2()
 				UI::Label(27, f + 1, 12.0f, AN_NODE_MODS[a - BT(MOD::NUM0) - 1], white());
@@ -156,8 +165,7 @@ void AnBrowse::Draw() {
 			}
 		}
 
-		MSC1(2, Generators)
-		if (mscFdExpanded[2]) {
+		MSC1(3, _("Generators")) {
 			for (byte a = BT(GEN::NUM0) + 1; a < BT(GEN::NUM); a++) {
 				MSC2()
 				UI::Label(27, f + 1, 12.0f, AN_NODE_GENS[a - BT(GEN::NUM0) - 1], white());
@@ -165,8 +173,7 @@ void AnBrowse::Draw() {
 			}
 		}
 
-		MSC1(3, Miscalleneous)
-		if (mscFdExpanded[3]) {
+		MSC1(4, _("Miscellaneous")) {
 			for (byte a = BT(MISC::NUM0) + 1; a < BT(MISC::NUM); a++) {
 				MSC2()
 				UI::Label(27, f + 1, 12.0f, AN_NODE_MISCS[a - BT(MISC::NUM0) - 1], white());

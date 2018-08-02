@@ -12,7 +12,8 @@
 int ParLoader::impId, ParLoader::funcId;
 ParImporter* ParLoader::customImp;
 bool ParLoader::loadAsTrj = false, ParLoader::additive = false;
-int ParLoader::maxframes = 0;
+uint ParLoader::frameskip = 1;
+int ParLoader::maxframes = 10;
 bool ParLoader::useConn, ParLoader::useConnCache, ParLoader::hasConnCache, ParLoader::oldConnCache, ParLoader::ovwConnCache;
 string ParLoader::connCachePath;
 
@@ -182,8 +183,8 @@ void ParLoader::DoOpen() {
 	auto t = milliseconds();
 
 	//
-	info.trajectory.maxFrames = 100;
-	info.trajectory.frameSkip = 1;
+	info.trajectory.maxFrames = maxframes;
+	info.trajectory.frameSkip = frameskip;
 
 	try {
 		if (impId > -1) {
@@ -575,6 +576,7 @@ void ParLoader::OnOpenFile(const std::vector<string>& files) {
 	loadAsTrj = !!Particles::particleSz;
 	ParMenu::showSplash = false;
 	FindImpId();
+	frameskip = FindNextOff(files[0]);
 
 	useConn = true;
 	hasConnCache = false;
@@ -678,4 +680,34 @@ void ParLoader::FindImpId(bool force) {
 			id++;
 		}
 	}
+}
+
+uint ParLoader::FindNextOff(string path) {
+	auto ld = path.find_last_of('.');
+	string ext = path.substr(ld);
+	path = path.substr(0, ld);
+	auto ls = path.find_last_of('/') + 1;
+	string nm = path.substr(ls);
+	path = path.substr(0, ls);
+	auto fls = IO::GetFiles(path, ext);
+	auto sz = nm.size();
+	auto off = sz - 1;
+	while (nm[off] >= '0' && nm[off] <= '9') {
+		uint mn = ~0U;
+		auto nm2 = nm.substr(0, off);
+		uint mv = (uint)std::atoi(&nm[off]);
+		for (auto& f : fls) {
+			if (!string_find(f, nm2)) {
+				uint val = TryParse(f.substr(off), ~0U);
+				if (val > mv && val < mn) {
+					mn = val;
+				}
+			}
+		}
+		if (mn != ~0U) {
+			return mn - mv;
+		}
+		off--;
+	}
+	return 1;
 }

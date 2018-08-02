@@ -2,14 +2,14 @@
 #ifndef IS_ANSERVER
 #include "md/Particles.h"
 #include "ui/icons.h"
+#include "ui/ui_ext.h"
 #endif
 
-Node_AddBond::Node_AddBond() : AnNode(new DmScript()) {
+Node_AddBond::Node_AddBond() : AnNode(new DmScript(".ABnd")) {
 	title = "Extra Bonds";
 	titleCol = Vec3(0.3f, 0.5f, 0.3f);
 	canTile = false;
 	inputR.resize(2);
-	script->name = ".ABnd";
 	script->invars.push_back(std::pair<string, string>("pair counts", "list(1i)"));
 	script->invars.push_back(std::pair<string, string>("bonds", "list(1i)"));
 
@@ -45,21 +45,64 @@ void Node_AddBond::Execute() {
 	}
 }
 
+void Node_AddBond::DrawSettings(float& off) {
+#define SV(v) auto _ ## v = cn.v
+#define CP(v) if (_ ## v != cn.v) { cn.v = _ ## v; Scene::dirty = true; }
+	auto& cn = Particles::particles_Conn2[0];
+	settSz = 17 * (((!cn.drawMode)? (cn.dashed? 5 : 3) : 2) + (cn.usecol? 2 : 1)) + 2;
+	Engine::DrawQuad(pos.x, off, width, (float)settSz, white(0.7f, 0.15f));
+	off++;
+	bool dl = !!cn.drawMode;
+	UI2::Toggle(pos.x + 2, off, width - 4, "Solid", dl);
+	if (dl != !!cn.drawMode) {
+		cn.drawMode = dl? 1 : 0;
+		Scene::dirty = true;
+	}
+	off += 17;
+	if (dl) {
+		auto _scale = UI2::Slider(pos.x + 2, off, width - 4, "Thickness", 0, 1, cn.scale);
+		off += 17;
+		CP(scale);
+	}
+	else {
+		SV(dashed);
+		auto _line_sc = UI2::Slider(pos.x + 2, off, width - 4, "Thickness", 1, 5, cn.line_sc);
+		off += 17;
+		UI2::Toggle(pos.x + 2, off, width - 4, "Dashed lines", _dashed);
+		off += 17;
+		if (_dashed) {
+			auto _line_sp = UI2::Slider(pos.x + 2, off, width - 4, "Spacing", 0, 1, cn.line_sp);
+			off += 17;
+			auto _line_rt = UI2::Slider(pos.x + 2, off, width - 4, "Ratio", 0, 1, cn.line_rt);
+			off += 17;
+			CP(line_sp); CP(line_rt);
+		}
+		CP(dashed); CP(line_sc);
+	}
+	SV(usecol);
+	UI2::Toggle(pos.x + 2, off, width - 4, "Custom Colors", _usecol);
+	off += 17;
+	if (_usecol) {
+		SV(col);
+		UI2::Color(pos.x + 2, off, width - 4, "Color", _col);
+		off += 18;
+		CP(col);
+	}
+	else off++;
+	CP(usecol);
+#undef SV
+#undef CP
+}
+
 float Node_AddBond::DrawSide() {
 	auto f = AnNode::DrawSide();
 	auto& c2 = Particles::particles_Conn2[animId];
-	if (Engine::Button(pos.x + width - 17, pos.y, 16, 16, c2.visible? Icons::visible : Icons::hidden, white(0.8f), white(), white(1, 0.5f))) {
+	if (Engine::Button(pos.x + width - 17, pos.y, 16, 16, c2.visible? Icons::visible : Icons::hidden, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
 		c2.visible = !c2.visible;
 	}
-	if (Engine::Button(pos.x + width - 50, pos.y, 16, 16, Icons::dm_line, (!c2.drawMode)? yellow() : white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
-		c2.drawMode = 0;
-		Scene::dirty = true;
+	if (Engine::Button(pos.x + width - 34, pos.y, 16, 16, Icons::down, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+		showSett = !showSett;
 	}
-	if (Engine::Button(pos.x + width - 34, pos.y, 16, 16, Icons::dm_stick, (!c2.drawMode)? white(0.8f) : yellow(), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
-		c2.drawMode = 1;
-		Scene::dirty = true;
-	}
-	return f;
 }
 
 void Node_AddBond::LoadOut(const string& path) {

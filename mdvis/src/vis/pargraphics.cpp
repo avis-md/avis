@@ -162,12 +162,14 @@ void ParGraphics::Init() {
 	i = 0;
 	LC(_MV); LC(_P); LC(camPos); LC(camFwd);
 	LC(screenSize); LC(posTex); LC(connTex);
+	LC(id2); LC(radScl);
 #undef LC
 
 	parConLineProg = Shader::FromVF(IO::GetText(IO::path + "/parConV_line.txt"), IO::GetText(IO::path + "/parConF_line.txt"));
 #define LC(nm) parConLineProgLocs[i++] = glGetUniformLocation(parConLineProg, #nm)
 	i = 0;
-	LC(_MV); LC(_P); LC(posTex); LC(connTex);
+	LC(_MV); LC(_P); LC(posTex);
+	LC(connTex), LC(rad); LC(id2);
 #undef LC
 
 	selHlProg = Shader::FromF(mv, IO::GetText(IO::path + "/selectorFrag.txt"));
@@ -284,7 +286,7 @@ void ParGraphics::Update() {
 				if ((VisSystem::mouseMode == VIS_MOUSE_MODE::ROTATE) && (dragMode != 2)) {
 					rotW = rotWs;
 					rotZ = rotZs;
-					rotW -= 180 * Input::mouseDelta.y / Display::height;
+					rotW += 180 * Input::mouseDelta.y / Display::height;
 					rotZ += 180 * Input::mouseDelta.x / Display::width;
 					rotW = Clamp<float>(rotW, -90, 90);
 					rotZ = Repeat<float>(rotZ, 0, 360);
@@ -376,8 +378,8 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 	if (!!Particles::particleSz) {
 		float csz = cos(-rotZ*deg2rad);
 		float snz = sin(-rotZ*deg2rad);
-		float csw = cos(rotW*deg2rad);
-		float snw = sin(rotW*deg2rad);
+		float csw = cos(-rotW*deg2rad);
+		float snw = sin(-rotW*deg2rad);
 		Mat4x4 mMatrix = Mat4x4(1, 0, 0, 0, 0, csw, snw, 0, 0, -snw, csw, 0, 0, 0, 0, 1) * Mat4x4(csz, 0, -snz, 0, 0, 1, 0, 0, snz, 0, csz, 0, 0, 0, 0, 1);
 		MVP::Mul(mMatrix);
 		float s = pow(2.0f, rotScale);
@@ -432,7 +434,6 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 			for (auto& p : drawListsB) {
 				byte& tp = p.second.second;
 				if (tp == 1) {
-					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 					glUseProgram(parConLineProg);
 					glUniformMatrix4fv(parConLineProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
 					glUniformMatrix4fv(parConLineProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
@@ -442,10 +443,12 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					glUniform1i(parConLineProgLocs[3], 2);
 					glActiveTexture(GL_TEXTURE2);
 					glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
-					glDrawArrays(GL_LINES, p.first * 2, p.second.first * 2);
+					float rad = 2;
+					glUniform2f(parConLineProgLocs[4], rad / Display::width, rad / Display::height);
+					glUniform1ui(parConLineProgLocs[5], 1);
+					glDrawArrays(GL_TRIANGLES, p.first * 6, p.second.first * 6);
 				}
 				else {
-					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 					glUseProgram(parConProg);
 					glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
 					glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
@@ -458,13 +461,16 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					glUniform1i(parConProgLocs[6], 2);
 					glActiveTexture(GL_TEXTURE2);
 					glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
+					glUniform1ui(parConProgLocs[7], 1);
+					glUniform1f(parConProgLocs[8], 1);
 					glDrawArrays(GL_POINTS, p.first, p.second.first);
 				}
 			}
+			uint id2 = 4;
 			for (auto& c2 : Particles::particles_Conn2) {
+				id2++;
 				if (!c2.cnt) continue;
 				if (!c2.drawMode) {
-					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 					glUseProgram(parConLineProg);
 					glUniformMatrix4fv(parConLineProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
 					glUniformMatrix4fv(parConLineProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
@@ -473,12 +479,12 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
 					glUniform1i(parConLineProgLocs[3], 2);
 					glActiveTexture(GL_TEXTURE2);
-					glActiveTexture(GL_TEXTURE2);
 					glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
-					glDrawArrays(GL_LINES, 0, c2.cnt * 2);
+					glUniform2f(parConLineProgLocs[4], c2.line_sc / Display::width, c2.line_sc / Display::height);
+					glUniform1ui(parConLineProgLocs[5], id2);
+					glDrawArrays(GL_TRIANGLES, 0, c2.cnt * 6);
 				}
 				else {
-					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 					glUseProgram(parConProg);
 					glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
 					glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
@@ -491,6 +497,8 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					glUniform1i(parConProgLocs[6], 2);
 					glActiveTexture(GL_TEXTURE2);
 					glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
+					glUniform1ui(parConProgLocs[7], id2);
+					glUniform1f(parConProgLocs[8], c2.scale);
 					glDrawArrays(GL_POINTS, 0, c2.cnt);
 				}
 			}
@@ -748,8 +756,8 @@ void ParGraphics::DrawMenu() {
 	rotCenter.y = TryParse(UI2::EditText(expandPos - 147, off + 17 * 2, 147, _("Center") + " Y", std::to_string(rotCenter.y), !htr, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
 	rotCenter.z = TryParse(UI2::EditText(expandPos - 147, off + 17 * 3, 147, _("Center") + " Z", std::to_string(rotCenter.z), !htr, Vec4(0.4f, 0.4f, 0.6f, 1)), 0.0f);
 
-	rotW = TryParse(UI2::EditText(expandPos - 147, off + 17 * 4, 147, _("Rotation") + " W", std::to_string(rotW), true, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.0f);
-	rotZ = TryParse(UI2::EditText(expandPos - 147, off + 17 * 5, 147, _("Rotation") + " Y", std::to_string(rotZ), true, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
+	rotZs = rotZ = TryParse(UI2::EditText(expandPos - 147, off + 17 * 4, 147, _("Rotation") + " W", std::to_string(rotZ), true, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.0f);
+	rotWs = rotW = TryParse(UI2::EditText(expandPos - 147, off + 17 * 5, 147, _("Rotation") + " Y", std::to_string(rotW), true, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
 
 	rotScale = TryParse(UI2::EditText(expandPos - 147, off + 17 * 6, 147, _("Scale"), std::to_string(rotScale)), 0.0f);
 

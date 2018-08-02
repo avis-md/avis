@@ -4,7 +4,6 @@
 
 class ParMenu {
 public:
-
 	static int activeMenu;
 	static int activeSubMenu[5];
 	static string menuNames[5];

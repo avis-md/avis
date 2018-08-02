@@ -43,4 +43,5 @@ bool AnConv::ToPy(void* v, PyObject* obj, int dim, int* szs) {
 	dims.ptr = (npy_intp*)szs;
 	dims.len = dim;
 	PyArray_Resize((PyArrayObject*)obj, &dims, 1, NPY_CORDER);
+	return true;
 }

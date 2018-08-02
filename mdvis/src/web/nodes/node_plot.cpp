@@ -4,11 +4,10 @@
 #include "ui/icons.h"
 #endif
 
-Node_Plot::Node_Plot() : AnNode(new DmScript()) {
+Node_Plot::Node_Plot() : AnNode(new DmScript(".Plot")) {
 	//width = 200;
 	canTile = true;
 	inputR.resize(1);
-	script->name = ".Plot";
 	script->invars.push_back(std::pair<string, string>("array", "list(1f)"));
 }
 

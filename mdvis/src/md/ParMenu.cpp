@@ -30,7 +30,7 @@ void ParMenu::Init() {
 	menuNames[1] = _("Colors");
 	menuNames[2] = _("Graphics");
 	menuNames[3] = _("Render");
-	menuNames[4] = ".";
+	menuNames[4] = "Information";
 }
 
 void ParMenu::Draw() {
@@ -68,6 +68,8 @@ void ParMenu::Draw() {
 				RayTracer::DrawMenu();
 				break;
 			case 4:
+				//
+				UI::Label(expandPos - 148, 30, 12, "Particle count: " + std::to_string(Particles::particleSz), white());
 				break;
 			}
 		}

@@ -20,7 +20,7 @@ public:
 	static Vec4 conCol;
 	
 	static GLuint reflProg, reflCProg, parProg, parConProg, parConLineProg;
-	static GLint reflProgLocs[15], reflCProgLocs[10], parProgLocs[10], parConProgLocs[7], parConLineProgLocs[5];
+	static GLint reflProgLocs[15], reflCProgLocs[10], parProgLocs[10], parConProgLocs[10], parConLineProgLocs[10];
 
 	static GLuint selHlProg, colProg;
 	static GLint selHlProgLocs[4], colProgLocs[10];

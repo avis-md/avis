@@ -1,12 +1,11 @@
 #include "node_recolor.h"
 #include "md/Particles.h"
 
-Node_Recolor::Node_Recolor() : AnNode(new DmScript()) {
+Node_Recolor::Node_Recolor() : AnNode(new DmScript(".Recol")) {
 	title = "Recolor";
 	titleCol = Vec3(0.3f, 0.5f, 0.3f);
     canTile = false;
 	inputR.resize(1);
-	script->name = ".Recol";
 	script->invars.push_back(std::pair<string, string>("grad", "list(1f)"));
 }
 
