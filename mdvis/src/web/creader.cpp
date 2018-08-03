@@ -7,12 +7,21 @@
 //#define _GEN_DEBUG
 
 string CReader::vcbatPath = "";
+bool CReader::useOMP;
+string CReader::flags1, CReader::flags2;
 
 void CReader::Init() {
 #ifdef PLATFORM_WIN
 	vcbatPath = VisSystem::envs["VCBAT"];
 	AnWeb::hasC = !!vcbatPath.size();
+	flags1 = VisSystem::prefs["ANL_FLAGS_WIN_CL"];
+	flags2 = VisSystem::prefs["ANL_FLAGS_WIN_LINK"];
+#elif PLATFORM_LNX
+	flags1 = VisSystem::prefs["ANL_FLAGS_LINUX"];
+#else
+	flags1 = VisSystem::prefs["ANL_FLAGS_MAC"];
 #endif
+	useOMP = (VisSystem::prefs["ANL_USE_OPENMP"] == "true");
 }
 
 string _rm_spaces(string s) {
@@ -76,27 +85,27 @@ bool CReader::Read(string path, CScript* scr) {
 			RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " && " + lk);
 		}
 #else
-		//}
-		//else {
-			const string cmd = "g++ -std=c++11 -shared -O0 -fPIC "
-#ifdef PLATFORM_OSX
-			"-Xpreprocessor -fopenmp -lomp"
-#else
-			"-fopenmp -fno-gnu-unique"
+		string cmd = "g++ -std=c++11 -shared -fPIC "
+#ifdef PLATFORM_LNX
+			" -fno-gnu-unique "
 #endif
-			" -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\"";
-			std::cout << cmd << std::endl;
-			RunCmd::Run(cmd);
-		//}
+		 + flags1;
+		if (useOMP) {
+#ifdef PLATFORM_OSX
+			cmd += " -Xpreprocessor -fopenmp -lomp";
+#else
+			cmd += " -fopenmp";
+#endif
+		}
+		cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\"";
+		std::cout << cmd << std::endl;
+		RunCmd::Run(cmd);
 #endif
 		const string ss = fp + "_temp__.cpp";
 		remove(&ss[0]);
 
 	}
-	//else {
-	//	std::cout << "skipping " << nm << std::endl;
-	//}
-
+	
 #endif
 
 	scr->name = path;

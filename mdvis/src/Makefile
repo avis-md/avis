@@ -18,12 +18,12 @@ C = gcc
 CXX = g++
 CXXFLAGS = -O0 -g -std=c++11 -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ -I/usr/local/lib/python3.6/site-packages/numpy/core/include $(shell python3-config --includes) $(OSFLAG)
 LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
-LIBS = $(shell python3-config --configdir)/libpython3.6m.a -lpthread -lm $(GLLIB) -lz $(LIBS2)
+LIBS = -weak_library $(shell python3-config --configdir)/libpython3.6m.a -lpthread -lm $(GLLIB) -lz $(LIBS2)
 
 OBJS = obj/hdr.o obj/lodepng.o obj/AudioEngine.o obj/ChokoLait.o obj/Engine.o obj/main.o obj/RenderEngine.o obj/Types.o obj/mdchan.o
 OBJS += obj/asset/mesh.o obj/asset/shader.o obj/asset/rendertexture.o obj/asset/texture.o obj/asset/texture3d.o
 OBJS += obj/core/bbox.o obj/core/debug.o obj/core/display.o obj/core/font.o obj/core/input.o obj/core/io.o obj/core/mvp.o obj/core/time.o obj/core/ui.o
-OBJS += obj/md/Protein.o obj/md/Gromacs.o obj/md/CDV.o obj/md/ParMenu.o obj/md/Particles.o obj/md/mdvbin.o obj/md/parloader.o obj/md/XYZ.o obj/md/pdb.o obj/md/lammps.o
+OBJS += obj/md/Protein.o obj/md/Gromacs.o obj/md/CDV.o obj/md/ParMenu.o obj/md/Particles.o obj/md/mdvbin.o obj/md/parloader.o obj/md/XYZ.o obj/md/pdb.o obj/md/lammps.o obj/md/dlpoly.o
 OBJS += obj/web/anbrowse.o obj/web/anconv.o obj/web/annode.o obj/web/anops.o obj/web/anscript.o obj/web/anweb.o obj/web/creader.o obj/web/pyreader.o
 OBJS += obj/web/nodes/node_inputs.o obj/web/nodes/node_plot.o obj/web/nodes/node_volume.o obj/web/nodes/node_gromacs.o obj/web/nodes/node_recolor.o obj/web/nodes/node_addbond.o obj/web/nodes/node_camera.o
 OBJS += obj/scene/object.o obj/scene/scene.o obj/scene/sceneobject.o obj/scene/transform.o obj/scene/comp/camera.o obj/scene/comp/component.o
@@ -37,7 +37,7 @@ OBJS += obj/xdrfile/xdrfile.o obj/xdrfile/xdrfile_trr.o obj/xdrfile/xdrfile_xtc.
 HEADERS = hdr.h lodepng.h AssetObjects.h AudioEngine.h ChokoLait.h Defines.h Engine.h SceneObjects.h SceneScriptResolver.h mdchan.h
 HEADERS += asset/mesh.h asset/shader.h asset/rendertexture.h asset/texture.h asset/texture3d.h
 HEADERS += core/bbox.h core/debug.h core/display.h core/font.h core/input.h core/io.h core/math.h core/mvp.h core/time.h core/ui.h
-HEADERS += md/Protein.h md/Gromacs.h md/CDV.h md/ParMenu.h md/Particles.h md/mdvbin.h md/parloader.h md/XYZ.h md/pdb.h md/lammps.h
+HEADERS += md/Protein.h md/Gromacs.h md/CDV.h md/ParMenu.h md/Particles.h md/mdvbin.h md/parloader.h md/XYZ.h md/pdb.h md/lammps.h md/dlpoly.h
 HEADERS += web/anbrowse.h web/anconv.h web/annode.h web/anscript.h web/anops.h web/anweb.h web/creader.h web/pyreader.h
 HEADERS += web/nodes/node_inputs.h web/nodes/node_plot.h web/nodes/node_volume.h web/nodes/node_gromacs.h web/nodes/node_recolor.h web/nodes/node_addbond.h web/nodes/node_camera.h
 HEADERS += scene/object.h scene/scene.h scene/sceneobject.h scene/transform.h scene/comp/camera.h scene/comp/component.h scene/comp/light.h scene/comp/voxelrenderer.h
@@ -51,6 +51,7 @@ HEADERSX = xdrfile/xdrfile.h xdrfile/xdrfile_trr.h xdrfile/xdrfile_xtc.h
 
 ../build/mdvis: $(OBJS)
 	$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
+	#install_name_tool -change $(shell python-config --prefix)/Python $(shell python3-config --prefix)/Pythonn ../build/mdvis
 
 obj/%.o: $(HEADERS)
 obj/%.o: %.cpp

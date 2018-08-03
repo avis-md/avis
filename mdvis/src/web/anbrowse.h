@@ -16,7 +16,7 @@ public:
 
 	static bool expanded;
 	static float expandPos;
-	static bool mscFdExpanded[5];
+	static bool mscFdExpanded[10];
 
 	static void Scan(), DoScan(Folder* f, const string& path, const string& incPath);
 	static void Refresh(), DoRefresh(Folder* f);

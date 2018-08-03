@@ -11,5 +11,7 @@ public:
 
 protected:
 	static string vcbatPath;
+	static bool useOMP;
+	static string flags1, flags2;
 	static bool ParseType(string s, CVar* var);
 };

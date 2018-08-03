@@ -2,8 +2,14 @@
 #include "anscript.h"
 #include "anconv.h"
 #include "vis/system.h"
+#ifndef PLATFORM_WIN
+#include <dlfcn.h>
+#endif
 
 void PyReader::Init() {
+#ifdef PLATFORM_OSX
+	if (dlsym(RTLD_DEFAULT, "Py_Initialize")) {
+#endif
 	_putenv_s("PYTHONPATH", VisSystem::envs["PYENV"].c_str());
 	try {
 		Py_Initialize();
@@ -28,6 +34,12 @@ void PyReader::Init() {
 		Debug::Warning("Python", "Cannot initialize python! PYTHONPATH env is: " + env);
 		AnWeb::hasPy = false;
 	}
+#ifdef PLATFORM_OSX
+	} else {
+		Debug::Warning("Python", "Python3.6 framework not loaded!");
+		AnWeb::hasPy = false;
+	}
+#endif
 }
 
 bool PyReader::Read(string path, PyScript* scr) { //"path/to/script[no .py]"

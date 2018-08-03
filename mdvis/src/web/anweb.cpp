@@ -26,6 +26,14 @@ AnNode* AnWeb::execNode = nullptr;
 bool AnWeb::hasPy = false, AnWeb::hasC = true, AnWeb::hasFt = false;
 bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
 
+void AnWeb::Init() {
+	Insert(new Node_Inputs());
+	for (int a = 0; a < 10; a++) {
+		AnBrowse::mscFdExpanded[a] = true;
+	}
+	ChokoLait::focusFuncs.push_back(CheckChanges);
+}
+
 void AnWeb::Insert(AnScript* scr, Vec2 pos) {
 	AnNode* nd;
 	if (scr->type == AN_SCRTYPE::PYTHON)
@@ -40,13 +48,6 @@ void AnWeb::Insert(AnScript* scr, Vec2 pos) {
 void AnWeb::Insert(AnNode* node, Vec2 pos) {
 	nodes.push_back(node);
 	nodes.back()->pos = pos;
-}
-
-void AnWeb::Init() {
-	Insert(new Node_Inputs());
-	//Insert(new Node_Inputs_ActPar());
-
-	ChokoLait::focusFuncs.push_back(CheckChanges);
 }
 
 void AnWeb::Update() {
