@@ -103,6 +103,7 @@ float Node_AddBond::DrawSide() {
 	if (Engine::Button(pos.x + width - 34, pos.y, 16, 16, Icons::down, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
 		showSett = !showSett;
 	}
+	return f;
 }
 
 void Node_AddBond::LoadOut(const string& path) {

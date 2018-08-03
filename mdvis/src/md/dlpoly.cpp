@@ -1,6 +1,7 @@
 #include "dlpoly.h"
 #include <fstream>
 #include <stdint.h>
+#include <algorithm>
 
 #define SETERR(msg) { memcpy(info->error, msg, sizeof(msg)); return false; }
 

@@ -13,7 +13,7 @@ int ParLoader::impId, ParLoader::funcId;
 ParImporter* ParLoader::customImp;
 bool ParLoader::loadAsTrj = false, ParLoader::additive = false;
 uint ParLoader::frameskip = 1;
-int ParLoader::maxframes = 10;
+int ParLoader::maxframes = -1;
 bool ParLoader::useConn, ParLoader::useConnCache, ParLoader::hasConnCache, ParLoader::oldConnCache, ParLoader::ovwConnCache;
 string ParLoader::connCachePath;
 
@@ -22,7 +22,8 @@ std::vector<string> ParLoader::exts;
 
 bool ParLoader::showDialog = false, ParLoader::busy = false, ParLoader::fault = false, ParLoader::directLoad = false;
 bool ParLoader::parDirty = false, ParLoader::trjDirty = false;
-float* ParLoader::loadProgress = 0, *ParLoader::loadProgress2;
+float* ParLoader::loadProgress = 0, *ParLoader::loadProgress2 = 0;
+uint16_t* ParLoader::loadFrames = 0;
 string ParLoader::loadName;
 std::vector<string> ParLoader::droppedFiles;
 
@@ -175,6 +176,7 @@ void ParLoader::DoOpen() {
 	info.nameSz = PAR_MAX_NAME_LEN;
 	loadProgress = &info.progress;
 	loadProgress2 = &info.trajectory.progress;
+	loadFrames = &info.trajectory.frames;
 	loadName = "Reading file(s)";
 	std::replace(droppedFiles[0].begin(), droppedFiles[0].end(), '\\', '/');
 	string nm = droppedFiles[0].substr(droppedFiles[0].find_last_of('/') + 1);
@@ -212,6 +214,7 @@ void ParLoader::DoOpen() {
 	}
 
 	*loadProgress2 = 0;
+	loadFrames = nullptr;
 
 	Particles::connSz = 0;
 	Particles::particles_ResName = info.resname;
@@ -391,7 +394,7 @@ void ParLoader::DoOpen() {
 		anm.reading = false;
 	}
 
-	VisSystem::SetMsg("Loaded " + nm + " in " + std::to_string((milliseconds() - t)*0.001f).substr(0, 5) + "s");
+	VisSystem::SetMsg("Loaded file(s) in " + std::to_string((milliseconds() - t)*0.001f).substr(0, 5) + "s");
 	ParMenu::SaveRecents(droppedFiles[0]);
 	ParLoader::parDirty = true;
 	busy = false;

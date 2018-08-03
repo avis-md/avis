@@ -32,6 +32,7 @@ public:
 	static bool showDialog, busy, fault, directLoad;
 	static bool parDirty, trjDirty;
 	static float* loadProgress, *loadProgress2;
+	static uint16_t* loadFrames;
 	static string loadName;
 	static std::vector<string> droppedFiles;
 

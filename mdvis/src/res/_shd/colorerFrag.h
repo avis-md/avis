@@ -6,8 +6,10 @@ uniform usampler2D idTex;
 uniform vec2 screenSize;
 uniform samplerBuffer id2col;
 uniform sampler2D colList;
+uniform uint doid;
 uniform int usegrad;
 uniform vec4 gradcols[3];
+uniform vec4 tint;
 
 layout (location = 0) out vec4 fragCol;
 
@@ -31,8 +33,17 @@ void main () {
 	}
 	float cdf = texelFetch(id2col, id-1).r;
 	int cd = int(cdf * 255);
-	if (usegrad == 1) fragCol.rgb = gradfill(cd / 255.0);
-	else fragCol = texture(colList, vec2((mod(cd, 16) + 0.5) / 16.0, ((cd / 16) + 0.5) / 16.0));
+	if (doid != 0U) {
+		if (doid == tx.y) fragCol = tint;
+		else fragCol = vec4(0, 0, 0, 0);	
+		return;
+	}
+	else if (usegrad == 1) fragCol.rgb = gradfill(cd / 255.0);
+	else {
+		fragCol = texture(colList, vec2((mod(cd, 16) + 0.5) / 16.0, ((cd / 16) + 0.5) / 16.0));
+		if (tx.y == 1U)
+			fragCol = mix(fragCol, tint, tint.a);
+	}
 	fragCol.a = 1;
 }
 )";

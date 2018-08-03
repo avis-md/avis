@@ -138,6 +138,7 @@
     <ClCompile Include="src\makeres.cpp" />
     <ClCompile Include="src\mdchan.cpp" />
     <ClCompile Include="src\md\CDV.cpp" />
+    <ClCompile Include="src\md\dlpoly.cpp" />
     <ClCompile Include="src\md\lammps.cpp" />
     <ClCompile Include="src\md\mdvbin.cpp" />
     <ClCompile Include="src\md\Gromacs.cpp" />
@@ -172,6 +173,7 @@
     <ClCompile Include="src\web\anweb.cpp" />
     <ClCompile Include="src\web\creader.cpp" />
     <ClCompile Include="src\web\nodes\node_addbond.cpp" />
+    <ClCompile Include="src\web\nodes\node_camera.cpp" />
     <ClCompile Include="src\web\nodes\node_gromacs.cpp" />
     <ClCompile Include="src\web\nodes\node_inputs.cpp" />
     <ClCompile Include="src\web\nodes\node_plot.cpp" />
@@ -231,6 +233,7 @@
     <ClInclude Include="src\makeres.h" />
     <ClInclude Include="src\mdchan.h" />
     <ClInclude Include="src\md\CDV.h" />
+    <ClInclude Include="src\md\dlpoly.h" />
     <ClInclude Include="src\md\importer_info.h" />
     <ClInclude Include="src\md\lammps.h" />
     <ClInclude Include="src\md\mdvbin.h" />
@@ -270,6 +273,7 @@
     <ClInclude Include="src\web\anweb.h" />
     <ClInclude Include="src\web\creader.h" />
     <ClInclude Include="src\web\nodes\node_addbond.h" />
+    <ClInclude Include="src\web\nodes\node_camera.h" />
     <ClInclude Include="src\web\nodes\node_gromacs.h" />
     <ClInclude Include="src\web\nodes\node_inputs.h" />
     <ClInclude Include="src\web\nodes\node_plot.h" />

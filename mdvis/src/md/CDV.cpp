@@ -1,7 +1,14 @@
 #include "CDV.h"
-#include "vis/system.h"
-#include "md/Protein.h"
+#include <sys/stat.h>
 #include <iomanip>
+
+inline bool file_exists(const std::string& name) {
+#ifndef _WIN32
+#define _stat stat
+#endif
+	struct _stat buf;
+	return (_stat(name.c_str(), &buf) == 0);
+}
 
 bool CDV::Read(ParInfo* info) {
 	char buf[500]{};
@@ -81,15 +88,27 @@ bool CDV::ReadTrj(TrjInfo* info) {
 	int st = std::stoi(nm.substr(n2 + 1, n1 - n2));
 	auto nm1 = nmf.substr(0, ps + 2 + n2);
 	auto nm2 = nm.substr(n1 + 1);
+	uint16_t frms = 0;
+	std::vector<string> nms;
+	do {
+		std::stringstream sstrm;
+		sstrm << std::setw(n1 - n2) << std::setfill('0') << st;
+		std::string nm = nm1 + sstrm.str() + nm2;
+		if (!file_exists(nm)) break;
+		nms.push_back(nm);
+		frms++;
+		st += info->frameSkip;
+	} while (frms != info->maxFrames);
+
 	std::vector<float*> poss;
+	poss.reserve(frms);
 	string s;
 	uint16_t id;
 	string dm;
 	float vl;
-	do {
-		std::stringstream sstrm;
-		sstrm << std::setw(n1 - n2) << std::setfill('0') << st;
-		std::ifstream strm(nm1 + sstrm.str() + nm2);
+	for (auto& nm : nms) {
+		info->progress = info->frames * 1.0f / frms;
+		std::ifstream strm(nm);
 		if (!strm.is_open()) break;
 		poss.push_back(new float[info->parNum * 3]);
 		auto ps = poss.back();
@@ -97,7 +116,6 @@ bool CDV::ReadTrj(TrjInfo* info) {
 		std::getline(strm, s);
 		std::getline(strm, s);
 		for (uint j = 0; j < info->parNum; j++) {
-			info->progress = j * 1.0f / info->parNum;
 			strm >> id >> dm;
 			strm >> vl;
 			ps[id * 3] = vl / 10;
@@ -107,8 +125,7 @@ bool CDV::ReadTrj(TrjInfo* info) {
 			ps[id * 3 + 2] = vl / 10;
 		}
 		info->frames++;
-		st += info->frameSkip;
-	} while (info->frames != info->maxFrames);
+	}
 	info->poss = new float*[info->frames];
 	memcpy(info->poss, &poss[0], info->frames * sizeof(float*));
 

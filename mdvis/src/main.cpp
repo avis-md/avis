@@ -326,13 +326,6 @@ int main(int argc, char **argv) {
 			ParLoader::OnOpenFile(fls);
 		}
 
-#ifdef AYB
-		ParLoader::useConn = false;
-		ParMenu::showSplash = false;
-		CDV::_Read(IO::path + "/ayuba/position000000.cdv", false);
-		CDV::_ReadTrj(IO::path + "/ayuba/position");
-#endif
-
 		LiveRunner* runner = new LiveRunner();
 		runner->initNm = "Init";
 		runner->loopNm = "Loop";

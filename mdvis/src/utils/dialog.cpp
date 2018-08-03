@@ -10,6 +10,9 @@ std::vector<string> Dialog::OpenFile(std::vector<string> pattern, bool mul) {
 	auto cres = tinyfd_openFileDialog("Open File", NULL, ps, &pts[0], NULL, mul);
 	if (cres) {
 		auto s = string(cres);
+#ifdef PLATFORM_WIN
+		std::replace(s.begin(), s.end(), '\\', '/');
+#endif
 		return string_split(s, '|', true);
 	}
 	return std::vector<string>();

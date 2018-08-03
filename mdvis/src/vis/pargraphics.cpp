@@ -183,7 +183,7 @@ void ParGraphics::Init() {
 	i = 0;
 	LC(idTex); LC(spTex); LC(screenSize);
 	LC(id2col); LC(colList); LC(usegrad);
-	LC(gradcols);
+	LC(gradcols); LC(doid); LC(tint);
 #undef LC
 
 	glDeleteShader(mv); 
@@ -545,7 +545,9 @@ void ParGraphics::Recolor() {
 	glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 	glUniform1i(colProgLocs[5], useGradCol? 1 : 0);
 	glUniform4fv(colProgLocs[6], 3, &gradCols[0][0]);
-
+	glUniform1ui(colProgLocs[7], 0);
+	glUniform4f(colProgLocs[8], 0.7f, 0.7f, 0.7f, 1);
+	
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glBindVertexArray(Camera::emptyVao);
