@@ -2,7 +2,7 @@
 #include "vis/pargraphics.h"
 #include "md/Particles.h"
 
-Node_Camera_Out::Node_Camera_Out() : AnNode(new DmScript(".Camout")) {
+Node_Camera_Out::Node_Camera_Out() : AnNode(new DmScript(sig)) {
     title = "Camera (Set)";
     titleCol = Vec3(0.3f, 0.5f, 0.3f);
     canTile = false;

@@ -6,6 +6,16 @@
 #include "res/resdata.h"
 #endif
 
+const string Node_Inputs::sig = ".in";
+const string Node_Inputs_ActPar::sig = ".inact";
+const string Node_Inputs_SelPar::sig = ".insel";
+const string Node_AddBond::sig = ".abnd";
+const string Node_Camera_Out::sig = ".camo";
+const string Node_Plot::sig = ".plot";
+const string Node_Recolor::sig = ".recol";
+const string Node_Recolor_All::sig = ".recola";
+const string Node_Volume::sig = ".vol";
+
 Texture* AnNode::tex_circle_open = nullptr, *AnNode::tex_circle_conn = nullptr;
 float AnNode::width = 220;
 
@@ -265,33 +275,7 @@ AnNode::AnNode(AnScript* scr) : script(scr), canTile(false) {
 #define sp << " "
 #define nl << "\n"
 void AnNode::Save(std::ofstream& strm) {
-	string ext;
-	strm << (int)script->type sp << (script->name + ext) sp;
-	uint iv = 0;
-	std::vector<int> is;
-	std::vector<bool> ii;
-	for (uint i = 0; i < script->invars.size(); i++) {
-		if (script->invars[i].second == "int" || script->invars[i].second == "float") {
-			iv++;
-			is.push_back(i);
-			ii.push_back(script->invars[i].second == "int");
-		}
-	}
-	strm << iv sp << inputR.size() sp << (int)canTile nl;
-	iv = 0;
-	for (auto& i : is) {
-		auto j = is[i];
-		strm << script->invars[j].first sp << (ii[i]? inputVDef[j].i : inputVDef[j].f) nl;
-	}
-
-	int i = 0;
-	for (auto& p : inputR) {
-		if (p.first)
-			strm << p.first->id sp << p.first->script->outvars[p.second].first sp << script->invars[i].first nl;
-		else
-			strm << "-1" nl;
-		i++;
-	}
+	
 }
 
 void AnNode::Load(std::ifstream& strm) {

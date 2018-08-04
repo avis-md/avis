@@ -6,7 +6,7 @@
 #include "ui/ui_ext.h"
 #endif
 
-Node_AddBond::Node_AddBond() : AnNode(new DmScript(".ABnd")) {
+Node_AddBond::Node_AddBond() : AnNode(new DmScript(sig)) {
 	title = "Extra Bonds";
 	titleCol = Vec3(0.3f, 0.5f, 0.3f);
 	canTile = false;

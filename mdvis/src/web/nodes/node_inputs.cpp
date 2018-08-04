@@ -4,7 +4,7 @@
 #include "ui/ui_ext.h"
 #endif
 
-Node_Inputs::Node_Inputs() : AnNode(new DmScript(".in")) {
+Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)) {
 	DmScript* scr = (DmScript*)script;
 	script->desc = "Particle coordinates and trajectory";
 	script->descLines = 2;
@@ -109,7 +109,7 @@ void Node_Inputs::LoadIn(const string& path) {
 
 Node_Inputs_ActPar::Node_Inputs_ActPar() : Node_Inputs() {
 	title = "Selected Particles";
-	script->name = ".inact";
+	script->name = sig;
 	script->desc = "Particle data for all frames";
 	script->descLines = 1;
 
@@ -123,7 +123,7 @@ void Node_Inputs_ActPar::Execute() {
 
 Node_Inputs_SelPar::Node_Inputs_SelPar() : Node_Inputs() {
 	title = "Particles of";
-	script->name = ".insel";
+	script->name = sig;
 	script->desc = "Particle data of Name/ID";
 	script->descLines = 1;
 

@@ -74,6 +74,8 @@ void AnWeb::Update() {
 		Particles::anim.activeFrame = -1;
 		Particles::SetFrame(frm);
 	}
+
+	if (Input::KeyDown(Key_P)) Save(IO::path + "/nodes/test.web");
 #endif
 }
 
@@ -387,13 +389,30 @@ void AnWeb::DoExecute_Srv() {
 
 #define sp << " "
 #define nl << "\n"
+#define wrs(s) _StreamWrite(s.c_str(), &strm, s.size() + 1);
 void AnWeb::Save(const string& s) {
 	std::ofstream strm(s, std::ios::binary);
-	strm << nodes.size() nl;
-	uint i = 0;
+	auto sz = (uint32_t)nodes.size();
+	_StreamWrite(&sz, &strm, 4);
+	int i = 0;
 	for (auto n : nodes) {
 		n->id = i++;
-		n->Save(strm);
+		_StreamWrite(&n->script->type, &strm, 1);
+		wrs(n->script->name);
+		strm.write((n->canTile ? "\x01" : "\x00"), 1);
+		n->SaveConn();
+		sz = n->_connInfo.size();
+		_StreamWrite(&sz, &strm, 2);
+		for (auto& c : n->_connInfo) {
+			strm.write((c.cond ? "\x01" : "\x00"), 1);
+			if (c.cond) {
+				wrs(c.mynm);
+				wrs(c.mytp);
+				_StreamWrite(&c.tar->id, &strm, 1);
+				wrs(c.tarnm);
+				wrs(c.tartp);
+			}
+		}
 	}
 	strm.close();
 	SaveIn();
@@ -435,43 +454,69 @@ void AnWeb::SaveOut() {
 	}
 }
 
+byte GB(std::istream& strm) {
+	byte b;
+	strm.read((char*)&b, 1);
+	return b;
+}
+
 void AnWeb::Load(const string& s) {
 	std::ifstream strm(s, std::ios::binary);
 	if (!strm.is_open()) {
 		Debug::Warning("AnWeb", "Cannot open save file!");
 		return;
 	}
-	uint sz;
-	strm >> sz;
+	uint32_t sz;
+	_Strm2Val(strm, sz);
 	nodes.resize(sz);
-	int t;
+	AN_SCRTYPE tp;
 	string nm;
 	for (uint a = 0; a < sz; a++) {
-		strm >> t >> nm;
-		switch (t) {
-		case 0:
-			if (nm == ".in") nodes[a] = new Node_Inputs();
-			else if (nm == ".insel") nodes[a] = new Node_Inputs_ActPar();
-			else if (nm == ".Vol") nodes[a] = new Node_Volume();
-			else if (nm == ".Plot") nodes[a] = new Node_Plot();
-			else if (nm == ".ingro") nodes[a] = new Node_Gromacs();
-			else {
-				Debug::Warning("AnWeb::Load", "Unknown node name: " + nm);
-			}
+		auto& n = nodes[a];
+		tp = (AN_SCRTYPE)GB(strm);
+		std::getline(strm, nm, char0);
+		switch (tp) {
+		case AN_SCRTYPE::NONE:
+#define ND(scr) if (nm == scr::sig) n = new scr(); else
+			ND(Node_Inputs)
+			ND(Node_Inputs_ActPar)
+			ND(Node_Inputs_SelPar)
+			ND(Node_AddBond)
+			ND(Node_Camera_Out)
+			ND(Node_Plot)
+			ND(Node_Recolor)
+			ND(Node_Recolor_All)
+			ND(Node_Volume)
+			Debug::Warning("AnWeb::Load", "Unknown node name: " + nm);
+#undef ND
 			break;
-		case 1:
-			nodes[a] = new CNode(CScript::allScrs[nm]);
+		case AN_SCRTYPE::C:
+			n = new CNode(CScript::allScrs[nm]);
 			break;
-		case 2:
-			nodes[a] = new PyNode(PyScript::allScrs[nm]);
+		case AN_SCRTYPE::PYTHON:
+			n = new PyNode(PyScript::allScrs[nm]);
 			break;
 		default:
-			Debug::Warning("AnWeb::Load", "Unknown node type: " + std::to_string((int)t));
+			Debug::Warning("AnWeb::Load", "Unknown node type: " + std::to_string((byte)tp));
 			break;
 		}
-		nodes[a]->Load(strm);
-		nodes[a]->id = a;
+		n->canTile = !!GB(strm);
+		uint16_t csz;
+		_Strm2Val(strm, csz);
+		n->_connInfo.resize(csz);
+		for (uint16_t q = 0; q < csz; q++) {
+			auto& c = n->_connInfo[q];
+			c.cond = !!GB(strm);
+			if (c.cond) {
+				std::getline(strm, c.mynm, char0);
+				std::getline(strm, c.mytp, char0);
+				c.tar = nodes[GB(strm)];
+				std::getline(strm, c.tarnm, char0);
+				std::getline(strm, c.tartp, char0);
+			}
+		}
 	}
+	Reconn();
 	activeFile = s;
 }
 

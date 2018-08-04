@@ -554,6 +554,16 @@ void ParGraphics::Recolor() {
 	glBindVertexArray(Camera::emptyVao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
+	uint a = 5;
+	for (auto& c2 : Particles::particles_Conn2) {
+		if (c2.usecol) {
+			glUniform1ui(colProgLocs[7], a);
+			glUniform4f(colProgLocs[8], c2.col.r, c2.col.g, c2.col.b, 1);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+		a++;
+	}
+
 	glUseProgram(0);
 	glBindVertexArray(0);
 

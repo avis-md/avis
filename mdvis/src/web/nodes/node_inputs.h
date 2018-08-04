@@ -3,6 +3,7 @@
 
 class Node_Inputs : public AnNode {
 public:
+	static const string sig;
 	Node_Inputs();
 
 	float DrawSide() override { return 0; }
@@ -16,12 +17,14 @@ public:
 
 class Node_Inputs_ActPar : public Node_Inputs {
 public:
+	static const string sig;
 	Node_Inputs_ActPar();
 	void Execute() override;
 };
 
 class Node_Inputs_SelPar : public Node_Inputs {
 public:
+	static const string sig;
 	enum class SELTYPE {
 		RSL, RES, PAR
 	} type;

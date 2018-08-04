@@ -46,7 +46,7 @@ void Node_Volume::Init() {
 #endif
 }
 
-Node_Volume::Node_Volume() : AnNode(new DmScript(".Voxel")) {
+Node_Volume::Node_Volume() : AnNode(new DmScript(sig)) {
 	//width = 200;
 	canTile = true;
 	inputR.resize(1);

@@ -3,6 +3,7 @@
 
 class Node_Plot : public AnNode {
 public:
+	static const string sig;
 	Node_Plot();
 
 	void Draw() override;

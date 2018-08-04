@@ -3,6 +3,7 @@
 
 class Node_AddBond : public AnNode {
 public:
+	static const string sig;
 	Node_AddBond();
 	~Node_AddBond();
 	

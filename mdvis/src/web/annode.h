@@ -40,6 +40,16 @@ public:
 	std::vector<std::pair<AnNode*, uint>> inputR, outputR;
 	std::vector<union AnVarBase> inputVDef;
 	std::vector<CVar> conV;
+
+	struct ConnInfo {
+		bool cond;
+		string mynm;
+		string mytp;
+		AnNode* tar;
+		string tarnm;
+		string tartp;
+	};
+	std::vector<ConnInfo> _connInfo;
 	
 	static void Init();
 
@@ -66,16 +76,6 @@ public:
 	virtual void OnAnimFrame() {}
 protected:
 	AnNode(AnScript* scr);
-
-	struct ConnInfo {
-		bool cond;
-		string mynm;
-		string mytp;
-		AnNode* tar;
-		string tarnm;
-		string tartp;
-	};
-	std::vector<ConnInfo> _connInfo;
 
 	static Texture* tex_circle_open, *tex_circle_conn;
 };

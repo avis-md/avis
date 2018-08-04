@@ -3,6 +3,7 @@
 
 class Node_Recolor : public AnNode {
 public:
+	static const string sig;
 	Node_Recolor();
     
 	void Execute() override;
@@ -12,6 +13,7 @@ public:
 
 class Node_Recolor_All : public Node_Recolor {
 public:
+	static const string sig;
 	Node_Recolor_All();
 
 	void Execute() override;

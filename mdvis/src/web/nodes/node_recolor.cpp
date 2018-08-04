@@ -1,7 +1,7 @@
 #include "node_recolor.h"
 #include "md/Particles.h"
 
-Node_Recolor::Node_Recolor() : AnNode(new DmScript(".Recol")) {
+Node_Recolor::Node_Recolor() : AnNode(new DmScript(sig)) {
 	title = "Recolor";
 	titleCol = Vec3(0.3f, 0.5f, 0.3f);
     canTile = false;
@@ -27,7 +27,7 @@ void Node_Recolor::LoadOut(const string& path) {
 }
 
 Node_Recolor_All::Node_Recolor_All() {
-	script->name = ".RecolA";
+	script->name = sig;
 	script->invars[0].second = "list(2f)";
 }
 

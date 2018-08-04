@@ -343,6 +343,8 @@ int main(int argc, char **argv) {
 		ChokoLait::mainCamera->quality2 = 1;
 
 		glfwShowWindow(Display::window);
+		
+		AnWeb::Load(IO::path + "/nodes/test.web");
 
 		while (ChokoLait::alive()) {
 			if (!Display::width || !Display::height)

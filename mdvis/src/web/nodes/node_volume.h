@@ -3,6 +3,7 @@
 
 class Node_Volume : public AnNode {
 public:
+	static const string sig;
 	Node_Volume();
 
 	static void Init();

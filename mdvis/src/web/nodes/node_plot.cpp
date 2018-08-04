@@ -4,7 +4,7 @@
 #include "ui/icons.h"
 #endif
 
-Node_Plot::Node_Plot() : AnNode(new DmScript(".Plot")) {
+Node_Plot::Node_Plot() : AnNode(new DmScript(sig)) {
 	//width = 200;
 	canTile = true;
 	inputR.resize(1);

@@ -88,6 +88,9 @@ void Color::DrawPicker(bool hasA) {
 
 	Vec3 hsv = Rgb2Hsv(cl);
 
+	Popups::pos.x = min(Popups::pos.x, Display::width - 155.0f);
+	Popups::pos.y = min(Popups::pos.y, Display::width - 155.0f);
+
 	Engine::DrawQuad(Popups::pos.x, Popups::pos.y, 150, 150, black(0.7f));
 	Color::DrawSV(Popups::pos.x + 5, Popups::pos.y + 5, 120, 120, hsv.r);
 	Vec2 sv(1-hsv.y, hsv.z);
