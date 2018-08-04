@@ -1,9 +1,20 @@
 # System config and properties
-# There must not be any spaces in each statement.
+# There should not generally be any spaces between each key and its value.
 
 # System language locale
 # Translation files should be in locale/## folder
-SYS_LOCALE=JP
+SYS_LOCALE=EN
+
+# Additional compiler flags for nodes.
+# Spaces between flags are allowed.
+ANL_FLAGS_WIN_CL=
+ANL_FLAGS_WIN_LINK=
+ANL_FLAGS_LINUX=
+ANL_FLAGS_MAC=
+
+# Enables the OpenMP flag when compiling nodes.
+# Installation of OpenMP libraries is required.
+ANL_USE_OPENMP=true
 
 # Enables instant-reload of scripts when they are modified.
 # Might be a source for instability.
