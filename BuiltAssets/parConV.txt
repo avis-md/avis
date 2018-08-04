@@ -17,13 +17,23 @@ out vec3 v2f_wpos1;
 out vec3 v2f_wpos2;
 out float v2f_scl;
 
+float len2(vec3 v) {
+	return v.x*v.x + v.y*v.y + v.z*v.z;
+}
+
 void main(){
+	float maxDst2 = 1;
+
     uint id1 = texelFetch(connTex, gl_VertexID * 2).r;
     uint id2 = texelFetch(connTex, gl_VertexID * 2 + 1).r;
     v2f_id1 = id1 + 1U;//gl_VertexID * 2 + 1;
     v2f_id2 = id2 + 1U;//gl_VertexID * 2 + 2;
 	vec3 pos1 = texelFetch(posTex, int(id1)).rgb;
 	vec3 pos2 = texelFetch(posTex, int(id2)).rgb;
+	if (len2(pos2 - pos1) > maxDst2) {
+		gl_PointSize = 0;
+		return;
+	}
 	vec3 pos = (pos1 + pos2) * 0.5;
 	
 	vec4 wpos = _MV*vec4(pos1, 1);
@@ -41,8 +51,12 @@ void main(){
     
     vec3 wdir = wpos.xyz - camPos;
     float z = length(wdir);
+	if (z < 0.1) {
+		gl_PointSize = 0;
+		return;
+	}
     float ca = dot(normalize(wpos.xyz - camPos), camFwd);
 	float z2 = z * ca;
 	gl_PointSize = (length(v2f_wpos2 - v2f_wpos1)/2 + 0.016 * v2f_scl) * screenSize.x / z2;
-	if (z < 0.1) gl_PointSize = 0;
+	
 }

@@ -2,20 +2,19 @@
 #include "web/anweb.h"
 #include "md/Protein.h"
 
-ResidueList* Particles::residueLists;
+std::vector<ResidueList> Particles::residueLists;
 uint Particles::residueListSz;
 uint Particles::particleSz;
-uint Particles::connSz;
 
 char* Particles::particles_Name, *Particles::particles_ResName;
 Vec3* Particles::particles_Pos, *Particles::particles_Vel;
 short* Particles::particles_Typ;
 byte* Particles::particles_Col;
-Int2* Particles::particles_Conn;
+Particles::conninfo Particles::particles_Conn;
 float* Particles::particles_Rad;
 Int2* Particles::particles_Res;
 
-std::vector<Particles::conn2info> Particles::particles_Conn2;
+std::vector<Particles::conninfo> Particles::particles_Conn2;
 
 AnimData Particles::anim;
 
@@ -67,22 +66,22 @@ void Particles::UpdateColorTex() {
 
 void Particles::Clear() {
 	if (particles_Pos) {
-		free(residueLists);
-		//delete[](residueLists);
+		residueLists.clear();
+		
 		delete[](particles_Name);
 		delete[](particles_ResName);
 		//delete[](particles_Pos);
 		//delete[](particles_Vel);
 		delete[](particles_Typ);
 		delete[](particles_Col);
-		delete[](particles_Conn);
+		std::free(particles_Conn.ids);
 		particles_Pos = 0;
 		/*
 		for (auto& c : particles_Conn2) {
 			delete[](c.ids);
 		}
 		*/
-		residueListSz = particleSz = connSz = 0;
+		residueListSz = particleSz = Particles::particles_Conn.cnt = 0;
 
 		if (anim.poss) {
 			delete[](anim.poss[0]);
@@ -132,7 +131,7 @@ void Particles::UpdateBufs() {
 	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(Vec3), particles_Pos, GL_DYNAMIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, connBuffer);
-	glBufferData(GL_ARRAY_BUFFER, connSz * 2 * sizeof(uint), particles_Conn, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, particles_Conn.cnt * 2 * sizeof(uint), particles_Conn.ids, GL_DYNAMIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, colIdBuffer);
 	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(byte), particles_Col, GL_STATIC_DRAW);

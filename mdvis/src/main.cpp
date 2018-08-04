@@ -306,7 +306,7 @@ int main(int argc, char **argv) {
 
 		imp = new ParImporter();
 		imp->name = "lammps";
-		imp->sig = "lmps";
+		imp->sig = "lmp";
 		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
 		imp->funcs.back().first.push_back(".atom");
 		imp->funcs.back().second = Lammps::Read;

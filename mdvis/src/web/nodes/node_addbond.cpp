@@ -1,6 +1,7 @@
 #include "node_addbond.h"
 #ifndef IS_ANSERVER
 #include "md/Particles.h"
+#include "md/ParMenu.h"
 #include "ui/icons.h"
 #include "ui/ui_ext.h"
 #endif
@@ -46,52 +47,10 @@ void Node_AddBond::Execute() {
 }
 
 void Node_AddBond::DrawSettings(float& off) {
-#define SV(v) auto _ ## v = cn.v
-#define CP(v) if (_ ## v != cn.v) { cn.v = _ ## v; Scene::dirty = true; }
+	float off0 = off;
 	auto& cn = Particles::particles_Conn2[0];
-	settSz = 17 * (((!cn.drawMode)? (cn.dashed? 5 : 3) : 2) + (cn.usecol? 2 : 1)) + 2;
-	Engine::DrawQuad(pos.x, off, width, (float)settSz, white(0.7f, 0.15f));
-	off++;
-	bool dl = !!cn.drawMode;
-	UI2::Toggle(pos.x + 2, off, width - 4, "Solid", dl);
-	if (dl != !!cn.drawMode) {
-		cn.drawMode = dl? 1 : 0;
-		Scene::dirty = true;
-	}
-	off += 17;
-	if (dl) {
-		auto _scale = UI2::Slider(pos.x + 2, off, width - 4, "Thickness", 0, 1, cn.scale);
-		off += 17;
-		CP(scale);
-	}
-	else {
-		SV(dashed);
-		auto _line_sc = UI2::Slider(pos.x + 2, off, width - 4, "Thickness", 1, 5, cn.line_sc);
-		off += 17;
-		UI2::Toggle(pos.x + 2, off, width - 4, "Dashed lines", _dashed);
-		off += 17;
-		if (_dashed) {
-			auto _line_sp = UI2::Slider(pos.x + 2, off, width - 4, "Spacing", 0, 1, cn.line_sp);
-			off += 17;
-			auto _line_rt = UI2::Slider(pos.x + 2, off, width - 4, "Ratio", 0, 1, cn.line_rt);
-			off += 17;
-			CP(line_sp); CP(line_rt);
-		}
-		CP(dashed); CP(line_sc);
-	}
-	SV(usecol);
-	UI2::Toggle(pos.x + 2, off, width - 4, "Custom Colors", _usecol);
-	off += 17;
-	if (_usecol) {
-		SV(col);
-		UI2::Color(pos.x + 2, off, width - 4, "Color", _col);
-		off += 18;
-		CP(col);
-	}
-	else off++;
-	CP(usecol);
-#undef SV
-#undef CP
+	ParMenu::DrawConnMenu(cn, pos.x, off, width);
+	settSz = (int)(off - off0);
 }
 
 float Node_AddBond::DrawSide() {

@@ -216,7 +216,6 @@ void ParLoader::DoOpen() {
 	*loadProgress2 = 0;
 	loadFrames = nullptr;
 
-	Particles::connSz = 0;
 	Particles::particles_ResName = info.resname;
 	Particles::particles_Name = info.name;
 	Particles::particles_Pos = (Vec3*)info.pos;
@@ -230,9 +229,8 @@ void ParLoader::DoOpen() {
 		info.bounds[2] + info.bounds[3], 
 		info.bounds[4] + info.bounds[5]) * 0.5f;
 
-	auto rs = rawvector<ResidueList, uint>(Particles::residueLists, Particles::residueListSz);
-	auto rsv = rawvector<Residue, uint>(Particles::residueLists->residues, Particles::residueLists->residueSz);
-	auto cn = rawvector<Int2, uint>(Particles::particles_Conn, Particles::connSz);
+	auto& conn = Particles::particles_Conn;
+	auto cn = rawvector<Int2, uint>(conn.ids, conn.cnt);
 
 	uint64_t currResNm = -1;
 	uint16_t currResId = -1;
@@ -249,9 +247,9 @@ void ParLoader::DoOpen() {
 			strm = new std::ifstream(droppedFiles[0] + ".conn", std::ios::binary);
 			char buf[100];
 			strm->getline(buf, 100, '\n');
-			strm->read((char*)(&Particles::connSz), 4);
-			Particles::particles_Conn = (Int2*)std::realloc(Particles::particles_Conn, Particles::connSz * sizeof(Int2));
-			strm->read((char*)Particles::particles_Conn, Particles::connSz * sizeof(Int2));
+			strm->read((char*)(&conn.cnt), 4);
+			conn.ids = (Int2*)std::realloc(conn.ids, conn.cnt * sizeof(Int2));
+			strm->read((char*)conn.ids, conn.cnt * sizeof(Int2));
 			strm->read(buf, 2);
 			if (buf[0] != 'X' || buf[1] != 'X') {
 				useConnCache = false;
@@ -269,9 +267,9 @@ void ParLoader::DoOpen() {
 		uint64_t resNm = *((uint64_t*)(&info.resname[i * PAR_MAX_NAME_LEN])) & 0x000000ffffffffff;
 
 		if (currResNm != resNm) {
-			rs.push(ResidueList());
-			trs = &Particles::residueLists[Particles::residueListSz - 1];
-			rsv = rawvector<Residue, uint>(trs->residues, trs->residueSz);
+			Particles::residueLists.push_back(ResidueList());
+			Particles::residueListSz++;
+			trs = &Particles::residueLists.back();
 			trs->name = string(info.resname + i * PAR_MAX_NAME_LEN, 5);
 			currResNm = resNm;
 		}
@@ -287,8 +285,9 @@ void ParLoader::DoOpen() {
 					lastCnt = 0;
 				}
 			}
-			rsv.push(Residue());
-			tr = &trs->residues[trs->residueSz - 1];
+			trs->residues.push_back(Residue());
+			trs->residueSz++;
+			tr = &trs->residues.back();
 			tr->offset = i;
 			tr->name = std::to_string(resId);
 			tr->type = AminoAcidType((char*)&resNm);
@@ -299,7 +298,7 @@ void ParLoader::DoOpen() {
 				_Strm2Val(*strm, tr->cnt_b);
 			}
 			else {
-				tr->offset_b = Particles::connSz;
+				tr->offset_b = conn.cnt;
 				tr->cnt_b = 0;
 			}
 		}
@@ -345,8 +344,8 @@ void ParLoader::DoOpen() {
 	if (useConnCache && (!hasConnCache || ovwConnCache)) {
 		std::ofstream ostrm(droppedFiles[0] + ".conn", std::ios::binary);
 		ostrm << __DATE__ << " " << __TIME__ << "\n";
-		_StreamWrite(&Particles::connSz, &ostrm, 4);
-		_StreamWrite(Particles::particles_Conn, &ostrm, Particles::connSz * sizeof(Int2));
+		_StreamWrite(&conn.cnt, &ostrm, 4);
+		_StreamWrite(conn.ids, &ostrm, conn.cnt * sizeof(Int2));
 		_StreamWrite("XX", &ostrm, 2);
 		for (uint a = 0; a < Particles::residueListSz; a++) {
 			auto& rsl = Particles::residueLists[a];

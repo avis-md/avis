@@ -16,7 +16,7 @@ endif
 
 C = gcc
 CXX = g++
-CXXFLAGS = -O0 -g -std=c++11 -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ -I/usr/local/lib/python3.6/site-packages/numpy/core/include $(shell python3-config --includes) $(OSFLAG)
+CXXFLAGS = -O0 -g -std=c++11 -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ -I/usr/local/lib/python3.6/site-packages/numpy/core/include -I$(shell python3-config --prefix)/include/python3.6m $(OSFLAG)
 LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
 LIBS = -weak_library $(shell python3-config --configdir)/libpython3.6m.a -lpthread -lm $(GLLIB) -lz $(LIBS2)
 
@@ -51,7 +51,6 @@ HEADERSX = xdrfile/xdrfile.h xdrfile/xdrfile_trr.h xdrfile/xdrfile_xtc.h
 
 ../build/mdvis: $(OBJS)
 	$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
-	#install_name_tool -change $(shell python-config --prefix)/Python $(shell python3-config --prefix)/Pythonn ../build/mdvis
 
 obj/%.o: $(HEADERS)
 obj/%.o: %.cpp

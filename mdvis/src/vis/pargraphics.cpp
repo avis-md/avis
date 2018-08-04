@@ -430,6 +430,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 				glDrawArrays(GL_POINTS, p.first, p.second.first);
 			}
 
+			auto& con = Particles::particles_Conn;
 			glBindVertexArray(Camera::emptyVao);
 			for (auto& p : drawListsB) {
 				byte& tp = p.second.second;
@@ -443,8 +444,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					glUniform1i(parConLineProgLocs[3], 2);
 					glActiveTexture(GL_TEXTURE2);
 					glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
-					float rad = 2;
-					glUniform2f(parConLineProgLocs[4], rad / Display::width, rad / Display::height);
+					glUniform2f(parConLineProgLocs[4], con.line_sc / Display::width, con.line_sc / Display::height);
 					glUniform1ui(parConLineProgLocs[5], 1);
 					glDrawArrays(GL_TRIANGLES, p.first * 6, p.second.first * 6);
 				}
@@ -462,7 +462,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					glActiveTexture(GL_TEXTURE2);
 					glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
 					glUniform1ui(parConProgLocs[7], 1);
-					glUniform1f(parConProgLocs[8], 1);
+					glUniform1f(parConProgLocs[8], con.scale);
 					glDrawArrays(GL_POINTS, p.first, p.second.first);
 				}
 			}
@@ -546,7 +546,8 @@ void ParGraphics::Recolor() {
 	glUniform1i(colProgLocs[5], useGradCol? 1 : 0);
 	glUniform4fv(colProgLocs[6], 3, &gradCols[0][0]);
 	glUniform1ui(colProgLocs[7], 0);
-	glUniform4f(colProgLocs[8], 0.7f, 0.7f, 0.7f, 1);
+	auto col = Particles::particles_Conn.col;
+	glUniform4f(colProgLocs[8], col.r, col.g, col.b, Particles::particles_Conn.usecol? 1 : 0);
 	
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

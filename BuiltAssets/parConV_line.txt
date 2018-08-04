@@ -9,7 +9,13 @@ flat out uint v2f_id1;
 flat out uint v2f_id2;
 out float v2f_u;
 
+float len2(vec3 v) {
+	return v.x*v.x + v.y*v.y + v.z*v.z;
+}
+
 void main(){
+	float maxDst2 = 1;
+
 	int vid = (gl_VertexID / 6) * 2;
     uint id1 = texelFetch(connTex, vid).r;
     uint id2 = texelFetch(connTex, vid + 1).r;
@@ -18,6 +24,10 @@ void main(){
 	v2f_u = mod(gl_VertexID, 2);
     vec3 pos1 = texelFetch(posTex, int(id1)).rgb;
     vec3 pos2 = texelFetch(posTex, int(id2)).rgb;
+    if (len2(pos2-pos1) > maxDst2) {
+        gl_Position = vec4(-1, -1, -1, 1);
+        return;
+    }
     vec4 spos1 = _P*_MV*vec4(pos1, 1);
     spos1 /= spos1.w;
     vec4 spos2 = _P*_MV*vec4(pos2, 1);

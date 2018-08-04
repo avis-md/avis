@@ -40,6 +40,10 @@ vec2 lli(vec3 p1, vec3 p2, vec3 d1, vec3 d2) {
 	return vec2(resx, resy);
 }
 
+float len2(vec3 v) {
+	return v.x*v.x + v.y*v.y + v.z*v.z;
+}
+
 void main()
 {
 	vec3 td = normalize(v2f_wpos2 - v2f_wpos1);
@@ -92,16 +96,17 @@ void main()
         
 		float l3f2 = lf * lf - p232;
         float l3f = 0;
-		if (l3f2 > 0) sqrt(l3f2);
+		if (l3f2 > 0)
+            l3f = sqrt(l3f2);
         
         vec3 td2 = td;
         if (dot(td2, fwd) > 0) td2 *= -1;
         vec3 cf = p1 + td2 * l3f;
         
-        float lc = length(cf - v2f_wpos1);
-        if ((dot(cf - v2f_wpos1, td) < 0) || (lc > lm))
+        float lc2 = len2(cf - v2f_wpos1);
+        if ((dot(cf - v2f_wpos1, td) < 0) || (lc2 > lm*lm))
             discard;
-        uint id = ((lc - lm/2) > 0) ? v2f_id2 : v2f_id1;
+        uint id = (sqrt(lc2)/lm > 0.5) ? v2f_id2 : v2f_id1;
         
         vec4 ndc2 = _P * vec4(pf, 1);
         ndc2 /= ndc2.w;

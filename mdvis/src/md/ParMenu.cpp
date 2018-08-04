@@ -138,8 +138,17 @@ void ParMenu::Draw_List(float off) {
 			}
 			ParGraphics::UpdateDrawLists();
 		}
+		if (Engine::Button(110, off, 16, 16, Icons::down) == MOUSE_RELEASE) {
+			Particles::particles_Conn.visible = !Particles::particles_Conn.visible;
+		}
+	}
+	else {
+		Particles::particles_Conn.visible = false;
 	}
 	off += 17;
+	if (!!selCnt && Particles::particles_Conn.visible) {
+		DrawConnMenu(Particles::particles_Conn, 1, off, 148);
+	}
 	//Engine::DrawQuad(1, off-1, expandPos - 2, Display::height - 37.0f, white(0.9f, 0.1f));
 	Engine::BeginStencil(0, off, expandPos, Display::height - 18 - off);
 	if (Rect(0, off, expandPos, Display::height - 18 - off).Inside(Input::mousePos)) {
@@ -340,6 +349,54 @@ void ParMenu::DrawSplash() {
  	if ((Input::KeyDown(Key_Escape) && UI::_layer == UI::_layerMax) || (Input::mouse0State == 1 && !Rect(Display::width*0.5f - 200, Display::height*0.5f - 150, 400, 300).Inside(Input::mousePos))) {
 		showSplash = false;
 	}
+}
+
+void ParMenu::DrawConnMenu(Particles::conninfo& cn, float x, float& off, float width) {
+#define SV(v) auto _ ## v = cn.v
+#define CP(v) if (_ ## v != cn.v) { cn.v = _ ## v; Scene::dirty = true; }
+	float sz = 17 * (((!cn.drawMode)? (cn.dashed? 5 : 3) : 2) + (cn.usecol? 2 : 1)) + 2;
+	Engine::DrawQuad(x, off, width, sz, white(0.7f, 0.15f));
+	off++;
+	bool dl = !!cn.drawMode;
+	UI2::Toggle(x + 2, off, width - 4, "Solid", dl);
+	if (dl != !!cn.drawMode) {
+		cn.drawMode = dl? 1 : 0;
+		Scene::dirty = true;
+	}
+	off += 17;
+	if (dl) {
+		auto _scale = UI2::Slider(x + 2, off, width - 4, "Thickness", 0, 1, cn.scale);
+		off += 17;
+		CP(scale);
+	}
+	else {
+		SV(dashed);
+		auto _line_sc = UI2::Slider(x + 2, off, width - 4, "Thickness", 1, 5, cn.line_sc);
+		off += 17;
+		UI2::Toggle(x + 2, off, width - 4, "Dashed lines", _dashed);
+		off += 17;
+		if (_dashed) {
+			auto _line_sp = UI2::Slider(x + 2, off, width - 4, "Spacing", 0, 1, cn.line_sp);
+			off += 17;
+			auto _line_rt = UI2::Slider(x + 2, off, width - 4, "Ratio", 0, 1, cn.line_rt);
+			off += 17;
+			CP(line_sp); CP(line_rt);
+		}
+		CP(dashed); CP(line_sc);
+	}
+	SV(usecol);
+	UI2::Toggle(x + 2, off, width - 4, "Custom Colors", _usecol);
+	off += 17;
+	if (_usecol) {
+		SV(col);
+		UI2::Color(x + 2, off, width - 4, "Color", cn.col);
+		off += 18;
+		if (_col != cn.col) Scene::dirty = true;
+	}
+	else off++;
+	CP(usecol);
+#undef SV
+#undef CP
 }
 
 void ParMenu::SelAll() {

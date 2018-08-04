@@ -118,7 +118,7 @@ bool Protein::Refresh() {
 				bool hascon = isn;
 				uint ls = ch[4];
                 for (uint k = 0; k < rs.cnt_b; k++) {
-                    auto& cn = Particles::particles_Conn[rs.offset_b + k];
+                    auto& cn = Particles::particles_Conn.ids[rs.offset_b + k];
 					if (cn[1] >= (int)rs.offset) {
 						conns[cn[0] - rs.offset].push_back(cn[1]);
 						conns[cn[1] - rs.offset].push_back(cn[0]);

@@ -166,8 +166,8 @@ void RayTracer::SetScene() {
 		clSetKernelArg(_kernel, 3, sizeof(_bls), (void*)&_bls);
 		clSetKernelArg(_kernel, 4, sizeof(cl_int), &vl);
 		
-		vl = min(17U, Particles::connSz);
-		if (!!Particles::connSz) {
+		vl = min(17U, Particles::particles_Conn.cnt);
+		if (!!vl) {
 			//_cns = clCreateBuffer(_ctx, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vl * 2 * sizeof(cl_int), Particles::particles_Conn, &err);
 			_cns = clCreateFromGLBuffer(_ctx, CL_MEM_READ_ONLY, Particles::connBuffer, &err);
 			clEnqueueAcquireGLObjects(_que, 1, &_cns, 0, 0, 0);

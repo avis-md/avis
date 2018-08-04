@@ -18,15 +18,11 @@ struct Residue {
 
 struct ResidueList { //residues with the same name
 	ResidueList() : visible(true), expanded(false), drawType(0x22), selected(false) {}
-
-	~ResidueList() {
-		if (residues) free(residues);
-	}
 	
 	uint maxOff;
 	bool visible, expanded;
 	string name;
-	Residue* residues = 0;
+	std::vector<Residue> residues;
 	uint residueSz = 0;
 	byte drawType;
 	bool selected;
@@ -48,20 +44,7 @@ private:
 
 class Particles {
 public:
-	static ResidueList* residueLists;
-	static uint residueListSz;
-	static uint particleSz;
-	static uint connSz;
-
-	static char* particles_Name, *particles_ResName; //10 chars per name
-	static Vec3* particles_Pos, *particles_Vel;
-	static short* particles_Typ;
-	static byte* particles_Col;
-	static Int2* particles_Conn;
-	static float* particles_Rad;
-	static Int2* particles_Res;
-
-	struct conn2info {
+	struct conninfo {
 		uint cnt, ocnt = 0;
 		Int2* ids;
 		GLuint buf = 0, tbuf = 0;
@@ -73,7 +56,20 @@ public:
 		Vec4 col = white();
 		bool visible = true;
 	};
-	static std::vector<conn2info> particles_Conn2;
+
+	static std::vector<ResidueList> residueLists;
+	static uint residueListSz;
+	static uint particleSz;
+
+	static char* particles_Name, *particles_ResName; //10 chars per name
+	static Vec3* particles_Pos, *particles_Vel;
+	static short* particles_Typ;
+	static byte* particles_Col;
+	static conninfo particles_Conn;
+	static float* particles_Rad;
+	static Int2* particles_Res;
+
+	static std::vector<conninfo> particles_Conn2;
 
 	static void UpdateConBufs2();
 
