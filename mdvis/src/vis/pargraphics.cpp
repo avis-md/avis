@@ -469,7 +469,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 			uint id2 = 4;
 			for (auto& c2 : Particles::particles_Conn2) {
 				id2++;
-				if (!c2.cnt) continue;
+				if (!c2.cnt || !c2.visible) continue;
 				if (!c2.drawMode) {
 					glUseProgram(parConLineProg);
 					glUniformMatrix4fv(parConLineProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));

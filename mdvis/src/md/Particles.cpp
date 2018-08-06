@@ -127,6 +127,15 @@ void Particles::GenTexBufs() {
 }
 
 void Particles::UpdateBufs() {
+	for (auto& a : anim.conns2) {
+		if (a.first) {
+			delete[](a.first);
+			delete[](a.second);
+		}
+		a.first = new uint[anim.frameCount]{};
+		a.second = new Int2*[anim.frameCount]{};
+	}
+
 	glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
 	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(Vec3), particles_Pos, GL_DYNAMIC_DRAW);
 

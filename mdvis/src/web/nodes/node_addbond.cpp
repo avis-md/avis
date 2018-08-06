@@ -16,9 +16,6 @@ Node_AddBond::Node_AddBond() : AnNode(new DmScript(sig)) {
 
 	Particles::anim.conns2.resize(1);
 	Particles::particles_Conn2.resize(1);
-	auto& bk2 = Particles::anim.conns2.back();
-	bk2.first = new uint[140]{};
-	bk2.second = new Int2*[140]{};
 	animId = 0;
 }
 

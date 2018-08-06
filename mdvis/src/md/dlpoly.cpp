@@ -1,5 +1,6 @@
 #include "dlpoly.h"
 #include <fstream>
+#include <vector>
 #include <stdint.h>
 #include <algorithm>
 
@@ -17,10 +18,9 @@ bool DLPoly::Read(ParInfo* info) {
 
 	strm >> dm;
 	if (dm != "timestep") SETERR("timestep tag not found!")
+	strm.ignore(500, '\n');
 
 	float vl;
-
-	strm >> dm >> dm >> dm >> dm >> dm >> dm >> dm;
 	strm >> vl >> dm >> dm;
 	info->bounds[0] = -vl / 20;
 	info->bounds[1] = vl / 20;
@@ -38,14 +38,24 @@ bool DLPoly::Read(ParInfo* info) {
 	info->pos = new float[sz * 3];
 	info->vel = new float[sz * 3];
 
-	int id;
-	for (uint i = 0; i < sz; i++) {
-		info->progress = i * 1.0f / sz;
-		strm >> dm >> id;
-		id--;
+	std::vector<uint32_t> ignores;
+	int li = 0;
+	for (uint32_t id = 0; id != sz; id++) {
+		info->progress = id * 1.0f / sz;
+		strm >> dm;
+		if (dm[0] == 'M' || dm[1] == 'M') {
+			ignores.push_back(id);
+			strm.ignore(500, '\n');
+			strm.ignore(500, '\n');
+			id--;
+			sz--;
+			li++;
+			continue;
+		}
+		else li = 0;
 		memcpy(info->name, &dm[0], std::min<size_t>(info->nameSz, dm.size()));
 		info->type[id] = dm[0];
-		strm >> dm >> dm;
+		strm >> dm >> dm >> dm;
 		strm >> vl;
 		info->pos[id * 3] = vl / 10;
 		strm >> vl;
@@ -53,6 +63,58 @@ bool DLPoly::Read(ParInfo* info) {
 		strm >> vl;
 		info->pos[id * 3 + 2] = vl / 10;
 	}
+
+	ignores.push_back(-1);
+	
+	auto trj = &info->trajectory;
+    std::vector<float*> poss = {};
+    float* _ps;
+    do {
+		int ign = 0;
+		dm = "";
+		strm >> dm;
+		if (dm != "timestep") goto out;
+
+		strm.ignore(500, '\n');
+		strm.ignore(500, '\n');
+		strm.ignore(500, '\n');
+		strm.ignore(500, '\n');
+		
+        _ps = new float[sz * 3];
+        
+        for (uint32_t a = 0; a != sz; a++) {
+			trj->progress = a * 1.0f / sz;
+			strm.ignore(500, '\n');
+			if (ignores[ign] == a) {
+				ign++;
+				a--;
+			}
+			else {
+				strm >> vl;
+				_ps[a * 3] = vl / 10;
+				strm >> vl;
+				_ps[a * 3 + 1] = vl / 10;
+				strm >> vl;
+				_ps[a * 3 + 2] = vl / 10;
+			}
+			strm.ignore(500, '\n');
+        }
+		for (int a = 0; a < li; a++){
+			strm.ignore(500, '\n');
+			strm.ignore(500, '\n');
+		}
+        poss.push_back(_ps);
+        trj->frames++;
+    } while (trj->frames + 1 != trj->maxFrames);
+out:
+    if (!!trj->frames) {
+        trj->frames++;
+	    trj->poss = new float*[trj->frames];
+        _ps = new float[sz*3];
+        memcpy(_ps, info->pos, sz*3*sizeof(float));
+        trj->poss[0] = _ps;
+	    memcpy(trj->poss + 1, &poss[0], trj->frames * sizeof(float*));
+    }
 
 	return true;
 }
