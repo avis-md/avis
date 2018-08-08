@@ -78,7 +78,7 @@ GLuint Font::glyph(uint size, uint mask) {
 	if (_glyphs.count(size) == 1) {
 		auto& gly = _glyphs[size];
 		if (gly.count(mask) == 1)
-			return _glyphs[size][mask];
+			return gly[mask];
 	}
 	return CreateGlyph(size, mask);
 }

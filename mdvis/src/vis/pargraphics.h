@@ -38,6 +38,12 @@ public:
 	static float rotWs, rotZs;
 	static float rotScale;
 
+	static bool useClipping;
+	static GLuint clipUbo;
+	static Vec3 clipCenter;
+	static Vec3 clipSize;
+	static Vec4 clippingPlanes[6];
+
 	static float zoomFade;
 
 	static bool dragging;
@@ -45,6 +51,8 @@ public:
 	static Vec3 scrX, scrY;
 
 	static bool animate, seek;
+	static float animOff;
+	static int animTarFps;
 	static bool tfboDirty;
 
 	class Eff {
@@ -67,6 +75,7 @@ public:
 	static void FillRad(byte* rads);
 
 	static void Update();
+	static void UpdateClipping();
 
 	static void Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h);
 

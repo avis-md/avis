@@ -10,13 +10,21 @@ void PyReader::Init() {
 #ifdef PLATFORM_OSX
 	if (dlsym(RTLD_DEFAULT, "Py_Initialize")) {
 #endif
-	_putenv_s("PYTHONPATH", VisSystem::envs["PYENV"].c_str());
+	auto pyenv = VisSystem::envs["PYENV"];
+	_putenv_s("PYTHONPATH", (pyenv + "/Lib").c_str());
 	try {
 		Py_Initialize();
-		PyObject *sys_path = PySys_GetObject((char*)"path");
+		PyObject *sys_path = PySys_GetObject("path");
 		auto path = IO::path + "/nodes/";
-		//std::replace(path.begin(), path.end(), '\\', '/');
-		PyList_Append(sys_path, PyUnicode_FromString(path.c_str()));
+		auto ps = PyUnicode_FromString(path.c_str());
+		PyList_Insert(sys_path, 0, ps);
+		Py_DecRef(ps);
+		ps = PyUnicode_FromString((pyenv + "/Lib").c_str());
+		PyList_Insert(sys_path, 0, ps);
+		Py_DecRef(ps);
+		ps = PyUnicode_FromString((pyenv + "/DLLs").c_str());
+		PyList_Insert(sys_path, 0, ps);
+		Py_DecRef(ps);
 		AnWeb::hasPy = true;
 	} catch (char* c) {
 		string env = "";
