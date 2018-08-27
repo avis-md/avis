@@ -20,7 +20,7 @@ struct ResidueList { //residues with the same name
 	ResidueList() : visible(true), expanded(false), drawType(0x22), selected(false) {}
 	
 	uint maxOff;
-	bool visible, expanded;
+	bool visible, visibleAll = true, expanded;
 	string name;
 	std::vector<Residue> residues;
 	uint residueSz = 0;

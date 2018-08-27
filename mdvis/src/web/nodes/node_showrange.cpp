@@ -1,5 +1,6 @@
 #include "node_showrange.h"
 #include "md/Particles.h"
+#include "vis/pargraphics.h"
 #include "ui/ui_ext.h"
 
 Node_ShowRange::Node_ShowRange() : AnNode(new DmScript(sig)) {
@@ -20,14 +21,22 @@ void Node_ShowRange::Execute() {
 
     //
     for (auto& r : Particles::residueLists) {
+        r.visible = r.visibleAll = true;
+        int a = -1;
         for (auto& rr : r.residues) {
             auto& v = vals[rr.offset];
             if (v > rMin && v < rMax) {
-                r.visible = !invert;
+                rr.visible = !invert;
             }
-            else r.visible = invert;
+            else rr.visible = invert;
+            if (a == -1) {
+                r.visible = rr.visible;
+                a = rr.visible? 1 : 0;
+            }
+            else if (!a == rr.visible) r.visibleAll = false;
         }
     }
+    ParGraphics::UpdateDrawLists();
 }
 
 void Node_ShowRange::DrawHeader(float& off) {
@@ -37,12 +46,13 @@ void Node_ShowRange::DrawHeader(float& off) {
     title = invert? "Hide Range" : "Show Range";
     off += 18;
     auto s = std::to_string(rMin);
-    UI2::EditText(pos.x + 2, off, width - 4, "min", s);
+    s = UI2::EditText(pos.x + 2, off, width - 4, "min", s);
     rMin = TryParse(s, 0.0f);
     s = std::to_string(rMax);
-    UI2::EditText(pos.x + 2, off + 17, width - 4, "max", s);
+    s = UI2::EditText(pos.x + 2, off + 17, width - 4, "max", s);
     rMax = TryParse(s, 0.0f);
 	off += 35;
+    hdSz = 17 * 3 + 2;
 }
 
 void Node_ShowRange::LoadOut(const string& path) {

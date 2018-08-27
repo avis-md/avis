@@ -157,6 +157,7 @@ void ParMenu::Draw_List(float off) {
 	}
 	off -= _off;
 	float mof = off;
+	static byte drawTypeOld;
 	for (uint i = 0; i < Particles::residueListSz; i++) {
 		auto& rli = Particles::residueLists[i];
 		//if (off > 0) {
@@ -189,10 +190,21 @@ void ParMenu::Draw_List(float off) {
 			if (Engine::Button(expandPos - 35, off, 16, 16, Icons::OfDM(rli.drawType), white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
 				Popups::type = POPUP_TYPE::DRAWMODE;
 				Popups::pos = Vec2(expandPos - 35, off);
+				drawTypeOld = rli.drawType;
 				Popups::data = &rli.drawType;
+			}
+			else if (Popups::type == POPUP_TYPE::DRAWMODE && Popups::data == &rli.drawType && drawTypeAll != rli.drawType) {
+				for (uint n = 0; n < rli.residueSz; n++) {
+					rli.residues[n].drawType = rli.drawType;
+				}
+				ParGraphics::UpdateDrawLists();
 			}
 			if (Engine::Button(expandPos - 18, off, 16, 16, rli.visible ? Icons::visible : Icons::hidden) == MOUSE_RELEASE) {
 				rli.visible = !rli.visible;
+				rli.visibleAll = true;
+				for (uint n = 0; n < rli.residueSz; n++) {
+					rli.residues[n].drawType = rli.visible;
+				}
 				ParGraphics::UpdateDrawLists();
 			}
 		//}
@@ -211,10 +223,17 @@ void ParMenu::Draw_List(float off) {
 					if (Engine::Button(expandPos - 35, off, 16, 16, Icons::OfDM(rj.drawType), white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
 						Popups::type = POPUP_TYPE::DRAWMODE;
 						Popups::pos = Vec2(expandPos - 35, off);
+						drawTypeOld = rj.drawType;
 						Popups::data = &rj.drawType;
+					}
+					else if (Popups::type == POPUP_TYPE::DRAWMODE && Popups::data == &rj.drawType && drawTypeOld != rj.drawType) {
+						rli.drawType = 255;
+						ParGraphics::UpdateDrawLists();
 					}
 					if (Engine::Button(expandPos - 18, off, 16, 16, rj.visible ? Icons::visible : Icons::hidden) == MOUSE_RELEASE) {
 						rj.visible = !rj.visible;
+						rli.visibleAll = false;
+						ParGraphics::UpdateDrawLists();
 					}
 				//}
 				off += 17;

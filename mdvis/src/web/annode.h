@@ -31,6 +31,7 @@ public:
 	bool executing = false;
 	ANNODE_OP op;
 	int settSz = 0;
+	int hdSz = 0;
 
 	bool logExpanded = true;
 	byte logMask = 7;

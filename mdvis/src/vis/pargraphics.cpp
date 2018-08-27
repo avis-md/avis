@@ -222,35 +222,63 @@ void ParGraphics::Init() {
 void ParGraphics::UpdateDrawLists() {
 	drawLists.clear();
 	drawListsB.clear();
-	int di = -1;
+	int di = -1, di2 = -1;
 	byte dt;
 	for (uint i = 0; i < Particles::residueListSz; i++) {
 		auto& r = Particles::residueLists[i];
-		if ((di == -1) && r.visible) {
-			di = i;
-			dt = r.drawType;
-		}
-		else if ((di > -1) && ((!r.visible) || (dt != r.drawType))) {
-			auto& rs = Particles::residueLists[di].residues[0];
-			auto& rs2 = Particles::residueLists[i - 1].residues[Particles::residueLists[i - 1].residueSz-1];
-			if (!!(dt & 0x0f) && (dt != 0x11)) {
-				drawLists.push_back(std::pair<uint, std::pair<uint, byte>>(rs.offset, std::pair<uint, byte>(rs2.offset - rs.offset + rs2.cnt, (dt == 0x01) ? 0x0f : (dt & 0x0f))));
+
+		if (r.drawType == 255 || !r.visibleAll) {
+			for (uint j = 0; j < r.residueSz; j++) {
+				auto rr = r.residues[j];
+				if ((di == -1) && rr.visible) {
+					di = rr.offset;
+					di2 = rr.offset_b;
+					dt = rr.drawType;
+				}
+				else if ((di > -1) && ((!rr.visible) || (dt != rr.drawType))) {
+					if (!!(dt & 0x0f) && (dt != 0x11)) {
+						drawLists.push_back(std::pair<uint, std::pair<uint, byte>>(di, std::pair<uint, byte>(rr.offset - di, (dt == 0x01) ? 0x0f : (dt & 0x0f))));
+					}
+					auto bcnt = rr.offset_b - di2;
+					if (!!bcnt && !!(dt >> 4)) drawListsB.push_back(std::pair<uint, std::pair<uint, byte>>(di2, std::pair<uint, byte>(bcnt, dt >> 4)));
+					if (!rr.visible) di = -1;
+					else {
+						di = rr.offset;
+						di2 = rr.offset_b;
+						dt = rr.drawType;
+					}
+				}
 			}
-			auto bcnt = rs2.offset_b - rs.offset_b + rs2.cnt_b;
-			if (!!bcnt && !!(dt >> 4)) drawListsB.push_back(std::pair<uint, std::pair<uint, byte>>(rs.offset_b, std::pair<uint, byte>(bcnt, dt >> 4)));
-			if (!r.visible) di = -1;
-			else {
-				di = i;
+		}
+		else {
+			if ((di == -1) && r.visible) {
+				di = r.residues[0].offset;
+				di2 = r.residues[0].offset_b;
 				dt = r.drawType;
+			}
+			else if ((di > -1) && ((!r.visible) || (dt != r.drawType))) {
+				if (!!(dt & 0x0f) && (dt != 0x11)) {
+					drawLists.push_back(std::pair<uint, std::pair<uint, byte>>(di, std::pair<uint, byte>(r.residues[0].offset - di, (dt == 0x01) ? 0x0f : (dt & 0x0f))));
+				}
+				auto bcnt = r.residues[0].offset_b - di2;
+				if (!!bcnt && !!(dt >> 4)) drawListsB.push_back(std::pair<uint, std::pair<uint, byte>>(di2, std::pair<uint, byte>(bcnt, dt >> 4)));
+				if (!r.visible) di = -1;
+				else {
+					di = r.residues[0].offset;
+					di2 = r.residues[0].offset_b;
+					dt = r.drawType;
+				}
 			}
 		}
 	}
 	if (di > -1) {
-		auto& rs = Particles::residueLists[di].residues[0];
-		auto& rs2 = Particles::residueLists[Particles::residueListSz-1].residues[Particles::residueLists[Particles::residueListSz - 1].residueSz - 1];
-		if (!!(dt & 0x0f) && (dt != 0x11)) drawLists.push_back(std::pair<uint, std::pair<uint, byte>>(rs.offset, std::pair<uint, byte>(rs2.offset - rs.offset + rs2.cnt, (dt == 0x01) ? 0x0f : (dt & 0x0f))));
-		auto bcnt = rs2.offset_b - rs.offset_b + rs2.cnt_b;
-		if (!!bcnt && !!(dt >> 4)) drawListsB.push_back(std::pair<uint, std::pair<uint, byte>>(rs.offset_b, std::pair<uint, byte>(bcnt, dt >> 4)));
+		auto& rl = Particles::residueLists[Particles::residueListSz - 1];
+		auto& rs = rl.residues[rl.residueSz-1];
+		if (!!(dt & 0x0f) && (dt != 0x11)) {
+			drawLists.push_back(std::pair<uint, std::pair<uint, byte>>(di, std::pair<uint, byte>(rs.offset + rs.cnt - di, (dt == 0x01) ? 0x0f : (dt & 0x0f))));
+		}
+		auto bcnt = rs.offset_b + rs.cnt_b - di2;
+		if (!!bcnt && !!(dt >> 4)) drawListsB.push_back(std::pair<uint, std::pair<uint, byte>>(di2, std::pair<uint, byte>(bcnt, dt >> 4)));
 	}
 	Scene::dirty = true;
 }
@@ -771,7 +799,7 @@ void ParGraphics::DrawColMenu() {
 	off += 18;
 	for (int a = 0; a < Particles::particles_ParamSz; a++) {
 		UI::Label(exps - 147, off + a*17, 12, std::to_string(a+1), white());
-		UI::EditText(exps - 130, off + a*17, 110, 16, 12, white(1, 0.4f), Particles::particles_ParamNms[a], true, white());
+		Particles::particles_ParamNms[a] = UI::EditText(exps - 130, off + a*17, 110, 16, 12, white(1, 0.4f), Particles::particles_ParamNms[a], true, white());
 	}
 	if (Engine::Button(exps - 130, off + Particles::particles_ParamSz*17, 110, 16, white(1, 0.4f), "+", 12, white(), true) == MOUSE_RELEASE) {
 		Particles::AddParam();
@@ -955,5 +983,5 @@ void ParGraphics::DrawPopupDM() {
 	if ((Input::mouse0State == 1) && !Engine::Button(Popups::pos.x, Popups::pos.y + 16, 111, 60)) {
 		Popups::type = POPUP_TYPE::NONE;
 	}
-	if (dto != dt) ParGraphics::UpdateDrawLists();
+	//if (dto != dt) ParGraphics::UpdateDrawLists();
 }

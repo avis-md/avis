@@ -145,7 +145,7 @@ void AnNode::Draw() {
 }
 
 float AnNode::GetHeaderSz() {
-	return (showDesc? (17 * script->descLines) : 0) + (showSett? settSz : 0);
+	return (showDesc? (17 * script->descLines) : 0) + (showSett? settSz : 0) + hdSz;
 }
 
 void AnNode::DrawHeader(float& off) {
@@ -203,7 +203,7 @@ float AnNode::DrawSide() {
 		if (AnWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));
 		return 19.0f + 17 * cnt + DrawLog(18.0f + 17 * cnt);
 	}
-	else return 17.0f + DrawLog(16.0f);
+	else return 17.0f + DrawLog(16.0f) + hdSz;
 #else
 	return 0;
 #endif
