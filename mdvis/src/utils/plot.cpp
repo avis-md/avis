@@ -1,4 +1,5 @@
 #include "plot.h"
+#include "ui/icons.h"
 
 string to_string_scientific(float f) {
 	std::stringstream strm;
@@ -50,5 +51,71 @@ void plt::plot(float x, float y, float w, float h, float* dx, float* dy, uint cn
 		UI::Label(x + w, y + h - 4 - sz, (float)sz, to_string_scientific(y2), col);
 		Engine::ResetUIMatrix();
 		font->Align(ALIGN_TOPLEFT);
+	}
+}
+
+void plt::remap(float x, float y, float w, float h, plt::remapdata& data) {
+	auto ps = data.pts.size();
+	for (int a = 0; a < 3; a++) {
+		if (Engine::Button(x + w - 21 * (2-a) - 20, y, 20, 16, white(1, 0.4f)) == MOUSE_RELEASE) {
+			data.type = a;
+		}
+	}
+	UI::Label(x, y + h - 17, 12, "anchor", white());
+	Engine::DrawQuad(x, y + 17, w, h - 34, white(1, 0.1f));
+	x += 2;
+	y += 19;
+	w -= 4;
+	h -= 38;
+	Engine::DrawQuad(x, y, w, h, white(1, 0.3f));
+	
+	if (!!ps){
+		float y0, x1;
+		y0 = y + (1-data.pts[0].y) * h;
+		if (ps > 1) {
+			switch (data.type) {
+			case 0:
+				x1 = x + data.pts[1].x * w;
+				Engine::DrawLine(Vec2(x, y0), Vec2(x1, y0), white(), 1);
+				Engine::DrawLine(Vec2(x1, y0), Vec2(x1, y + (1-data.pts[1].y) * h), white(), 1);
+				for (int a = 1; a < ps - 1; a++) {
+					y0 = y + (1-data.pts[a].y) * h;
+					x1 = x + data.pts[a+1].x * w;
+					Engine::DrawLine(Vec2(x + data.pts[a].x * w, y0), Vec2(x1, y0), white(), 1);
+					Engine::DrawLine(Vec2(x1, y0), Vec2(x1, y + (1-data.pts[a+1].y) * h), white(), 1);
+				}
+				y0 = y + (1-data.pts[ps-1].y) * h;
+				Engine::DrawLine(Vec2(x + data.pts[ps-1].x * w, y0), Vec2(x + w, y0), white(), 1);
+				break;
+			case 1:
+				Engine::DrawLine(Vec2(x, y0), Vec2(x + data.pts[0].x * w, y0), white(), 1);
+				for (int a = 0; a < ps - 1; a++) {
+					y0 = y + (1-data.pts[a].y) * h;
+					Engine::DrawLine(Vec2(x + data.pts[a].x * w, y + (1-data.pts[a].y) * h), 
+						Vec2(x + data.pts[a+1].x * w, y + (1-data.pts[a+1].y) * h), white(), 1);
+				}
+				y0 = y + (1-data.pts[ps-1].y) * h;
+				Engine::DrawLine(Vec2(x + data.pts[ps-1].x * w, y0), Vec2(x + w, y0), white(), 1);
+				break;
+			}
+		}
+		else Engine::DrawLine(Vec2(x, y0), Vec2(x + w, y0), white(), 1);
+	}
+	else Engine::DrawLine(Vec2(x, y + h), Vec2(x + w, y), white(), 1);
+	
+	if (Input::mouse0State == 1) data.selId = -1;
+	for (size_t i = 0; i < ps; i++) {
+		auto& pt = data.pts[i];
+		if (Engine::Button(x + w*pt.x - 4, y + h*(1-pt.y) - 4, 8, 8, Icons::circle, (i == data.selId)? yellow() : white()) == MOUSE_PRESS) {
+			data.selId = i;
+		}
+	}
+	if (data.selId > -1 && Input::mouse0) {
+		data.pts[data.selId] = Vec2(Clamp((Input::mousePos.x - x)/w, 0.0f, 1.0f), 
+			1 - Clamp((Input::mousePos.y - y)/h, 0.0f, 1.0f));
+		
+		Vec2 me = data.pts[data.selId];
+		std::sort(data.pts.begin(), data.pts.end(), [](Vec2 v1, Vec2 v2) { return v1.x < v2.x; });
+		data.selId = std::find(data.pts.begin(), data.pts.end(), me) - data.pts.begin();
 	}
 }

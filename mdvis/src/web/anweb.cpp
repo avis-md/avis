@@ -185,6 +185,7 @@ void AnWeb::Draw() {
 						SW(GEN::VOL, Node_Volume);
 
 						SW(MISC::PLOT, Node_Plot);
+						SW(MISC::SRNG, Node_ShowRange);
 					default:
 						Debug::Error("AnWeb::Draw", "Unhandled node type: " + std::to_string((int)selSpNode));
 						return;
@@ -485,11 +486,12 @@ void AnWeb::Load(const string& s) {
 			ND(Node_Inputs_SelPar)
 			ND(Node_AddBond)
 			ND(Node_Camera_Out)
-			ND(Node_Plot)
 			ND(Node_Recolor)
 			ND(Node_Recolor_All)
 			ND(Node_SetParam)
 			ND(Node_Volume)
+			ND(Node_Plot)
+			ND(Node_ShowRange)
 			Debug::Warning("AnWeb::Load", "Unknown node name: " + nm);
 #undef ND
 			break;

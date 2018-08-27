@@ -15,6 +15,7 @@ const string Node_Plot::sig = ".plot";
 const string Node_Recolor::sig = ".recol";
 const string Node_Recolor_All::sig = ".recola";
 const string Node_SetParam::sig = ".param";
+const string Node_ShowRange::sig = ".srng";
 const string Node_Volume::sig = ".vol";
 
 Texture* AnNode::tex_circle_open = nullptr, *AnNode::tex_circle_conn = nullptr;

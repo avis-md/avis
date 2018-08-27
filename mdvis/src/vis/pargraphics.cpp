@@ -602,6 +602,7 @@ void ParGraphics::Recolor() {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, cam->d_colfbo);
 
+
 	glUseProgram(colProg);
 	glUniform1i(colProgLocs[0], 0);
 	glActiveTexture(GL_TEXTURE0);

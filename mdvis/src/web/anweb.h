@@ -40,9 +40,10 @@ const string AN_NODE_GENS[] = { "Add Bonds", "Add Volume" };
 enum class AN_NODE_MISC {
 	NUM0 = 0x60,
 	PLOT,
+	SRNG,
 	NUM
 };
-const string AN_NODE_MISCS[] = { "Plot graph" };
+const string AN_NODE_MISCS[] = { "Plot graph", "Show Range" };
 
 class AnWeb {
 public:
@@ -86,4 +87,5 @@ public:
 #include "nodes/node_plot.h"
 #include "nodes/node_recolor.h"
 #include "nodes/node_setparam.h"
+#include "nodes/node_showrange.h"
 #include "nodes/node_volume.h"
