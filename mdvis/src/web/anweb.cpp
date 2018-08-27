@@ -179,6 +179,8 @@ void AnWeb::Draw() {
 						SW(MOD::RECOL, Node_Recolor);
 						SW(MOD::RECOLA, Node_Recolor_All);
 
+						SW(MOD::PARAM, Node_SetParam);
+
 						SW(GEN::BOND, Node_AddBond);
 						SW(GEN::VOL, Node_Volume);
 
@@ -486,6 +488,7 @@ void AnWeb::Load(const string& s) {
 			ND(Node_Plot)
 			ND(Node_Recolor)
 			ND(Node_Recolor_All)
+			ND(Node_SetParam)
 			ND(Node_Volume)
 			Debug::Warning("AnWeb::Load", "Unknown node name: " + nm);
 #undef ND

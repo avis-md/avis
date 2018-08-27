@@ -2,6 +2,30 @@
 #include "web/anweb.h"
 #include "md/Protein.h"
 
+Particles::paramdata::paramdata() {
+	data = new float[particleSz]{};
+	glGenBuffers(1, &buf);
+	glBindBuffer(GL_ARRAY_BUFFER, buf);
+	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(float), 0, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glGenTextures(1, &texBuf);
+	glBindTexture(GL_TEXTURE_BUFFER, texBuf);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, buf);
+	glBindTexture(GL_TEXTURE_BUFFER, 0);
+}
+
+Particles::paramdata::~paramdata() {
+	delete[](data);
+	glDeleteBuffers(1, &buf);
+	glDeleteTextures(1, &texBuf);
+}
+
+void Particles::paramdata::Update() {
+	glBindBuffer(GL_ARRAY_BUFFER, buf);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(float), data);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
 std::vector<ResidueList> Particles::residueLists;
 uint Particles::residueListSz;
 uint Particles::particleSz;
@@ -13,6 +37,10 @@ byte* Particles::particles_Col;
 Particles::conninfo Particles::particles_Conn;
 float* Particles::particles_Rad;
 Int2* Particles::particles_Res;
+
+int Particles::particles_ParamSz = 0;
+Particles::paramdata* Particles::particles_Params[] = {};
+string Particles::particles_ParamNms[] = {};
 
 std::vector<Particles::conninfo> Particles::particles_Conn2;
 
@@ -206,4 +234,20 @@ void Particles::SetFrame(uint frm) {
 		AnWeb::OnAnimFrame();
 		Scene::active->dirty = true;
 	}
+}
+
+void Particles::AddParam() {
+	particles_Params[particles_ParamSz] = new paramdata();
+	particles_ParamNms[particles_ParamSz] = "Unnamed " + std::to_string(particles_ParamSz+1);
+	particles_ParamSz++;
+}
+
+void Particles::RmParam(int i) {
+	delete(particles_Params[i]);
+	for (int a = i+1; a < particles_ParamSz; a++) {
+		particles_Params[a-1] = particles_Params[a];
+		particles_ParamNms[a-1] = particles_ParamNms[a];
+	}
+	particles_ParamSz--;
+	particles_ParamNms[particles_ParamSz] = "";
 }

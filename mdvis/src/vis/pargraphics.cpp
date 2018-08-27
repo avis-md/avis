@@ -26,6 +26,7 @@ std::vector<string> ParGraphics::reflNms;
 Popups::DropdownItem ParGraphics::reflItms((uint*)&reflId, nullptr);
 
 bool ParGraphics::useGradCol = false;
+uint ParGraphics::gradColParam;
 Vec4 ParGraphics::gradCols[] = { blue(), green(), red() };
 bool ParGraphics::useConCol;
 Vec4 ParGraphics::conCol = white();
@@ -49,6 +50,12 @@ float ParGraphics::rotW = 0, ParGraphics::rotZ = 0;
 float ParGraphics::rotWs = 0, ParGraphics::rotZs = 0;
 float ParGraphics::rotScale = 0;
 
+bool ParGraphics::useClipping = true;
+GLuint ParGraphics::clipUbo;
+Vec3 ParGraphics::clipCenter = Vec3();
+Vec3 ParGraphics::clipSize = Vec3(1, 1, 1) * 4.0f;
+Vec4 ParGraphics::clippingPlanes[] = {};
+
 float ParGraphics::zoomFade = 0;
 
 Vec3 ParGraphics::scrX, ParGraphics::scrY;
@@ -57,6 +64,8 @@ bool ParGraphics::dragging = false;
 byte ParGraphics::dragMode = 0;
 
 bool ParGraphics::animate = false, ParGraphics::seek = false;
+float ParGraphics::animOff;
+int ParGraphics::animTarFps = 5;
 bool ParGraphics::tfboDirty = true;
 
 //---------------- effects vars -------------------
@@ -113,6 +122,8 @@ float ParGraphics::Eff::DrawMenu(float off) {
 
 
 void ParGraphics::Init() {
+	const GLuint _clipBindId = 11;
+
 	_usePBRNms[0] = _("Classic");
 	_usePBRNms[1] = _("PBR");
 	std::ifstream strm(IO::path + "/backgrounds/default");
@@ -155,6 +166,8 @@ void ParGraphics::Init() {
 	LC(_MV); LC(_P); LC(camPos);
 	LC(camFwd); LC(orthoSz); LC(screenSize);
 	LC(radTex); LC(radScl);
+	auto bid = glGetUniformBlockIndex(parProg, "clipping");
+	glUniformBlockBinding(parProg, bid, _clipBindId);
 #undef LC
 
 	parConProg = Shader::FromVF(IO::GetText(IO::path + "/parConV.txt"), IO::GetText(IO::path + "/parConF.txt"));
@@ -186,7 +199,14 @@ void ParGraphics::Init() {
 	LC(gradcols); LC(doid); LC(tint);
 #undef LC
 
-	glDeleteShader(mv); 
+	glDeleteShader(mv);
+
+	clippingPlanes[0] = Vec4(0, 1, 0, 0);
+	glGenBuffers(1, &clipUbo);
+	glBindBuffer(GL_UNIFORM_BUFFER, clipUbo);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(Vec4)*6, &clippingPlanes[0][0], GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	glBindBufferBase(GL_UNIFORM_BUFFER, _clipBindId, clipUbo);
 
 	hlIds.resize(1);
 	ChokoLait::mainCamera->onBlit = Reblit;
@@ -260,7 +280,17 @@ void ParGraphics::Update() {
 	if (!Particles::particleSz)
 		Scene::dirty = true;
 	else if (animate && !seek) {
-		Particles::IncFrame(true);
+		if (!animTarFps) {
+			Particles::IncFrame(true);
+		}
+		else {
+			auto af = Particles::anim.activeFrame;
+			auto dt = Time::delta + animOff;
+			auto df = dt * animTarFps;
+			auto dfi = (uint)floor(df);
+			animOff = (df - dfi) / animTarFps;
+			Particles::SetFrame(Repeat(af + dfi, 0U, Particles::anim.frameCount - 1));
+		}
 		Scene::dirty = true;
 	}
 	if (!!Particles::particleSz && !UI::editingText && !UI::_layerMax) {
@@ -374,6 +404,47 @@ void ParGraphics::Update() {
 	}
 }
 
+void ParGraphics::UpdateClipping() {
+	if (useClipping) {
+		auto mv = MVP::modelview();
+		auto cs = Vec4(clipCenter, 1);
+		Vec4 cents[6], dirs[3];
+		dirs[0] = Vec4(1, 0, 0, 0);
+		dirs[1] = Vec4(0, 1, 0, 0);
+		dirs[2] = Vec4(0, 0, 1, 0);
+		cents[0] = cs - dirs[0] * clipSize.x * 0.5f;
+		cents[1] = cs + dirs[0] * clipSize.x * 0.5f;
+		cents[2] = cs - dirs[1] * clipSize.y * 0.5f;
+		cents[3] = cs + dirs[1] * clipSize.y * 0.5f;
+		cents[4] = cs - dirs[2] * clipSize.z * 0.5f;
+		cents[5] = cs + dirs[2] * clipSize.z * 0.5f;
+		for (int a = 0; a < 3; a++) {
+			dirs[a] = Normalize(mv * dirs[a]);
+		}
+		clippingPlanes[0] = -dirs[0];
+		clippingPlanes[1] = dirs[0];
+		clippingPlanes[2] = -dirs[1];
+		clippingPlanes[3] = dirs[1];
+		clippingPlanes[4] = -dirs[2];
+		clippingPlanes[5] = dirs[2];
+		for (int a = 0; a < 6; a++) {
+			cents[a] = mv * cents[a];
+			cents[a] /= cents[a].w;
+			clippingPlanes[a].w = glm::dot((Vec3)cents[a], (Vec3)clippingPlanes[a]);
+		}
+	}
+	else {
+		for (int a = 0; a < 6; a++) {
+			clippingPlanes[a] = Vec4();
+		}
+	}
+
+	glBindBuffer(GL_UNIFORM_BUFFER, clipUbo);
+	GLvoid* p = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+	memcpy(p, &clippingPlanes[0][0], sizeof(Vec4)*4);
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
+}
+
 void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 	if (!!Particles::particleSz) {
 		float csz = cos(-rotZ*deg2rad);
@@ -388,6 +459,8 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 			rotCenter = Particles::particles_Pos[rotCenterTrackId];
 		}
 		MVP::Translate(-rotCenter.x, -rotCenter.y, -rotCenter.z);
+
+		UpdateClipping();
 
 		auto _mv = MVP::modelview();
 		auto _p = MVP::projection();
@@ -539,7 +612,12 @@ void ParGraphics::Recolor() {
 	glUniform2f(colProgLocs[2], Display::width * cam->quality, Display::height * cam->quality);
 	glUniform1i(colProgLocs[3], 2);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
+	if (useGradCol) {
+		auto prm = Particles::particles_Params[gradColParam];
+		if (prm->dirty) prm->Update();
+		glBindTexture(GL_TEXTURE_BUFFER, prm->texBuf);
+	}
+	else glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
 	glUniform1i(colProgLocs[4], 3);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
@@ -687,12 +765,33 @@ void ParGraphics::BlitHl() {
 void ParGraphics::DrawColMenu() {
 	auto& exps = ParMenu::expandPos;
 	float off = 20;
+	UI::Label(exps - 148, off, 12, "Parameters", white());
+	Engine::DrawQuad(exps - 149, off + 17, 149, 17 * 4 + 2, white(0.9f, 0.1f));
+	off += 18;
+	for (int a = 0; a < Particles::particles_ParamSz; a++) {
+		UI::Label(exps - 147, off + a*17, 12, std::to_string(a+1), white());
+		UI::EditText(exps - 130, off + a*17, 110, 16, 12, white(1, 0.4f), Particles::particles_ParamNms[a], true, white());
+	}
+	if (Engine::Button(exps - 130, off + Particles::particles_ParamSz*17, 110, 16, white(1, 0.4f), "+", 12, white(), true) == MOUSE_RELEASE) {
+		Particles::AddParam();
+	}
+	off += 4 * 17 + 3;
+
+	UI::Label(exps - 148, off, 12, "Coloring", white());
+	off += 17;
+	UI::alpha = (Particles::particles_ParamSz > 0)? 1 : 0.5f;
 	UI2::Toggle(exps - 148, off, 147, _("Gradient Fill"), useGradCol);
-	off += 19;
+	if (Particles::particles_ParamSz == 0) useGradCol = false;
+	UI::alpha = 1;
+	off += 17;
 	if (useGradCol) {
+		gradColParam = min(gradColParam, (uint)(Particles::particles_ParamSz-1));
+		static Popups::DropdownItem di = Popups::DropdownItem(&gradColParam, Particles::particles_ParamNms);
+		UI2::Dropdown(exps - 147, off, 146, "Param", di);
+		off += 20;
 		Color::DrawH2(exps - 115, off + 8, 16, 17*5 - 16, gradCols);
+		static const string ii[] = { "0.0", "0.5", "1.0" };
 		for (int a = 0; a < 3; a++) {
-			const string ii[] = { "0.0", "0.5", "1.0" };
 			UI2::Color(exps - 140, off + 34 * (2 - a), 138, ii[a], gradCols[a]);
 			UI::Texture(exps - 95, off + 34 * a, 16, 16, Icons::left, white(1, 0.4f));
 		}

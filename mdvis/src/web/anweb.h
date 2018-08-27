@@ -24,9 +24,10 @@ enum class AN_NODE_MOD {
 	NUM0 = 0x20,
 	RECOL,
 	RECOLA,
+	PARAM,
 	NUM
 };
-const string AN_NODE_MODS[] = { "Recolor", "Recolor All" };
+const string AN_NODE_MODS[] = { "Recolor", "Recolor All", "Set Param" };
 
 enum class AN_NODE_GEN {
 	NUM0 = 0x40,
@@ -84,4 +85,5 @@ public:
 #include "nodes/node_inputs.h"
 #include "nodes/node_plot.h"
 #include "nodes/node_recolor.h"
+#include "nodes/node_setparam.h"
 #include "nodes/node_volume.h"

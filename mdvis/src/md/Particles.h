@@ -57,6 +57,17 @@ public:
 		bool visible = true;
 	};
 
+	struct paramdata {
+		paramdata();
+		~paramdata();
+
+		bool dirty = false;
+		float* data;
+		GLuint buf, texBuf;
+		
+		void Update();
+	};
+
 	static std::vector<ResidueList> residueLists;
 	static uint residueListSz;
 	static uint particleSz;
@@ -68,6 +79,10 @@ public:
 	static conninfo particles_Conn;
 	static float* particles_Rad;
 	static Int2* particles_Res;
+
+	static int particles_ParamSz;
+	static paramdata* particles_Params[10];
+	static string particles_ParamNms[11];
 
 	static std::vector<conninfo> particles_Conn2;
 
@@ -87,6 +102,7 @@ public:
 	static bool palleteDirty;
 
 	static void Init(), Clear(), GenTexBufs(), UpdateBufs(), UpdateColorTex(), UpdateRadBuf();
+	static void AddParam(), RmParam(int i);
 
 	static GLuint posVao;
 	static GLuint posBuffer; //xyz
