@@ -193,7 +193,8 @@ void ParMenu::Draw_List(float off) {
 				drawTypeOld = rli.drawType;
 				Popups::data = &rli.drawType;
 			}
-			else if (Popups::type == POPUP_TYPE::DRAWMODE && Popups::data == &rli.drawType && drawTypeAll != rli.drawType) {
+			else if (Popups::type == POPUP_TYPE::DRAWMODE && Popups::data == &rli.drawType && drawTypeOld != rli.drawType) {
+				drawTypeOld = rli.drawType;
 				for (uint n = 0; n < rli.residueSz; n++) {
 					rli.residues[n].drawType = rli.drawType;
 				}
@@ -227,6 +228,7 @@ void ParMenu::Draw_List(float off) {
 						Popups::data = &rj.drawType;
 					}
 					else if (Popups::type == POPUP_TYPE::DRAWMODE && Popups::data == &rj.drawType && drawTypeOld != rj.drawType) {
+						drawTypeOld = rj.drawType;
 						rli.drawType = 255;
 						ParGraphics::UpdateDrawLists();
 					}
