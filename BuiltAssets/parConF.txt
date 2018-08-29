@@ -2,7 +2,6 @@
 
 flat in uint v2f_id1;
 flat in uint v2f_id2;
-in vec3 v2f_pos;
 in vec3 v2f_wpos1;
 in vec3 v2f_wpos2;
 in float v2f_scl;
@@ -73,6 +72,8 @@ void main()
     float lp12 = length(p1 - p2);
 	if (lp12 > r) {
         discard;
+        gl_FragDepth = gl_FragCoord.z;
+        Output(uvec4(0, 0, 0, 0), vec3(0, 0, 0), vec3(0, 0, 0), 0, vec4(0, 1, 0, 0));
     }
     else {
         float p232 = r*r - lp12*lp12;
@@ -104,8 +105,11 @@ void main()
         vec3 cf = p1 + td2 * l3f;
         
         float lc2 = len2(cf - v2f_wpos1);
-        if ((dot(cf - v2f_wpos1, td) < 0) || (lc2 > lm*lm))
+        if ((dot(cf - v2f_wpos1, td) < 0) || (lc2 > lm*lm)) {
             discard;
+            gl_FragDepth = gl_FragCoord.z;
+			Output(uvec4(0, 0, 0, 0), vec3(0, 0, 0), vec3(0, 0, 0), 0, vec4(0, 1, 0, 0));
+        }
         uint id = (sqrt(lc2)/lm > 0.5) ? v2f_id2 : v2f_id1;
         
         vec4 ndc2 = _P * vec4(pf, 1);

@@ -175,7 +175,7 @@ void ParGraphics::Init() {
 	i = 0;
 	LC(_MV); LC(_P); LC(camPos); LC(camFwd);
 	LC(screenSize); LC(posTex); LC(connTex);
-	LC(id2); LC(radScl);
+	LC(id2); LC(radScl), LC(orthoSz);
 #undef LC
 
 	parConLineProg = Shader::FromVF(IO::GetText(IO::path + "/parConV_line.txt"), IO::GetText(IO::path + "/parConF_line.txt"));
@@ -564,7 +564,8 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
 					glUniform1ui(parConProgLocs[7], 1);
 					glUniform1f(parConProgLocs[8], con.scale);
-					glDrawArrays(GL_POINTS, p.first, p.second.first);
+					glUniform1f(parConProgLocs[9], osz);
+					glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
 				}
 			}
 			uint id2 = 4;
