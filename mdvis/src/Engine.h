@@ -144,6 +144,7 @@ const uint UI_MAX_EDIT_TEXT_FRAMES = 8;
 
 float Dw(float), Dh(float);
 Vec3 Ds(Vec3);
+Vec2 Ds2(Vec2);
 
 #include "core/math.h"
 
@@ -422,7 +423,6 @@ enum FFT_WINDOW : byte {
 
 #include "utils/random.h"
 #include "utils/ptrext.h"
-#include "utils/precedurals.h"
 #include "utils/stream.h"
 
 #include "core/font.h"

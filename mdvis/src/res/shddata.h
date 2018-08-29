@@ -22,3 +22,4 @@
 #include "_shd/reflFragC.h"
 #include "_shd/voxelFrag.h"
 #include "_shd/voxelVert.h"
+#include "_shd/bezierVert.h"

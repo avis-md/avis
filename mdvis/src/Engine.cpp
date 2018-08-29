@@ -24,6 +24,9 @@ float Dh(float f) {
 Vec3 Ds(Vec3 v) {
 	return Vec3(Dw(v.x) * 2 - 1, 1 - Dh(v.y) * 2, 1);
 }
+Vec2 Ds2(Vec2 v) {
+	return Vec2(Dw(v.x) * 2 - 1, 1 - Dh(v.y) * 2);
+}
 
 
 #ifdef PLATFORM_WIN

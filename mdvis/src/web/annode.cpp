@@ -47,7 +47,11 @@ Vec2 AnNode::DrawConn() {
 	float y = pos.y + 18 + hy;
 	for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 		auto& ri = inputR[i];
-		if (ri.first) Engine::DrawLine(Vec2(pos.x, expanded ? y + 8 : pos.y + 8), Vec2(ri.first->pos.x + ri.first->width, ri.first->expanded ? ri.first->pos.y + 28 + ri.first->GetHeaderSz() + (ri.second + ri.first->inputR.size()) * 17 : ri.first->pos.y + 8), white(), 2);
+		if (ri.first) {
+			Vec2 p2 = Vec2(pos.x, expanded ? y + 8 : pos.y + 8);
+			Vec2 p1 = Vec2(ri.first->pos.x + ri.first->width, ri.first->expanded ? ri.first->pos.y + 28 + ri.first->GetHeaderSz() + (ri.second + ri.first->inputR.size()) * 17 : ri.first->pos.y + 8);
+			UI2::Bezier(p1, p1 + Vec2(10, 0), p2 - Vec2(10, 0), p2, white());
+		}
 	}
 	if (expanded) return Vec2(width, 19 + 17 * cnt + DrawLog(19.0f + 17 * cnt) + hy);
 	else return Vec2(width, 16 + DrawLog(16));
@@ -58,9 +62,11 @@ Vec2 AnNode::DrawConn() {
 
 void AnNode::Draw() {
 #ifndef IS_ANSERVER
+	const float connrad = 6;
+
 	auto cnt = (script->invars.size() + script->outvars.size());
 	Engine::DrawQuad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
-	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
+	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 18, pos.y + 1, 12, title, script->ok? white() : red());
 	DrawToolbar();
 	if (expanded) {
@@ -70,7 +76,7 @@ void AnNode::Draw() {
 		y += 2;
 		for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 			if (!AnWeb::selConnNode || (AnWeb::selConnIdIsOut && AnWeb::selConnNode != this)) {
-				if (Engine::Button(pos.x - 5, y + 3, 10, 10, inputR[i].first ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
+				if (Engine::Button(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, inputR[i].first ? tex_circle_conn : tex_circle_open, white(), Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f)) == MOUSE_RELEASE) {
 					if (!AnWeb::selConnNode) {
 						AnWeb::selConnNode = this;
 						AnWeb::selConnId = i;
@@ -85,10 +91,10 @@ void AnNode::Draw() {
 			}
 			else if (AnWeb::selConnNode == this && AnWeb::selConnId == i && !AnWeb::selConnIdIsOut) {
 				Engine::DrawLine(Vec2(pos.x, y + 8), Input::mousePos, white(), 1);
-				UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[i].first ? tex_circle_conn : tex_circle_open);
+				UI::Texture(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, inputR[i].first ? tex_circle_conn : tex_circle_open);
 			}
 			else {
-				UI::Texture(pos.x - 5, y + 3, 10, 10, inputR[i].first ? tex_circle_conn : tex_circle_open, red(0.3f));
+				UI::Texture(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, inputR[i].first ? tex_circle_conn : tex_circle_open, red(0.3f));
 			}
 			UI::Label(pos.x + 10, y, 12, script->invars[i].first, white());
 			if (!inputR[i].first) {
@@ -112,7 +118,7 @@ void AnNode::Draw() {
 
 		for (uint i = 0; i < script->outvars.size(); i++, y += 17) {
 			if (!AnWeb::selConnNode || ((!AnWeb::selConnIdIsOut) && (AnWeb::selConnNode != this))) {
-				if (Engine::Button(pos.x + width - 5, y + 3, 10, 10, outputR[i].first ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
+				if (Engine::Button(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, outputR[i].first ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
 					if (!AnWeb::selConnNode) {
 						AnWeb::selConnNode = this;
 						AnWeb::selConnId = i;
@@ -127,10 +133,10 @@ void AnNode::Draw() {
 			}
 			else if (AnWeb::selConnNode == this && AnWeb::selConnId == i && AnWeb::selConnIdIsOut) {
 				Engine::DrawLine(Vec2(pos.x + width, y + 8), Input::mousePos, white(), 1);
-				UI::Texture(pos.x + width - 5, y + 3, 10, 10, outputR[i].first ? tex_circle_conn : tex_circle_open);
+				UI::Texture(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, outputR[i].first ? tex_circle_conn : tex_circle_open);
 			}
 			else {
-				UI::Texture(pos.x + width - 5, y + 3, 10, 10, outputR[i].first ? tex_circle_conn : tex_circle_open, red(0.3f));
+				UI::Texture(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, outputR[i].first ? tex_circle_conn : tex_circle_open, red(0.3f));
 			}
 
 

@@ -3,6 +3,7 @@
 //#define MAKE_RES
 //#define MAKE_LOCL
 
+#include "ui/ui_ext.h"
 #include "ui/localizer.h"
 #include "ui/icons.h"
 #include "ui/popups.h"
@@ -244,6 +245,7 @@ int main(int argc, char **argv) {
 		RayTracer::Init();
 		Color::Init();
 		Icons::Init();
+		UI2::Init();
 		SSH::Init();
 		CubeMarcher::Init();
 		VisSystem::Init();

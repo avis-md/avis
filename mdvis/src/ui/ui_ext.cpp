@@ -2,6 +2,19 @@
 #include "icons.h"
 #include "popups.h"
 #include "utils/dialog.h"
+#include "res/shddata.h"
+
+PROGDEF(UI2::bezierProg)
+
+void UI2::Init() {
+	bezierProg = Shader::FromVF(glsl::bezierVert, glsl::coreFrag3);
+#define LC(nm) bezierProgLocs[i++] = glGetUniformLocation(bezierProg, #nm) 
+	int i = 0;
+	LC(pts);
+	LC(count);
+	LC(col);
+#undef LC
+}
 
 void UI2::LabelMul(float x, float y, float sz, const string& s) {
 	auto ss = string_split(s, '\n');
@@ -93,4 +106,15 @@ void UI2::Switch(float x, float y, float w, const string& title, int c, string* 
 			i = a;
 		}
 	}
+}
+
+void UI2::Bezier(Vec2 p1, Vec2 t1, Vec2 t2, Vec2 p2, Vec4 col, int reso) {
+	glUseProgram(bezierProg);
+	Vec2 pts[4] = { Ds2(p1), Ds2(t1), Ds2(t2), Ds2(p2) };
+	glUniform2fv(bezierProgLocs[0], 4, &pts[0][0]);
+	glUniform1i(bezierProgLocs[1], reso-1);
+	glUniform4f(bezierProgLocs[2], col.r, col.g, col.b, col.a);
+	glBindVertexArray(Camera::emptyVao);
+	glDrawArrays(GL_LINE_STRIP, 0, reso);
+	glUseProgram(0);
 }

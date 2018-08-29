@@ -1,6 +1,9 @@
 #pragma once
 #include "AssetObjects.h"
 
+#define PROGDEF(nm) GLuint nm; GLint nm ## Locs[] = {};
+#define PROGDEF_H(nm, c) static GLuint nm; static GLint nm ## Locs[c];
+
 class IShaderBuffer {
 public:
 	IShaderBuffer(uint size, void* data, uint padding = 0, uint stride = 1);
