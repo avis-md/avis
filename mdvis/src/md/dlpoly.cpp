@@ -3,6 +3,7 @@
 #include <vector>
 #include <stdint.h>
 #include <algorithm>
+#include <cstring>
 
 #define SETERR(msg) { memcpy(info->error, msg, sizeof(msg)); return false; }
 

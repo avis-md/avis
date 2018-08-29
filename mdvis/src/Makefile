@@ -2,23 +2,28 @@ OSFLAG :=
 LDFLAGS2 :=
 GLLIB :=
 LIBS2 :=
+PYLIB :=
+WEAK_LIB :=
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	OSFLAG += -D PLATFORM_LNX
 	LDFLAGS2 += -Wl,-rpath='$$ORIGIN' -static-libstdc++
 	GLLIB += -ljpeg -lssh2 -lOpenCL `pkg-config --static --libs gl glew glfw3 freetype2` #-lGL -lglfw3 -lGLEW -ljpeg -lfreetype
+	PYLIB += $(shell python3-config --libs)
 endif
 ifeq ($(UNAME_S),Darwin)
 	OSFLAG += -D PLATFORM_OSX
 	GLLIB += -framework OpenGL -framework OpenCL /usr/local/Cellar/glew/2.1.0/lib/libGLEW.a /usr/local/Cellar/jpeg/9c/lib/libjpeg.a /usr/local/Cellar/freetype/2.9.1/lib/libfreetype.a /usr/local/Cellar/libpng/1.6.34/lib/libpng.a -lbz2 -lglfw3 -framework Cocoa -framework IOKit -framework CoreVideo
 	LIBS2 += /usr/local/Cellar/libssh2/1.8.0/lib/libssh2.a /usr/local/Cellar/openssl/1.0.2o_1/lib/libcrypto.a
+	WEAK_LIB += -weak_library
+	PYLIB += $(shell python3-config --configdir)/libpython3.6m.a
 endif
 
 C = gcc
 CXX = g++
-CXXFLAGS = -O0 -g -std=c++11 -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ -I/usr/local/lib/python3.6/site-packages/numpy/core/include -I$(shell python3-config --prefix)/include/python3.6m $(OSFLAG)
+CXXFLAGS = -O0 -g -std=c++11 -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ -I/usr/local/lib/python3.6/dist-packages/numpy/core/include -I$(shell python3-config --prefix)/include/python3.6m $(OSFLAG)
 LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
-LIBS = -weak_library $(shell python3-config --configdir)/libpython3.6m.a -lpthread -lm $(GLLIB) -lz $(LIBS2)
+LIBS = $(WEAK_LIB) $(PYLIB) -lpthread -lm $(GLLIB) -lz $(LIBS2)
 
 OBJS = obj/hdr.o obj/lodepng.o obj/AudioEngine.o obj/ChokoLait.o obj/Engine.o obj/main.o obj/RenderEngine.o obj/Types.o obj/mdchan.o
 OBJS += obj/asset/mesh.o obj/asset/shader.o obj/asset/rendertexture.o obj/asset/texture.o obj/asset/texture3d.o

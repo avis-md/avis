@@ -2,6 +2,7 @@
 #include "importer_info.h"
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 const char* Lammps::ATTRS[] = {
     "id","mol","type","element",
