@@ -85,7 +85,8 @@ bool CReader::Read(string path, CScript* scr) {
 				"/debug /pdb:\"" + fp2 + nm + ".pdb\" "
 #endif
 				"/out:\"" + fp2 + nm + ".so\" \"" + fp2 + nm + ".obj\"";
-			RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " && " + lk + " > " + fp + "_log.txt");
+			RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " > \"" + fp + "_log.txt\" && " + lk + " > \"" + fp + "_log.txt\"");
+			scr->errorCount = ErrorView::Parse_MSVC(fp + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 		}
 #else
 		string cmd = "g++ -std=c++11 -shared -fPIC "
@@ -104,13 +105,13 @@ bool CReader::Read(string path, CScript* scr) {
 		std::cout << cmd << std::endl;
 		RunCmd::Run(cmd);
 		scr->errorCount = ErrorView::Parse_GCC(fp + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
+#endif
 		for (auto& m : scr->compileLog) {
 			m.path = fp + ".cpp";
 			m.linenum -= 7;
 		}
 		ErrorView::compileMsgs.insert(ErrorView::compileMsgs.end(), scr->compileLog.begin(), scr->compileLog.end());
 		ErrorView::compileMsgSz = ErrorView::compileMsgs.size();
-#endif
 		const string ss = fp + "_temp__.cpp";
 		remove(&ss[0]);
 

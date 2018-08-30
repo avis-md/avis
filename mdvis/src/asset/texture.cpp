@@ -161,7 +161,6 @@ byte* Texture::LoadPixels(const string& path, byte& chn, uint& w, uint& h) {
 
 byte* Texture::LoadPixels(const byte* data, const uint dataSz, uint& w, uint& h) {
 	std::vector<byte> dataV;
-	byte chn;
 	uint err = lodepng::decode(dataV, w, h, data, dataSz);
 	if (!!err) {
 		Debug::Error("PNG reader", "Read PNG error: " + string(lodepng_error_text(err)));
@@ -234,7 +233,6 @@ Texture::Texture(const string& path, bool mipmap, TEX_FILTERING filter, byte ani
 
 Texture::Texture(const byte* data, const uint dataSz, TEX_FILTERING filter, TEX_WRAPING wrap) : AssetObject(ASSETTYPE_TEXTURE) {
 	std::vector<byte> dataV;
-	byte chn;
 	uint err = lodepng::decode(dataV, width, height, data, dataSz);
 	if (!!err) {
 		Debug::Error("PNG reader", "Read PNG error: " + string(lodepng_error_text(err)));

@@ -127,7 +127,7 @@ GLuint Font::CreateGlyph(uint sz, uint mask) {
 				pr.o2s[a] = 0;
 			}
 			else {
-				pr.o2s[a] = _face->glyph->advance.x >> 6;//_face->glyph->metrics.horiAdvance / sz / 64.0f;
+				pr.o2s[a] = (float)(_face->glyph->advance.x >> 6);//_face->glyph->metrics.horiAdvance / sz / 64.0f;
 			}
 			pr.off[a] = Vec2(_face->glyph->bitmap_left, sz - _face->glyph->bitmap_top);
 		}

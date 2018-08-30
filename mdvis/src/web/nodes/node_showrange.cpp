@@ -46,10 +46,10 @@ void Node_ShowRange::DrawHeader(float& off) {
     title = invert? "Hide Range" : "Show Range";
     off += 18;
     auto s = std::to_string(rMin);
-    s = UI2::EditText(pos.x + 2, off, width - 4, "min", s);
+    s = UI2::EditText(pos.x + 2, off, (uint)width - 4, "min", s);
     rMin = TryParse(s, 0.0f);
     s = std::to_string(rMax);
-    s = UI2::EditText(pos.x + 2, off + 17, width - 4, "max", s);
+    s = UI2::EditText(pos.x + 2, off + 17, (uint)width - 4, "max", s);
     rMax = TryParse(s, 0.0f);
 	off += 35;
 }

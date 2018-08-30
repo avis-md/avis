@@ -12,6 +12,7 @@
 #include "utils/dialog.h"
 
 Vec4 VisSystem::accentColor = Vec4(1, 1, 1, 1);
+float VisSystem::glass = 0.9f;
 uint VisSystem::renderMs, VisSystem::uiMs;
 
 std::vector<MenuItem> VisSystem::menuItems[];
@@ -176,7 +177,7 @@ void VisSystem::DrawTitle() {
 	const string menu[] = {"File", "Edit", "Options", "Render", "Help"};
 	const uint menusp[] = {0, 30, 62, 115, 170, 210};
 	for (uint i = 0; i < 5; i++) {
-		if (Engine::Button(2 + menusp[i], 1, menusp[i + 1] - menusp[i] - 1, 16, white(0), menu[i], 12, white(), true) == MOUSE_RELEASE) {
+		if (Engine::Button(2.0f + menusp[i], 1, menusp[i + 1] - menusp[i] - 1.0f, 16, white(0), menu[i], 12, white(), true) == MOUSE_RELEASE) {
 			Popups::type = POPUP_TYPE::MENU;
 			Popups::pos = Vec2(2 + menusp[i], 17);
 			Popups::data = menuItems + i;
@@ -219,7 +220,7 @@ void VisSystem::DrawBar() {
 		fps = Clamp(fps, 0, 1000);
 
 		float al = float(Particles::anim.activeFrame) / (Particles::anim.frameCount - 1);
-		al = Engine::DrawSliderFill(225, Display::height - 13.0f, Display::width - 385.0f, 9, 0, 1, al, white(0.5f), accent());
+		al = Engine::DrawSliderFill(225, Display::height - 13.0f, Display::width - 385.0f, 9, 0, 1, al, white(0.5f), VisSystem::accentColor);
 		Engine::DrawQuad(222 + (Display::width - 385.0f) * al, Display::height - 17.0f, 6, 16, white());
 
 		if ((Engine::Button(225, Display::height - 13.0f, Display::width - 385.0f, 9) & 0x0f) == MOUSE_DOWN)
@@ -245,7 +246,7 @@ void VisSystem::DrawBar() {
 
 void VisSystem::DrawMsgPopup() {
 	UI::IncLayer();
-	Engine::DrawQuad(0, 0, Display::width, Display::height, black(0.7f));
+	Engine::DrawQuad(0, 0, (float)Display::width, (float)Display::height, black(0.7f));
 	
 	Engine::DrawQuad(Display::width * 0.5f - 200, Display::height * 0.5f - 50, 400, 100, white(0.95f, 0.15f));
 

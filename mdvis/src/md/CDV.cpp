@@ -23,7 +23,6 @@ bool CDV::Read(ParInfo* info) {
 
 	uint32_t pi;
 	auto& sz = info->num = 0;
-	float dm;
 
 	std::string s;
 	while (std::getline(strm, s)) {
@@ -73,7 +72,7 @@ bool CDV::ReadTrj(TrjInfo* info) {
 	auto ps = nmf.find_last_of('/');
 	auto nm = nmf.substr(ps + 1);
 	int n1, n2 = 0;
-	for (int a = 0; a < nm.size() - 1; a++) {
+	for (uint a = 0; a < nm.size() - 1; a++) {
 		if (nm[a + 1] == '.' && ISNUM(nm[a])) {
 			n1 = a;
 			break;

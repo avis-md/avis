@@ -340,9 +340,9 @@ void Protein::DrawMenu(float off) {
 		}
 		off += 17;
 		if (p.expanded) {
-			int f2 = p.first.y;
+			uint f2 = (uint)p.first.y;
 			uint a = 0;
-			for (int f1 = p.first.x; f1 < Particles::residueListSz; f1++) {
+			for (uint f1 = (uint)p.first.x; f1 < Particles::residueListSz; f1++) {
 				auto& rli = Particles::residueLists[f1];
 				while (f2 < rli.residueSz) {
 					Engine::DrawQuad(exp - 143, off, 141, 16, white(1, 0.4f));

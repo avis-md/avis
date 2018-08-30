@@ -26,7 +26,7 @@ void PyReader::Init() {
 		PyList_Insert(sys_path, 0, ps);
 		Py_DecRef(ps);
 		AnWeb::hasPy = true;
-	} catch (char* c) {
+	} catch (char*) {
 		string env = "";
 #ifdef PLATFORM_WIN
 		char* buf;

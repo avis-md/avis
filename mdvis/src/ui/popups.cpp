@@ -54,22 +54,22 @@ void Popups::DrawDropdown() {
 	auto dt = (DropdownItem*)data;
 	uint n = 0;
 	while (!!dt->list[n][0]) n++;
-	Engine::DrawQuad(pos.x-1, pos.y, pos2.x+2, 16*n + 1, black(0.7f));
+	Engine::DrawQuad(pos.x-1, pos.y, pos2.x+2, 16*n + 1.0f, black(0.7f));
 	for (uint a = 0; a < n; a++) {
 		if (Engine::Button(pos.x, pos.y + 16*a, pos2.x, 16, white(1, 0.2f), dt->list[a], 12, white()) == MOUSE_RELEASE) {
 			(*dt->target) = a;
 			Popups::type = POPUP_TYPE::NONE;
 		}
 	}
-	if ((Input::mouse0State == 1) && !Engine::Button(pos.x, pos.y, pos2.x, 16*n)) {
+	if ((Input::mouse0State == 1) && !Engine::Button(pos.x, pos.y, pos2.x, 16.0f*n)) {
 		Popups::type = POPUP_TYPE::NONE;
 	}
 }
 
 bool Popups::DoDrawMenu(std::vector<MenuItem>* mn, float x, float y) {
 	auto sz = mn->size();
-	Engine::DrawQuad(x - 1, y, 122, 18 * sz + 1, black(0.7f));
-	Engine::DrawQuad(x, y, 120, 18 * sz, white(1, 0.1f));
+	Engine::DrawQuad(x - 1, y, 122, 18 * sz + 1.0f, black(0.7f));
+	Engine::DrawQuad(x, y, 120, 18.0f * sz, white(1, 0.1f));
 	for (size_t a = 0; a < sz; a++) {
 		auto& i = mn->at(a);
 		auto st = Engine::Button(x + 1, y + 18 * a + 1, 118, 16, white(0), white(1, 0.2f), white(1, 0.05f));
@@ -83,7 +83,7 @@ bool Popups::DoDrawMenu(std::vector<MenuItem>* mn, float x, float y) {
 			if (i.callback) i.callback();
 		}
 	}
-	bool clk = (Input::mouse0State == 1) && !Engine::Button(x - 1, y, 122, 18 * sz + 3);
-	bool hvr = !Rect(x - 30, y - 30, 182, 18 * sz + 3 + 60).Inside(Input::mousePos);
+	bool clk = (Input::mouse0State == 1) && !Engine::Button(x - 1, y, 122, 18 * sz + 3.0f);
+	bool hvr = !Rect(x - 30, y - 30, 182, 18 * sz + 63.0f).Inside(Input::mousePos);
 	return (clk || hvr);
 }

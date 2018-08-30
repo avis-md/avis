@@ -25,7 +25,7 @@ enum class AN_VARTYPE : byte {
 class AnScript {
 public:
 	string name, path, libpath;
-	int chgtime;
+	time_t chgtime;
 	AN_SCRTYPE type;
 	std::vector<std::pair<string, string>> invars, outvars;
 	void* progress = 0;

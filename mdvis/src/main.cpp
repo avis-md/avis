@@ -37,7 +37,7 @@ Mat4x4 _mv, _p;
 
 void rendFunc() {
 	auto& cm = ChokoLait::mainCamera->object->transform;
-	ParGraphics::Rerender(cm.position(), cm.forward(), Display::width, Display::height);
+	ParGraphics::Rerender(cm.position(), cm.forward(), (float)Display::width, (float)Display::height);
 	if (!!Particles::particleSz && Shadows::show) {
 		Shadows::UpdateBox();
 		Mat4x4 _p = MVP::projection();

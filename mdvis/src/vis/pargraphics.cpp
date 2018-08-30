@@ -112,7 +112,7 @@ float ParGraphics::Eff::DrawMenu(float off) {
 	Engine::DrawQuad(expandPos - 148, off - 1, 147, 17 * 5 + 2, white(0.9f, 0.1f));
 	UI::Label(expandPos - 146, off, 12, _("Ambient Occlusion"), white());
 	useSSAO = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, useSSAO, white(), ORIENT_HORIZONTAL);
-	ssaoSamples = (int)UI2::Slider(expandPos - 147, off + 17, 147, _("Samples"), 5, 100, ssaoSamples, std::to_string(ssaoSamples));
+	ssaoSamples = (int)UI2::Slider(expandPos - 147, off + 17, 147, _("Samples"), 5, 100, (float)ssaoSamples, std::to_string(ssaoSamples));
 	ssaoSamples = Clamp(ssaoSamples, 10, 100);
 	ssaoRad = UI2::Slider(expandPos - 147, off + 17 * 2, 147, _("Radius"), 0.001f, 0.05f, ssaoRad);
 	ssaoStr = UI2::Slider(expandPos - 147, off + 17 * 3, 147, _("Strength"), 0, 3, ssaoStr);
@@ -655,7 +655,7 @@ void ParGraphics::Recolor() {
 	glUniform4fv(colProgLocs[6], 3, &gradCols[0][0]);
 	glUniform1ui(colProgLocs[7], 0);
 	auto col = Particles::particles_Conn.col;
-	glUniform4f(colProgLocs[8], col.r, col.g, col.b, Particles::particles_Conn.usecol? 1 : 0);
+	glUniform4f(colProgLocs[8], col.r, col.g, col.b, Particles::particles_Conn.usecol? 1.0f : 0.0f);
 	
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

@@ -10,7 +10,6 @@ Vec4 blue(float f, float i) { return Vec4(0, 0, i, f); }
 Vec4 cyan(float f, float i) { return Vec4(i*0.09f, i*0.706f, i, f); }
 Vec4 yellow(float f, float i) { return Vec4(i, i, 0, f); }
 Vec4 white(float f, float i) { return Vec4(i, i, i, f); }
-Vec4 accent() { return Vec4(1, 0.8f, 0.2f, 1); }
 
 GLuint Color::pickerProgH, Color::pickerProgH2, Color::pickerProgSV;
 GLint Color::pickerProgH2Locs[], Color::pickerProgSVLocs[];

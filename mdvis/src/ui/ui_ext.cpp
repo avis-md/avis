@@ -18,7 +18,7 @@ void UI2::Init() {
 
 void UI2::LabelMul(float x, float y, float sz, const string& s) {
 	auto ss = string_split(s, '\n');
-	for (auto a = 0; a < ss.size(); a++) {
+	for (size_t a = 0; a < ss.size(); a++) {
 		UI::Label(x, round(y + sz * 1.2f * a), sz, ss[a], white());
 	}
 }
@@ -27,10 +27,10 @@ string UI2::EditText(float x, float y, uint w, const string& title, const string
 	UI::Label(x, y, 12, title, white());
 	w /= 2;
 	if (enabled) {
-		return UI::EditText(x + w, y, w - 1, 16, 12, col, val, true, white());
+		return UI::EditText(x + w, y, w - 1.0f, 16, 12, col, val, true, white());
 	}
 	else {
-		Engine::Button(x + w, y, w - 1, 16, col, val, 12, white(0.5f));
+		Engine::Button(x + w, y, w - 1.0f, 16, col, val, 12, white(0.5f));
 		return val;
 	}
 }
@@ -42,7 +42,7 @@ float UI2::Slider(float x, float y, uint w, const string& title, float a, float 
 float UI2::Slider(float x, float y, uint w, const string& title, float a, float b, float t, const string& lbl) {
 	UI::Label(x, y, 12, title, white());
 	w /= 2;
-	t = Engine::DrawSliderFill(x + w, y, w - 1, 16, a, b, t, white(1, 0.5f), white());
+	t = Engine::DrawSliderFill(x + w, y, w - 1.0f, 16, a, b, t, white(1, 0.5f), white());
 	UI::Label(x + w + 2, y, 12, lbl, white(1, 0.2f));
 	return t;
 }
@@ -50,7 +50,7 @@ float UI2::Slider(float x, float y, uint w, const string& title, float a, float 
 void UI2::Color(float x, float y, uint w, const string& title, Vec4& col) {
 	UI::Label(x, y, 12, title, white());
 	w /= 2;
-	if (Engine::Button(x + w, y, w-1, 16, col) == MOUSE_RELEASE) {
+	if (Engine::Button(x + w, y, w-1.0f, 16, col) == MOUSE_RELEASE) {
 		Popups::type = POPUP_TYPE::COLORPICK;
 		Popups::pos = Vec2(x + w, y + 16);
 		Popups::data = &col;
@@ -61,7 +61,7 @@ void UI2::Color(float x, float y, uint w, const string& title, Vec4& col) {
 void UI2::File(float x, float y, uint w, const string& title, const string& fl, std::function<void(std::vector<string>)> func) {
 	UI::Label(x, y, 12, "File", white());
 	w /= 2;
-	if (Engine::Button(x + w, y, w-1, 16, white(1, 0.3f), fl, 12, white(0.5f)) == MOUSE_RELEASE) {
+	if (Engine::Button(x + w, y, w-1.0f, 16, white(1, 0.3f), fl, 12, white(0.5f)) == MOUSE_RELEASE) {
 		std::vector<string> exts = {"*.hdr"};
 		auto res = Dialog::OpenFile(exts);
 		if (!!res.size()) {

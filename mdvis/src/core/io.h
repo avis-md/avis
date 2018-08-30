@@ -17,7 +17,7 @@ public:
 	static string GetText(const string& path);
 	static std::vector<byte> GetBytes(const string& path);
 
-	static int ModTime(const string& path);
+	static time_t ModTime(const string& path);
 
 	static void StartReadStdio(string path, stdioCallback callback);
 	static void FlushStdio();

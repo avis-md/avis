@@ -23,7 +23,7 @@ GLuint VisRenderer::res_fbo = 0, VisRenderer::res_img = 0;
 void VisRenderer::Draw() {
 	if (status == IMG) {
 		UI::IncLayer();
-		Engine::DrawQuad(0, 0, Display::width, Display::height, black(0.9f*resLerp));
+		Engine::DrawQuad(0, 0, (float)Display::width, (float)Display::height, black(0.9f*resLerp));
 		resLerp = (resLerp >= 0)? min(resLerp + 4 * Time::delta, 1.0f) : 0;
 		float dw = Display::width * 0.1f;
 		float dh = Display::height * 0.1f;
@@ -84,7 +84,7 @@ void VisRenderer::ToImage() {
 
 	cam->Render(nullptr, []() {
 		auto& cm = ChokoLait::mainCamera->object->transform;
-		ParGraphics::Rerender(cm.position(), cm.forward(), imgW, imgH);
+		ParGraphics::Rerender(cm.position(), cm.forward(), (float)imgW, (float)imgH);
 	});
 
 	Display::width = w;

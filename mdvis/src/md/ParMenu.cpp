@@ -47,10 +47,10 @@ void ParMenu::Draw() {
 			switch (activeMenu) {
 			case 0:
 				if (!!Protein::proCnt) {
-					if (UI2::Button2(expandPos - 148, 20, 70, _("Atoms"), Icons::vis_atom, white(1, 0.3f), (!activeSubMenu[0]) ? accent() : white(0.8f)) == MOUSE_RELEASE) {
+					if (UI2::Button2(expandPos - 148, 20, 70, _("Atoms"), Icons::vis_atom, white(1, 0.3f), (!activeSubMenu[0]) ? VisSystem::accentColor : white(0.8f)) == MOUSE_RELEASE) {
 						activeSubMenu[0] = 0;
 					}
-					if (UI2::Button2(expandPos - 77, 20, 75, _("Proteins"), Icons::vis_prot, white(1, 0.3f), (!activeSubMenu[0]) ? white(0.8f) : accent()) == MOUSE_RELEASE) {
+					if (UI2::Button2(expandPos - 77, 20, 75, _("Proteins"), Icons::vis_prot, white(1, 0.3f), (!activeSubMenu[0]) ? white(0.8f) : VisSystem::accentColor) == MOUSE_RELEASE) {
 						activeSubMenu[0] = 1;
 					}
 					if (!activeSubMenu[0]) Draw_List(38);
@@ -86,7 +86,7 @@ void ParMenu::Draw() {
 		Engine::RotateUI(90, Vec2(expandPos + 16, 18));
 		UI::font->Align(ALIGN_TOPCENTER);
 		for (uint i = 0; i < 5; i++) {
-			UI::Label(expandPos + 56 + 81 * i, 18, 12, menuNames[i], (i == activeMenu) ? accent() : white());
+			UI::Label(expandPos + 56 + 81 * i, 18, 12, menuNames[i], (i == activeMenu) ? VisSystem::accentColor : white());
 		}
 		UI::font->Align(ALIGN_TOPLEFT);
 		Engine::ResetUIMatrix();
@@ -304,7 +304,7 @@ void ParMenu::DrawStart() {
 
 void ParMenu::DrawSplash() {
 	UI::IncLayer();
-	Engine::DrawQuad(0, 0, Display::width, Display::height, black(0.7f));
+	Engine::DrawQuad(0, 0, (float)Display::width, (float)Display::height, black(0.7f));
 	UI::Texture(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, ParGraphics::splash);
 	UI::font->Align(ALIGN_TOPRIGHT);
 	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 120, 12, __APPVERSION__, white());
@@ -375,7 +375,7 @@ void ParMenu::DrawSplash() {
 void ParMenu::DrawConnMenu(Particles::conninfo& cn, float x, float& off, float width) {
 #define SV(v) auto _ ## v = cn.v
 #define CP(v) if (_ ## v != cn.v) { cn.v = _ ## v; Scene::dirty = true; }
-	float sz = 17 * (((!cn.drawMode)? (cn.dashed? 5 : 3) : 2) + (cn.usecol? 2 : 1)) + 2;
+	float sz = 17 * (((!cn.drawMode)? (cn.dashed? 5 : 3) : 2) + (cn.usecol? 2 : 1)) + 2.0f;
 	Engine::DrawQuad(x, off, width, sz, white(0.7f, 0.15f));
 	off++;
 	bool dl = !!cn.drawMode;
@@ -386,20 +386,20 @@ void ParMenu::DrawConnMenu(Particles::conninfo& cn, float x, float& off, float w
 	}
 	off += 17;
 	if (dl) {
-		auto _scale = UI2::Slider(x + 2, off, width - 4, "Thickness", 0, 1, cn.scale);
+		auto _scale = UI2::Slider(x + 2, off, (uint)width - 4, "Thickness", 0, 1, cn.scale);
 		off += 17;
 		CP(scale);
 	}
 	else {
 		SV(dashed);
-		auto _line_sc = UI2::Slider(x + 2, off, width - 4, "Thickness", 1, 5, cn.line_sc);
+		auto _line_sc = UI2::Slider(x + 2, off, (uint)width - 4, "Thickness", 1, 5, cn.line_sc);
 		off += 17;
 		UI2::Toggle(x + 2, off, width - 4, "Dashed lines", _dashed);
 		off += 17;
 		if (_dashed) {
-			auto _line_sp = UI2::Slider(x + 2, off, width - 4, "Spacing", 0, 1, cn.line_sp);
+			auto _line_sp = UI2::Slider(x + 2, off, (uint)width - 4, "Spacing", 0, 1, cn.line_sp);
 			off += 17;
-			auto _line_rt = UI2::Slider(x + 2, off, width - 4, "Ratio", 0, 1, cn.line_rt);
+			auto _line_rt = UI2::Slider(x + 2, off, (uint)width - 4, "Ratio", 0, 1, cn.line_rt);
 			off += 17;
 			CP(line_sp); CP(line_rt);
 		}
@@ -410,7 +410,7 @@ void ParMenu::DrawConnMenu(Particles::conninfo& cn, float x, float& off, float w
 	off += 17;
 	if (_usecol) {
 		SV(col);
-		UI2::Color(x + 2, off, width - 4, "Color", cn.col);
+		UI2::Color(x + 2, off, (uint)width - 4, "Color", cn.col);
 		off += 18;
 		if (_col != cn.col) Scene::dirty = true;
 	}
@@ -451,7 +451,7 @@ void ParMenu::SelClear() {
 }
 
 void ParMenu::DrawSelPopup() {
-	Engine::DrawQuad(0, 20, 150, Display::height - 40, white(1, 0.1f));
+	Engine::DrawQuad(0, 20, 150, Display::height - 40.0f, white(1, 0.1f));
 	UI::Label(2, 20, 12, "Select", white());
 	if (Engine::Button(100, 20, 49, 16, white(1, 0.4f), "Cancel", 12, white(), true) == MOUSE_RELEASE) {
 		Popups::type = POPUP_TYPE::NONE;

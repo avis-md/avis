@@ -82,7 +82,7 @@ void BVH::Calc(Ball* objs, uint cnt, Node*& res, uint& resCnt, BBox box) {
 			}
 
 			float md2 = bl->orig[st.axis];//((st.axis == 0) ? bl.orig.x : ((st.axis == 1) ? bl.orig.y : bl.orig.z));
-			for (int a = 1; a < st.idc; a++) {
+			for (uint a = 1; a < st.idc; a++) {
 				bl = objs + st.ids[a];
 #define MN(a, b) a = min(a, b)
 #define MX(a, b) a = max(a, b)
@@ -96,7 +96,7 @@ void BVH::Calc(Ball* objs, uint cnt, Node*& res, uint& resCnt, BBox box) {
 			}
 			md2 /= st.idc;
 			//float md = ((st.axis == 0) ? nd->box.x0 + nd->box.x1 : ((st.axis == 1) ? nd->box.y0 + nd->box.y1 : nd->box.z0 + nd->box.z1)) / 2;
-			for (int a = 0; a < st.idc; a++) {
+			for (uint a = 0; a < st.idc; a++) {
 				uint i = st.ids[a];
 				bl = objs + i;
 				float orr = bl->orig[st.axis];

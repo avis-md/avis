@@ -66,6 +66,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OpenMPSupport>true</OpenMPSupport>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -172,12 +173,17 @@
     <ClCompile Include="src\web\anops.cpp" />
     <ClCompile Include="src\web\anweb.cpp" />
     <ClCompile Include="src\web\creader.cpp" />
+    <ClCompile Include="src\web\errorview.cpp" />
     <ClCompile Include="src\web\nodes\node_addbond.cpp" />
     <ClCompile Include="src\web\nodes\node_camera.cpp" />
     <ClCompile Include="src\web\nodes\node_gromacs.cpp" />
     <ClCompile Include="src\web\nodes\node_inputs.cpp" />
     <ClCompile Include="src\web\nodes\node_plot.cpp" />
     <ClCompile Include="src\web\nodes\node_recolor.cpp" />
+    <ClCompile Include="src\web\nodes\node_remap.cpp" />
+    <ClCompile Include="src\web\nodes\node_setparam.cpp" />
+    <ClCompile Include="src\web\nodes\node_showrange.cpp" />
+    <ClCompile Include="src\web\nodes\node_tracetrj.cpp" />
     <ClCompile Include="src\web\nodes\node_volume.cpp" />
     <ClCompile Include="src\web\pyreader.cpp" />
     <ClCompile Include="src\xdrfile\xdrfile.c" />
@@ -197,7 +203,6 @@
     <ClCompile Include="src\RenderEngine.cpp" />
     <ClCompile Include="src\Types.cpp" />
     <ClCompile Include="src\utils\plot.cpp" />
-    <ClCompile Include="src\utils\precedurals.cpp" />
     <ClCompile Include="src\utils\random.cpp" />
     <ClCompile Include="src\utils\rect.cpp" />
     <ClCompile Include="src\utils\solidify.cpp" />
@@ -272,12 +277,17 @@
     <ClInclude Include="src\web\anops.h" />
     <ClInclude Include="src\web\anweb.h" />
     <ClInclude Include="src\web\creader.h" />
+    <ClInclude Include="src\web\errorview.h" />
     <ClInclude Include="src\web\nodes\node_addbond.h" />
     <ClInclude Include="src\web\nodes\node_camera.h" />
     <ClInclude Include="src\web\nodes\node_gromacs.h" />
     <ClInclude Include="src\web\nodes\node_inputs.h" />
     <ClInclude Include="src\web\nodes\node_plot.h" />
     <ClInclude Include="src\web\nodes\node_recolor.h" />
+    <ClInclude Include="src\web\nodes\node_remap.h" />
+    <ClInclude Include="src\web\nodes\node_setparam.h" />
+    <ClInclude Include="src\web\nodes\node_showrange.h" />
+    <ClInclude Include="src\web\nodes\node_tracetrj.h" />
     <ClInclude Include="src\web\nodes\node_volume.h" />
     <ClInclude Include="src\web\pyreader.h" />
     <ClInclude Include="src\xdrfile\xdrfile.h" />
@@ -303,7 +313,6 @@
     <ClInclude Include="src\scene\object.h" />
     <ClInclude Include="src\utils\color.h" />
     <ClInclude Include="src\utils\fft.h" />
-    <ClInclude Include="src\utils\precedurals.h" />
     <ClInclude Include="src\utils\random.h" />
     <ClInclude Include="src\utils\rect.h" />
     <ClInclude Include="src\utils\solidify.h" />

@@ -104,7 +104,7 @@ void LiveSyncer::DrawSide() {
 			UI::Label(Display::width - expandPos + 2, 17 * 5 + 4, 12, "Select Module", white());
 			uint a = 0;
 			for (auto& r : runners) {
-				if (Engine::Button(Display::width - expandPos + 4, 17 * 6 + 5 + 17 * a, 170, 16, white(1, 0.6f), r->name, 12, white()) == MOUSE_RELEASE) {
+				if (Engine::Button(Display::width - expandPos + 4, 17 * 6 + 5.0f + 17 * a, 170, 16, white(1, 0.6f), r->name, 12, white()) == MOUSE_RELEASE) {
 					Init(a);
 				}
 				a++;

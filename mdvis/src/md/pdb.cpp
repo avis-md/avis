@@ -84,7 +84,7 @@ bool PDB::Read(ParInfo* info) {
 		info->type[i] &= 0x00ff;
 	}
 
-	info->secStructNum = helices.size() + sheets.size();
+	info->secStructNum = (uint16_t)(helices.size() + sheets.size());
 	auto sc = info->secStructs = new ParInfo::ProSec[info->secStructNum];
 	for (auto& h : helices) {
 		sc->type = ParInfo::ProSec::HELIX;

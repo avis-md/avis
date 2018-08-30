@@ -432,8 +432,8 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 	}
 	for (uint i = 0; i < usz; i++) {
 		auto& c = ucs[i];
-		if (c < 0x0100) totalW += font->params[s][0].o2s[c & 0x00ff];
-		else totalW += font2->params[s][c & 0xff00].o2s[c & 0x00ff];
+		if (c < 0x0100) totalW += font->params[(uint)s][0].o2s[c & 0x00ff];
+		else totalW += font2->params[(uint)s][c & 0xff00].o2s[c & 0x00ff];
 		if (maxw > 0 && totalW > maxw) {
 			usz = i;
 			break;
@@ -453,7 +453,7 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 		auto& c = ucs[i / 4];
 		auto m = c & 0xff00;
 		auto cc = c & 0x00ff;
-		auto& prm = (!m) ? font->params[s][0] : font2->params[s][m];
+		auto& prm = (!m) ? font->params[(uint)s][0] : font2->params[(uint)s][m];
 		//if (c == '\n')
 		//	c = ' ';
 

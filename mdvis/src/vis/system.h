@@ -11,6 +11,7 @@ enum class VIS_MOUSE_MODE : byte {
 class VisSystem {
 public:
 	static Vec4 accentColor;
+	static float glass;
 	static uint renderMs, uiMs;
 
 	static std::vector<MenuItem> menuItems[10];

@@ -82,7 +82,7 @@ void plt::remap(float x, float y, float w, float h, plt::remapdata& data) {
 				x1 = x + data.pts[1].x * w;
 				Engine::DrawLine(Vec2(x, y0), Vec2(x1, y0), white(), 1);
 				Engine::DrawLine(Vec2(x1, y0), Vec2(x1, y + (1-data.pts[1].y) * h), white(), 1);
-				for (int a = 1; a < ps - 1; a++) {
+				for (size_t a = 1; a < ps - 1; a++) {
 					y0 = y + (1-data.pts[a].y) * h;
 					x1 = x + data.pts[a+1].x * w;
 					Engine::DrawLine(Vec2(x + data.pts[a].x * w, y0), Vec2(x1, y0), white(), 1);
@@ -93,7 +93,7 @@ void plt::remap(float x, float y, float w, float h, plt::remapdata& data) {
 				break;
 			case 1:
 				Engine::DrawLine(Vec2(x, y0), Vec2(x + data.pts[0].x * w, y0), white(), 1);
-				for (int a = 0; a < ps - 1; a++) {
+				for (size_t a = 0; a < ps - 1; a++) {
 					y0 = y + (1-data.pts[a].y) * h;
 					Engine::DrawLine(Vec2(x + data.pts[a].x * w, y + (1-data.pts[a].y) * h), 
 						Vec2(x + data.pts[a+1].x * w, y + (1-data.pts[a+1].y) * h), white(), 1);

@@ -92,3 +92,4 @@ public:
 #include "nodes/node_showrange.h"
 #include "nodes/node_tracetrj.h"
 #include "nodes/node_volume.h"
+#include "nodes/node_remap.h"

@@ -156,7 +156,7 @@ std::vector<byte> IO::GetBytes(const string& path) {
 	std::ifstream ifs(path, std::ios::binary | std::ios::ate);
 	auto pos = ifs.tellg();
 
-	std::vector<byte> res(pos);
+	std::vector<byte> res((uint)pos);
 
 	ifs.seekg(0, std::ios::beg);
 	ifs.read((char*)&res[0], pos);
@@ -164,11 +164,11 @@ std::vector<byte> IO::GetBytes(const string& path) {
 	return res;
 }
 
-int IO::ModTime(const string& s) {
+time_t IO::ModTime(const string& s) {
 	struct stat stt;
 	auto rt = stat(s.c_str(), &stt);
 	if (!!rt) return -1;
-	return stt.st_mtime;
+	return (int)stt.st_mtime;
 }
 
 #ifndef PLATFORM_WIN

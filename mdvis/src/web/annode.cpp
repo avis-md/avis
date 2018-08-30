@@ -18,6 +18,7 @@ const string Node_SetParam::sig = ".param";
 const string Node_ShowRange::sig = ".srng";
 const string Node_TraceTrj::sig = ".trrj";
 const string Node_Volume::sig = ".vol";
+const string Node_Remap::sig = ".remap";
 
 Texture* AnNode::tex_circle_open = nullptr, *AnNode::tex_circle_conn = nullptr;
 float AnNode::width = 220;
@@ -71,7 +72,7 @@ void AnNode::Draw() {
 	auto cnt = (script->invars.size() + script->outvars.size());
 	Engine::DrawQuad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) expanded = !expanded;
-	UI::Label(pos.x + 18, pos.y + 1, 12, title, script->ok? white() : red());
+	UI::Label(pos.x + 18, pos.y + 1, 12, title, white());
 	DrawToolbar();
 	if (!script->ok) {
 		Engine::DrawQuad(pos.x, pos.y + 16, width, 19, white(0.7f, 0.25f));
@@ -167,7 +168,7 @@ float AnNode::GetHeaderSz() {
 
 void AnNode::DrawHeader(float& off) {
 	if (showDesc) {
-		Engine::DrawQuad(pos.x, off, width, 17 * script->descLines, white(0.7f, 0.25f));
+		Engine::DrawQuad(pos.x, off, width, 17.0f * script->descLines, white(0.7f, 0.25f));
 		UI::alpha = 0.7f;
 		UI2::LabelMul(pos.x + 5, off + 1, 12, script->desc);
 		UI::alpha = 1;
@@ -490,7 +491,7 @@ void PyNode::Execute() {
 		Py_INCREF(outputV[i].value);
 		switch (outputV[i].type) {
 		case AN_VARTYPE::FLOAT:
-			*(float*)conV[i].value = PyFloat_AsDouble(outputV[i].value);
+			*(float*)conV[i].value = (float)PyFloat_AsDouble(outputV[i].value);
 			break;
 		case AN_VARTYPE::INT:
 			//*(float*)conV[i].value = PyFloat_AsDouble(outputV[i].value);

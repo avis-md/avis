@@ -4,7 +4,6 @@
 
 void MakeRes::Do() {
 	const char* hx = "0123456789ABCDEF";
-	char chs[3];
 	auto fls = IO::GetFiles(IO::path + "/res/", ".png");
 	auto sz = (IO::path + "/res").size();
 	std::ofstream strma(IO::path + "/res/src/resdata.h", std::ios::app);
