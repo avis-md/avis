@@ -184,6 +184,7 @@ void AnWeb::Draw() {
 
 						SW(GEN::BOND, Node_AddBond);
 						SW(GEN::VOL, Node_Volume);
+						SW(GEN::TRJ, Node_TraceTrj);
 
 						SW(MISC::PLOT, Node_Plot);
 						SW(MISC::SRNG, Node_ShowRange);
@@ -488,6 +489,8 @@ void AnWeb::Load(const string& s) {
 			ND(Node_Inputs_ActPar)
 			ND(Node_Inputs_SelPar)
 			ND(Node_AddBond)
+			//ND(Node_AddVolume)
+			ND(Node_TraceTrj)
 			ND(Node_Camera_Out)
 			ND(Node_Recolor)
 			ND(Node_Recolor_All)

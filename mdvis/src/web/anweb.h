@@ -33,9 +33,10 @@ enum class AN_NODE_GEN {
 	NUM0 = 0x40,
 	BOND,
 	VOL,
+	TRJ,
 	NUM
 };
-const string AN_NODE_GENS[] = { "Add Bonds", "Add Volume" };
+const string AN_NODE_GENS[] = { "Add Bonds", "Add Volume", "Trace Trajectory" };
 
 enum class AN_NODE_MISC {
 	NUM0 = 0x60,
@@ -81,6 +82,7 @@ public:
 
 #include "anbrowse.h"
 #include "nodes/node_addbond.h"
+//#include "nodes/node_volume.h"
 #include "nodes/node_camera.h"
 #include "nodes/node_gromacs.h"
 #include "nodes/node_inputs.h"
@@ -88,4 +90,5 @@ public:
 #include "nodes/node_recolor.h"
 #include "nodes/node_setparam.h"
 #include "nodes/node_showrange.h"
+#include "nodes/node_tracetrj.h"
 #include "nodes/node_volume.h"
