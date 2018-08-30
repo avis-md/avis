@@ -1,9 +1,11 @@
 #pragma once
 #include "Engine.h"
 #include <Python.h>
+#include "errorview.h"
 #ifndef IS_ANSERVER
 #include "utils/dylib.h"
 #endif
+
 enum class AN_SCRTYPE : byte {
 	NONE,
 	C,
@@ -27,6 +29,9 @@ public:
 	AN_SCRTYPE type;
 	std::vector<std::pair<string, string>> invars, outvars;
 	void* progress = 0;
+
+	std::vector<ErrorView::Message> compileLog;
+	int errorCount = 0;
 
 	string desc = "";
 	int descLines = 0;

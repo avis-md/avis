@@ -1,6 +1,7 @@
 #include "anweb.h"
 #ifndef IS_ANSERVER
 #include "anops.h"
+#include "errorview.h"
 #include "ui/icons.h"
 #include "md/Particles.h"
 #include "vis/pargraphics.h"
@@ -224,6 +225,8 @@ void AnWeb::Draw() {
 
 	AnBrowse::Draw();
 	AnOps::Draw();
+
+	ErrorView::Draw();
 
 	if (Input::KeyDown(Key_Escape)) {
 		if (selScript) selScript = nullptr;

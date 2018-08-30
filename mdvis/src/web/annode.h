@@ -30,8 +30,6 @@ public:
 	bool canTile = false;
 	bool executing = false;
 	ANNODE_OP op;
-	int settSz = 0;
-	int hdSz = 0;
 
 	bool logExpanded = true;
 	byte logMask = 7;
@@ -58,7 +56,13 @@ public:
 	virtual Vec2 DrawConn();
 	virtual void Draw();
 	virtual float GetHeaderSz();
+	float hdrSz;
 	virtual void DrawHeader(float& off);
+	float midSz;
+	virtual void DrawMiddle(float& off) {}
+	float ftrSz;
+	virtual void DrawFooter(float& off) {}
+	float setSz;
 	virtual void DrawSettings(float& off) {}
 	virtual float DrawSide();
 	float DrawLog(float off);

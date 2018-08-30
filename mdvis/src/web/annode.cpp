@@ -42,19 +42,22 @@ bool AnNode::Select() {
 
 Vec2 AnNode::DrawConn() {
 #ifndef IS_ANSERVER
-	auto cnt = (script->invars.size() + script->outvars.size());
-	float hy = GetHeaderSz();
-	float y = pos.y + 18 + hy;
-	for (uint i = 0; i < script->invars.size(); i++, y += 17) {
-		auto& ri = inputR[i];
-		if (ri.first) {
-			Vec2 p2 = Vec2(pos.x, expanded ? y + 8 : pos.y + 8);
-			Vec2 p1 = Vec2(ri.first->pos.x + ri.first->width, ri.first->expanded ? ri.first->pos.y + 28 + ri.first->GetHeaderSz() + (ri.second + ri.first->inputR.size()) * 17 : ri.first->pos.y + 8);
-			UI2::Bezier(p1, p1 + Vec2(10, 0), p2 - Vec2(10, 0), p2, white());
+	if (script->ok) {
+		auto cnt = (script->invars.size() + script->outvars.size());
+		float hy = GetHeaderSz();
+		float y = pos.y + 18 + hy;
+		for (uint i = 0; i < script->invars.size(); i++, y += 17) {
+			auto& ri = inputR[i];
+			if (ri.first) {
+				Vec2 p2 = Vec2(pos.x, expanded ? y + 8 : pos.y + 8);
+				Vec2 p1 = Vec2(ri.first->pos.x + ri.first->width, ri.first->expanded ? ri.first->pos.y + 28 + ri.first->GetHeaderSz() + (ri.second + ri.first->inputR.size()) * 17 : ri.first->pos.y + 8);
+				UI2::Bezier(p1, p1 + Vec2(10, 0), p2 - Vec2(10, 0), p2, white());
+			}
 		}
+		if (expanded) return Vec2(width, 19 + 17 * cnt + DrawLog(19.0f + 17 * cnt) + hy);
+		else return Vec2(width, 16 + DrawLog(16));
 	}
-	if (expanded) return Vec2(width, 19 + 17 * cnt + DrawLog(19.0f + 17 * cnt) + hy);
-	else return Vec2(width, 16 + DrawLog(16));
+	else return Vec2(width, 35);
 #else
 	return Vec2();
 #endif
@@ -69,89 +72,96 @@ void AnNode::Draw() {
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 18, pos.y + 1, 12, title, script->ok? white() : red());
 	DrawToolbar();
-	if (expanded) {
-		float y = pos.y + 16;
-		DrawHeader(y);
-		Engine::DrawQuad(pos.x, y, width, 3.0f + 17 * cnt, white(0.7f, 0.25f));
-		y += 2;
-		for (uint i = 0; i < script->invars.size(); i++, y += 17) {
-			if (!AnWeb::selConnNode || (AnWeb::selConnIdIsOut && AnWeb::selConnNode != this)) {
-				if (Engine::Button(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, inputR[i].first ? tex_circle_conn : tex_circle_open, white(), Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f)) == MOUSE_RELEASE) {
-					if (!AnWeb::selConnNode) {
-						AnWeb::selConnNode = this;
-						AnWeb::selConnId = i;
-						AnWeb::selConnIdIsOut = false;
-						AnWeb::selPreClear = false;
-					}
-					else {
-						AnWeb::selConnNode->ConnectTo(AnWeb::selConnId, this, i);
-						AnWeb::selConnNode = nullptr;
+	if (!script->ok) {
+		Engine::DrawQuad(pos.x, pos.y + 16, width, 19, white(0.7f, 0.25f));
+		UI::Label(pos.x + 5, pos.y + 17, 12, std::to_string(script->errorCount) + " errors", red());
+	}
+	else {
+		if (expanded) {
+			float y = pos.y + 16, yy = y;
+			DrawHeader(y);
+			hdrSz = y-yy - setSz;
+			Engine::DrawQuad(pos.x, y, width, 3.0f + 17 * cnt, white(0.7f, 0.25f));
+			y += 2;
+			for (uint i = 0; i < script->invars.size(); i++, y += 17) {
+				if (!AnWeb::selConnNode || (AnWeb::selConnIdIsOut && AnWeb::selConnNode != this)) {
+					if (Engine::Button(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, inputR[i].first ? tex_circle_conn : tex_circle_open, white(), Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f)) == MOUSE_RELEASE) {
+						if (!AnWeb::selConnNode) {
+							AnWeb::selConnNode = this;
+							AnWeb::selConnId = i;
+							AnWeb::selConnIdIsOut = false;
+							AnWeb::selPreClear = false;
+						}
+						else {
+							AnWeb::selConnNode->ConnectTo(AnWeb::selConnId, this, i);
+							AnWeb::selConnNode = nullptr;
+						}
 					}
 				}
-			}
-			else if (AnWeb::selConnNode == this && AnWeb::selConnId == i && !AnWeb::selConnIdIsOut) {
-				Engine::DrawLine(Vec2(pos.x, y + 8), Input::mousePos, white(), 1);
-				UI::Texture(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, inputR[i].first ? tex_circle_conn : tex_circle_open);
-			}
-			else {
-				UI::Texture(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, inputR[i].first ? tex_circle_conn : tex_circle_open, red(0.3f));
-			}
-			UI::Label(pos.x + 10, y, 12, script->invars[i].first, white());
-			if (!inputR[i].first) {
-				auto& vr = script->invars[i].second;
-				auto isi = (vr == "int");
-				if (isi || (vr == "float")) {
-					string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].f);
-					s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, true, white());
-					if (isi) inputVDef[i].i = TryParse(s, 0);
-					else inputVDef[i].f = TryParse(s, 0.0f);
+				else if (AnWeb::selConnNode == this && AnWeb::selConnId == i && !AnWeb::selConnIdIsOut) {
+					Engine::DrawLine(Vec2(pos.x, y + 8), Input::mousePos, white(), 1);
+					UI::Texture(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, inputR[i].first ? tex_circle_conn : tex_circle_open);
 				}
 				else {
-					UI::Label(pos.x + width * 0.33f, y, 12, script->invars[i].second, white(0.3f));
+					UI::Texture(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, inputR[i].first ? tex_circle_conn : tex_circle_open, red(0.3f));
 				}
-			}
-			else {
-				UI::Label(pos.x + width * 0.33f, y, 12, "<connected>", yellow());
-			}
-		}
-		y += 2;
-
-		for (uint i = 0; i < script->outvars.size(); i++, y += 17) {
-			if (!AnWeb::selConnNode || ((!AnWeb::selConnIdIsOut) && (AnWeb::selConnNode != this))) {
-				if (Engine::Button(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, outputR[i].first ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
-					if (!AnWeb::selConnNode) {
-						AnWeb::selConnNode = this;
-						AnWeb::selConnId = i;
-						AnWeb::selConnIdIsOut = true;
-						AnWeb::selPreClear = false;
+				UI::Label(pos.x + 10, y, 12, script->invars[i].first, white());
+				if (!inputR[i].first) {
+					auto& vr = script->invars[i].second;
+					auto isi = (vr == "int");
+					if (isi || (vr == "float")) {
+						string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].f);
+						s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, true, white());
+						if (isi) inputVDef[i].i = TryParse(s, 0);
+						else inputVDef[i].f = TryParse(s, 0.0f);
 					}
 					else {
-						ConnectTo(i, AnWeb::selConnNode, AnWeb::selConnId);
-						AnWeb::selConnNode = nullptr;
+						UI::Label(pos.x + width * 0.33f, y, 12, script->invars[i].second, white(0.3f));
 					}
 				}
+				else {
+					UI::Label(pos.x + width * 0.33f, y, 12, "<connected>", yellow());
+				}
 			}
-			else if (AnWeb::selConnNode == this && AnWeb::selConnId == i && AnWeb::selConnIdIsOut) {
-				Engine::DrawLine(Vec2(pos.x + width, y + 8), Input::mousePos, white(), 1);
-				UI::Texture(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, outputR[i].first ? tex_circle_conn : tex_circle_open);
-			}
-			else {
-				UI::Texture(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, outputR[i].first ? tex_circle_conn : tex_circle_open, red(0.3f));
-			}
+			y += 2;
+
+			for (uint i = 0; i < script->outvars.size(); i++, y += 17) {
+				if (!AnWeb::selConnNode || ((!AnWeb::selConnIdIsOut) && (AnWeb::selConnNode != this))) {
+					if (Engine::Button(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, outputR[i].first ? tex_circle_conn : tex_circle_open, white(), white(), white()) == MOUSE_RELEASE) {
+						if (!AnWeb::selConnNode) {
+							AnWeb::selConnNode = this;
+							AnWeb::selConnId = i;
+							AnWeb::selConnIdIsOut = true;
+							AnWeb::selPreClear = false;
+						}
+						else {
+							ConnectTo(i, AnWeb::selConnNode, AnWeb::selConnId);
+							AnWeb::selConnNode = nullptr;
+						}
+					}
+				}
+				else if (AnWeb::selConnNode == this && AnWeb::selConnId == i && AnWeb::selConnIdIsOut) {
+					Engine::DrawLine(Vec2(pos.x + width, y + 8), Input::mousePos, white(), 1);
+					UI::Texture(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, outputR[i].first ? tex_circle_conn : tex_circle_open);
+				}
+				else {
+					UI::Texture(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, outputR[i].first ? tex_circle_conn : tex_circle_open, red(0.3f));
+				}
 
 
-			UI::font->Align(ALIGN_TOPRIGHT);
-			UI::Label(pos.x + width - 10, y, 12, script->outvars[i].first, white());
-			UI::font->Align(ALIGN_TOPLEFT);
-			UI::Label(pos.x + 2, y, 12, script->outvars[i].second, white(0.3f), width * 0.67f - 6);
+				UI::font->Align(ALIGN_TOPRIGHT);
+				UI::Label(pos.x + width - 10, y, 12, script->outvars[i].first, white());
+				UI::font->Align(ALIGN_TOPLEFT);
+				UI::Label(pos.x + 2, y, 12, script->outvars[i].second, white(0.3f), width * 0.67f - 6);
+			}
+			if (AnWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));
 		}
-		if (AnWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));
 	}
 #endif
 }
 
 float AnNode::GetHeaderSz() {
-	return (showDesc? (17 * script->descLines) : 0) + (showSett? settSz : 0) + hdSz;
+	return (showDesc? (17 * script->descLines) : 0) + (showSett? setSz : 0) + hdrSz;
 }
 
 void AnNode::DrawHeader(float& off) {
@@ -163,8 +173,11 @@ void AnNode::DrawHeader(float& off) {
 		off += 17 * script->descLines;
 	}
 	if (showSett) {
+		float offo = off;
 		DrawSettings(off);
+		setSz = off - offo;
 	}
+	else setSz = 0;
 }
 
 float AnNode::DrawSide() {
@@ -209,7 +222,7 @@ float AnNode::DrawSide() {
 		if (AnWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));
 		return 19.0f + 17 * cnt + DrawLog(18.0f + 17 * cnt);
 	}
-	else return 17.0f + DrawLog(16.0f) + hdSz;
+	else return 17.0f + DrawLog(16.0f) + hdrSz;
 #else
 	return 0;
 #endif

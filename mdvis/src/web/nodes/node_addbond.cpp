@@ -47,7 +47,6 @@ void Node_AddBond::DrawSettings(float& off) {
 	float off0 = off;
 	auto& cn = Particles::particles_Conn2[0];
 	ParMenu::DrawConnMenu(cn, pos.x, off, width);
-	settSz = (int)(off - off0);
 }
 
 float Node_AddBond::DrawSide() {

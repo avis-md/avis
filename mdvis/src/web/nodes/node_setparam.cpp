@@ -25,7 +25,6 @@ void Node_SetParam::DrawHeader(float& off) {
 	Engine::DrawQuad(pos.x, off, width, 18, white(0.7f, 0.25f));
 	UI2::Dropdown(pos.x + 2, off, width - 4, "Parameter", di);
 	off += 18;
-	hdSz = 18;
 }
 
 void Node_SetParam::LoadOut(const string& path) {

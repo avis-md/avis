@@ -7,8 +7,7 @@ void main(){
 	float t = gl_VertexID * 1.0 / count;
 	float i = 1-t;
 	gl_Position.xy = i*i*i*pts[0] + 3*i*i*t*pts[1] + 3*i*t*t*pts[2] + t*t*t*pts[3];
-	gl_Position.z = 0.0;
-	gl_Position.w = 1.0;
+	gl_Position.z = gl_Position.w = 1.0;
 }
 )";
 }

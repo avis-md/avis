@@ -8,6 +8,10 @@ string to_string_scientific(float f) {
 	return strm.str();
 }
 
+float plt::remapdata::Eval(float f) {
+	return f;
+}
+
 void plt::plot(float x, float y, float w, float h, float* dx, float* dy, uint cnt, Font* font, uint sz, Vec4 col) {
 	Engine::DrawQuad(x, y, w, h, black());
 	x += 2;

@@ -51,6 +51,9 @@ bool CReader::Read(string path, CScript* scr) {
 	auto ot = IO::ModTime(fp2 + nm + ".so");
 
 	if (mt >= ot) {
+		
+		string lp(fp2 + nm + ".so");
+		remove(&lp[0]);
 
 #ifdef PLATFORM_WIN
 		const string dlx = " __declspec(dllexport)";
@@ -82,7 +85,7 @@ bool CReader::Read(string path, CScript* scr) {
 				"/debug /pdb:\"" + fp2 + nm + ".pdb\" "
 #endif
 				"/out:\"" + fp2 + nm + ".so\" \"" + fp2 + nm + ".obj\"";
-			RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " && " + lk);
+			RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " && " + lk + " > " + fp + "_log.txt");
 		}
 #else
 		string cmd = "g++ -std=c++11 -shared -fPIC "
@@ -97,9 +100,16 @@ bool CReader::Read(string path, CScript* scr) {
 			cmd += " -fopenmp";
 #endif
 		}
-		cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\"";
+		cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\" 2> " + fp + "_log.txt";
 		std::cout << cmd << std::endl;
 		RunCmd::Run(cmd);
+		scr->errorCount = ErrorView::Parse_GCC(fp + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
+		for (auto& m : scr->compileLog) {
+			m.path = fp + ".cpp";
+			m.linenum -= 7;
+		}
+		ErrorView::compileMsgs.insert(ErrorView::compileMsgs.end(), scr->compileLog.begin(), scr->compileLog.end());
+		ErrorView::compileMsgSz = ErrorView::compileMsgs.size();
 #endif
 		const string ss = fp + "_temp__.cpp";
 		remove(&ss[0]);

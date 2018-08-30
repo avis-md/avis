@@ -52,7 +52,6 @@ void Node_ShowRange::DrawHeader(float& off) {
     s = UI2::EditText(pos.x + 2, off + 17, width - 4, "max", s);
     rMax = TryParse(s, 0.0f);
 	off += 35;
-    hdSz = 17 * 3 + 2;
 }
 
 void Node_ShowRange::LoadOut(const string& path) {
