@@ -2,14 +2,6 @@
     "configurations": [
         {
             "name": "Mac",
-            "browse": {
-                "path": [
-                    "${workspaceFolder}",
-                    "/usr/include",
-                    "usr/local/include"
-                ],
-                "limitSymbolsToIncludedHeaders": true
-            },
             "includePath": [
                 "${workspaceFolder}/src",
                 "/usr/include",
@@ -28,6 +20,17 @@
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "clang-x64"
+        },
+        {
+            "name": "MinGW",
+            "includePath": [
+                "${workspaceFolder}/src"
+            ],
+            "defines": [],
+            "compilerPath": "D:/MinGW/bin/gcc.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64"
         }
     ],
     "version": 4

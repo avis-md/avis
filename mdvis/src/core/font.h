@@ -1,9 +1,6 @@
 #pragma once
 #include "Engine.h"
 
-#ifdef PLATFORM_WIN
-#pragma comment(lib, "freetype_win.lib")
-#endif
 #include <ft2build.h>
 #include FT_FREETYPE_H
 

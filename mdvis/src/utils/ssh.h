@@ -5,9 +5,6 @@
 #endif
 #include <libssh2.h>
 #include <libssh2_sftp.h>
-#ifdef PLATFORM_WIN
-#pragma comment(lib, "libssh2_win.lib")
-#endif
 
 enum class SSH_Auth {
 	PUBKEY,

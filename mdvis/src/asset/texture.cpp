@@ -1,8 +1,5 @@
 #include "Engine.h"
 
-#ifdef PLATFORM_WIN
-#pragma comment(lib, "jpeg_win.lib")
-#endif
 #include "jpeglib.h"
 #include "jerror.h"
 #include "lodepng.h"

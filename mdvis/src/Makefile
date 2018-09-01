@@ -5,11 +5,19 @@ LIBS2 :=
 PYLIB :=
 WEAK_LIB :=
 NUMPY :=
+USR := /usr
 UNAME_S := $(shell uname -s)
+ifeq ($(OS),Windows_NT)
+	USR = D:/usr
+	OSFLAG += -D PLATFORM_WIN
+	GLLIB += -ljpeg -lssh2 -lOpenCL -I$(USR)/include/glew -I$(USR)/include/glfw3 -I$(USR)/include/freetype2
+	PYLIB += $(shell python3-config --libs)
+	NUMPY += C:/Anaconda/Lib/site-packages/numpy/core/include
+endif
 ifeq ($(UNAME_S),Linux)
 	OSFLAG += -D PLATFORM_LNX
 	LDFLAGS2 += -Wl,-rpath='$$ORIGIN' -static-libstdc++
-	GLLIB += -ljpeg -lssh2 -lOpenCL `pkg-config --static --libs gl glew glfw3 freetype2` #-lGL -lglfw3 -lGLEW -ljpeg -lfreetype
+	GLLIB += -ljpeg -lssh2 -lOpenCL `pkg-config --static --libs gl glew glfw3 freetype2`
 	PYLIB += $(shell python3-config --libs)
 	NUMPY +=  -I/usr/local/lib/python3.6/dist-packages/numpy/core/include
 endif

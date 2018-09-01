@@ -73,24 +73,18 @@
 #define __debugbreak() raise(SIGTRAP)
 #endif
 
-/* gl (windows) */
-#ifdef PLATFORM_WIN
-#pragma comment(lib, "glfw_win.lib")
-#pragma comment(lib, "glew_win.lib")
-#include <glew.h>
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
+typedef GLFWwindow NativeWindow;
+#ifdef PLATFORM_WIN
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define GLFW_EXPOSE_NATIVE_WGL
 #include <GLFW/glfw3native.h>
-typedef GLFWwindow NativeWindow;
 #else
-#include "GL/glew.h"
-#include "GLFW/glfw3.h"
 //#define GLFW_EXPOSE_NATIVE_X11
 //#define GLFW_EXPOSE_NATIVE_GLX
 //#include "GLFW/glfw3native.h"
 //typedef void* NativeWindow;
-typedef GLFWwindow NativeWindow;
 #endif
 
 #include <complex>
