@@ -9,6 +9,7 @@
 #include "_shd/colorPickerSV.h"
 #include "_shd/coreVert.h"
 #include "_shd/coreVertW.h"
+#include "_shd/lineWVert.h"
 #include "_shd/coreFrag.h"
 #include "_shd/coreFrag2.h"
 #include "_shd/coreFrag3.h"

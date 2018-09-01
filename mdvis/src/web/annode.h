@@ -103,3 +103,12 @@ public:
 	void Execute() override;
 	void Reconn() override;
 };
+
+class FNode : public AnNode {
+public:
+	FNode(FScript*);
+
+	std::vector<void*> inputV, outputV;
+
+	void Execute() override;
+};

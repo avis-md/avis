@@ -115,3 +115,21 @@ public:
 
 	static std::unordered_map<string, CScript*> allScrs;
 };
+
+class FScript : public AnScript {
+public:
+	FScript() : AnScript(AN_SCRTYPE::FORTRAN) {}
+
+	std::vector<CVar> _invars, _outvars;
+
+	void Clear() override;
+	string Exec() override;
+	void Set(uint i, int v) override, Set(uint i, float v) override, Set(uint i, void* v) override;
+	void* Get(uint i) override;
+	DyLib* lib;
+	
+	typedef void (*emptyFunc)();
+	emptyFunc funcLoc;
+
+	static std::unordered_map<string, FScript*> allScrs;
+};

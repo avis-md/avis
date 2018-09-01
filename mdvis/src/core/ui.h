@@ -50,7 +50,7 @@ public:
 
 	static void InitVao(), SetVao(uint sz, void* verts, void* uvs = nullptr);
 	static uint _vboSz;
-	static GLuint _vao, _vboV, _vboU;
+	static GLuint _vao, _vboV, _vboU, _tvbo;
 
 	static byte _layer, _layerMax;
 

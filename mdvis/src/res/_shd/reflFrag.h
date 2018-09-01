@@ -47,7 +47,8 @@ void main () {
         fragCol.rgb = bgCol;
     }
     else if (length(nCol.xyz) == 0) {
-        fragCol.rgb = bgCol;
+        //fragCol.rgb = bgCol;
+        fragCol.rgb = dCol.rgb;
     }
     else {
         vec3 skycol = skyColAt(inSkyE, nCol.xyz).rgb;

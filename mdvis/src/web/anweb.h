@@ -3,8 +3,9 @@
 #include "anscript.h"
 #include "annode.h"
 #include "anbrowse.h"
-#include "pyreader.h"
 #include "creader.h"
+#include "pyreader.h"
+#include "freader.h"
 
 enum class AN_NODE_SCN : byte {
 	NUM0 = 0x80,

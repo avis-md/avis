@@ -242,6 +242,7 @@ int main(int argc, char **argv) {
 
 		CReader::Init();
 		PyReader::Init();
+		FReader::Init();
 		RayTracer::Init();
 		Color::Init();
 		Icons::Init();

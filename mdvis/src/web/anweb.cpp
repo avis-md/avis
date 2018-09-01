@@ -7,7 +7,7 @@
 #include "vis/pargraphics.h"
 #endif
 
-#define NO_REDIR_LOG
+//#define NO_REDIR_LOG
 
 AnNode* AnWeb::selConnNode = nullptr;
 uint AnWeb::selConnId = 0;
@@ -24,7 +24,7 @@ float AnWeb::maxScroll, AnWeb::scrollPos = 0, AnWeb::expandPos = 0;
 std::thread* AnWeb::execThread = nullptr;
 AnNode* AnWeb::execNode = nullptr;
 
-bool AnWeb::hasPy = false, AnWeb::hasC = true, AnWeb::hasFt = false;
+bool AnWeb::hasPy = false, AnWeb::hasC = true, AnWeb::hasFt = true;
 bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
 
 void AnWeb::Init() {
@@ -165,6 +165,9 @@ void AnWeb::Draw() {
 					case AN_SCRTYPE::C:
 						pn = new CNode((CScript*)selScript);
 						break;
+					case AN_SCRTYPE::FORTRAN:
+						pn = new FNode((FScript*)selScript);
+						break;
 					default:
 						Debug::Error("AnWeb::Draw", "Unhandled script type: " + std::to_string((int)selScript->type));
 						break;
@@ -244,6 +247,8 @@ void AnWeb::Draw() {
 			icon = Icons::lang_c;
 		else if (selScript->type == AN_SCRTYPE::PYTHON)
 			icon = Icons::lang_py;
+		else
+			icon = Icons::lang_ft;
 		UI::Texture(Input::mousePos.x - 16, Input::mousePos.y - 16, 32, 32, icon, white(0.3f));
 	}
 
@@ -337,6 +342,10 @@ void AnWeb::Execute() {
 void AnWeb::DoExecute() {
 #ifndef NO_REDIR_LOG
 	IO::StartReadStdio(IO::path + "/nodes/__tmpstd", OnExecLog);
+	execNode = (AnNode*)2;
+	std::cout << "__start__\n";
+	std::cerr << "__start__\n";
+	while (execNode) {}
 #endif
 	for (auto n : nodes) {
 		n->log.clear();
@@ -352,7 +361,9 @@ void AnWeb::DoExecute() {
 		}
 		n->executing = false;
 #ifndef NO_REDIR_LOG
+		std::cout << "\n___123___\n";
 		IO::FlushStdio();
+		while (execNode) {}
 	}
 	IO::StopReadStdio();
 #else
@@ -364,9 +375,17 @@ void AnWeb::DoExecute() {
 }
 
 void AnWeb::OnExecLog(string s, bool e) {
-	//std::cout << ">" << s << std::endl;
-	if (execNode)
-		execNode->log.push_back(std::pair<byte, string>(e ? 1 : 0, s));
+	if (execNode) {
+		if (s == "___123___") {
+			if (execNode->log.back().second == "")
+				execNode->log.pop_back();
+			execNode = nullptr;
+		}
+		else if ((uintptr_t)execNode <= 2) {
+			(*(uintptr_t*)&execNode)--;
+		}
+		else execNode->log.push_back(std::pair<byte, string>(e ? 1 : 0, s));
+	}
 }
 
 void AnWeb::DoExecute_Srv() {
@@ -506,6 +525,9 @@ void AnWeb::Load(const string& s) {
 			break;
 		case AN_SCRTYPE::PYTHON:
 			n = new PyNode(PyScript::allScrs[nm]);
+			break;
+		case AN_SCRTYPE::FORTRAN:
+			n = new FNode(FScript::allScrs[nm]);
 			break;
 		default:
 			Debug::Warning("AnWeb::Load", "Unknown node type: " + std::to_string((byte)tp));

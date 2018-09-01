@@ -456,15 +456,15 @@ PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 void PyNode::Execute() {
 	auto scr = (PyScript*)script;
 	for (uint i = 0; i < script->invars.size(); i++) {
+		auto& mv = scr->_invars[i];
 		if (inputR[i].first) {
-			//scr->_invars[i].value = ((PyNode*)inputR[i].first)->outputV[inputR[i].second].value;
-			auto val = inputR[i].first->conV[inputR[i].second].value;
-			switch (scr->_invars[i].type) {
+			auto& cv = inputR[i].first->conV[inputR[i].second];
+			switch (mv.type) {
 			case AN_VARTYPE::INT:
-				script->Set(i, *((int*)val));
+				script->Set(i, *((int*)cv.value));
 				break;
 			case AN_VARTYPE::FLOAT:
-				script->Set(i, *((float*)val));
+				script->Set(i, *((float*)cv.value));
 				break;
 			default:
 				Debug::Error("PyNode", "Value not handled!");
@@ -472,7 +472,7 @@ void PyNode::Execute() {
 			}
 		}
 		else {
-			switch (scr->_invars[i].type) {
+			switch (mv.type) {
 			case AN_VARTYPE::INT:
 				script->Set(i, inputVDef[i].i);
 				break;
@@ -527,9 +527,9 @@ CNode::CNode(CScript* scr) : AnNode(scr) {
 void CNode::Execute() {
 	auto scr = (CScript*)script;
 	for (uint i = 0; i < script->invars.size(); i++) {
+		auto& mv = scr->_invars[i];
 		if (inputR[i].first) {
 			auto& cv = inputR[i].first->conV[inputR[i].second];
-			auto& mv = scr->_invars[i];
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
 				script->Set(i, *((int*)cv.value));
@@ -550,7 +550,7 @@ void CNode::Execute() {
 			}
 		}
 		else {
-			switch (scr->_invars[i].type) {
+			switch (mv.type) {
 			case AN_VARTYPE::INT:
 				script->Set(i, inputVDef[i].i);
 				break;
@@ -582,4 +582,58 @@ void CNode::Reconn() {
 		outputV[i] = scr->_outvars[i].value;
 		conV[i] = scr->_outvars[i];
 	}
+}
+
+
+FNode::FNode(FScript* scr) : AnNode(scr) {
+	if (!scr) return;
+	title += " (fortran)";
+	inputV.resize(scr->invars.size());
+	outputV.resize(scr->outvars.size());
+	inputVDef.resize(scr->invars.size());
+	for (uint i = 0; i < scr->invars.size(); i++) {
+		inputV[i] = scr->_invars[i].value;
+		if (scr->_invars[i].type == AN_VARTYPE::FLOAT) inputVDef[i].f = 0;
+		else inputVDef[i].i = 0;
+	}
+	for (uint i = 0; i < scr->outvars.size(); i++) {
+		outputV[i] = scr->_outvars[i].value;
+		conV[i] = scr->_outvars[i];
+	}
+}
+
+void FNode::Execute() {
+	auto scr = (FScript*)script;
+	for (uint i = 0; i < script->invars.size(); i++) {
+		auto& mv = scr->_invars[i];
+		if (inputR[i].first) {
+			auto& cv = inputR[i].first->conV[inputR[i].second];
+			switch (mv.type) {
+			case AN_VARTYPE::INT:
+				script->Set(i, *((int*)cv.value));
+				break;
+			case AN_VARTYPE::FLOAT:
+				script->Set(i, *((float*)cv.value));
+				break;
+			default:
+				Debug::Warning("FNode", "var not handled!");
+				break;
+			}
+		}
+		else {
+			switch (scr->_invars[i].type) {
+			case AN_VARTYPE::INT:
+				script->Set(i, inputVDef[i].i);
+				break;
+			case AN_VARTYPE::FLOAT:
+				script->Set(i, inputVDef[i].f);
+				break;
+			default:
+				Debug::Error("FNode", "Value not handled!");
+				break;
+			}
+		}
+	}
+
+	script->Exec();
 }

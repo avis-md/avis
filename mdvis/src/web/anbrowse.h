@@ -22,6 +22,4 @@ public:
 	static void Refresh(), DoRefresh(Folder* f);
 
 	static void Draw(), DoDraw(Folder* f, float& off, uint layer);
-	static void PreC(bool f), PreFt(bool f);
-	static void DoPreC(const string& path, bool f), DoPreFt();
 };

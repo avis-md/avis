@@ -216,3 +216,38 @@ void* CScript::Get(uint i) {
 
 	return nullptr;
 }
+
+
+std::unordered_map<string, FScript*> FScript::allScrs;
+
+void FScript::Clear() {
+	AnScript::Clear();
+	_invars.clear();
+	_outvars.clear();
+	if (AnWeb::hasFt) {
+		DyLib::ForceUnload(lib, libpath);
+		delete(lib);
+	}
+}
+
+string FScript::Exec() {
+	funcLoc();
+	return "";
+}
+
+void FScript::Set(uint i, int v) {
+	*((int*)_invars[i].value) = v;
+}
+
+void FScript::Set(uint i, float v) {
+	*((float*)_invars[i].value) = v;
+}
+
+void FScript::Set(uint i, void* v) {
+
+}
+
+void* FScript::Get(uint i) {
+
+	return nullptr;
+}

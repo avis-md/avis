@@ -432,6 +432,8 @@ enum FFT_WINDOW : byte {
 
 #include "utils/fft.h"
 
+#include "AssetObjects.h"
+
 class Engine { //why do I have this class again?
 public:
 	static void BeginStencil(float x, float y, float w, float h);
@@ -441,6 +443,7 @@ public:
 	static void DrawLine(Vec2 v1, Vec2 v2, Vec4 col, float width);
 	static void DrawLine(Vec3 v1, Vec3 v2, Vec4 col, float width);
 	static void DrawLineW(Vec3 v1, Vec3 v2, Vec4 col, float width);
+	static void DrawLinesW(Vec3* pts, int num, Vec4 col, float width);
 	static void DrawLineWDotted(Vec3 v1, Vec3 v2, Vec4 col, float width, float dotSz, bool app = false);
 	static void DrawTriangle(Vec2 v1, Vec2 v2, Vec2 v3, Vec4 col, bool fill = true, float width = 1);
 	static void DrawTriangle(Vec2 centre, Vec2 dir, Vec4 col, bool fill = true, float width = 1);
@@ -468,16 +471,17 @@ public:
 
 	static GLuint defProgram, defProgramW, unlitProgram, unlitProgramA, unlitProgramC, skyProgram;
 	static GLint defColLoc, defWColLoc, defWMVPLoc;
-	//static uint blurProgram, blurSBProgram;
-	static Font* defaultFont;
+	PROGDEF_H(lineWProg, 5)
 	
+	static void InitShaders();
+
 	static ulong GetNewId();
 
 	static Texture* fallbackTex;
 
 	static GLuint quadBuffer;
 	static GLint drawQuadLocs[3], drawQuadLocsA[3], drawQuadLocsC[1];
-	static void ScanQuadParams();
+
 	static void DrawQuad(float x, float y, float w, float h, uint texture, float miplevel = 0);
 	static void DrawQuad(float x, float y, float w, float h, uint texture, Vec4 col);
 	static void DrawQuad(float x, float y, float w, float h, Vec4 col);
@@ -495,6 +499,5 @@ public:
 	static Rect* stencilRect;
 };
 
-#include "AssetObjects.h"
 #include "SceneObjects.h"
 #include "SceneScriptResolver.h"

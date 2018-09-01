@@ -22,6 +22,7 @@ uint UI::_vboSz = 32;
 GLuint UI::_vao = 0;
 GLuint UI::_vboV = 0;
 GLuint UI::_vboU = 0;
+GLuint UI::_tvbo = 0;
 
 byte UI::_layer, UI::_layerMax;
 
@@ -62,6 +63,10 @@ void UI::InitVao() {
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	glGenTextures(1, &_tvbo);
+	glBindTexture(GL_TEXTURE_BUFFER, _tvbo);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, _vboV);
+	glBindTexture(GL_TEXTURE_BUFFER, 0);
 }
 
 void UI::IncLayer() {
@@ -127,7 +132,7 @@ void UI::Texture(float x, float y, float w, float h, ::Texture* texture, float a
 	UI::Texture(x, y, w, h, texture, white(alpha), scl, miplevel);
 }
 void UI::Texture(float x, float y, float w, float h, ::Texture* texture, Vec4 tint, DRAWTEX_SCALING scl, float miplevel) {
-	GLuint tex = (texture->loaded) ? texture->pointer : Engine::fallbackTex->pointer;
+	GLuint tex = (texture && texture->loaded) ? texture->pointer : Engine::fallbackTex->pointer;
 	if (!texture->tiled) {
 		if (scl == DRAWTEX_STRETCH)
 			Engine::DrawQuad(x, y, w, h, tex, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0), false, tint, miplevel);

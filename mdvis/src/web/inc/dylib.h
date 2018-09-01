@@ -7,7 +7,8 @@ public:
 	~DyLib();
 
 	void* GetSym(string nm);
-
+	bool is_open();
+	
 private:
 	void* lib;
 };

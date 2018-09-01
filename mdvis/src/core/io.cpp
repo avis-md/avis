@@ -282,42 +282,44 @@ void IO::DoReadStdio(stdioCallback cb) {
 	std::ifstream strm(p);
 	std::ifstream strm2(p2);
 	std::string line;
-	if (!strm.is_open() || !strm2.is_open())
+	std::streampos pos = 0, pos2 = 0;
+	if (!strm.is_open() || !strm2.is_open()) {
 		Debug::Warning("IO", "Cannot open file for stdout / stderr!");
-	else {
+		return;
+	}
+	while (readingStdio) {
 		bool has = false;
-		while (readingStdio || has) {
-			if (!!waitstdio) waitstdio = 2;
-			has = false;
-			if (std::getline(strm, line)) {
-				has = true;
-				cb(line, false);
+		if (!!waitstdio) waitstdio = 2;
+		if (std::getline(strm, line)) {
+			has = true;
+			pos = strm.tellg();
+			cb(line, false);
+		}
+		else {
+			if (!strm.eof()) {
+				Debug::Warning("IO", "Failed to read from redirected stdout!");
+				break;
 			}
-			else {
-				if (!strm.eof()) {
-					Debug::Warning("IO", "Failed to read from redirected stdout!");
-					break;
-				}
-				strm.clear();
+			strm.clear();
+		}
+		if (std::getline(strm2, line)) {
+			has = true;
+			pos2 = strm2.tellg();
+			cb(line, true);
+		}
+		else {
+			if (!strm2.eof()) {
+				Debug::Warning("IO", "Failed to read from redirected stderr!");
+				break;
 			}
-			if (std::getline(strm2, line)) {
-				has = true;
-				cb(line, true);
-			}
-			else {
-				if (!strm2.eof()) {
-					Debug::Warning("IO", "Failed to read from redirected stdout!");
-					break;
-				}
-				strm2.clear();
-			}
-			if (!has) {
-				if (waitstdio == 2)
-					waitstdio = 0;
-				Engine::Sleep(100);
-			}
+			strm2.clear();
+		}
+		if (!has) {
+			if (waitstdio == 2)
+				waitstdio = 0;
+			Engine::Sleep(100);
+			strm.seekg(pos);
+			strm2.seekg(pos2);
 		}
 	}
-	strm.close();
-	strm2.close();
 }

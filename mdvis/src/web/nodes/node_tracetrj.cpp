@@ -25,17 +25,8 @@ void Node_TraceTrj::DrawScene() {
 	if (!has || (pathSz != Particles::anim.frameCount) || pathSz == 1) return;
 
 	auto fc = traceAll? Particles::anim.activeFrame + 1 : Particles::anim.frameCount;
-	UI::SetVao(fc, &path[0][0]);
 	
-	auto mvp = MVP::projection() * MVP::modelview();
-
-	glUseProgram(Engine::defProgramW);
-	glUniformMatrix4fv(Engine::defWMVPLoc, 1, GL_FALSE, glm::value_ptr(mvp));
-	glUniform4f(Engine::defWColLoc, col.r, col.g, col.b, col.a);
-	glBindVertexArray(UI::_vao);
-	glDrawArrays(GL_LINE_STRIP, 0, fc);
-	glBindVertexArray(0);
-	glUseProgram(0);
+	Engine::DrawLinesW(&path[0], fc, black(), 4);
 }
 
 void Node_TraceTrj::LoadOut(const string& path) {

@@ -24,16 +24,6 @@ void CReader::Init() {
 	useOMP = (VisSystem::prefs["ANL_USE_OPENMP"] == "true");
 }
 
-string _rm_spaces(string s) {
-	string ss;
-	ss.reserve(s.size());
-	for (char& c : s) {
-		if (c != ' ')
-			ss += c;
-	}
-	return ss;
-}
-
 bool CReader::Read(string path, CScript* scr) {
 	string fp = IO::path + "/nodes/" + path;
 	std::replace(fp.begin(), fp.end(), '\\', '/');
@@ -67,7 +57,7 @@ bool CReader::Read(string path, CScript* scr) {
 #define VECSZ(...)\n\
 #define VECVAR VARIN\n\
 #define PROGRS VARIN\n\
-\n" + s;
+#line 1\n" + s;
 		std::ofstream ostrm(fp + "_temp__.cpp");
 		ostrm << s;
 		ostrm.close();
@@ -108,7 +98,6 @@ bool CReader::Read(string path, CScript* scr) {
 #endif
 		for (auto& m : scr->compileLog) {
 			m.path = fp + ".cpp";
-			m.linenum -= 7;
 		}
 		ErrorView::compileMsgs.insert(ErrorView::compileMsgs.end(), scr->compileLog.begin(), scr->compileLog.end());
 		ErrorView::compileMsgSz = ErrorView::compileMsgs.size();
@@ -169,7 +158,7 @@ bool CReader::Read(string path, CScript* scr) {
 			}
 			CVar* bk = 0;
 			if (vec > 0) {
-				auto s2 = _rm_spaces(ln.substr(6));
+				auto s2 = rm_spaces(ln.substr(6));
 				byte tp = 255;
 				for (byte b = 0; b < 3; b++) {
 					if (s2.substr(0, tpszs[b]) == tpnms[b]) {
@@ -219,7 +208,7 @@ bool CReader::Read(string path, CScript* scr) {
 			}
 			CVar* bk = 0;
 			if (vec > 0) {
-				auto s2 = _rm_spaces(ln.substr(6));
+				auto s2 = rm_spaces(ln.substr(6));
 				byte tp = 255;
 				for (byte b = 0; b < 3; b++) {
 					if (s2.substr(0, tpszs[b]) == tpnms[b]) {
@@ -313,7 +302,7 @@ bool CReader::Read(string path, CScript* scr) {
 			vr.dimVals.resize(vec);
 			int i = 0;
 			for (auto& a : ss) {
-				a = _rm_spaces(a);
+				a = rm_spaces(a);
 				if (a[0] >= 'A') {
 					vr.dimNames[i] = a = a.substr(0, ln.find_first_of('=')).substr(0, ln.find_first_of(';'));
 					//vecvarLocs.push_back(std::pair<string, int**>(a, &vr.dimVals[i]));

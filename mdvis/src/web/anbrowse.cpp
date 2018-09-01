@@ -25,22 +25,28 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 	for (auto f : ff) {
 		auto nm = f.substr(f.find_last_of('/') + 1);
 		if (nm.substr(0, 2) == "__") continue;
-		fo->scripts.push_back(new PyScript());
-		auto scr = fo->scripts.back();
+		auto scr = new PyScript();
+		fo->scripts.push_back(scr);
 		scr->path = incPath + nm.substr(0, nm.size() - 3);
-		scr->ok = PyReader::Read(scr->path, (PyScript*)scr);
+		scr->ok = PyReader::Read(scr->path, scr);
 	}
 
 	ff = IO::GetFiles(path, ".cpp");
-	if (ff.size() && !IO::HasDirectory(path + "/__ccache__/"))
-		IO::MakeDirectory(path + "/__ccache__/");
-
 	for (auto f : ff) {
 		auto nm = f.substr(f.find_last_of('/') + 1);
-		fo->scripts.push_back(new CScript());
-		auto scr = fo->scripts.back();
+		auto scr = new CScript();
+		fo->scripts.push_back(scr);
 		scr->path = incPath + nm.substr(0, nm.size() - 4);
-		scr->ok = CReader::Read(scr->path, (CScript*)scr);
+		scr->ok = CReader::Read(scr->path, scr);
+	}
+
+	ff = IO::GetFiles(path, ".f90");
+	for (auto f : ff) {
+		auto nm = f.substr(f.find_last_of('/') + 1);
+		auto scr = new FScript();
+		fo->scripts.push_back(scr);
+		scr->path = incPath + nm.substr(0, nm.size() - 4);
+		scr->ok = FReader::Read(scr->path, scr);
 	}
 
 	std::vector<string> fd;
@@ -112,6 +118,8 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 				icon = Icons::lang_c;
 			else if (fs->type == AN_SCRTYPE::PYTHON)
 				icon = Icons::lang_py;
+			else
+				icon = Icons::lang_ft;
 			UI::Texture(2.0f + 5 * layer, off, 16.0f, 16.0f, icon);
 			UI::Label(22.0f + 5 * layer, off, 12.0f, fs->name, white());
 			if (!fs->ok) {
@@ -201,67 +209,4 @@ void AnBrowse::Draw() {
 		expandPos = max(expandPos - 1500 * Time::delta, 0.0f);
 	}
 #endif
-}
-
-void AnBrowse::PreC(bool f) {
-	DoPreC(IO::path + "/nodes/", f);
-}
-
-void AnBrowse::PreFt(bool f) {
-	
-}
-
-void AnBrowse::DoPreC(const string& path, bool _f) {
-	auto ff = IO::GetFiles(path, ".cpp");
-	if (ff.size() && !IO::HasDirectory(path + "__ccache__/"))
-		IO::MakeDirectory(path + "__ccache__/");
-
-	for (auto f : ff) {
-		//auto nm = f.substr(f.find_last_of('/') + 1);
-		auto nm = f.substr(0, f.find_last_of('.'));
-
-		if (!_f) {
-			string srf = path + f;
-			string obf = path + "__ccache__/" + nm + ".so";
-			struct stat tsf, tof;
-			if (!stat(srf.c_str(), & tsf) && !stat(obf.c_str(), & tof)) {
-				if (tsf.st_mtime < tof.st_mtime) {
-					std::cout << "Skipping " << path + nm << std::endl;
-					continue;
-				}
-			}
-		}
-		
-		std::cout << "Compiling " << path + nm << std::endl;
-
-		auto s = IO::GetText(path + f);
-		s = "\
-#define VARIN extern \"C\"\n\
-#define VAROUT VARIN\n\
-#define ENTRY VARIN\n\
-#define VECSZ(...)\n\
-#define VECVAR VARIN\n\
-\n" + s;
-
-		const string ss = path + nm + "_temp__.cpp";
-		std::ofstream ostrm(ss);
-		ostrm << s;
-		ostrm.close();
-
-		const string cmd = "g++ -std=c++11 -shared -O0 -fPIC -o \"" + path + "__ccache__/" + nm + ".so\" \"" + path + nm + "_temp__.cpp\"";
-		std::cout << cmd << std::endl;
-		RunCmd::Run(cmd);
-		remove(&ss[0]);
-	}
-
-	std::vector<string> fd;
-	IO::GetFolders(path, &fd);
-
-	for (auto f : fd) {
-		DoPreC(path + "/" + f, _f);
-	}
-}
-
-void AnBrowse::DoPreFt() {
-	
 }

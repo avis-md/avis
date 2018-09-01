@@ -53,7 +53,8 @@ void PyReader::Init() {
 bool PyReader::Read(string path, PyScript* scr) { //"path/to/script[no .py]"
 	string mdn = scr->name = path;
 	std::replace(mdn.begin(), mdn.end(), '/', '.');
-	scr->chgtime = IO::ModTime(IO::path + "/nodes/" + scr->path + ".py");
+	string spath = IO::path + "/nodes/" + scr->path + ".py";
+	scr->chgtime = IO::ModTime(spath);
 	//auto pName = PyUnicode_FromString(path.c_str());
 	//scr->pModule = PyImport_Import(pName);
 	if (AnWeb::hasPy) {
@@ -75,7 +76,7 @@ bool PyReader::Read(string path, PyScript* scr) { //"path/to/script[no .py]"
 		Py_INCREF(scr->pFunc);
 	}
 	//extract io variables
-	std::ifstream strm(IO::path + "/nodes/" + path + ".py");
+	std::ifstream strm(spath);
 	string ln;
 	while (!strm.eof()) {
 		std::getline(strm, ln);

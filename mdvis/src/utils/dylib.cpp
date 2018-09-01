@@ -39,3 +39,7 @@ void* DyLib::GetSym(string s) {
 	return dlsym(lib, &s[0]);
 #endif
 }
+
+bool DyLib::is_open() {
+	return lib;
+}

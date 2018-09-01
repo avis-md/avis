@@ -53,6 +53,27 @@ int string_find(const string& s, const string& s2, int start) {
 	return -1;
 }
 
+string to_lowercase(const string& s) {
+	string ss;
+	ss.reserve(s.size());
+	for (auto c : s) {
+		if (c >= 'A' && c <= 'Z')
+			ss += (c - 'A' + 'a');
+		else ss += c;
+	}
+	return ss;
+}
+
+string rm_spaces(const string& s) {
+	string ss;
+	ss.reserve(s.size());
+	for (auto c : s) {
+		if (c != ' ')
+			ss += c;
+	}
+	return ss;
+}
+
 int TryParse(string str, int defVal) {
 	try {
 		return std::stoi(str);
