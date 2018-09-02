@@ -7,7 +7,13 @@
 //#define _GEN_DEBUG
 
 void FReader::Init() {
-
+#ifdef PLATFORM_WIN
+	if (IO::HasFile(CReader::mingwPath + "/gfortran.exe")) {
+		AnWeb::hasFt = true;
+	}
+#else
+	AnWeb::hasFt = true;
+#endif
 }
 
 bool FReader::Read(string path, FScript* scr) {

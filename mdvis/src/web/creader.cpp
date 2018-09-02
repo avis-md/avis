@@ -4,27 +4,42 @@
 #include "utils/runcmd.h"
 #endif
 
-//#define _GEN_DEBUG
-
-string CReader::vcbatPath = "";
-bool CReader::useOMP;
+string CReader::vcbatPath = "", CReader::mingwPath = "";
+bool CReader::useMsvc, CReader::useOMP;
 string CReader::flags1, CReader::flags2;
 
 void CReader::Init() {
+	flags1 = VisSystem::prefs["ANL_COMP_FLAGS"];
 #ifdef PLATFORM_WIN
 	vcbatPath = VisSystem::envs["VCBAT"];
-	AnWeb::hasC = !!vcbatPath.size();
-	flags1 = VisSystem::prefs["ANL_FLAGS_WIN_CL"];
-	flags2 = VisSystem::prefs["ANL_FLAGS_WIN_LINK"];
-#elif PLATFORM_LNX
-	flags1 = VisSystem::prefs["ANL_FLAGS_LINUX"];
+	mingwPath = VisSystem::envs["MINGW"];
+	useMsvc = (VisSystem::prefs["ANL_WIN_USE_MSVC"] == "true");
+	int has = 2;
+	if (!mingwPath.size() || !IO::HasFile(mingwPath + "/g++.exe")) {
+		mingwPath = "";
+		has--;
+		if (!useMsvc) useMsvc = true;
+	}
+	if (!vcbatPath.size() || !IO::HasFile(vcbatPath)) {
+		vcbatPath = "";
+		has--;
+		if (!useMsvc) useMsvc = true;
+	}
+	if (!!has) {
+		AnWeb::hasC = true;
+		if (useMsvc) {
+			flags1 = VisSystem::prefs["ANL_CL_FLAGS"];
+			flags2 = VisSystem::prefs["ANL_LINK_FLAGS"];
+		}
+	}
 #else
-	flags1 = VisSystem::prefs["ANL_FLAGS_MAC"];
+	AnWeb::hasC = true;
 #endif
 	useOMP = (VisSystem::prefs["ANL_USE_OPENMP"] == "true");
 }
 
 bool CReader::Read(string path, CScript* scr) {
+	scr->name = path;
 	string fp = IO::path + "/nodes/" + path;
 	std::replace(fp.begin(), fp.end(), '\\', '/');
 	auto ls = fp.find_last_of('/');
@@ -36,85 +51,94 @@ bool CReader::Read(string path, CScript* scr) {
 #ifndef IS_ANSERVER
 	if (!IO::HasDirectory(fp2)) IO::MakeDirectory(fp2);
 
-	auto mt = scr->chgtime = IO::ModTime(fp + ".cpp");
-	if (mt < 0) return false;
-	auto ot = IO::ModTime(fp2 + nm + ".so");
+	if (AnWeb::hasC) {
+		auto mt = scr->chgtime = IO::ModTime(fp + ".cpp");
+		if (mt < 0) return false;
+		auto ot = IO::ModTime(fp2 + nm + ".so");
 
-	if (mt >= ot) {
-		
-		string lp(fp2 + nm + ".so");
-		remove(&lp[0]);
+		if (mt >= ot) {
+
+			string lp(fp2 + nm + ".so");
+			remove(&lp[0]);
 
 #ifdef PLATFORM_WIN
-		const string dlx = " __declspec(dllexport)";
+			const string dlx = " __declspec(dllexport)";
 #else
-		const string dlx = "";
+			const string dlx = "";
 #endif
-		s = "\
+			s = "\
 #define VARIN extern \"C\"" + dlx + "\n\
 #define VAROUT VARIN\n\
-#define ENTRY VARIN void __cdecl\n\
+#define ENTRY VARIN void\n\
 #define VECSZ(...)\n\
 #define VECVAR VARIN\n\
 #define PROGRS VARIN\n\
 #line 1\n" + s;
-		std::ofstream ostrm(fp + "_temp__.cpp");
-		ostrm << s;
-		ostrm.close();
+			std::ofstream ostrm(fp + "_temp__.cpp");
+			ostrm << s;
+			ostrm.close();
 
 #ifdef PLATFORM_WIN
-		if (!!vcbatPath.size()) {
-		//if (0) {
-			const string cl = "cl /nologo /c -Od "
-#ifdef _GEN_DEBUG
-				"/Zi"
-#endif
-				" /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
-			const string lk = "link /nologo /dll "
-#ifdef _GEN_DEBUG
-				"/debug /pdb:\"" + fp2 + nm + ".pdb\" "
-#endif
-				"/out:\"" + fp2 + nm + ".so\" \"" + fp2 + nm + ".obj\"";
-			RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " > \"" + fp + "_log.txt\" && " + lk + " > \"" + fp + "_log.txt\"");
-			scr->errorCount = ErrorView::Parse_MSVC(fp + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
-		}
+			if (useMsvc) {
+				//if (0) {
+				string cl = "cl /nologo /c -Od ";
+				if (useOMP) {
+					cl += " /openmp";
+				}
+				cl += " /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
+				const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".so\" \"" + fp2 + nm + ".obj\"";
+				RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " > \"" + fp + "_log.txt\" && " + lk + " > \"" + fp + "_log.txt\"");
+				scr->errorCount = ErrorView::Parse_MSVC(fp + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
+			}
+			else {
+				string cmd = "g++ -std=c++11 -static-libstdc++ -shared -fPIC " + flags1;
+				if (useOMP) {
+					cmd += " -fopenmp";
+				}
+				cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\" 2> \"" + fp + "_log.txt\"";
+				std::cout << cmd << std::endl;
+				RunCmd::Run("path=%path%;" + mingwPath + " && " + cmd);
+				scr->errorCount = ErrorView::Parse_GCC(fp + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
+			}
 #else
-		string cmd = "g++ -std=c++11 -shared -fPIC "
+			string cmd = "g++ -std=c++11 -shared -fPIC "
 #ifdef PLATFORM_LNX
-			" -fno-gnu-unique "
+				" -fno-gnu-unique "
 #endif
-		 + flags1;
-		if (useOMP) {
+				+ flags1;
+			if (useOMP) {
 #ifdef PLATFORM_OSX
-			cmd += " -Xpreprocessor -fopenmp -lomp";
+				cmd += " -Xpreprocessor -fopenmp -lomp";
 #else
-			cmd += " -fopenmp";
+				cmd += " -fopenmp";
 #endif
-		}
-		cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\" 2> " + fp + "_log.txt";
-		std::cout << cmd << std::endl;
-		RunCmd::Run(cmd);
-		scr->errorCount = ErrorView::Parse_GCC(fp + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
+			}
+			cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\" 2> " + fp + "_log.txt";
+			std::cout << cmd << std::endl;
+			RunCmd::Run(cmd);
+			scr->errorCount = ErrorView::Parse_GCC(fp + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 #endif
-		for (auto& m : scr->compileLog) {
-			m.path = fp + ".cpp";
-		}
-		ErrorView::compileMsgs.insert(ErrorView::compileMsgs.end(), scr->compileLog.begin(), scr->compileLog.end());
-		ErrorView::compileMsgSz = ErrorView::compileMsgs.size();
-		const string ss = fp + "_temp__.cpp";
-		remove(&ss[0]);
+			for (auto& m : scr->compileLog) {
+				m.path = fp + ".cpp";
+			}
+			ErrorView::compileMsgs.insert(ErrorView::compileMsgs.end(), scr->compileLog.begin(), scr->compileLog.end());
+			ErrorView::compileMsgSz = ErrorView::compileMsgs.size();
+			remove((fp + "_temp__.cpp").c_str());
 
-	}
+		}
 	
 #endif
 
-	scr->name = path;
-
-	if (AnWeb::hasC) {
 		scr->libpath = fp2 + nm + ".so";
 		scr->lib = new DyLib(scr->libpath);
-		if (!scr->lib) {
-			Debug::Warning("CReader", "Failed to load script into memory!");
+		if (!scr->lib->is_open()) {
+			string err =
+#ifdef PLATFORM_WIN
+				std::to_string(GetLastError());
+#else
+				"";//dlerror();
+#endif
+			Debug::Warning("CReader", "Failed to load script into memory! " + err);
 			return false;
 		}
 		scr->funcLoc = (CScript::emptyFunc)scr->lib->GetSym("Execute");

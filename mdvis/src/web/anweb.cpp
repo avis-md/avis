@@ -24,7 +24,7 @@ float AnWeb::maxScroll, AnWeb::scrollPos = 0, AnWeb::expandPos = 0;
 std::thread* AnWeb::execThread = nullptr;
 AnNode* AnWeb::execNode = nullptr;
 
-bool AnWeb::hasPy = false, AnWeb::hasC = true, AnWeb::hasFt = true;
+bool AnWeb::hasPy = false, AnWeb::hasC = false, AnWeb::hasFt = false;
 bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
 
 void AnWeb::Init() {

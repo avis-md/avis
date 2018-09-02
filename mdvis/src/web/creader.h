@@ -9,9 +9,10 @@ public:
 	static bool Read(string path, CScript* scr);
 	static void Refresh(CScript* scr);
 
+	friend class FReader;
 protected:
-	static string vcbatPath;
-	static bool useOMP;
+	static string vcbatPath, mingwPath;
+	static bool useMsvc, useOMP;
 	static string flags1, flags2;
 	static bool ParseType(string s, CVar* var);
 };

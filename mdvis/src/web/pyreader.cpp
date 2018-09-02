@@ -40,12 +40,10 @@ void PyReader::Init() {
 		env = getenv("PYTHONPATH");
 #endif
 		Debug::Warning("Python", "Cannot initialize python! PYTHONPATH env is: " + env);
-		AnWeb::hasPy = false;
 	}
 #ifdef PLATFORM_OSX
 	} else {
 		Debug::Warning("Python", "Python3.6 framework not loaded!");
-		AnWeb::hasPy = false;
 	}
 #endif
 }
