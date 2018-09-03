@@ -11,7 +11,9 @@ void PyReader::Init() {
 	if (dlsym(RTLD_DEFAULT, "Py_Initialize")) {
 #endif
 	auto pyenv = VisSystem::envs["PYENV"];
-	_putenv_s("PYTHONPATH", (pyenv + "/Lib").c_str());
+	Py_SetPythonHome((wchar_t*)pyenv.c_str());
+	//Py_SetProgramName((wchar_t*)(pyenv + "/python.exe").c_str());
+	//_putenv_s("PYTHONPATH", );
 	try {
 		Py_Initialize();
 		PyObject *sys_path = PySys_GetObject("path");
@@ -152,7 +154,7 @@ void PyReader::Refresh(PyScript* scr) {
 
 bool PyReader::ParseType(string s, PyVar* var) {
 	if (s.substr(0, 3) == "int") var->type = AN_VARTYPE::INT;
-	else if (s.substr(0, 5) == "float") var->type = AN_VARTYPE::FLOAT;
+	else if (s.substr(0, 5) == "double") var->type = AN_VARTYPE::DOUBLE;
 	else if (s.substr(0, 4) == "list") {
 		var->type = AN_VARTYPE::LIST;
 		var->dim = s[5] - '1' + 1;

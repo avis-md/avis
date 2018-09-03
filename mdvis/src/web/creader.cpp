@@ -56,49 +56,97 @@ bool CReader::Read(string path, CScript* scr) {
 		if (mt < 0) return false;
 		auto ot = IO::ModTime(fp2 + nm + ".so");
 
-		if (mt >= ot) {
+		string funcNm;
 
-			string lp(fp2 + nm + ".so");
-			remove(&lp[0]);
+		bool fail = false;
+#define _ER(a, b)\
+			scr->compileLog.push_back(ErrorView::Message());\
+			auto& msgg = scr->compileLog.back();\
+			msgg.name = path;\
+			msgg.path = fp + ".cpp";\
+			msgg.msg.resize(1, "(System) " b);\
+			msgg.severe = true;\
+			scr->errorCount = 1;\
+			ErrorView::compileMsgs.push_back(msgg);\
+			ErrorView::compileMsgSz++;\
+			Debug::Warning(a, b);
+
+		if (mt > ot || !IO::HasFile(fp2 + nm + ".entry")) {
+			remove((fp2 + nm + ".so").c_str());
 
 #ifdef PLATFORM_WIN
 			const string dlx = " __declspec(dllexport)";
 #else
 			const string dlx = "";
 #endif
-			s = "\
-#define VARIN extern \"C\"" + dlx + "\n\
-#define VAROUT VARIN\n\
-#define ENTRY VARIN void\n\
-#define VECSZ(...)\n\
-#define VECVAR VARIN\n\
-#define PROGRS VARIN\n\
-#line 1\n" + s;
-			std::ofstream ostrm(fp + "_temp__.cpp");
-			ostrm << s;
-			ostrm.close();
+			{
+				std::ifstream strm(fp + ".cpp");
+				std::ofstream ostrm(fp + "_temp__.cpp");
+				string s;
+				int tp = 0;
+				size_t loc = -1;
+				while (std::getline(strm, s)) {
+					if (s[0] == '/' && s[1] == '/') {
+						auto ss = string_split(s, ' ');
+						if (ss[0] == "//in"
+							|| ss[0] == "//out"
+							|| ss[0] == "//var") {
+							ostrm << "extern \"C\" " + dlx << '\n';
+						}
+						else if (ss[0] == "//entry") {
+							ostrm << "extern \"C\" " + dlx << '\n';
+							std::getline(strm, s);
+							ostrm << s << '\n';
+							s = rm_spaces(s);
+							int bo = s.find('(');
+							int bc = s.find(')');
+							string ib = s.substr(bo + 1, bc - bo - 1);
+							if ((*(int32_t*)&s[0] == *(int32_t*)"void") && (ib == "" || ib == "void")) {
+								funcNm = s.substr(4, bo - 4);
+								std::ofstream ets(fp2 + nm + ".entry");
+								ets << funcNm;
+							}
+							else {
+								_ER("CReader", "//entry must precede a void function with no arguments!");
+								fail = true;
+								break;
+							}
+						}
+						else ostrm << s << "\n";
+					}
+					else ostrm << s << "\n";
+				}
+				if (funcNm == "") {
+					_ER("CReader", "Script has no entry point!");
+					fail = true;
+				}
+			}
+
+			if (fail) {
+				remove((fp + "_temp__.cpp").c_str());
+				return false;
+			}
 
 #ifdef PLATFORM_WIN
 			if (useMsvc) {
-				//if (0) {
 				string cl = "cl /nologo /c -Od ";
 				if (useOMP) {
 					cl += " /openmp";
 				}
 				cl += " /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
 				const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".so\" \"" + fp2 + nm + ".obj\"";
-				RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " > \"" + fp + "_log.txt\" && " + lk + " > \"" + fp + "_log.txt\"");
-				scr->errorCount = ErrorView::Parse_MSVC(fp + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
+				RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " > \"" + fp2 + nm + "_log.txt\" && " + lk + " > \"" + fp2 + nm + "_log.txt\"");
+				scr->errorCount = ErrorView::Parse_MSVC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 			}
 			else {
 				string cmd = "g++ -std=c++11 -static-libstdc++ -shared -fPIC " + flags1;
 				if (useOMP) {
 					cmd += " -fopenmp";
 				}
-				cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\" 2> \"" + fp + "_log.txt\"";
+				cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\" 2> \"" + fp2 + nm + "_log.txt\"";
 				std::cout << cmd << std::endl;
 				RunCmd::Run("path=%path%;" + mingwPath + " && " + cmd);
-				scr->errorCount = ErrorView::Parse_GCC(fp + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
+				scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 			}
 #else
 			string cmd = "g++ -std=c++11 -shared -fPIC "
@@ -122,9 +170,8 @@ bool CReader::Read(string path, CScript* scr) {
 				m.path = fp + ".cpp";
 			}
 			ErrorView::compileMsgs.insert(ErrorView::compileMsgs.end(), scr->compileLog.begin(), scr->compileLog.end());
-			ErrorView::compileMsgSz = ErrorView::compileMsgs.size();
+			ErrorView::compileMsgSz += ErrorView::compileMsgs.size();
 			remove((fp + "_temp__.cpp").c_str());
-
 		}
 	
 #endif
@@ -138,10 +185,14 @@ bool CReader::Read(string path, CScript* scr) {
 #else
 				"";//dlerror();
 #endif
-			Debug::Warning("CReader", "Failed to load script into memory! " + err);
+			_ER("CReader", "Failed to load script into memory! " + err);
 			return false;
 		}
-		scr->funcLoc = (CScript::emptyFunc)scr->lib->GetSym("Execute");
+		{
+			std::ifstream ets(fp2 + nm + ".entry");
+			ets >> funcNm;
+		}
+		scr->funcLoc = (CScript::emptyFunc)scr->lib->GetSym(funcNm);
 		if (!scr->funcLoc) {
 			string err = 
 #ifdef PLATFORM_WIN
@@ -149,7 +200,7 @@ bool CReader::Read(string path, CScript* scr) {
 #else
 				"";//dlerror();
 #endif
-			Debug::Warning("CReader", "Failed to load function Execute into memory! " + err);
+			_ER("CReader", "Failed to load function \"" + funcNm + "\" into memory! " + err);
 			return false;
 		}
 	}
@@ -370,7 +421,7 @@ void CReader::Refresh(CScript* scr) {
 
 bool CReader::ParseType(string s, CVar* var) {
 	if (s.substr(0, 3) == "int") var->type = AN_VARTYPE::INT;
-	else if (s.substr(0, 5) == "float") var->type = AN_VARTYPE::FLOAT;
+	else if (s.substr(0, 5) == "double") var->type = AN_VARTYPE::DOUBLE;
 	else return false;
 	return true;
 }

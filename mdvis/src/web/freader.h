@@ -11,5 +11,5 @@ public:
 	static void Refresh(FScript* scr);
 
 protected:
-	static bool ParseType(string s, CVar* var);
+	static bool ParseType(string& s, CVar* var);
 };

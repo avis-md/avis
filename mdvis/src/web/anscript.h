@@ -15,11 +15,26 @@ enum class AN_SCRTYPE : byte {
 
 enum class AN_VARTYPE : byte {
 	INT,
-	FLOAT,
+	DOUBLE,
 	LIST,
 	ID_RSL,
 	ID_RES,
 	ID_PAR,
+};
+
+union _VarVal {
+	int i;
+	double d;
+	void* p;
+
+	_VarVal() {
+		memset(this, 0, sizeof(_VarVal));
+	}
+};
+
+struct VarVal {
+	_VarVal val;
+	std::vector<int> dims;
 };
 
 class AnScript {
@@ -39,8 +54,6 @@ public:
 
 	virtual void Clear();
 	virtual string Exec() = 0;
-	virtual void Set(uint i, int v) = 0, Set(uint i, float v) = 0, Set(uint i, void* v) = 0;
-	virtual void* Get(uint i) = 0;
 protected:
 	AnScript(AN_SCRTYPE t) : type(t) {}
 };
@@ -54,8 +67,6 @@ public:
 
 	void Clear() override {}
 	string Exec() override { return ""; }
-	void Set(uint i, int v) override, Set(uint i, float v) override, Set(uint i, void* v) override;
-	void* Get(uint i) override;
 };
 
 struct PyVar {
@@ -74,8 +85,7 @@ public:
 	
 	void Clear() override;
 	string Exec() override;
-	void Set(uint i, int v) override, Set(uint i, float v) override, Set(uint i, void* v) override;
-	void* Get(uint i) override;
+	void Set(uint i, int v), Set(uint i, double v), Set(uint i, void* v);
 
 	PyObject* pModule, *pFunc, *pArgl;
 	std::vector<PyObject*> pArgs, pRets;
@@ -90,7 +100,7 @@ public:
 	string name, typeName;
 	AN_VARTYPE type;
 
-	void* value; //same as pRets
+	void* value;
 	std::vector<string> dimNames;
 	std::vector<int*> dimVals;
 
@@ -106,8 +116,11 @@ public:
 
 	void Clear() override;
 	string Exec() override;
-	void Set(uint i, int v) override, Set(uint i, float v) override, Set(uint i, void* v) override;
-	void* Get(uint i) override;
+	
+	template<typename T> void Set(int i, T& val) {
+		*((T*)_invars[i].value) = val;
+	}
+	
 	DyLib* lib;
 	
 	typedef void (*emptyFunc)();
@@ -124,8 +137,9 @@ public:
 
 	void Clear() override;
 	string Exec() override;
-	void Set(uint i, int v) override, Set(uint i, float v) override, Set(uint i, void* v) override;
-	void* Get(uint i) override;
+	
+
+	
 	DyLib* lib;
 	
 	typedef void (*emptyFunc)();

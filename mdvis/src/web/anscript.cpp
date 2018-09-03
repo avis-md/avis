@@ -8,23 +8,6 @@ void AnScript::Clear() {
 	ok = false;
 }
 
-void DmScript::Set(uint i, int v) {
-	
-}
-
-void DmScript::Set(uint i, float v) {
-	
-}
-
-void DmScript::Set(uint i, void* v) {
-	
-}
-
-void* DmScript::Get(uint i) {
-	return nullptr;
-}
-
-
 std::unordered_map<string, PyScript*> PyScript::allScrs;
 
 void PyScript::Clear() {
@@ -70,7 +53,7 @@ void PyScript::Set(uint i, int v) {
 	vl = PyLong_FromLong(v);
 }
 
-void PyScript::Set(uint i, float v) {
+void PyScript::Set(uint i, double v) {
 	if (invars.size() <= i) return;
 	auto& vl = _invars[i].value;
 	if (vl) Py_DECREF(vl);
@@ -82,39 +65,12 @@ void PyScript::Set(uint i, void* v) {
 	_invars[i].value = (PyObject*)v;
 }
 
-void* PyScript::Get(uint i) {
-	if (outvars.size() <= i) return nullptr;
-	switch (_outvars[i].type) {
-	case AN_VARTYPE::INT:
-		return new int(_PyLong_AsInt(pRets[i]));
-		break;
-	case AN_VARTYPE::FLOAT:
-		return new float((float)PyFloat_AsDouble(pRets[i]));
-		break;
-	default:
-		Debug::Error("PyScript", "Get for this type not implemented!");
-		return nullptr;
-		break;
-	}
-	if (_outvars[i].typeName == "list(float)") {
-		auto sz = PyList_Size(pRets[i]);
-		std::vector<float>* v = new std::vector<float>(sz);
-		for (Py_ssize_t a = 0; a < sz; a++) {
-			auto obj = PyList_GetItem(pRets[i], a);
-			(*v)[a] = (float)PyFloat_AsDouble(obj);
-		}
-		return v;
-	}
-	Debug::Warning("PyScript", "Cannot convert type \"" + _outvars[i].typeName + "\" to C++ type!");
-	return nullptr;
-}
-
 
 void CVar::Write(std::ofstream& strm) {
 	_StreamWrite(&type, &strm, 1);
 	switch (type) {
-	case AN_VARTYPE::FLOAT:
-		_StreamWrite((float*)value, &strm, sizeof(float));
+	case AN_VARTYPE::DOUBLE:
+		_StreamWrite((double*)value, &strm, sizeof(double));
 		break;
 	case AN_VARTYPE::INT:
 		_StreamWrite((int32_t*)value, &strm, 4);
@@ -144,12 +100,13 @@ void CVar::Write(std::ofstream& strm) {
 	}
 }
 
+//TODO: remove dangling pointers
 void CVar::Read(std::ifstream& strm) {
 	_Strm2Val(strm, type);
 	switch (type) {
-	case AN_VARTYPE::FLOAT:
-		value = new float();
-		_Strm2Val(strm, *((float**)value));
+	case AN_VARTYPE::DOUBLE:
+		value = new double();
+		_Strm2Val(strm, *((double**)value));
 		break;
 	case AN_VARTYPE::INT:
 		value = new int();
@@ -200,24 +157,6 @@ string CScript::Exec() {
 	return "";
 }
 
-void CScript::Set(uint i, int v) {
-	*((int*)_invars[i].value) = v;
-}
-
-void CScript::Set(uint i, float v) {
-	*((float*)_invars[i].value) = v;
-}
-
-void CScript::Set(uint i, void* v) {
-
-}
-
-void* CScript::Get(uint i) {
-
-	return nullptr;
-}
-
-
 std::unordered_map<string, FScript*> FScript::allScrs;
 
 void FScript::Clear() {
@@ -233,21 +172,4 @@ void FScript::Clear() {
 string FScript::Exec() {
 	funcLoc();
 	return "";
-}
-
-void FScript::Set(uint i, int v) {
-	*((int*)_invars[i].value) = v;
-}
-
-void FScript::Set(uint i, float v) {
-	*((float*)_invars[i].value) = v;
-}
-
-void FScript::Set(uint i, void* v) {
-
-}
-
-void* FScript::Get(uint i) {
-
-	return nullptr;
 }

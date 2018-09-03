@@ -17,23 +17,36 @@ int ErrorView::Parse_GCC(const string& path, const string& sig, const string& na
     const auto sz = sig.size();
     const string nm = name.substr(name.find_last_of('/') + 1);
     while (std::getline(strm, str)) {
+#ifdef PLATFORM_WIN
+		if (str[1] == ':' && str[0] >= 'A' && str[0] <= 'Z') {
+#else
         if (str[0] == '/') {
-            if (str.substr(0, sz) == sig) {
-                msgs.push_back(Message());
-                msg = &msgs.back();
-                msg->name = nm; msg->path = sig;
-                int i = str.find_first_of(':', sz + 2);
-                msg->linenum = TryParse(str.substr(sz + 1, i - sz - 1), -1);
-                int j = str.find_first_of(':', i + 2);
-                msg->charnum = TryParse(str.substr(i + 1, j - i - 1), -1);
-                str = str.substr(j + 2);
-                if (str.substr(0, 5) == "error") {
-                    msg->severe = true;
-                    msg->msg.resize(1, str.substr(7));
-                    n++;
-                }
-                msg->msg.resize(1, str.substr(9));
-            }
+#endif
+			if (str.substr(0, sz) == sig) {
+				msgs.push_back(Message());
+				msg = &msgs.back();
+				msg->name = nm; msg->path = sig;
+				int i = str.find_first_of(':', sz + 2);
+				msg->linenum = TryParse(str.substr(sz + 1, i - sz - 1), -1);
+				if (msg->linenum > -1) {
+					int j = str.find_first_of(':', i + 2);
+					msg->charnum = TryParse(str.substr(i + 1, j - i - 1), -1);
+					str = str.substr(j + 2);
+					if (str.substr(0, 5) == "error") {
+						msg->severe = true;
+						msg->msg.resize(1, str.substr(7));
+						n++;
+					}
+					else {
+						msg->msg.resize(1, str.substr(9));
+						
+					}
+				}
+				else {
+					msg = nullptr;
+					msgs.pop_back();
+				}
+			}
             else msg = nullptr;
         }
         else if (str.size() > 11 && str.substr(str.size() - 10) == "generated.") {

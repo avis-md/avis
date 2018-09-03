@@ -11,6 +11,7 @@ enum class ANNODE_OP {
 union AnVarBase {
 	int i;
 	float f;
+	double d;
 };
 
 class AnNode {
@@ -90,6 +91,7 @@ public:
 	PyNode(PyScript*);
 	
 	std::vector<PyVar> inputV, outputV;
+	std::vector<VarVal> outputVC;
 	
 	void Execute() override;
 };

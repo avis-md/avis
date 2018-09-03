@@ -311,8 +311,8 @@ void AnNode::Load(std::ifstream& strm) {
 			string nn = script->invars[b].first;
 			if (nn == vn) {
 				auto t = ((CScript*)script)->_invars[b].type;
-				if (t == AN_VARTYPE::FLOAT)
-					inputVDef[b].f = TryParse(tp, 0.0f);
+				if (t == AN_VARTYPE::DOUBLE)
+					inputVDef[b].d = TryParse(tp, 0.0);
 				else if (t == AN_VARTYPE::INT)
 					inputVDef[b].i = TryParse(tp, 0);
 			}
@@ -425,26 +425,28 @@ PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 	title += " (python)";
 	inputV.resize(scr->invars.size());
 	outputV.resize(scr->outvars.size());
+	outputVC.resize(scr->outvars.size());
 	inputVDef.resize(scr->invars.size());
 	for (uint i = 0; i < scr->invars.size(); i++) {
 		inputV[i] = scr->_invars[i];
-		if (scr->_invars[i].type == AN_VARTYPE::FLOAT) inputVDef[i].f = 0;
+		if (scr->_invars[i].type == AN_VARTYPE::DOUBLE) inputVDef[i].d = 0;
 		else inputVDef[i].i = 0;
 	}
 	for (uint i = 0; i < scr->outvars.size(); i++) {
 		outputV[i] = scr->_outvars[i];
 		switch (scr->_outvars[i].type) {
 		case AN_VARTYPE::INT:
-			conV[i].value = new int();
+			conV[i].value = &outputVC[i].val.i;
 			break;
-		case AN_VARTYPE::FLOAT:
-			conV[i].value = new float();
+		case AN_VARTYPE::DOUBLE:
+			conV[i].value = &outputVC[i].val.d;
 			break;
 		case AN_VARTYPE::LIST:
 			conV[i].dimVals.resize(outputV[i].dim);
+			outputVC[i].dims.resize(outputV[i].dim);
 			for (int j = 0; j < outputV[i].dim; j++)
-				conV[i].dimVals[j] = new int();
-			conV[i].value = new uintptr_t();
+				conV[i].dimVals[j] = &outputVC[i].dims[j];
+			conV[i].value = &outputVC[i].val.p;
 			break;
 		default:
 			Debug::Warning("PyNode", "case not handled!");
@@ -461,10 +463,10 @@ void PyNode::Execute() {
 			auto& cv = inputR[i].first->conV[inputR[i].second];
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
-				script->Set(i, *((int*)cv.value));
+				scr->Set(i, *((int*)cv.value));
 				break;
-			case AN_VARTYPE::FLOAT:
-				script->Set(i, *((float*)cv.value));
+			case AN_VARTYPE::DOUBLE:
+				scr->Set(i, *((float*)cv.value));
 				break;
 			default:
 				Debug::Error("PyNode", "Value not handled!");
@@ -474,10 +476,10 @@ void PyNode::Execute() {
 		else {
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
-				script->Set(i, inputVDef[i].i);
+				scr->Set(i, inputVDef[i].i);
 				break;
-			case AN_VARTYPE::FLOAT:
-				script->Set(i, inputVDef[i].f);
+			case AN_VARTYPE::DOUBLE:
+				scr->Set(i, inputVDef[i].f);
 				break;
 			default:
 				Debug::Error("PyNode", "Value not handled!");
@@ -490,15 +492,14 @@ void PyNode::Execute() {
 		outputV[i].value = scr->pRets[i];
 		Py_INCREF(outputV[i].value);
 		switch (outputV[i].type) {
-		case AN_VARTYPE::FLOAT:
-			*(float*)conV[i].value = (float)PyFloat_AsDouble(outputV[i].value);
+		case AN_VARTYPE::DOUBLE:
+			outputVC[i].val.d = PyFloat_AsDouble(outputV[i].value);
 			break;
 		case AN_VARTYPE::INT:
-			//*(float*)conV[i].value = PyFloat_AsDouble(outputV[i].value);
-			*(int*)conV[i].value = PyLong_AsLong(outputV[i].value);
+			outputVC[i].val.i = (int)PyLong_AsLong(outputV[i].value);
 			break;
 		case AN_VARTYPE::LIST:
-			*(void**)conV[i].value = AnConv::FromPy(outputV[i].value, conV[i].dimVals.size(), &conV[i].dimVals[0]);
+			outputVC[i].val.p = AnConv::FromPy(outputV[i].value, conV[i].dimVals.size(), &conV[i].dimVals[0]);
 			break;
 		default:
 			Debug::Warning("AnVar", "exec case not handled!");
@@ -515,7 +516,7 @@ CNode::CNode(CScript* scr) : AnNode(scr) {
 	inputVDef.resize(scr->invars.size());
 	for (uint i = 0; i < scr->invars.size(); i++) {
 		inputV[i] = scr->_invars[i].value;
-		if (scr->_invars[i].type == AN_VARTYPE::FLOAT) inputVDef[i].f = 0;
+		if (scr->_invars[i].type == AN_VARTYPE::DOUBLE) inputVDef[i].d = 0;
 		else inputVDef[i].i = 0;
 	}
 	for (uint i = 0; i < scr->outvars.size(); i++) {
@@ -532,13 +533,13 @@ void CNode::Execute() {
 			auto& cv = inputR[i].first->conV[inputR[i].second];
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
-				script->Set(i, *((int*)cv.value));
+				scr->Set(i, *(int*)cv.value);
 				break;
-			case AN_VARTYPE::FLOAT:
-				script->Set(i, *((float*)cv.value));
+			case AN_VARTYPE::DOUBLE:
+				scr->Set(i, *(double*)cv.value);
 				break;
 			case AN_VARTYPE::LIST:
-				*((float**)mv.value) = *((float**)cv.value);
+				scr->Set(i, *(float**)cv.value);
 				
 				for (uint j = 0; j < mv.dimVals.size(); j++) {
 					*mv.dimVals[j] = *cv.dimVals[j];
@@ -552,10 +553,10 @@ void CNode::Execute() {
 		else {
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
-				script->Set(i, inputVDef[i].i);
+				scr->Set(i, inputVDef[i].i);
 				break;
-			case AN_VARTYPE::FLOAT:
-				script->Set(i, inputVDef[i].f);
+			case AN_VARTYPE::DOUBLE:
+				scr->Set(i, inputVDef[i].d);
 				break;
 			default:
 				Debug::Error("CNode", "Value not handled!");
@@ -575,7 +576,7 @@ void CNode::Reconn() {
 	inputVDef.resize(scr->invars.size());
 	for (uint i = 0; i < scr->invars.size(); i++) {
 		inputV[i] = scr->_invars[i].value;
-		if (scr->_invars[i].type == AN_VARTYPE::FLOAT) inputVDef[i].f = 0;
+		if (scr->_invars[i].type == AN_VARTYPE::DOUBLE) inputVDef[i].d = 0;
 		else inputVDef[i].i = 0;
 	}
 	for (uint i = 0; i < scr->outvars.size(); i++) {
@@ -593,7 +594,7 @@ FNode::FNode(FScript* scr) : AnNode(scr) {
 	inputVDef.resize(scr->invars.size());
 	for (uint i = 0; i < scr->invars.size(); i++) {
 		inputV[i] = scr->_invars[i].value;
-		if (scr->_invars[i].type == AN_VARTYPE::FLOAT) inputVDef[i].f = 0;
+		if (scr->_invars[i].type == AN_VARTYPE::DOUBLE) inputVDef[i].d = 0;
 		else inputVDef[i].i = 0;
 	}
 	for (uint i = 0; i < scr->outvars.size(); i++) {
@@ -604,36 +605,7 @@ FNode::FNode(FScript* scr) : AnNode(scr) {
 
 void FNode::Execute() {
 	auto scr = (FScript*)script;
-	for (uint i = 0; i < script->invars.size(); i++) {
-		auto& mv = scr->_invars[i];
-		if (inputR[i].first) {
-			auto& cv = inputR[i].first->conV[inputR[i].second];
-			switch (mv.type) {
-			case AN_VARTYPE::INT:
-				script->Set(i, *((int*)cv.value));
-				break;
-			case AN_VARTYPE::FLOAT:
-				script->Set(i, *((float*)cv.value));
-				break;
-			default:
-				Debug::Warning("FNode", "var not handled!");
-				break;
-			}
-		}
-		else {
-			switch (scr->_invars[i].type) {
-			case AN_VARTYPE::INT:
-				script->Set(i, inputVDef[i].i);
-				break;
-			case AN_VARTYPE::FLOAT:
-				script->Set(i, inputVDef[i].f);
-				break;
-			default:
-				Debug::Error("FNode", "Value not handled!");
-				break;
-			}
-		}
-	}
+	
 
 	script->Exec();
 }

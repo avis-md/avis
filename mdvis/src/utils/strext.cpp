@@ -99,3 +99,11 @@ float TryParse(string str, float defVal) {
 		return defVal;
 	}
 }
+double TryParse(string str, double defVal) {
+	try {
+		return std::stod(str);
+	}
+	catch (...) {
+		return defVal;
+	}
+}

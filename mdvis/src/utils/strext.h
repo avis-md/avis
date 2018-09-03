@@ -31,3 +31,4 @@ string rm_spaces(const string& s);
 int TryParse(string str, int defVal);
 uint TryParse(string str, uint defVal);
 float TryParse(string str, float defVal);
+double TryParse(string str, double defVal);
