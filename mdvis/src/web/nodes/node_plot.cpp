@@ -32,17 +32,17 @@ void Node_Plot::Execute() {
 	switch (cv.typeName[6]) {
 	case 's':
 		for (int i = 0; i < sz; i++) {
-			valYs[i] = (float)(*(short*)cv.value);
+			valYs[i] = (float)(*(short**)cv.value)[i];
 		}
 		break;
 	case 'i':
 		for (int i = 0; i < sz; i++) {
-			valYs[i] = (float)(*(int*)cv.value);
+			valYs[i] = (float)(*(int**)cv.value)[i];
 		}
 		break;
 	case 'd':
 		for (int i = 0; i < sz; i++) {
-			valYs[i] = (float)(*(double*)cv.value);
+			valYs[i] = (float)(*(double**)cv.value)[i];
 		}
 		break;
 	default:

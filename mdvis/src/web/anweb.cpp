@@ -340,17 +340,13 @@ void AnWeb::Execute() {
 }
 
 void AnWeb::DoExecute() {
-#ifndef NO_REDIR_LOG
-	IO::StartReadStdio(IO::path + "/nodes/__tmpstd", OnExecLog);
-	execNode = (AnNode*)2;
-	std::cout << "__start__\n";
-	std::cerr << "__start__\n";
-	while (execNode) {}
-#endif
 	for (auto n : nodes) {
 		n->log.clear();
 	}
 	for (auto n : nodes) {
+#ifndef NO_REDIR_LOG
+		IO::RedirectStdio2(IO::path + "/nodes/__tmpstd");
+#endif
 		execNode = n;
 		n->executing = true;
 		try {
@@ -361,17 +357,18 @@ void AnWeb::DoExecute() {
 		}
 		n->executing = false;
 #ifndef NO_REDIR_LOG
-		std::cout << "\n___123___\n";
-		IO::FlushStdio();
-		while (execNode) {}
-	}
-	IO::StopReadStdio();
-#else
-	}
+		IO::RestoreStdio2();
+		auto f = std::ifstream(IO::path + "/nodes/__tmpstd");
+		string s;
+		while (std::getline(f, s)) {
+			n->log.push_back(std::pair<byte, string>(0, s));
+		}
 #endif
+	}
 	execNode = nullptr;
 	executing = false;
 	apply = true;
+	remove((IO::path + "/nodes/__tmpstd").c_str());
 }
 
 void AnWeb::OnExecLog(string s, bool e) {

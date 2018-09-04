@@ -23,6 +23,9 @@ public:
 	static void FlushStdio();
 	static void StopReadStdio();
 
+	static void RedirectStdio2(string path);
+	static void RestoreStdio2();
+
 	static void OpenEx(string path);
 
 	static string path;

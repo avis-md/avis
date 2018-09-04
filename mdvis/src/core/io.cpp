@@ -224,6 +224,30 @@ void IO::StopReadStdio() {
 	remove(p2.c_str());
 }
 
+void IO::RedirectStdio2(string path) {
+	fflush(stdout);
+	fflush(stderr);
+	stdout_o = _dup(1);
+	stderr_o = _dup(2);
+#ifdef PLATFORM_WIN
+	stdout_n = _fsopen(path.c_str(), "w", _SH_DENYWR);
+#else
+	stdout_n = fopen(path.c_str(), "w");
+#endif
+	_dup2(_fileno(stdout_n), 1);
+	_dup2(_fileno(stdout_n), 2);
+}
+
+void IO::RestoreStdio2() {
+	fflush(stdout);
+	fflush(stderr);
+	_dup2(stdout_o, 1);
+	_dup2(stderr_o, 2);
+	_close(stdout_o);
+	_close(stderr_o);
+	fclose(stdout_n);
+}
+
 void IO::OpenEx(string path) {
 	//path = "\"" + path + "\"";
 #ifdef PLATFORM_WIN
@@ -317,7 +341,7 @@ void IO::DoReadStdio(stdioCallback cb) {
 		if (!has) {
 			if (waitstdio == 2)
 				waitstdio = 0;
-			Engine::Sleep(100);
+			Engine::Sleep(50);
 			strm.seekg(pos);
 			strm2.seekg(pos2);
 		}

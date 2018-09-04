@@ -46,17 +46,17 @@ Vec2 AnNode::DrawConn() {
 #ifndef IS_ANSERVER
 	if (script->ok) {
 		auto cnt = (script->invars.size() + script->outvars.size());
-		float hy = GetHeaderSz();
-		float y = pos.y + 18 + hy;
+		float y = pos.y + 18 + hdrSz;
 		for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 			auto& ri = inputR[i];
 			if (ri.first) {
 				Vec2 p2 = Vec2(pos.x, expanded ? y + 8 : pos.y + 8);
-				Vec2 p1 = Vec2(ri.first->pos.x + ri.first->width, ri.first->expanded ? ri.first->pos.y + 28 + ri.first->GetHeaderSz() + (ri.second + ri.first->inputR.size()) * 17 : ri.first->pos.y + 8);
-				UI2::Bezier(p1, p1 + Vec2(10, 0), p2 - Vec2(10, 0), p2, white());
+				Vec2 p1 = Vec2(ri.first->pos.x + ri.first->width, ri.first->expanded ? ri.first->pos.y + 28 + ri.first->hdrSz + (ri.second + ri.first->inputR.size()) * 17 : ri.first->pos.y + 8);
+				Vec2 hx = Vec2((p2.x > p1.x) ? (p2.x - p1.x) / 2 : (p1.x - p2.x) / 3, 0);
+				UI2::Bezier(p1, p1 + hx, p2 - hx, p2, white(), 30);
 			}
 		}
-		if (expanded) return Vec2(width, 19 + 17 * cnt + ftrSz + DrawLog(19.0f + 17 * cnt + hy + ftrSz) + hy);
+		if (expanded) return Vec2(width, 19 + 17 * cnt + hdrSz + ftrSz + DrawLog(19 + 17 * cnt + hdrSz + ftrSz));
 		else return Vec2(width, 16 + DrawLog(16));
 	}
 	else return Vec2(width, 35);
@@ -101,7 +101,11 @@ void AnNode::Draw() {
 					}
 				}
 				else if (AnWeb::selConnNode == this && AnWeb::selConnId == i && !AnWeb::selConnIdIsOut) {
-					Engine::DrawLine(Vec2(pos.x, y + 8), Input::mousePos, white(), 1);
+					Vec2 p2(pos.x, y + 8);
+					Vec2 p1 = Input::mousePos;
+					Vec2 hx = Vec2((p2.x > p1.x) ? (p2.x - p1.x)/2 : (p1.x - p2.x)/3, 0);
+					UI2::Bezier(p1, p1 + hx, p2 - hx, p2, white(), 30);
+					//Engine::DrawLine(Vec2(pos.x, y + 8), Input::mousePos, white(), 1);
 					UI::Texture(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, inputR[i].first ? tex_circle_conn : tex_circle_open);
 				}
 				else {
@@ -143,7 +147,11 @@ void AnNode::Draw() {
 					}
 				}
 				else if (AnWeb::selConnNode == this && AnWeb::selConnId == i && AnWeb::selConnIdIsOut) {
-					Engine::DrawLine(Vec2(pos.x + width, y + 8), Input::mousePos, white(), 1);
+					Vec2 p2 = Input::mousePos;
+					Vec2 p1(pos.x + width, y + 8);
+					Vec2 hx = Vec2((p2.x > p1.x) ? (p2.x - p1.x) / 2 : (p1.x - p2.x) / 3, 0);
+					UI2::Bezier(p1, p1 + hx, p2 - hx, p2, white(), 30);
+					//Engine::DrawLine(Vec2(pos.x + width, y + 8), Input::mousePos, white(), 1);
 					UI::Texture(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, outputR[i].first ? tex_circle_conn : tex_circle_open);
 				}
 				else {
