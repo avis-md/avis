@@ -25,6 +25,7 @@ public:
 	static float width;
 	string title;
 	Vec3 titleCol = Vec3(0.35f, 0.35f, 0.35f);
+	static Vec4 bgCol;
 
 	bool expanded = true;
 	bool showDesc = false, showSett = false;
@@ -82,6 +83,7 @@ public:
 
 	virtual void OnSceneUpdate() {}
 	virtual void OnAnimFrame() {}
+	virtual void OnConn(bool o, int i) {}
 protected:
 	AnNode(AnScript* scr);
 

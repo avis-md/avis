@@ -201,6 +201,7 @@ void AnWeb::Draw() {
 					if (iterTileTop) nodes[iter + 1]->canTile = true;
 					else pn->canTile = true;
 				}
+				else pn->canTile = false;
 				nodes.insert(nodes.begin() + iter + 1, pn);
 			}
 			selScript = nullptr;

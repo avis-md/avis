@@ -41,7 +41,7 @@ void Node_ShowRange::Execute() {
 
 void Node_ShowRange::DrawHeader(float& off) {
 	AnNode::DrawHeader(off);
-	Engine::DrawQuad(pos.x, off, width, 17*3+2, white(0.7f, 0.25f));
+	Engine::DrawQuad(pos.x, off, width, 17*3+2, bgCol);
 	UI2::Toggle(pos.x + 2, off, width - 4, "invert", invert);
     title = invert? "Hide Range" : "Show Range";
     off += 18;

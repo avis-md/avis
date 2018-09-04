@@ -22,7 +22,7 @@ void Node_SetParam::Execute() {
 
 void Node_SetParam::DrawHeader(float& off) {
 	AnNode::DrawHeader(off);
-	Engine::DrawQuad(pos.x, off, width, 18, white(0.7f, 0.25f));
+	Engine::DrawQuad(pos.x, off, width, 18, bgCol);
 	UI2::Dropdown(pos.x + 2, off, width - 4, "Parameter", di);
 	off += 18;
 }

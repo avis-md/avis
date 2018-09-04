@@ -20,6 +20,8 @@ const string Node_TraceTrj::sig = ".trrj";
 const string Node_Volume::sig = ".vol";
 const string Node_Remap::sig = ".remap";
 
+Vec4 AnNode::bgCol = white(0.7f, 0.25f);
+
 Texture* AnNode::tex_circle_open = nullptr, *AnNode::tex_circle_conn = nullptr;
 float AnNode::width = 220;
 
@@ -83,7 +85,7 @@ void AnNode::Draw() {
 			float y = pos.y + 16, yy = y;
 			DrawHeader(y);
 			hdrSz = y-yy - setSz;
-			Engine::DrawQuad(pos.x, y, width, 4.0f + 17 * cnt, white(0.7f, 0.25f));
+			Engine::DrawQuad(pos.x, y, width, 4.0f + 17 * cnt, bgCol);
 			y += 2;
 			for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 				if (!AnWeb::selConnNode || (AnWeb::selConnIdIsOut && AnWeb::selConnNode != this)) {
@@ -179,7 +181,7 @@ float AnNode::GetHeaderSz() {
 
 void AnNode::DrawHeader(float& off) {
 	if (showDesc) {
-		Engine::DrawQuad(pos.x, off, width, 17.0f * script->descLines, white(0.7f, 0.25f));
+		Engine::DrawQuad(pos.x, off, width, 17.0f * script->descLines, bgCol);
 		UI::alpha = 0.7f;
 		UI2::LabelMul(pos.x + 5, off + 1, 12, script->desc);
 		UI::alpha = 1;
@@ -213,7 +215,7 @@ float AnNode::DrawSide() {
 	if (expanded) {
 		DrawHeader(y);
 		if (cnt > 0) {
-			Engine::DrawQuad(pos.x, y, width, 2.0f + 17 * cnt, white(0.7f, 0.25f));
+			Engine::DrawQuad(pos.x, y, width, 2.0f + 17 * cnt, bgCol);
 			for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 				UI::Label(pos.x + 2, y, 12, script->invars[i].first, white());
 				if (!inputR[i].first) {
@@ -300,6 +302,8 @@ void AnNode::ConnectTo(uint id, AnNode* tar, uint tarId) {
 		tar->inputR[tarId].second = id;
 		outputR[id].first = tar;
 		outputR[id].second = tarId;
+		OnConn(true, id);
+		tar->OnConn(false, tarId);
 	}
 }
 

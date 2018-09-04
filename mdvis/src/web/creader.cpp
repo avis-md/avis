@@ -279,7 +279,13 @@ bool CReader::Read(string path, CScript* scr) {
 				}
 				if (ira) {
 					for (size_t a = 0; a < bk->dimVals.size(); a++) {
-						if (!(bk->dimVals[a] = (int*)scr->lib->GetSym(bk->dimNames[a]))) {
+						int es = TryParse(bk->dimNames[a], 0);
+						if (es > 0) {
+							bk->data.dims.resize(a + 1);
+							bk->data.dims[a] = es;
+							bk->dimVals[a] = &bk->data.dims[a];
+						}
+						else if (!(bk->dimVals[a] = (int*)scr->lib->GetSym(bk->dimNames[a]))) {
 							_ER("CReader", "cannot find \"" + bk->dimNames[a] + "\" from memory!");
 							return false;
 						}

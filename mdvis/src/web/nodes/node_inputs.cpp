@@ -133,7 +133,7 @@ Node_Inputs_SelPar::Node_Inputs_SelPar() : Node_Inputs() {
 
 void Node_Inputs_SelPar::DrawHeader(float& off) {
 	AnNode::DrawHeader(off);
-	Engine::DrawQuad(pos.x, off, width, 35, white(0.7f, 0.25f));
+	Engine::DrawQuad(pos.x, off, width, 35, bgCol);
 	string nms[] = { "ResNm", "ResID", "AtomID" };
 	string nmfs[] = { "Residue Name", "Residue ID", "Atom ID" };
 	UI2::Switch(pos.x + 2, off + 1, width - 2, "type", 3, nms, (int&)type);
