@@ -56,7 +56,7 @@ Vec2 AnNode::DrawConn() {
 				UI2::Bezier(p1, p1 + Vec2(10, 0), p2 - Vec2(10, 0), p2, white());
 			}
 		}
-		if (expanded) return Vec2(width, 19 + 17 * cnt + DrawLog(19.0f + 17 * cnt) + hy);
+		if (expanded) return Vec2(width, 19 + 17 * cnt + ftrSz + DrawLog(19.0f + 17 * cnt + hy + ftrSz) + hy);
 		else return Vec2(width, 16 + DrawLog(16));
 	}
 	else return Vec2(width, 35);
@@ -83,7 +83,7 @@ void AnNode::Draw() {
 			float y = pos.y + 16, yy = y;
 			DrawHeader(y);
 			hdrSz = y-yy - setSz;
-			Engine::DrawQuad(pos.x, y, width, 3.0f + 17 * cnt, white(0.7f, 0.25f));
+			Engine::DrawQuad(pos.x, y, width, 4.0f + 17 * cnt, white(0.7f, 0.25f));
 			y += 2;
 			for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 				if (!AnWeb::selConnNode || (AnWeb::selConnIdIsOut && AnWeb::selConnNode != this)) {
@@ -156,6 +156,9 @@ void AnNode::Draw() {
 				UI::font->Align(ALIGN_TOPLEFT);
 				UI::Label(pos.x + 2, y, 12, script->outvars[i].second, white(0.3f), width * 0.67f - 6);
 			}
+			auto yo = y;
+			DrawFooter(y);
+			ftrSz = y - yo;
 			if (AnWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));
 		}
 	}
@@ -198,33 +201,38 @@ float AnNode::DrawSide() {
 		else
 			Engine::DrawQuad(pos.x, pos.y + 16, width * 0.1f, 2, red());
 	}
+	float y = pos.y + (executing ? 18 : 16);
 	if (expanded) {
-		float y = pos.y + (executing? 18 : 16);
 		DrawHeader(y);
-		Engine::DrawQuad(pos.x, y, width, 2.0f + 17 * cnt, white(0.7f, 0.25f));
-		for (uint i = 0; i < script->invars.size(); i++, y += 17) {
-			UI::Label(pos.x + 2, y, 12, script->invars[i].first, white());
-			if (!inputR[i].first) {
-				auto& vr = script->invars[i].second;
-				auto isi = (vr == "int");
-				if (isi || (vr == "float")) {
-					string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].f);
-					s = UI::EditText(pos.x + width * 0.4f, y, width * 0.6f - 3, 16, 12, white(1, 0.5f), s, true, white());
-					if (isi) inputVDef[i].i = TryParse(s, 0);
-					else inputVDef[i].f = TryParse(s, 0.0f);
+		if (cnt > 0) {
+			Engine::DrawQuad(pos.x, y, width, 2.0f + 17 * cnt, white(0.7f, 0.25f));
+			for (uint i = 0; i < script->invars.size(); i++, y += 17) {
+				UI::Label(pos.x + 2, y, 12, script->invars[i].first, white());
+				if (!inputR[i].first) {
+					auto& vr = script->invars[i].second;
+					auto isi = (vr == "int");
+					if (isi || (vr == "float")) {
+						string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].f);
+						s = UI::EditText(pos.x + width * 0.4f, y, width * 0.6f - 3, 16, 12, white(1, 0.5f), s, true, white());
+						if (isi) inputVDef[i].i = TryParse(s, 0);
+						else inputVDef[i].f = TryParse(s, 0.0f);
+					}
+					else {
+						UI::Label(pos.x + width * 0.4f, y, 12, script->invars[i].second, white(0.3f));
+					}
 				}
 				else {
-					UI::Label(pos.x + width * 0.4f, y, 12, script->invars[i].second, white(0.3f));
+					UI::Label(pos.x + width * 0.4f, y, 12, "<connected>", yellow());
 				}
-			}
-			else {
-				UI::Label(pos.x + width * 0.4f, y, 12, "<connected>", yellow());
 			}
 		}
 		if (AnWeb::executing) Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));
-		return 19.0f + 17 * cnt + DrawLog(18.0f + 17 * cnt);
+		
+		DrawFooter(y);
+		
+		return y - pos.y + 1 + DrawLog(y);
 	}
-	else return 17.0f + DrawLog(16.0f) + hdrSz;
+	else return y - pos.y + 1 + DrawLog(y);
 #else
 	return 0;
 #endif
@@ -278,7 +286,7 @@ void AnNode::DrawToolbar() {
 }
 
 void AnNode::ConnectTo(uint id, AnNode* tar, uint tarId) {
-	if (script->outvars[id].second == tar->script->invars[tarId].second) {
+	if (CanConn(script->outvars[id].second, tar->script->invars[tarId].second)) {
 		if (tar->inputR[tarId].first) tar->inputR[tarId].first->outputR[tar->inputR[tarId].second].first = nullptr;
 		tar->inputR[tarId].first = this;
 		tar->inputR[tarId].second = id;
@@ -419,6 +427,16 @@ void AnNode::Reconn() {
 	}
 }
 
+bool AnNode::CanConn(string lhs, string rhs) {
+	if (rhs[0] == '*' && lhs.substr(0, 4) != "list") return true;
+	auto s = lhs.size();
+	if (s != rhs.size()) return false;
+	for (int a = 0; a < s; a++) {
+		if (lhs[a] != rhs[a] && rhs[a] != '*') return false;
+	}
+	return true;
+}
+
 
 PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 	if (!scr) return;
@@ -446,7 +464,7 @@ PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 			outputVC[i].dims.resize(outputV[i].dim);
 			for (int j = 0; j < outputV[i].dim; j++)
 				conV[i].dimVals[j] = &outputVC[i].dims[j];
-			conV[i].value = &outputVC[i].val.p;
+			conV[i].value = &outputVC[i].val.arr.p;
 			break;
 		default:
 			Debug::Warning("PyNode", "case not handled!");
@@ -466,7 +484,7 @@ void PyNode::Execute() {
 				scr->Set(i, *((int*)cv.value));
 				break;
 			case AN_VARTYPE::DOUBLE:
-				scr->Set(i, *((float*)cv.value));
+				scr->Set(i, *((double*)cv.value));
 				break;
 			default:
 				Debug::Error("PyNode", "Value not handled!");
@@ -499,8 +517,13 @@ void PyNode::Execute() {
 			outputVC[i].val.i = (int)PyLong_AsLong(outputV[i].value);
 			break;
 		case AN_VARTYPE::LIST:
-			outputVC[i].val.p = AnConv::FromPy(outputV[i].value, conV[i].dimVals.size(), &conV[i].dimVals[0]);
+		{
+			auto& ar = outputVC[i].val.arr;
+			int n;
+			ar.p = AnConv::FromPy(outputV[i].value, conV[i].dimVals.size(), &conV[i].dimVals[0], n);
+			memcpy(&ar.data[0], ar.p, n * scr->_outvars[i].stride);
 			break;
+		}
 		default:
 			Debug::Warning("AnVar", "exec case not handled!");
 			break;
@@ -527,7 +550,7 @@ CNode::CNode(CScript* scr) : AnNode(scr) {
 
 void CNode::Execute() {
 	auto scr = (CScript*)script;
-	for (uint i = 0; i < script->invars.size(); i++) {
+	for (uint i = 0; i < scr->invars.size(); i++) {
 		auto& mv = scr->_invars[i];
 		if (inputR[i].first) {
 			auto& cv = inputR[i].first->conV[inputR[i].second];

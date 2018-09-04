@@ -25,10 +25,21 @@ enum class AN_VARTYPE : byte {
 union _VarVal {
 	int i;
 	double d;
-	void* p;
+	struct arr {
+		void* p;
+		std::vector<char> data;
+	} arr;
 
 	_VarVal() {
 		memset(this, 0, sizeof(_VarVal));
+	}
+	~_VarVal() {}
+	_VarVal(const _VarVal& o) {
+		memcpy(this, &o, sizeof(_VarVal));
+	}
+	_VarVal& operator=(const _VarVal& o) {
+		memcpy(this, &o, sizeof(_VarVal));
+		return *this;
 	}
 };
 
@@ -52,6 +63,8 @@ public:
 	int descLines = 0;
 	bool ok = false;
 
+	static int StrideOf(char c);
+
 	virtual void Clear();
 	virtual string Exec() = 0;
 protected:
@@ -74,7 +87,7 @@ public:
 	string name, typeName;
 	AN_VARTYPE type;
 	PyObject* value;
-	int dim;
+	int dim, stride;
 };
 
 class PyScript : public AnScript {
@@ -100,9 +113,11 @@ public:
 	string name, typeName;
 	AN_VARTYPE type;
 
+	VarVal data;
 	void* value;
 	std::vector<string> dimNames;
 	std::vector<int*> dimVals;
+	int stride;
 
 	void Write(std::ofstream& strm);
 	void Read(std::ifstream& strm);

@@ -158,6 +158,7 @@ bool PyReader::ParseType(string s, PyVar* var) {
 	else if (s.substr(0, 4) == "list") {
 		var->type = AN_VARTYPE::LIST;
 		var->dim = s[5] - '1' + 1;
+		var->stride = AnScript::StrideOf(s[6]);
 	}
 	else return false;
 	return true;

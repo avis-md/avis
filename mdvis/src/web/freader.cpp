@@ -156,8 +156,8 @@ bool FReader::Read(string path, FScript* scr) {
 	bool fst = true;
 	while (!strm.eof()) {
 		std::getline(strm, ln);
-		while (fst && ln[0] == '/' && ln[1] == '/' && ln[2] == '/') {
-			scr->desc += ln.substr(3) + "\n";
+		while (fst && ln[0] == '!' && ln[1] == '!') {
+			scr->desc += ln.substr(2) + "\n";
 			scr->descLines++;
 			std::getline(strm, ln);
 		}
@@ -212,7 +212,7 @@ bool FReader::Read(string path, FScript* scr) {
 				else
 					bk->value = scr->lib->GetSym("__test_MOD_" + to_lowercase(bk->name));
 				if (!bk->value) {
-					Debug::Warning("CReader", "cannot find \"" + bk->name + "\" from memory!");
+					Debug::Warning("FReader", "cannot find \"" + bk->name + "\" from memory!");
 					return false;
 				}
 			}

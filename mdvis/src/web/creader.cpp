@@ -205,198 +205,86 @@ bool CReader::Read(string path, CScript* scr) {
 		}
 	}
 
-	const char* tpnms[] = { "float*", "short*", "int*" };
-	const char tpaps[] = { 'f', 's', 'i' };
-	const int tpszs[] = { 6, 6, 4 };
 	std::ifstream strm(fp + ".cpp");
 	string ln;
-	std::vector<std::pair<string, int*>> vecvars;
-	std::vector<std::pair<string, int**>> vecvarLocs;
-	int vec = 0;
-	CVar vr;
 	bool fst = true;
 	while (!strm.eof()) {
 		std::getline(strm, ln);
-		while (ln[0] == '/' && ln[1] == '/' && ln[2] == '/') {
+		while (fst && ln[0] == '/' && ln[1] == '/' && ln[2] == '/') {
 			scr->desc += ln.substr(3) + "\n";
 			scr->descLines++;
 			std::getline(strm, ln);
 		}
-		string ln2 = ln.substr(0, 6);
-		long long lln2 = *((long long*)&ln2[0]) & 0x0000ffffffffffff;
-#define TL(s) (*((long long*)s) & 0x0000ffffffffffff)
-		if (lln2 == TL("VARIN ")) {
-			auto ss = string_split(ln, ' ', true);
-			if (ss.size() < 3) {
-				Debug::Warning("CReader", "incomplete type for VARIN!");
-				return false;
-			}
-			CVar* bk = 0;
-			if (vec > 0) {
-				auto s2 = rm_spaces(ln.substr(6));
-				byte tp = 255;
-				for (byte b = 0; b < 3; b++) {
-					if (s2.substr(0, tpszs[b]) == tpnms[b]) {
-						tp = b;
-						break;
-					}
-				}
-				if (tp == 255) {
-					Debug::Warning("CReader", "unsupported type for list!");
-					return false;
-				}
-				scr->_invars.push_back(vr);
-				bk = &scr->_invars.back();
-				bk->name = s2.substr(tpszs[tp], s2.find_first_of('=') - tpszs[tp]).substr(0, ln.find_first_of(';'));
-				bk->type = AN_VARTYPE::LIST;
-				bk->typeName[6] = tpaps[tp];
-				int ii = 0;
-				for (auto& a : bk->dimNames) {
-					if (!!a[0]) vecvarLocs.push_back(std::pair<string, int**>(a, &bk->dimVals[ii]));
-					ii++;
-				}
-			}
-			else {
-				scr->_invars.push_back(CVar());
-				bk = &scr->_invars.back();
-				bk->typeName = ss[1];
-				if (!ParseType(bk->typeName, bk)) {
-					Debug::Warning("CReader", "input arg type \"" + bk->typeName + "\" not recognized!");
-					return false;
-				}
-				bk->name = ss[2].substr(0, ln.find_first_of('=')).substr(0, ln.find_first_of(';'));
-			}
-			scr->invars.push_back(std::pair<string, string>(bk->name, bk->typeName));
-			if (scr->lib) {
-				bk->value = scr->lib->GetSym(bk->name);
-				if (!bk->value) {
-					Debug::Warning("CReader", "cannot find \"" + bk->name + "\" from memory!");
-					return false;
-				}
-			}
-		}
-		else if (lln2 == TL("VAROUT")) {
-			auto ss = string_split(ln, ' ', true);
-			if (ss.size() < 3) {
-				Debug::Warning("CReader", "incomplete type for VAROUT!");
-				return false;
-			}
-			CVar* bk = 0;
-			if (vec > 0) {
-				auto s2 = rm_spaces(ln.substr(6));
-				byte tp = 255;
-				for (byte b = 0; b < 3; b++) {
-					if (s2.substr(0, tpszs[b]) == tpnms[b]) {
-						tp = b;
-						break;
-					}
-				}
-				if (tp == 255) {
-					Debug::Warning("CReader", "unsupported type for list!");
-					return false;
-				}
-				scr->_outvars.push_back(vr);
-				bk = &scr->_outvars.back();
-				bk->name = s2.substr(tpszs[tp], s2.find_first_of('=') - tpszs[tp]).substr(0, ln.find_first_of(';'));
-				bk->type = AN_VARTYPE::LIST;
-				bk->typeName[6] = tpaps[tp];
-				int ii = 0;
-				for (auto& a : bk->dimNames) {
-					if (!!a[0]) vecvarLocs.push_back(std::pair<string, int**>(a, &bk->dimVals[ii]));
-					ii++;
-				}
-			}
-			else {
-				scr->_outvars.push_back(CVar());
-				bk = &scr->_outvars.back();
-				bk->typeName = ss[1];
-				if (!ParseType(bk->typeName, bk)) {
-					Debug::Warning("CReader", "output arg type \"" + bk->typeName + "\" not recognized!");
-					return false;
-				}
-				bk->name = ss[2].substr(0, ln.find_first_of('=')).substr(0, ln.find_first_of(';'));
-			}
-			scr->outvars.push_back(std::pair<string, string>(bk->name, bk->typeName));
-			bk->value = (AnWeb::hasC) ? scr->lib->GetSym(bk->name) : nullptr;
-			if (!bk->value) {
-				Debug::Warning("CReader", "cannot find \"" + bk->name + "\" from memory!");
-				return false;
-			}
-		}
-		else if (lln2 == TL("VECVAR")) {
-			auto ss = string_split(ln, ' ', true);
-			if (ss.size() < 3) {
-				Debug::Warning("CReader", "incomplete type for VECVAR!");
-				return false;
-			}
-			if (ss[1] != "int") {
-				Debug::Warning("CReader", "is \"" + ln + "\" an int type?");
-			}
-			auto nm = ss[2].substr(0, ln.find_first_of('=')).substr(0, ln.find_first_of(';'));
-			if (scr->lib) {
-				void* loc = scr->lib->GetSym(nm);
-				if (!loc) {
-					Debug::Warning("CReader", "cannot find \"" + nm + "\" from memory!");
-					return false;
-				}
-				vecvars.push_back(std::pair<string, int*>(nm, (int*)loc));
-			}
-			else
-				vecvars.push_back(std::pair<string, int*>(nm, nullptr));
-		}
-		else if (lln2 == TL("PROGRS")) {
-			auto ss = string_split(ln, ' ', true);
-			if (ss.size() < 3) {
-				Debug::Warning("CReader", "incomplete type for PROGRS!");
-				return false;
-			}
-			if (ss[1] != "float") {
-				Debug::Warning("CReader", "PROGRS type must be float!");
-				return false;
-			}
-			auto nm = ss[2].substr(0, ln.find_first_of('=')).substr(0, ln.find_first_of(';'));
-			scr->progress = (AnWeb::hasC) ? scr->lib->GetSym(nm) : nullptr;
-			if (!scr->progress) {
-				Debug::Warning("CReader", "cannot find \"" + nm + "\" from memory!");
-				return false;
-			}
-		}
-		if (lln2 == TL("VECSZ(")) {
-			auto p1 = 6U;
-			auto p2 = ln.find_first_of(')');
-			if (p2 < p1) {
-				Debug::Warning("CReader", "VECSZ syntax is not correct!");
-				return false;
-			}
-			ln = ln.substr(p1, p2 - p1);
-			auto ss = string_split(ln, ',', true);
-			vec = ss.size();
-			vr = CVar();
-			vr.typeName = "list(" + std::to_string(vec) + " )";
-			vr.dimNames.resize(vec);
-			vr.dimVals.resize(vec);
-			int i = 0;
-			for (auto& a : ss) {
-				a = rm_spaces(a);
-				if (a[0] >= 'A') {
-					vr.dimNames[i] = a = a.substr(0, ln.find_first_of('=')).substr(0, ln.find_first_of(';'));
-					//vecvarLocs.push_back(std::pair<string, int**>(a, &vr.dimVals[i]));
-				}
-				else
-					vr.dimVals[i] = new int(TryParse(a, 0));
-				i++;
-			}
-		}
-		else {
-			vec = 0;
-		}
-	}
+		fst = false;
 
-	for (auto& v : vecvars) {
-		for (int i = vecvarLocs.size() - 1; i >= 0; i--) {
-			if (v.first == vecvarLocs[i].first) {
-				*vecvarLocs[i].second = v.second;
-				vecvarLocs.erase(vecvarLocs.begin() + i);
+		auto lns = string_split(ln, ' ', true);
+		int lnsz = lns.size();
+		if (!lnsz) continue;
+		bool iso = (lns[0] == "//out");
+		if (lns[0] == "//in" || iso) {
+			std::vector<std::pair<string, string>>& cv = iso ? scr->outvars : scr->invars;
+			std::vector<CVar>& _cv = iso ? scr->_outvars : scr->_invars;
+			const string ios = iso ? "output " : "input ";
+			_cv.push_back(CVar());
+			auto bk = &_cv.back();
+
+			std::getline(strm, ln);
+			bool ira = false;
+
+			auto ss = string_split(ln, ' ', true);
+			bk->typeName = ss[0];
+			if (bk->typeName.back() == '*') {
+				bk->typeName.pop_back();
+				ira = true;
+			}
+			else if (ss[1][0] == '*') {
+				ss[1] = ss[1].substr(1);
+				ira = true;
+			}
+			if (ira && lnsz == 1) {
+				_ER("CReader", "Plain " + ios + " must be of non-pointer type!");
+				return false;
+			}
+			if (!ira && lnsz > 1) {
+				_ER("CReader", "" + ios + " with specified size must be of pointer type!");
+				return false;
+			}
+			if (!ira && !ParseType(bk->typeName, bk)) {
+				_ER("CReader", "arg type \"" + bk->typeName + "\" not recognized!");
+				return false;
+			}
+			
+			string::iterator eps;
+			if ((eps = std::find(ss[1].begin(), ss[1].end(), '=')) != ss[1].end()) {
+				bk->name = ss[1].substr(0, eps - ss[1].begin());
+			}
+			else bk->name = ss[1];
+
+			if (ira) {
+				bk->dimVals.resize(lnsz - 1);
+				bk->dimNames.insert(bk->dimNames.end(), lns.begin() + 1, lns.end());
+				bk->stride = AnScript::StrideOf(bk->typeName[0]);
+				if (!bk->stride) {
+					_ER("CReader", "unsupported type \"" + bk->typeName + "\" for list!");
+					return false;
+				}
+				bk->typeName = "list(" + std::to_string(lnsz-1) + bk->typeName[0] + ")";
+			}
+			cv.push_back(std::pair<string, string>(bk->name, bk->typeName));
+
+			if (AnWeb::hasC) {
+				if (!(bk->value = scr->lib->GetSym(bk->name))) {
+					_ER("CReader", "cannot find \"" + bk->name + "\" from memory!");
+					return false;
+				}
+				if (ira) {
+					for (size_t a = 0; a < bk->dimVals.size(); a++) {
+						if (!(bk->dimVals[a] = (int*)scr->lib->GetSym(bk->dimNames[a]))) {
+							_ER("CReader", "cannot find \"" + bk->dimNames[a] + "\" from memory!");
+							return false;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -420,8 +308,8 @@ void CReader::Refresh(CScript* scr) {
 }
 
 bool CReader::ParseType(string s, CVar* var) {
-	if (s.substr(0, 3) == "int") var->type = AN_VARTYPE::INT;
-	else if (s.substr(0, 5) == "double") var->type = AN_VARTYPE::DOUBLE;
+	if (s == "int") var->type = AN_VARTYPE::INT;
+	else if (s == "double") var->type = AN_VARTYPE::DOUBLE;
 	else return false;
 	return true;
 }

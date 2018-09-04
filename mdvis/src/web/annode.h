@@ -78,6 +78,8 @@ public:
 	virtual void LoadOut(const string& path);
 	virtual void SaveConn(), ClearConn(), Reconn();
 
+	static bool CanConn(string lhs, string rhs);
+
 	virtual void OnSceneUpdate() {}
 	virtual void OnAnimFrame() {}
 protected:

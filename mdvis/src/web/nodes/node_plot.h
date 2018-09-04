@@ -6,8 +6,7 @@ public:
 	static const string sig;
 	Node_Plot();
 
-	void Draw() override;
-	float DrawSide() override;
+	void DrawFooter(float& y) override;
 	void Execute() override;
 	void SaveOut(const string& path) override {}
 	void LoadOut(const string& path) override;

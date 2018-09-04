@@ -8,6 +8,20 @@ void AnScript::Clear() {
 	ok = false;
 }
 
+int AnScript::StrideOf(char c) {
+	switch (c) {
+	case 's':
+		return sizeof(short);
+	case 'i':
+		return sizeof(int);
+	case 'd':
+		return sizeof(double);
+	default:
+		return 0;
+	}
+}
+
+
 std::unordered_map<string, PyScript*> PyScript::allScrs;
 
 void PyScript::Clear() {
@@ -70,7 +84,7 @@ void CVar::Write(std::ofstream& strm) {
 	_StreamWrite(&type, &strm, 1);
 	switch (type) {
 	case AN_VARTYPE::DOUBLE:
-		_StreamWrite((double*)value, &strm, sizeof(double));
+		_StreamWrite((double*)value, &strm, 8);
 		break;
 	case AN_VARTYPE::INT:
 		_StreamWrite((int32_t*)value, &strm, 4);
@@ -86,9 +100,9 @@ void CVar::Write(std::ofstream& strm) {
 			}
 			if (totalSz > 0) {
 				auto po = strm.tellp();
-				strm.write(*((char**)value), totalSz * sizeof(float));
+				strm.write(*((char**)value), totalSz * stride);
 				ulong wt = (ulong)(strm.tellp() - po);
-				if (wt < totalSz * sizeof(float) || strm.bad()) {
+				if (wt < totalSz * stride || strm.bad()) {
 					Debug::Error("CVar", "not enough bytes written!");
 				}
 			}
@@ -100,34 +114,35 @@ void CVar::Write(std::ofstream& strm) {
 	}
 }
 
-//TODO: remove dangling pointers
 void CVar::Read(std::ifstream& strm) {
 	_Strm2Val(strm, type);
 	switch (type) {
 	case AN_VARTYPE::DOUBLE:
-		value = new double();
-		_Strm2Val(strm, *((double**)value));
+		value = &data.val.d;
+		_Strm2Val(strm, data.val.d);
 		break;
 	case AN_VARTYPE::INT:
-		value = new int();
-		_Strm2Val(strm, *((int32_t**)value));
+		value = &data.val.i;
+		_Strm2Val(strm, (int32_t&)data.val.i);
 		break;
 	case AN_VARTYPE::LIST:
 		{
 			byte sz = 0;
 			_Strm2Val(strm, sz);
 			dimVals.resize(sz);
+			data.dims.resize(sz);
 			int totalSz = 1;
 			for (auto a = 0; a < sz; a++) {
-				dimVals[a] = new int();
-				_Strm2Val(strm, *((int32_t*)dimVals[a]));
-				totalSz *= *dimVals[a];
+				dimVals[a] = &data.dims[a];
+				_Strm2Val(strm, data.dims[a]);
+				totalSz *= data.dims[a];
 			}
-			auto vec = new float[max(totalSz, 1)];
-			value = new float*(vec);
+			data.val.arr.data.resize(max(totalSz * stride, 1));
+			data.val.arr.p = &data.val.arr.data[0];
+			value = &data.val.arr.p;
 			if (!!totalSz) {
-				strm.read((char*)vec, totalSz * sizeof(float));
-				if (strm.gcount() != totalSz * sizeof(float) || strm.bad()) {
+				strm.read(&data.val.arr.data[0], totalSz * stride);
+				if (strm.gcount() != totalSz * stride || strm.bad()) {
 					Debug::Error("CVar", "not enough bytes read!");
 				}
 			}
