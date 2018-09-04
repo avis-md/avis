@@ -640,7 +640,36 @@ FNode::FNode(FScript* scr) : AnNode(scr) {
 
 void FNode::Execute() {
 	auto scr = (FScript*)script;
-	
+	for (uint i = 0; i < scr->invars.size(); i++) {
+		auto& mv = scr->_invars[i];
+		if (inputR[i].first) {
+			auto& cv = inputR[i].first->conV[inputR[i].second];
+			switch (mv.type) {
+			case AN_VARTYPE::INT:
+				scr->Set(i, *(int*)cv.value);
+				break;
+			case AN_VARTYPE::DOUBLE:
+				scr->Set(i, *(double*)cv.value);
+				break;
+			default:
+				Debug::Warning("CNode", "var not handled!");
+				break;
+			}
+		}
+		else {
+			switch (mv.type) {
+			case AN_VARTYPE::INT:
+				scr->Set(i, inputVDef[i].i);
+				break;
+			case AN_VARTYPE::DOUBLE:
+				scr->Set(i, inputVDef[i].d);
+				break;
+			default:
+				Debug::Error("CNode", "Value not handled!");
+				break;
+			}
+		}
+	}
 
 	script->Exec();
 }

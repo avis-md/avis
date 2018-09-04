@@ -152,8 +152,10 @@ public:
 
 	void Clear() override;
 	string Exec() override;
-	
 
+	template<typename T> void Set(int i, T& val) {
+		*((T*)_invars[i].value) = val;
+	}
 	
 	DyLib* lib;
 	

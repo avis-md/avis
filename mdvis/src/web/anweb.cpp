@@ -7,7 +7,7 @@
 #include "vis/pargraphics.h"
 #endif
 
-//#define NO_REDIR_LOG
+#define NO_REDIR_LOG
 
 AnNode* AnWeb::selConnNode = nullptr;
 uint AnWeb::selConnId = 0;
@@ -355,6 +355,9 @@ void AnWeb::DoExecute() {
 		}
 		catch (char* e) {
 			n->log.push_back(std::pair<byte, string>(2, string(e)));
+		}
+		catch (...) {
+			n->log.push_back(std::pair<byte, string>(2, "An exception was thrown!"));
 		}
 		n->executing = false;
 #ifndef NO_REDIR_LOG

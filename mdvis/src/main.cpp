@@ -2,6 +2,7 @@
 
 //#define MAKE_RES
 //#define MAKE_LOCL
+#define NOCATCH
 
 #include "ui/ui_ext.h"
 #include "ui/localizer.h"
@@ -186,7 +187,9 @@ int main(int argc, char **argv) {
 int main(int argc, char **argv) {
 #endif
 
+#ifndef NOCATCH
 	try {
+#endif
 		std::vector<string> fls;
 		bool _s = false, _x = false;
 		string _xs = "";
@@ -366,11 +369,13 @@ int main(int argc, char **argv) {
 		}
 		glfwDestroyWindow(Display::window);
 		//*/
+#ifndef NOCATCH
 	}
 	catch (...) {
-		std::cout << "Press enter to exit..." << std::endl;
+		std::cout << "Something fatal happened!!\nPress enter to exit..." << std::endl;
 		string s;
 		std::getline(std::cin, s);
 		return -1;
 	}
+#endif
 }

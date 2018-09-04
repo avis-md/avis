@@ -8,12 +8,19 @@
 
 void FReader::Init() {
 #ifdef PLATFORM_WIN
-	if (IO::HasFile(CReader::mingwPath + "/gfortran.exe")) {
+	if (IO::HasFile(CReader::mingwPath + "/gfortran.exe") && IO::HasFile(CReader::mingwPath + "/g++.exe")) {
 		AnWeb::hasFt = true;
 	}
 #else
 	AnWeb::hasFt = true;
 #endif
+	if (AnWeb::hasFt && !IO::HasFile(IO::path + "/res/noterminate.o")) {
+		string cmd = "g++ -c -o \""
+			+ IO::path + "/res/noterminate.o\" \""
+			+ IO::path + "/res/noterminate.cpp\"";
+		std::cout << cmd << std::endl;
+		RunCmd::Run("path=%path%;" + CReader::mingwPath + " && " + cmd);
+	}
 }
 
 bool FReader::Read(string path, FScript* scr) {
@@ -109,10 +116,10 @@ bool FReader::Read(string path, FScript* scr) {
 				return false;
 			}
 
-			string cmd = "gfortran -shared -fPIC ";
-			cmd += " -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.f90\" 2> " + fp2 + nm + "_log.txt";
+			string cmd = "g++ -shared -static-libstdc++ -fPIC \"" + IO::path + "/res/noterminate.o\" -mthreads -o \""
+				+ fp2 + nm + ".so\" \"" + fp + "_temp__.f90\" -lgfortran 2> " + fp2 + nm + "_log.txt";
 			std::cout << cmd << std::endl;
-			RunCmd::Run(cmd);
+			RunCmd::Run("path=%path%;" + CReader::mingwPath + " && " + cmd);
 			//scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 			for (auto& m : scr->compileLog) {
 				m.path = fp + ".f90";
