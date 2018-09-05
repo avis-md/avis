@@ -96,6 +96,12 @@ public:
 
 	std::vector<PyVar> _invars, _outvars;
 	
+	static void InitLog();
+	static string GetLog();
+	static void ClearLog();
+
+	static PyObject* mainModule, *logCatcher, *emptyString;
+
 	void Clear() override;
 	string Exec() override;
 	void Set(uint i, int v), Set(uint i, double v), Set(uint i, void* v);

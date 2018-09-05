@@ -28,6 +28,8 @@ void PyReader::Init() {
 		PyList_Insert(sys_path, 0, ps);
 		Py_DecRef(ps);
 		AnWeb::hasPy = true;
+
+		PyScript::InitLog();
 	} catch (char*) {
 		string env = "";
 #ifdef PLATFORM_WIN
@@ -51,6 +53,7 @@ void PyReader::Init() {
 }
 
 bool PyReader::Read(string path, PyScript* scr) { //"path/to/script[no .py]"
+	PyScript::ClearLog();
 	string mdn = scr->name = path;
 	std::replace(mdn.begin(), mdn.end(), '/', '.');
 	string spath = IO::path + "/nodes/" + scr->path + ".py";
@@ -63,6 +66,8 @@ bool PyReader::Read(string path, PyScript* scr) { //"path/to/script[no .py]"
 		if (!mdl) {
 			Debug::Warning("PyReader", "Failed to read python file " + path + "!");
 			PyErr_Print();
+			//
+			std::cout << PyScript::GetLog() << std::endl;
 			return false;
 		}
 		scr->pModule = mdl;
@@ -80,6 +85,12 @@ bool PyReader::Read(string path, PyScript* scr) { //"path/to/script[no .py]"
 	string ln;
 	while (!strm.eof()) {
 		std::getline(strm, ln);
+		while (ln[0] == '#' && ln[1] == '#' && ln[2] == ' ') {
+			scr->desc += ln.substr(3) + "\n";
+			scr->descLines++;
+			std::getline(strm, ln);
+		}
+
 		string ln2 = ln.substr(0, 4);
 		if (ln2 == "#in ") {
 			auto ss = string_split(ln, ' ');
@@ -154,7 +165,7 @@ void PyReader::Refresh(PyScript* scr) {
 
 bool PyReader::ParseType(string s, PyVar* var) {
 	if (s.substr(0, 3) == "int") var->type = AN_VARTYPE::INT;
-	else if (s.substr(0, 5) == "double") var->type = AN_VARTYPE::DOUBLE;
+	else if (s.substr(0, 6) == "double") var->type = AN_VARTYPE::DOUBLE;
 	else if (s.substr(0, 4) == "list") {
 		var->type = AN_VARTYPE::LIST;
 		var->dim = s[5] - '1' + 1;

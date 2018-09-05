@@ -100,6 +100,8 @@ public:
 	std::vector<VarVal> outputVC;
 	
 	void Execute() override;
+
+	void CatchExp(char* c) override;
 };
 
 class CNode : public AnNode {

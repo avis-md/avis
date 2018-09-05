@@ -364,9 +364,13 @@ void AnWeb::DoExecute() {
 		n->log.clear();
 	}
 	char* err = 0;
+	static string pylog;
 	for (auto n : nodes) {
 #ifndef NO_REDIR_LOG
-		IO::RedirectStdio2(IO::path + "/nodes/__tmpstd");
+		if (n->script->type == AN_SCRTYPE::PYTHON)
+			PyScript::ClearLog();
+		else
+			IO::RedirectStdio2(IO::path + "/nodes/__tmpstd");
 #endif
 		execNode = n;
 		n->executing = true;
@@ -381,14 +385,29 @@ void AnWeb::DoExecute() {
 		}
 		n->executing = false;
 #ifndef NO_REDIR_LOG
-		IO::RestoreStdio2();
-		auto f = std::ifstream(IO::path + "/nodes/__tmpstd");
-		string s;
-		while (std::getline(f, s)) {
-			n->log.push_back(std::pair<byte, string>(0, s));
+		if (n->script->type == AN_SCRTYPE::PYTHON) {
+			pylog = PyScript::GetLog();
+		}
+		else {
+			IO::RestoreStdio2();
+			auto f = std::ifstream(IO::path + "/nodes/__tmpstd");
+			string s;
+			while (std::getline(f, s)) {
+				n->log.push_back(std::pair<byte, string>(0, s));
+			}
 		}
 #endif
-		if (err) {
+		if (n->script->type == AN_SCRTYPE::PYTHON) {
+			if (err)
+				n->CatchExp(&pylog[0]);
+			else {
+				auto ss = string_split(pylog, '\n');
+				for (auto& s : ss) {
+					n->log.push_back(std::pair<byte, string>(0, s));
+				}
+			}
+		}
+		else if (err) {
 			n->CatchExp(err);
 			break;
 		}
@@ -397,7 +416,7 @@ void AnWeb::DoExecute() {
 	executing = false;
 	apply = true;
 #ifndef NO_REDIR_LOG
-	remove((IO::path + "/nodes/__tmpstd").c_str());
+	//remove((IO::path + "/nodes/__tmpstd").c_str());
 #endif
 }
 

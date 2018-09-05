@@ -254,7 +254,7 @@ float AnNode::DrawLog(float off) {
 	auto sz2 = min<int>(sz, 10);
 	if (logExpanded) {
 		Engine::DrawQuad(pos.x, pos.y + off, width, 15.0f * sz2 + 2, black(0.9f));
-		Engine::PushStencil(pos.x + 1, pos.y + off, width, 15.0f * sz2);
+		Engine::PushStencil(pos.x + 1, pos.y + off, width - 2, 15.0f * sz2);
 		for (int i = 0; i < sz2; i++) {
 			auto& l = log[i + logOffset];
 			Vec4 col = (!l.first) ? white() : ((l.first == 1) ? yellow() : red());
@@ -558,6 +558,36 @@ void PyNode::Execute() {
 	}
 }
 
+void PyNode::CatchExp(char* c) {
+	auto ss = string_split(c, '\n');
+	int i = 0;
+	for (auto& s : ss) {
+		if (s == "Traceback (most recent call last):") {
+			break;
+		}
+		else {
+			log.push_back(std::pair<byte, string>(0, s));
+			i++;
+		}
+	}
+	auto n = ss.size() - 1;
+	log.push_back(std::pair<byte, string>(2, ss[n-1]));
+	ErrorView::Message msg{};
+	msg.name = script->name;
+	msg.path = script->path;
+	msg.severe = true;
+	msg.msg.resize(n - i - 1);
+	msg.msg[0] = ss[n-1];
+	for (int a = i + 1; a < n - 1; a++) {
+		msg.msg[a - i] = ss[a];
+	}
+	auto loc = string_find(ss[n - 3], ", line ");
+	msg.linenum = atoi(&ss[n - 3][loc + 7]);
+	ErrorView::compileMsgs.push_back(msg);
+	ErrorView::compileMsgSz++;
+}
+
+
 CNode::CNode(CScript* scr) : AnNode(scr) {
 	if (!scr) return;
 	title += " (c++)";
@@ -691,12 +721,14 @@ void FNode::Execute() {
 
 void FNode::CatchExp(char* c) {
 	ErrorView::Message msg{};
+	msg.name = script->name;
+	msg.path = script->path;
+	msg.severe = true;
 	if (strcmp(c, "At line ") > 0) {
 		if ((msg.linenum = atoi(c + 8)) > 0) {
 			auto lc = strchr(c, '\n');
 			log.push_back(std::pair<byte, string>(2, lc + 1));
 			string s(c + 9, (size_t)lc - (size_t)c - 20); //_temp__.f90\n
-			msg.name = s.substr(s.find_last_of('/') + 1) + ".f90";
 			msg.msg.resize(1, lc + 1);
 			msg.msg.push_back("Fortran runtime error caught by handler");
 			ErrorView::compileMsgs.push_back(msg);

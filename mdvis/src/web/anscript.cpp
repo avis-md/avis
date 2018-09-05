@@ -24,6 +24,39 @@ int AnScript::StrideOf(char c) {
 
 std::unordered_map<string, PyScript*> PyScript::allScrs;
 
+PyObject* PyScript::mainModule, *PyScript::logCatcher, *PyScript::emptyString;
+
+void PyScript::InitLog() {
+	std::string stdOutErr = "import sys\n\
+class CatchOutErr:\n\
+    value = ''\n\
+    def write(self, txt):\n\
+        self.value += txt\n\
+    def clear(self):\n\
+        self.value = ''\n\
+catchOutErr = CatchOutErr()\n\
+sys.stdout = catchOutErr\n\
+sys.stderr = catchOutErr\n\
+";
+	mainModule = PyImport_AddModule("__main__");
+	PyRun_SimpleString(stdOutErr.c_str());
+	logCatcher = PyObject_GetAttrString(mainModule, "catchOutErr"); //get our catchOutErr created above
+	emptyString = PyUnicode_FromString("");
+}
+
+string PyScript::GetLog() {
+	PyObject *output = PyObject_GetAttrString(logCatcher, "value"); //get the stdout and stderr from our catchOutErr object
+	auto u = PyUnicode_AsEncodedString(output, "UTF-8", "strict");
+	char* res = PyBytes_AsString(u);
+	Py_DECREF(u);
+	Py_DECREF(output);
+	return res;
+}
+
+void PyScript::ClearLog() {
+	PyObject_SetAttrString(logCatcher, "value", emptyString);
+}
+
 void PyScript::Clear() {
 	AnScript::Clear();
 	_invars.clear();
@@ -50,8 +83,7 @@ string PyScript::Exec() {
 	if (res) Py_DECREF(res);
 	else {
 		PyErr_Print();
-		Debug::Warning("PyScript", "Failed to execute script!");
-		return "";
+		throw "\x01";
 	}
 	for (uint i = 0; i < outvars.size(); i++) {
 		Py_DECREF(pRets[i]);
