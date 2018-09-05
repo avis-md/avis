@@ -81,6 +81,8 @@ public:
 
 	static bool CanConn(string lhs, string rhs);
 
+	virtual void CatchExp(char* c);
+
 	virtual void OnSceneUpdate() {}
 	virtual void OnAnimFrame() {}
 	virtual void OnConn(bool o, int i) {}
@@ -117,4 +119,6 @@ public:
 	std::vector<void*> inputV, outputV;
 
 	void Execute() override;
+
+	void CatchExp(char* c) override;
 };

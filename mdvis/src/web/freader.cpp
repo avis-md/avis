@@ -107,6 +107,7 @@ bool FReader::Read(string path, FScript* scr) {
 						if (s == "!in") tp = 1;
 						if (s == "!out") tp = 2;
 						if (s == "!entry") tp = 3;
+						ostrm << "\n";
 					}
 				}
 			}
@@ -175,8 +176,8 @@ bool FReader::Read(string path, FScript* scr) {
 	bool fst = true;
 	while (!strm.eof()) {
 		std::getline(strm, ln);
-		while (fst && ln[0] == '!' && ln[1] == '!') {
-			scr->desc += ln.substr(2) + "\n";
+		while (fst && ln[0] == '!' && ln[1] == '!' && ln[2] == ' ') {
+			scr->desc += ln.substr(3) + "\n";
 			scr->descLines++;
 			std::getline(strm, ln);
 		}

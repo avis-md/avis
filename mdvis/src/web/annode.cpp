@@ -451,6 +451,19 @@ bool AnNode::CanConn(string lhs, string rhs) {
 	return true;
 }
 
+void AnNode::CatchExp(char* c) {
+	auto ss = string_split(c, '\n');
+	for (auto& s : ss) {
+		log.push_back(std::pair<byte, string>(2, s));
+	}
+
+	ErrorView::Message msg{};
+	msg.name = script->name;
+	msg.msg = ss;
+	ErrorView::compileMsgs.push_back(msg);
+	ErrorView::compileMsgSz++;
+}
+
 
 PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 	if (!scr) return;
@@ -674,4 +687,22 @@ void FNode::Execute() {
 	}
 
 	script->Exec();
+}
+
+void FNode::CatchExp(char* c) {
+	ErrorView::Message msg{};
+	if (strcmp(c, "At line ") > 0) {
+		if ((msg.linenum = atoi(c + 8)) > 0) {
+			auto lc = strchr(c, '\n');
+			log.push_back(std::pair<byte, string>(2, lc + 1));
+			string s(c + 9, (size_t)lc - (size_t)c - 20); //_temp__.f90\n
+			msg.name = s.substr(s.find_last_of('/') + 1) + ".f90";
+			msg.msg.resize(1, lc + 1);
+			msg.msg.push_back("Fortran runtime error caught by handler");
+			ErrorView::compileMsgs.push_back(msg);
+			ErrorView::compileMsgSz++;
+			return;
+		}
+	}
+	AnNode::CatchExp(c);
 }

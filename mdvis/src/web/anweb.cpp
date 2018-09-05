@@ -7,7 +7,7 @@
 #include "vis/pargraphics.h"
 #endif
 
-#define NO_REDIR_LOG
+//#define NO_REDIR_LOG
 
 AnNode* AnWeb::selConnNode = nullptr;
 uint AnWeb::selConnId = 0;
@@ -363,7 +363,7 @@ void AnWeb::DoExecute() {
 	for (auto n : nodes) {
 		n->log.clear();
 	}
-	bool fail = false;
+	char* err = 0;
 	for (auto n : nodes) {
 #ifndef NO_REDIR_LOG
 		IO::RedirectStdio2(IO::path + "/nodes/__tmpstd");
@@ -371,30 +371,13 @@ void AnWeb::DoExecute() {
 		execNode = n;
 		n->executing = true;
 		try {
-			char buf[1024]{};
 			n->Execute();
-			if (!!buf[0]) {
-				n->log.push_back(std::pair<byte, string>(2, buf));
-				fail = true;
-			}
 		}
 		catch (char* e) {
-			auto ss = string_split(e, '\n');
-			for (auto& s : ss) {
-				n->log.push_back(std::pair<byte, string>(2, s));
-			}
-			//
-			ErrorView::Message msg;
-			msg.name = n->script->name;
-			msg.msg = ss;
-			ErrorView::compileMsgs.push_back(msg);
-			ErrorView::compileMsgSz++;
-
-			fail = true;
+			err = e;
 		}
 		catch (...) {
-			n->log.push_back(std::pair<byte, string>(2, "An exception was thrown!"));
-			fail = true;
+			err = "An exception was thrown!";
 		}
 		n->executing = false;
 #ifndef NO_REDIR_LOG
@@ -405,7 +388,10 @@ void AnWeb::DoExecute() {
 			n->log.push_back(std::pair<byte, string>(0, s));
 		}
 #endif
-		if (fail) break;
+		if (err) {
+			n->CatchExp(err);
+			break;
+		}
 	}
 	execNode = nullptr;
 	executing = false;
