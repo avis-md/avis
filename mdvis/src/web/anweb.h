@@ -67,10 +67,15 @@ public:
 	static bool hasPy, hasC, hasFt;
 	static bool hasPy_s, hasC_s, hasFt_s;
 
+	typedef void(*gccCallFunc)(emptyFunc, char*);
+	static DyLib* gccLib;
+	static gccCallFunc gccSafeCall;
+	static void gccSafeCallStub(emptyFunc, char*);
+
 	static void Insert(AnScript* scr, Vec2 pos = Vec2(100, 100));
 	static void Insert(AnNode* node, Vec2 pos = Vec2(100, 100));
 	static void Init(), Update(), Draw(), DrawSide(), DrawScene();
-	static void Execute(), DoExecute(), DoExecute_Srv();
+	static void Execute(), DoExecute(), DoExecute2(), DoExecute_Srv();
 	static void Save(const string& s), SaveIn(), SaveOut();
 	static void Load(const string& s), LoadIn(), LoadOut();
 	static void CheckChanges();

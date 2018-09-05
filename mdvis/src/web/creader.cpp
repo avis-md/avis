@@ -192,7 +192,7 @@ bool CReader::Read(string path, CScript* scr) {
 			std::ifstream ets(fp2 + nm + ".entry");
 			ets >> funcNm;
 		}
-		scr->funcLoc = (CScript::emptyFunc)scr->lib->GetSym(funcNm);
+		scr->funcLoc = (emptyFunc)scr->lib->GetSym(funcNm);
 		if (!scr->funcLoc) {
 			string err = 
 #ifdef PLATFORM_WIN

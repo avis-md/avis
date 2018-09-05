@@ -64,7 +64,6 @@ void _dieded(int i) {
 	Debug::Error("System", "Abort trap!");
 	throw "abort trap!";
 }
-
 void _sigfpe(int i) {
 	Debug::Error("System", "FP exception!");
 	throw "floating-point exception!";
@@ -73,16 +72,21 @@ void _sigseg(int i) {
 	Debug::Error("System", "Segmentation fault!");
 	throw "segmentation error!";
 }
+void _sigtrm(int i) {
+	Debug::Error("System", "Termination request!");
+	throw "termination request!";
+}
 
 void ChokoLait::_InitVars() {
 #ifdef PLATFORM_WIN
 	SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
-	signal(SIGABRT, &_dieded);
 #else
 
 #endif
+	signal(SIGABRT, &_dieded);
 	signal(SIGFPE, &_sigfpe);
 	signal(SIGSEGV, &_sigseg);
+	signal(SIGTERM, &_sigtrm);
 
 	const string& path = IO::InitPath();
 

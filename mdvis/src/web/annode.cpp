@@ -254,11 +254,13 @@ float AnNode::DrawLog(float off) {
 	auto sz2 = min<int>(sz, 10);
 	if (logExpanded) {
 		Engine::DrawQuad(pos.x, pos.y + off, width, 15.0f * sz2 + 2, black(0.9f));
+		Engine::PushStencil(pos.x + 1, pos.y + off, width, 15.0f * sz2);
 		for (int i = 0; i < sz2; i++) {
 			auto& l = log[i + logOffset];
 			Vec4 col = (!l.first) ? white() : ((l.first == 1) ? yellow() : red());
 			UI::Label(pos.x + 4, pos.y + off + 1 + 15 * i, 12, l.second, col);
 		}
+		Engine::PopStencil();
 		if (sz > 10) {
 			float mw = 115;
 			float of = logOffset * mw / sz;

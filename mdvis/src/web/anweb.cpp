@@ -27,12 +27,31 @@ AnNode* AnWeb::execNode = nullptr;
 bool AnWeb::hasPy = false, AnWeb::hasC = false, AnWeb::hasFt = false;
 bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
 
+DyLib* AnWeb::gccLib;
+AnWeb::gccCallFunc AnWeb::gccSafeCall;
+
+void AnWeb::gccSafeCallStub(emptyFunc f, char*) {
+	f();
+}
+
 void AnWeb::Init() {
 	Insert(new Node_Inputs());
 	for (int a = 0; a < 10; a++) {
 		AnBrowse::mscFdExpanded[a] = true;
 	}
 	ChokoLait::focusFuncs.push_back(CheckChanges);
+
+#ifdef PLATFORM_WIN
+	gccLib = new DyLib(IO::path + "/res/wingcc.so");
+	if (gccLib->is_open())
+		gccSafeCall = (gccCallFunc)gccLib->GetSym("gcc_safe_call");
+	if (!gccSafeCall) {
+		Debug::Warning("AnWeb", "Failed to load internal WinGCC module! Some handlers might not function correctly!");
+		gccSafeCall = &gccSafeCallStub;
+	}
+#else
+	gccSafeCall = &gccSafeCallStub;
+#endif
 }
 
 void AnWeb::Insert(AnScript* scr, Vec2 pos) {
@@ -344,6 +363,7 @@ void AnWeb::DoExecute() {
 	for (auto n : nodes) {
 		n->log.clear();
 	}
+	bool fail = false;
 	for (auto n : nodes) {
 #ifndef NO_REDIR_LOG
 		IO::RedirectStdio2(IO::path + "/nodes/__tmpstd");
@@ -351,13 +371,30 @@ void AnWeb::DoExecute() {
 		execNode = n;
 		n->executing = true;
 		try {
+			char buf[1024]{};
 			n->Execute();
+			if (!!buf[0]) {
+				n->log.push_back(std::pair<byte, string>(2, buf));
+				fail = true;
+			}
 		}
 		catch (char* e) {
-			n->log.push_back(std::pair<byte, string>(2, string(e)));
+			auto ss = string_split(e, '\n');
+			for (auto& s : ss) {
+				n->log.push_back(std::pair<byte, string>(2, s));
+			}
+			//
+			ErrorView::Message msg;
+			msg.name = n->script->name;
+			msg.msg = ss;
+			ErrorView::compileMsgs.push_back(msg);
+			ErrorView::compileMsgSz++;
+
+			fail = true;
 		}
 		catch (...) {
 			n->log.push_back(std::pair<byte, string>(2, "An exception was thrown!"));
+			fail = true;
 		}
 		n->executing = false;
 #ifndef NO_REDIR_LOG
@@ -368,11 +405,18 @@ void AnWeb::DoExecute() {
 			n->log.push_back(std::pair<byte, string>(0, s));
 		}
 #endif
+		if (fail) break;
 	}
 	execNode = nullptr;
 	executing = false;
 	apply = true;
+#ifndef NO_REDIR_LOG
 	remove((IO::path + "/nodes/__tmpstd").c_str());
+#endif
+}
+
+void AnWeb::DoExecute2() {
+	execNode->Execute();
 }
 
 void AnWeb::OnExecLog(string s, bool e) {

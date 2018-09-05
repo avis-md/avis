@@ -185,6 +185,8 @@ void FScript::Clear() {
 }
 
 string FScript::Exec() {
-	funcLoc();
+	auto res = funcLoc();
+	if (res)
+		throw res;
 	return "";
 }

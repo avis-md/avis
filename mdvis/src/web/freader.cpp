@@ -116,8 +116,8 @@ bool FReader::Read(string path, FScript* scr) {
 				return false;
 			}
 
-			string cmd = "g++ -shared -static-libstdc++ -fPIC \"" + IO::path + "/res/noterminate.o\" -mthreads -o \""
-				+ fp2 + nm + ".so\" \"" + fp + "_temp__.f90\" -lgfortran 2> " + fp2 + nm + "_log.txt";
+			string cmd = "g++ -shared -static-libstdc++ -static-libgcc -fPIC \"" + IO::path + "/res/noterminate.o\" -o \""
+				+ fp2 + nm + ".so\" \"" + fp + "_temp__.f90\" -Wl,--export-all-symbols -lgfortran 2> " + fp2 + nm + "_log.txt";
 			std::cout << cmd << std::endl;
 			RunCmd::Run("path=%path%;" + CReader::mingwPath + " && " + cmd);
 			//scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
@@ -143,8 +143,8 @@ bool FReader::Read(string path, FScript* scr) {
 			std::ifstream ets(fp2 + nm + ".entry");
 			ets >> funcNm;
 		}
-		scr->funcLoc = (CScript::emptyFunc)scr->lib->GetSym(funcNm);
-		if (!scr->funcLoc) {
+		auto acf = (emptyFunc)scr->lib->GetSym(funcNm);
+		if (!acf) {
 			string err = 
 #ifdef PLATFORM_WIN
 				std::to_string(GetLastError());
@@ -152,6 +152,18 @@ bool FReader::Read(string path, FScript* scr) {
 				"";//dlerror();
 #endif
 			_ER("FReader", "Failed to load function \"" + funcNm + "\" into memory! " + err);
+			return false;
+		}
+		auto fhlc = (emptyFunc*)scr->lib->GetSym("ftFunc");
+		if (!fhlc) {
+			_ER("FReader", "Failed to register function pointer! Please tell the monkey!");
+			return false;
+		}
+		*fhlc = acf;
+		
+		scr->funcLoc = (FScript::wrapFunc)scr->lib->GetSym("_Z4Execv");
+		if (!scr->funcLoc) {
+			_ER("FReader", "Failed to register entry function! Please tell the monkey!");
 			return false;
 		}
 	}

@@ -123,6 +123,8 @@ public:
 	void Read(std::ifstream& strm);
 };
 
+typedef void(*emptyFunc)();
+
 class CScript : public AnScript {
 public:
 	CScript() : AnScript(AN_SCRTYPE::C) {}
@@ -138,7 +140,6 @@ public:
 	
 	DyLib* lib;
 	
-	typedef void (*emptyFunc)();
 	emptyFunc funcLoc;
 
 	static std::unordered_map<string, CScript*> allScrs;
@@ -159,8 +160,8 @@ public:
 	
 	DyLib* lib;
 	
-	typedef void (*emptyFunc)();
-	emptyFunc funcLoc;
+	typedef char* (*wrapFunc)();
+	wrapFunc funcLoc;
 
 	static std::unordered_map<string, FScript*> allScrs;
 };
