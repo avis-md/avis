@@ -14,12 +14,12 @@
 #include "md/Protein.h"
 #include "md/parloader.h"
 #include "md/Gromacs.h"
-#include "md/CDV.h"
-#include "md/pdb.h"
-#include "md/XYZ.h"
-#include "md/mdvbin.h"
-#include "md/lammps.h"
-#include "md/dlpoly.h"
+//#include "md/CDV.h"
+//#include "md/pdb.h"
+//#include "md/XYZ.h"
+//#include "md/mdvbin.h"
+//#include "md/lammps.h"
+//#include "md/dlpoly.h"
 #include "vis/cubemarcher.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
@@ -279,55 +279,25 @@ int main(int argc, char **argv) {
 		imp->trjFuncs.back().second = Gromacs::ReadTrj;
 		ParLoader::importers.push_back(imp);
 
-		imp = new ParImporter();
-		imp->name = "Protein DataBank";
-		imp->sig = "pdb";
-		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
-		imp->funcs.back().first.push_back(".pdb");
-		imp->funcs.back().second = PDB::Read;
-		ParLoader::importers.push_back(imp);
+		ParLoader::exts = std::vector<string>({ "*.gro", "*.trr" });
 
-		imp = new ParImporter();
-		imp->name = "XYZ coords";
-		imp->sig = "xyz";
-		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
-		imp->funcs.back().first.push_back(".xyz");
-		imp->funcs.back().second = XYZ::Read;
-		ParLoader::importers.push_back(imp);
+#define NEWIMP(_nm, _sig, _ext, _fnc) \
+		imp = new ParImporter(); \
+		imp->name = #_nm; \
+		imp->sig = #_sig; \
+		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>()); \
+		imp->funcs.back().first.push_back(#_ext); \
+		imp->funcs.back().second = _fnc::Read; \
+		ParLoader::importers.push_back(imp); \
+		ParLoader::exts.push_back(#_ext);
 
-		imp = new ParImporter();
-		imp->name = "CDView";
-		imp->sig = "cdv";
-		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
-		imp->funcs.back().first.push_back(".cdv");
-		imp->funcs.back().second = CDV::Read;
-		ParLoader::importers.push_back(imp);
+		//NEWIMP(Protein DataBank, pdb, .pdb, PDB);
+		//NEWIMP(XYZ coords, xyz, .xyz, XYZ);
+		//NEWIMP(CDView, cdv, .cdv, CDV);
+		//NEWIMP(Binary, bin, .bin, MDVBin);
+		//NEWIMP(Lammps, lmp, .atom, Lammps);
+		//NEWIMP(DLPoly, dlp, .000, DLPoly);
 
-		imp = new ParImporter();
-		imp->name = "binary";
-		imp->sig = "bin";
-		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
-		imp->funcs.back().first.push_back(".bin");
-		imp->funcs.back().second = MDVBin::Read;
-		ParLoader::importers.push_back(imp);
-
-		imp = new ParImporter();
-		imp->name = "lammps";
-		imp->sig = "lmp";
-		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
-		imp->funcs.back().first.push_back(".atom");
-		imp->funcs.back().second = Lammps::Read;
-		ParLoader::importers.push_back(imp);
-
-		imp = new ParImporter();
-		imp->name = "DL Poly";
-		imp->sig = "dlp";
-		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
-		imp->funcs.back().first.push_back(".000");
-		imp->funcs.back().second = DLPoly::Read;
-		ParLoader::importers.push_back(imp);
-
-		ParLoader::exts = std::vector<string>({ "*.gro", "*.trr", "*.pdb", "*.xyz", "*.cdv", "*.bin", "*.atom", "*.000" });
 		if (fls.size()) {
 			ParLoader::directLoad = _s;
 			ParLoader::OnOpenFile(fls);

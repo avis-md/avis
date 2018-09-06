@@ -513,8 +513,12 @@ void PyNode::Execute() {
 			case AN_VARTYPE::DOUBLE:
 				scr->Set(i, *((double*)cv.value));
 				break;
-			default:
-				Debug::Error("PyNode", "Value not handled!");
+			case AN_VARTYPE::LIST:
+				auto sz = cv.dimVals.size();
+				std::vector<int> dims(sz);
+				for (size_t a = 0; a < sz; a++)
+					dims[a] = *cv.dimVals[a];
+				scr->Set(i, AnConv::PyArr(inputR[i].first->script->outvars[inputR[i].second].second[6], (int)sz, &dims[0], cv.value));
 				break;
 			}
 		}

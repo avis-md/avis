@@ -2,24 +2,33 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 
-PyObject* AnConv::PyArr(int nd, char tp) {
+int AnConv::Init() {
+	import_array();
+	return 0;
+}
+
+PyObject* AnConv::PyArr(char tp, int nd, int* szs, void* data) {
 	if (!AnWeb::hasPy) return nullptr;
-	assert(nd <= 10);
-	npy_intp zs[10]{};
 	int tn = NPY_FLOAT;
-	int sz = 4;
+	int sz = 8;
 	switch (tp) {
+	case 'd':
+		break;
 	case 'i':
 		tn = NPY_INT;
-		sz = sizeof(int);
+		sz = 4;
 		break;
 	case 's':
 		tn = NPY_SHORT;
 		sz = 2;
 		break;
-	default: break;
+	default: 
+		Debug::Warning("AnConv", "unknown type " + string(&tp, 1) + "!");
+		return nullptr;
 	}
-	return PyArray_New(&PyArray_Type, nd, zs, tn, nullptr, nullptr, sz, 0, nullptr);
+	auto res = PyArray_SimpleNewFromData(nd, szs, tn, data);//PyArray_New(&PyArray_Type, nd, szs, tn, NULL, data, sz, NPY_ARRAY_C_CONTIGUOUS, NULL);
+	Py_INCREF(res);
+	return res;
 }
 
 void* AnConv::FromPy(PyObject* o, int dim, int** szs, int& tsz) {

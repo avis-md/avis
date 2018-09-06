@@ -13,7 +13,7 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)) {
 	titleCol = Vec3(0.3f, 0.3f, 0.5f);
 	canTile = true;
 	auto v = std::pair<string, string>();
-	v.second = "list(2f)";
+	v.second = "list(2d)";
 	outputR.resize(8);
 	scr->outvars.resize(8, v);
 	scr->outvars[0].first = "atom count";
@@ -27,7 +27,7 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)) {
 	scr->outvars[5].second = "list(1s)";
 	scr->outvars[6].first = "positions (all)";
 	scr->outvars[7].first = "velocities (all)";
-	scr->outvars[6].second = scr->outvars[7].second = "list(3f)";
+	scr->outvars[6].second = scr->outvars[7].second = "list(3d)";
 	
 	conV.resize(8);
 	

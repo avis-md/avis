@@ -1,5 +1,7 @@
 #include "anweb.h"
 
+#define NO_PYLOG
+
 void AnScript::Clear() {
 	invars.clear();
 	outvars.clear();
@@ -11,11 +13,11 @@ void AnScript::Clear() {
 int AnScript::StrideOf(char c) {
 	switch (c) {
 	case 's':
-		return sizeof(short);
+		return 2;
 	case 'i':
-		return sizeof(int);
+		return 4;
 	case 'd':
-		return sizeof(double);
+		return 8;
 	default:
 		return 0;
 	}
@@ -27,6 +29,9 @@ std::unordered_map<string, PyScript*> PyScript::allScrs;
 PyObject* PyScript::mainModule, *PyScript::logCatcher, *PyScript::emptyString;
 
 void PyScript::InitLog() {
+#ifdef NO_PYLOG
+	return;
+#endif
 	std::string stdOutErr = "import sys\n\
 class CatchOutErr:\n\
     value = ''\n\
@@ -45,6 +50,7 @@ sys.stderr = catchOutErr\n\
 }
 
 string PyScript::GetLog() {
+	if (!logCatcher) return "";
 	PyObject *output = PyObject_GetAttrString(logCatcher, "value"); //get the stdout and stderr from our catchOutErr object
 	auto u = PyUnicode_AsEncodedString(output, "UTF-8", "strict");
 	char* res = PyBytes_AsString(u);
@@ -54,6 +60,7 @@ string PyScript::GetLog() {
 }
 
 void PyScript::ClearLog() {
+	if (!logCatcher) return;
 	PyObject_SetAttrString(logCatcher, "value", emptyString);
 }
 
@@ -108,7 +115,9 @@ void PyScript::Set(uint i, double v) {
 
 void PyScript::Set(uint i, void* v) {
 	if (invars.size() <= i) return;
-	_invars[i].value = (PyObject*)v;
+	auto& vl = _invars[i].value;
+	if (vl) Py_DECREF(vl);
+	vl = (PyObject*)v;
 }
 
 

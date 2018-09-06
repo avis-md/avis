@@ -50,7 +50,7 @@ float ParGraphics::rotW = 0, ParGraphics::rotZ = 0;
 float ParGraphics::rotWs = 0, ParGraphics::rotZs = 0;
 float ParGraphics::rotScale = 0;
 
-bool ParGraphics::useClipping = true;
+bool ParGraphics::useClipping = false;
 GLuint ParGraphics::clipUbo;
 Vec3 ParGraphics::clipCenter = Vec3();
 Vec3 ParGraphics::clipSize = Vec3(1, 1, 1) * 4.0f;

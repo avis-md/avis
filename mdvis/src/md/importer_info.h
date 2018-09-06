@@ -45,8 +45,8 @@ struct ParInfo {
 	char* name;
 	uint16_t* type; //H\0 if hydrogen
 	uint16_t* resId;
-	float* pos;
-	float* vel; //OPT
+	double* pos;
+	double* vel; //OPT
 	struct ProSec{
 		enum TYPE { HELIX, SHEET } type;
 		uint16_t resSt, resEd;

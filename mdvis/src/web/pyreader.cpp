@@ -30,6 +30,15 @@ void PyReader::Init() {
 #endif
 	try {
 		Py_Initialize();
+		PyObject *sys_path = PySys_GetObject("path");
+		auto path = IO::path + "/nodes/";
+		auto ps = PyUnicode_FromString(path.c_str());
+		PyList_Insert(sys_path, 0, ps);
+		Py_DecRef(ps);
+
+		if (!!AnConv::Init())
+			return;
+
 		AnWeb::hasPy = true;
 		PyScript::InitLog();
 	} catch (char*) {

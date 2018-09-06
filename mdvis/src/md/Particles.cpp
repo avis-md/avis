@@ -31,7 +31,7 @@ uint Particles::residueListSz;
 uint Particles::particleSz;
 
 char* Particles::particles_Name, *Particles::particles_ResName;
-Vec3* Particles::particles_Pos, *Particles::particles_Vel;
+glm::dvec3* Particles::particles_Pos, *Particles::particles_Vel;
 short* Particles::particles_Typ;
 byte* Particles::particles_Col;
 Particles::conninfo Particles::particles_Conn;
@@ -164,8 +164,15 @@ void Particles::UpdateBufs() {
 		a.second = new Int2*[anim.frameCount]{};
 	}
 
+	static std::vector<Vec3> poss;
+	poss.resize(particleSz);
+#pragma omp parallel for
+	for (int a = 0; a < (int)particleSz; a++) {
+		poss[a] = (Vec3)particles_Pos[a];
+	}
+
 	glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
-	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(Vec3), particles_Pos, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(Vec3), &poss[0], GL_DYNAMIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, connBuffer);
 	glBufferData(GL_ARRAY_BUFFER, particles_Conn.cnt * 2 * sizeof(uint), particles_Conn.ids, GL_DYNAMIC_DRAW);
@@ -219,7 +226,7 @@ void Particles::SetFrame(uint frm) {
 		anim.activeFrame = frm;
 		particles_Pos = anim.poss[anim.activeFrame];
 		glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(Vec3), particles_Pos);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(glm::dvec3), particles_Pos);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		bool has = false;
 		for (int i = anim.conns2.size() - 1; i >= 0; i--) {

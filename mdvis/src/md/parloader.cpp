@@ -218,8 +218,8 @@ void ParLoader::DoOpen() {
 
 	Particles::particles_ResName = info.resname;
 	Particles::particles_Name = info.name;
-	Particles::particles_Pos = (Vec3*)info.pos;
-	Particles::particles_Vel = (Vec3*)info.vel;
+	Particles::particles_Pos = (glm::dvec3*)info.pos;
+	Particles::particles_Vel = (glm::dvec3*)info.vel;
 	Particles::particles_Typ = (short*)info.type;
 	memcpy(Particles::boundingBox, info.bounds, 6 * sizeof(float));
 	Particles::particles_Col = new byte[info.num];
@@ -302,7 +302,7 @@ void ParLoader::DoOpen() {
 				tr->cnt_b = 0;
 			}
 		}
-		Vec3 vec = *((Vec3*)(&info.pos[i * 3]));
+		auto vec = *((glm::dvec3*)(&info.pos[i * 3]));
 		int cnt = int(lastCnt + tr->cnt);
 		if (useConn && (!useConnCache || !hasConnCache || ovwConnCache)) {
 #pragma omp parallel for
@@ -358,22 +358,23 @@ void ParLoader::DoOpen() {
 
 	Particles::particleSz = info.num;
 
+//update import trj data type
 	auto& anm = Particles::anim;
 	if (info.trajectory.frames > 0) {
 		auto& trj = info.trajectory;
 		anm.reading = true;
 
-		anm.poss = new Vec3*[trj.frames];
-		anm.poss[0] = new Vec3[trj.frames * info.num];
-		anm.vels = new Vec3*[trj.frames];
-		anm.vels[0] = new Vec3[trj.frames * info.num];
+		anm.poss = new glm::dvec3*[trj.frames];
+		anm.poss[0] = new glm::dvec3[trj.frames * info.num];
+		anm.vels = new glm::dvec3*[trj.frames];
+		anm.vels[0] = new glm::dvec3[trj.frames * info.num];
 		for (uint16_t i = 0; i < trj.frames; i++) {
 			anm.poss[i] = anm.poss[0] + info.num * i;
-			memcpy(anm.poss[i], trj.poss[i], info.num * sizeof(Vec3));
+			memcpy(anm.poss[i], trj.poss[i], info.num * sizeof(glm::dvec3));
 			delete[](trj.poss[i]);
 			anm.vels[i] = anm.vels[0] + info.num * i;
 			if (trj.vels) {
-				memcpy(anm.vels[i], trj.vels[i], info.num * sizeof(Vec3));
+				memcpy(anm.vels[i], trj.vels[i], info.num * sizeof(glm::dvec3));
 				delete[](trj.vels[i]);
 			}
 		}
@@ -385,10 +386,10 @@ void ParLoader::DoOpen() {
 	}
 	else {
 		anm.reading = true;
-		anm.poss = new Vec3*[1];
-		anm.poss[0] = (Vec3*)info.pos;
-		anm.vels = new Vec3*[1];
-		anm.vels[0] = (Vec3*)info.vel;
+		anm.poss = new glm::dvec3*[1];
+		anm.poss[0] = (glm::dvec3*)info.pos;
+		anm.vels = new glm::dvec3*[1];
+		anm.vels[0] = (glm::dvec3*)info.vel;
 		anm.frameCount = 1;
 		anm.reading = false;
 	}
@@ -417,17 +418,17 @@ void ParLoader::DoOpenAnim() {
 		fault = true;
 	}
 
-	anm.poss = new Vec3*[info.frames];
-	anm.poss[0] = new Vec3[info.frames * info.parNum];
-	anm.vels = new Vec3*[info.frames];
-	anm.vels[0] = new Vec3[info.frames * info.parNum];
+	anm.poss = new glm::dvec3*[info.frames];
+	anm.poss[0] = new glm::dvec3[info.frames * info.parNum];
+	anm.vels = new glm::dvec3*[info.frames];
+	anm.vels[0] = new glm::dvec3[info.frames * info.parNum];
 	for (uint16_t i = 0; i < info.frames; i++) {
 		anm.poss[i] = anm.poss[0] + info.parNum * i;
-		memcpy(anm.poss[i], info.poss[i], info.parNum * sizeof(Vec3));
+		memcpy(anm.poss[i], info.poss[i], info.parNum * sizeof(glm::dvec3));
 		delete[](info.poss[i]);
 		anm.poss[i] = anm.poss[0] + info.parNum * i;
 		if (info.vels) {
-			memcpy(anm.poss[i], info.poss[i], info.parNum * sizeof(Vec3));
+			memcpy(anm.poss[i], info.poss[i], info.parNum * sizeof(glm::dvec3));
 			delete[](info.poss[i]);
 		}
 	}

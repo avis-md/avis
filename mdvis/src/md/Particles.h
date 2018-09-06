@@ -33,7 +33,7 @@ struct AnimData {
 
 	bool reading, dynamicBonds;
 	uint frameCount, activeFrame;
-	Vec3** poss, **vels;
+	glm::dvec3** poss, **vels;
 	uint* connCounts;
 	Int2** conns;
 	std::vector<std::pair<uint*, Int2**>> conns2;
@@ -73,7 +73,7 @@ public:
 	static uint particleSz;
 
 	static char* particles_Name, *particles_ResName; //10 chars per name
-	static Vec3* particles_Pos, *particles_Vel;
+	static glm::dvec3* particles_Pos, *particles_Vel;
 	static short* particles_Typ;
 	static byte* particles_Col;
 	static conninfo particles_Conn;

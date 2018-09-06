@@ -4,7 +4,9 @@
 
 class AnConv {
 public:
-	static PyObject* PyArr(int nd, char tp);
+	static int Init();
+	
+	static PyObject* PyArr(char tp, int nd, int* szs, void* data);
 	static void* FromPy(PyObject* obj, int dim, int** szs, int& tsz);
 	static bool ToPy(void* v, PyObject* obj, int dim, int* szs);
 };

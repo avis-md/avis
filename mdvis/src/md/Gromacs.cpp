@@ -47,8 +47,8 @@ bool Gromacs::Read(ParInfo* info) {
 	info->name = new char[sz * info->nameSz]{};
 	info->type = new uint16_t[sz];
 	info->resId = new uint16_t[sz];
-	info->pos = new float[sz * 3];
-	info->vel = new float[sz * 3];
+	info->pos = new double[sz * 3];
+	info->vel = new double[sz * 3];
 
 	for (uint i = 0; i < sz; i++) {
 		info->progress = i * 1.0f / sz;
@@ -63,13 +63,13 @@ bool Gromacs::Read(ParInfo* info) {
 		n0 = _find_char_not_of(buf + 10, buf + 15, ' ');
 		memcpy(info->name + i * info->nameSz, buf + 10 + n0, 5 - n0);
 		info->type[i] = (uint16_t)buf[10 + n0];
-		info->pos[i * 3] = std::stof(string(buf + 20, 8));
-		info->pos[i * 3 + 1] = std::stof(string(buf + 28, 8));
-		info->pos[i * 3 + 2] = std::stof(string(buf + 36, 8));
+		info->pos[i * 3] = std::stod(string(buf + 20, 8));
+		info->pos[i * 3 + 1] = std::stod(string(buf + 28, 8));
+		info->pos[i * 3 + 2] = std::stod(string(buf + 36, 8));
 		if (!!buf[50]) {
-			info->vel[i * 3] = std::stof(string(buf + 44, 8));
-			info->vel[i * 3 + 1] = std::stof(string(buf + 52, 8));
-			info->vel[i * 3 + 2] = std::stof(string(buf + 60, 8));
+			info->vel[i * 3] = std::stod(string(buf + 44, 8));
+			info->vel[i * 3 + 1] = std::stod(string(buf + 52, 8));
+			info->vel[i * 3 + 2] = std::stod(string(buf + 60, 8));
 		}
 	}
 
