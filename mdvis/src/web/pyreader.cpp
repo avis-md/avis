@@ -10,25 +10,27 @@ void PyReader::Init() {
 #ifdef PLATFORM_OSX
 	if (dlsym(RTLD_DEFAULT, "Py_Initialize")) {
 #endif
-	auto pyenv = VisSystem::envs["PYENV"];
-	Py_SetPythonHome((wchar_t*)pyenv.c_str());
-	//Py_SetProgramName((wchar_t*)(pyenv + "/python.exe").c_str());
-	//_putenv_s("PYTHONPATH", );
+	static string pyenv = VisSystem::envs["PYENV"];
+#ifdef PLATFORM_WIN
+	size_t psz;
+	getenv_s(&psz, 0, 0, "PATH");
+	char* pbuf = new char[psz];
+	getenv_s(&psz, pbuf, psz, "PATH");
+	_putenv_s("PATH", &(pyenv + "\\;" + string(pbuf))[0]);
+	delete[](pbuf);
+
+	static std::wstring pyenvw = IO::_tow(pyenv);
+	Py_SetPythonHome(&pyenvw[0]);
+	static std::wstring pynmw = IO::_tow(pyenv + "\\python");
+	Py_SetProgramName(&pynmw[0]);
+#else
+#error set python path
+	Py_SetPythonHome(&pyenv[0]);
+	Py_SetProgramName("python3");
+#endif
 	try {
 		Py_Initialize();
-		PyObject *sys_path = PySys_GetObject("path");
-		auto path = IO::path + "/nodes/";
-		auto ps = PyUnicode_FromString(path.c_str());
-		PyList_Insert(sys_path, 0, ps);
-		Py_DecRef(ps);
-		ps = PyUnicode_FromString((pyenv + "/Lib").c_str());
-		PyList_Insert(sys_path, 0, ps);
-		Py_DecRef(ps);
-		ps = PyUnicode_FromString((pyenv + "/DLLs").c_str());
-		PyList_Insert(sys_path, 0, ps);
-		Py_DecRef(ps);
 		AnWeb::hasPy = true;
-
 		PyScript::InitLog();
 	} catch (char*) {
 		string env = "";
