@@ -6,6 +6,7 @@ class CReader {
 public:
 	static void Init();
 
+	static void Compile(string path);
 	static bool Read(string path, CScript* scr);
 	static void Refresh(CScript* scr);
 

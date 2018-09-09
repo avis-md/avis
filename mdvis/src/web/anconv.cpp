@@ -9,17 +9,17 @@ int AnConv::Init() {
 
 PyObject* AnConv::PyArr(char tp, int nd, int* szs, void* data) {
 	if (!AnWeb::hasPy) return nullptr;
-	int tn = NPY_FLOAT;
+	int tn = NPY_FLOAT64;
 	int sz = 8;
 	switch (tp) {
 	case 'd':
 		break;
 	case 'i':
-		tn = NPY_INT;
+		tn = NPY_INT32;
 		sz = 4;
 		break;
 	case 's':
-		tn = NPY_SHORT;
+		tn = NPY_INT16;
 		sz = 2;
 		break;
 	default: 
@@ -27,7 +27,7 @@ PyObject* AnConv::PyArr(char tp, int nd, int* szs, void* data) {
 		return nullptr;
 	}
 	auto res = PyArray_SimpleNewFromData(nd, szs, tn, data);//PyArray_New(&PyArray_Type, nd, szs, tn, NULL, data, sz, NPY_ARRAY_C_CONTIGUOUS, NULL);
-	Py_INCREF(res);
+	//Py_INCREF(res);
 	return res;
 }
 
@@ -44,6 +44,7 @@ void* AnConv::FromPy(PyObject* o, int dim, int** szs, int& tsz) {
 	for (int a = 0; a < nd; a++)
 		tsz *= (*(szs[a]) = shp[a]);
 	auto tp = PyArray_TYPE(ao);
+	std::cout << "conv success" << std::endl;
 	return PyArray_DATA(ao);
 }
 

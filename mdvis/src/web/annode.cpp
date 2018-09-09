@@ -478,8 +478,10 @@ PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 		else inputVDef[i].i = 0;
 	}
 	for (uint i = 0; i < scr->outvars.size(); i++) {
-		outputV[i] = scr->_outvars[i];
-		switch (scr->_outvars[i].type) {
+		auto& ovi = outputV[i] = scr->_outvars[i];
+		conV[i].type = ovi.type;
+		conV[i].typeName = ovi.typeName;
+		switch (ovi.type) {
 		case AN_VARTYPE::INT:
 			conV[i].value = &outputVC[i].val.i;
 			break;
@@ -487,8 +489,8 @@ PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 			conV[i].value = &outputVC[i].val.d;
 			break;
 		case AN_VARTYPE::LIST:
-			conV[i].dimVals.resize(outputV[i].dim);
-			outputVC[i].dims.resize(outputV[i].dim);
+			conV[i].dimVals.resize(ovi.dim);
+			outputVC[i].dims.resize(ovi.dim);
 			for (int j = 0; j < outputV[i].dim; j++)
 				conV[i].dimVals[j] = &outputVC[i].dims[j];
 			conV[i].value = &outputVC[i].val.arr.p;
@@ -518,7 +520,7 @@ void PyNode::Execute() {
 				std::vector<int> dims(sz);
 				for (size_t a = 0; a < sz; a++)
 					dims[a] = *cv.dimVals[a];
-				scr->Set(i, AnConv::PyArr(inputR[i].first->script->outvars[inputR[i].second].second[6], (int)sz, &dims[0], cv.value));
+				scr->Set(i, AnConv::PyArr(inputR[i].first->script->outvars[inputR[i].second].second[6], (int)sz, &dims[0], *(void**)cv.value));
 				break;
 			}
 		}
@@ -552,7 +554,9 @@ void PyNode::Execute() {
 			auto& ar = outputVC[i].val.arr;
 			int n;
 			ar.p = AnConv::FromPy(outputV[i].value, conV[i].dimVals.size(), &conV[i].dimVals[0], n);
+			ar.data.resize(n * conV[i].stride);
 			memcpy(&ar.data[0], ar.p, n * scr->_outvars[i].stride);
+			ar.p = &ar.data[0];
 			break;
 		}
 		default:
@@ -563,7 +567,10 @@ void PyNode::Execute() {
 }
 
 void PyNode::CatchExp(char* c) {
+	if (!c[0]) return;
 	auto ss = string_split(c, '\n');
+	if (ss.size() == 1 && ss[0] == "") return;
+
 	int i = 0;
 	for (auto& s : ss) {
 		if (s == "Traceback (most recent call last):") {

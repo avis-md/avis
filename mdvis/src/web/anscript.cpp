@@ -113,11 +113,11 @@ void PyScript::Set(uint i, double v) {
 	vl = PyFloat_FromDouble(v);
 }
 
-void PyScript::Set(uint i, void* v) {
+void PyScript::Set(uint i, PyObject* v) {
 	if (invars.size() <= i) return;
 	auto& vl = _invars[i].value;
 	if (vl) Py_DECREF(vl);
-	vl = (PyObject*)v;
+	vl = v;
 }
 
 

@@ -104,7 +104,7 @@ public:
 
 	void Clear() override;
 	string Exec() override;
-	void Set(uint i, int v), Set(uint i, double v), Set(uint i, void* v);
+	void Set(uint i, int v), Set(uint i, double v), Set(uint i, PyObject* v);
 
 	PyObject* pModule, *pFunc, *pArgl;
 	std::vector<PyObject*> pArgs, pRets;

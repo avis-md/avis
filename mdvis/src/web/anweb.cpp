@@ -9,6 +9,8 @@
 
 //#define NO_REDIR_LOG
 
+bool AnWeb::lazyLoad = true;
+
 AnNode* AnWeb::selConnNode = nullptr;
 uint AnWeb::selConnId = 0;
 bool AnWeb::selConnIdIsOut = false, AnWeb::selPreClear = false;
@@ -27,31 +29,12 @@ AnNode* AnWeb::execNode = nullptr;
 bool AnWeb::hasPy = false, AnWeb::hasC = false, AnWeb::hasFt = false;
 bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
 
-DyLib* AnWeb::gccLib;
-AnWeb::gccCallFunc AnWeb::gccSafeCall;
-
-void AnWeb::gccSafeCallStub(emptyFunc f, char*) {
-	f();
-}
-
 void AnWeb::Init() {
 	Insert(new Node_Inputs());
 	for (int a = 0; a < 10; a++) {
 		AnBrowse::mscFdExpanded[a] = true;
 	}
 	ChokoLait::focusFuncs.push_back(CheckChanges);
-
-#ifdef PLATFORM_WIN
-	gccLib = new DyLib(IO::path + "/res/wingcc.so");
-	if (gccLib->is_open())
-		gccSafeCall = (gccCallFunc)gccLib->GetSym("gcc_safe_call");
-	if (!gccSafeCall) {
-		Debug::Warning("AnWeb", "Failed to load internal WinGCC module! Some handlers might not function correctly!");
-		gccSafeCall = &gccSafeCallStub;
-	}
-#else
-	gccSafeCall = &gccSafeCallStub;
-#endif
 }
 
 void AnWeb::Insert(AnScript* scr, Vec2 pos) {

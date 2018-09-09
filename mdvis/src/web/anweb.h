@@ -49,6 +49,8 @@ const string AN_NODE_MISCS[] = { "Plot graph", "Show Range" };
 
 class AnWeb {
 public:
+	static bool lazyLoad;
+	
 	static AnNode* selConnNode;
 	static uint selConnId;
 	static bool selConnIdIsOut, selPreClear;
@@ -66,11 +68,6 @@ public:
 
 	static bool hasPy, hasC, hasFt;
 	static bool hasPy_s, hasC_s, hasFt_s;
-
-	typedef void(*gccCallFunc)(emptyFunc, char*);
-	static DyLib* gccLib;
-	static gccCallFunc gccSafeCall;
-	static void gccSafeCallStub(emptyFunc, char*);
 
 	static void Insert(AnScript* scr, Vec2 pos = Vec2(100, 100));
 	static void Insert(AnNode* node, Vec2 pos = Vec2(100, 100));
