@@ -209,7 +209,9 @@ void CScript::Clear() {
 }
 
 string CScript::Exec() {
-	funcLoc();
+	auto res = funcLoc();
+	if (res)
+		throw res;
 	return "";
 }
 

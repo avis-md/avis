@@ -130,6 +130,7 @@ public:
 };
 
 typedef void(*emptyFunc)();
+typedef char* (*wrapFunc)();
 
 class CScript : public AnScript {
 public:
@@ -146,7 +147,7 @@ public:
 	
 	DyLib* lib;
 	
-	emptyFunc funcLoc;
+	wrapFunc funcLoc;
 
 	static std::unordered_map<string, CScript*> allScrs;
 };
@@ -166,7 +167,6 @@ public:
 	
 	DyLib* lib;
 	
-	typedef char* (*wrapFunc)();
 	wrapFunc funcLoc;
 
 	static std::unordered_map<string, FScript*> allScrs;

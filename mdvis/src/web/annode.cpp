@@ -460,8 +460,7 @@ void AnNode::CatchExp(char* c) {
 	ErrorView::Message msg{};
 	msg.name = script->name;
 	msg.msg = ss;
-	ErrorView::compileMsgs.push_back(msg);
-	ErrorView::compileMsgSz++;
+	ErrorView::execMsgs.push_back(msg);
 }
 
 
@@ -594,8 +593,7 @@ void PyNode::CatchExp(char* c) {
 	}
 	auto loc = string_find(ss[n - 3], ", line ");
 	msg.linenum = atoi(&ss[n - 3][loc + 7]);
-	ErrorView::compileMsgs.push_back(msg);
-	ErrorView::compileMsgSz++;
+	ErrorView::execMsgs.push_back(msg);
 }
 
 
@@ -742,8 +740,7 @@ void FNode::CatchExp(char* c) {
 			string s(c + 9, (size_t)lc - (size_t)c - 20); //_temp__.f90\n
 			msg.msg.resize(1, lc + 1);
 			msg.msg.push_back("Fortran runtime error caught by handler");
-			ErrorView::compileMsgs.push_back(msg);
-			ErrorView::compileMsgSz++;
+			ErrorView::execMsgs.push_back(msg);
 			return;
 		}
 	}
