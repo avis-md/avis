@@ -7,6 +7,9 @@ WEAK_LIB :=
 NUMPY :=
 USR := /usr
 UNAME_S := $(shell uname -s)
+RRAYPRE := -L../../../radeonrays
+RRAY := -I$(RRAYPRE)/Calc/inc -I$(RRAYPRE)/CLW/ -I$(RRAYPRE)/RadeonRays/include
+
 ifeq ($(OS),Windows_NT)
 	USR = D:/usr
 	OSFLAG += -D PLATFORM_WIN
