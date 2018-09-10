@@ -5,12 +5,19 @@
 # Translation files should be in locale/## folder
 SYS_LOCALE=EN
 
-# Additional compiler flags for nodes.
-# Spaces between flags are allowed.
-ANL_FLAGS_WIN_CL=
-ANL_FLAGS_WIN_LINK=
-ANL_FLAGS_LINUX=
-ANL_FLAGS_MAC=
+# Additional compiler flags for nodes (space separated).
+ANL_COMP_FLAGS=
+
+# (Windows Only) Use the Visual Studio compiler instead of the MinGW compiler.
+# You must specify the path to either compilers in the env file.
+# If you specified both, then the other will be used if the one you selected is not available.
+ANL_WIN_USE_MSVC=false
+
+# (Windows, Visual Studio compiler) Additional compiler flags for nodes (space separated).
+ANL_CL_FLAGS=
+
+# (Windows, Visual Studio compiler) Additional linker flags for nodes (space separated).
+ANL_LINK_FLAGS=
 
 # Enables the OpenMP flag when compiling nodes.
 # Installation of OpenMP libraries is required.
