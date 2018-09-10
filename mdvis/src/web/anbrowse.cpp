@@ -65,6 +65,7 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 void AnBrowse::Scan() {
 	folder = Folder(_("Custom"));
 	DoScan(&folder, IO::path + "/nodes", "");
+	ErrorView::Refresh();
 }
 
 void AnBrowse::DoRefresh(Folder* fd) {

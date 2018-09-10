@@ -14,13 +14,6 @@ void FReader::Init() {
 #else
 	AnWeb::hasFt = true;
 #endif
-	if (AnWeb::hasFt && !IO::HasFile(IO::path + "/res/noterminate.o")) {
-		string cmd = "g++ -c -o \""
-			+ IO::path + "/res/noterminate.o\" \""
-			+ IO::path + "/res/noterminate.cpp\"";
-		std::cout << cmd << std::endl;
-		RunCmd::Run("path=%path%;" + CReader::mingwPath + " && " + cmd);
-	}
 }
 
 bool FReader::Read(string path, FScript* scr) {
@@ -48,10 +41,8 @@ bool FReader::Read(string path, FScript* scr) {
 				msgg.path = fp + ".cpp";\
 				msgg.msg.resize(1, "(System) " b);\
 				msgg.severe = true;\
-				ErrorView::compileMsgs.push_back(msgg);\
-				ErrorView::compileMsgSz++;\
 				scr->errorCount = 1;\
-				Debug::Warning(a, b);
+				Debug::Warning(a "(" + scr->name + ")", b);
 
 		string funcNm = "";
 
@@ -118,15 +109,13 @@ bool FReader::Read(string path, FScript* scr) {
 			}
 
 			string cmd = "g++ -shared -static-libstdc++ -static-libgcc -fPIC \"" + IO::path + "/res/noterminate.o\" -o \""
-				+ fp2 + nm + ".so\" \"" + fp + "_temp__.f90\" -Wl,--export-all-symbols -lgfortran 2> " + fp2 + nm + "_log.txt";
+				+ fp2 + nm + ".so\" \"" + fp + "_temp__.f90\" -Wl,--export-all-symbols -lgfortran 2> \"" + fp2 + nm + "_log.txt\"";
 			std::cout << cmd << std::endl;
 			RunCmd::Run("path=%path%;" + CReader::mingwPath + " && " + cmd);
 			//scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 			for (auto& m : scr->compileLog) {
 				m.path = fp + ".f90";
 			}
-			ErrorView::compileMsgs.insert(ErrorView::compileMsgs.end(), scr->compileLog.begin(), scr->compileLog.end());
-			ErrorView::compileMsgSz = ErrorView::compileMsgs.size();
 
 			remove((fp + "_temp__.f90").c_str());
 		}
@@ -155,14 +144,14 @@ bool FReader::Read(string path, FScript* scr) {
 			_ER("FReader", "Failed to load function \"" + funcNm + "\" into memory! " + err);
 			return false;
 		}
-		auto fhlc = (emptyFunc*)scr->lib->GetSym("ftFunc");
+		auto fhlc = (emptyFunc*)scr->lib->GetSym("__noterm_ftFunc");
 		if (!fhlc) {
 			_ER("FReader", "Failed to register function pointer! Please tell the monkey!");
 			return false;
 		}
 		*fhlc = acf;
 		
-		scr->funcLoc = (FScript::wrapFunc)scr->lib->GetSym("_Z4Execv");
+		scr->funcLoc = (wrapFunc)scr->lib->GetSym("_Z5ExecFv");
 		if (!scr->funcLoc) {
 			_ER("FReader", "Failed to register entry function! Please tell the monkey!");
 			return false;

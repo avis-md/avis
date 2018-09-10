@@ -1,12 +1,24 @@
 #include "errorview.h"
 #include "ui/icons.h"
 #include "utils/runcmd.h"
+#include "web/anweb.h"
 
 std::vector<ErrorView::Message> ErrorView::compileMsgs, ErrorView::execMsgs;
-int ErrorView::compileMsgSz = 0, ErrorView::execMsgSz = 0;
 
 int ErrorView::descId = -1;
 int ErrorView::windowSize = 200, ErrorView::descSize = 68;
+
+void _DoRefresh(AnBrowse::Folder& f) {
+	for (auto& ff : f.subfolders)
+		_DoRefresh(ff);
+	for (auto& scr : f.scripts)
+		ErrorView::compileMsgs.insert(ErrorView::compileMsgs.end(), scr->compileLog.begin(), scr->compileLog.end());
+}
+
+void ErrorView::Refresh() {
+	compileMsgs.clear();
+	_DoRefresh(AnBrowse::folder);
+}
 
 int ErrorView::Parse_GCC(const string& path, const string& sig, const string& name, std::vector<Message>& msgs) {
     msgs.clear();
@@ -93,7 +105,7 @@ void ErrorView::Draw() {
     Engine::DrawQuad(0, y, (float)Display::width, (float)windowSize, white(0.95f, 0.1f));
     UI::Label(5, y + 2, 12, "Compile Log", white());
     y += 20;
-    for (int a = 0; a < compileMsgSz; a++) {
+    for (size_t a = 0; a < compileMsgs.size(); a++) {
         auto& err = compileMsgs[a];
         if (Engine::Button(0, y + a*17, (float)Display::width, 17, white((a == descId)? 0.1f : 0), white(0.2f), black(0.1f)) == MOUSE_RELEASE) {
             if (Input::dbclick) {

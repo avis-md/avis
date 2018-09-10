@@ -346,6 +346,7 @@ void AnWeb::DoExecute() {
 	for (auto n : nodes) {
 		n->log.clear();
 	}
+	ErrorView::execMsgs.clear();
 	char* err = 0;
 	static string pylog;
 	for (auto n : nodes) {
@@ -399,12 +400,8 @@ void AnWeb::DoExecute() {
 	executing = false;
 	apply = true;
 #ifndef NO_REDIR_LOG
-	//remove((IO::path + "/nodes/__tmpstd").c_str());
+	remove((IO::path + "/nodes/__tmpstd").c_str());
 #endif
-}
-
-void AnWeb::DoExecute2() {
-	execNode->Execute();
 }
 
 void AnWeb::OnExecLog(string s, bool e) {

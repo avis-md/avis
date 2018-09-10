@@ -36,6 +36,14 @@ void CReader::Init() {
 	AnWeb::hasC = true;
 #endif
 	useOMP = (VisSystem::prefs["ANL_USE_OPENMP"] == "true");
+
+	if (AnWeb::hasC && !useMsvc && !IO::HasFile(IO::path + "/res/noterminate.o")) {
+		string cmd = "g++ -std=c++11 -c -o \""
+			+ IO::path + "/res/noterminate.o\" \""
+			+ IO::path + "/res/noterminate.cpp\"";
+		std::cout << cmd << std::endl;
+		RunCmd::Run("path=%path%;" + CReader::mingwPath + " && " + cmd);
+	}
 }
 
 bool CReader::Read(string path, CScript* scr) {
@@ -68,8 +76,7 @@ bool CReader::Read(string path, CScript* scr) {
 			msgg.severe = true;\
 			scr->errorCount = 1;\
 			ErrorView::compileMsgs.push_back(msgg);\
-			ErrorView::compileMsgSz++;\
-			Debug::Warning(a, b);
+			Debug::Warning(a "(" + scr->name + ")", b);
 
 		if (mt > ot || !IO::HasFile(fp2 + nm + ".entry")) {
 			remove((fp2 + nm + ".so").c_str());
@@ -143,7 +150,7 @@ bool CReader::Read(string path, CScript* scr) {
 				if (useOMP) {
 					cmd += " -fopenmp";
 				}
-				cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\" 2> \"" + fp2 + nm + "_log.txt\"";
+				cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + IO::path + "/res/noterminate.o\" \"" + fp + "_temp__.cpp\" -Wl,--export-all-symbols 2> \"" + fp2 + nm + "_log.txt\"";
 				std::cout << cmd << std::endl;
 				RunCmd::Run("path=%path%;" + mingwPath + " && " + cmd);
 				scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
@@ -170,7 +177,6 @@ bool CReader::Read(string path, CScript* scr) {
 				m.path = fp + ".cpp";
 			}
 			ErrorView::compileMsgs.insert(ErrorView::compileMsgs.end(), scr->compileLog.begin(), scr->compileLog.end());
-			ErrorView::compileMsgSz += ErrorView::compileMsgs.size();
 			remove((fp + "_temp__.cpp").c_str());
 		}
 	
@@ -192,15 +198,28 @@ bool CReader::Read(string path, CScript* scr) {
 			std::ifstream ets(fp2 + nm + ".entry");
 			ets >> funcNm;
 		}
-		scr->funcLoc = (emptyFunc)scr->lib->GetSym(funcNm);
-		if (!scr->funcLoc) {
-			string err = 
+
+		auto acf = (emptyFunc)scr->lib->GetSym(funcNm);
+		if (!acf) {
+			string err =
 #ifdef PLATFORM_WIN
 				std::to_string(GetLastError());
 #else
 				"";//dlerror();
 #endif
 			_ER("CReader", "Failed to load function \"" + funcNm + "\" into memory! " + err);
+			return false;
+		}
+		auto fhlc = (emptyFunc*)scr->lib->GetSym("__noterm_cFunc");
+		if (!fhlc) {
+			_ER("CReader", "Failed to register function pointer! Please tell the monkey!");
+			return false;
+		}
+		*fhlc = acf;
+
+		scr->funcLoc = (wrapFunc)scr->lib->GetSym("_Z5ExecCv");
+		if (!scr->funcLoc) {
+			_ER("CReader", "Failed to register entry function! Please tell the monkey!");
 			return false;
 		}
 	}
