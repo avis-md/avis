@@ -209,9 +209,18 @@ void CScript::Clear() {
 }
 
 string CScript::Exec() {
-	auto res = funcLoc();
-	if (res)
-		throw res;
+#ifdef PLATFORM_WIN
+	if (useMsvc) {
+		funcLoc();
+	}
+	else {
+		auto res = wFuncLoc();
+		if (res)
+			throw res;
+	}
+#else
+	funcLoc();
+#endif
 	return "";
 }
 

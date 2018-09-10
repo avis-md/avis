@@ -4,6 +4,13 @@
 #include "utils/runcmd.h"
 #endif
 
+#ifdef PLATFORM_WIN
+#define SETPATH "path=%path%;" + mingwPath + "&&" + 
+#else
+#define SETPATH
+#endif
+
+string CReader::gpp = "g++";
 string CReader::vcbatPath = "", CReader::mingwPath = "";
 bool CReader::useMsvc, CReader::useOMP;
 string CReader::flags1, CReader::flags2;
@@ -33,16 +40,17 @@ void CReader::Init() {
 		}
 	}
 #else
+	gpp = VisSystem::envs["ANL_GPP_PATH"];
 	AnWeb::hasC = true;
 #endif
 	useOMP = (VisSystem::prefs["ANL_USE_OPENMP"] == "true");
 
 	if (AnWeb::hasC && !useMsvc && !IO::HasFile(IO::path + "/res/noterminate.o")) {
-		string cmd = "g++ -std=c++11 -c -o \""
+		string cmd = gpp + " -std=c++11 -c -o \""
 			+ IO::path + "/res/noterminate.o\" \""
 			+ IO::path + "/res/noterminate.cpp\"";
 		std::cout << cmd << std::endl;
-		RunCmd::Run("path=%path%;" + CReader::mingwPath + " && " + cmd);
+		RunCmd::Run(SETPATH cmd);
 	}
 }
 
@@ -156,7 +164,7 @@ bool CReader::Read(string path, CScript* scr) {
 				scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 			}
 #else
-			string cmd = "g++ -std=c++11 -shared -fPIC "
+			string cmd = gpp + " -std=c++11 -shared -fPIC "
 #ifdef PLATFORM_LNX
 				" -fno-gnu-unique "
 #endif
@@ -168,10 +176,10 @@ bool CReader::Read(string path, CScript* scr) {
 				cmd += " -fopenmp";
 #endif
 			}
-			cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\" 2> " + fp + "_log.txt";
+			cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\" 2> " + fp2 + nm + "_log.txt";
 			std::cout << cmd << std::endl;
 			RunCmd::Run(cmd);
-			scr->errorCount = ErrorView::Parse_GCC(fp + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
+			scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 #endif
 			for (auto& m : scr->compileLog) {
 				m.path = fp + ".cpp";
@@ -199,8 +207,8 @@ bool CReader::Read(string path, CScript* scr) {
 			ets >> funcNm;
 		}
 
-		auto acf = (emptyFunc)scr->lib->GetSym(funcNm);
-		if (!acf) {
+		scr->funcLoc = (emptyFunc)scr->lib->GetSym(funcNm);
+		if (!scr->funcLoc) {
 			string err =
 #ifdef PLATFORM_WIN
 				std::to_string(GetLastError());
@@ -210,18 +218,23 @@ bool CReader::Read(string path, CScript* scr) {
 			_ER("CReader", "Failed to load function \"" + funcNm + "\" into memory! " + err);
 			return false;
 		}
-		auto fhlc = (emptyFunc*)scr->lib->GetSym("__noterm_cFunc");
-		if (!fhlc) {
-			_ER("CReader", "Failed to register function pointer! Please tell the monkey!");
-			return false;
-		}
-		*fhlc = acf;
 
-		scr->funcLoc = (wrapFunc)scr->lib->GetSym("_Z5ExecCv");
-		if (!scr->funcLoc) {
-			_ER("CReader", "Failed to register entry function! Please tell the monkey!");
-			return false;
+#ifdef PLATFORM_WIN
+		if (!useMsvc) {
+			auto fhlc = (emptyFunc*)scr->lib->GetSym("__noterm_cFunc");
+			if (!fhlc) {
+				_ER("CReader", "Failed to register function pointer! Please tell the monkey!");
+				return false;
+			}
+			*fhlc = scr->funcLoc;
+
+			scr->wFuncLoc = (wrapFunc)scr->lib->GetSym("_Z5ExecCv");
+			if (!scr->funcLoc) {
+				_ER("CReader", "Failed to register entry function! Please tell the monkey!");
+				return false;
+			}
 		}
+#endif
 	}
 
 	std::ifstream strm(fp + ".cpp");

@@ -12,6 +12,7 @@ public:
 
 	friend class FReader;
 protected:
+	static string gpp;
 	static string vcbatPath, mingwPath;
 	static bool useMsvc, useOMP;
 	static string flags1, flags2;

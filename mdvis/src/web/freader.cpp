@@ -108,10 +108,20 @@ bool FReader::Read(string path, FScript* scr) {
 				return false;
 			}
 
-			string cmd = "g++ -shared -static-libstdc++ -static-libgcc -fPIC \"" + IO::path + "/res/noterminate.o\" -o \""
-				+ fp2 + nm + ".so\" \"" + fp + "_temp__.f90\" -Wl,--export-all-symbols -lgfortran 2> \"" + fp2 + nm + "_log.txt\"";
+			string cmd = CReader::gpp + " -shared "
+			#ifdef PLATFORM_WIN
+				"-static-libstdc++ -static-libgcc -Wl,--export-all-symbols "
+			#else
+				"-lc++ "
+			#endif
+			"-fPIC \"" + IO::path + "/res/noterminate.o\" -o \""
+				+ fp2 + nm + ".so\" \"" + fp + "_temp__.f90\" -lgfortran 2> \"" + fp2 + nm + "_log.txt\"";
 			std::cout << cmd << std::endl;
-			RunCmd::Run("path=%path%;" + CReader::mingwPath + " && " + cmd);
+			#ifdef PLATFORM_WIN
+				RunCmd::Run("path=%path%;" + CReader::mingwPath + " && " + cmd);
+			#else
+				RunCmd::Run(cmd);
+			#endif
 			//scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 			for (auto& m : scr->compileLog) {
 				m.path = fp + ".f90";

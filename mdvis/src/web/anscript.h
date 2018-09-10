@@ -147,7 +147,8 @@ public:
 	
 	DyLib* lib;
 	
-	wrapFunc funcLoc;
+	emptyFunc funcLoc;
+	wrapFunc wFuncLoc;
 
 	static std::unordered_map<string, CScript*> allScrs;
 };

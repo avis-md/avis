@@ -8,6 +8,10 @@ SYS_LOCALE=EN
 # Additional compiler flags for nodes (space separated).
 ANL_COMP_FLAGS=
 
+# (Linux/Mac) Specify the g++ compiler used.
+# Examples: g++, g++-7, /your/path/to/g++-8
+# ANL_GPP_PATH=g++-8
+
 # (Windows Only) Use the Visual Studio compiler instead of the MinGW compiler.
 # You must specify the path to either compilers in the env file.
 # If you specified both, then the other will be used if the one you selected is not available.

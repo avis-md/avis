@@ -24,9 +24,8 @@ void PyReader::Init() {
 	static std::wstring pynmw = IO::_tow(pyenv + "\\python");
 	Py_SetProgramName(&pynmw[0]);
 #else
-#error set python path
-	Py_SetPythonHome(&pyenv[0]);
-	Py_SetProgramName("python3");
+	//Py_SetPythonHome(&pyenv[0]);
+	//Py_SetProgramName("python3");
 #endif
 	try {
 		Py_Initialize();
