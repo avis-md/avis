@@ -5,17 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(Windows) Launch",
-            "type": "cppvsdbg",
-            "request": "launch",
-            "program": "C:/Users/Pua Kai/Documents/GitHub/mdvis/Debug/mdvis.exe",
-            "args": ["--debug"],
-            "stopAtEntry": false,
-            "cwd": "C:/Users/Pua Kai/Documents/GitHub/mdvis/Debug/",
-            "environment": [],
-            "externalConsole": true
-        },
-        {
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
@@ -47,6 +36,17 @@
             "externalConsole": true,
             "MIMode": "lldb",
             "preLaunchTask": "make"
+        },
+        {
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "C:/Users/Pua Kai/Documents/GitHub/mdvis/Debug/mdvis.exe",
+            "args": ["--debug"],
+            "stopAtEntry": false,
+            "cwd": "C:/Users/Pua Kai/Documents/GitHub/mdvis/Debug/",
+            "environment": [],
+            "externalConsole": true
         }
     ]
 }

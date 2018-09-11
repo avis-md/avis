@@ -90,8 +90,7 @@ void updateFunc() {
 		}
 	}
 	if (RayTracer::resTex) {
-		if (Scene::dirty) RayTracer::expDirty = true;
-		else Scene::dirty = true;
+		
 	}
 }
 

@@ -1,19 +1,18 @@
-///this is a script to test the
-///ability of instant reloading
-
 #include <iostream>
 #include <cmath>
 
-VECSZ(cnt)
-VAROUT float* vec = 0;
+//in cnt
+double* ivec = 0;
+//out cnt
+double* ovec = 0;
+//var
+int cnt = 0;
 
-VECVAR int cnt = 100;
-
-float ff = 1;
-
-ENTRY Execute() {
-	if (!vec) vec = new float[100]{};
+//entry
+void Execute() {
+	if (ovec) delete[](ovec);
+	ovec = new double[cnt]{};
 	for (int a = 0; a < cnt; a++)
-		vec[a] = sinf(ff + a * 0.0314159f * 2);
-	ff += 2;
+		ovec[a] = ivec[a] * std::exp(-a*2.0/cnt);
+	printf("C says hello!");
 }

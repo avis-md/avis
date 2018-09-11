@@ -1,6 +1,6 @@
 #include "anweb.h"
 
-#define NO_PYLOG
+//#define NO_PYLOG
 
 void AnScript::Clear() {
 	invars.clear();
@@ -56,7 +56,9 @@ string PyScript::GetLog() {
 	char* res = PyBytes_AsString(u);
 	Py_DECREF(u);
 	Py_DECREF(output);
-	return res;
+	string s(res);
+	if (s.back() == '\n') s.pop_back();
+	return s;
 }
 
 void PyScript::ClearLog() {

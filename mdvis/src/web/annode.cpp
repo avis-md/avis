@@ -533,33 +533,36 @@ void PyNode::Execute() {
 				break;
 			default:
 				Debug::Error("PyNode", "Value not handled!");
+				throw "";
 				break;
 			}
 		}
 	}
 	script->Exec();
 	for (uint i = 0; i < script->outvars.size(); i++) {
-		outputV[i].value = scr->pRets[i];
-		Py_INCREF(outputV[i].value);
-		switch (outputV[i].type) {
+		auto& mv = outputV[i];
+		mv.value = scr->pRets[i];
+		Py_INCREF(mv.value);
+		switch (mv.type) {
 		case AN_VARTYPE::DOUBLE:
-			outputVC[i].val.d = PyFloat_AsDouble(outputV[i].value);
+			outputVC[i].val.d = PyFloat_AsDouble(mv.value);
 			break;
 		case AN_VARTYPE::INT:
-			outputVC[i].val.i = (int)PyLong_AsLong(outputV[i].value);
+			outputVC[i].val.i = (int)PyLong_AsLong(mv.value);
 			break;
 		case AN_VARTYPE::LIST:
 		{
 			auto& ar = outputVC[i].val.arr;
 			int n;
-			ar.p = AnConv::FromPy(outputV[i].value, conV[i].dimVals.size(), &conV[i].dimVals[0], n);
-			ar.data.resize(n * conV[i].stride);
-			memcpy(&ar.data[0], ar.p, n * scr->_outvars[i].stride);
+			ar.p = AnConv::FromPy(mv.value, conV[i].dimVals.size(), &conV[i].dimVals[0], n);
+			n *= scr->_outvars[i].stride;
+			ar.data.resize(n);
+			memcpy(&ar.data[0], ar.p, n);
 			ar.p = &ar.data[0];
 			break;
 		}
 		default:
-			Debug::Warning("AnVar", "exec case not handled!");
+			OHNO("AnVar", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
 			break;
 		}
 	}
@@ -635,7 +638,7 @@ void CNode::Execute() {
 				}
 				break;
 			default:
-				Debug::Warning("CNode", "var not handled!");
+				OHNO("CNode", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
 				break;
 			}
 		}
@@ -707,7 +710,7 @@ void FNode::Execute() {
 				break;
 			default:
 				Debug::Warning("CNode", "var not handled!");
-				break;
+				throw("");
 			}
 		}
 		else {
@@ -720,12 +723,31 @@ void FNode::Execute() {
 				break;
 			default:
 				Debug::Error("CNode", "Value not handled!");
-				break;
+				throw("");
 			}
 		}
 	}
+	
+	scr->Exec();
 
-	script->Exec();
+	for (uint i = 0; i < scr->outvars.size(); i++) {
+		if (scr->_outvars[i].type == AN_VARTYPE::LIST) {
+			scr->_outarr_post[i]();
+			auto& cv = conV[i];
+			size_t dn = cv.dimVals.size();
+			cv.data.dims.resize(dn);
+			int sz = 1;
+			for (size_t a = 0; a < dn; a++) {
+				cv.data.dims[a] = (*scr->arr_shapeloc)[a];
+				cv.dimVals[a] = &cv.data.dims[a];
+				sz *= cv.data.dims[a];
+			}
+			cv.data.val.arr.data.resize(cv.stride * sz);
+			cv.data.val.arr.p = &cv.data.val.arr.data[0];
+			memcpy(cv.data.val.arr.p, *scr->arr_dataloc, cv.stride * sz);
+			cv.value = &cv.data.val.arr.p;
+		}
+	}
 }
 
 void FNode::CatchExp(char* c) {

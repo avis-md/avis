@@ -53,6 +53,7 @@ bool FReader::Read(string path, FScript* scr) {
 			{
 				std::ifstream strm(fp + ".f90");
 				std::ofstream ostrm(fp + "_temp__.f90");
+				std::vector<string> arr_o;
 				string s;
 				int tp = 0;
 				size_t loc = -1;
@@ -69,8 +70,19 @@ bool FReader::Read(string path, FScript* scr) {
 								_ER("FReader", "Variable parse error after \"!in\"!");
 								break;
 							}
-							if (string_find(to_lowercase(s), ", allocatable") > -1)
+							if (string_find(to_lowercase(s), ", allocatable") > -1) {
 								ostrm << s << "\n";
+								if (tp == 2) {
+									auto s2 = rm_spaces(s);
+									auto l1 = string_find(s2, "::");
+									auto l2 = string_find(s2, "(:");
+									if (l1 == -1 || l2 == -1) {
+										_ER("FReader", "Failed to parse array name!");
+										break;
+									}
+									arr_o.push_back(s2.substr(l1 + 2, l2 - l1 - 2));
+								}
+							}
 							else
 								ostrm << s.substr(0, loc - 1) << ", BIND(C) " << s.substr(loc) << "\n";
 							break;
@@ -101,12 +113,17 @@ bool FReader::Read(string path, FScript* scr) {
 						ostrm << "\n";
 					}
 				}
+
+				GenArrIO(fp2, nm, arr_o);
+				ostrm << "\ninclude \"__fcache__/" + nm + ".ext.f95\"";
 			}
 
 			if (fail) {
 				remove((fp + "_temp__.cpp").c_str());
 				return false;
 			}
+
+
 
 			string cmd = CReader::gpp + " -shared "
 			#ifdef PLATFORM_WIN
@@ -166,12 +183,22 @@ bool FReader::Read(string path, FScript* scr) {
 			_ER("FReader", "Failed to register entry function! Please tell the monkey!");
 			return false;
 		}
+
+		scr->arr_shapeloc = (int32_t**)scr->lib->GetSym("__mod_exp_MOD_exp_arr_shp");
+		if (!scr->arr_shapeloc) {
+			_ER("FReader", "Failed to register array shape pointer! Please tell the monkey!");
+			return false;
+		}
+		scr->arr_dataloc = (void**)scr->lib->GetSym("exp_arr_ptr");
+		if (!scr->arr_dataloc) {
+			_ER("FReader", "Failed to register array data pointer! Please tell the monkey!");
+			return false;
+		}
 	}
 
 
 	std::ifstream strm(fp + ".f90");
 	string ln;
-	CVar* bk;
 	bool fst = true;
 	while (!strm.eof()) {
 		std::getline(strm, ln);
@@ -182,16 +209,21 @@ bool FReader::Read(string path, FScript* scr) {
 		}
 		fst = false;
 
-		if (ln == "!in" || ln == "!out") {
-			std::vector<std::pair<string, string>>& cv = (ln == "!out") ? scr->outvars : scr->invars;
-			std::vector<CVar>& _cv = (ln == "!out") ? scr->_outvars : scr->_invars;
-			const string ios = (ln == "!out") ? "output " : "input ";
+		bool iso = ln == "!out";
+		if (iso || ln == "!in") {
+			std::vector<std::pair<string, string>>& cv = iso ? scr->outvars : scr->invars;
+			std::vector<CVar>& _cv = iso ? scr->_outvars : scr->_invars;
+			std::vector<emptyFunc>& _fc = iso? scr->_outarr_post : scr->_inarr_pre;
+			_cv.push_back(CVar());
+			auto bk = &_cv.back();
+			_fc.push_back(emptyFunc());
+			auto fk = &_fc.back();
+
+			const string ios = iso ? "output " : "input ";
 
 			std::getline(strm, ln);
 			auto ss = string_split(ln, ' ', true);
 			auto sss = ss.size();
-			_cv.push_back(CVar());
-			bk = &_cv.back();
 			int atn = 0;
 			while (ss[atn].back() == ',') {
 				ss[atn].pop_back();
@@ -202,6 +234,7 @@ bool FReader::Read(string path, FScript* scr) {
 				_ER("FReader", "arg type \"" + bk->typeName + "\" not recognized!");
 				return false;
 			}
+			bk->stride = AnScript::StrideOf(bk->typeName[0]);
 			if (sss < atn + 2) {
 				_ER("FReader", "variable name not found!");
 				return false;
@@ -221,15 +254,19 @@ bool FReader::Read(string path, FScript* scr) {
 			}
 			
 			if (isa) {
+				bk->type = AN_VARTYPE::LIST;
 				bk->typeName = "list(" + std::to_string(bk->dimVals.size()) + bk->typeName[0] + ")";
 			}
 			cv.push_back(std::pair<string, string>(bk->name, bk->typeName));
 			
 			if (AnWeb::hasFt) {
+				auto nml = to_lowercase(bk->name);
 				if (!isa)
-					bk->value = scr->lib->GetSym(to_lowercase(bk->name));
-				else
-					bk->value = scr->lib->GetSym("__test_MOD_" + to_lowercase(bk->name));
+					bk->value = scr->lib->GetSym(nml);
+				else {
+					bk->value = scr->lib->GetSym("__test_MOD_" + nml);
+					if (iso) *fk = (emptyFunc)scr->lib->GetSym("exp_get_" + nml);
+				}
 				if (!bk->value) {
 					Debug::Warning("FReader", "cannot find \"" + bk->name + "\" from memory!");
 					return false;
@@ -265,4 +302,25 @@ bool FReader::ParseType(string& s, CVar* var) {
 	}
 	else return false;
 	return true;
+}
+
+void FReader::GenArrIO(string path, string name, std::vector<string> outvars) {
+	std::ofstream strm(path + name + ".ext.f95");
+
+	strm << R"(module mod_exp
+ use iso_c_binding
+ use )" << name << R"(
+ implicit none
+    integer, allocatable, target :: exp_arr_shp(:)
+    type(c_ptr), bind(c) :: exp_arr_ptr
+
+ contains 
+)";
+	for (auto& v : outvars) {
+		strm << "    subroutine exp_get_" + v + "() bind(c)\n\
+        exp_arr_shp = shape(" + v + ")\n\
+        exp_arr_ptr = c_loc(" + v + ")\n\
+    end subroutine exp_get_" + v + "\n";
+	}
+	strm << "end module mod_exp";
 }

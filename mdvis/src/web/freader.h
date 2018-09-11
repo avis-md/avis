@@ -12,4 +12,6 @@ public:
 
 protected:
 	static bool ParseType(string& s, CVar* var);
+
+	static void GenArrIO(string path, string name, std::vector<string> outvars);
 };

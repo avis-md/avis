@@ -295,6 +295,7 @@ bool CReader::Read(string path, CScript* scr) {
 			if (ira) {
 				bk->dimVals.resize(lnsz - 1);
 				bk->dimNames.insert(bk->dimNames.end(), lns.begin() + 1, lns.end());
+				bk->type = AN_VARTYPE::LIST;
 				bk->stride = AnScript::StrideOf(bk->typeName[0]);
 				if (!bk->stride) {
 					_ER("CReader", "unsupported type \"" + bk->typeName + "\" for list!");

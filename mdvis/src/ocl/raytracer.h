@@ -15,7 +15,7 @@ class RayTracer {
 public:
 	static bool Init();
 	
-
+	static void Clear();
 	static void SetScene();
 	static void Render();
 
