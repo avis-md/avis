@@ -10,6 +10,7 @@ public:
 	static bool Read(string path, CScript* scr);
 	static void Refresh(CScript* scr);
 
+	friend class CScript;
 	friend class FReader;
 protected:
 	static string gpp;

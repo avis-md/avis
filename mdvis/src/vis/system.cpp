@@ -11,7 +11,7 @@
 #include "live/livesyncer.h"
 #include "utils/dialog.h"
 
-Vec4 VisSystem::accentColor = Vec4(1, 1, 1, 1);
+Vec4 VisSystem::accentColor = Vec4(1, 0.75f, 0, 1);
 float VisSystem::glass = 0.9f;
 uint VisSystem::renderMs, VisSystem::uiMs;
 
@@ -197,7 +197,9 @@ void VisSystem::DrawTitle() {
 
 void VisSystem::DrawBar() {
 	Engine::DrawQuad(0, Display::height - 18.0f, (float)Display::width, 18, white(0.9f, 0.1f));
-	UI::Label(2, Display::height - 16.0f, 12, "Render: " + std::to_string(renderMs) + "ms  UI: " + std::to_string(uiMs) + "ms", white(0.5f));
+	//UI::Label(2, Display::height - 16.0f, 12, "Render: " + std::to_string(renderMs) + "ms  UI: " + std::to_string(uiMs) + "ms", white(0.5f));
+
+
 
 	if (Particles::anim.frameCount > 1) {
 		if (!LiveSyncer::activeRunner) {

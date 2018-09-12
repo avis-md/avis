@@ -125,6 +125,8 @@ void paintfunc() {
 	}
 	VisSystem::DrawBar();
 
+	ErrorView::Draw();
+
 	if (!AnWeb::drawFull)
 		VisSystem::DrawTitle();
 

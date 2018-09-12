@@ -13,7 +13,7 @@ Texture* Icons::expand, *Icons::collapse, *Icons::play, *Icons::playall, *Icons:
 *Icons::colorwheel,
 *Icons::vis_atom, *Icons::vis_prot,
 *Icons::pro_col, *Icons::pro_grad,
-*Icons::details;
+*Icons::details, *Icons::compile, *Icons::exec;
 
 #define TEXN(nm) new Texture(res::nm ## _png, res::nm ## _png_sz)
 #define TEX(nm) nm = new Texture(res::nm ## _png, res::nm ## _png_sz)
@@ -68,6 +68,8 @@ void Icons::Init() {
 	TEX(pro_col);
 	TEX(pro_grad);
 	TEX(details);
+	TEX(compile);
+	TEX(exec);
 }
 
 Texture* Icons::OfDM(byte b) {

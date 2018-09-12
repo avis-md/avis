@@ -6,7 +6,7 @@ class FReader {
 public:
 	static void Init();
 	
-	static bool Read(string path, FScript* scr);
+	static bool Read(FScript* scr);
 
 	static void Refresh(FScript* scr);
 

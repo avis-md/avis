@@ -12,6 +12,7 @@ public:
 
     static std::vector<Message> compileMsgs, execMsgs;
 
+	static bool show, showExec;
     static int descId;
     static int windowSize, descSize;
 

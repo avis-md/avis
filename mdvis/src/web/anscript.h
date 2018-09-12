@@ -159,6 +159,7 @@ public:
 
 	std::vector<CVar> _invars, _outvars;
 	std::vector<emptyFunc> _inarr_pre, _outarr_post;
+	int pre, post;
 
 	int32_t** arr_shapeloc;
 	void** arr_dataloc;

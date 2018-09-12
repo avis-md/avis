@@ -16,14 +16,16 @@ void FReader::Init() {
 #endif
 }
 
-bool FReader::Read(string path, FScript* scr) {
+bool FReader::Read(FScript* scr) {
+	string path = scr->path;
 	string fp = IO::path + "/nodes/" + path;
 	std::replace(fp.begin(), fp.end(), '\\', '/');
+	auto s = IO::GetText(fp);
+	fp = fp.substr(0, fp.size() - 4);
 	auto ls = fp.find_last_of('/');
-	string nm = fp.substr(ls + 1);
+	string& nm = scr->name = fp.substr(ls + 1);
 	string fp2 = fp.substr(0, ls + 1) + "__fcache__/";
 
-	auto s = IO::GetText(fp + ".f90");
 
 #ifndef IS_ANSERVER
 	if (!IO::HasDirectory(fp2)) IO::MakeDirectory(fp2);
@@ -148,8 +150,6 @@ bool FReader::Read(string path, FScript* scr) {
 		}
 
 #endif
-
-		scr->name = path;
 		scr->libpath = fp2 + nm + ".so";
 		scr->lib = new DyLib(scr->libpath);
 		if (!scr->lib->is_open()) {
@@ -282,11 +282,11 @@ bool FReader::Read(string path, FScript* scr) {
 }
 
 void FReader::Refresh(FScript* scr) {
-	auto mt = IO::ModTime(IO::path + "/nodes/" + scr->path + ".f90");
+	auto mt = IO::ModTime(IO::path + "/nodes/" + scr->path);
 	if (mt > scr->chgtime) {
-		Debug::Message("FReader", "Reloading " + scr->path + ".f90");
+		Debug::Message("FReader", "Reloading " + scr->path);
 		scr->Clear();
-		scr->ok = Read(scr->path, scr);
+		scr->ok = Read(scr);
 	}
 }
 

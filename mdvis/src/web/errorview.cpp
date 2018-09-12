@@ -1,10 +1,13 @@
 #include "errorview.h"
+#include "ui/ui_ext.h"
 #include "ui/icons.h"
 #include "utils/runcmd.h"
 #include "web/anweb.h"
+#include "vis/system.h"
 
 std::vector<ErrorView::Message> ErrorView::compileMsgs, ErrorView::execMsgs;
 
+bool ErrorView::show = false, ErrorView::showExec = true;
 int ErrorView::descId = -1;
 int ErrorView::windowSize = 200, ErrorView::descSize = 68;
 
@@ -101,39 +104,80 @@ int ErrorView::Parse_MSVC(const string& path, const string& sig, const string& n
 }
 
 void ErrorView::Draw() {
-    float y = Display::height - 18.0f - windowSize;
-    Engine::DrawQuad(0, y, (float)Display::width, (float)windowSize, white(0.95f, 0.1f));
-    UI::Label(5, y + 2, 12, "Compile Log", white());
-    y += 20;
-    for (size_t a = 0; a < compileMsgs.size(); a++) {
-        auto& err = compileMsgs[a];
-        if (Engine::Button(0, y + a*17, (float)Display::width, 17, white((a == descId)? 0.1f : 0), white(0.2f), black(0.1f)) == MOUSE_RELEASE) {
-            if (Input::dbclick) {
-                RunCmd::Run("open " + err.path);
-            }
-            else if (descId == a) descId = -1;
-            else descId = a;
-        }
-        if (err.severe) {
-            UI::Texture(5, y + a*17 + 1, 14, 14, Icons::cross, red());
-        }
-        UI::Label(25, y + a*17, 12, err.name, white());
-        UI::Label(Display::width * 0.15f, y + a*17, 12, "(" + std::to_string(err.linenum) + ":" + std::to_string(err.charnum) + ") " + err.msg[0], white());
-    }
-
-	if (descId > -1) {
-		y = Display::height - 18.0f - descSize;
-		Engine::DrawQuad(0, y, (float)Display::width, (float)descSize, white(0.95f, 0.15f));
-		int a = 0;
-		auto& msg = compileMsgs[descId];
-        for (auto& m : msg.msg) {
-            UI::Label(5, y + 17 * a, 12, m, white());
-            a++;
-        }
-		UI::Label(100, Display::height - 16.0f - windowSize, 12, msg.path, white(0.7f));
+	if (Engine::Button(3, Display::height - 17, 35, 16, white(0), white(0.2f), black(0.2f)) == MOUSE_RELEASE) {
+		if (show && !showExec) show = false;
+		else {
+			show = true;
+			showExec = false;
+		}
+		descId = -1;
 	}
-	else {
-		Engine::DrawQuad(0, Display::height - 35.0f, (float)Display::width, 17, white(0.95f, 0.15f));
-		UI::Label(5, Display::height - 35.0f, 12, "Select an error message", white(0.7f));
+	UI::Texture(5, Display::height - 17, 16, 16, Icons::compile);
+	auto csz = compileMsgs.size();
+	UI::Label(22, Display::height - 17, 12, std::to_string(csz), (!csz) ? white(0.8f) : red());
+	if (Engine::Button(40, Display::height - 17, 35, 16, white(0), white(0.2f), black(0.2f)) == MOUSE_RELEASE) {
+		if (show && showExec) show = false;
+		else {
+			show = true;
+			showExec = true;
+		}
+		descId = -1;
+	}
+	UI::Texture(42, Display::height - 17, 16, 16, Icons::exec);
+	auto msz = execMsgs.size();
+	UI::Label(58, Display::height - 17, 12, std::to_string(msz), (!msz) ? white(0.8f) : red());
+
+	if (show) {
+		float y = Display::height - 18.0f - windowSize;
+		Engine::DrawQuad(0, y, (float)Display::width, (float)windowSize, white(0.95f, 0.1f));
+		y++;
+		if (Engine::Button(2, y, 80, 16, white(0), white(0.2f), black(0.2f), "Compile Log", 12, UI::font, showExec ? white(0.8f) : VisSystem::accentColor) == MOUSE_RELEASE) {
+			showExec = false;
+			descId = -1;
+		}
+		if (Engine::Button(85, y, 80, 16, white(0), white(0.2f), black(0.2f), "Exec Log", 12, UI::font, showExec ? VisSystem::accentColor : white(0.8f)) == MOUSE_RELEASE) {
+			showExec = true;
+			descId = -1;
+		}
+		if (Engine::Button(Display::width - 18, y, 16, 16, Icons::cross) == MOUSE_RELEASE) {
+			show = false;
+		}
+		y += 19;
+		std::vector<Message>& msgs = showExec ? execMsgs : compileMsgs;
+		for (size_t a = 0; a < msgs.size(); a++) {
+			auto& err = msgs[a];
+			if (Engine::Button(0, y + a * 17, (float)Display::width, 17, white((a == descId) ? 0.1f : 0), white(0.2f), black(0.1f)) == MOUSE_RELEASE) {
+				if (Input::dbclick) {
+#ifdef PLATFORM_WIN
+					RunCmd::Run("\"" + IO::path + "/nodes/" + err.path + "\"");
+#else
+					RunCmd::Run("open " + IO::path + "/nodes/" + err.path);
+#endif
+				}
+				else if (descId == a) descId = -1;
+				else descId = a;
+			}
+			if (err.severe) {
+				UI::Texture(5, y + a * 17 + 1, 14, 14, Icons::cross, red());
+			}
+			UI::Label(25, y + a * 17, 12, err.name, white());
+			UI::Label(Display::width * 0.15f, y + a * 17, 12, "(" + std::to_string(err.linenum) + ":" + std::to_string(err.charnum) + ") " + err.msg[0], white());
+		}
+
+		if (descId > -1) {
+			y = Display::height - 18.0f - descSize;
+			Engine::DrawQuad(0, y, (float)Display::width, (float)descSize, white(0.95f, 0.15f));
+			int a = 0;
+			auto& msg = msgs[descId];
+			for (auto& m : msg.msg) {
+				UI::Label(5, y + 17 * a, 12, m, white());
+				a++;
+			}
+			//UI::Label(100, Display::height - 16.0f - windowSize, 12, msg.path, white(0.7f));
+		}
+		else {
+			Engine::DrawQuad(0, Display::height - 35.0f, (float)Display::width, 17, white(0.95f, 0.15f));
+			UI::Label(5, Display::height - 35.0f, 12, "Select an error message for details", white(0.7f));
+		}
 	}
 }

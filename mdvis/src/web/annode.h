@@ -112,6 +112,8 @@ public:
 
 	void Execute() override;
 	void Reconn() override;
+
+	void CatchExp(char* c) override;
 };
 
 class FNode : public AnNode {

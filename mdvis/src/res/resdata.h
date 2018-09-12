@@ -62,3 +62,5 @@
 #include "_res/icon.h"
 #include "_res/loading.h"
 #include "_res/picker.h"
+#include "_res/compile.h"
+#include "_res/exec.h"

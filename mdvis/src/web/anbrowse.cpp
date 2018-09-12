@@ -45,8 +45,8 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 		auto nm = f.substr(f.find_last_of('/') + 1);
 		auto scr = new FScript();
 		fo->scripts.push_back(scr);
-		scr->path = incPath + nm.substr(0, nm.size() - 4);
-		scr->ok = FReader::Read(scr->path, scr);
+		scr->path = incPath + nm;
+		scr->ok = FReader::Read(scr);
 	}
 
 	std::vector<string> fd;

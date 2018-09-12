@@ -20,7 +20,7 @@ public:
 		*colorwheel,
 		*vis_atom, *vis_prot,
 		*pro_col, *pro_grad,
-		*details;
+		*details, *compile, *exec;
 	
 	static Texture* OfDM(byte b);
 };

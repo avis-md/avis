@@ -212,7 +212,7 @@ void CScript::Clear() {
 
 string CScript::Exec() {
 #ifdef PLATFORM_WIN
-	if (useMsvc) {
+	if (CReader::useMsvc) {
 		funcLoc();
 	}
 	else {

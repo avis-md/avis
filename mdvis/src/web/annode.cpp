@@ -677,6 +677,14 @@ void CNode::Reconn() {
 	}
 }
 
+void CNode::CatchExp(char* c) {
+	ErrorView::Message msg{};
+	msg.name = script->name;
+	msg.path = script->path;
+	msg.severe = true;
+	
+}
+
 
 FNode::FNode(FScript* scr) : AnNode(scr) {
 	if (!scr) return;
@@ -698,6 +706,7 @@ FNode::FNode(FScript* scr) : AnNode(scr) {
 void FNode::Execute() {
 	auto scr = (FScript*)script;
 	for (uint i = 0; i < scr->invars.size(); i++) {
+		scr->pre = i;
 		auto& mv = scr->_invars[i];
 		if (inputR[i].first) {
 			auto& cv = inputR[i].first->conV[inputR[i].second];
@@ -727,10 +736,13 @@ void FNode::Execute() {
 			}
 		}
 	}
+	scr->pre = -1;
+	scr->post = -1;
 	
 	scr->Exec();
 
 	for (uint i = 0; i < scr->outvars.size(); i++) {
+		scr->post = i;
 		if (scr->_outvars[i].type == AN_VARTYPE::LIST) {
 			scr->_outarr_post[i]();
 			auto& cv = conV[i];
@@ -748,6 +760,7 @@ void FNode::Execute() {
 			cv.value = &cv.data.val.arr.p;
 		}
 	}
+	scr->post = -1;
 }
 
 void FNode::CatchExp(char* c) {
@@ -755,7 +768,8 @@ void FNode::CatchExp(char* c) {
 	msg.name = script->name;
 	msg.path = script->path;
 	msg.severe = true;
-	if (strcmp(c, "At line ") > 0) {
+	string s = c;
+	if (string_find(s, "At line ") == 0) {
 		if ((msg.linenum = atoi(c + 8)) > 0) {
 			auto lc = strchr(c, '\n');
 			log.push_back(std::pair<byte, string>(2, lc + 1));
@@ -765,6 +779,20 @@ void FNode::CatchExp(char* c) {
 			ErrorView::execMsgs.push_back(msg);
 			return;
 		}
+	}
+	else if (s.back() == 1) {
+		s.pop_back();
+		log.push_back(std::pair<byte, string>(2, s));
+		msg.msg.resize(1, s);
+		auto scr = (FScript*)script;
+		if (scr->pre > -1) {
+			msg.msg.push_back("While handling input variable " + scr->invars[scr->pre].first);
+		}
+		else if (scr->post > -1) {
+			msg.msg.push_back("While handling output variable " + scr->outvars[scr->post].first);
+		}
+		ErrorView::execMsgs.push_back(msg);
+		return;
 	}
 	AnNode::CatchExp(c);
 }

@@ -233,8 +233,6 @@ void AnWeb::Draw() {
 	AnBrowse::Draw();
 	AnOps::Draw();
 
-	ErrorView::Draw();
-
 	if (Input::KeyDown(Key_Escape)) {
 		if (selScript) selScript = nullptr;
 		else {
@@ -358,6 +356,7 @@ void AnWeb::DoExecute() {
 #endif
 		execNode = n;
 		n->executing = true;
+		std::exception_ptr cxp;
 		try {
 			n->Execute();
 		}
@@ -365,9 +364,21 @@ void AnWeb::DoExecute() {
 			err = e;
 		}
 		catch (...) {
-			err = "An exception was thrown!";
+			cxp = std::current_exception();
 		}
 		n->executing = false;
+
+		if (cxp) {
+			try {
+				std::rethrow_exception(cxp);
+			}
+			catch (std::exception& e) {
+				static string serr = e.what();
+				serr += " thrown!\x01";
+				err = &serr[0];
+			}
+		}
+
 #ifndef NO_REDIR_LOG
 		if (n->script->type == AN_SCRTYPE::PYTHON) {
 			pylog = PyScript::GetLog();

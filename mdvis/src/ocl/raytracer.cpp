@@ -26,7 +26,7 @@
 GLuint RayTracer::resTex = 0;
 
 bool RayTracer::Init() {
-	
+	return false;
 }
 
 void RayTracer::Clear() {
