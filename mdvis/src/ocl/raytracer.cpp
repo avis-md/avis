@@ -1,6 +1,4 @@
 #include "raytracer.h"
-#include "radeon_rays.h"
-#include "radeon_rays_cl.h"
 #include "hdr.h"
 #include "kernel.h"
 
@@ -8,6 +6,9 @@ GLuint RayTracer::resTex = 0;
 
 CLWContext RayTracer::context;
 CLWProgram RayTracer::program;
+
+CLWCommandQueue RayTracer::queue;
+RR::IntersectionApi* RayTracer::api;
 
 bool RayTracer::Init() {
 	std::vector<CLWPlatform> platforms;
@@ -40,6 +41,16 @@ bool RayTracer::Init() {
 	catch (CLWException& e) {
 		OHNO("Raytracer", + string(e.what()));
 		return false;
+	}
+
+	auto id = context.GetDevice(0).GetID();
+	queue = context.GetCommandQueue(0);
+
+	try {
+		api = RR::CreateFromOpenClContext(context, id, queue, IO::path);
+	}
+	catch (std::runtime_error& err) {
+		std::cout << err.what() << std::endl;
 	}
 	return true;
 }

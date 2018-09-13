@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine.h"
+#include "radeon_rays_cl.h"
 #include "CLW.h"
 
 #ifdef PLATFORM_WIN
@@ -7,6 +8,8 @@
 #pragma comment(lib, "CLW.lib")
 #pragma comment(lib, "OpenCL.lib")
 #endif
+
+namespace RR = RadeonRays;
 
 class RayTracer {
 public:
@@ -23,4 +26,6 @@ public:
 private:
 	static CLWContext context;
 	static CLWProgram program;
+	static CLWCommandQueue queue;
+	static RR::IntersectionApi* api;
 };

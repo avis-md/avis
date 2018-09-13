@@ -2,7 +2,7 @@
 
 //#define MAKE_RES
 //#define MAKE_LOCL
-//#define NOCATCH
+#define NOCATCH
 
 #include "ui/ui_ext.h"
 #include "ui/localizer.h"
