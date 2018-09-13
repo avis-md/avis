@@ -447,7 +447,7 @@ void ParGraphics::UpdateClipping() {
 		cents[4] = cs - dirs[2] * clipSize.z * 0.5f;
 		cents[5] = cs + dirs[2] * clipSize.z * 0.5f;
 		for (int a = 0; a < 3; a++) {
-			dirs[a] = Normalize(mv * dirs[a]);
+			dirs[a] = glm::normalize(mv * dirs[a]);
 		}
 		clippingPlanes[0] = -dirs[0];
 		clippingPlanes[1] = dirs[0];

@@ -1,13 +1,10 @@
 #pragma once
 #include "Engine.h"
-#include "utils/BVH.h"
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-#ifdef PLATFORM_OSX
-#include <OpenCL/cl.h>
-#else
-#include <CL/cl.h>
-#endif
+#include "CLW.h"
+
 #ifdef PLATFORM_WIN
+#pragma comment(lib, "RadeonRays.lib")
+#pragma comment(lib, "CLW.lib")
 #pragma comment(lib, "OpenCL.lib")
 #endif
 
@@ -23,4 +20,7 @@ public:
 
 	static GLuint resTex;
 
+private:
+	static CLWContext context;
+	static CLWProgram program;
 };

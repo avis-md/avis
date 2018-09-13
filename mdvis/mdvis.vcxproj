@@ -76,10 +76,10 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include;C:\Intel\OpenCL\sdk\include;C:\Anaconda\include;C:\Anaconda\Lib\site-packages\numpy\core\include;./src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include;C:\Intel\OpenCL\sdk\include;C:\Anaconda\include;C:\Anaconda\Lib\site-packages\numpy\core\include;../../radeonrays/RadeonRays/include/;../../radeonrays/CLW/;./src</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;GLEW_STATIC;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OpenMPSupport>true</OpenMPSupport>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>SyncCThrow</ExceptionHandling>
@@ -168,7 +168,6 @@
     <ClCompile Include="src\ui\popups.cpp" />
     <ClCompile Include="src\ui\ui_ext.cpp" />
     <ClCompile Include="src\utils\avi.cpp" />
-    <ClCompile Include="src\utils\BVH.cpp" />
     <ClCompile Include="src\utils\dialog.cpp" />
     <ClCompile Include="src\utils\dylib.cpp" />
     <ClCompile Include="src\utils\effects.cpp" />
@@ -273,7 +272,6 @@
     <ClInclude Include="src\ui\ui_ext.h" />
     <ClInclude Include="src\utils\avi.h" />
     <ClInclude Include="src\utils\aviriff2.h" />
-    <ClInclude Include="src\utils\BVH.h" />
     <ClInclude Include="src\utils\dialog.h" />
     <ClInclude Include="src\utils\dylib.h" />
     <ClInclude Include="src\utils\effects.h" />
@@ -339,6 +337,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="src\ocl\kernel.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

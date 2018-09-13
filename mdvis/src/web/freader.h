@@ -13,5 +13,10 @@ public:
 protected:
 	static bool ParseType(string& s, CVar* var);
 
-	static void GenArrIO(string path, string name, std::vector<string> outvars);
+	struct typestring {
+		string type, name, dims;
+
+		typestring(string a, string b, string c) : type(a), name(b), dims(c) {}
+	};
+	static void GenArrIO(string path, string name, std::vector<typestring> invars, std::vector<string> outvars);
 };

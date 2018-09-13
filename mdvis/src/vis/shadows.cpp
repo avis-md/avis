@@ -129,7 +129,7 @@ void Shadows::Rerender() {
 	MVP::Switch(false);
 	MVP::Clear();
 	glViewport(0, 0, _sz, _sz);
-	ParGraphics::Rerender(cpos, Normalize(pos - cpos), (float)_sz, (float)_sz);
+	ParGraphics::Rerender(cpos, glm::normalize(pos - cpos), (float)_sz, (float)_sz);
 	glViewport(0, 0, Display::actualWidth, Display::actualHeight);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->d_fbo);
 }

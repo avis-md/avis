@@ -7,7 +7,7 @@
 #define STRINGMRGDO(a,b) a ## b
 #define STRINGMRG(a,b) STRINGMRGDO(a,b)
 
-#define OHNO(nm, msg) Debug::Warning(#nm, "Something unexpected happened!. Please contact the developer!\n  Tell the monkey this: " msg)
+#define OHNO(nm, msg) Debug::Error(#nm, "Something happened that should not!. Please contact the monkey!\n  Information the monkey needs: " msg)
 
 #pragma region includes
 /* OS-specific headers */
@@ -132,9 +132,6 @@ const float deg2rad = 0.0174533f;
 const char char0 = 0;
 
 const uint UI_MAX_EDIT_TEXT_FRAMES = 8;
-
-#define Normalize(a) glm::normalize(a)
-#define Distance(a, b) glm::distance(a, b)
 
 float Dw(float), Dh(float);
 Vec3 Ds(Vec3);

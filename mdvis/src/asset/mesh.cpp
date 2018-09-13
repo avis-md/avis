@@ -363,7 +363,7 @@ void Mesh::CalcTangents() {
 		tC[n2]++;
 	}
 	for (uint a = 0; a < vertexCount; a++) {
-		if (tC[a] > 0) tangents[a] = Normalize(tangents[a] / ((float)tC[a]));
+		if (tC[a] > 0) tangents[a] = glm::normalize(tangents[a] / ((float)tC[a]));
 	}
 }
 

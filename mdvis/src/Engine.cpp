@@ -499,23 +499,23 @@ void Engine::DrawLineWDotted(Vec3 v1, Vec3 v2, Vec4 col, float width, float dotS
 	Vec3 p2 = v1;
 	uint aa = 0;
 	bool ad = true;
-	while (Distance(p2, v1) < Distance(v2, v1)) {
+	while (glm::distance2(p2, v1) < glm::distance2(v2, v1)) {
 		quadPoss.push_back(p2);
-		if (Distance(p2, v2) < dotSz) {
+		if (glm::distance(p2, v2) < dotSz) {
 			quadPoss.push_back(v2);
 			ad = false;
 		}
 		else
-			quadPoss.push_back(p2 + Normalize(v2-v1)*dotSz);
+			quadPoss.push_back(p2 + glm::normalize(v2-v1)*dotSz);
 		quadIndexes.push_back(aa++);
 		quadIndexes.push_back(aa++);
-		p2 += Normalize(v2 - v1)*dotSz*2.0f;
+		p2 += glm::normalize(v2 - v1)*dotSz*2.0f;
 	}
 
 	if (quadPoss.size() == 0) return;
 	if (ad) {
 		quadPoss.push_back(v2);
-		quadPoss.push_back(v2 + Normalize(v1 - v2)*dotSz);
+		quadPoss.push_back(v2 + glm::normalize(v1 - v2)*dotSz);
 		quadIndexes.push_back(aa++);
 		quadIndexes.push_back(aa++);
 	}

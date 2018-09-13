@@ -161,8 +161,10 @@ public:
 	std::vector<emptyFunc> _inarr_pre, _outarr_post;
 	int pre, post;
 
-	int32_t** arr_shapeloc;
-	void** arr_dataloc;
+	int32_t** arr_in_shapeloc;
+	void** arr_in_dataloc;
+	int32_t** arr_out_shapeloc;
+	void** arr_out_dataloc;
 	
 	void Clear() override;
 	string Exec() override;

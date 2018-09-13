@@ -1,32 +1,47 @@
 #include "raytracer.h"
+#include "radeon_rays.h"
+#include "radeon_rays_cl.h"
 #include "hdr.h"
-#include "md/Particles.h"
-#include "md/ParMenu.h"
-#include "utils/dialog.h"
-#include "vis/pargraphics.h"
-#include "ui/ui_ext.h"
-#ifdef PLATFORM_OSX
-#include <OpenCL/cl_gl_ext.h>
-#include <OpenGL/CGLDevice.h>
-#include <OpenGL/CGLCurrent.h>
-#include <OpenCL/cl_gl.h>
-#else
-#include <CL/cl_gl.h>
-#ifdef PLATFORM_LNX
-#define Time Time_XII
-#define Font Font_XII
-#define Display Display_XII
-#include <GL/glx.h>
-#undef Time
-#undef Font
-#undef Display
-#endif
-#endif
+#include "kernel.h"
 
 GLuint RayTracer::resTex = 0;
 
+CLWContext RayTracer::context;
+CLWProgram RayTracer::program;
+
 bool RayTracer::Init() {
-	return false;
+	std::vector<CLWPlatform> platforms;
+	CLWPlatform::CreateAllPlatforms(platforms);
+
+	if (platforms.size() == 0)
+	{
+		Debug::Warning("RayTracer", "No OpenCL platforms installed.");
+		return false;
+	}
+
+	for (int i = 0; i < platforms.size(); ++i) {
+		for (int d = 0; d < (int)platforms[i].GetDeviceCount(); ++d) {
+			if (platforms[i].GetDevice(d).GetType() == CL_DEVICE_TYPE_GPU) {
+				context = CLWContext::Create(platforms[i].GetDevice(d));
+				break;
+			}
+		}
+		if (context) break;
+	}
+	if (!context) {
+		Debug::Warning("RayTracer", "Cannot find a GPU context!");
+		return false;
+	}
+	const char* kBuildopts(" -cl-mad-enable -cl-fast-relaxed-math -cl-std=CL1.2 -I.");
+
+	try {
+		program = CLWProgram::CreateFromSource(ocl::raykernel, ocl::raykernel_sz, kBuildopts, context);
+	}
+	catch (CLWException& e) {
+		OHNO("Raytracer", + string(e.what()));
+		return false;
+	}
+	return true;
 }
 
 void RayTracer::Clear() {

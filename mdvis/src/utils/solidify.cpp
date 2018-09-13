@@ -2,17 +2,17 @@
 
 void Solidify::GetTangents(Vec3* path, uint cnt, Vec3* tans) {
 	Vec3* dirs = new Vec3[cnt];
-	dirs[0] = Normalize(path[1] - path[0]);
+	dirs[0] = glm::normalize(path[1] - path[0]);
 	for (uint i = 1; i < cnt - 1; i++) {
-		dirs[i] = Normalize(path[i+1] - path[i-1]);
+		dirs[i] = glm::normalize(path[i+1] - path[i-1]);
 	}
-	dirs[cnt-1] = Normalize(path[cnt-1] - path[cnt-2]);
+	dirs[cnt-1] = glm::normalize(path[cnt-1] - path[cnt-2]);
 
 	tans[0] = glm::cross(Vec3(1, 0, 0), dirs[0]);
 	if (!glm::length(tans[0])) tans[0] = glm::cross(Vec3(0, 1, 0), dirs[0]);
-	tans[0] = Normalize(tans[0]);
+	tans[0] = glm::normalize(tans[0]);
 	for (uint i = 1; i < cnt; i++) {
-		auto tmp = Normalize(glm::cross(tans[i-1], dirs[i]));
+		auto tmp = glm::normalize(glm::cross(tans[i-1], dirs[i]));
 		tans[i] = glm::cross(dirs[i], tmp);
 	}
 	delete[](dirs);
@@ -23,20 +23,20 @@ pMesh Solidify::Do(Vec3* path, uint cnt, float rad, uint dim, Vec3* str) {
 	std::vector<int> tris((cnt-1) * dim * 2 * 3);
 
 	Vec3* dirs = new Vec3[cnt];
-	dirs[0] = Normalize(path[1] - path[0]);
+	dirs[0] = glm::normalize(path[1] - path[0]);
 	for (uint i = 1; i < cnt - 1; i++) {
-		dirs[i] = Normalize(path[i+1] - path[i-1]);
+		dirs[i] = glm::normalize(path[i+1] - path[i-1]);
 	}
-	dirs[cnt-1] = Normalize(path[cnt-1] - path[cnt-2]);
+	dirs[cnt-1] = glm::normalize(path[cnt-1] - path[cnt-2]);
 	
 	Vec3* lops = new Vec3[cnt];
 	Vec3* bilops = new Vec3[cnt];
 	lops[0] = glm::cross(Vec3(1, 0, 0), dirs[0]);
 	if (!glm::length(lops[0])) lops[0] = glm::cross(Vec3(0, 1, 0), dirs[0]);
-	lops[0] = Normalize(lops[0]);
+	lops[0] = glm::normalize(lops[0]);
 	bilops[0] = glm::cross(lops[0], dirs[0]);
 	for (uint i = 1; i < cnt; i++) {
-		bilops[i] = Normalize(glm::cross(lops[i-1], dirs[i]));
+		bilops[i] = glm::normalize(glm::cross(lops[i-1], dirs[i]));
 		lops[i] = glm::cross(dirs[i], bilops[i]);
 	}
 

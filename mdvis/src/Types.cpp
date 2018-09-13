@@ -36,7 +36,7 @@ Mat4x4 QuatFunc::ToMatrix(const Quat& q) {
 }
 
 Quat QuatFunc::FromAxisAngle(Vec3 axis, float angle) {
-	axis = Normalize(axis);
+	axis = glm::normalize(axis);
 	float a = deg2rad*angle;
 	float factor = (float)sin(a / 2.0);
 	// Calculate the x, y and z of the quaternion
@@ -46,12 +46,12 @@ Quat QuatFunc::FromAxisAngle(Vec3 axis, float angle) {
 
 	// CalcuKey_LeftAlte the w value by cos( theta / 2 )
 	float w = (float)cos(a / 2.0);
-	return Normalize(Quat(w, x, y, z));
+	return glm::normalize(Quat(w, x, y, z));
 }
 
 //https://gamedev.stackexchange.com/questions/53129/quaternion-look-at-with-up-vector
 Quat QuatFunc::LookAt(const Vec3& tarr, const Vec3& up) {
-	Vec3 tar = Normalize(tarr);
+	Vec3 tar = glm::normalize(tarr);
 	Vec3 fw = Vec3(0,0,1);
 	Vec3 axis = cross(tar, fw);
 	float angle = rad2deg*acos(Clamp(dot(tar,fw), -1.0f, 1.0f));
@@ -62,7 +62,7 @@ Quat QuatFunc::LookAt(const Vec3& tarr, const Vec3& up) {
 
 	Vec3 mup = q1*Vec3(0, 1, 0);//QuatFunc::ToMatrix(q1)*Vec4(0, 1, 0, 0);
 	Vec3 mrt = q1*Vec3(1, 0, 0);
-	Vec3 rt = Normalize(cross(up, tar));
+	Vec3 rt = glm::normalize(cross(up, tar));
 	float angle2 = rad2deg*acos(Clamp(dot(mrt, rt), -1.0f, 1.0f));
 	if (dot(mup, rt) < 0) angle2 *= -1;
 	Quat q2 = FromAxisAngle(tar, angle2);

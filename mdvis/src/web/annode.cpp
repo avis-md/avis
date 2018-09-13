@@ -718,8 +718,13 @@ void FNode::Execute() {
 				scr->Set(i, *(double*)cv.value);
 				break;
 			default:
-				Debug::Warning("CNode", "var not handled!");
-				throw("");
+				auto nd = cv.dimVals.size();
+				int32_t* dims = new int32_t[nd];
+				for (int a = 0; a < nd; a++) dims[nd-a-1] = *cv.dimVals[a];
+				*scr->arr_in_shapeloc = dims;
+				*scr->arr_in_dataloc = *(void**)cv.value;
+				scr->_inarr_pre[i]();
+				delete[](dims);
 			}
 		}
 		else {
@@ -750,13 +755,13 @@ void FNode::Execute() {
 			cv.data.dims.resize(dn);
 			int sz = 1;
 			for (size_t a = 0; a < dn; a++) {
-				cv.data.dims[a] = (*scr->arr_shapeloc)[a];
+				cv.data.dims[a] = (*scr->arr_out_shapeloc)[a];
 				cv.dimVals[a] = &cv.data.dims[a];
 				sz *= cv.data.dims[a];
 			}
 			cv.data.val.arr.data.resize(cv.stride * sz);
 			cv.data.val.arr.p = &cv.data.val.arr.data[0];
-			memcpy(cv.data.val.arr.p, *scr->arr_dataloc, cv.stride * sz);
+			memcpy(cv.data.val.arr.p, *scr->arr_out_dataloc, cv.stride * sz);
 			cv.value = &cv.data.val.arr.p;
 		}
 	}
