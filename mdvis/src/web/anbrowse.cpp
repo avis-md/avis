@@ -15,6 +15,7 @@ bool AnBrowse::mscFdExpanded[] = {};
 float AnBrowse::expandPos = 0;
 
 void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
+	fo->fullName = path;
 	auto ff = IO::GetFiles(path, ".anl");
 	fo->saves.reserve(ff.size());
 	for (auto f : ff) {
@@ -77,8 +78,11 @@ void AnBrowse::DoRefresh(Folder* fd) {
 		case AN_SCRTYPE::PYTHON:
 			PyReader::Refresh((PyScript*)s);
 			break;
+		case AN_SCRTYPE::FORTRAN:
+			FReader::Refresh((FScript*)s);
+			break;
 		default:
-
+			OHNO("AnBrowse::DoRefresh", "Invalid script type " + std::to_string((int)s->type));
 			break;
 		}
 	}
@@ -96,6 +100,11 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 	Engine::DrawQuad(2.0f + 5 * layer, off, 150.0f, 16.0f, white(1, 0.3f));
 	if (Engine::Button(2.0f + 5 * layer, off, 16.0f, 16.0f, f->expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE)
 		f->expanded = !f->expanded;
+	if (!!Engine::Button(2.0f + 5 * layer, off, 150.0f, 16.0f)) {
+		if (Engine::Button(expandPos - 18, off, 16, 16, Icons::browse) == MOUSE_RELEASE) {
+			IO::OpenFd(f->fullName);
+		}
+	}
 	UI::Label(22.0f + 5 * layer, off, 12.0f, f->name, white());
 	off += 17;
 	if (f->expanded) {

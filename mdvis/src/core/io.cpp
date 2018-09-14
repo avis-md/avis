@@ -1,6 +1,7 @@
 #include "Engine.h"
 #include <locale>
 #include <codecvt>
+#include "utils/runcmd.h"
 
 #ifdef PLATFORM_WIN
 #include <io.h>
@@ -248,6 +249,15 @@ void IO::RestoreStdio2() {
 	fclose(stdout_n);
 }
 
+void IO::OpenFd(string path) {
+#ifdef PLATFORM_WIN
+	std::replace(path.begin(), path.end(), '/', '\\');
+	RunCmd::Run("explorer \"" + path + "\"");
+#else
+#error open folder code here
+#endif
+}
+
 void IO::OpenEx(string path) {
 	//path = "\"" + path + "\"";
 #ifdef PLATFORM_WIN
@@ -287,7 +297,7 @@ string IO::InitPath() {
 	path2 = path2.substr(0, path2.find_last_of('/') + 1);
 #endif
 	path = path2;
-	//Debug::Message("IO", "Path set to " + path);
+	if (path.back() == '/') path.pop_back();
 	return path2;
 }
 

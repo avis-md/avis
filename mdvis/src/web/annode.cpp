@@ -495,8 +495,8 @@ PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 			conV[i].value = &outputVC[i].val.arr.p;
 			break;
 		default:
-			Debug::Warning("PyNode", "case not handled!");
-			break;
+			OHNO("AnVar", "Unexpected scr_vartype " + std::to_string((int)(ovi.type)));
+			throw "";
 		}
 	}
 }
@@ -514,13 +514,17 @@ void PyNode::Execute() {
 			case AN_VARTYPE::DOUBLE:
 				scr->Set(i, *((double*)cv.value));
 				break;
-			case AN_VARTYPE::LIST:
+			case AN_VARTYPE::LIST: {
 				auto sz = cv.dimVals.size();
 				std::vector<int> dims(sz);
 				for (size_t a = 0; a < sz; a++)
 					dims[a] = *cv.dimVals[a];
 				scr->Set(i, AnConv::PyArr(inputR[i].first->script->outvars[inputR[i].second].second[6], (int)sz, &dims[0], *(void**)cv.value));
-				break;
+				break; 
+			}
+			default:
+				OHNO("AnVar", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
+				throw "";
 			}
 		}
 		else {
@@ -531,10 +535,13 @@ void PyNode::Execute() {
 			case AN_VARTYPE::DOUBLE:
 				scr->Set(i, inputVDef[i].f);
 				break;
-			default:
-				Debug::Error("PyNode", "Value not handled!");
+			case AN_VARTYPE::LIST:
+				Debug::Error("PyNode", "Value not handled!\1");
 				throw "";
 				break;
+			default:
+				OHNO("AnVar", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
+				throw "";
 			}
 		}
 	}
@@ -563,7 +570,7 @@ void PyNode::Execute() {
 		}
 		default:
 			OHNO("AnVar", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
-			break;
+			throw "";
 		}
 	}
 }
@@ -639,7 +646,7 @@ void CNode::Execute() {
 				break;
 			default:
 				OHNO("CNode", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
-				break;
+				throw "";
 			}
 		}
 		else {
@@ -650,9 +657,11 @@ void CNode::Execute() {
 			case AN_VARTYPE::DOUBLE:
 				scr->Set(i, inputVDef[i].d);
 				break;
+			case AN_VARTYPE::LIST:
+				throw("Input variable not set!\1");
 			default:
-				Debug::Error("CNode", "Value not handled!");
-				break;
+				OHNO("CNode", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
+				throw "";
 			}
 		}
 	}
@@ -717,14 +726,19 @@ void FNode::Execute() {
 			case AN_VARTYPE::DOUBLE:
 				scr->Set(i, *(double*)cv.value);
 				break;
-			default:
+			case AN_VARTYPE::LIST:
+			{
 				auto nd = cv.dimVals.size();
 				int32_t* dims = new int32_t[nd];
-				for (int a = 0; a < nd; a++) dims[nd-a-1] = *cv.dimVals[a];
+				for (int a = 0; a < nd; a++) dims[nd - a - 1] = *cv.dimVals[a];
 				*scr->arr_in_shapeloc = dims;
 				*scr->arr_in_dataloc = *(void**)cv.value;
 				scr->_inarr_pre[i]();
 				delete[](dims);
+			}
+			default:
+				OHNO("CNode", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
+				throw "";
 			}
 		}
 		else {
@@ -735,9 +749,11 @@ void FNode::Execute() {
 			case AN_VARTYPE::DOUBLE:
 				scr->Set(i, inputVDef[i].d);
 				break;
+			case AN_VARTYPE::LIST:
+				throw("Input variable not set!\1");
 			default:
-				Debug::Error("CNode", "Value not handled!");
-				throw("");
+				OHNO("CNode", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
+				throw "";
 			}
 		}
 	}
@@ -769,11 +785,15 @@ void FNode::Execute() {
 }
 
 void FNode::CatchExp(char* c) {
+	string s = c;
+	if (s.back() == -1) {
+		AnNode::CatchExp(c);
+		return;
+	}
 	ErrorView::Message msg{};
 	msg.name = script->name;
 	msg.path = script->path;
 	msg.severe = true;
-	string s = c;
 	if (string_find(s, "At line ") == 0) {
 		if ((msg.linenum = atoi(c + 8)) > 0) {
 			auto lc = strchr(c, '\n');

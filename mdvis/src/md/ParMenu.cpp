@@ -308,7 +308,7 @@ void ParMenu::DrawSplash() {
 	UI::Texture(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, ParGraphics::splash);
 	UI::font->Align(ALIGN_TOPRIGHT);
 	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 120, 12, __APPVERSION__, white());
-	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 104, 12, "Build: " __DATE__ "  " __TIME__, white());
+	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 104, 12, "Build hash: " + VisSystem::version_hash, white());
 	UI::font->Align(ALIGN_TOPLEFT);
 
 	string sub = "";

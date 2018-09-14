@@ -10,6 +10,8 @@ enum class VIS_MOUSE_MODE : byte {
 
 class VisSystem {
 public:
+	static string version_hash;
+
 	static Vec4 accentColor;
 	static float glass;
 	static uint renderMs, uiMs;

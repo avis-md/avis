@@ -45,9 +45,10 @@ bool RayTracer::Init() {
 
 	auto id = context.GetDevice(0).GetID();
 	queue = context.GetCommandQueue(0);
-
+	
+	return false;
 	try {
-		api = RR::CreateFromOpenClContext(context, id, queue, IO::path);
+		//api = RR::CreateFromOpenClContext(context, id, queue, IO::path);
 	}
 	catch (std::runtime_error& err) {
 		std::cout << err.what() << std::endl;

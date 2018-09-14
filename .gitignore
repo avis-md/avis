@@ -7,6 +7,7 @@ build/
 #additional
 *.o
 .DS_Store
+githash.h
 
 # User-specific files
 *.suo

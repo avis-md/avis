@@ -38,6 +38,7 @@ int ErrorView::Parse_GCC(const string& path, const string& sig, const string& na
         if (str[0] == '/') {
 #endif
 			if (str.substr(0, sz) == sig) {
+				if (string_find(str, " initialized and declared 'extern'") > -1) continue;
 				msgs.push_back(Message());
 				msg = &msgs.back();
 				msg->name = nm; msg->path = sig;

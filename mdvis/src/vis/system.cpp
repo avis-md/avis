@@ -11,6 +11,10 @@
 #include "live/livesyncer.h"
 #include "utils/dialog.h"
 
+string VisSystem::version_hash =
+#include "../../githash.h"
+;
+
 Vec4 VisSystem::accentColor = Vec4(1, 0.75f, 0, 1);
 float VisSystem::glass = 0.9f;
 uint VisSystem::renderMs, VisSystem::uiMs;

@@ -26,6 +26,7 @@ public:
 	static void RedirectStdio2(string path);
 	static void RestoreStdio2();
 
+	static void OpenFd(string path);
 	static void OpenEx(string path);
 
 	static string path;
