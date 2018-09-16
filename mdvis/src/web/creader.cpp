@@ -45,30 +45,29 @@ void CReader::Init() {
 #endif
 	useOMP = (VisSystem::prefs["ANL_USE_OPENMP"] == "true");
 
-	if (AnWeb::hasC && !useMsvc && !IO::HasFile(IO::path + "/res/noterminate.o")) {
+	if (AnWeb::hasC && !useMsvc && !IO::HasFile(IO::path + "res/noterminate.o")) {
 		string cmd = gpp + " -std=c++11 -c -o \""
-			+ IO::path + "/res/noterminate.o\" \""
-			+ IO::path + "/res/noterminate.cpp\"";
+			+ IO::path + "res/noterminate.o\" \""
+			+ IO::path + "res/noterminate.cpp\"";
 		std::cout << cmd << std::endl;
 		RunCmd::Run(SETPATH cmd);
 	}
 }
 
-bool CReader::Read(string path, CScript* scr) {
-	scr->name = path;
-	string fp = IO::path + "/nodes/" + path;
-	std::replace(fp.begin(), fp.end(), '\\', '/');
+bool CReader::Read(CScript* scr) {
+	string& path = scr->path;
+	string fp = IO::path + "nodes/" + path;
 	auto ls = fp.find_last_of('/');
 	string nm = fp.substr(ls + 1);
 	string fp2 = fp.substr(0, ls + 1) + "__ccache__/";
     
-	auto s = IO::GetText(fp + ".cpp");
+	auto s = IO::GetText(fp + EXT_CS);
 
 #ifndef IS_ANSERVER
 	if (!IO::HasDirectory(fp2)) IO::MakeDirectory(fp2);
 
 	if (AnWeb::hasC) {
-		auto mt = scr->chgtime = IO::ModTime(fp + ".cpp");
+		auto mt = scr->chgtime = IO::ModTime(fp + EXT_CS);
 		if (mt < 0) return false;
 		auto ot = IO::ModTime(fp2 + nm + ".so");
 
@@ -79,7 +78,7 @@ bool CReader::Read(string path, CScript* scr) {
 			scr->compileLog.push_back(ErrorView::Message());\
 			auto& msgg = scr->compileLog.back();\
 			msgg.name = path;\
-			msgg.path = fp + ".cpp";\
+			msgg.path = fp + EXT_CS;\
 			msgg.msg.resize(1, "(System) " b);\
 			msgg.severe = true;\
 			scr->errorCount = 1;\
@@ -95,7 +94,7 @@ bool CReader::Read(string path, CScript* scr) {
 			const string dlx = "";
 #endif
 			{
-				std::ifstream strm(fp + ".cpp");
+				std::ifstream strm(fp + EXT_CS);
 				std::ofstream ostrm(fp + "_temp__.cpp");
 				string s;
 				int tp = 0;
@@ -158,7 +157,7 @@ bool CReader::Read(string path, CScript* scr) {
 				if (useOMP) {
 					cmd += " -fopenmp";
 				}
-				cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + IO::path + "/res/noterminate.o\" \"" + fp + "_temp__.cpp\" -Wl,--export-all-symbols 2> \"" + fp2 + nm + "_log.txt\"";
+				cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + IO::path + "res/noterminate.o\" \"" + fp + "_temp__.cpp\" -Wl,--export-all-symbols 2> \"" + fp2 + nm + "_log.txt\"";
 				std::cout << cmd << std::endl;
 				RunCmd::Run("path=%path%;" + mingwPath + " && " + cmd);
 				scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
@@ -182,7 +181,7 @@ bool CReader::Read(string path, CScript* scr) {
 			scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 #endif
 			for (auto& m : scr->compileLog) {
-				m.path = fp + ".cpp";
+				m.path = fp + EXT_CS;
 			}
 			ErrorView::compileMsgs.insert(ErrorView::compileMsgs.end(), scr->compileLog.begin(), scr->compileLog.end());
 			remove((fp + "_temp__.cpp").c_str());
@@ -237,7 +236,7 @@ bool CReader::Read(string path, CScript* scr) {
 #endif
 	}
 
-	std::ifstream strm(fp + ".cpp");
+	std::ifstream strm(fp + EXT_CS);
 	string ln;
 	bool fst = true;
 	while (!strm.eof()) {
@@ -338,11 +337,11 @@ bool CReader::Read(string path, CScript* scr) {
 }
 
 void CReader::Refresh(CScript* scr) {
-	auto mt = IO::ModTime(IO::path + "/nodes/" + scr->path + ".cpp");
+	auto mt = IO::ModTime(IO::path + "nodes/" + scr->path + EXT_CS);
 	if (mt > scr->chgtime) {
-		Debug::Message("CReader", "Reloading " + scr->path + ".cpp");
+		Debug::Message("CReader", "Reloading " + scr->path + EXT_CS);
 		scr->Clear();
-		scr->ok = Read(scr->path, scr);
+		scr->ok = Read(scr);
 	}
 }
 

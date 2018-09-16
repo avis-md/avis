@@ -1,21 +1,27 @@
 #include "Engine.h"
 
+#define DBG_TIMESTAMP " " + std::to_string(milliseconds() - Time::startMillis) + "]"
+
+#ifndef DBG_TIMESTAMP
+#define DBG_TIMESTAMP "]"
+#endif
+
 byte Debug::suppress = 0;
 
 void Debug::Message(string c, string s) {
-	if (stream) *stream << "[i]" << c << ": " << s << std::endl;
+	if (stream) *stream << "[i" DBG_TIMESTAMP << c << ": " << s << std::endl;
 	if (suppress == 0)
-		std::cout << "[i]" << c << ": " << s << std::endl;
+		std::cout << "[i" DBG_TIMESTAMP << c << ": " << s << std::endl;
 }
 void Debug::Warning(string c, string s) {
-	if (stream) *stream << "[w]" << c << ": " << s << std::endl;
+	if (stream) *stream << "[w" DBG_TIMESTAMP << c << ": " << s << std::endl;
 	if (suppress <= 1) {
 #ifdef PLATFORM_WIN
 		SetConsoleTextAttribute(winHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 #else
 		std::cout << "\033[33m";
 #endif
-		std::cout << "[w]" << c << ": " << s << std::endl;
+		std::cout << "[w" DBG_TIMESTAMP << c << ": " << s << std::endl;
 #ifdef PLATFORM_WIN
 		SetConsoleTextAttribute(winHandle, winTextAttr);
 #else
@@ -24,13 +30,13 @@ void Debug::Warning(string c, string s) {
 	}
 }
 void Debug::Error(string c, string s) {
-	if (stream) *stream << "[e]" << c << ": " << s << std::endl;
+	if (stream) *stream << "[e" DBG_TIMESTAMP << c << ": " << s << std::endl;
 #ifdef PLATFORM_WIN
 	SetConsoleTextAttribute(winHandle, FOREGROUND_RED | FOREGROUND_INTENSITY);
 #else
 	std::cout << "\033[31m";
 #endif
-	std::cout << "[e]" << c << ": " << s << std::endl;
+	std::cout << "[e" DBG_TIMESTAMP << c << ": " << s << std::endl;
 #ifdef PLATFORM_WIN
 	SetConsoleTextAttribute(winHandle, winTextAttr);
 #else
@@ -55,10 +61,9 @@ std::ofstream* Debug::stream = nullptr;
 	HANDLE Debug::winHandle = 0;
 	WORD Debug::winTextAttr = 0;
 #endif
-void Debug::Init(string s) {
-	string ss = s + "/Log.txt";
+void Debug::Init() {
+	string ss = IO::path +"/Log.txt";
 	stream = new std::ofstream(ss.c_str());
-	Message("Debug", "Log Initialized");
 
 #ifdef PLATFORM_WIN
 	winHandle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -66,4 +71,6 @@ void Debug::Init(string s) {
 	GetConsoleScreenBufferInfo(winHandle, &info);
 	winTextAttr = info.wAttributes;
 #endif
+
+	Message("Debug", "Log Initialized");
 }

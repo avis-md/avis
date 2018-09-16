@@ -71,13 +71,13 @@ void CubeMarcher::Init() {
 	GLuint geometry_shader, vertex_shader, fragment_shader;
 	string err;
 
-	if (!Shader::LoadShader(GL_VERTEX_SHADER, IO::GetText(IO::path + "/mcVert.txt"), vertex_shader, &err)) {
+	if (!Shader::LoadShader(GL_VERTEX_SHADER, IO::GetText(IO::path + "mcVert.txt"), vertex_shader, &err)) {
 		Debug::Error("Shader Compiler", "Vert error: " + err);
 	}
-	if (!Shader::LoadShader(GL_GEOMETRY_SHADER, IO::GetText(IO::path + "/mcGeom.txt"), geometry_shader, &err)) {
+	if (!Shader::LoadShader(GL_GEOMETRY_SHADER, IO::GetText(IO::path + "mcGeom.txt"), geometry_shader, &err)) {
 		Debug::Error("Shader Compiler", "Geom error: " + err);
 	}
-	if (!Shader::LoadShader(GL_FRAGMENT_SHADER, IO::GetText(IO::path + "/mcFrag.txt"), fragment_shader, &err)) {
+	if (!Shader::LoadShader(GL_FRAGMENT_SHADER, IO::GetText(IO::path + "mcFrag.txt"), fragment_shader, &err)) {
 		Debug::Error("Shader Compiler", "Frag error: " + err);
 	}
 

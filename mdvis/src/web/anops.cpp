@@ -116,7 +116,7 @@ void AnOps::Connect() {
 	message = "initializing files";
 	if (!ssh.HasFile(path + "/mdvis_ansrv")) {
 		ssh.MkDir(path);
-		ssh.SendFile(IO::path + "/bin/mdvis_ansrv", path + "/mdvis_ansrv");
+		ssh.SendFile(IO::path + "bin/mdvis_ansrv", path + "/mdvis_ansrv");
 		ssh.Write("chmod +rx " + path + "/mdvis_ansrv");
 	}
 	ssh.Write("cd " + path);
@@ -152,7 +152,7 @@ void AnOps::Disconnect() {
 
 void AnOps::SendNodes(bool cp) {
 	message = "syncing nodes";
-	DoSendNodes(IO::path + "/nodes/", "nodes/");
+	DoSendNodes(IO::path + "nodes/", "nodes/");
 	message = "compiling";
 	ssh.Write("./mdvis_ansrv -p -c 1; echo '<''>'");
 	ssh.WaitFor("<>", 500);
@@ -177,9 +177,9 @@ void AnOps::DoSendNodes(string p, string rp) {
 
 void AnOps::SendIn() {
 	message = "syncing input";
-	auto ins = IO::GetFiles(IO::path + "/nodes/__tmp__/in/");
+	auto ins = IO::GetFiles(IO::path + "nodes/__tmp__/in/");
 	for (auto& i : ins) {
-		ssh.SendFile(IO::path + "/nodes/__tmp__/in/" + i, path + "/ser/in/" + i);
+		ssh.SendFile(IO::path + "nodes/__tmp__/in/" + i, path + "/ser/in/" + i);
 	}
 	ssh.Flush();
 	for (auto& i : ins) {
@@ -189,10 +189,10 @@ void AnOps::SendIn() {
 
 void AnOps::RecvOut() {
 	message = "syncing output";
-	if (!IO::HasDirectory(IO::path + "/nodes/__tmp__/out/")) IO::MakeDirectory(IO::path + "/nodes/__tmp__/out/");
+	if (!IO::HasDirectory(IO::path + "nodes/__tmp__/out/")) IO::MakeDirectory(IO::path + "nodes/__tmp__/out/");
 	auto fls = ssh.ListFiles(path + "/ser/out/");
 	for (auto& f : fls) {
 		if (f[0] != '.')
-			ssh.GetFile(path + "/ser/out/" + f, IO::path + "/nodes/__tmp__/out/" + f);
+			ssh.GetFile(path + "/ser/out/" + f, IO::path + "nodes/__tmp__/out/" + f);
 	}
 }

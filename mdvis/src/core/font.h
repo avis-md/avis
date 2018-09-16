@@ -18,11 +18,12 @@ public:
 
 	static uint utf2unc(char*& c);
 
-	friend class Engine;
+	static void Init();
+
 	friend class UI;
 protected:
 	static FT_Library _ftlib;
-	static void Init(), InitVao(uint sz);
+	static void InitVao(uint sz);
 	FT_Face _face;
 	static GLuint fontProgram;
 	static GLint fontProgLocs[5];

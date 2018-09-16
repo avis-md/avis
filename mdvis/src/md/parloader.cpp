@@ -55,7 +55,7 @@ string _RMSP(string s) {
 }
 
 void ParLoader::Scan() {
-	string fd = IO::path + "/bin/importers/";
+	string fd = IO::path + "bin/importers/";
 	std::vector<string> fds;
 	IO::GetFolders(fd, &fds);
 	exts.clear();

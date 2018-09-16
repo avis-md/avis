@@ -48,7 +48,7 @@ std::unordered_map<string, string> VisSystem::envs, VisSystem::prefs;
 
 void VisSystem::Init() {
 	radii.clear();
-	std::ifstream strm(IO::path + "/radii.txt");
+	std::ifstream strm(IO::path + "radii.txt");
 	if (strm.is_open()) {
 		string s;
 		while (!strm.eof()) {
@@ -62,7 +62,7 @@ void VisSystem::Init() {
 		}
 		strm.close();
 	}
-	strm.open(IO::path + "/bondlengths.txt");
+	strm.open(IO::path + "bondlengths.txt");
 	_bondLengths.clear();
 	if (strm.is_open()) {
 		string s;
@@ -80,7 +80,7 @@ void VisSystem::Init() {
 		}
 		strm.close();
 	}
-	strm.open(IO::path + "/colors.txt");
+	strm.open(IO::path + "colors.txt");
 	_type2Col.clear();
 	if (strm.is_open()) {
 		string s;
@@ -139,13 +139,13 @@ void VisSystem::Init() {
 	mi3.resize(1);
 	mi3[0].Set(0, "User Manual", []() {
 		//HelpMenu::show = true;
-		IO::OpenEx(IO::path + "/docs/index.html");
+		IO::OpenEx(IO::path + "docs/index.html");
 	});
 }
 
 void VisSystem::InitEnv() {
 	envs.clear();
-	std::ifstream strm(IO::path + "/env.txt");
+	std::ifstream strm(IO::path + "env.txt");
 	if (strm.is_open()) {
 		string s;
 		while (std::getline(strm, s)) {
@@ -158,7 +158,7 @@ void VisSystem::InitEnv() {
 	}
 	strm.close();
 	prefs.clear();
-	strm.open(IO::path + "/preferences.txt");
+	strm.open(IO::path + "preferences.txt");
 	if (strm.is_open()) {
 		string s;
 		while (std::getline(strm, s)) {

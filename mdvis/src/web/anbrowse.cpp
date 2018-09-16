@@ -16,39 +16,26 @@ float AnBrowse::expandPos = 0;
 
 void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 	fo->fullName = path;
-	auto ff = IO::GetFiles(path, ".anl");
-	fo->saves.reserve(ff.size());
-	for (auto f : ff) {
-		string nm = f.substr(f.find_last_of('/') + 1);
-		fo->saves.push_back(incPath + nm.substr(0, nm.size() - 4));
-	}
-	ff = IO::GetFiles(path, ".py");
+	auto ff = IO::GetFiles(path, EXT_ANSV);
 	for (auto f : ff) {
 		auto nm = f.substr(f.find_last_of('/') + 1);
-		if (nm.substr(0, 2) == "__") continue;
-		auto scr = new PyScript();
-		fo->scripts.push_back(scr);
-		scr->path = incPath + nm.substr(0, nm.size() - 3);
-		scr->ok = PyReader::Read(scr->path, scr);
+		fo->saves.push_back(nm.substr(0, nm.size() - EXT_ANSV_SZ));
+	}
+#define READ(ext, sz, cond, hd)\
+	ff = IO::GetFiles(path, ext);\
+	for (auto f : ff) { \
+		auto nm = f.substr(f.find_last_of('/') + 1);\
+		if (cond) {\
+			auto scr = new hd##Script();\
+			fo->scripts.push_back(scr);\
+			scr->path = incPath + nm.substr(0, nm.size() - sz);\
+			scr->ok = hd##Reader::Read(scr);\
+		}\
 	}
 
-	ff = IO::GetFiles(path, ".cpp");
-	for (auto f : ff) {
-		auto nm = f.substr(f.find_last_of('/') + 1);
-		auto scr = new CScript();
-		fo->scripts.push_back(scr);
-		scr->path = incPath + nm.substr(0, nm.size() - 4);
-		scr->ok = CReader::Read(scr->path, scr);
-	}
-
-	ff = IO::GetFiles(path, ".f90");
-	for (auto f : ff) {
-		auto nm = f.substr(f.find_last_of('/') + 1);
-		auto scr = new FScript();
-		fo->scripts.push_back(scr);
-		scr->path = incPath + nm;
-		scr->ok = FReader::Read(scr);
-	}
+	READ(EXT_PS, EXT_PS_SZ, nm.substr(0, 2) == "__", Py);
+	READ(EXT_CS, EXT_CS_SZ, 1, C);
+	READ(EXT_FS, EXT_FS_SZ, 1, F);
 
 	std::vector<string> fd;
 	IO::GetFolders(path, &fd);
@@ -56,16 +43,15 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 	for (auto f : fd) {
 		fo->subfolders.push_back(Folder(f));
 		auto& bk = fo->subfolders.back();
-		DoScan(&bk, path + "/" + f, incPath + f + "/");
+		DoScan(&bk, path + f + "/", incPath + f + "/");
 		if (!bk.scripts.size() && !bk.subfolders.size())
 			fo->subfolders.pop_back();
-		bk.fullName = incPath + f;
 	}
 }
 
 void AnBrowse::Scan() {
 	folder = Folder(_("Custom"));
-	DoScan(&folder, IO::path + "/nodes", "");
+	DoScan(&folder, IO::path + "nodes", "");
 	ErrorView::Refresh();
 }
 
@@ -113,7 +99,7 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 			DoDraw(&fd, off, layer);
 		for (auto& fs : f->saves) {
 			if (Engine::Button(2.0f + 5 * layer, off, 150.0f, 16.0f, white(1, 0.35f)) == MOUSE_RELEASE) {
-				
+				AnWeb::Load(f->fullName + fs + EXT_ANSV);
 			}
 			UI::Texture(2.0f + 5 * layer, off, 16.0f, 16.0f, Icons::icon_anl);
 			UI::Label(22.0f + 5 * layer, off, 12.0f, fs, white());

@@ -34,7 +34,7 @@ void Node_Volume::Init() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 #define LC(i, nm) shadLocs[i] = glGetUniformLocation(shad, #nm)
-	shad = Shader::FromVF(IO::GetText(IO::path + "/voxelVert.txt"), IO::GetText(IO::path + "/voxelFrag.txt"));
+	shad = Shader::FromVF(IO::GetText(IO::path + "voxelVert.txt"), IO::GetText(IO::path + "voxelFrag.txt"));
 	LC(0, _MV);
 	LC(1, _P);
 	LC(2, size);

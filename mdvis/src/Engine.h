@@ -484,7 +484,7 @@ public:
 
 	static std::thread::id _mainThreadId;
 
-	static void Init(string path = "");
+	static void Init();
 
 	static std::vector<Rect> stencilRects;
 	static Rect* stencilRect;

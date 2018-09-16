@@ -6,7 +6,7 @@ class PyReader {
 public:
 	static void Init();
 	
-	static bool Read(string path, PyScript* scr);
+	static bool Read(PyScript* scr);
 
 	static void Refresh(PyScript* scr);
 

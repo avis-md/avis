@@ -35,8 +35,8 @@ void UI::Init() {
 
 	InitVao();
 
-	font = new Font(IO::path + "/res/font.ttf");
-	font2 = new Font(IO::path + "/res/font2.ttf");
+	font = new Font(IO::path + "res/font.ttf");
+	font2 = new Font(IO::path + "res/font2.ttf");
 	if (!font) {
 		Debug::Warning("UI", "failed to open default font (/res/font.ttf)!");
 		if (font2) font = font2;

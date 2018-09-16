@@ -24,7 +24,7 @@ GLint Shadows::_progLocs[] = {};
 void Shadows::Init() {
 	cam = ChokoLait::mainCamera().get();
 
-	_prog = Shader::FromVF(glsl::minVert, IO::GetText(IO::path + "/shadows.txt"));
+	_prog = Shader::FromVF(glsl::minVert, IO::GetText(IO::path + "shadows.txt"));
 
 #define LOC(nm) _progLocs[i++] = glGetUniformLocation(_prog, #nm)
 	uint i = 0;
@@ -56,11 +56,8 @@ void Shadows::Init() {
 	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
 	if (Status != GL_FRAMEBUFFER_COMPLETE) {
-		Debug::Error("ShadowMap", "FB error:" + std::to_string(Status));
+		Debug::Error("ShadowMap", "FB error " + std::to_string(Status));
 		abort();
-	}
-	else {
-		Debug::Message("ShadowMap", "FB ok");
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);

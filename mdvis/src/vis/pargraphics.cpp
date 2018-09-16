@@ -126,21 +126,21 @@ void ParGraphics::Init() {
 
 	_usePBRNms[0] = _("Classic");
 	_usePBRNms[1] = _("PBR");
-	std::ifstream strm(IO::path + "/backgrounds/default");
+	std::ifstream strm(IO::path + "backgrounds/default");
 	strm >> reflId;
 	strm.close();
 	std::vector<string> fds;
-	IO::GetFolders(IO::path + "/backgrounds/", &fds);
+	IO::GetFolders(IO::path + "backgrounds/", &fds);
 	for (auto& fd : fds) {
-		if (IO::HasFile(IO::path + "/backgrounds/" + fd + "/diffuse.hdr") &&
-			IO::HasFile(IO::path + "/backgrounds/" + fd + "/specular.hdr")) {
+		if (IO::HasFile(IO::path + "backgrounds/" + fd + "/diffuse.hdr") &&
+			IO::HasFile(IO::path + "backgrounds/" + fd + "/specular.hdr")) {
 			reflNms.push_back(fd);
 		}
 	}
 	reflNms.push_back("\0");
 	reflItms.list = &reflNms[0];
 
-	bg = new Texture(IO::path + "/res/bg.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
+	bg = new Texture(IO::path + "res/bg.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	splash = new Texture(res::bg_splash_png, res::bg_splash_png_sz);
 	GLuint mv;
 	Shader::LoadShader(GL_VERTEX_SHADER, glsl::minVert, mv);
@@ -160,7 +160,7 @@ void ParGraphics::Init() {
 	LC(skyStrDecay); LC(specStr); LC(bgCol);
 #undef LC
 	
-	parProg = Shader::FromVF(IO::GetText(IO::path + "/parV.txt"), IO::GetText(IO::path + "/parF.txt"));
+	parProg = Shader::FromVF(IO::GetText(IO::path + "parV.txt"), IO::GetText(IO::path + "parF.txt"));
 #define LC(nm) parProgLocs[i++] = glGetUniformLocation(parProg, #nm)
 	i = 0;
 	LC(_MV); LC(_P); LC(camPos);
@@ -170,7 +170,7 @@ void ParGraphics::Init() {
 	glUniformBlockBinding(parProg, bid, _clipBindId);
 #undef LC
 
-	parConProg = Shader::FromVF(IO::GetText(IO::path + "/parConV.txt"), IO::GetText(IO::path + "/parConF.txt"));
+	parConProg = Shader::FromVF(IO::GetText(IO::path + "parConV.txt"), IO::GetText(IO::path + "parConF.txt"));
 #define LC(nm) parConProgLocs[i++] = glGetUniformLocation(parConProg, #nm)
 	i = 0;
 	LC(_MV); LC(_P); LC(camPos); LC(camFwd);
@@ -178,14 +178,14 @@ void ParGraphics::Init() {
 	LC(id2); LC(radScl), LC(orthoSz);
 #undef LC
 
-	parConLineProg = Shader::FromVF(IO::GetText(IO::path + "/parConV_line.txt"), IO::GetText(IO::path + "/parConF_line.txt"));
+	parConLineProg = Shader::FromVF(IO::GetText(IO::path + "parConV_line.txt"), IO::GetText(IO::path + "parConF_line.txt"));
 #define LC(nm) parConLineProgLocs[i++] = glGetUniformLocation(parConLineProg, #nm)
 	i = 0;
 	LC(_MV); LC(_P); LC(posTex);
 	LC(connTex), LC(rad); LC(id2);
 #undef LC
 
-	selHlProg = Shader::FromF(mv, IO::GetText(IO::path + "/selectorFrag.txt"));
+	selHlProg = Shader::FromF(mv, IO::GetText(IO::path + "selectorFrag.txt"));
 #define LC(nm) selHlProgLocs[i++] = glGetUniformLocation(selHlProg, #nm)
 	i = 0;
 	LC(screenSize); LC(myId); LC(idTex); LC(hlCol);
@@ -389,7 +389,7 @@ void ParGraphics::Update() {
 
 		if (reflId != _reflId) {
 			_reflId = reflId;
-			auto pth = IO::path + "/backgrounds/" + reflNms[reflId] + "/";
+			auto pth = IO::path + "backgrounds/" + reflNms[reflId] + "/";
 			if (!!refl) {
 				glDeleteTextures(1, &refl);
 				glDeleteTextures(1, &reflE);
@@ -399,7 +399,7 @@ void ParGraphics::Update() {
 			float* dv = new float[_w*_h * 3];
 			if (d) {
 				hdr::to_float(d, _w, _h, dv);
-				//byte* d = Texture::LoadPixels(IO::path + "/res/?.png", chn, _w, _h);
+				//byte* d = Texture::LoadPixels(IO::path + "res/?.png", chn, _w, _h);
 				glGenTextures(1, &refl);
 				glBindTexture(GL_TEXTURE_2D, refl);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv);

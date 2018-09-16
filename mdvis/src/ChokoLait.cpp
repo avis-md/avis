@@ -88,10 +88,10 @@ void ChokoLait::_InitVars() {
 	signal(SIGSEGV, &_sigseg);
 	signal(SIGTERM, &_sigtrm);
 
-	const string& path = IO::InitPath();
+	IO::InitPath();
+	Debug::Init();
 
-	Debug::Init(path);
-
+	Debug::Message("System", "Opening GL context");
 	if (!glfwInit()) {
 		Debug::Error("System", "Fatal: Cannot init glfw!");
 		abort();
@@ -138,7 +138,7 @@ void ChokoLait::_InitVars() {
 	}
 #endif
 	
-	Engine::Init(path);
+	Engine::Init();
 }
 
 void ChokoLait::Init(int scrW, int scrH) {
@@ -153,10 +153,10 @@ void ChokoLait::Init(int scrW, int scrH) {
 		Scene::AddObject(cam);
 		mainCamera(cam->AddComponent<Camera>());
 
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glFrontFace(GL_CW);
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		Time::startMillis = milliseconds();
+		glEnable(GL_PROGRAM_POINT_SIZE);
+		glClearColor(0, 0, 0, 1.0f);
 
 		glfwSetWindowSize(window, scrW, scrH);
 		ReshapeGL(window, scrW, scrH);
@@ -169,11 +169,8 @@ void ChokoLait::Init(int scrW, int scrH) {
 		glfwSetDropCallback(window, DropGL);
 		glfwSetWindowFocusCallback(window, FocusGL);
 
-		glClearColor(0, 0, 0, 1.0f);
-		glEnable(GL_PROGRAM_POINT_SIZE);
 
 		initd = 2;
-		Debug::Message("ChokoLait", "Init finished.");
 		Time::millis = milliseconds();
 	}
 }
@@ -239,12 +236,10 @@ void ChokoLait::MotionGL(GLFWwindow* window, double x, double y) {
 void ChokoLait::ReshapeGL(GLFWwindow* window, int w, int h) {
 	Display::width = (int)(w * Display::dpiScl);
 	Display::height = (int)(h * Display::dpiScl);
-	glfwGetFramebufferSize(window, &w, &h);
-	glViewport(0, 0, w, h);
 	Display::actualWidth = w;
 	Display::actualHeight = h;
-
-	//Debug::Message("CL", std::to_string(Display::width) + " " + std::to_string(Display::height) + " : " + std::to_string(w) + " " + std::to_string(h));
+	glfwGetFramebufferSize(window, &w, &h);
+	glViewport(0, 0, w, h);
 }
 
 void ChokoLait::DropGL(GLFWwindow* window, int w, const char** c) {

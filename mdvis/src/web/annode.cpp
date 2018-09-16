@@ -735,6 +735,7 @@ void FNode::Execute() {
 				*scr->arr_in_dataloc = *(void**)cv.value;
 				scr->_inarr_pre[i]();
 				delete[](dims);
+				break;
 			}
 			default:
 				OHNO("CNode", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));

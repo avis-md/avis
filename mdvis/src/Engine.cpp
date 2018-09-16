@@ -69,25 +69,20 @@ Rect* Engine::stencilRect = nullptr;
 
 GLuint Engine::quadBuffer;
 
-void Engine::Init(string path) {
-	if (path != "") {
-		fallbackTex = new Texture(IO::path + "/fallback.bmp");
-		if (!fallbackTex->loaded)
-			std::cout << "cannot load fallback texture!" << std::endl;
-	}
+void Engine::Init() {
+	fallbackTex = new Texture(IO::path + "fallback.bmp");
+	if (!fallbackTex->loaded)
+		std::cout << "cannot load fallback texture!" << std::endl;
 	Engine::_mainThreadId = std::this_thread::get_id();
 	
 
 	InitShaders();
 
 	Input::RegisterCallbacks();
-	Font::Init();
-	UI::Init();
 	MVP::Reset();
-	Light::InitShadow();
 	Camera::InitShaders();
 
-	uint d[6] = {0, 2, 1, 2, 3, 1};
+	uint d[] = {0, 2, 1, 2, 3, 1};
 
 	glGenBuffers(1, &quadBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadBuffer);
@@ -633,7 +628,7 @@ ulong Engine::idCounter = 0;
 ulong Engine::GetNewId() {
 	if (++idCounter >= ULONG_MAX) {
 		idCounter = 0;
-		Debug::Warning("Engine", "max id count reached! (" + std::to_string(idCounter) + ")");
+		Debug::Warning("Engine", "max id count reached!");
 	}
 	return idCounter;
 }

@@ -105,7 +105,7 @@ int ErrorView::Parse_MSVC(const string& path, const string& sig, const string& n
 }
 
 void ErrorView::Draw() {
-	if (Engine::Button(3, Display::height - 17, 35, 16, white(0), white(0.2f), black(0.2f)) == MOUSE_RELEASE) {
+	if (Engine::Button(3, Display::height - 17.0f, 35, 16, white(0), white(0.2f), black(0.2f)) == MOUSE_RELEASE) {
 		if (show && !showExec) show = false;
 		else {
 			show = true;
@@ -150,9 +150,9 @@ void ErrorView::Draw() {
 			if (Engine::Button(0, y + a * 17, (float)Display::width, 17, white((a == descId) ? 0.1f : 0), white(0.2f), black(0.1f)) == MOUSE_RELEASE) {
 				if (Input::dbclick) {
 #ifdef PLATFORM_WIN
-					RunCmd::Run("\"" + IO::path + "/nodes/" + err.path + "\"");
+					RunCmd::Run("\"" + IO::path + "nodes/" + err.path + "\"");
 #else
-					RunCmd::Run("open " + IO::path + "/nodes/" + err.path);
+					RunCmd::Run("open " + IO::path + "nodes/" + err.path);
 #endif
 				}
 				else if (descId == a) descId = -1;

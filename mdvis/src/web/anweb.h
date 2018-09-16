@@ -7,6 +7,16 @@
 #include "pyreader.h"
 #include "freader.h"
 
+
+#define EXT_PS ".py"
+const int EXT_PS_SZ = strlen(EXT_PS) - 1;
+#define EXT_CS ".cpp"
+const int EXT_CS_SZ = strlen(EXT_CS) - 1;
+#define EXT_FS ".f90"
+const int EXT_FS_SZ = strlen(EXT_FS) - 1;
+#define EXT_ANSV ".anl"
+const int EXT_ANSV_SZ = strlen(EXT_ANSV) - 1;
+
 enum class AN_NODE_SCN : byte {
 	NUM0 = 0x80,
 	OCAM,

@@ -4,7 +4,7 @@ bool Localizer::useDict = false;
 
 void Localizer::Init(const string& nm) {
 	if (nm == "EN") return;
-    auto path = IO::path + "/locale/" + nm + "/locale.txt";
+    auto path = IO::path + "locale/" + nm + "/locale.txt";
     std::ifstream strm(path);
     if (!strm.is_open()) {
         Debug::Warning("System", "locale not found! defaulting to english...");
@@ -43,18 +43,18 @@ void Localizer::Init(const string& nm) {
 
 void Localizer::MakeMap(string path) {
 	std::cout << "Scanning keywords..." << std::endl;
-    path = IO::path + "/" + path;
+    path = IO::path + "" + path;
     std::map<uint32_t, string> strs;
     _MakeMap(path, strs);
 	std::cout << "Writing " << strs.size() << " keywords..." << std::endl;
-    std::ofstream strm(IO::path + "/locale/template.txt");
-    std::ofstream strm2(IO::path + "/locale/EN/locale.txt");
+    std::ofstream strm(IO::path + "locale/template.txt");
+    std::ofstream strm2(IO::path + "locale/EN/locale.txt");
     for (auto& a : strs) {
         strm << a.first << "\n<" << a.second << "\n>\n\n";
         strm2 << a.first << "\n<" << a.second << "\n>" + a.second + "\n\n";
     }
 	std::vector<string> dirs;
-	IO::GetFolders(IO::path + "/locale/", &dirs);
+	IO::GetFolders(IO::path + "locale/", &dirs);
 	for (auto& d : dirs) {
 		if (d != "EN") {
 			std::cout << "Updating locale: " << d << std::endl;
@@ -87,9 +87,9 @@ void Localizer::_MakeMap(string path, std::map<uint32_t, string>& strs) {
 }
 
 void Localizer::Merge(string path, std::map<uint32_t, string> strs) {
-	std::ifstream strm(IO::path + "/locale/" + path + "/locale.txt", std::ios::binary);
+	std::ifstream strm(IO::path + "locale/" + path + "/locale.txt", std::ios::binary);
 	if (strm.is_open()) {
-		std::ofstream ostrm(IO::path + "/locale/" + path + "/locale_new.txt", std::ios::binary);
+		std::ofstream ostrm(IO::path + "locale/" + path + "/locale_new.txt", std::ios::binary);
 		char buf[500];
 		int l = 0;
 		while (strm.getline(buf, 500)) {

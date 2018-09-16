@@ -16,7 +16,7 @@ public:
 	friend class ChokoLait;
 protected:
 	static std::ofstream* stream;
-	static void Init(string path);
+	static void Init();
 
 private:
 #ifdef PLATFORM_WIN

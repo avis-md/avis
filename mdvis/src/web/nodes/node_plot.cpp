@@ -16,9 +16,9 @@ void Node_Plot::DrawHeader(float& y) {
 	if (inputR[0].first && useids) {
 		Engine::DrawQuad(pos.x, y, width, 34, bgCol);
 		auto xo = xid, yo = yid;
-		xid = TryParse(UI2::EditText(pos.x + 2, y, width - 4, "X axis index", std::to_string(xid)), 0);
-		yid = TryParse(UI2::EditText(pos.x + 2, y + 17, width - 4, "Y axis index", std::to_string(yid)), 0);
-		auto s = inputR[0].first->conV[inputR[0].second].dimVals.size();
+		xid = TryParse(UI2::EditText(pos.x + 2, y, (uint)width - 4U, "X axis index", std::to_string(xid)), 0);
+		yid = TryParse(UI2::EditText(pos.x + 2, y + 17, (uint)width - 4U, "Y axis index", std::to_string(yid)), 0);
+		auto s = *inputR[0].first->conV[inputR[0].second].dimVals[1];
 		xid = Clamp(xid, -1, (int)s - 1);
 		yid = Clamp(yid, -1, (int)s - 1);
 		if (xid != xo || yid != yo) Execute();

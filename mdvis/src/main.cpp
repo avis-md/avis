@@ -191,6 +191,8 @@ int main(int argc, char **argv) {
 #ifndef NOCATCH
 	try {
 #endif
+		Time::startMillis = milliseconds();
+
 		std::vector<string> fls;
 		bool _s = false, _x = false;
 		string _xs = "";
@@ -245,29 +247,31 @@ int main(int argc, char **argv) {
 		//glfwSetWindowIcon(Display::window, 1, &icon);
 		//delete[](icon.pixels);
 
-		CReader::Init();
-		PyReader::Init();
-		FReader::Init();
-		RayTracer::Init();
-		Color::Init();
-		Icons::Init();
-		UI2::Init();
-		SSH::Init();
-		CubeMarcher::Init();
-		VisSystem::Init();
-		Particles::Init();
-		ParMenu::Init();
-		ParLoader::Init();
-		ParGraphics::Init();
-		Protein::Init();
-		AnWeb::Init();
-		AnNode::Init();
+#define INITS(nm) nm::Init()
+#define INIT(nm) Debug::Message("System", "Initializing " #nm); INITS(nm)
+		INIT(Font);
+		INIT(UI);
+		INIT(UI2);
+		INIT(CReader);
+		INIT(PyReader);
+		INIT(FReader);
+		INIT(RayTracer);
+		INIT(Color);
+		INIT(Icons);
+		INIT(CubeMarcher);
+		INIT(VisSystem);
+		INIT(Particles);
+		INIT(ParMenu);
+		INIT(ParLoader);
+		INIT(ParGraphics);
+		INIT(Protein);
+		INIT(AnWeb);
+		INIT(AnNode);
 		Effects::Init(0xffff);
 		ParMenu::LoadRecents();
+		//SSH::Init();
 
 		AnBrowse::Scan();
-
-		//cm = new CubeMarcher(0);
 
 		ParImporter* imp = new ParImporter();
 		imp->name = "Gromacs";
@@ -307,7 +311,7 @@ int main(int argc, char **argv) {
 		LiveRunner* runner = new LiveRunner();
 		runner->initNm = "Init";
 		runner->loopNm = "Loop";
-		runner->path = IO::path + "/bin/liverunners/lj256/win32/lj256.dll";
+		runner->path = IO::path + "bin/liverunners/lj256/win32/lj256.dll";
 		runner->name = "LJ256";
 		LiveSyncer::runners.push_back(runner);
 
@@ -322,7 +326,7 @@ int main(int argc, char **argv) {
 
 		glfwShowWindow(Display::window);
 		
-		AnWeb::Load(IO::path + "/nodes/test.web");
+		AnWeb::Load(IO::path + "nodes/test.web");
 
 		while (ChokoLait::alive()) {
 			if (!Display::width || !Display::height)

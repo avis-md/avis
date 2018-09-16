@@ -60,7 +60,7 @@ byte _CntOf(const std::vector<uint>& c, char _c) {
 }
 
 void Protein::Init() {
-	shad = Shader::FromVF(IO::GetText(IO::path + "/prochainV.txt"), IO::GetText(IO::path + "/prochainF.txt"));
+	shad = Shader::FromVF(IO::GetText(IO::path + "prochainV.txt"), IO::GetText(IO::path + "prochainF.txt"));
 #define LC(nm) shadLocs[i++] = glGetUniformLocation(shad, #nm);
 	int i = 0;
 	LC(_MV);

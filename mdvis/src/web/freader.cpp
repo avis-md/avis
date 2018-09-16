@@ -17,11 +17,9 @@ void FReader::Init() {
 }
 
 bool FReader::Read(FScript* scr) {
-	string path = scr->path;
-	string fp = IO::path + "/nodes/" + path;
-	std::replace(fp.begin(), fp.end(), '\\', '/');
+	string& path = scr->path;
+	string fp = IO::path + "nodes/" + path;
 	auto s = IO::GetText(fp);
-	fp = fp.substr(0, fp.size() - 4);
 	auto ls = fp.find_last_of('/');
 	string& nm = scr->name = fp.substr(ls + 1);
 	string fp2 = fp.substr(0, ls + 1) + "__fcache__/";
@@ -137,7 +135,7 @@ bool FReader::Read(FScript* scr) {
 			#else
 				"-lc++ "
 			#endif
-			"-fPIC \"" + IO::path + "/res/noterminate.o\" -o \""
+			"-fPIC \"" + IO::path + "res/noterminate.o\" -o \""
 				+ fp2 + nm + ".so\" \"" + fp + "_temp__.f90\" -lgfortran 2> \"" + fp2 + nm + "_log.txt\"";
 			std::cout << cmd << std::endl;
 			#ifdef PLATFORM_WIN
@@ -304,7 +302,7 @@ bool FReader::Read(FScript* scr) {
 }
 
 void FReader::Refresh(FScript* scr) {
-	auto mt = IO::ModTime(IO::path + "/nodes/" + scr->path);
+	auto mt = IO::ModTime(IO::path + "nodes/" + scr->path);
 	if (mt > scr->chgtime) {
 		Debug::Message("FReader", "Reloading " + scr->path);
 		scr->Clear();

@@ -30,7 +30,7 @@ void PyReader::Init() {
 	try {
 		Py_Initialize();
 		PyObject *sys_path = PySys_GetObject("path");
-		auto path = IO::path + "/nodes/";
+		auto path = IO::path + "nodes/";
 		auto ps = PyUnicode_FromString(path.c_str());
 		PyList_Insert(sys_path, 0, ps);
 		Py_DecRef(ps);
@@ -62,19 +62,18 @@ void PyReader::Init() {
 #endif
 }
 
-bool PyReader::Read(string path, PyScript* scr) { //"path/to/script[no .py]"
+bool PyReader::Read(PyScript* scr) {
 	PyScript::ClearLog();
-	string mdn = scr->name = path;
+	string& path = scr->path;
+	string mdn = path;
 	std::replace(mdn.begin(), mdn.end(), '/', '.');
-	string spath = IO::path + "/nodes/" + scr->path + ".py";
+	string spath = IO::path + "nodes/" + path + EXT_PS;
 	scr->chgtime = IO::ModTime(spath);
-	//auto pName = PyUnicode_FromString(path.c_str());
-	//scr->pModule = PyImport_Import(pName);
 	if (AnWeb::hasPy) {
 		auto mdl = scr->pModule ? PyImport_ReloadModule(scr->pModule) : PyImport_ImportModule(mdn.c_str());
 		//Py_DECREF(pName);
 		if (!mdl) {
-			Debug::Warning("PyReader", "Failed to read python file " + path + "!");
+			Debug::Warning("PyReader", "Failed to read python file " + path + EXT_PS "!");
 			PyErr_Print();
 			//
 			std::cout << PyScript::GetLog() << std::endl;
@@ -83,7 +82,7 @@ bool PyReader::Read(string path, PyScript* scr) { //"path/to/script[no .py]"
 		scr->pModule = mdl;
 		scr->pFunc = PyObject_GetAttrString(scr->pModule, "Execute");
 		if (!scr->pFunc || !PyCallable_Check(scr->pFunc)) {
-			Debug::Warning("PyReader", "Failed to find \"Execute\" function in " + path + "!");
+			Debug::Warning("PyReader", "Failed to find \"Execute\" function in " + path + EXT_PS "!");
 			Py_XDECREF(scr->pFunc);
 			Py_DECREF(scr->pModule);
 			return false;
@@ -165,11 +164,11 @@ bool PyReader::Read(string path, PyScript* scr) { //"path/to/script[no .py]"
 }
 
 void PyReader::Refresh(PyScript* scr) {
-	auto mt = IO::ModTime(IO::path + "/nodes/" + scr->path + ".py");
+	auto mt = IO::ModTime(IO::path + "nodes/" + scr->path + EXT_PS);
 	if (mt > scr->chgtime) {
-		Debug::Message("CReader", "Reloading " + scr->path + ".py");
+		Debug::Message("CReader", "Reloading " + scr->path + EXT_PS);
 		scr->Clear();
-		scr->ok = Read(scr->path, scr);
+		scr->ok = Read(scr);
 	}
 }
 

@@ -7,7 +7,7 @@ public:
 	static void Init();
 
 	static void Compile(string path);
-	static bool Read(string path, CScript* scr);
+	static bool Read(CScript* scr);
 	static void Refresh(CScript* scr);
 
 	friend class CScript;

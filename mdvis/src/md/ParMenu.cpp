@@ -317,7 +317,7 @@ void ParMenu::DrawSplash() {
 	if (ms & MOUSE_HOVER_FLAG) {
 		sub = "Displays the user manual in the browser";
 		if (ms == MOUSE_RELEASE) {
-			IO::OpenEx(IO::path + "/docs/index.html");
+			IO::OpenEx(IO::path + "docs/index.html");
 		}
 	}
 	ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63 + 56, 140, 54, white(0.3f), _("Report A Problem"), 12, white(), true);
@@ -516,7 +516,7 @@ loopout:
 void ParMenu::LoadRecents() {
 	recentFiles.clear();
 	recentFilesN.clear();
-	std::ifstream strm(IO::path + "/.recentfiles");
+	std::ifstream strm(IO::path + ".recentfiles");
 	if (strm.is_open()) {
 		string s;
 		while (std::getline(strm, s, '\n')) {
@@ -541,7 +541,7 @@ void ParMenu::SaveRecents(const string& entry) {
 	}
 	recentFiles.insert(recentFiles.begin(), entry);
 	recentFilesN.insert(recentFilesN.begin(), entry.substr(entry.find_last_of('/') + 1));
-	std::ofstream strm(IO::path + "/.recentfiles");
+	std::ofstream strm(IO::path + ".recentfiles");
 	for (auto& s : recentFiles) {
 		strm << s << "\n";
 	}
@@ -550,7 +550,7 @@ void ParMenu::SaveRecents(const string& entry) {
 void ParMenu::RemoveRecent(uint i) {
 	recentFiles.erase(recentFiles.begin() + i);
 	recentFilesN.erase(recentFilesN.begin() + i);
-	std::ofstream strm(IO::path + "/.recentfiles");
+	std::ofstream strm(IO::path + ".recentfiles");
 	for (auto& s : recentFiles) {
 		strm << s << "\n";
 	}

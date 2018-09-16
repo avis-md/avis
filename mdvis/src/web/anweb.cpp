@@ -78,7 +78,7 @@ void AnWeb::Update() {
 		Particles::SetFrame(frm);
 	}
 
-	if (Input::KeyDown(Key_P)) Save(IO::path + "/nodes/test.web");
+	if (Input::KeyDown(Key_P)) Save(IO::path + "nodes/test.web");
 #endif
 }
 
@@ -259,7 +259,7 @@ void AnWeb::Draw() {
 	}
 	
 	if (Engine::Button(200, 1, 70.0f, 16.0f, white(1, 0.4f), "Save", 12.0f, white(), true) == MOUSE_RELEASE)
-		Save(IO::path + "/nodes/rdf.anl");
+		Save(IO::path + "nodes/rdf.anl");
 
 	if (Engine::Button(275, 1, 70, 16, white(1, executing ? 0.2f : 0.4f), "Run", 12, white(), true) == MOUSE_RELEASE) {
 
@@ -352,7 +352,7 @@ void AnWeb::DoExecute() {
 		if (n->script->type == AN_SCRTYPE::PYTHON)
 			PyScript::ClearLog();
 		else
-			IO::RedirectStdio2(IO::path + "/nodes/__tmpstd");
+			IO::RedirectStdio2(IO::path + "nodes/__tmpstd");
 #endif
 		execNode = n;
 		n->executing = true;
@@ -385,7 +385,7 @@ void AnWeb::DoExecute() {
 		}
 		else {
 			IO::RestoreStdio2();
-			auto f = std::ifstream(IO::path + "/nodes/__tmpstd");
+			auto f = std::ifstream(IO::path + "nodes/__tmpstd");
 			string s;
 			while (std::getline(f, s)) {
 				n->log.push_back(std::pair<byte, string>(0, s));
@@ -411,7 +411,7 @@ void AnWeb::DoExecute() {
 	executing = false;
 	apply = true;
 #ifndef NO_REDIR_LOG
-	remove((IO::path + "/nodes/__tmpstd").c_str());
+	remove((IO::path + "nodes/__tmpstd").c_str());
 #endif
 }
 
@@ -486,7 +486,7 @@ void AnWeb::Save(const string& s) {
 }
 
 void AnWeb::SaveIn() {
-	string path = IO::path + "/nodes/__tmp__/";
+	string path = IO::path + "nodes/__tmp__/";
 	if (!IO::HasDirectory(path)) IO::MakeDirectory(path);
 	path += "in/";
 	if (!IO::HasDirectory(path)) IO::MakeDirectory(path);
@@ -503,9 +503,9 @@ void AnWeb::SaveIn() {
 
 void AnWeb::SaveOut() {
 #ifdef IS_ANSERVER
-	string path = IO::path + "/ser/";
+	string path = IO::path + "ser/";
 #else
-	string path = IO::path + "/nodes/__tmp__/";
+	string path = IO::path + "nodes/__tmp__/";
 #endif
 	if (!IO::HasDirectory(path)) IO::MakeDirectory(path);
 	path += "out/";
@@ -596,9 +596,9 @@ void AnWeb::Load(const string& s) {
 
 void AnWeb::LoadIn() {
 #ifdef IS_ANSERVER
-	string path = IO::path + "/ser/in/";
+	string path = IO::path + "ser/in/";
 #else
-	string path = IO::path + "/nodes/__tmp__/in/";
+	string path = IO::path + "nodes/__tmp__/in/";
 #endif
 	for (auto n : nodes) {
 		n->LoadIn(path);
@@ -606,7 +606,7 @@ void AnWeb::LoadIn() {
 }
 
 void AnWeb::LoadOut() {
-	string path = IO::path + "/nodes/__tmp__/out/";
+	string path = IO::path + "nodes/__tmp__/out/";
 	for (auto n : nodes) {
 		n->LoadOut(path);
 	}

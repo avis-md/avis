@@ -18,7 +18,7 @@
 #endif
 #endif
 
-string IO::path = IO::InitPath();
+string IO::path;
 
 std::thread IO::readstdiothread;
 bool IO::readingStdio;
@@ -279,26 +279,24 @@ void IO::OpenEx(string path) {
 #endif
 }
 
-string IO::InitPath() {
+void IO::InitPath() {
 	char cpath[200];
 #ifdef PLATFORM_WIN
 	GetModuleFileName(NULL, cpath, 200);
-	string path2 = cpath;
-	path2 = path2.substr(0, path2.find_last_of('\\') + 1);
-	std::replace(path2.begin(), path2.end(), '\\', '/');
+	path = cpath;
+	path = path.substr(0, path.find_last_of('\\') + 1);
+	std::replace(path.begin(), path.end(), '\\', '/');
 #elif defined(PLATFORM_LNX)
 	readlink("/proc/self/exe", cpath, 200);
-	string path2 = cpath;
-	path2 = path2.substr(0, path2.find_last_of('/') + 1);
+	path = cpath;
+	path = path.substr(0, path.find_last_of('/') + 1);
 #else
 	uint32_t sz = sizeof(cpath);
 	_NSGetExecutablePath(cpath, &sz);
-	string path2 = realpath(cpath, 0);
-	path2 = path2.substr(0, path2.find_last_of('/') + 1);
+	path = realpath(cpath, 0);
+	path = path.substr(0, path.find_last_of('/') + 1);
 #endif
-	path = path2;
-	if (path.back() == '/') path.pop_back();
-	return path2;
+	if (path.back() != '/') path += "/";
 }
 
 std::wstring IO::_tow(const string& s) {
