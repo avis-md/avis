@@ -54,6 +54,8 @@ const char * hdr::szFormat = "FORMAT=32-bit_rle_rgbe";
 /* HDR Function Definitions */
 unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int *h)
 {
+	Debug::Message("hdr", "Opening " + string(filename));
+
     char buf[1024] = {0};
     char col[4] = {0};
     unsigned char *imagergbe;
@@ -66,7 +68,7 @@ unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int
 	fopen_s(&fp, filename, "rb");
 
     if (!fp) {
-        Debug::Error("hdr", "failed to load hdri: " + string(filename) + "!");
+        Debug::Error("hdr", "Cannot open file " + string(filename) + "!");
         return nullptr;
     }
 

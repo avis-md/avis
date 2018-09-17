@@ -7,15 +7,14 @@
 #include "pyreader.h"
 #include "freader.h"
 
-
 #define EXT_PS ".py"
-const int EXT_PS_SZ = strlen(EXT_PS) - 1;
+constexpr int EXT_PS_SZ = strlen_c(EXT_PS);
 #define EXT_CS ".cpp"
-const int EXT_CS_SZ = strlen(EXT_CS) - 1;
+constexpr int EXT_CS_SZ = strlen_c(EXT_CS);
 #define EXT_FS ".f90"
-const int EXT_FS_SZ = strlen(EXT_FS) - 1;
+constexpr int EXT_FS_SZ = strlen_c(EXT_FS);
 #define EXT_ANSV ".anl"
-const int EXT_ANSV_SZ = strlen(EXT_ANSV) - 1;
+constexpr int EXT_ANSV_SZ = strlen_c(EXT_ANSV);
 
 enum class AN_NODE_SCN : byte {
 	NUM0 = 0x80,

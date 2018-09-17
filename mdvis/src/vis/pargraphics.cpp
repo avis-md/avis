@@ -215,8 +215,6 @@ void ParGraphics::Init() {
 	Eff::ssaoRad = 0.015f;
 	Eff::ssaoStr = 1;
 	Eff::ssaoBlur = 6.5f;
-
-	Shadows::Init();
 }
 
 void ParGraphics::UpdateDrawLists() {

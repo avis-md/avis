@@ -15,6 +15,7 @@ bool AnBrowse::mscFdExpanded[] = {};
 float AnBrowse::expandPos = 0;
 
 void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
+	Debug::Message("AnBrowse", " Scanning folder: /" + incPath);
 	fo->fullName = path;
 	auto ff = IO::GetFiles(path, EXT_ANSV);
 	for (auto f : ff) {
@@ -26,6 +27,7 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 	for (auto f : ff) { \
 		auto nm = f.substr(f.find_last_of('/') + 1);\
 		if (cond) {\
+			Debug::Message("AnBrowse", "  file: " + f);\
 			auto scr = new hd##Script();\
 			fo->scripts.push_back(scr);\
 			scr->path = incPath + nm.substr(0, nm.size() - sz);\
@@ -41,6 +43,7 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 	IO::GetFolders(path, &fd);
 
 	for (auto f : fd) {
+		if (f.substr(0, 2) == "__") continue;
 		fo->subfolders.push_back(Folder(f));
 		auto& bk = fo->subfolders.back();
 		DoScan(&bk, path + f + "/", incPath + f + "/");
@@ -50,6 +53,7 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 }
 
 void AnBrowse::Scan() {
+	Debug::Message("AnBrowse", "Scanning nodes folder...");
 	folder = Folder(_("Custom"));
 	DoScan(&folder, IO::path + "nodes", "");
 	ErrorView::Refresh();

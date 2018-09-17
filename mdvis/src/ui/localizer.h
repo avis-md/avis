@@ -4,11 +4,6 @@
 
 #define _(s) (Localizer::useDict? Localizer::dict[HASH(s)] : s)
 
-int constexpr strlen_c(const char* str)
-{
-    return *str ? 1 + strlen_c(str + 1) : 0;
-}
-
 constexpr uint32_t HASH_H1(const char* s, const uint32_t i, const uint32_t x) {
     return (x*65599u+(uint8_t)s[(i)<(strlen_c(s)-1-(i))]);
 }

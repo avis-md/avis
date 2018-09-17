@@ -55,6 +55,7 @@ bool LoadJPEG(string fileN, uint &x, uint &y, byte& channels, byte** data)
 
 //slow!!
 void InvertPNG(std::vector<byte>& data, uint x, uint y) {
+	/*
 	for (uint a = 0; a < y/2; a++) {
 		for (uint b = 0; b < x; b++) {
 			for (uint c = 0; c < 4; c++) {
@@ -63,6 +64,14 @@ void InvertPNG(std::vector<byte>& data, uint x, uint y) {
 				data[((y - a - 1)*x + b) * 4 + c] = t;
 			}
 		}
+	}
+	*/
+#pragma omp parallel for
+	for (int a = 0; a < y / 2; a++) {
+		std::vector<byte> tmp(x*4);
+		memcpy(&tmp[0], &data[a*x * 4], x * 4);
+		memcpy(&data[a*x * 4], &data[(y - a - 1)*x * 4], x * 4);
+		memcpy(&data[(y - a - 1)*x * 4], &tmp[0], x * 4);
 	}
 }
 

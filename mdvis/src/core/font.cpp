@@ -13,6 +13,7 @@ void Font::Init() {
 	int err = FT_Init_FreeType(&_ftlib);
 	if (err != FT_Err_Ok) {
 		Debug::Error("Font", "Fatal: Initializing freetype failed!");
+		abort();
 	}
 
 	fontProgram = Shader::FromVF(glsl::fontVert, glsl::fontFrag);
@@ -23,7 +24,7 @@ void Font::Init() {
 	LC(mask);
 #undef LC
 
-	InitVao(500);
+	InitVao(128);
 }
 
 void Font::InitVao(uint sz) {

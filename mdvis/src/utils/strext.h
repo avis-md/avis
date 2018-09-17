@@ -1,20 +1,10 @@
 #pragma once
 #include "Engine.h"
 
-/* cmake for msvc does not have to_string */
-#if defined(PLATFORM_ADR)
-namespace std {
-	template <typename T> string to_string(T val) {
-		std::ostringstream strm;
-		strm << val;
-		return strm.str();
-	}
-
-	int stoi(const string& s);
-	float stof(const string& s);
-	unsigned long stoul(const string& s);
+int constexpr strlen_c(const char* str)
+{
+	return *str ? 1 + strlen_c(str + 1) : 0;
 }
-#endif
 
 namespace std {
 	string to_string(Vec2 v);

@@ -255,7 +255,7 @@ int main(int argc, char **argv) {
 		INIT(CReader);
 		INIT(PyReader);
 		INIT(FReader);
-		INIT(RayTracer);
+		//INIT(RayTracer);
 		INIT(Color);
 		INIT(Icons);
 		INIT(CubeMarcher);
@@ -265,6 +265,7 @@ int main(int argc, char **argv) {
 		INIT(ParLoader);
 		INIT(ParGraphics);
 		INIT(Protein);
+		INIT(Shadows);
 		INIT(AnWeb);
 		INIT(AnNode);
 		Effects::Init(0xffff);
