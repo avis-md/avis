@@ -7,7 +7,7 @@ uniform mat4 MVP;
 out vec2 UV;
 void main(){
 	gl_Position = MVP * vec4(pos, 1);
-	gl_Position /= gl_Position.w;
+	//gl_Position /= gl_Position.w;
 	UV = uv;
 }
 )";

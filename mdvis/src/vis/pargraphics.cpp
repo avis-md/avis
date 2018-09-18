@@ -67,6 +67,7 @@ bool ParGraphics::animate = false, ParGraphics::seek = false;
 float ParGraphics::animOff;
 int ParGraphics::animTarFps = 5;
 bool ParGraphics::tfboDirty = true;
+Mat4x4 ParGraphics::lastMVP;
 
 //---------------- effects vars -------------------
 
@@ -485,6 +486,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 			rotCenter = Particles::particles_Pos[rotCenterTrackId];
 		}
 		MVP::Translate(-rotCenter.x, -rotCenter.y, -rotCenter.z);
+		lastMVP = MVP::projection() * MVP::modelview();
 
 		UpdateClipping();
 

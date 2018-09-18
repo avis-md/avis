@@ -378,6 +378,7 @@ enum FFT_WINDOW : byte {
 #include "core/input.h"
 #include "core/display.h"
 #include "core/ui.h"
+#include "core/ui3.h"
 
 #include "utils/fft.h"
 
@@ -393,12 +394,7 @@ public:
 	static void DrawLine(Vec3 v1, Vec3 v2, Vec4 col, float width);
 	static void DrawLineW(Vec3 v1, Vec3 v2, Vec4 col, float width);
 	static void DrawLinesW(Vec3* pts, int num, Vec4 col, float width);
-	static void DrawLineWDotted(Vec3 v1, Vec3 v2, Vec4 col, float width, float dotSz, bool app = false);
-	static void DrawTriangle(Vec2 v1, Vec2 v2, Vec2 v3, Vec4 col, bool fill = true, float width = 1);
-	static void DrawTriangle(Vec2 centre, Vec2 dir, Vec4 col, bool fill = true, float width = 1);
-	static void DrawCircle(Vec2 c, float r, uint n, Vec4 col, float width);
-	static void DrawCircleW(Vec3 c, Vec3 x, Vec3 y, float r, uint n, Vec4 col, float width, bool dotted = false);
-	static void DrawCubeLinesW(float x0, float x1, float y0, float y1, float z0, float z1, float width, Vec4 col);
+	static void DrawCubeLinesW(Vec3 pos, float dx, float dy, float dz, Vec4 col);
 	static MOUSE_STATUS Button(float x, float y, float w, float h);
 	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4);
 	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4, string label, float labelSize, Vec4 labelCol, bool labelCenter = false, Font* labelFont = UI::font);

@@ -21,17 +21,17 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 #define READ(ext, sz, cond, hd)\
 	ff = IO::GetFiles(path, ext);\
 	for (auto f : ff) { \
-		auto nm = f.substr(f.find_last_of('/') + 1);\
 		if (cond) {\
 			Debug::Message("AnBrowse", "  file: " + f);\
 			auto scr = new hd##Script();\
 			fo->scripts.push_back(scr);\
-			scr->path = incPath + nm.substr(0, nm.size() - sz);\
+			scr->name = f.substr(0, f.size() - sz);\
+			scr->path = incPath + scr->name;\
 			scr->ok = hd##Reader::Read(scr);\
 		}\
 	}
 
-	READ(EXT_PS, EXT_PS_SZ, nm.substr(0, 2) == "__", Py);
+	READ(EXT_PS, EXT_PS_SZ, f.substr(0, 2) == "__", Py);
 	READ(EXT_CS, EXT_CS_SZ, 1, C);
 	READ(EXT_FS, EXT_FS_SZ, 1, F);
 

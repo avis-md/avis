@@ -56,6 +56,8 @@ public:
 	static int animTarFps;
 	static bool tfboDirty;
 
+	static Mat4x4 lastMVP;
+
 	class Eff {
 	public:
 		static bool expanded;

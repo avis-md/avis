@@ -4,7 +4,6 @@
 #include "utils/rawvector.h"
 #include "utils/spline.h"
 #include "utils/solidify.h"
-#include "utils/solidify.h"
 #include "vis/pargraphics.h"
 #include "ui/icons.h"
 #include "ui/ui_ext.h"

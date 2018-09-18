@@ -137,6 +137,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\asset\mesh.cpp" />
+    <ClCompile Include="src\core\ui3.cpp" />
     <ClCompile Include="src\utils\shader.cpp" />
     <ClCompile Include="src\hdr.cpp" />
     <ClCompile Include="src\live\livesyncer.cpp" />
@@ -231,6 +232,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\asset\mesh.h" />
+    <ClInclude Include="src\core\ui3.h" />
     <ClInclude Include="src\utils\shader.h" />
     <ClInclude Include="src\hdr.h" />
     <ClInclude Include="src\live\livesyncer.h" />

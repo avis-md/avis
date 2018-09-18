@@ -21,7 +21,7 @@ bool FReader::Read(FScript* scr) {
 	string fp = IO::path + "nodes/" + path;
 	auto s = IO::GetText(fp);
 	auto ls = fp.find_last_of('/');
-	string& nm = scr->name = fp.substr(ls + 1);
+	string& nm = scr->name;
 	string fp2 = fp.substr(0, ls + 1) + "__fcache__/";
 
 
