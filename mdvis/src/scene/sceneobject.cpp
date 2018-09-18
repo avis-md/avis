@@ -1,9 +1,7 @@
 #include "Engine.h"
 
 SceneObject::SceneObject(Vec3 pos, Quat rot, Vec3 scale) : SceneObject("New Object", pos, rot, scale) {}
-SceneObject::SceneObject(string s, Vec3 pos, Quat rot, Vec3 scale) : _expanded(true), Object(s) {
-	id = Engine::GetNewId();
-}
+SceneObject::SceneObject(string s, Vec3 pos, Quat rot, Vec3 scale) : _expanded(true), Object(s) {}
 SceneObject::SceneObject(byte* data) {}
 
 SceneObject::~SceneObject() {

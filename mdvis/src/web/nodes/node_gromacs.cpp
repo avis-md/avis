@@ -26,9 +26,9 @@ void Node_Gromacs::Draw() {
 #ifndef IS_ANSERVER
 	auto cnt = 4;
 	this->pos = pos;
-	Engine::DrawQuad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
+	UI::Quad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
 	UI::Label(pos.x + 2, pos.y + 1, 12, title, white());
-	Engine::DrawQuad(pos.x, pos.y + 16, width, 20.0f + 17 * cnt, white(0.7f, 0.25f));
+	UI::Quad(pos.x, pos.y + 16, width, 20.0f + 17 * cnt, white(0.7f, 0.25f));
 	UI::Label(pos.x + 2, pos.y + 18, 12, "File", white());
 	DrawToolbar();
 	file = UI::EditText(pos.x + 32, pos.y + 18, width - 50, 16, 12, white(1, 0.5f), file, true, white());

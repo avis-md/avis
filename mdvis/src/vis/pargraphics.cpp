@@ -109,7 +109,7 @@ float ParGraphics::Eff::DrawMenu(float off) {
 	UI::Label(expandPos - 148, off, 12, _("Effects"), white());
 
 	off += 17;
-	Engine::DrawQuad(expandPos - 148, off - 1, 147, 17 * 5 + 2, white(0.9f, 0.1f));
+	UI::Quad(expandPos - 148, off - 1, 147, 17 * 5 + 2, white(0.9f, 0.1f));
 	UI::Label(expandPos - 146, off, 12, _("Ambient Occlusion"), white());
 	useSSAO = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, useSSAO, white(), ORIENT_HORIZONTAL);
 	ssaoSamples = (int)UI2::Slider(expandPos - 147, off + 17, 147, _("Samples"), 5, 100, (float)ssaoSamples, std::to_string(ssaoSamples));
@@ -686,7 +686,7 @@ void ParGraphics::Reblit() {
 		glClearBufferfv(GL_COLOR, 0, zero);
 		if (!!Particles::particleSz) {
 			if (RayTracer::resTex) {
-				Engine::DrawQuad(0, 0, (float)Display::width, (float)Display::height, RayTracer::resTex);
+				UI::Quad(0, 0, (float)Display::width, (float)Display::height, RayTracer::resTex);
 			}
 			else {
 				Recolor();
@@ -794,7 +794,7 @@ void ParGraphics::DrawColMenu() {
 	auto& exps = ParMenu::expandPos;
 	float off = 20;
 	UI::Label(exps - 148, off, 12, "Parameters", white());
-	Engine::DrawQuad(exps - 149, off + 17, 149, 17 * 4 + 2, white(0.9f, 0.1f));
+	UI::Quad(exps - 149, off + 17, 149, 17 * 4 + 2, white(0.9f, 0.1f));
 	off += 18;
 	for (int a = 0; a < Particles::particles_ParamSz; a++) {
 		UI::Label(exps - 147, off + a*17, 12, std::to_string(a+1), white());
@@ -826,7 +826,7 @@ void ParGraphics::DrawColMenu() {
 		off += 17 * 5 + 2;
 	}
 	else {
-		Engine::DrawQuad(exps - 148, off, 147, Display::height*0.5f - off, white(0.9f, 0.1f));
+		UI::Quad(exps - 148, off, 147, Display::height*0.5f - off, white(0.9f, 0.1f));
 		Engine::PushStencil(exps - 148, off + 1, 147, Display::height*0.5f - off - 2);
 		off++;
 		for (int x = 0; x < 256; x++) {
@@ -866,12 +866,12 @@ void ParGraphics::DrawMenu() {
 
 	UI::Label(expandPos - 148, off, 12, _("Lighting"), white());
 	if (usePBR && !!_usePBRItems.target) {
-		Engine::DrawQuad(expandPos - 149, off + 17, 148, 17, white(0.9f, 0.1f));
+		UI::Quad(expandPos - 149, off + 17, 148, 17, white(0.9f, 0.1f));
 		off += 1;
 		UI2::Dropdown(expandPos - 147, off + 17, 146, _("Sky"), reflItms);
 		off += 17;
 	}
-	Engine::DrawQuad(expandPos - 149, off + 16, 148, 17 * 4 + 2, white(0.9f, 0.1f));
+	UI::Quad(expandPos - 149, off + 16, 148, 17 * 4 + 2, white(0.9f, 0.1f));
 	reflStr = UI2::Slider(expandPos - 147, off + 17, 147, _("Strength"), 0, 5, reflStr);
 	reflStrDecay = UI2::Slider(expandPos - 147, off + 17 * 2, 147, _("Falloff"), 0, 50, reflStrDecay);
 	specStr = UI2::Slider(expandPos - 147, off + 17 * 3, 147, _("Specular"), 0, 1, specStr);
@@ -880,7 +880,7 @@ void ParGraphics::DrawMenu() {
 	off += 17 * 5 + 2;
 
 	UI::Label(expandPos - 148, off, 12, _("Camera"), white());
-	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 9 + 2, white(0.9f, 0.1f));
+	UI::Quad(expandPos - 149, off + 17, 148, 17 * 9 + 2, white(0.9f, 0.1f));
 	off += 18;
 	UI::Label(expandPos - 147, off, 12, _("Target"), white());
 	bool htr = (rotCenterTrackId < ~0);
@@ -926,7 +926,7 @@ void ParGraphics::DrawMenu() {
 	off += 17 * 9 + 3;
 
 	if (a2) {
-		Engine::DrawQuad(expandPos - 149, off - 2, 148, 18, white(0.9f, 0.1f));
+		UI::Quad(expandPos - 149, off - 2, 148, 18, white(0.9f, 0.1f));
 		UI::Label(expandPos - 147, off - 1, 12, _("Quality 2"), white());
 		ql = cm->quality2;
 		ql = Engine::DrawSliderFill(expandPos - 80, off - 1, 78, 16, 0.25f, 1, ql, white(1, 0.5f), white());
@@ -950,11 +950,11 @@ void ParGraphics::DrawPopupDM() {
 	auto dto = dt;
 	byte a = dt & 0x0f;
 	byte b = dt >> 4;
-	Engine::DrawQuad(Popups::pos.x - 1, Popups::pos.y - 1, 18, 18, black(0.7f));
-	Engine::DrawQuad(Popups::pos.x - 1, Popups::pos.y + 15, 113, 37, black(0.7f));
-	Engine::DrawQuad(Popups::pos.x, Popups::pos.y, 16, 16, white(1, 0.3f));
+	UI::Quad(Popups::pos.x - 1, Popups::pos.y - 1, 18, 18, black(0.7f));
+	UI::Quad(Popups::pos.x - 1, Popups::pos.y + 15, 113, 37, black(0.7f));
+	UI::Quad(Popups::pos.x, Popups::pos.y, 16, 16, white(1, 0.3f));
 	UI::Texture(Popups::pos.x, Popups::pos.y, 16, 16, Icons::OfDM(dt));
-	Engine::DrawQuad(Popups::pos.x, Popups::pos.y + 16, 111, 35, white(1, 0.3f));
+	UI::Quad(Popups::pos.x, Popups::pos.y + 16, 111, 35, white(1, 0.3f));
 
 	UI::Label(Popups::pos.x + 2, Popups::pos.y + 18, 12, _("Atoms"), white());
 	for (byte i = 0; i < 4; i++) {

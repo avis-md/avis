@@ -14,7 +14,7 @@ Node_Plot::Node_Plot() : AnNode(new DmScript(sig)) {
 
 void Node_Plot::DrawHeader(float& y) {
 	if (inputR[0].first && useids) {
-		Engine::DrawQuad(pos.x, y, width, 34, bgCol);
+		UI::Quad(pos.x, y, width, 34, bgCol);
 		auto xo = xid, yo = yid;
 		xid = TryParse(UI2::EditText(pos.x + 2, y, (uint)width - 4U, "X axis index", std::to_string(xid)), 0);
 		yid = TryParse(UI2::EditText(pos.x + 2, y + 17, (uint)width - 4U, "Y axis index", std::to_string(yid)), 0);
@@ -27,7 +27,7 @@ void Node_Plot::DrawHeader(float& y) {
 }
 
 void Node_Plot::DrawFooter(float& y) {
-	Engine::DrawQuad(pos.x, y, width, width, bgCol);
+	UI::Quad(pos.x, y, width, width, bgCol);
 	if (valXs.size()) {
 		plt::plot(pos.x + 12, y + 2, width - 14, width - 14, &valXs[0], &valYs[0], valXs.size(), UI::font, 10, white(1, 0.8f));
 	}

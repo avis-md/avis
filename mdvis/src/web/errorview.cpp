@@ -130,7 +130,7 @@ void ErrorView::Draw() {
 
 	if (show) {
 		float y = Display::height - 18.0f - windowSize;
-		Engine::DrawQuad(0, y, (float)Display::width, (float)windowSize, white(0.95f, 0.1f));
+		UI::Quad(0, y, (float)Display::width, (float)windowSize, white(0.95f, 0.1f));
 		y++;
 		if (Engine::Button(2, y, 80, 16, white(0), white(0.2f), black(0.2f), "Compile Log", 12, UI::font, showExec ? white(0.8f) : VisSystem::accentColor) == MOUSE_RELEASE) {
 			showExec = false;
@@ -167,7 +167,7 @@ void ErrorView::Draw() {
 
 		if (descId > -1) {
 			y = Display::height - 18.0f - descSize;
-			Engine::DrawQuad(0, y, (float)Display::width, (float)descSize, white(0.95f, 0.15f));
+			UI::Quad(0, y, (float)Display::width, (float)descSize, white(0.95f, 0.15f));
 			int a = 0;
 			auto& msg = msgs[descId];
 			for (auto& m : msg.msg) {
@@ -177,7 +177,7 @@ void ErrorView::Draw() {
 			//UI::Label(100, Display::height - 16.0f - windowSize, 12, msg.path, white(0.7f));
 		}
 		else {
-			Engine::DrawQuad(0, Display::height - 35.0f, (float)Display::width, 17, white(0.95f, 0.15f));
+			UI::Quad(0, Display::height - 35.0f, (float)Display::width, 17, white(0.95f, 0.15f));
 			UI::Label(5, Display::height - 35.0f, 12, "Select an error message for details", white(0.7f));
 		}
 	}

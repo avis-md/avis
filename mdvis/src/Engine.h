@@ -1,5 +1,13 @@
 #pragma once
-#include "Defines.h"
+
+/*
+ChokoLait Interface for ChokoEngine (c) Chokomancarr 2018
+
+See https://chokomancarr.github.io/ChokoLait/ for documentation and examples.
+*/
+
+#include "../../appversion.h"
+#define VERSIONSTRING "version " APPVERSION
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -7,58 +15,17 @@
 #define STRINGMRGDO(a,b) a ## b
 #define STRINGMRG(a,b) STRINGMRGDO(a,b)
 
-#define OHNO(nm, msg) Debug::Error(#nm, "Something happened that should not!. Please contact the monkey!\n  Information the monkey needs: " msg)
+#define OHNO(nm, msg) Debug::Error(#nm, "Something happened that should not! Please contact the monkey!\n  Information the monkey needs: " msg)
 
 #pragma region includes
 /* OS-specific headers */
 #if defined(PLATFORM_WIN)
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-
-//disables windows.h features
-#define NOGDICAPMASKS     ;// CC_*, LC_*, PC_*, CP_*, TC_*, RC_
-#define NOVIRTUALKEYCODES ;// VK_*
-#define NOWINMESSAGES     ;// WM_*, EM_*, LB_*, CB_*
-#define NOWINSTYLES       ;// WS_*, CS_*, ES_*, LBS_*, SBS_*, CBS_*
-#define NOSYSMETRICS      ;// SM_*
-#define NOMENUS           ;// MF_*
-#define NOICONS           ;// IDI_*
-#define NOKEYSTATES       ;// MK_*
-#define NOSYSCOMMANDS     ;// SC_*
-#define NORASTEROPS       ;// Binary and Tertiary raster ops
-#define OEMRESOURCE       ;// OEM Resource values
-#define NOATOM            ;// Atom Manager routines
-#define NOCLIPBOARD       ;// Clipboard routines
-#define NOCOLOR           ;// Screen colors
-#define NODRAWTEXT        ;// DrawText() and DT_*
-#define NOKERNEL          ;// All KERNEL defines and routines
-#define NONLS             ;// All NLS defines and routines
-#define NOMEMMGR          ;// GMEM_*, LMEM_*, GHND, LHND, associated routines
-#define NOMETAFILE        ;// typedef METAFILEPICT
-#define NOMINMAX          ;// Macros min(a,b) and max(a,b)
-#define NOOPENFILE        ;// OpenFile(), OemToAnsi, AnsiToOem, and OF_*
-#define NOSCROLL          ;// SB_* and scrolling routines
-#define NOSERVICE         ;// All Service Controller routines, SERVICE_ equates, etc.
-#define NOSOUND           ;// Sound driver routines
-#define NOTEXTMETRIC      ;// typedef TEXTMETRIC and associated routines
-#define NOWH              ;// SetWindowsHook and WH_*
-#define NOWINOFFSETS      ;// GWL_*, GCL_*, associated routines
-#define NOCOMM            ;// COMM driver routines
-#define NOKANJI           ;// Kanji support stuff.
-#define NOHELP            ;// Help engine interface.
-#define NOPROFILER        ;// Profiler interface.
-#define NODEFERWINDOWPOS  ;// DeferWindowPos routines
-#define NOMCX             ;// Modem Configuration Extensions
-#define NOBITMAP
-
-#include <Windows.h>
+#include "minimalwin.h"
 #include <WinSock2.h>
 #pragma comment(lib, "Secur32.lib")
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "iphlpapi.lib")
-//#pragma comment(lib, "Dbghelp.lib")
-#else //networking is identical on *nix systems
+#else
 #include <arpa/inet.h>
 #if defined(PLATFORM_LNX) || defined(PLATFORM_OSX)
 #include <unistd.h>
@@ -67,9 +34,7 @@
 #endif
 
 #include <signal.h>
-#if defined(PLATFORM_LNX)
-#define __debugbreak() raise(SIGTRAP)
-#elif defined(PLATFORM_OSX)
+#ifndef PLATFORM_WIN
 #define __debugbreak() raise(SIGTRAP)
 #endif
 
@@ -124,8 +89,6 @@ typedef glm::vec4 Vec4;
 typedef glm::quat Quat;
 typedef glm::mat4 Mat4x4;
 
-typedef int ASSETID;
-
 const float PI = 3.1415926535f;
 const float rad2deg = 57.2958f;
 const float deg2rad = 0.0174533f;
@@ -154,22 +117,16 @@ public:
 
 #define push_val(var, nm, val) auto var = nm; nm = val;
 
-#ifndef PLATFORM_WIN
+#ifdef PLATFORM_WIN
+#define stat _stat
+#else
 void fopen_s(FILE** f, const char* c, const char* m);
 #define sscanf_s sscanf
-//void _putenv_s(string nm, const char* loc);
 #define _putenv_s(nm, loc) setenv(nm, loc, 1)
 #endif
 
 #define F2ISTREAM(_varname, _pathname) std::ifstream _f2i_ifstream((_pathname).c_str(), std::ios::in | std::ios::binary); \
 std::istream _varname(_f2i_ifstream.rdbuf());
-
-#ifdef PLATFORM_WIN
-class WinFunc {
-public:
-	static HWND GetHwndFromProcessID(DWORD id);
-};
-#endif
 
 #include "utils/net.h"
 #include "utils/xml.h"
@@ -180,15 +137,6 @@ public:
 
 #include "utils/color.h"
 #include "utils/rect.h"
-
-typedef byte DRAWORDER; //because we use this as flags
-const DRAWORDER DRAWORDER_NONE = 0x00;
-const DRAWORDER DRAWORDER_SOLID = 0x01;
-const DRAWORDER DRAWORDER_TRANSPARENT = 0x02;
-const DRAWORDER DRAWORDER_OVERLAY = 0x04;
-const DRAWORDER DRAWORDER_LIGHT = 0x08;
-
-const uint ECACHESZ_PADDING = 1;
 
 #pragma endregion
 
@@ -250,6 +198,15 @@ _canref(AudioClip);
 #pragma endregion
 
 #pragma region enums
+
+/*
+typedef byte DRAWORDER; //because we use this as flags
+const DRAWORDER DRAWORDER_NONE = 0x00;
+const DRAWORDER DRAWORDER_SOLID = 0x01;
+const DRAWORDER DRAWORDER_TRANSPARENT = 0x02;
+const DRAWORDER DRAWORDER_OVERLAY = 0x04;
+const DRAWORDER DRAWORDER_LIGHT = 0x08;
+*/
 
 enum MOUSE_STATUS : byte {
 	MOUSE_NONE = 0x00,
@@ -415,6 +372,7 @@ enum FFT_WINDOW : byte {
 #include "utils/random.h"
 #include "utils/ptrext.h"
 #include "utils/stream.h"
+#include "utils/shader.h"
 
 #include "core/font.h"
 #include "core/input.h"
@@ -462,25 +420,17 @@ public:
 
 	static GLuint defProgram, defProgramW, unlitProgram, unlitProgramA, unlitProgramC, skyProgram;
 	static GLint defColLoc, defWColLoc, defWMVPLoc;
-	PROGDEF_H(lineWProg, 5)
 	
-	static void InitShaders();
+	PROGDEF_H(lineWProg, 5)
 
-	static ulong GetNewId();
+	static void InitShaders();
 
 	static Texture* fallbackTex;
 
 	static GLuint quadBuffer;
 	static GLint drawQuadLocs[3], drawQuadLocsA[3], drawQuadLocsC[1];
 
-	static void DrawQuad(float x, float y, float w, float h, uint texture, float miplevel = 0);
-	static void DrawQuad(float x, float y, float w, float h, uint texture, Vec4 col);
-	static void DrawQuad(float x, float y, float w, float h, Vec4 col);
-	static void DrawQuad(float x, float y, float w, float h, GLuint texture, Vec2 uv0, Vec2 uv1, Vec2 uv2, Vec2 uv3, bool single, Vec4 col, float miplevel = 0);
 	static void DrawCube(Vec3 pos, float dx, float dy, float dz, Vec4 col);
-	
-	static ulong idCounter;
-	static std::vector<Camera*> sceneCameras;
 
 	static std::thread::id _mainThreadId;
 
@@ -491,4 +441,3 @@ public:
 };
 
 #include "SceneObjects.h"
-#include "SceneScriptResolver.h"

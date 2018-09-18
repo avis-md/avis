@@ -5,6 +5,8 @@
 [av] */
 class UI {
 public:
+	static void Quad(float x, float y, float w, float h, Vec4 col);
+	static void Quad(float x, float y, float w, float h, GLuint tex, Vec4 col = white(), Vec2 uv0 = Vec2(0, 1), Vec2 uv1 = Vec2(1, 1), Vec2 uv2 = Vec2(0, 0), Vec2 uv3 = Vec2(1, 0));
 	static void Texture(float x, float y, float w, float h, ::Texture* texture, DRAWTEX_SCALING scl = DRAWTEX_STRETCH, float miplevel = 0);
 	static void Texture(float x, float y, float w, float h, ::Texture* texture, float alpha, DRAWTEX_SCALING scl = DRAWTEX_STRETCH, float miplevel = 0);
 	static void Texture(float x, float y, float w, float h, ::Texture* texture, Vec4 tint, DRAWTEX_SCALING scl = DRAWTEX_STRETCH, float miplevel = 0);
@@ -53,6 +55,9 @@ public:
 	static GLuint _vao, _vboV, _vboU, _tvbo;
 
 	static byte _layer, _layerMax;
+
+	PROGDEF_H(quadProgC, 5)
+	PROGDEF_H(quadProgT, 5)
 
 	static void Init(), IncLayer();
 };

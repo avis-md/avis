@@ -61,12 +61,12 @@ void Node_Volume::Draw() {
 #ifndef IS_ANSERVER
 	auto cnt = 1;
 	this->pos = pos;
-	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
+	UI::Quad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 20, pos.y + 1, 12, "Density Plot (DIM=3)", white());
 	DrawToolbar();
 	if (expanded) {
-		Engine::DrawQuad(pos.x, pos.y + 16, width, 3.0f + 17 * (cnt + 5), white(0.7f, 0.25f));
+		UI::Quad(pos.x, pos.y + 16, width, 3.0f + 17 * (cnt + 5), white(0.7f, 0.25f));
 		float y = pos.y + 18;
 		const uint i = 0;
 		if (!AnWeb::selConnNode || (AnWeb::selConnIdIsOut && AnWeb::selConnNode != this)) {
@@ -98,11 +98,11 @@ void Node_Volume::Draw() {
 
 float Node_Volume::DrawSide() {
 #ifndef IS_ANSERVER
-	Engine::DrawQuad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
+	UI::Quad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 20, pos.y + 1, 12, "Density Plot", white());
 	if (expanded) {
-		Engine::DrawQuad(pos.x, pos.y + 16, width, 17, white(0.7f, 0.25f));
+		UI::Quad(pos.x, pos.y + 16, width, 17, white(0.7f, 0.25f));
 		
 		return 34;
 	}

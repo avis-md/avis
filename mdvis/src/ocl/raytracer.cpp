@@ -87,7 +87,7 @@ void RayTracer::DrawMenu() {
 	}
 
 	UI::Label(expandPos - 148, off, 12, "Preview", white());
-	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
+	UI::Quad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
 	off++;
 	prvRes = UI2::Slider(expandPos - 147, off + 17, 147, "Quality", 0.1f, 1, prvRes, std::to_string(int(prvRes * 100)) + "%");
 	prvSmp = TryParse(UI2::EditText(expandPos - 147, off + 17 * 2, 147, "Samples", std::to_string(prvSmp)), 50U);
@@ -95,7 +95,7 @@ void RayTracer::DrawMenu() {
 	off += 17 * 3 * 2;
 
 	UI::Label(expandPos - 148, off, 12, "Background", white());
-	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
+	UI::Quad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
 	off++;
 	UI2::File(expandPos - 147, off + 17, 147, "File", bgName, [](std::vector<string> res) {
 		SetBg(res[0]);
@@ -106,7 +106,7 @@ void RayTracer::DrawMenu() {
 	off += 17 * 3 + 2;
 
 	UI::Label(expandPos - 148, off, 12, "Material", white());
-	Engine::DrawQuad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
+	UI::Quad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
 	off++;
 	SV(mt.specular, spc) = UI2::Slider(expandPos - 147, off + 17, 147, "Specular", 0, 1, mt.specular);
 	SV(mt.gloss, gls) = UI2::Slider(expandPos - 147, off + 17 * 2, 147, "Gloss", 0, 1, mt.gloss);

@@ -17,7 +17,7 @@ std::thread* AnOps::conThread;
 SSH AnOps::ssh;
 
 void AnOps::Draw() {
-	Engine::DrawQuad(Display::width - expandPos, 0.0f, 180.0f, Display::height - 18.0f, white(0.9f, 0.15f));
+	UI::Quad(Display::width - expandPos, 0.0f, 180.0f, Display::height - 18.0f, white(0.9f, 0.15f));
 	if (expanded) {
 		float w = 180;
 		UI::Label(Display::width - expandPos + 5, 1, 12, "Options", white());
@@ -73,19 +73,19 @@ void AnOps::Draw() {
 		off = max(off, Display::height - 68.0f - 18.f);
 		UI::Label(Display::width - expandPos + 2, off, 12, "Status", white());
 		UI::Label(Display::width - expandPos + 4, off + 17, 12, "C++", white());
-		Engine::DrawQuad(Display::width - expandPos + 164, off + 18, 14, 14, (remote? AnWeb::hasC_s : AnWeb::hasC) ? green() : red());
+		UI::Quad(Display::width - expandPos + 164, off + 18, 14, 14, (remote? AnWeb::hasC_s : AnWeb::hasC) ? green() : red());
 		UI::Label(Display::width - expandPos + 4, off + 34, 12, "Python", white());
-		Engine::DrawQuad(Display::width - expandPos + 164, off + 34, 14, 14, (remote ? AnWeb::hasPy_s : AnWeb::hasPy) ? green() : red());
+		UI::Quad(Display::width - expandPos + 164, off + 34, 14, 14, (remote ? AnWeb::hasPy_s : AnWeb::hasPy) ? green() : red());
 		UI::Label(Display::width - expandPos + 4, off + 51, 12, "Fortran", white());
-		Engine::DrawQuad(Display::width - expandPos + 164, off + 51, 14, 14, (remote ? AnWeb::hasFt_s : AnWeb::hasFt) ? green() : red());
+		UI::Quad(Display::width - expandPos + 164, off + 51, 14, 14, (remote ? AnWeb::hasFt_s : AnWeb::hasFt) ? green() : red());
 		
-		Engine::DrawQuad(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, white(0.9f, 0.15f));
+		UI::Quad(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, white(0.9f, 0.15f));
 		if ((!UI::editingText && (Input::KeyUp(Key_O))) || Engine::Button(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = Clamp(expandPos + 1500 * Time::delta, 0.0f, 180.0f);
 	}
 	else {
-		Engine::DrawQuad(Display::width - expandPos, 0.0f, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
+		UI::Quad(Display::width - expandPos, 0.0f, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
 		if ((!UI::editingText && (Input::KeyUp(Key_O))) || Engine::Button(Display::width - expandPos - 110.0f, Display::height - 34.0f, 110.0f, 16.0f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(Display::width - expandPos - 110.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::expand);

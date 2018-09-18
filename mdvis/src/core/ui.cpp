@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "res/shddata.h"
 
 bool UI::_isDrawingLoop = false;
 uintptr_t UI::_activeEditText[UI_MAX_EDIT_TEXT_FRAMES] = {};
@@ -26,12 +27,26 @@ GLuint UI::_tvbo = 0;
 
 byte UI::_layer, UI::_layerMax;
 
+PROGDEF(UI::quadProgC)
+PROGDEF(UI::quadProgT)
+
 void UI::Init() {
 	_defaultStyle.fontSize = 12;
 	_defaultStyle.normal.Set(white(1, 0.3f), black());
 	_defaultStyle.mouseover.Set(white(), black());
 	_defaultStyle.highlight.Set(blue(), white());
 	_defaultStyle.press.Set(white(1, 0.5f), black());
+
+	quadProgC = Shader::FromVF(glsl::coreVert, glsl::coreFrag3);
+	quadProgT = Shader::FromVF(glsl::coreVert, glsl::coreFrag);
+
+	quadProgCLocs[0] = glGetUniformLocation(quadProgC, "col");
+#define LC(nm) quadProgTLocs[i++] = glGetUniformLocation(quadProgT, #nm)
+	int i = 0;
+	LC(sampler);
+	LC(col);
+	LC(level);
+#undef LC
 
 	InitVao();
 
@@ -125,6 +140,63 @@ void UI::PreLoop() {
 	_layer = 0;
 }
 
+void UI::Quad(float x, float y, float w, float h, Vec4 col) {
+	if (col.a <= 0) return;
+	Vec3 quadPoss[4];
+	quadPoss[0].x = x;
+	quadPoss[0].y = y;
+	quadPoss[1].x = x + w;
+	quadPoss[1].y = y;
+	quadPoss[2].x = x;
+	quadPoss[2].y = y + h;
+	quadPoss[3].x = x + w;
+	quadPoss[3].y = y + h;
+	for (int y = 0; y < 4; y++) {
+		quadPoss[y].z = 1;
+		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
+	}
+
+	UI::SetVao(4, quadPoss);
+
+	glUseProgram(Engine::defProgram);
+	glUniform4f(Engine::defColLoc, col.r, col.g, col.b, col.a * UI::alpha);
+	glBindVertexArray(UI::_vao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Engine::quadBuffer);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
+void UI::Quad(float x, float y, float w, float h, GLuint tex, Vec4 col, Vec2 uv0, Vec2 uv1, Vec2 uv2, Vec2 uv3) {
+	if (col.a <= 0) return;
+	Vec3 quadPoss[4];
+	quadPoss[0].x = x;		quadPoss[0].y = y;
+	quadPoss[1].x = x + w;	quadPoss[1].y = y;
+	quadPoss[2].x = x;		quadPoss[2].y = y + h;
+	quadPoss[3].x = x + w;	quadPoss[3].y = y + h;
+	for (int y = 0; y < 4; y++) {
+		quadPoss[y].z = 1;
+		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
+	}
+	Vec2 quadUvs[4]{ uv0, uv1, uv2, uv3 };
+
+	UI::SetVao(4, quadPoss, quadUvs);
+
+	glUseProgram(quadProgT);
+	glUniform1i(quadProgTLocs[0], 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glUniform4f(quadProgTLocs[1], col.r, col.g, col.b, col.a * UI::alpha);
+	glUniform1f(quadProgTLocs[2], 0);
+	glBindVertexArray(UI::_vao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Engine::quadBuffer);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
 void UI::Texture(float x, float y, float w, float h, ::Texture* texture, DRAWTEX_SCALING scl, float miplevel) {
 	UI::Texture(x, y, w, h, texture, white(), scl, miplevel);
 }
@@ -135,27 +207,27 @@ void UI::Texture(float x, float y, float w, float h, ::Texture* texture, Vec4 ti
 	GLuint tex = (texture && texture->loaded) ? texture->pointer : Engine::fallbackTex->pointer;
 	if (!texture->tiled) {
 		if (scl == DRAWTEX_STRETCH)
-			Engine::DrawQuad(x, y, w, h, tex, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0), false, tint, miplevel);
+			UI::Quad(x, y, w, h, tex, tint, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));
 		else if (scl == DRAWTEX_FIT) {
 			float w2h = ((float)texture->width) / texture->height;
 			if (w / h > w2h)
-				Engine::DrawQuad(x + 0.5f*(w - h*w2h), y, h*w2h, h, tex, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0), false, tint, miplevel);
+				UI::Quad(x + 0.5f*(w - h*w2h), y, h*w2h, h, tex, tint, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));
 			else
-				Engine::DrawQuad(x, y + 0.5f*(h - w / w2h), w, w / w2h, tex, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0), false, tint, miplevel);
+				UI::Quad(x, y + 0.5f*(h - w / w2h), w, w / w2h, tex, tint, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));
 		}
 		else if (scl == DRAWTEX_CROP) {
 			float w2h = ((float)texture->width) / texture->height;
 			if (w / h > w2h) {
 				float dh = (1 - ((h * texture->width / w) / texture->height)) / 2;
-				Engine::DrawQuad(x, y, w, h, tex, Vec2(0, 1-dh), Vec2(1, 1-dh), Vec2(0, dh), Vec2(1, dh), false, tint, miplevel);
+				UI::Quad(x, y, w, h, tex, tint, Vec2(0, 1-dh), Vec2(1, 1-dh), Vec2(0, dh), Vec2(1, dh));
 			}
 			else {
 				float dw = (1 - ((w * texture->height / h) / texture->width)) / 2;
-				Engine::DrawQuad(x, y, w, h, tex, Vec2(dw, 1), Vec2(1 - dw, 1), Vec2(dw, 0), Vec2(1 - dw, 0), false, tint, miplevel);
+				UI::Quad(x, y, w, h, tex, tint, Vec2(dw, 1), Vec2(1 - dw, 1), Vec2(dw, 0), Vec2(1 - dw, 0));
 			}
 		}
 		else {
-			Engine::DrawQuad(x, y, w, h, tex, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0), false, tint, miplevel);
+			UI::Quad(x, y, w, h, tex, tint);
 		}
 	}
 	else {
@@ -169,7 +241,7 @@ void UI::Texture(float x, float y, float w, float h, ::Texture* texture, Vec4 ti
 		const float x2 = dx * (ix + 1);
 		const float y1 = 1 - dy * (iy + 1);
 		const float y2 = 1 - dy * (iy);
-		Engine::DrawQuad(x, y, w, h, tex, Vec2(x1, y2), Vec2(x2, y2), Vec2(x1, y1), Vec2(x2, y1), false, tint, miplevel);
+		UI::Quad(x, y, w, h, tex, tint, Vec2(x1, y2), Vec2(x2, y2), Vec2(x1, y1), Vec2(x2, y1));
 	}
 }
 
@@ -229,8 +301,8 @@ string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, cons
 			if (!delayed && changed) *changed = true;
 			_editTextBlinkTime = 0;
 		}
-		Engine::DrawQuad(x, y, w, h, black());
-		Engine::DrawQuad(x + 1, y + 1, w - 2, h - 2, white());
+		UI::Quad(x, y, w, h, black());
+		UI::Quad(x + 1, y + 1, w - 2, h - 2, white());
 		UI::Label(x + 2, y + 0.4f*h, s, _editTextString);
 
 		auto szz = _editTextString.size();
@@ -253,7 +325,7 @@ string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, cons
 		if (!_editTextCursorPos2) xp2 = x + 2;
 		else xp2 = font->poss[_editTextCursorPos2 * 4].x*Display::width;
 		if (_editTextCursorPos != _editTextCursorPos2) {
-			Engine::DrawQuad(xp, y + 2, xp2 - xp, h - 4, hcol);
+			UI::Quad(xp, y + 2, xp2 - xp, h - 4, hcol);
 			UI::Label(min(xp, xp2), y + 0.4f*h, s, _editTextString.substr(min(_editTextCursorPos, _editTextCursorPos2), abs((int)_editTextCursorPos - (int)_editTextCursorPos2)), acol);
 		}
 		_editTextBlinkTime += Time::delta;
@@ -344,8 +416,8 @@ string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, 
 			if (!delayed && changed) *changed = true;
 			_editTextBlinkTime = 0;
 		}
-		Engine::DrawQuad(x, y, w, h, black());
-		Engine::DrawQuad(x + 1, y + 1, w - 2, h - 2, white());
+		UI::Quad(x, y, w, h, black());
+		UI::Quad(x + 1, y + 1, w - 2, h - 2, white());
 		pstr.resize(_editTextString.size(), repl);
 		UI::Label(x + 2, y + 0.4f*h, s, pstr, black());
 
@@ -369,7 +441,7 @@ string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, 
 		if (!_editTextCursorPos2) xp2 = x + 2;
 		else xp2 = font->poss[_editTextCursorPos2 * 4].x*Display::width;
 		if (_editTextCursorPos != _editTextCursorPos2) {
-			Engine::DrawQuad(xp, y + 2, xp2 - xp, h - 4, hcol);
+			UI::Quad(xp, y + 2, xp2 - xp, h - 4, hcol);
 			pstr.resize(_editTextString.size(), repl);
 			UI::Label(min(xp, xp2), y + 0.4f*h, s, pstr.substr(min(_editTextCursorPos, _editTextCursorPos2), abs((int)_editTextCursorPos - (int)_editTextCursorPos2)), acol);
 		}

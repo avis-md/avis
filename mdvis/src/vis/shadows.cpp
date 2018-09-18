@@ -170,7 +170,7 @@ float Shadows::DrawMenu(float off) {
 	SV(rw);
 	SV(rz);
 
-	Engine::DrawQuad(expandPos - 148, off - 1, 147, 17 * 5 + 2, white(0.9f, 0.1f));
+	UI::Quad(expandPos - 148, off - 1, 147, 17 * 5 + 2, white(0.9f, 0.1f));
 	UI::Label(expandPos - 147, off, 12, "Shadows", white());
 	show = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, show, white(), ORIENT_HORIZONTAL);
 	str = UI2::Slider(expandPos - 147, off + 17, 147, "Strength", 0, 5, str);

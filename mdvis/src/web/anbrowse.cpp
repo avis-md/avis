@@ -5,10 +5,6 @@
 #include "utils/runcmd.h"
 #endif
 
-#ifdef PLATFORM_WIN
-   #define stat _stat
-#endif
-
 AnBrowse::Folder AnBrowse::folder = AnBrowse::Folder("");
 bool AnBrowse::expanded = true;
 bool AnBrowse::mscFdExpanded[] = {};
@@ -87,7 +83,7 @@ void AnBrowse::Refresh() {
 
 void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 #ifndef IS_ANSERVER
-	Engine::DrawQuad(2.0f + 5 * layer, off, 150.0f, 16.0f, white(1, 0.3f));
+	UI::Quad(2.0f + 5 * layer, off, 150.0f, 16.0f, white(1, 0.3f));
 	if (Engine::Button(2.0f + 5 * layer, off, 16.0f, 16.0f, f->expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE)
 		f->expanded = !f->expanded;
 	if (!!Engine::Button(2.0f + 5 * layer, off, 150.0f, 16.0f)) {
@@ -135,14 +131,14 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 
 void AnBrowse::Draw() {
 #ifndef IS_ANSERVER
-	Engine::DrawQuad(0.0f, 0.0f, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
+	UI::Quad(0.0f, 0.0f, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
 	if (expanded) {
 		float f = 20;
 		Engine::BeginStencil(0.0f, 0.0f, expandPos, Display::height - 18.0f);
 		UI::Label(5.0f, 3.0f, 12.0f, "Scripts", white());
 
 #define BT(nm) (byte)(AN_NODE_ ## nm)
-#define MSC1(n, nm) Engine::DrawQuad(2, f, 150.0f, 16.0f, white(1, 0.3f)); \
+#define MSC1(n, nm) UI::Quad(2, f, 150.0f, 16.0f, white(1, 0.3f)); \
 		if (Engine::Button(2, f, 16.0f, 16.0f, mscFdExpanded[n] ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) \
 			mscFdExpanded[n] = !mscFdExpanded[n]; \
 		UI::Label(22, f, 12.0f, nm, white()); \
@@ -196,7 +192,7 @@ void AnBrowse::Draw() {
 
 		DoDraw(&folder, f, 0);
 		Engine::EndStencil();
-		Engine::DrawQuad(expandPos, Display::height - 34.0f, 16.0f, 16.0f, white(1, 0.2f));
+		UI::Quad(expandPos, Display::height - 34.0f, 16.0f, 16.0f, white(1, 0.2f));
 		if ((!UI::editingText && Input::KeyUp(Key_S)) || Engine::Button(expandPos, Display::height - 34.0f, 16.0f, 16.0f, Icons::collapse) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = min(expandPos + 1500 * Time::delta, 150.0f);

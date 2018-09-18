@@ -36,8 +36,6 @@ public:
 
 	Camera(std::ifstream& stream, SceneObject* o, long pos = -1);
 
-	std::vector<ASSETID> _effects;
-
 	static GLuint rectIdBuf;
 	//static GLuint d_probeMaskProgram, d_probeProgram, d_blurProgram, d_blurSBProgram, d_skyProgram, d_pLightProgram, d_sLightProgram, d_sLightCSProgram, d_sLightRSMProgram, d_sLightRSMFluxProgram;
 	//static GLuint d_reflQuadProgram;

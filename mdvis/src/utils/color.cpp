@@ -90,7 +90,7 @@ void Color::DrawPicker(bool hasA) {
 	Popups::pos.x = min(Popups::pos.x, Display::width - 155.0f);
 	Popups::pos.y = min(Popups::pos.y, Display::width - 155.0f);
 
-	Engine::DrawQuad(Popups::pos.x, Popups::pos.y, 150, 150, black(0.7f));
+	UI::Quad(Popups::pos.x, Popups::pos.y, 150, 150, black(0.7f));
 	Color::DrawSV(Popups::pos.x + 5, Popups::pos.y + 5, 120, 120, hsv.r);
 	Vec2 sv(1-hsv.y, hsv.z);
 	sv = Engine::DrawSliderFill2D(Popups::pos.x + 5, Popups::pos.y + 5, 120, 120, Vec2(), Vec2(1, 1), sv, white(0), white(0));
@@ -100,7 +100,7 @@ void Color::DrawPicker(bool hasA) {
 	UI::Texture(Popups::pos.x + 1 + 120 * sv.x, Popups::pos.y + 121 - 120 * sv.y, 8, 8, Icons::circle, cl);
 	Color::DrawH(Popups::pos.x + 132, Popups::pos.y + 5, 15, 120);
 	hsv.x = Engine::DrawSliderFillY(Popups::pos.x + 132, Popups::pos.y + 5, 15, 120, 0, 1, hsv.x, white(0), white(0));
-	Engine::DrawQuad(Popups::pos.x + 130, Popups::pos.y + 4 + 120 * hsv.x, 19, 2, white());
+	UI::Quad(Popups::pos.x + 130, Popups::pos.y + 4 + 120 * hsv.x, 19, 2, white());
 
 	if ((Input::mouse0State == 1) && !Engine::Button(Popups::pos.x, Popups::pos.y, 150, 150)) {
 		Popups::type = POPUP_TYPE::NONE;

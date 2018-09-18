@@ -78,7 +78,7 @@ void LiveSyncer::Stop() {
 }
 
 void LiveSyncer::DrawSide() {
-	Engine::DrawQuad(Display::width - expandPos, 18, 180, Display::height - 36.0f, white(0.9f, 0.15f));
+	UI::Quad(Display::width - expandPos, 18, 180, Display::height - 36.0f, white(0.9f, 0.15f));
 	if (expanded) {
 		UI::Label(Display::width - expandPos + 5, 20, 12, "Live Run", white());
 
@@ -99,7 +99,7 @@ void LiveSyncer::DrawSide() {
 		if (Engine::Button(Display::width - expandPos + 5, 17 * 3 + 4, expandPos - 10, 16, Vec4(0.7f, 0.4f, 0.4f, nma)) == MOUSE_RELEASE) {
 			if (status > IDLE) Stop();
 		}
-		Engine::DrawQuad(Display::width - expandPos * 0.5f - 5, 17 * 3 + 7, 10, 10, red());
+		UI::Quad(Display::width - expandPos * 0.5f - 5, 17 * 3 + 7, 10, 10, red());
 		if (status == MENU) {
 			UI::Label(Display::width - expandPos + 2, 17 * 5 + 4, 12, "Select Module", white());
 			uint a = 0;
@@ -116,7 +116,7 @@ void LiveSyncer::DrawSide() {
 		expandPos = Clamp(expandPos + 1500 * Time::delta, 0.0f, 180.0f);
 	}
 	else {
-		Engine::DrawQuad(Display::width - expandPos, 0.0f, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
+		UI::Quad(Display::width - expandPos, 0.0f, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
 		if ((!UI::editingText && Input::KeyUp(Key_R)) || Engine::Button(Display::width - expandPos - 110.0f, Display::height - 34.0f, 110.0f, 16.0f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(Display::width - expandPos - 110.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::expand);

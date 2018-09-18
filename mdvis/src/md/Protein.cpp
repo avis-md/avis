@@ -315,7 +315,7 @@ void Protein::DrawMenu(float off) {
 	off += 17;
 	for (uint i = 0; i < proCnt; i++) {
 		Protein& p = pros[i];
-		Engine::DrawQuad(exp - 148, off, 146, 16, white(1, 0.3f));
+		UI::Quad(exp - 148, off, 146, 16, white(1, 0.3f));
 		if (Engine::Button(exp - 148, off, 16, 16, p.expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) {
 			p.expanded = !p.expanded;
 		}
@@ -345,7 +345,7 @@ void Protein::DrawMenu(float off) {
 			for (uint f1 = (uint)p.first.x; f1 < Particles::residueListSz; f1++) {
 				auto& rli = Particles::residueLists[f1];
 				while (f2 < rli.residueSz) {
-					Engine::DrawQuad(exp - 143, off, 141, 16, white(1, 0.4f));
+					UI::Quad(exp - 143, off, 141, 16, white(1, 0.4f));
 					UI::Label(exp - 141, off, 12, rli.name, white());
 					f2++;
 					off += 17;

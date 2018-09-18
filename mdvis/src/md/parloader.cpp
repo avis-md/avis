@@ -445,13 +445,13 @@ void ParLoader::DoOpenAnim() {
 void ParLoader::DrawOpenDialog() {
 	if (!showDialog) return;
 	UI::IncLayer();
-	Engine::DrawQuad(0, 0, (float)Display::width, (float)Display::height, black(0.7f));
+	UI::Quad(0, 0, (float)Display::width, (float)Display::height, black(0.7f));
 
 	float woff = roundf(Display::width*0.5f - 200 - _impPos / 2);
 	float hoff = roundf(Display::height * 0.5f - 150);
 
 	if (_showImp || _impPos > 0) {
-		Engine::DrawQuad(woff + 400, hoff, _impPos, 300, white(0.8f, 0.1f));
+		UI::Quad(woff + 400, hoff, _impPos, 300, white(0.8f, 0.1f));
 		Engine::PushStencil(woff + 400, hoff, _impPos, 300);
 		UI::Label(woff + 402, hoff, 12, "Choose Importer", white());
 		uint i = 1;
@@ -478,8 +478,8 @@ void ParLoader::DrawOpenDialog() {
 	}
 	_impPos = _showImp ? min(_impPos + 800 * Time::delta, 100.0f) : max(_impPos - 800 * Time::delta, 0.0f);
 
-	Engine::DrawQuad(woff, hoff, 400, 300, white(0.8f, 0.15f));
-	Engine::DrawQuad(woff, hoff, 400, 16, white(0.9f, 0.1f));
+	UI::Quad(woff, hoff, 400, 300, white(0.8f, 0.15f));
+	UI::Quad(woff, hoff, 400, 16, white(0.9f, 0.1f));
 	UI::Label(woff + 2, hoff, 12, loadAsTrj ? "Load Trajectory" : "Load Configuration", white());
 	UI::Label(woff + 2, hoff + 17, 12, "File(s)", white());
 	string nm = droppedFiles[0];

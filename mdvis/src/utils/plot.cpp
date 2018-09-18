@@ -13,12 +13,12 @@ float plt::remapdata::Eval(float f) {
 }
 
 void plt::plot(float x, float y, float w, float h, float* dx, float* dy, uint cnt, Font* font, uint sz, Vec4 col) {
-	Engine::DrawQuad(x, y, w, h, black());
+	UI::Quad(x, y, w, h, black());
 	x += 2;
 	y += 2;
 	w -= 4;
 	h -= 4;
-	Engine::DrawQuad(x, y, w, h, white());
+	UI::Quad(x, y, w, h, white());
 
 	Vec3* poss = new Vec3[cnt];
 	float x1 = *dx, x2 = *dx, y1 = *dy, y2 = *dy;
@@ -66,12 +66,12 @@ void plt::remap(float x, float y, float w, float h, plt::remapdata& data) {
 		}
 	}
 	UI::Label(x, y + h - 17, 12, "anchor", white());
-	Engine::DrawQuad(x, y + 17, w, h - 34, white(1, 0.1f));
+	UI::Quad(x, y + 17, w, h - 34, white(1, 0.1f));
 	x += 2;
 	y += 19;
 	w -= 4;
 	h -= 38;
-	Engine::DrawQuad(x, y, w, h, white(1, 0.3f));
+	UI::Quad(x, y, w, h, white(1, 0.3f));
 	
 	if (!!ps){
 		float y0, x1;

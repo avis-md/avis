@@ -144,7 +144,7 @@ void RenderTexture::Blit(Texture* src, RenderTexture* dst, Shader* shd, string t
 		Debug::Warning("Blit", "Parameter is null!");
 		return;
 	}
-	Blit(src->pointer, dst, shd->pointer, texName);
+	//Blit(src->pointer, dst, shd->pointer, texName);
 }
 
 void RenderTexture::Blit(GLuint src, RenderTexture* dst, GLuint shd, string texName) {

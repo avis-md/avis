@@ -66,7 +66,6 @@ enum GBUFFERS : byte {
 #pragma endregion
 
 #include "asset/assetobject.h"
-#include "asset/shader.h"
 #include "asset/mesh.h"
 #include "asset/texture.h"
 #include "asset/texture3d.h"

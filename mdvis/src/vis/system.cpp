@@ -177,7 +177,7 @@ bool VisSystem::InMainWin(const Vec2& pos) {
 }
 
 void VisSystem::DrawTitle() {
-	Engine::DrawQuad(0,0, (float)Display::width, 18, white(0.95f, 0.05f));
+	UI::Quad(0,0, (float)Display::width, 18, white(0.95f, 0.05f));
 	const string menu[] = {"File", "Edit", "Options", "Render", "Help"};
 	const uint menusp[] = {0, 30, 62, 115, 170, 210};
 	for (uint i = 0; i < 5; i++) {
@@ -188,19 +188,19 @@ void VisSystem::DrawTitle() {
 		}
 		//UI::Label(5 + menusp[i], 1, 12, menu[i], white());
 	}
-	Engine::DrawQuad(Display::width * 0.6f, 1, Display::width * 0.3f, 16, white(1, 0.2f));
+	UI::Quad(Display::width * 0.6f, 1, Display::width * 0.3f, 16, white(1, 0.2f));
 	UI::Label(Display::width * 0.6f + 2, 1, 12, message, (!messageSev) ? white(0.5f) : ((messageSev==1)? yellow(0.8f) : red(0.8f)));
 	if (hasMessage2 && Engine::Button(Display::width * 0.9f - 16, 1, 16, 16, Icons::details, white(0.8f)) == MOUSE_RELEASE) {
 		Popups::type = POPUP_TYPE::SYSMSG;
 	}
 
 	UI::font->Align(ALIGN_TOPRIGHT);
-	UI::Label(Display::width - 5.0f, 3, 10, __APPVERSION__, white(0.7f));
+	UI::Label(Display::width - 5.0f, 3, 10, VERSIONSTRING, white(0.7f));
 	UI::font->Align(ALIGN_TOPLEFT);
 }
 
 void VisSystem::DrawBar() {
-	Engine::DrawQuad(0, Display::height - 18.0f, (float)Display::width, 18, white(0.9f, 0.1f));
+	UI::Quad(0, Display::height - 18.0f, (float)Display::width, 18, white(0.9f, 0.1f));
 	//UI::Label(2, Display::height - 16.0f, 12, "Render: " + std::to_string(renderMs) + "ms  UI: " + std::to_string(uiMs) + "ms", white(0.5f));
 
 
@@ -227,7 +227,7 @@ void VisSystem::DrawBar() {
 
 		float al = float(Particles::anim.activeFrame) / (Particles::anim.frameCount - 1);
 		al = Engine::DrawSliderFill(225, Display::height - 13.0f, Display::width - 385.0f, 9, 0, 1, al, white(0.5f), VisSystem::accentColor);
-		Engine::DrawQuad(222 + (Display::width - 385.0f) * al, Display::height - 17.0f, 6, 16, white());
+		UI::Quad(222 + (Display::width - 385.0f) * al, Display::height - 17.0f, 6, 16, white());
 
 		if ((Engine::Button(225, Display::height - 13.0f, Display::width - 385.0f, 9) & 0x0f) == MOUSE_DOWN)
 			ParGraphics::seek = true;
@@ -252,9 +252,9 @@ void VisSystem::DrawBar() {
 
 void VisSystem::DrawMsgPopup() {
 	UI::IncLayer();
-	Engine::DrawQuad(0, 0, (float)Display::width, (float)Display::height, black(0.7f));
+	UI::Quad(0, 0, (float)Display::width, (float)Display::height, black(0.7f));
 	
-	Engine::DrawQuad(Display::width * 0.5f - 200, Display::height * 0.5f - 50, 400, 100, white(0.95f, 0.15f));
+	UI::Quad(Display::width * 0.5f - 200, Display::height * 0.5f - 50, 400, 100, white(0.95f, 0.15f));
 
  	if ((Engine::Button(Display::width * 0.5f + 120, Display::height * 0.5f + 33, 79, 16, white(1, 0.4f), "Close", 12, white(), true) == MOUSE_RELEASE) ||
 		(Input::KeyDown(Key_Escape) && UI::_layer == UI::_layerMax) || 

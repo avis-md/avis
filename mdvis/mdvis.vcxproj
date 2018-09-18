@@ -137,7 +137,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\asset\mesh.cpp" />
-    <ClCompile Include="src\asset\shader.cpp" />
+    <ClCompile Include="src\utils\shader.cpp" />
     <ClCompile Include="src\hdr.cpp" />
     <ClCompile Include="src\live\livesyncer.cpp" />
     <ClCompile Include="src\live\lj256.cpp" />
@@ -231,7 +231,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\asset\mesh.h" />
-    <ClInclude Include="src\asset\shader.h" />
+    <ClInclude Include="src\utils\shader.h" />
     <ClInclude Include="src\hdr.h" />
     <ClInclude Include="src\live\livesyncer.h" />
     <ClInclude Include="src\live\lj256.h" />
@@ -265,6 +265,7 @@
     <ClInclude Include="src\md\pdb.h" />
     <ClInclude Include="src\md\Protein.h" />
     <ClInclude Include="src\md\XYZ.h" />
+    <ClInclude Include="src\minimalwin.h" />
     <ClInclude Include="src\ocl\oclcode.h" />
     <ClInclude Include="src\ocl\raytracer.h" />
     <ClInclude Include="src\res\resdata.h" />
@@ -320,7 +321,6 @@
     <ClInclude Include="src\utils\ptrext.h" />
     <ClInclude Include="src\core\time.h" />
     <ClInclude Include="src\core\ui.h" />
-    <ClInclude Include="src\Defines.h" />
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\utils\net.h" />
     <ClInclude Include="src\SceneObjects.h" />

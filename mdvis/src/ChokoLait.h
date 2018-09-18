@@ -6,7 +6,6 @@ ChokoLait Interface for ChokoEngine (c) Chokomancarr 2018
 See https://chokomancarr.github.io/ChokoLait/ for documentation and examples.
 */
 
-#include "Defines.h"
 #include "Engine.h"
 
 typedef void(*emptyCallbackFunc)(void);

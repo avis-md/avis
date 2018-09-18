@@ -34,7 +34,7 @@ void ParMenu::Init() {
 }
 
 void ParMenu::Draw() {
-	Engine::DrawQuad(0, 18, expandPos, Display::height - 36.0f, white(0.9f, 0.15f));
+	UI::Quad(0, 18, expandPos, Display::height - 36.0f, white(0.9f, 0.15f));
 	if (expanded) {
 		if (!Particles::particleSz) {
 			if (Engine::Button(expandPos - 110, Display::height * 0.4f - 40, 80, 80, Icons::openfile, white(0.4f)) == MOUSE_RELEASE) {
@@ -76,7 +76,7 @@ void ParMenu::Draw() {
 
 		for (uint i = 0; i < 5; i++) {
 			if (i == activeMenu)
-				Engine::DrawQuad(expandPos, 81.0f * i + 18, 17, 81, white(0.9f, 0.15f));
+				UI::Quad(expandPos, 81.0f * i + 18, 17, 81, white(0.9f, 0.15f));
 			else
 				if (Engine::Button(expandPos, 81.0f * i + 18, 16, 80, white(0.7f, 0.1f), white(1, 0.2f), white(1, 0.05f)) == MOUSE_RELEASE) {
 					activeMenu = i;
@@ -91,7 +91,7 @@ void ParMenu::Draw() {
 		UI::font->Align(ALIGN_TOPLEFT);
 		Engine::ResetUIMatrix();
 
-		Engine::DrawQuad(expandPos, Display::height - 34.0f, 16, 16, white(0.9f, 0.15f));
+		UI::Quad(expandPos, Display::height - 34.0f, 16, 16, white(0.9f, 0.15f));
 		if ((!UI::editingText && Input::KeyUp(Key_T)) || Engine::Button(expandPos, Display::height - 34.0f, 16, 16, Icons::collapse) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = Clamp(expandPos + 1500 * Time::delta, 2.0f, 150.0f);
@@ -149,7 +149,7 @@ void ParMenu::Draw_List(float off) {
 	if (!!selCnt && Particles::particles_Conn.visible) {
 		DrawConnMenu(Particles::particles_Conn, 1, off, 148);
 	}
-	//Engine::DrawQuad(1, off-1, expandPos - 2, Display::height - 37.0f, white(0.9f, 0.1f));
+	//UI::Quad(1, off-1, expandPos - 2, Display::height - 37.0f, white(0.9f, 0.1f));
 	Engine::BeginStencil(0, off, expandPos, Display::height - 18 - off);
 	if (Rect(0, off, expandPos, Display::height - 18 - off).Inside(Input::mousePos)) {
 		_off -= Input::mouseScroll * 20;
@@ -161,7 +161,7 @@ void ParMenu::Draw_List(float off) {
 	for (uint i = 0; i < Particles::residueListSz; i++) {
 		auto& rli = Particles::residueLists[i];
 		//if (off > 0) {
-			Engine::DrawQuad(expandPos - 148, off, 146, 16, rli.selected? Vec4(0.45f, 0.3f, 0.1f, 1) : white(1, 0.3f));
+			UI::Quad(expandPos - 148, off, 146, 16, rli.selected? Vec4(0.45f, 0.3f, 0.1f, 1) : white(1, 0.3f));
 			if (Engine::Button(expandPos - 148, off, 16, 16, rli.expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) {
 				rli.expanded = !rli.expanded;
 			}
@@ -216,7 +216,7 @@ void ParMenu::Draw_List(float off) {
 			for (uint j = 0; j < rli.residueSz; j++) {
 				auto& rj = rli.residues[j];
 				//if (off > 0) {
-					Engine::DrawQuad(expandPos - 143, off, 141, 16, white(1, 0.35f));
+					UI::Quad(expandPos - 143, off, 141, 16, white(1, 0.35f));
 					if (Engine::Button(expandPos - 143, off, 16, 16, rj.expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) {
 						rj.expanded = !rj.expanded;
 					}
@@ -246,7 +246,7 @@ void ParMenu::Draw_List(float off) {
 					for (uint k = 0; k < rj.cnt; k++) {
 						auto itr = std::find(sell.begin(), sell.end(), rj.offset + k + 1);
 						bool has = itr != sell.end();
-						Engine::DrawQuad(expandPos - 138, off, 136, 16, has? Vec4(0.3f, 0.5f, 0.3f, 1) : white(1, 0.4f));
+						UI::Quad(expandPos - 138, off, 136, 16, has? Vec4(0.3f, 0.5f, 0.3f, 1) : white(1, 0.4f));
 						UI::Label(expandPos - 136, off, 12, &Particles::particles_Name[(rj.offset + k)*PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
 						if (Engine::Button(expandPos - 138, off, 120, 16) == MOUSE_RELEASE) {
 							if (!Input::KeyHold(Key_LeftShift)) {
@@ -289,12 +289,12 @@ loopout:
 void ParMenu::DrawStart() {
 	UI::Texture(0, 0, (float)Display::width, (float)Display::height, ParGraphics::bg, DRAWTEX_CROP);
 	if (ParLoader::busy) {
-		Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100, 6, white(0.8f, 0.2f));
-		Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f, 100 * *ParLoader::loadProgress, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
+		UI::Quad(Display::width * 0.5f - 50, Display::height * 0.6f, 100, 6, white(0.8f, 0.2f));
+		UI::Quad(Display::width * 0.5f - 50, Display::height * 0.6f, 100 * *ParLoader::loadProgress, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
 		float oy = 10;
 		if (ParLoader::loadProgress2 && *ParLoader::loadProgress2 > 0) {
-			Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f + 8, 100, 6, white(0.8f, 0.2f));
-			Engine::DrawQuad(Display::width * 0.5f - 50, Display::height * 0.6f + 8, 100 * *ParLoader::loadProgress2, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
+			UI::Quad(Display::width * 0.5f - 50, Display::height * 0.6f + 8, 100, 6, white(0.8f, 0.2f));
+			UI::Quad(Display::width * 0.5f - 50, Display::height * 0.6f + 8, 100 * *ParLoader::loadProgress2, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
 			oy += 14;
 			UI::Label(Display::width * 0.5f - 48, Display::height * 0.6f + oy + 16, 12, "Frame " + std::to_string(*ParLoader::loadFrames));
 		}
@@ -304,10 +304,10 @@ void ParMenu::DrawStart() {
 
 void ParMenu::DrawSplash() {
 	UI::IncLayer();
-	Engine::DrawQuad(0, 0, (float)Display::width, (float)Display::height, black(0.7f));
+	UI::Quad(0, 0, (float)Display::width, (float)Display::height, black(0.7f));
 	UI::Texture(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, ParGraphics::splash);
 	UI::font->Align(ALIGN_TOPRIGHT);
-	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 120, 12, __APPVERSION__, white());
+	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 120, 12, VERSIONSTRING, white());
 	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 104, 12, "Build hash: " + VisSystem::version_hash, white());
 	UI::font->Align(ALIGN_TOPLEFT);
 
@@ -338,7 +338,7 @@ void ParMenu::DrawSplash() {
 	auto pos = Vec4(Display::width*0.5f - 20, Display::height*0.5f - 80, 215, 183);
 	if (!!recentFiles.size()) {
 		UI::Label(pos.x + 2, pos.y + 1, 12, _("Recent Files"), white());
-		Engine::DrawQuad(pos.x, pos.y + 17, pos.z, pos.w - 17, white(0.7f, 0.05f));
+		UI::Quad(pos.x, pos.y + 17, pos.z, pos.w - 17, white(0.7f, 0.05f));
 		for (uint i = 0; i < recentFiles.size(); i++) {
 			if (35 + 17 * i > pos.w) break;
 			ms = Engine::Button(pos.x + 5, pos.y + 20 + 17 * i, pos.z - 10, 16, white(0, 0.4f), recentFilesN[i], 12, white());
@@ -376,7 +376,7 @@ void ParMenu::DrawConnMenu(Particles::conninfo& cn, float x, float& off, float w
 #define SV(v) auto _ ## v = cn.v
 #define CP(v) if (_ ## v != cn.v) { cn.v = _ ## v; Scene::dirty = true; }
 	float sz = 17 * (((!cn.drawMode)? (cn.dashed? 5 : 3) : 2) + (cn.usecol? 2 : 1)) + 2.0f;
-	Engine::DrawQuad(x, off, width, sz, white(0.7f, 0.15f));
+	UI::Quad(x, off, width, sz, white(0.7f, 0.15f));
 	off++;
 	bool dl = !!cn.drawMode;
 	UI2::Toggle(x + 2, off, width - 4, "Solid", dl);
@@ -451,7 +451,7 @@ void ParMenu::SelClear() {
 }
 
 void ParMenu::DrawSelPopup() {
-	Engine::DrawQuad(0, 20, 150, Display::height - 40.0f, white(1, 0.1f));
+	UI::Quad(0, 20, 150, Display::height - 40.0f, white(1, 0.1f));
 	UI::Label(2, 20, 12, "Select", white());
 	if (Engine::Button(100, 20, 49, 16, white(1, 0.4f), "Cancel", 12, white(), true) == MOUSE_RELEASE) {
 		Popups::type = POPUP_TYPE::NONE;
@@ -461,7 +461,7 @@ void ParMenu::DrawSelPopup() {
 	Engine::BeginStencil(0, off, expandPos, Display::height - 18 - off);
 	for (uint i = 0; i < Particles::residueListSz; i++) {
 		auto& rli = Particles::residueLists[i];
-		Engine::DrawQuad(expandPos - 148, off, 146, 16, white(1, 0.3f));
+		UI::Quad(expandPos - 148, off, 146, 16, white(1, 0.3f));
 		//UI::Label(expandPos - 132, off, 12, rli.name, white());
 		if (Engine::Button(expandPos - 130, off, 128, 16, white(0), rli.name, 12, white()) == MOUSE_RELEASE && Popups::type == POPUP_TYPE::RESNM) {
 			*(string*)Popups::data = string(rli.name);
@@ -477,7 +477,7 @@ void ParMenu::DrawSelPopup() {
 			if (rli.expanded) {
 				for (uint j = 0; j < rli.residueSz; j++) {
 					auto& rj = rli.residues[j];
-					Engine::DrawQuad(expandPos - 143, off, 141, 16, white(1, 0.35f));
+					UI::Quad(expandPos - 143, off, 141, 16, white(1, 0.35f));
 					if (Engine::Button(expandPos - 126, off, 124, 16, white(0), rj.name, 12, white()) == MOUSE_RELEASE && Popups::type == POPUP_TYPE::RESID) {
 						//*(uint*)Popups::data = ;
 						Popups::type = POPUP_TYPE::NONE;
@@ -491,7 +491,7 @@ void ParMenu::DrawSelPopup() {
 							goto loopout;
 						if (rj.expanded) {
 							for (uint k = 0; k < rj.cnt; k++) {
-								Engine::DrawQuad(expandPos - 138, off, 136, 16, white(1, 0.4f));
+								UI::Quad(expandPos - 138, off, 136, 16, white(1, 0.4f));
 								UI::Label(expandPos - 136, off, 12, &Particles::particles_Name[(rj.offset + k)*PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
 								if (Engine::Button(expandPos - 138, off, 120, 16) == MOUSE_RELEASE) {
 									*(uint*)Popups::data = rj.offset + k;

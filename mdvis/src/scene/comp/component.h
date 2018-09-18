@@ -1,6 +1,8 @@
 #pragma once
 #include "SceneObjects.h"
 
+typedef byte DRAWORDER;
+
 class Component : public Object {
 public:
 	Component(string name, COMPONENT_TYPE t, DRAWORDER drawOrder = 0x00, SceneObject* o = nullptr, std::vector<COMPONENT_TYPE> dep = {});

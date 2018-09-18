@@ -36,7 +36,7 @@ void Light::CalcShadowMatrix() {
 	}
 }
 
-Light::Light() : Component("Light", COMP_LHT, DRAWORDER_LIGHT), lightType(LIGHTTYPE_POINT), color(white()), cookie(0), hsvMap(0) {}
+Light::Light() : Component("Light", COMP_LHT), lightType(LIGHTTYPE_POINT), color(white()), cookie(0), hsvMap(0) {}
 
 Light::Light(std::ifstream& stream, SceneObject* o, long pos) : Light() {
 	if (pos >= 0)
