@@ -250,11 +250,13 @@ void IO::RestoreStdio2() {
 }
 
 void IO::OpenFd(string path) {
-#ifdef PLATFORM_WIN
+#if PLATFORM_WIN
 	std::replace(path.begin(), path.end(), '/', '\\');
 	RunCmd::Run("explorer \"" + path + "\"");
+#elif PLATFORM_LNX
+	RunCmd::Run("gnome-open \"" + path + "\"");
 #else
-#error open folder code here
+	RunCmd::Run("open \"" + path + "\"");
 #endif
 }
 

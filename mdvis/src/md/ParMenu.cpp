@@ -8,7 +8,6 @@
 #include "ui/popups.h"
 #include "ui/ui_ext.h"
 #include "ocl/raytracer.h"
-#include "mdchan.h"
 
 int ParMenu::activeMenu = 0;
 int ParMenu::activeSubMenu[] = {};

@@ -164,8 +164,7 @@ void Particles::UpdateBufs() {
 		a.second = new Int2*[anim.frameCount]{};
 	}
 
-	static std::vector<Vec3> poss;
-	poss.resize(particleSz);
+	std::vector<Vec3> poss(particleSz);
 #pragma omp parallel for
 	for (int a = 0; a < (int)particleSz; a++) {
 		poss[a] = (Vec3)particles_Pos[a];
@@ -225,8 +224,13 @@ void Particles::SetFrame(uint frm) {
 	else {
 		anim.activeFrame = frm;
 		particles_Pos = anim.poss[anim.activeFrame];
+		std::vector<Vec3> poss(particleSz);
+#pragma omp parallel for
+		for (int a = 0; a < (int)particleSz; a++) {
+			poss[a] = (Vec3)particles_Pos[a];
+		}
 		glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(glm::dvec3), particles_Pos);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(Vec3), &poss[0]);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		bool has = false;
 		for (int i = anim.conns2.size() - 1; i >= 0; i--) {

@@ -9,7 +9,7 @@ template <typename T> const T& max(const T& a, const T& b) {
 	else return b;
 }
 template <typename T> T Repeat(T t, T a, T b) {
-	while (t > b)
+	while (t >= b)
 		t -= (b - a);
 	while (t < a)
 		t += (b - a);

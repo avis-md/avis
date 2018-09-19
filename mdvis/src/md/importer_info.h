@@ -30,8 +30,8 @@ struct TrjInfo {
 	float progress;
 	byte padding[3];
 	uint16_t frames;
-	float** poss;
-	float** vels;
+	double** poss;
+	double** vels;
 	char error[100];
 };
 

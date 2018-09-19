@@ -10,7 +10,6 @@
 #include "ui/localizer.h"
 #include "utils/effects.h"
 #include "web/anweb.h"
-#include "mdchan.h"
 #include "shadows.h"
 #include "hdr.h"
 #include "ocl/raytracer.h"
@@ -316,7 +315,9 @@ void ParGraphics::Update() {
 			auto df = dt * animTarFps;
 			auto dfi = (uint)floor(df);
 			animOff = (df - dfi) / animTarFps;
-			Particles::SetFrame(Repeat(af + dfi, 0U, Particles::anim.frameCount - 1));
+			af += dfi;
+			while (af >= Particles::anim.frameCount) af -= Particles::anim.frameCount;
+			Particles::SetFrame(af);
 		}
 		Scene::dirty = true;
 	}

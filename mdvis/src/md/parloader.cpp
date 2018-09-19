@@ -358,7 +358,6 @@ void ParLoader::DoOpen() {
 
 	Particles::particleSz = info.num;
 
-//update import trj data type
 	auto& anm = Particles::anim;
 	if (info.trajectory.frames > 0) {
 		auto& trj = info.trajectory;

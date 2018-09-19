@@ -1,7 +1,6 @@
 #include "Gromacs.h"
-#include "vis/system.h"
-#include "md/Protein.h"
-#include "utils/rawvector.h"
+#include <string>
+#include <vector>
 #include "xdrfile/xdrfile.h"
 #include "xdrfile/xdrfile_trr.h"
 
@@ -23,24 +22,13 @@ bool Gromacs::Read(ParInfo* info) {
 	}
 
 	char buf[100] = {};
-	string s;
+	std::string s;
 
 	std::getline(strm, s);
 	if (strm.eof()) {
 		SETERR("Cannot read from file!");
 		return false;
 	}
-	/*
-	auto tp = string_find(s, "t=");
-	if (tp > -1) {
-		//frm.name = s.substr(0, tp);
-		//frm.time = std::stof(s.substr(tp + 2));
-	}
-	else {
-		//frm.name = s;
-		//frm.time = 0;
-	}
-	*/
 	std::getline(strm, s);
 	auto& sz = info->num = std::stoi(s);
 	info->resname = new char[sz * info->nameSz]{};
@@ -50,6 +38,10 @@ bool Gromacs::Read(ParInfo* info) {
 	info->pos = new double[sz * 3];
 	info->vel = new double[sz * 3];
 
+	auto lc = strm.tellg();
+	strm.getline(buf, 100);
+	auto ns = _find_char_not_of(buf, buf + 10, ' ') + 1;
+	strm.seekg(lc);
 	for (uint i = 0; i < sz; i++) {
 		info->progress = i * 1.0f / sz;
 		strm.getline(buf, 100);
@@ -57,26 +49,56 @@ bool Gromacs::Read(ParInfo* info) {
 			SETERR("File data is incomplete!");
 			return false;
 		}
-		uint n0 = _find_char_not_of(buf, buf + 5, ' ');
-		info->resId[i] = (uint16_t)std::stoi(string(buf + n0, 5 - n0));
-		memcpy(info->resname + i * info->nameSz, buf + 5, 5);
-		n0 = _find_char_not_of(buf + 10, buf + 15, ' ');
-		memcpy(info->name + i * info->nameSz, buf + 10 + n0, 5 - n0);
-		info->type[i] = (uint16_t)buf[10 + n0];
-		info->pos[i * 3] = std::stod(string(buf + 20, 8));
-		info->pos[i * 3 + 1] = std::stod(string(buf + 28, 8));
-		info->pos[i * 3 + 2] = std::stod(string(buf + 36, 8));
+		auto bf = buf;
+		info->resId[i] = (uint16_t)std::atoi(bf); bf += ns;
+		memcpy(info->resname + i * info->nameSz, bf, 5); bf += 5;
+		uint n0 = _find_char_not_of(bf, bf + 5, ' ');
+		memcpy(info->name + i * info->nameSz, bf + n0, 5 - n0);
+		info->type[i] = (uint16_t)bf[n0];
+		bf += 5 + ns;
+		info->pos[i * 3] = std::atof(bf); bf += 8;
+		info->pos[i * 3 + 1] = std::atof(bf); bf += 8;
+		info->pos[i * 3 + 2] = std::atof(bf);
 		if (!!buf[50]) {
-			info->vel[i * 3] = std::stod(string(buf + 44, 8));
-			info->vel[i * 3 + 1] = std::stod(string(buf + 52, 8));
-			info->vel[i * 3 + 2] = std::stod(string(buf + 60, 8));
+			bf += 8;
+			info->vel[i * 3] = std::atof(bf); bf += 8;
+			info->vel[i * 3 + 1] = std::atof(bf); bf += 8;
+			info->vel[i * 3 + 2] = std::atof(bf);
 		}
 	}
 
 	strm >> info->bounds[1] >> info->bounds[3] >> info->bounds[5];
+	strm.ignore(10, '\n');
+	ReadGro2(info, strm, ns);
 	return true;
 }
 
+bool Gromacs::ReadGro2(ParInfo* info, std::ifstream& strm, size_t isz) {
+	auto trj = &info->trajectory;
+	std::vector<double*> poss;
+	double* ps;
+	char buf[100] = {};
+	isz = 10 + 2 * isz;
+	while (strm.getline(buf, 100)) {
+		ps = new double[info->num * 3];
+		strm.ignore(100, '\n');
+		for (uint32_t i = 0; i < info->num; i++) {
+			strm.getline(buf, 100);
+			auto bf = buf + isz;
+			ps[i * 3] = std::atof(bf); bf += 8;
+			ps[i * 3 + 1] = std::atof(bf); bf += 8;
+			ps[i * 3 + 2] = std::atof(bf);
+		}
+		poss.push_back(ps);
+		trj->frames++;
+		strm.ignore(100, '\n');
+	}
+	trj->poss = new double*[trj->frames];
+	memcpy(trj->poss, &poss[0], trj->frames * sizeof(uintptr_t));
+	return true;
+}
+
+//fix float
 bool Gromacs::ReadTrj(TrjInfo* info) {
 	int natoms = 0;
 	auto file = xdrfile_open(info->first, "rb");
@@ -106,7 +128,7 @@ bool Gromacs::ReadTrj(TrjInfo* info) {
 		SETERR("No frames contained in file!");
 		return false;
 	}
-	info->poss = new float*[info->frames];
+	info->poss = new double*[info->frames];
 	memcpy(info->poss, &poss[0], info->frames * sizeof(uintptr_t));
 	return true;
 }
