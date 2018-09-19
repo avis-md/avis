@@ -3,13 +3,7 @@
         {
             "name": "Mac",
             "includePath": [
-                "${workspaceFolder}/src",
-                "/usr/include",
-                "usr/local/include",
-                "usr/include/freetype2/",
-                "/usr/local/include/freetype2/",
-                "/usr/include/python2.7/",
-                "/usr/local/include/python2.7"
+                "${workspaceFolder}/src"
             ],
             "defines": [],
             "macFrameworkPath": [

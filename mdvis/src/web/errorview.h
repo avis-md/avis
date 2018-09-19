@@ -20,6 +20,7 @@ public:
 
     static int Parse_GCC(const string& path, const string& sig, const string& name, std::vector<Message>& msgs);
 	static int Parse_MSVC(const string& path, const string& sig, const string& name, std::vector<Message>& msgs);
-
+    static int Parse_GFortran(const string& path, const string& sig, const string& name, std::vector<Message>& msgs);
+	
     static void Draw();
 };

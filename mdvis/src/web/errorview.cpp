@@ -182,3 +182,52 @@ void ErrorView::Draw() {
 		}
 	}
 }
+
+int ErrorView::Parse_GFortran(const string& path, const string& sig, const string& name, std::vector<Message>& msgs) {
+    msgs.clear();
+    std::ifstream strm(path);
+    string str;
+    int n = 0;
+    Message* msg = nullptr;
+    const auto sz = sig.size();
+    const string nm = name.substr(name.find_last_of('/') + 1);
+    while (std::getline(strm, str)) {
+#ifdef PLATFORM_WIN
+		if (str[1] == ':' && str[0] >= 'A' && str[0] <= 'Z') {
+#else
+        if (str[0] == '/') {
+#endif
+			if (str.substr(0, sz) == sig) {
+				msgs.push_back(Message());
+				msg = &msgs.back();
+				msg->name = nm; msg->path = sig;
+				int i = str.find_first_of(':', sz + 2);
+				msg->linenum = TryParse(str.substr(sz + 1, i - sz - 1), -1);
+				if (msg->linenum > -1) {
+					int j = str.find_first_of(':', i + 2);
+					msg->charnum = TryParse(str.substr(i + 1, j - i - 1), -1);
+					msg->msg.resize(1);
+					continue;
+				}
+				else {
+					msg = nullptr;
+					msgs.pop_back();
+				}
+			}
+        }
+        if (msg) {
+			if (str.substr(0, 7) == "Error: ") {
+				msg->msg[0] = str.substr(7);
+				msg->severe = true;
+				msg = nullptr;
+			}
+			else if (str.substr(0, 7) == "Warning: ") {
+				msg->msg[0] = str.substr(7);
+				msg = nullptr;
+			}
+			else
+	            msg->msg.push_back(str);
+		}
+    }
+    return n;
+}

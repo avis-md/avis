@@ -412,7 +412,7 @@ void ParGraphics::Update() {
 				delete[](d);
 				delete[](dv);
 			}
-			d = hdr::read_hdr((pth + "/diffuse.hdr").c_str(), &_w, &_h);
+			d = hdr::read_hdr((pth + "diffuse.hdr").c_str(), &_w, &_h);
 			if (d) {
 				dv = new float[_w*_h * 3];
 				hdr::to_float(d, _w, _h, dv);

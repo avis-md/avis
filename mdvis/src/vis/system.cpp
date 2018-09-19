@@ -264,3 +264,7 @@ void VisSystem::DrawMsgPopup() {
 
 	UI2::LabelMul(Display::width * 0.5f - 195, Display::height * 0.5f - 45, 12, message2);
 }
+
+void VisSystem::Save() {
+	
+}

@@ -31,7 +31,7 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 		}\
 	}
 
-	READ(EXT_PS, EXT_PS_SZ, f.substr(0, 2) == "__", Py);
+	READ(EXT_PS, EXT_PS_SZ, f.substr(0, 2) != "__", Py);
 	READ(EXT_CS, EXT_CS_SZ, 1, C);
 	READ(EXT_FS, EXT_FS_SZ, 1, F);
 

@@ -143,7 +143,7 @@ bool FReader::Read(FScript* scr) {
 			#else
 				RunCmd::Run(cmd);
 			#endif
-			//scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
+			scr->errorCount = ErrorView::Parse_GFortran(fp2 + nm + "_log.txt", fp + "_temp__.f90", nm + ".f90", scr->compileLog);
 			for (auto& m : scr->compileLog) {
 				m.path = fp + ".f90";
 			}
@@ -302,9 +302,9 @@ bool FReader::Read(FScript* scr) {
 }
 
 void FReader::Refresh(FScript* scr) {
-	auto mt = IO::ModTime(IO::path + "nodes/" + scr->path);
+	auto mt = IO::ModTime(IO::path + "nodes/" + scr->path + EXT_FS);
 	if (mt > scr->chgtime) {
-		Debug::Message("FReader", "Reloading " + scr->path);
+		Debug::Message("FReader", "Reloading " + scr->path + EXT_FS);
 		scr->Clear();
 		scr->ok = Read(scr);
 	}

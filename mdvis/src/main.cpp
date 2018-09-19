@@ -39,8 +39,8 @@ Mat4x4 _mv, _p;
 void rendFunc() {
 	auto& cm = ChokoLait::mainCamera->object->transform;
 	ParGraphics::Rerender(cm.position(), cm.forward(), (float)Display::width, (float)Display::height);
-//#define bb Particles::boundingBox
-	//UI3::Cube(bb[0], bb[1], bb[2], bb[3], bb[4], bb[5], blue());
+#define bb Particles::boundingBox
+	UI3::Cube(bb[0], bb[1], bb[2], bb[3], bb[4], bb[5], blue());
 	if (!!Particles::particleSz && Shadows::show) {
 		Shadows::UpdateBox();
 		Mat4x4 _p = MVP::projection();

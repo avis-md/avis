@@ -22,7 +22,7 @@ ifeq ($(UNAME_S),Darwin)
 	OSFLAG += -D PLATFORM_OSX
 	GLLIB += -framework OpenGL -framework OpenCL /usr/local/Cellar/glew/2.1.0/lib/libGLEW.a /usr/local/Cellar/jpeg/9c/lib/libjpeg.a /usr/local/Cellar/freetype/2.9.1/lib/libfreetype.a /usr/local/Cellar/libpng/1.6.34/lib/libpng.a -lbz2 -lglfw3 -framework Cocoa -framework IOKit -framework CoreVideo
 	LIBS2 += /usr/local/Cellar/libssh2/1.8.0/lib/libssh2.a /usr/local/Cellar/openssl/1.0.2o_1/lib/libcrypto.a
-	LIBS2 += $(RRAYL) -lCalc -lCLW #-lRadeonRays
+	LIBS2 += $(RRAYL) -lCalc -lCLW -lRadeonRays
 	WEAK_LIB += -weak_library
 	PYLIB += $(shell python3-config --configdir)/libpython3.6m.a
 	NUMPY +=  -I/usr/local/lib/python3.6/site-packages/numpy/core/include
@@ -64,7 +64,13 @@ HEADERS += ocl/raytracer.h ocl/oclcode.h
 HEADERSX = xdrfile/xdrfile.h xdrfile/xdrfile_trr.h xdrfile/xdrfile_xtc.h
 
 ../build/mdvis: $(OBJS)
+ifeq ($(UNAME_S),Darwin)
+	cp $(RRAYPRE)/build/bin/libRadeonRays.dylib ../build/libRadeonRays.dylib
+endif
 	$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
+ifeq ($(UNAME_S),Darwin)
+	install_name_tool -add_rpath "@executable_path" ../build/mdvis
+endif
 
 obj/%.o: $(HEADERS)
 obj/%.o: %.cpp

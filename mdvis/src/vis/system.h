@@ -38,4 +38,6 @@ public:
 	static bool InMainWin(const Vec2& pos);
 
 	static void DrawTitle(), DrawBar(), DrawMsgPopup();
+
+	static void Save(const string& path);
 };

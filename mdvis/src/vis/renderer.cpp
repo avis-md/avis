@@ -7,7 +7,7 @@ VisRenderer::VID_TYPE VisRenderer::vidType;
 VisRenderer::STATUS VisRenderer::status;
 
 bool VisRenderer::imgUseAlpha = true, VisRenderer::vidUseAlpha;
-uint VisRenderer::imgW = 1920, VisRenderer::imgH = 1080, VisRenderer::vidW = 1024, VisRenderer::vidH = 600;
+uint VisRenderer::imgW = 2048, VisRenderer::imgH = 2048, VisRenderer::vidW = 1024, VisRenderer::vidH = 600;
 float VisRenderer::resLerp = -1;
 
 string VisRenderer::outputFolder =
