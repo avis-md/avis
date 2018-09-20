@@ -32,6 +32,7 @@
 #include "res/resdata.h"
 
 bool __debug = false;
+float autoSaveTime = 10;
 
 CubeMarcher* cm;
 Mat4x4 _mv, _p;
@@ -58,6 +59,11 @@ void rendFunc() {
 }
 
 void updateFunc() {
+	if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime)) {
+		VisSystem::lastSave = Time::time;
+		VisSystem::Save(IO::path + ".recover");
+	}
+
 	if (ParLoader::parDirty) {
 		ParLoader::parDirty = false;
 		Particles::UpdateBufs();
@@ -65,6 +71,7 @@ void updateFunc() {
 			Particles::GenTexBufs();
 			ParGraphics::UpdateDrawLists();
 		}
+		VisSystem::lastSave = Time::time;
 	}
 
 	ParGraphics::Update();
@@ -331,6 +338,8 @@ int main(int argc, char **argv) {
 		glfwShowWindow(Display::window);
 		
 		AnWeb::Load(IO::path + "nodes/test.web");
+
+		VisSystem::Save(IO::path + "test.xml");
 
 		while (ChokoLait::alive()) {
 			if (!Display::width || !Display::height)

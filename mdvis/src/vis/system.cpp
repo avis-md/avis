@@ -10,6 +10,7 @@
 #include "res/resdata.h"
 #include "live/livesyncer.h"
 #include "utils/dialog.h"
+#include "utils/xml.h"
 
 string VisSystem::version_hash =
 #include "../../githash.h"
@@ -18,6 +19,8 @@ string VisSystem::version_hash =
 Vec4 VisSystem::accentColor = Vec4(1, 0.75f, 0, 1);
 float VisSystem::glass = 0.9f;
 uint VisSystem::renderMs, VisSystem::uiMs;
+
+float VisSystem::lastSave;
 
 std::vector<MenuItem> VisSystem::menuItems[];
 
@@ -265,6 +268,16 @@ void VisSystem::DrawMsgPopup() {
 	UI2::LabelMul(Display::width * 0.5f - 195, Display::height * 0.5f - 45, 12, message2);
 }
 
-void VisSystem::Save() {
-	
+void VisSystem::Save(const string& path) {
+	Debug::Message("System", "Saving...");
+	XmlNode head("MDVis_State_File");
+	head.params.emplace("hash", version_hash);
+	head.children.reserve(10);
+	ParGraphics::Serialize(head.addchild());
+	Xml::Write(&head, path);
+	Debug::Message("System", "Save complete");
+}
+
+bool VisSystem::Load(const string& path) {
+	return false;
 }

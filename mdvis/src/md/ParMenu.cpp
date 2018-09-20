@@ -337,9 +337,9 @@ void ParMenu::DrawSplash() {
 	auto pos = Vec4(Display::width*0.5f - 20, Display::height*0.5f - 80, 215, 183);
 	if (!!recentFiles.size()) {
 		UI::Label(pos.x + 2, pos.y + 1, 12, _("Recent Files"), white());
-		UI::Quad(pos.x, pos.y + 17, pos.z, pos.w - 17, white(0.7f, 0.05f));
+		UI::Quad(pos.x, pos.y + 17, pos.z, pos.w - 35, white(0.7f, 0.05f));
 		for (uint i = 0; i < recentFiles.size(); i++) {
-			if (35 + 17 * i > pos.w) break;
+			if (53 + 17 * i > pos.w) break;
 			ms = Engine::Button(pos.x + 5, pos.y + 20 + 17 * i, pos.z - 10, 16, white(0, 0.4f), recentFilesN[i], 12, white());
 			if (ms & MOUSE_HOVER_FLAG) {
 				sub = recentFiles[i];
@@ -357,6 +357,10 @@ void ParMenu::DrawSplash() {
 					ParLoader::OnOpenFile(std::vector<string>{ recentFiles[i] });
 				}
 			}
+		}
+		if (Engine::Button(pos.x, pos.y + pos.w - 17, 170, 17, white(1, 0.3f), _("Recover last session"), 12, white(), true) == MOUSE_RELEASE) {
+			if (VisSystem::Load(IO::path + ".recovery"))
+				showSplash = false;
 		}
 	}
 	else UI::Label(pos.x + 2, pos.y + 1, 12, _("No Recent Files"), white());

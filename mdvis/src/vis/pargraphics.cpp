@@ -120,6 +120,16 @@ float ParGraphics::Eff::DrawMenu(float off) {
 	return off + 17 * 5 + 1;
 }
 
+void ParGraphics::Eff::Serialize(XmlNode* nd) {
+	auto n = nd->addchild("SSAO");
+#define SVS(nm, vl) n->addchild(#nm, vl)
+#define SV(nm, vl) SVS(nm, std::to_string(vl))
+	SV(samples, ssaoSamples); SV(radius, ssaoRad);
+	SV(strength, ssaoStr); SV(blur, ssaoBlur);
+#undef SVS
+#undef SV
+}
+
 
 void ParGraphics::Init() {
 	const GLuint _clipBindId = 11;
@@ -986,4 +996,28 @@ void ParGraphics::DrawPopupDM() {
 		Popups::type = POPUP_TYPE::NONE;
 	}
 	//if (dto != dt) ParGraphics::UpdateDrawLists();
+}
+
+void ParGraphics::Serialize(XmlNode* nd) {
+	nd->name = "PGraphics";
+	auto gp = nd->addchild("Graphics");
+	auto n = gp->addchild("Lighting");
+#define SVS(nm, vl) n->addchild(#nm, vl)
+#define SV(nm, vl) SVS(nm, std::to_string(vl))
+	SV(shading, (int)usePBR); SV(sky, reflId); SV(skystr, reflStr);
+	SV(skyfall, reflStrDecay), SV(specstr, specStr);
+	n->children.push_back(Xml::FromVec("bgcol", bgCol));
+
+	n = gp->addchild("Camera");
+	SV(target, rotCenterTrackId);
+	n->children.push_back(Xml::FromVec("center", rotCenter));
+	SV(rotw, rotW); SV(rotz, rotZ); SV(scale, rotScale);
+	auto cm = ChokoLait::mainCamera.raw();
+	SV(quality, cm->quality);
+	SVS(usequality2, cm->useGBuffer2? "1" : "0");
+	SV(quality2, cm->quality2);
+#undef SVS
+#undef SV
+	Eff::Serialize(nd->addchild("Effects"));
+	Shadows::Serialize(nd->addchild("Shadows"));
 }

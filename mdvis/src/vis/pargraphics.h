@@ -71,6 +71,8 @@ public:
 
 		static void Apply();
 		static float DrawMenu(float off);
+
+		static void Serialize(XmlNode* nd);
 	};
 
 	static void Init(), UpdateDrawLists();
@@ -91,6 +93,8 @@ public:
 	static void DrawColMenu();
 	static void DrawMenu();
 	static void DrawPopupDM();
+
+	static void Serialize(XmlNode* nd);
 
 protected:
 	static void BlitSky();

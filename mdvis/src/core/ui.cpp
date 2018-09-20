@@ -204,7 +204,8 @@ void UI::Texture(float x, float y, float w, float h, ::Texture* texture, float a
 	UI::Texture(x, y, w, h, texture, white(alpha), scl, miplevel);
 }
 void UI::Texture(float x, float y, float w, float h, ::Texture* texture, Vec4 tint, DRAWTEX_SCALING scl, float miplevel) {
-	GLuint tex = (texture && texture->loaded) ? texture->pointer : Engine::fallbackTex->pointer;
+	if (!texture || !texture->loaded) return;
+	auto tex = texture->pointer;
 	if (!texture->tiled) {
 		if (scl == DRAWTEX_STRETCH)
 			UI::Quad(x, y, w, h, tex, tint, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));

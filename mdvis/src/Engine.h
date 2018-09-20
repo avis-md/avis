@@ -45,11 +45,6 @@ typedef GLFWwindow NativeWindow;
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define GLFW_EXPOSE_NATIVE_WGL
 #include <GLFW/glfw3native.h>
-#else
-//#define GLFW_EXPOSE_NATIVE_X11
-//#define GLFW_EXPOSE_NATIVE_GLX
-//#include "GLFW/glfw3native.h"
-//typedef void* NativeWindow;
 #endif
 
 #include <complex>
@@ -199,15 +194,6 @@ _canref(AudioClip);
 
 #pragma region enums
 
-/*
-typedef byte DRAWORDER; //because we use this as flags
-const DRAWORDER DRAWORDER_NONE = 0x00;
-const DRAWORDER DRAWORDER_SOLID = 0x01;
-const DRAWORDER DRAWORDER_TRANSPARENT = 0x02;
-const DRAWORDER DRAWORDER_OVERLAY = 0x04;
-const DRAWORDER DRAWORDER_LIGHT = 0x08;
-*/
-
 enum MOUSE_STATUS : byte {
 	MOUSE_NONE = 0x00,
 	MOUSE_DOWN,
@@ -286,52 +272,10 @@ enum OBJECT_STATUS : byte {
 	OBJECT_DEAD
 };
 
-enum SHADER_VARTYPE : byte {
-	SHADER_INT = 0x00,
-	SHADER_FLOAT = 0x01,
-	SHADER_VEC2 = 0x02,
-	SHADER_VEC3 = 0x03,
-	SHADER_SAMPLER = 0x10,
-	SHADER_MATRIX = 0x20,
-	SHADER_BUFFER = 0x30
-};
-
-enum SHADER_TEST : byte {
-	SHADER_TEST_NEVER,
-	SHADER_TEST_ALWAYS,
-	SHADER_TEST_LESS,
-	SHADER_TEST_LEQUAL,
-	SHADER_TEST_EQUAL,
-	SHADER_TEST_GEQUAL,
-	SHADER_TEST_GREATER,
-	SHADER_TEST_NOTEQUAL
-};
-
-enum SHADER_CULL : byte {
-	SHADER_CULL_BACK,
-	SHADER_CULL_FRONT,
-	SHADER_CULL_NONE
-};
-
-enum DEFTEX : byte {
-	DEFTEX_BLACK,
-	DEFTEX_GREY,
-	DEFTEX_WHITE,
-	DEFTEX_RED,
-	DEFTEX_GREEN,
-	DEFTEX_BLUE,
-	DEFTEX_NORMAL
-};
-
 enum DRAWTEX_SCALING : byte {
 	DRAWTEX_FIT,
 	DRAWTEX_CROP,
 	DRAWTEX_STRETCH
-};
-
-enum GITYPE : byte {
-	GITYPE_NONE,
-	GITYPE_RSM
 };
 
 enum COMPONENT_TYPE : byte {
@@ -353,7 +297,6 @@ enum COMPONENT_TYPE : byte {
 	COMP_PST = 0x50, //particle system
 	COMP_SCR = 0xff //script
 };
-
 
 enum FFT_WINDOW : byte {
 	FFT_WINDOW_RECTANGLE,
@@ -420,8 +363,6 @@ public:
 	PROGDEF_H(lineWProg, 5)
 
 	static void InitShaders();
-
-	static Texture* fallbackTex;
 
 	static GLuint quadBuffer;
 	static GLint drawQuadLocs[3], drawQuadLocsA[3], drawQuadLocsC[1];

@@ -23,4 +23,6 @@ public:
 	static void UpdateBox();
 	static void Rerender(), Reblit();
 	static float DrawMenu(float off);
+
+	static void Serialize(XmlNode* nd);
 };

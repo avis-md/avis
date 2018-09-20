@@ -16,6 +16,8 @@ public:
 	static float glass;
 	static uint renderMs, uiMs;
 
+	static float lastSave;
+
 	static std::vector<MenuItem> menuItems[10];
 
 	static string message, message2;
@@ -40,4 +42,5 @@ public:
 	static void DrawTitle(), DrawBar(), DrawMsgPopup();
 
 	static void Save(const string& path);
+	static bool Load(const string& path);
 };

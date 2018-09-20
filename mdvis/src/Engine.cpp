@@ -28,9 +28,6 @@ Vec2 Ds2(Vec2 v) {
 	return Vec2(Dw(v.x) * 2 - 1, 1 - Dh(v.y) * 2);
 }
 
-
-Texture* Engine::fallbackTex = nullptr;
-
 GLuint Engine::defProgram = 0;
 GLuint Engine::defProgramW = 0;
 GLuint Engine::unlitProgram = 0;
@@ -49,9 +46,6 @@ Rect* Engine::stencilRect = nullptr;
 GLuint Engine::quadBuffer;
 
 void Engine::Init() {
-	fallbackTex = new Texture(IO::path + "fallback.bmp");
-	if (!fallbackTex->loaded)
-		std::cout << "cannot load fallback texture!" << std::endl;
 	Engine::_mainThreadId = std::this_thread::get_id();
 	
 
@@ -203,8 +197,9 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4,
 	return (inside && (UI::_layer == UI::_layerMax)) ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
 }
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Texture* texture, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, float uvx, float uvy, float uvw, float uvh) {
+	if (!texture || !texture->loaded) return MOUSE_NONE;
 	if (!UI::focused || (UI::_layer < UI::_layerMax) || (Input::mouse0State != 0 && !Rect(x, y, w, h).Inside(Input::mouseDownPos))) {
-		UI::Quad(x, y, w, h, (texture->loaded) ? texture->pointer : Engine::fallbackTex->pointer, normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
+		UI::Quad(x, y, w, h, texture->pointer, normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
 		return MOUSE_NONE;
 	}
 	bool inside = Rect(x, y, w, h).Inside(Input::mousePos);
@@ -215,11 +210,11 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Texture* texture
 	switch (Input::mouse0State) {
 	case 0:
 	case MOUSE_UP:
-		UI::Quad(x, y, w, h, (texture->loaded) ? texture->pointer : Engine::fallbackTex->pointer, inside ? highlightVec4 : normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
+		UI::Quad(x, y, w, h, texture->pointer, inside ? highlightVec4 : normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
 		break;
 	case MOUSE_DOWN:
 	case MOUSE_HOLD:
-		UI::Quad(x, y, w, h, (texture->loaded) ? texture->pointer : Engine::fallbackTex->pointer, inside ? pressVec4 : normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
+		UI::Quad(x, y, w, h, texture->pointer , inside ? pressVec4 : normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
 		break;
 	}
 	return (inside && (UI::_layer == UI::_layerMax)) ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;

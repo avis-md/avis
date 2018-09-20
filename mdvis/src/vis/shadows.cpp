@@ -184,3 +184,12 @@ float Shadows::DrawMenu(float off) {
 
 	return off + 17 * 5 + 1;
 }
+
+void Shadows::Serialize(XmlNode* nd) {
+#define SVS(nm, vl) nd->addchild(#nm, vl)
+#define SV(nm, vl) SVS(nm, std::to_string(vl))
+	SV(quality, quality); SV(strength, str);
+	SV(bias, bias); SV(rw, rw); SV(rz, rz);
+#undef SVS
+#undef SV
+}

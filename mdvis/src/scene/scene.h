@@ -6,8 +6,6 @@ public:
 	Background* sky;
 	float skyStrength, skyBrightness;
 	Color ambientCol;
-	GITYPE GIType = GITYPE_RSM;
-	float rsmRadius;
 
 	bool useFog, sunFog;
 	float fogDensity, fogSunSpread;

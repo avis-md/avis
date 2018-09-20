@@ -70,3 +70,67 @@ bool Xml::Read(string& s, uint& pos, XmlNode* parent) {
 	parent->children.push_back(n);
 	return true;
 }
+
+#define SVV(nm, vl) nd.addchild(nm, std::to_string(vl))
+XmlNode Xml::FromVec(string nm, Vec2 v) {
+	XmlNode nd(nm);
+	SVV("x", v.x);
+	SVV("y", v.y);
+	return nd;
+}
+
+XmlNode Xml::FromVec(string nm, Vec3 v) {
+	XmlNode nd(nm);
+	SVV("x", v.x);
+	SVV("y", v.y);
+	SVV("z", v.y);
+	return nd;
+}
+
+XmlNode Xml::FromVec(string nm, Vec4 v) {
+	XmlNode nd(nm);
+	SVV("x", v.x);
+	SVV("y", v.y);
+	SVV("z", v.z);
+	SVV("w", v.w);
+	return nd;
+}
+
+XmlNode* XmlNode::addchild(string nm, string vl) {
+	children.push_back(XmlNode(nm, vl));
+	return &children.back();
+}
+
+void Xml::Write(XmlNode* node, const string& path) {
+	std::ofstream strm(path);
+	DoWrite(node, strm, 0);
+}
+
+void Xml::DoWrite(XmlNode* n, std::ofstream& strm, int ind) {
+	for (int i = 0; i < ind; i++) strm << "    ";
+	strm << "<" << n->name;
+	if (n->params.size() > 0) {
+		for (auto& p : n->params) {
+			strm << " " << p.first << "=\"" << p.second << "\"";
+		}
+	}
+	if (n->children.size() > 0) {
+		strm << ">\n";
+		for (auto& c : n->children) {
+			DoWrite(&c, strm, ind+1);
+		}
+		for (int i = 0; i < ind; i++) strm << "    ";
+		strm << "</" << n->name << ">\n";
+	}
+	else if (n->value != "") {
+		if (n->value.size() > 10) {
+			strm << ">\n";
+			for (int i = 0; i <= ind; i++) strm << "    ";
+			strm << n->value << "\n";
+			for (int i = 0; i < ind; i++) strm << "    ";
+		}
+		else strm << ">" << n->value;
+		strm << "</" << n->name << ">\n";
+	}
+	else strm << "/>\n";
+}
