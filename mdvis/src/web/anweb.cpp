@@ -17,7 +17,7 @@ bool AnWeb::selConnIdIsOut = false, AnWeb::selPreClear = false;
 AnScript* AnWeb::selScript = nullptr;
 byte AnWeb::selSpNode = 0;
 
-string AnWeb::activeFile = "";
+std::string AnWeb::activeFile = "";
 std::vector<AnNode*> AnWeb::nodes;
 
 bool AnWeb::drawFull = false, AnWeb::expanded = true, AnWeb::executing = false, AnWeb::apply = false;
@@ -346,7 +346,7 @@ void AnWeb::DoExecute() {
 	}
 	ErrorView::execMsgs.clear();
 	char* err = 0;
-	static string pylog;
+	static std::string pylog;
 	for (auto n : nodes) {
 #ifndef NO_REDIR_LOG
 		if (n->script->type == AN_SCRTYPE::PYTHON)
@@ -373,7 +373,7 @@ void AnWeb::DoExecute() {
 				std::rethrow_exception(cxp);
 			}
 			catch (std::exception& e) {
-				static string serr = e.what();
+				static std::string serr = e.what();
 				serr += " thrown!\x01";
 				err = &serr[0];
 			}
@@ -386,9 +386,9 @@ void AnWeb::DoExecute() {
 		else {
 			IO::RestoreStdio2();
 			auto f = std::ifstream(IO::path + "nodes/__tmpstd");
-			string s;
+			std::string s;
 			while (std::getline(f, s)) {
-				n->log.push_back(std::pair<byte, string>(0, s));
+				n->log.push_back(std::pair<byte, std::string>(0, s));
 			}
 		}
 #endif
@@ -398,7 +398,7 @@ void AnWeb::DoExecute() {
 			else {
 				auto ss = string_split(pylog, '\n');
 				for (auto& s : ss) {
-					n->log.push_back(std::pair<byte, string>(0, s));
+					n->log.push_back(std::pair<byte, std::string>(0, s));
 				}
 			}
 		}
@@ -415,7 +415,7 @@ void AnWeb::DoExecute() {
 #endif
 }
 
-void AnWeb::OnExecLog(string s, bool e) {
+void AnWeb::OnExecLog(std::string s, bool e) {
 	if (execNode) {
 		if (s == "___123___") {
 			if (execNode->log.back().second == "")
@@ -425,7 +425,7 @@ void AnWeb::OnExecLog(string s, bool e) {
 		else if ((uintptr_t)execNode <= 2) {
 			(*(uintptr_t*)&execNode)--;
 		}
-		else execNode->log.push_back(std::pair<byte, string>(e ? 1 : 0, s));
+		else execNode->log.push_back(std::pair<byte, std::string>(e ? 1 : 0, s));
 	}
 }
 
@@ -457,7 +457,7 @@ void AnWeb::DoExecute_Srv() {
 #define sp << " "
 #define nl << "\n"
 #define wrs(s) _StreamWrite(s.c_str(), &strm, s.size() + 1);
-void AnWeb::Save(const string& s) {
+void AnWeb::Save(const std::string& s) {
 	std::ofstream strm(s, std::ios::binary);
 	auto sz = (uint32_t)nodes.size();
 	_StreamWrite(&sz, &strm, 4);
@@ -486,7 +486,7 @@ void AnWeb::Save(const string& s) {
 }
 
 void AnWeb::SaveIn() {
-	string path = IO::path + "nodes/__tmp__/";
+	std::string path = IO::path + "nodes/__tmp__/";
 	if (!IO::HasDirectory(path)) IO::MakeDirectory(path);
 	path += "in/";
 	if (!IO::HasDirectory(path)) IO::MakeDirectory(path);
@@ -503,9 +503,9 @@ void AnWeb::SaveIn() {
 
 void AnWeb::SaveOut() {
 #ifdef IS_ANSERVER
-	string path = IO::path + "ser/";
+	std::string path = IO::path + "ser/";
 #else
-	string path = IO::path + "nodes/__tmp__/";
+	std::string path = IO::path + "nodes/__tmp__/";
 #endif
 	if (!IO::HasDirectory(path)) IO::MakeDirectory(path);
 	path += "out/";
@@ -527,7 +527,7 @@ byte GB(std::istream& strm) {
 	return b;
 }
 
-void AnWeb::Load(const string& s) {
+void AnWeb::Load(const std::string& s) {
 	std::ifstream strm(s, std::ios::binary);
 	if (!strm.is_open()) {
 		Debug::Warning("AnWeb", "Cannot open save file!");
@@ -537,7 +537,7 @@ void AnWeb::Load(const string& s) {
 	_Strm2Val(strm, sz);
 	nodes.resize(sz);
 	AN_SCRTYPE tp;
-	string nm;
+	std::string nm;
 	for (uint a = 0; a < sz; a++) {
 		auto& n = nodes[a];
 		tp = (AN_SCRTYPE)GB(strm);
@@ -596,9 +596,9 @@ void AnWeb::Load(const string& s) {
 
 void AnWeb::LoadIn() {
 #ifdef IS_ANSERVER
-	string path = IO::path + "ser/in/";
+	std::string path = IO::path + "ser/in/";
 #else
-	string path = IO::path + "nodes/__tmp__/in/";
+	std::string path = IO::path + "nodes/__tmp__/in/";
 #endif
 	for (auto n : nodes) {
 		n->LoadIn(path);
@@ -606,7 +606,7 @@ void AnWeb::LoadIn() {
 }
 
 void AnWeb::LoadOut() {
-	string path = IO::path + "nodes/__tmp__/out/";
+	std::string path = IO::path + "nodes/__tmp__/out/";
 	for (auto n : nodes) {
 		n->LoadOut(path);
 	}

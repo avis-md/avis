@@ -12,12 +12,12 @@ enum class SSH_Auth {
 };
 
 struct SSHConfig {
-	string ip;
+	std::string ip;
 	ushort port = 22;
-	string user;
+	std::string user;
 	SSH_Auth auth = SSH_Auth::PUBKEY;
-	string keyPath1, keyPath2;
-	string pw;
+	std::string keyPath1, keyPath2;
+	std::string pw;
 };
 
 class SSH {
@@ -26,16 +26,16 @@ public:
 
 	static void Init();
 	static SSH Connect(const SSHConfig& conf);
-	string Read(uint maxlen);
-	bool Write(string s);
+	std::string Read(uint maxlen);
+	bool Write(std::string s);
 	void Flush();
-	bool WaitFor(string s, uint rate, uint timeout = -1);
+	bool WaitFor(std::string s, uint rate, uint timeout = -1);
 	void EnableSFTP(), DisableSFTP();
-	void MkDir(const string& path);
-	std::vector<string> ListFiles(const string& path);
-	bool HasFile(const string& path);
-	void GetFile(const string& from, const string& to), SendFile(const string& from, const string& to);
-	bool HasCmd(string cmd, string& path);
+	void MkDir(const std::string& path);
+	std::vector<std::string> ListFiles(const std::string& path);
+	bool HasFile(const std::string& path);
+	void GetFile(const std::string& from, const std::string& to), SendFile(const std::string& from, const std::string& to);
+	bool HasCmd(std::string cmd, std::string& path);
 	void Disconnect();
 	void EnableDump(uint rate);
 

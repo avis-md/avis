@@ -3,7 +3,7 @@
 
 class Node_Camera_Out : public AnNode {
 public:
-	static const string sig;
+	static const std::string sig;
 	Node_Camera_Out();
     
 	void Execute() override;

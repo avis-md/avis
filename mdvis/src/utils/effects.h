@@ -26,5 +26,5 @@ protected:
     static GLint blurProgLocs[4], ssaoProgLocs[10], ssaoProg2Locs[5];
 	static GLuint noiseTex;
 
-    static void _InitBlur(const string& vs), _InitSSAO(const string& vs);
+    static void _InitBlur(const std::string& vs), _InitSSAO(const std::string& vs);
 };

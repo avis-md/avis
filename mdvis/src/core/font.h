@@ -8,7 +8,7 @@
 [av]*/
 class Font {
 public:
-	Font(const string& path, ALIGNMENT align = ALIGN_TOPLEFT);
+	Font(const std::string& path, ALIGNMENT align = ALIGN_TOPLEFT);
 	bool loaded = false;
 	GLuint glyph(uint size, uint mask);
 

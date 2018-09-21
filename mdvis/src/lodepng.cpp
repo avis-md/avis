@@ -127,7 +127,7 @@ Example: if(!uivector_resizev(&frequencies_ll, 286, 0)) ERROR_BREAK(83);
 About uivector, ucvector and string:
 -All of them wrap dynamic arrays or text strings in a similar way.
 -LodePNG was originally written in C++. The vectors replace the std::vectors that were used in the C++ version.
--The string tools are made to avoid problems with compilers that declare things like strncat as deprecated.
+-The std::string tools are made to avoid problems with compilers that declare things like strncat as deprecated.
 -They're not used in the interface, only internally in this file as static functions.
 -As with many other structs in this file, the init and cleanup functions serve as ctor and dtor.
 */
@@ -287,7 +287,7 @@ static unsigned string_resize(char** out, size_t size)
   return data != 0;
 }
 
-/*init a {char*, size_t} pair for use as string*/
+/*init a {char*, size_t} pair for use as std::string*/
 static void string_init(char** out)
 {
   *out = NULL;
@@ -1526,7 +1526,7 @@ static unsigned encodeLZ77(uivector* out, Hash* hash,
 
     lastptr = &in[insize < pos + MAX_SUPPORTED_DEFLATE_LENGTH ? insize : pos + MAX_SUPPORTED_DEFLATE_LENGTH];
 
-    /*search for the longest string*/
+    /*search for the longest std::string*/
     prev_offset = 0;
     for(;;)
     {
@@ -4864,7 +4864,7 @@ void lodepng_state_copy(LodePNGState* dest, const LodePNGState* source)
 /* / PNG Encoder                                                            / */
 /* ////////////////////////////////////////////////////////////////////////// */
 
-/*chunkName must be string of 4 characters*/
+/*chunkName must be std::string of 4 characters*/
 static unsigned addChunk(ucvector* out, const char* chunkName, const unsigned char* data, size_t length)
 {
   CERROR_TRY_RETURN(lodepng_chunk_create(&out->data, &out->size, (unsigned)length, chunkName, data));

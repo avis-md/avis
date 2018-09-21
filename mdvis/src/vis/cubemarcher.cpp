@@ -69,7 +69,7 @@ CubeMarcher::CubeMarcher(Texture3D* tex) : tex(tex) {
 
 void CubeMarcher::Init() {
 	GLuint geometry_shader, vertex_shader, fragment_shader;
-	string err;
+	std::string err;
 
 	if (!Shader::LoadShader(GL_VERTEX_SHADER, IO::GetText(IO::path + "mcVert.txt"), vertex_shader, &err)) {
 		Debug::Error("Shader Compiler", "Vert error: " + err);
@@ -96,7 +96,7 @@ void CubeMarcher::Init() {
 		glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &info_log_length);
 		std::vector<char> program_log(info_log_length);
 		glGetProgramInfoLog(prog, info_log_length, NULL, &program_log[0]);
-		Debug::Error("Shader", "Link error: " + string(&program_log[0]));
+		Debug::Error("Shader", "Link error: " + std::string(&program_log[0]));
 		glDeleteProgram(prog);
 	}
 

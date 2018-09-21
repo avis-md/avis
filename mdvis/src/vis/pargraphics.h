@@ -11,7 +11,7 @@ public:
 	static Vec4 bgCol;
 	
 	static int reflId, _reflId;
-	static std::vector<string> reflNms;
+	static std::vector<std::string> reflNms;
 	static Popups::DropdownItem reflItms;
 
 	static bool useGradCol;
@@ -30,7 +30,7 @@ public:
 	static std::vector<std::pair<uint, std::pair<uint, byte>>> drawLists, drawListsB;
 
 	static uint usePBR;
-	static string _usePBRNms[3];
+	static std::string _usePBRNms[3];
 	static const Popups::DropdownItem _usePBRItems;
 
 	static Vec3 rotCenter;

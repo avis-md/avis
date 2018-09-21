@@ -1,4 +1,4 @@
 #include "Engine.h"
 
-Object::Object(string nm) : id(0), name(nm) {}
-Object::Object(ulong id, string nm) : id(id), name(nm) {}
+Object::Object(std::string nm) : id(0), name(nm) {}
+Object::Object(ulong id, std::string nm) : id(id), name(nm) {}

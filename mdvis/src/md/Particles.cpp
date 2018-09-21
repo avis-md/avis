@@ -40,7 +40,7 @@ Int2* Particles::particles_Res;
 
 int Particles::particles_ParamSz = 0;
 Particles::paramdata* Particles::particles_Params[] = {};
-string Particles::particles_ParamNms[] = {};
+std::string Particles::particles_ParamNms[] = {};
 
 std::vector<Particles::conninfo> Particles::particles_Conn2;
 

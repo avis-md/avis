@@ -1,12 +1,12 @@
 #include "makegen.h"
 
-void makegen_scan(string path, string relpath, std::vector<string>& hs, std::vector<string>& cs) {
+void makegen_scan(std::string path, std::string relpath, std::vector<std::string>& hs, std::vector<std::string>& cs) {
 	auto files = IO::GetFiles(path);
 	for (auto f : files) {
 		if (f.substr(f.size() - 2) == ".h") hs.push_back(relpath + f.substr(f.find_last_of('\\') + 1));
 		else if (f.substr(f.size() - 4) == ".cpp") cs.push_back(relpath + f.substr(f.find_last_of('\\') + 1));
 	}
-	std::vector<string> folds;
+	std::vector<std::string> folds;
 	IO::GetFolders(path, &folds);
 	for (auto f : folds) {
 		if (f != "." && f != "..") {
@@ -15,11 +15,11 @@ void makegen_scan(string path, string relpath, std::vector<string>& hs, std::vec
 	}
 }
 
-void makegen(const string& path) {
+void makegen(const std::string& path) {
 	std::ifstream istrm(path + "/Makefile.txt");
 	std::ofstream ostrm(path + "/Makefile");
 
-	std::vector<string> headers, cpps, objs;
+	std::vector<std::string> headers, cpps, objs;
 
 	makegen_scan(path, "", headers, cpps);
 	

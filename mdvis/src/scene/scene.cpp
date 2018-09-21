@@ -4,7 +4,7 @@ bool Scene::dirty = false;
 
 Scene* Scene::active = nullptr;
 std::ifstream* Scene::strm = nullptr;
-std::vector<string> Scene::sceneNames = {};
+std::vector<std::string> Scene::sceneNames = {};
 std::vector<long> Scene::scenePoss = {};
 
 Scene::Scene() : sceneName("newScene"), settings() {

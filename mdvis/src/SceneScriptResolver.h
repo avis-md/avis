@@ -9,7 +9,7 @@ class SceneScriptResolver {
 public:
 	SceneScriptResolver(); 
 	static SceneScriptResolver* instance; 
-	std::vector<string> names; 
+	std::vector<std::string> names; 
 	std::vector<sceneScriptInstantiator> map;
 	std::vector<sceneScriptAssigner> ass;
 	SceneScript* Resolve(std::ifstream& strm);

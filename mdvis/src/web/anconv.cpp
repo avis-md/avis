@@ -23,7 +23,7 @@ PyObject* AnConv::PyArr(char tp, int nd, int* szs, void* data) {
 		sz = 2;
 		break;
 	default: 
-		Debug::Warning("AnConv", "unknown type " + string(&tp, 1) + "!");
+		Debug::Warning("AnConv", "unknown type " + std::string(&tp, 1) + "!");
 		return nullptr;
 	}
 	npy_intp* dims = new npy_intp[nd];

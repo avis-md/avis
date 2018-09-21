@@ -7,8 +7,8 @@
 struct LiveRunner {
 	typedef bool(*initSig)(SyncInfo*);
 	typedef bool(*loopSig)(SyncInfo*);
-	string name, path;
-	string initNm, loopNm;
+	std::string name, path;
+	std::string initNm, loopNm;
 	DyLib* lib;
 	initSig initFunc;
 	loopSig loopFunc;

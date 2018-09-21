@@ -9,17 +9,17 @@ public:
 	static float expandPos;
 
 	static bool remote;
-	static string user, ip, pw;
+	static std::string user, ip, pw;
 	static ushort port;
 
-	static string path;
-	static string message;
+	static std::string path;
+	static std::string message;
 
 	static void Draw();
 	static std::thread* conThread;
 	static void Connect(), Disconnect();
 	static void SendNodes(bool cp);
-	static void DoSendNodes(string p, string rp);
+	static void DoSendNodes(std::string p, std::string rp);
 	static void SendIn(), RecvOut();
 
 	static SSH ssh;

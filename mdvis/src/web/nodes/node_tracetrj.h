@@ -3,7 +3,7 @@
 
 class Node_TraceTrj : public AnNode {
 public:
-	static const string sig;
+	static const std::string sig;
 	Node_TraceTrj();
 
 	bool has = false, traceAll = true;
@@ -14,6 +14,6 @@ public:
     
 	void Execute() override;
 	void DrawScene() override;
-	void SaveOut(const string& path) override {}
-	void LoadOut(const string& path) override;
+	void SaveOut(const std::string& path) override {}
+	void LoadOut(const std::string& path) override;
 };

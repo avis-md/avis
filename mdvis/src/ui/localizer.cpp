@@ -2,7 +2,7 @@
 
 bool Localizer::useDict = false;
 
-void Localizer::Init(const string& nm) {
+void Localizer::Init(const std::string& nm) {
 	if (nm == "EN") return;
     auto path = IO::path + "locale/" + nm + "/locale.txt";
     std::ifstream strm(path);
@@ -12,14 +12,14 @@ void Localizer::Init(const string& nm) {
     }
     char buf[500]{};
     dict.clear();
-    std::pair<uint32_t, string> pr;
+    std::pair<uint32_t, std::string> pr;
     int l = 1;
     while (strm.getline(buf, 20)) {
         if (!buf[0]) {
             l++;
             continue;
         }
-        pr.first = TryParse(string(buf), ~0U);
+        pr.first = TryParse(std::string(buf), ~0U);
         if (pr.first == ~0U) {
             Debug::Warning("System", "Locale syntax error at line " + std::to_string(l));
 			return;
@@ -41,10 +41,10 @@ void Localizer::Init(const string& nm) {
 	useDict = true;
 }
 
-void Localizer::MakeMap(string path) {
+void Localizer::MakeMap(std::string path) {
 	std::cout << "Scanning keywords..." << std::endl;
     path = IO::path + "" + path;
-    std::map<uint32_t, string> strs;
+    std::map<uint32_t, std::string> strs;
     _MakeMap(path, strs);
 	std::cout << "Writing " << strs.size() << " keywords..." << std::endl;
     std::ofstream strm(IO::path + "locale/template.txt");
@@ -53,7 +53,7 @@ void Localizer::MakeMap(string path) {
         strm << a.first << "\n<" << a.second << "\n>\n\n";
         strm2 << a.first << "\n<" << a.second << "\n>" + a.second + "\n\n";
     }
-	std::vector<string> dirs;
+	std::vector<std::string> dirs;
 	IO::GetFolders(IO::path + "locale/", &dirs);
 	for (auto& d : dirs) {
 		if (d != "EN") {
@@ -66,10 +66,10 @@ void Localizer::MakeMap(string path) {
 	return;
 }
 
-void Localizer::_MakeMap(string path, std::map<uint32_t, string>& strs) {
-    std::vector<string> nms = IO::GetFiles(path, ".cpp");
+void Localizer::_MakeMap(std::string path, std::map<uint32_t, std::string>& strs) {
+    std::vector<std::string> nms = IO::GetFiles(path, ".cpp");
     for (auto& n : nms) {
-        string cd = IO::GetText(path + "/" + n);
+        std::string cd = IO::GetText(path + "/" + n);
         auto cds = cd.size();
         int p0 = 0, p1 = 0;
         for(;;) {
@@ -86,7 +86,7 @@ void Localizer::_MakeMap(string path, std::map<uint32_t, string>& strs) {
         _MakeMap(path + "/" + n, strs);
 }
 
-void Localizer::Merge(string path, std::map<uint32_t, string> strs) {
+void Localizer::Merge(std::string path, std::map<uint32_t, std::string> strs) {
 	std::ifstream strm(IO::path + "locale/" + path + "/locale.txt", std::ios::binary);
 	if (strm.is_open()) {
 		std::ofstream ostrm(IO::path + "locale/" + path + "/locale_new.txt", std::ios::binary);
@@ -98,7 +98,7 @@ void Localizer::Merge(string path, std::map<uint32_t, string> strs) {
 				l++;
 				continue;
 			}
-			uint32_t i = TryParse(string(buf), ~0U);
+			uint32_t i = TryParse(std::string(buf), ~0U);
 			if (i == ~0U) {
 				Debug::Warning("Localizer", path + "Locale syntax error at line " + std::to_string(l));
 				return;
@@ -115,7 +115,7 @@ void Localizer::Merge(string path, std::map<uint32_t, string> strs) {
 			}
 			if (strs.count(i) == 1) {
 				auto s = strs[i];
-				ostrm << i << "\n<" << s << "\n" << string(buf) << "\n";
+				ostrm << i << "\n<" << s << "\n" << std::string(buf) << "\n";
 				strs.erase(i);
 			}
 			l += 3;
@@ -126,4 +126,4 @@ void Localizer::Merge(string path, std::map<uint32_t, string> strs) {
 	}
 }
 
-std::unordered_map<uint32_t, string> Localizer::dict;
+std::unordered_map<uint32_t, std::string> Localizer::dict;

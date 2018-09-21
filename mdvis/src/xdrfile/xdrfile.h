@@ -412,11 +412,11 @@ extern "C"
 
 
 
-	/*! \brief Read a string (array of characters)
+	/*! \brief Read a std::string (array of characters)
 	 *
 	 *  \param ptr     Pointer to memory where data should be written
-	 *  \param maxlen  Maximum length of string. If no end-of-string is encountered,
-	 *                 one byte less than this is read and end-of-string appended.
+	 *  \param maxlen  Maximum length of string. If no end-of-std::string is encountered,
+	 *                 one byte less than this is read and end-of-std::string appended.
 	 *  \param xfp     Handle to portable binary file, created with xdrfile_open()
 	 *
 	 *  \return        Number of characters read, including end-of-string
@@ -428,7 +428,7 @@ extern "C"
 
 
 
-	/*! \brief Write a string (array of characters)
+	/*! \brief Write a std::string (array of characters)
 	 *
 	 *  \param ptr     Pointer to memory where data should be read
 	 *  \param xfp     Handle to portable binary file, created with xdrfile_open()

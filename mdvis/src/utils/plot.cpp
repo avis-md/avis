@@ -1,7 +1,7 @@
 #include "plot.h"
 #include "ui/icons.h"
 
-string to_string_scientific(float f) {
+std::string to_string_scientific(float f) {
 	std::stringstream strm;
 	strm.precision(3);
 	strm << std::scientific << f;

@@ -28,8 +28,8 @@ void Net::Init() {
 #endif
 }
 
-std::vector<string> Net::MyIp() {
-	std::vector<string> res;
+std::vector<std::string> Net::MyIp() {
+	std::vector<std::string> res;
 	ulong sz = 25000;
 	char cbuf[255];
 #ifdef PLATFORM_WIN
@@ -42,7 +42,7 @@ std::vector<string> Net::MyIp() {
 				{
 					sockaddr_in *sa_in = (sockaddr_in *)unicast->Address.lpSockaddr;
 					inet_ntop(AF_INET, &(sa_in->sin_addr), cbuf, 255);
-					res.push_back(string(cbuf));
+					res.push_back(std::string(cbuf));
 				}
 			}
 		}
@@ -56,7 +56,7 @@ std::vector<string> Net::MyIp() {
 			if (buf->ifa_addr->sa_family == AF_INET) {
 				sockaddr_in *sa_in = (sockaddr_in *)buf->ifa_addr;
 				inet_ntop(AF_INET, &(sa_in->sin_addr), cbuf, 255);
-				res.push_back(string(cbuf));
+				res.push_back(std::string(cbuf));
 			}
 		}
 	}
@@ -100,7 +100,7 @@ bool Net::StopListen() {
 	return true;
 }
 
-bool Net::Send(string ip, uint port, byte* data, uint dataSz) {
+bool Net::Send(std::string ip, uint port, byte* data, uint dataSz) {
 #ifdef PLATFORM_WIN
 	if (!wsa && !InitWsa()) return false;
 #endif

@@ -4,7 +4,7 @@
 #include "jerror.h"
 #include "lodepng.h"
 
-bool LoadJPEG(string fileN, uint &x, uint &y, byte& channels, byte** data)
+bool LoadJPEG(std::string fileN, uint &x, uint &y, byte& channels, byte** data)
 {
 	//unsigned int texture_id;
 	unsigned long data_size;     // length
@@ -75,18 +75,18 @@ void InvertPNG(std::vector<byte>& data, uint x, uint y) {
 	}
 }
 
-bool LoadPNG(string fileN, uint &x, uint &y, byte& channels, std::vector<byte>& data) {
+bool LoadPNG(std::string fileN, uint &x, uint &y, byte& channels, std::vector<byte>& data) {
 	channels = 4;
 	uint err = lodepng::decode(data, x, y, fileN.c_str());
 	if (err) {
-		Debug::Error("PNG reader", "Read PNG error: " + string(lodepng_error_text(err)));
+		Debug::Error("PNG reader", "Read PNG error: " + std::string(lodepng_error_text(err)));
 		return false;
 	}
 	InvertPNG(data, x, y);
 	return true;
 }
 
-bool LoadBMP(string fileN, uint &x, uint &y, byte& channels, byte** data) {
+bool LoadBMP(std::string fileN, uint &x, uint &y, byte& channels, byte** data) {
 
 	char header[54]; // Each BMP file begins by a 54-bytes header
 	unsigned int dataPos;     // Position in the file where the actual data begins
@@ -132,8 +132,8 @@ bool LoadBMP(string fileN, uint &x, uint &y, byte& channels, byte** data) {
 	return true;
 }
 
-byte* Texture::LoadPixels(const string& path, byte& chn, uint& w, uint& h) {
-	string sss = path.substr(path.find_last_of('.'), string::npos);
+byte* Texture::LoadPixels(const std::string& path, byte& chn, uint& w, uint& h) {
+	std::string sss = path.substr(path.find_last_of('.'), std::string::npos);
 	byte *data;
 	std::vector<byte> dataV;
 	//std::cout << "opening image at " << path << std::endl;
@@ -169,7 +169,7 @@ byte* Texture::LoadPixels(const byte* data, const uint dataSz, uint& w, uint& h)
 	std::vector<byte> dataV;
 	uint err = lodepng::decode(dataV, w, h, data, dataSz);
 	if (!!err) {
-		Debug::Error("PNG reader", "Read PNG error: " + string(lodepng_error_text(err)));
+		Debug::Error("PNG reader", "Read PNG error: " + std::string(lodepng_error_text(err)));
 		return nullptr;
 	}
 	InvertPNG(dataV, w, h);
@@ -178,7 +178,7 @@ byte* Texture::LoadPixels(const byte* data, const uint dataSz, uint& w, uint& h)
 	return res;
 }
 
-void Texture::ToPNG(std::vector<byte>& data, uint w, uint h, const string& loc) {
+void Texture::ToPNG(std::vector<byte>& data, uint w, uint h, const std::string& loc) {
 	std::vector<byte> res;
 	InvertPNG(data, w, h);
 	lodepng::encode(res, &data[0], w, h);
@@ -186,11 +186,11 @@ void Texture::ToPNG(std::vector<byte>& data, uint w, uint h, const string& loc) 
 	strm.write((char*)&res[0], res.size());
 }
 
-Texture::Texture(const string& path, bool mipmap, TEX_FILTERING filter, byte aniso, TEX_WRAPING warp) :
+Texture::Texture(const std::string& path, bool mipmap, TEX_FILTERING filter, byte aniso, TEX_WRAPING warp) :
 	Texture(path, mipmap, filter, aniso, (warp == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT, (warp == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT) {}
 
-Texture::Texture(const string& path, bool mipmap, TEX_FILTERING filter, byte aniso, GLenum wrapx, GLenum wrapy) : AssetObject(ASSETTYPE_TEXTURE), _mipmap(mipmap), _filter(filter), _aniso(aniso) {
-	string sss = path.substr(path.find_last_of('.') + 1, string::npos);
+Texture::Texture(const std::string& path, bool mipmap, TEX_FILTERING filter, byte aniso, GLenum wrapx, GLenum wrapy) : AssetObject(ASSETTYPE_TEXTURE), _mipmap(mipmap), _filter(filter), _aniso(aniso) {
+	std::string sss = path.substr(path.find_last_of('.') + 1, std::string::npos);
 	byte *data;
 	std::vector<byte> dataV;
 	byte chn;
@@ -241,7 +241,7 @@ Texture::Texture(const byte* data, const uint dataSz, TEX_FILTERING filter, TEX_
 	std::vector<byte> dataV;
 	uint err = lodepng::decode(dataV, width, height, data, dataSz);
 	if (!!err) {
-		Debug::Error("PNG reader", "Read PNG error: " + string(lodepng_error_text(err)));
+		Debug::Error("PNG reader", "Read PNG error: " + std::string(lodepng_error_text(err)));
 		return;
 	}
 	InvertPNG(dataV, width, height);

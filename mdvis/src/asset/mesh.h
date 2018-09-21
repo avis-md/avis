@@ -12,8 +12,8 @@ public:
 	std::vector<int> triangles;
 	std::vector<Vec2> uv0, uv1;
 	std::vector<std::vector<std::pair<byte, float>>> vertexGroupWeights;
-	std::vector<string> vertexGroups;
-	std::vector<std::pair<string, std::vector<Vec3>>> shapekeys;
+	std::vector<std::string> vertexGroups;
+	std::vector<std::pair<std::string, std::vector<Vec3>>> shapekeys;
 	BBox boundingBox;
 
 	uint vertexCount, triangleCount, materialCount;
@@ -27,7 +27,7 @@ public:
 	_allowshared(Mesh);
 protected:
 	Mesh(std::istream& strm, uint offset = 0);
-	Mesh(string path);
+	Mesh(std::string path);
 	Mesh(byte* mem);
 
 	void CalcTangents();

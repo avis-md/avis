@@ -160,7 +160,6 @@
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\makeres.cpp" />
-    <ClCompile Include="src\mdchan.cpp" />
     <ClCompile Include="src\md\Gromacs.cpp" />
     <ClCompile Include="src\makegen.cpp" />
     <ClCompile Include="src\md\parloader.cpp" />
@@ -253,7 +252,6 @@
     <ClInclude Include="src\core\io.h" />
     <ClInclude Include="src\core\mvp.h" />
     <ClInclude Include="src\makeres.h" />
-    <ClInclude Include="src\mdchan.h" />
     <ClInclude Include="src\md\CDV.h" />
     <ClInclude Include="src\md\dlpoly.h" />
     <ClInclude Include="src\md\importer_info.h" />

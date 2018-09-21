@@ -3,5 +3,5 @@
 
 class Dialog {
 public:
-	static std::vector<string> OpenFile(std::vector<string> pattern, bool multi = false);
+	static std::vector<std::string> OpenFile(std::vector<std::string> pattern, bool multi = false);
 };

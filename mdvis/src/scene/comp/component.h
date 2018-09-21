@@ -5,7 +5,7 @@ typedef byte DRAWORDER;
 
 class Component : public Object {
 public:
-	Component(string name, COMPONENT_TYPE t, DRAWORDER drawOrder = 0x00, SceneObject* o = nullptr, std::vector<COMPONENT_TYPE> dep = {});
+	Component(std::string name, COMPONENT_TYPE t, DRAWORDER drawOrder = 0x00, SceneObject* o = nullptr, std::vector<COMPONENT_TYPE> dep = {});
 	virtual  ~Component() {}
 
 	const COMPONENT_TYPE componentType = COMP_UNDEF;
@@ -29,7 +29,7 @@ protected:
 
 	bool _expanded;
 
-	static COMPONENT_TYPE Name2Type(string nm);
+	static COMPONENT_TYPE Name2Type(std::string nm);
 
 	virtual void LoadDefaultValues() {} //also loads assets
 

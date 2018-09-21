@@ -2,7 +2,7 @@
 #include "Particles.h"
 
 const byte AMINO_ACID_LEN = 20;
-const string AMINO_ACIDS =
+const std::string AMINO_ACIDS =
 "ALA\
 ARG\
 ASN\

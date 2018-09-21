@@ -73,7 +73,6 @@ typedef unsigned char byte;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 typedef unsigned short ushort;
-typedef std::string string;
 
 typedef glm::tvec2<int, glm::highp> Int2;
 typedef glm::vec2 Vec2;
@@ -340,10 +339,10 @@ public:
 	static void DrawCubeLinesW(Vec3 pos, float dx, float dy, float dz, Vec4 col);
 	static MOUSE_STATUS Button(float x, float y, float w, float h);
 	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4);
-	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4, string label, float labelSize, Vec4 labelCol, bool labelCenter = false, Font* labelFont = UI::font);
+	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4, std::string label, float labelSize, Vec4 labelCol, bool labelCenter = false, Font* labelFont = UI::font);
 	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4);
 	static MOUSE_STATUS Button(float x, float y, float w, float h, Texture* texture, Vec4 normalVec4 = white(0.8f), Vec4 highlightVec4 = white(), Vec4 pressVec4 = white(1, 0.5f), float uvx = 0, float uvy = 0, float uvw = 1, float uvh = 1);
-	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, string label, float labelSize, Font* labelFont, Vec4 labelVec4, bool labelCenter = false);
+	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, std::string label, float labelSize, Font* labelFont, Vec4 labelVec4, bool labelCenter = false);
 	static bool Toggle(float x, float y, float s, Vec4 col, bool t);
 	static bool Toggle(float x, float y, float s, Texture* texture, bool t, Vec4 col=white(), ORIENTATION o = ORIENT_NONE);
 	static float DrawSliderFill(float x, float y, float w, float h, float min, float max, float val, Vec4 background, Vec4 foreground);

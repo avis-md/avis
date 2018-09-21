@@ -5,9 +5,9 @@
 [av] */
 class Debug {
 public:
-	static void Message(string c, string s);
-	static void Warning(string c, string s);
-	static void Error(string c, string s);
+	static void Message(std::string c, std::string s);
+	static void Warning(std::string c, std::string s);
+	static void Error(std::string c, std::string s);
 
 	static uint StackTrace(uint count, void** buffer);
 

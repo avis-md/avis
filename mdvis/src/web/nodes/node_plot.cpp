@@ -9,7 +9,7 @@ Node_Plot::Node_Plot() : AnNode(new DmScript(sig)) {
 	title = "Plot Data";
 	canTile = true;
 	inputR.resize(1);
-	script->invars.push_back(std::pair<string, string>("array", "list(**)"));
+	script->invars.push_back(std::pair<std::string, std::string>("array", "list(**)"));
 }
 
 void Node_Plot::DrawHeader(float& y) {
@@ -102,7 +102,7 @@ void Node_Plot::Execute() {
 #endif
 }
 
-void Node_Plot::LoadOut(const string& path) {
+void Node_Plot::LoadOut(const std::string& path) {
 	Execute();
 }
 

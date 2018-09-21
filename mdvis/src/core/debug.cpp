@@ -8,12 +8,12 @@
 
 byte Debug::suppress = 0;
 
-void Debug::Message(string c, string s) {
+void Debug::Message(std::string c, std::string s) {
 	if (stream) *stream << "[i" DBG_TIMESTAMP << c << ": " << s << std::endl;
 	if (suppress == 0)
 		std::cout << "[i" DBG_TIMESTAMP << c << ": " << s << std::endl;
 }
-void Debug::Warning(string c, string s) {
+void Debug::Warning(std::string c, std::string s) {
 	if (stream) *stream << "[w" DBG_TIMESTAMP << c << ": " << s << std::endl;
 	if (suppress <= 1) {
 #ifdef PLATFORM_WIN
@@ -29,7 +29,7 @@ void Debug::Warning(string c, string s) {
 #endif
 	}
 }
-void Debug::Error(string c, string s) {
+void Debug::Error(std::string c, std::string s) {
 	if (stream) *stream << "[e" DBG_TIMESTAMP << c << ": " << s << std::endl;
 #ifdef PLATFORM_WIN
 	SetConsoleTextAttribute(winHandle, FOREGROUND_RED | FOREGROUND_INTENSITY);
@@ -62,7 +62,7 @@ std::ofstream* Debug::stream = nullptr;
 	WORD Debug::winTextAttr = 0;
 #endif
 void Debug::Init() {
-	string ss = IO::path +"/Log.txt";
+	std::string ss = IO::path +"/Log.txt";
 	stream = new std::ofstream(ss.c_str());
 
 #ifdef PLATFORM_WIN

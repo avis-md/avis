@@ -32,7 +32,7 @@
 #include "res/resdata.h"
 
 bool __debug = false;
-float autoSaveTime = 10;
+float autoSaveTime = 30;
 
 CubeMarcher* cm;
 Mat4x4 _mv, _p;
@@ -191,7 +191,7 @@ void paintfunc() {
 #include "makeres.h"
 int main(int argc, char **argv) {
 	MakeRes::Do();
-	std::getline(std::cin, *(new string()));
+	std::getline(std::cin, *(new std::string()));
 	return 0;
 #else
 int main(int argc, char **argv) {
@@ -202,9 +202,9 @@ int main(int argc, char **argv) {
 #endif
 		Time::startMillis = milliseconds();
 
-		std::vector<string> fls;
+		std::vector<std::string> fls;
 		bool _s = false, _x = false;
-		string _xs = "";
+		std::string _xs = "";
 		for (auto a = 1; a < argc; a++) {
 			if (argv[a][0] == '-') {
 				if (argv[a][1] == '-') {
@@ -287,7 +287,7 @@ int main(int argc, char **argv) {
 		ParImporter* imp = new ParImporter();
 		imp->name = "Gromacs";
 		imp->sig = "gro";
-		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>());
+		imp->funcs.push_back(std::pair<std::vector<std::string>, ParImporter::loadsig>());
 		imp->funcs.back().first.push_back(".gro");
 		imp->funcs.back().second = Gromacs::Read;
 		imp->trjFuncs.push_back(std::pair<std::vector<std::string>, ParImporter::loadtrjsig>());
@@ -295,13 +295,13 @@ int main(int argc, char **argv) {
 		imp->trjFuncs.back().second = Gromacs::ReadTrj;
 		ParLoader::importers.push_back(imp);
 
-		ParLoader::exts = std::vector<string>({ "*.gro", "*.trr" });
+		ParLoader::exts = std::vector<std::string>({ "*.gro", "*.trr" });
 
 #define NEWIMP(_nm, _sig, _ext, _fnc) \
 		imp = new ParImporter(); \
 		imp->name = #_nm; \
 		imp->sig = #_sig; \
-		imp->funcs.push_back(std::pair<std::vector<string>, ParImporter::loadsig>()); \
+		imp->funcs.push_back(std::pair<std::vector<std::string>, ParImporter::loadsig>()); \
 		imp->funcs.back().first.push_back(#_ext); \
 		imp->funcs.back().second = _fnc::Read; \
 		ParLoader::importers.push_back(imp); \
@@ -361,7 +361,7 @@ int main(int argc, char **argv) {
 	}
 	catch (...) {
 		std::cout << "Something fatal happened!!\nPress enter to exit..." << std::endl;
-		string s;
+		std::string s;
 		std::getline(std::cin, s);
 		return -1;
 	}

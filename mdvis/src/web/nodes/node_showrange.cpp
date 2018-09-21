@@ -8,7 +8,7 @@ Node_ShowRange::Node_ShowRange() : AnNode(new DmScript(sig)) {
 	titleCol = Vec3(0.3f, 0.5f, 0.3f);
     canTile = false;
 	inputR.resize(1);
-	script->invars.push_back(std::pair<string, string>("values", "list(1f)"));
+	script->invars.push_back(std::pair<std::string, std::string>("values", "list(1f)"));
 }
 
 void Node_ShowRange::Execute() {
@@ -54,6 +54,6 @@ void Node_ShowRange::DrawHeader(float& off) {
 	off += 35;
 }
 
-void Node_ShowRange::LoadOut(const string& path) {
+void Node_ShowRange::LoadOut(const std::string& path) {
     Execute();
 }

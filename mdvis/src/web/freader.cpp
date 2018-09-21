@@ -17,12 +17,12 @@ void FReader::Init() {
 }
 
 bool FReader::Read(FScript* scr) {
-	string& path = scr->path;
-	string fp = IO::path + "nodes/" + path;
+	std::string& path = scr->path;
+	std::string fp = IO::path + "nodes/" + path;
 	auto s = IO::GetText(fp);
 	auto ls = fp.find_last_of('/');
-	string& nm = scr->name;
-	string fp2 = fp.substr(0, ls + 1) + "__fcache__/";
+	std::string& nm = scr->name;
+	std::string fp2 = fp.substr(0, ls + 1) + "__fcache__/";
 
 
 #ifndef IS_ANSERVER
@@ -44,18 +44,18 @@ bool FReader::Read(FScript* scr) {
 				scr->errorCount = 1;\
 				Debug::Warning(a "(" + scr->name + ")", b);
 
-		string funcNm = "";
+		std::string funcNm = "";
 
 		if (mt >= ot) {
-			string lp(fp2 + nm + ".so");
+			std::string lp(fp2 + nm + ".so");
 			remove(&lp[0]);
 
 			{
 				std::ifstream strm(fp + ".f90");
 				std::ofstream ostrm(fp + "_temp__.f90");
 				std::vector<typestring> arr_i;
-				std::vector<string> arr_o;
-				string s;
+				std::vector<std::string> arr_o;
+				std::string s;
 				int tp = 0;
 				size_t loc = -1;
 				while (!fail && std::getline(strm, s)) {
@@ -129,7 +129,7 @@ bool FReader::Read(FScript* scr) {
 
 
 
-			string cmd = CReader::gpp + " -shared "
+			std::string cmd = CReader::gpp + " -shared "
 			#ifdef PLATFORM_WIN
 				"-static-libstdc++ -static-libgcc -Wl,--export-all-symbols "
 			#else
@@ -164,7 +164,7 @@ bool FReader::Read(FScript* scr) {
 		}
 		auto acf = (emptyFunc)scr->lib->GetSym(funcNm);
 		if (!acf) {
-			string err = 
+			std::string err = 
 #ifdef PLATFORM_WIN
 				std::to_string(GetLastError());
 #else
@@ -213,7 +213,7 @@ bool FReader::Read(FScript* scr) {
 
 
 	std::ifstream strm(fp + ".f90");
-	string ln;
+	std::string ln;
 	bool fst = true;
 	while (!strm.eof()) {
 		std::getline(strm, ln);
@@ -226,7 +226,7 @@ bool FReader::Read(FScript* scr) {
 
 		bool iso = ln == "!out";
 		if (iso || ln == "!in") {
-			std::vector<std::pair<string, string>>& cv = iso ? scr->outvars : scr->invars;
+			std::vector<std::pair<std::string, std::string>>& cv = iso ? scr->outvars : scr->invars;
 			std::vector<CVar>& _cv = iso ? scr->_outvars : scr->_invars;
 			std::vector<emptyFunc>& _fc = iso? scr->_outarr_post : scr->_inarr_pre;
 			_cv.push_back(CVar());
@@ -234,7 +234,7 @@ bool FReader::Read(FScript* scr) {
 			_fc.push_back(emptyFunc());
 			auto fk = &_fc.back();
 
-			const string ios = iso ? "output " : "input ";
+			const std::string ios = iso ? "output " : "input ";
 
 			std::getline(strm, ln);
 			auto ss = string_split(ln, ' ', true);
@@ -272,7 +272,7 @@ bool FReader::Read(FScript* scr) {
 				bk->type = AN_VARTYPE::LIST;
 				bk->typeName = "list(" + std::to_string(bk->dimVals.size()) + bk->typeName[0] + ")";
 			}
-			cv.push_back(std::pair<string, string>(bk->name, bk->typeName));
+			cv.push_back(std::pair<std::string, std::string>(bk->name, bk->typeName));
 			
 			if (AnWeb::hasFt) {
 				auto nml = to_lowercase(bk->name);
@@ -310,7 +310,7 @@ void FReader::Refresh(FScript* scr) {
 	}
 }
 
-bool FReader::ParseType(string& s, CVar* var) {
+bool FReader::ParseType(std::string& s, CVar* var) {
 	s = to_lowercase(s);
 	if (s == "integer") {
 		var->type = AN_VARTYPE::INT;
@@ -324,7 +324,7 @@ bool FReader::ParseType(string& s, CVar* var) {
 	return true;
 }
 
-void FReader::GenArrIO(string path, string name, std::vector<typestring> invars, std::vector<string> outvars) {
+void FReader::GenArrIO(std::string path, std::string name, std::vector<typestring> invars, std::vector<std::string> outvars) {
 	std::ofstream strm(path + name + ".ext.f95");
 
 	strm << R"(module mod_imp

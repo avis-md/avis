@@ -24,7 +24,7 @@ public:
 	
 	static float resLerp;
 
-	static string outputFolder;
+	static std::string outputFolder;
 
 	static GLuint res_fbo, res_img;
 

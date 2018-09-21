@@ -6,7 +6,7 @@ Node_TraceTrj::Node_TraceTrj() : AnNode(new DmScript(sig)) {
 	titleCol = Vec3(0.3f, 0.5f, 0.3f);
     canTile = false;
 	inputR.resize(1);
-	script->invars.push_back(std::pair<string, string>("values", "list(2f)"));
+	script->invars.push_back(std::pair<std::string, std::string>("values", "list(2f)"));
 }
 
 void Node_TraceTrj::Execute() {
@@ -29,6 +29,6 @@ void Node_TraceTrj::DrawScene() {
 	Engine::DrawLinesW(&path[0], fc, black(), 4);
 }
 
-void Node_TraceTrj::LoadOut(const string& path) {
+void Node_TraceTrj::LoadOut(const std::string& path) {
     Execute();
 }

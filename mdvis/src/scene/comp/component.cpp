@@ -1,6 +1,6 @@
 #include "Engine.h"
 
-Component::Component(string name, COMPONENT_TYPE t, DRAWORDER drawOrder, SceneObject* o, std::vector<COMPONENT_TYPE> dep)
+Component::Component(std::string name, COMPONENT_TYPE t, DRAWORDER drawOrder, SceneObject* o, std::vector<COMPONENT_TYPE> dep)
 	: Object(name), componentType(t), active(true), drawOrder(drawOrder), _expanded(true), dependancies(dep) {
 	for (COMPONENT_TYPE t : dependancies) {
 		dependacyPointers.push_back(rComponent());
@@ -8,8 +8,8 @@ Component::Component(string name, COMPONENT_TYPE t, DRAWORDER drawOrder, SceneOb
 	if (o) object(o);
 }
 
-COMPONENT_TYPE Component::Name2Type(string nm) {
-	static const string names[] = {
+COMPONENT_TYPE Component::Name2Type(std::string nm) {
+	static const std::string names[] = {
 		"Camera",
 		"MeshFilter",
 		"MeshRenderer",

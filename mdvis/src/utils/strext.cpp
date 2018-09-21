@@ -2,46 +2,46 @@
 
 #ifdef PLATFORM_ADR
 namespace std {
-	int stoi(const string& s) {
+	int stoi(const std::string& s) {
 		return 1;
 	}
-	float stof(const string& s) {
+	float stof(const std::string& s) {
 		return 1.0f;
 	}
-	unsigned long stoul(const string& s) {
+	unsigned long stoul(const std::string& s) {
 		return 0UL;
 	}
 }
 #endif
 
 namespace std {
-	string to_string(Vec2 v) {
+	std::string to_string(Vec2 v) {
 		return "(" + to_string(v.x) + ", " + to_string(v.y) + ")";
 	}
-	string to_string(Vec3 v) {
+	std::string to_string(Vec3 v) {
 		return "(" + to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ")";
 	}
-	string to_string(Vec4 v) {
+	std::string to_string(Vec4 v) {
 		return "(" + to_string(v.w) + ", " + to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ")";
 	}
-	string to_string(Quat v) {
+	std::string to_string(Quat v) {
 		return "(" + to_string(v.w) + ", " + to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ")";
 	}
 }
 
-std::vector<string> string_split(string s, char c, bool rm) {
-	std::vector<string> o = std::vector<string>();
+std::vector<std::string> string_split(std::string s, char c, bool rm) {
+	std::vector<std::string> o = std::vector<std::string>();
 	size_t pos = -1;
 	do {
 		s = s.substr(pos + 1);
 		pos = s.find_first_of(c);
 		if (!rm || pos > 0)
 			o.push_back(s.substr(0, pos));
-	} while (pos != string::npos);
+	} while (pos != std::string::npos);
 	return o;
 }
 
-int string_find(const string& s, const string& s2, int start) {
+int string_find(const std::string& s, const std::string& s2, int start) {
 	uint ss = s.size();
 	uint s2s = s2.size();
 	int p = start;
@@ -53,8 +53,8 @@ int string_find(const string& s, const string& s2, int start) {
 	return -1;
 }
 
-string to_lowercase(const string& s) {
-	string ss;
+std::string to_lowercase(const std::string& s) {
+	std::string ss;
 	ss.reserve(s.size());
 	for (auto c : s) {
 		if (c >= 'A' && c <= 'Z')
@@ -64,8 +64,8 @@ string to_lowercase(const string& s) {
 	return ss;
 }
 
-string rm_spaces(const string& s) {
-	string ss;
+std::string rm_spaces(const std::string& s) {
+	std::string ss;
 	ss.reserve(s.size());
 	for (auto c : s) {
 		if (c != ' ')
@@ -74,7 +74,7 @@ string rm_spaces(const string& s) {
 	return ss;
 }
 
-int TryParse(string str, int defVal) {
+int TryParse(std::string str, int defVal) {
 	try {
 		return std::stoi(str);
 	}
@@ -82,7 +82,7 @@ int TryParse(string str, int defVal) {
 		return defVal;
 	}
 }
-uint TryParse(string str, uint defVal) {
+uint TryParse(std::string str, uint defVal) {
 	try {
 		if (str[0] == '-') return 0;
 		else return std::stoul(str);
@@ -91,7 +91,7 @@ uint TryParse(string str, uint defVal) {
 		return defVal;
 	}
 }
-float TryParse(string str, float defVal) {
+float TryParse(std::string str, float defVal) {
 	try {
 		return std::stof(str);
 	}
@@ -99,7 +99,7 @@ float TryParse(string str, float defVal) {
 		return defVal;
 	}
 }
-double TryParse(string str, double defVal) {
+double TryParse(std::string str, double defVal) {
 	try {
 		return std::stod(str);
 	}

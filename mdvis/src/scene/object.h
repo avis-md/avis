@@ -4,10 +4,10 @@
 [av] */
 class Object : public std::enable_shared_from_this<Object> {
 public:
-	Object(string nm = "");
-	Object(ulong id, string nm);
+	Object(std::string nm = "");
+	Object(ulong id, std::string nm);
 	ulong id;
-	string name;
+	std::string name;
 	bool dirty = false; //triggers a reload of internal variables
 	bool dead = false; //will be cleaned up after this frame
 

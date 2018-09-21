@@ -4,7 +4,7 @@
 
 class Node_SetParam : public AnNode {
 public:
-	static const string sig;
+	static const std::string sig;
 	Node_SetParam();
 
     uint paramId;
@@ -12,6 +12,6 @@ public:
     
 	void Execute() override;
     void DrawHeader(float& off) override;
-	void SaveOut(const string& path) override {}
-	void LoadOut(const string& path) override;
+	void SaveOut(const std::string& path) override {}
+	void LoadOut(const std::string& path) override;
 };

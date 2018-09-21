@@ -11,12 +11,12 @@ public:
 	static void Refresh(FScript* scr);
 
 protected:
-	static bool ParseType(string& s, CVar* var);
+	static bool ParseType(std::string& s, CVar* var);
 
 	struct typestring {
-		string type, name, dims;
+		std::string type, name, dims;
 
-		typestring(string a, string b, string c) : type(a), name(b), dims(c) {}
+		typestring(std::string a, std::string b, std::string c) : type(a), name(b), dims(c) {}
 	};
-	static void GenArrIO(string path, string name, std::vector<typestring> invars, std::vector<string> outvars);
+	static void GenArrIO(std::string path, std::string name, std::vector<typestring> invars, std::vector<std::string> outvars);
 };

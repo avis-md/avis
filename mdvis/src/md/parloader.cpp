@@ -15,17 +15,17 @@ bool ParLoader::loadAsTrj = false, ParLoader::additive = false;
 uint ParLoader::frameskip = 1;
 int ParLoader::maxframes = -1;
 bool ParLoader::useConn, ParLoader::useConnCache, ParLoader::hasConnCache, ParLoader::oldConnCache, ParLoader::ovwConnCache;
-string ParLoader::connCachePath;
+std::string ParLoader::connCachePath;
 
 std::vector<ParImporter*> ParLoader::importers;
-std::vector<string> ParLoader::exts;
+std::vector<std::string> ParLoader::exts;
 
 bool ParLoader::showDialog = false, ParLoader::busy = false, ParLoader::fault = false, ParLoader::directLoad = false;
 bool ParLoader::parDirty = false, ParLoader::trjDirty = false;
 float* ParLoader::loadProgress = 0, *ParLoader::loadProgress2 = 0;
 uint16_t* ParLoader::loadFrames = 0;
-string ParLoader::loadName;
-std::vector<string> ParLoader::droppedFiles;
+std::string ParLoader::loadName;
+std::vector<std::string> ParLoader::droppedFiles;
 
 bool ParLoader::_showImp = false;
 float ParLoader::_impPos = 0, ParLoader::_impScr = 0;
@@ -45,8 +45,8 @@ void ParLoader::Init() {
 #define LIBEXT ".so"
 #endif
 
-string _RMSP(string s) {
-	string res;
+std::string _RMSP(std::string s) {
+	std::string res;
 	res.reserve(s.size());
 	for (auto& c : s) {
 		if (c != ' ') res += c;
@@ -55,8 +55,8 @@ string _RMSP(string s) {
 }
 
 void ParLoader::Scan() {
-	string fd = IO::path + "bin/importers/";
-	std::vector<string> fds;
+	std::string fd = IO::path + "bin/importers/";
+	std::vector<std::string> fds;
 	IO::GetFolders(fd, &fds);
 	exts.clear();
 	for (auto& f : fds) {
@@ -65,10 +65,10 @@ void ParLoader::Scan() {
 		std::ifstream strm(fd + f + "/config.txt");
 		if (strm.is_open()) {
 			ParImporter* imp = new ParImporter();
-			string s, libname;
+			std::string s, libname;
 			while (std::getline(strm, s)) {
 				auto lc = s.find_first_of('=');
-				if (lc != string::npos) {
+				if (lc != std::string::npos) {
 					auto tp = s.substr(0, lc);
 					auto vl = s.substr(lc + 1);
 					if (tp == "name") imp->name = vl;
@@ -88,16 +88,16 @@ void ParLoader::Scan() {
 					}
 					s = _RMSP(s);
 					auto lc = s.find('{');
-					if (lc != string::npos) {
+					if (lc != std::string::npos) {
 						auto tp = s.substr(0, lc);
 						if (tp == "configuration") {
 							std::getline(strm, s);
 							s = _RMSP(s);
-							std::pair<std::vector<string>, ParImporter::loadsig> pr;
+							std::pair<std::vector<std::string>, ParImporter::loadsig> pr;
 							int vlc = 0;
 							while (s != "}") {
 								auto lc = s.find_first_of('=');
-								if (lc == string::npos) continue;
+								if (lc == std::string::npos) continue;
 								auto tp = s.substr(0, lc);
 								auto vl = s.substr(lc + 1);
 								if (tp == "func") {
@@ -123,11 +123,11 @@ void ParLoader::Scan() {
 						else if (tp == "trajectory") {
 							std::getline(strm, s);
 							s = _RMSP(s);
-							std::pair<std::vector<string>, ParImporter::loadtrjsig> pr;
+							std::pair<std::vector<std::string>, ParImporter::loadtrjsig> pr;
 							int vlc = 0;
 							while (s != "}") {
 								auto lc = s.find_first_of('=');
-								if (lc == string::npos) continue;
+								if (lc == std::string::npos) continue;
 								auto tp = s.substr(0, lc);
 								auto vl = s.substr(lc + 1);
 								if (tp == "func") {
@@ -179,7 +179,7 @@ void ParLoader::DoOpen() {
 	loadFrames = &info.trajectory.frames;
 	loadName = "Reading file(s)";
 	std::replace(droppedFiles[0].begin(), droppedFiles[0].end(), '\\', '/');
-	string nm = droppedFiles[0].substr(droppedFiles[0].find_last_of('/') + 1);
+	std::string nm = droppedFiles[0].substr(droppedFiles[0].find_last_of('/') + 1);
 	VisSystem::SetMsg("Reading " + nm);
 
 	auto t = milliseconds();
@@ -196,7 +196,7 @@ void ParLoader::DoOpen() {
 					VisSystem::SetMsg("Unspecified import error", 2);
 				}
 				else {
-					Debug::Warning("ParLoader", "Importer error: " + string(info.error));
+					Debug::Warning("ParLoader", "Importer error: " + std::string(info.error));
 					VisSystem::SetMsg(info.error, 2);
 				}
 				busy = false;
@@ -206,8 +206,8 @@ void ParLoader::DoOpen() {
 		}
 	}
 	catch (char* c) {
-		Debug::Warning("ParLoader", "Importer exception: " + string(c));
-		VisSystem::SetMsg("Importer threw " + string(c), 2);
+		Debug::Warning("ParLoader", "Importer exception: " + std::string(c));
+		VisSystem::SetMsg("Importer threw " + std::string(c), 2);
 		busy = false;
 		fault = true;
 		return;
@@ -270,7 +270,7 @@ void ParLoader::DoOpen() {
 			Particles::residueLists.push_back(ResidueList());
 			Particles::residueListSz++;
 			trs = &Particles::residueLists.back();
-			trs->name = string(info.resname + i * PAR_MAX_NAME_LEN, 5);
+			trs->name = std::string(info.resname + i * PAR_MAX_NAME_LEN, 5);
 			currResNm = resNm;
 		}
 
@@ -481,7 +481,7 @@ void ParLoader::DrawOpenDialog() {
 	UI::Quad(woff, hoff, 400, 16, white(0.9f, 0.1f));
 	UI::Label(woff + 2, hoff, 12, loadAsTrj ? "Load Trajectory" : "Load Configuration", white());
 	UI::Label(woff + 2, hoff + 17, 12, "File(s)", white());
-	string nm = droppedFiles[0];
+	std::string nm = droppedFiles[0];
 	if (Engine::Button(woff + 60, hoff + 17, 339, 16, white(1, 0.4f)) == MOUSE_RELEASE) {
 
 	}
@@ -532,7 +532,7 @@ void ParLoader::DrawOpenDialog() {
 		useConnCache = Engine::Toggle(woff + 100, hoff + 17 * 6, 16, Icons::checkbox, useConnCache, white(), ORIENT_HORIZONTAL);
 		UI::Label(woff + 123, hoff + 17 * 6, 12, "Use Bond Cache", white(), 326);
 		if (useConnCache) {
-			UI::Label(woff + 5, hoff + 17 * 7, 12, hasConnCache ? "Cache found" + (string)(oldConnCache ? "(outdated): " : ": ") + connCachePath : "No cache found", white(), 326);
+			UI::Label(woff + 5, hoff + 17 * 7, 12, hasConnCache ? "Cache found" + (std::string)(oldConnCache ? "(outdated): " : ": ") + connCachePath : "No cache found", white(), 326);
 			if (hasConnCache) {
 				ovwConnCache = Engine::Toggle(woff + 300, hoff + 17 * 7, 16, Icons::checkbox, ovwConnCache, white(), ORIENT_HORIZONTAL);
 				UI::Label(woff + 320, hoff + 17 * 7, 12, "Overwrite", white(), 326);
@@ -540,7 +540,7 @@ void ParLoader::DrawOpenDialog() {
 		}
 	}
 
-	string line = "";
+	std::string line = "";
 	if (loadAsTrj) line += "-trj ";
 	if (additive) line += "-a";
 	if (maxframes > 0) line += "-n" + std::to_string(maxframes) + " ";
@@ -564,15 +564,15 @@ void ParLoader::DrawOpenDialog() {
 
 bool ParLoader::OnDropFile(int i, const char** c) {
 	if (AnWeb::drawFull) return false;
-	std::vector<string> fs(i);
+	std::vector<std::string> fs(i);
 	for (i--; i >= 0; i--) {
-		fs[i] = string(c[i]);
+		fs[i] = std::string(c[i]);
 	}
 	OnOpenFile(fs);
 	return true;
 }
 
-void ParLoader::OnOpenFile(const std::vector<string>& files) {
+void ParLoader::OnOpenFile(const std::vector<std::string>& files) {
 	if (!files.size()) return;
 	droppedFiles = files;
 	loadAsTrj = !!Particles::particleSz;
@@ -583,7 +583,7 @@ void ParLoader::OnOpenFile(const std::vector<string>& files) {
 	useConn = true;
 	hasConnCache = false;
 
-	string cpt = droppedFiles[0] + ".conn";
+	std::string cpt = droppedFiles[0] + ".conn";
 	std::ifstream strm(cpt);
 	if (strm.is_open()) {
 		std::getline(strm, connCachePath);
@@ -684,12 +684,12 @@ void ParLoader::FindImpId(bool force) {
 	}
 }
 
-uint ParLoader::FindNextOff(string path) {
+uint ParLoader::FindNextOff(std::string path) {
 	auto ld = path.find_last_of('.');
-	string ext = path.substr(ld);
+	std::string ext = path.substr(ld);
 	path = path.substr(0, ld);
 	auto ls = path.find_last_of('/') + 1;
-	string nm = path.substr(ls);
+	std::string nm = path.substr(ls);
 	path = path.substr(0, ls);
 	auto fls = IO::GetFiles(path, ext);
 	auto sz = nm.size();

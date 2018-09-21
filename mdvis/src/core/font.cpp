@@ -61,7 +61,7 @@ void Font::InitVao(uint sz) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-Font::Font(const string& path, ALIGNMENT align) : vecSize(0), alignment(align) {
+Font::Font(const std::string& path, ALIGNMENT align) : vecSize(0), alignment(align) {
 	auto err = FT_New_Face(_ftlib, path.c_str(), 0, &_face);
 	if (err != FT_Err_Ok) {
 		Debug::Warning("Font", "Failed to load font! " + std::to_string(err));

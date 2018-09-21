@@ -50,7 +50,7 @@ Node_Volume::Node_Volume() : AnNode(new DmScript(sig)) {
 	//width = 200;
 	canTile = true;
 	inputR.resize(1);
-	script->invars.push_back(std::pair<string, string>("array", "list(3)"));
+	script->invars.push_back(std::pair<std::string, std::string>("array", "list(3)"));
 	ox = oy = oz = 4;
 	sx = sy = sz = 5;
 	cutC = Vec3(0, 0, 0);

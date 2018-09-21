@@ -8,10 +8,10 @@
 struct ParImporter {
 	typedef bool(*loadsig)(ParInfo*);
 	typedef bool(*loadtrjsig)(TrjInfo*);
-	string name, sig;
+	std::string name, sig;
 	DyLib* lib;
-	std::vector<std::pair<std::vector<string>, loadsig>> funcs;
-	std::vector<std::pair<std::vector<string>, loadtrjsig>> trjFuncs;
+	std::vector<std::pair<std::vector<std::string>, loadsig>> funcs;
+	std::vector<std::pair<std::vector<std::string>, loadtrjsig>> trjFuncs;
 };
 
 class ParLoader {
@@ -24,17 +24,17 @@ public:
 	static uint frameskip;
 	static int maxframes;
 	static bool useConn, useConnCache, hasConnCache, oldConnCache, ovwConnCache;
-	static string connCachePath;
+	static std::string connCachePath;
 
 	static std::vector<ParImporter*> importers;
-	static std::vector<string> exts;
+	static std::vector<std::string> exts;
 	
 	static bool showDialog, busy, fault, directLoad;
 	static bool parDirty, trjDirty;
 	static float* loadProgress, *loadProgress2;
 	static uint16_t* loadFrames;
-	static string loadName;
-	static std::vector<string> droppedFiles;
+	static std::string loadName;
+	static std::vector<std::string> droppedFiles;
 
 	static bool _showImp;
 	static float _impPos, _impScr;
@@ -45,7 +45,7 @@ public:
 	static void DrawOpenDialog();
 
 	static bool OnDropFile(int i, const char** c);
-	static void OnOpenFile(const std::vector<string>& files);
+	static void OnOpenFile(const std::vector<std::string>& files);
 	static void FindImpId(bool force = false);
-	static uint FindNextOff(string path);
+	static uint FindNextOff(std::string path);
 };

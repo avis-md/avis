@@ -12,7 +12,7 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)) {
 	title = "All Particles";
 	titleCol = Vec3(0.3f, 0.3f, 0.5f);
 	canTile = true;
-	auto v = std::pair<string, string>();
+	auto v = std::pair<std::string, std::string>();
 	v.second = "list(2d)";
 	outputR.resize(8);
 	scr->outvars.resize(8, v);
@@ -94,9 +94,9 @@ void Node_Inputs::Execute() {
 #endif
 }
 
-void Node_Inputs::SaveIn(const string& path) {
+void Node_Inputs::SaveIn(const std::string& path) {
 	Execute();
-	string nm = script->name;
+	std::string nm = script->name;
 	//std::replace(nm.begin(), nm.end(), '/', '_');
 	std::ofstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
@@ -105,8 +105,8 @@ void Node_Inputs::SaveIn(const string& path) {
 	}
 }
 
-void Node_Inputs::LoadIn(const string& path) {
-	string nm = script->name;
+void Node_Inputs::LoadIn(const std::string& path) {
+	std::string nm = script->name;
 	//std::replace(nm.begin(), nm.end(), '/', '_');
 	std::ifstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
@@ -145,16 +145,16 @@ Node_Inputs_SelPar::Node_Inputs_SelPar() : Node_Inputs() {
 void Node_Inputs_SelPar::DrawHeader(float& off) {
 	AnNode::DrawHeader(off);
 	UI::Quad(pos.x, off, width, 35, bgCol);
-	string nms[] = { "ResNm", "ResID", "AtomID" };
-	string nmfs[] = { "Residue Name", "Residue ID", "Atom ID" };
+	std::string nms[] = { "ResNm", "ResID", "AtomID" };
+	std::string nmfs[] = { "Residue Name", "Residue ID", "Atom ID" };
 	UI2::Switch(pos.x + 2, off + 1, width - 2, "type", 3, nms, (int&)type);
 	UI::Label(pos.x + 2, off + 18, 12, nmfs[(int)type], white());
-	string tv = (type == SELTYPE::RSL)? tv_resNm : 
+	std::string tv = (type == SELTYPE::RSL)? tv_resNm : 
 		(type == SELTYPE::RES)? std::to_string(tv_resId) : 
 			std::to_string(tv_atomId);
-	string tv2 = (type == SELTYPE::RSL)? tv_resNm : 
+	std::string tv2 = (type == SELTYPE::RSL)? tv_resNm : 
 		(type == SELTYPE::RES)? std::to_string(tv_resId) + " (" + tv_resNm + ")" : 
-			std::to_string(tv_atomId) + " (" + string(Particles::particles_Name, PAR_MAX_NAME_LEN) + ")";
+			std::to_string(tv_atomId) + " (" + std::string(Particles::particles_Name, PAR_MAX_NAME_LEN) + ")";
 	tv = UI::EditText(pos.x + width / 2, off + 18, width/2 - 18, 16, 12, white(1, 0.3f), tv, true, white(), 0, tv2);
 	if (Engine::Button(pos.x + width - 17, off + 18, 16, 16, white(1, 0.5f)) == MOUSE_RELEASE) {
 		Popups::type = (POPUP_TYPE)((int)POPUP_TYPE::RESNM + (int)type);

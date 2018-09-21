@@ -17,11 +17,11 @@ struct MenuItem {
 	typedef void(*CBK)();
 
 	GLuint icon = 0;
-	string label;
+	std::string label;
 	std::vector<MenuItem> child;
 	CBK callback;
 
-	void Set(Texture* tex, const string& str, CBK cb) {
+	void Set(Texture* tex, const std::string& str, CBK cb) {
 		icon = tex? tex->pointer : 0;
 		label = str;
 		callback = cb;
@@ -31,10 +31,10 @@ struct MenuItem {
 class Popups {
 public:
 	struct DropdownItem {
-		DropdownItem(uint* a, string* b) : target(a), list(b) {}
+		DropdownItem(uint* a, std::string* b) : target(a), list(b) {}
 
 		uint* target;
-		string* list;
+		std::string* list;
 	};
 
     static POPUP_TYPE type;

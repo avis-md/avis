@@ -8,7 +8,7 @@ Node_Camera_Out::Node_Camera_Out() : AnNode(new DmScript(sig)) {
     canTile = false;
     inputR.resize(6);
     auto& vrs = script->invars;
-    std::pair<string, string> pr("", "float");
+    std::pair<std::string, std::string> pr("", "float");
     vrs.resize(6, pr);
     vrs[0].first = "center X";
     vrs[1].first = "center Y";

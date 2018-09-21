@@ -23,14 +23,14 @@ void ErrorView::Refresh() {
 	_DoRefresh(AnBrowse::folder);
 }
 
-int ErrorView::Parse_GCC(const string& path, const string& sig, const string& name, std::vector<Message>& msgs) {
+int ErrorView::Parse_GCC(const std::string& path, const std::string& sig, const std::string& name, std::vector<Message>& msgs) {
     msgs.clear();
     std::ifstream strm(path);
-    string str;
+    std::string str;
     int n = 0;
     Message* msg = nullptr;
     const auto sz = sig.size();
-    const string nm = name.substr(name.find_last_of('/') + 1);
+    const std::string nm = name.substr(name.find_last_of('/') + 1);
     while (std::getline(strm, str)) {
 #ifdef PLATFORM_WIN
 		if (str[1] == ':' && str[0] >= 'A' && str[0] <= 'Z') {
@@ -74,14 +74,14 @@ int ErrorView::Parse_GCC(const string& path, const string& sig, const string& na
     return n;
 }
 
-int ErrorView::Parse_MSVC(const string& path, const string& sig, const string& name, std::vector<Message>& msgs) {
+int ErrorView::Parse_MSVC(const std::string& path, const std::string& sig, const std::string& name, std::vector<Message>& msgs) {
 	msgs.clear();
 	std::ifstream strm(path);
-	string str;
+	std::string str;
 	int n = 0;
 	Message* msg = nullptr;
 	const auto sz = sig.size();
-	const string nm = name.substr(name.find_last_of('/') + 1);
+	const std::string nm = name.substr(name.find_last_of('/') + 1);
 	while (std::getline(strm, str)) {
 		if (str[0] == ' ' && msg)
 			msg->msg.push_back(str);
@@ -183,14 +183,14 @@ void ErrorView::Draw() {
 	}
 }
 
-int ErrorView::Parse_GFortran(const string& path, const string& sig, const string& name, std::vector<Message>& msgs) {
+int ErrorView::Parse_GFortran(const std::string& path, const std::string& sig, const std::string& name, std::vector<Message>& msgs) {
     msgs.clear();
     std::ifstream strm(path);
-    string str;
+    std::string str;
     int n = 0;
     Message* msg = nullptr;
     const auto sz = sig.size();
-    const string nm = name.substr(name.find_last_of('/') + 1);
+    const std::string nm = name.substr(name.find_last_of('/') + 1);
     while (std::getline(strm, str)) {
 #ifdef PLATFORM_WIN
 		if (str[1] == ':' && str[0] >= 'A' && str[0] <= 'Z') {

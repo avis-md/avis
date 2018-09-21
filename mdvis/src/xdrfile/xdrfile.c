@@ -1761,7 +1761,7 @@ xdrfile_compress_coord_double(double   *ptr,
 static XDRFILE *f77xdr[MAX_FORTRAN_XDR]; /* array of file handles */
 static int      f77init = 1;             /* zero array first time */
 
-/* internal to this file: C<-->Fortran string conversion */
+/* internal to this file: C<-->Fortran std::string conversion */
 static int ftocstr(char *dest, int dest_len, char *src, int src_len);
 static int ctofstr(char *dest, int dest_len, char *src);
 
@@ -2338,7 +2338,7 @@ xdr_opaque (XDR *xdrs, char *cp, unsigned int cnt)
 static int
 xdr_string (XDR *xdrs, char **cpp, unsigned int maxsize)
 {
-	char *sp = *cpp;	/* sp is the actual string pointer */
+	char *sp = *cpp;	/* sp is the actual std::string pointer */
 	unsigned int size;
 	unsigned int nodesize;
 

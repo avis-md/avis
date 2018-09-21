@@ -7,7 +7,7 @@ Node_SetParam::Node_SetParam() : AnNode(new DmScript(sig)), paramId(0), di(&para
 	titleCol = Vec3(0.3f, 0.5f, 0.3f);
     canTile = false;
 	inputR.resize(1);
-	script->invars.push_back(std::pair<string, string>("values", "list(1f)"));
+	script->invars.push_back(std::pair<std::string, std::string>("values", "list(1f)"));
 }
 
 void Node_SetParam::Execute() {
@@ -27,6 +27,6 @@ void Node_SetParam::DrawHeader(float& off) {
 	off += 18;
 }
 
-void Node_SetParam::LoadOut(const string& path) {
+void Node_SetParam::LoadOut(const std::string& path) {
     Execute();
 }

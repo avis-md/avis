@@ -24,7 +24,7 @@ int AnScript::StrideOf(char c) {
 }
 
 
-std::unordered_map<string, PyScript*> PyScript::allScrs;
+std::unordered_map<std::string, PyScript*> PyScript::allScrs;
 
 PyObject* PyScript::mainModule, *PyScript::logCatcher, *PyScript::emptyString;
 
@@ -49,14 +49,14 @@ sys.stderr = catchOutErr\n\
 	emptyString = PyUnicode_FromString("");
 }
 
-string PyScript::GetLog() {
+std::string PyScript::GetLog() {
 	if (!logCatcher) return "";
 	PyObject *output = PyObject_GetAttrString(logCatcher, "value"); //get the stdout and stderr from our catchOutErr object
 	auto u = PyUnicode_AsEncodedString(output, "UTF-8", "strict");
 	char* res = PyBytes_AsString(u);
 	Py_DECREF(u);
 	Py_DECREF(output);
-	string s(res);
+	std::string s(res);
 	if (s.back() == '\n') s.pop_back();
 	return s;
 }
@@ -81,7 +81,7 @@ void PyScript::Clear() {
 	}
 }
 
-string PyScript::Exec() {
+std::string PyScript::Exec() {
 	uint i = 0;
 	for (; i < invars.size(); ++i) {
 		auto& val = _invars[i].value;
@@ -198,7 +198,7 @@ void CVar::Read(std::ifstream& strm) {
 }
 
 
-std::unordered_map<string, CScript*> CScript::allScrs;
+std::unordered_map<std::string, CScript*> CScript::allScrs;
 
 void CScript::Clear() {
 	AnScript::Clear();
@@ -210,7 +210,7 @@ void CScript::Clear() {
 	}
 }
 
-string CScript::Exec() {
+std::string CScript::Exec() {
 #ifdef PLATFORM_WIN
 	if (CReader::useMsvc) {
 		funcLoc();
@@ -226,7 +226,7 @@ string CScript::Exec() {
 	return "";
 }
 
-std::unordered_map<string, FScript*> FScript::allScrs;
+std::unordered_map<std::string, FScript*> FScript::allScrs;
 
 void FScript::Clear() {
 	AnScript::Clear();
@@ -238,7 +238,7 @@ void FScript::Clear() {
 	}
 }
 
-string FScript::Exec() {
+std::string FScript::Exec() {
 	auto res = funcLoc();
 	if (res)
 		throw res;

@@ -96,7 +96,7 @@ byte Effects::SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLui
 
 #define gu(i, nm) locs[i] = glGetUniformLocation(prog, #nm)
 
-void Effects::_InitBlur(const string& vs) {
+void Effects::_InitBlur(const std::string& vs) {
 	auto& prog = blurProg = Shader::FromVF(vs, IO::GetText(IO::path + "blurFrag.txt"));
 	auto& locs = blurProgLocs;
 	gu(0, mainTex);
@@ -105,7 +105,7 @@ void Effects::_InitBlur(const string& vs) {
 	gu(3, isY);
 }
 
-void Effects::_InitSSAO(const string& vs) {
+void Effects::_InitSSAO(const std::string& vs) {
 	auto prog = ssaoProg = Shader::FromVF(vs, IO::GetText(IO::path + "ssaoFrag.txt"));
 	GLint* locs = ssaoProgLocs;
 	gu(0, normTex);

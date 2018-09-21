@@ -145,8 +145,8 @@ bool Protein::Refresh() {
 				}
                 
 				int mxf = 0;
-                string msg2 = "Amino chain not found for residue ";
-				msg2 += string(&rl.name[0]);
+                std::string msg2 = "Amino chain not found for residue ";
+				msg2 += std::string(&rl.name[0]);
 				msg2 += " (" + rs.name + ")\n";
 				for (uint a = 0; a < rs.cnt; a++) {
                     if (Particles::particles_Name[(a + rs.offset) * PAR_MAX_NAME_LEN] == 'N') {

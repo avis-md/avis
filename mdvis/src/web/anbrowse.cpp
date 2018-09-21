@@ -10,7 +10,7 @@ bool AnBrowse::expanded = true;
 bool AnBrowse::mscFdExpanded[] = {};
 float AnBrowse::expandPos = 0;
 
-void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
+void AnBrowse::DoScan(Folder* fo, const std::string& path, const std::string& incPath) {
 	Debug::Message("AnBrowse", " Scanning folder: /" + incPath);
 	fo->fullName = path;
 	auto ff = IO::GetFiles(path, EXT_ANSV);
@@ -35,7 +35,7 @@ void AnBrowse::DoScan(Folder* fo, const string& path, const string& incPath) {
 	READ(EXT_CS, EXT_CS_SZ, 1, C);
 	READ(EXT_FS, EXT_FS_SZ, 1, F);
 
-	std::vector<string> fd;
+	std::vector<std::string> fd;
 	IO::GetFolders(path, &fd);
 
 	for (auto f : fd) {

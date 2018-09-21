@@ -6,7 +6,7 @@ Node_Recolor::Node_Recolor() : AnNode(new DmScript(sig)) {
 	titleCol = Vec3(0.3f, 0.5f, 0.3f);
     canTile = false;
 	inputR.resize(1);
-	script->invars.push_back(std::pair<string, string>("grad", "list(1f)"));
+	script->invars.push_back(std::pair<std::string, std::string>("grad", "list(1f)"));
 }
 
 void Node_Recolor::Execute() {
@@ -22,7 +22,7 @@ void Node_Recolor::Execute() {
     Particles::palleteDirty = true;
 }
 
-void Node_Recolor::LoadOut(const string& path) {
+void Node_Recolor::LoadOut(const std::string& path) {
     Execute();
 }
 

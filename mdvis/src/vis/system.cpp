@@ -12,7 +12,7 @@
 #include "utils/dialog.h"
 #include "utils/xml.h"
 
-string VisSystem::version_hash =
+std::string VisSystem::version_hash =
 #include "../../githash.h"
 ;
 
@@ -24,12 +24,12 @@ float VisSystem::lastSave;
 
 std::vector<MenuItem> VisSystem::menuItems[];
 
-string VisSystem::message = "Hello";
-string VisSystem::message2 = "";
+std::string VisSystem::message = "Hello";
+std::string VisSystem::message2 = "";
 bool VisSystem::hasMessage2 = false;
 byte VisSystem::messageSev = 0;
 
-void VisSystem::SetMsg(const string& msg, byte sev, const string& msg2) {
+void VisSystem::SetMsg(const std::string& msg, byte sev, const std::string& msg2) {
 	message = msg;
 	message2 = msg2;
 	hasMessage2 = !!msg2.size();
@@ -47,13 +47,13 @@ std::unordered_map<uint, float> VisSystem::_bondLengths;
 std::unordered_map<ushort, Vec3> VisSystem::_type2Col;
 std::unordered_map<ushort, std::array<float, 2>> VisSystem::radii;
 
-std::unordered_map<string, string> VisSystem::envs, VisSystem::prefs;
+std::unordered_map<std::string, std::string> VisSystem::envs, VisSystem::prefs;
 
 void VisSystem::Init() {
 	radii.clear();
 	std::ifstream strm(IO::path + "radii.txt");
 	if (strm.is_open()) {
-		string s;
+		std::string s;
 		while (!strm.eof()) {
 			std::getline(strm, s);
 			auto p = string_split(s, ' ', true);
@@ -68,7 +68,7 @@ void VisSystem::Init() {
 	strm.open(IO::path + "bondlengths.txt");
 	_bondLengths.clear();
 	if (strm.is_open()) {
-		string s;
+		std::string s;
 		while (!strm.eof()) {
 			std::getline(strm, s);
 			auto p = string_split(s, ' ', true);
@@ -86,7 +86,7 @@ void VisSystem::Init() {
 	strm.open(IO::path + "colors.txt");
 	_type2Col.clear();
 	if (strm.is_open()) {
-		string s;
+		std::string s;
 		Vec4 col;
 		while (!strm.eof()) {
 			std::getline(strm, s);
@@ -150,11 +150,11 @@ void VisSystem::InitEnv() {
 	envs.clear();
 	std::ifstream strm(IO::path + "env.txt");
 	if (strm.is_open()) {
-		string s;
+		std::string s;
 		while (std::getline(strm, s)) {
 			if (!s.size() || s[0] == '!') continue;
 			auto lc = s.find_first_of('=');
-			if (lc != string::npos) {
+			if (lc != std::string::npos) {
 				envs.emplace(s.substr(0, lc), s.substr(lc + 1));
 			}
 		}
@@ -163,11 +163,11 @@ void VisSystem::InitEnv() {
 	prefs.clear();
 	strm.open(IO::path + "preferences.txt");
 	if (strm.is_open()) {
-		string s;
+		std::string s;
 		while (std::getline(strm, s)) {
 			if (!s.size() || s[0] == '#') continue;
 			auto lc = s.find_first_of('=');
-			if (lc != string::npos) {
+			if (lc != std::string::npos) {
 				prefs.emplace(s.substr(0, lc), s.substr(lc + 1));
 			}
 		}
@@ -181,7 +181,7 @@ bool VisSystem::InMainWin(const Vec2& pos) {
 
 void VisSystem::DrawTitle() {
 	UI::Quad(0,0, (float)Display::width, 18, white(0.95f, 0.05f));
-	const string menu[] = {"File", "Edit", "Options", "Render", "Help"};
+	const std::string menu[] = {"File", "Edit", "Options", "Render", "Help"};
 	const uint menusp[] = {0, 30, 62, 115, 170, 210};
 	for (uint i = 0; i < 5; i++) {
 		if (Engine::Button(2.0f + menusp[i], 1, menusp[i + 1] - menusp[i] - 1.0f, 16, white(0), menu[i], 12, white(), true) == MOUSE_RELEASE) {
@@ -268,7 +268,8 @@ void VisSystem::DrawMsgPopup() {
 	UI2::LabelMul(Display::width * 0.5f - 195, Display::height * 0.5f - 45, 12, message2);
 }
 
-void VisSystem::Save(const string& path) {
+void VisSystem::Save(const std::string& path) {
+	if (!Particles::particleSz) return;
 	Debug::Message("System", "Saving...");
 	XmlNode head("MDVis_State_File");
 	head.params.emplace("hash", version_hash);
@@ -278,6 +279,6 @@ void VisSystem::Save(const string& path) {
 	Debug::Message("System", "Save complete");
 }
 
-bool VisSystem::Load(const string& path) {
+bool VisSystem::Load(const std::string& path) {
 	return false;
 }

@@ -10,7 +10,7 @@ enum class VIS_MOUSE_MODE : byte {
 
 class VisSystem {
 public:
-	static string version_hash;
+	static std::string version_hash;
 
 	static Vec4 accentColor;
 	static float glass;
@@ -20,11 +20,11 @@ public:
 
 	static std::vector<MenuItem> menuItems[10];
 
-	static string message, message2;
+	static std::string message, message2;
 	static bool hasMessage2;
 	static byte messageSev;
 
-	static void SetMsg(const string& msg, byte sev = 0, const string& msg2 = "");
+	static void SetMsg(const std::string& msg, byte sev = 0, const std::string& msg2 = "");
 
 	static VIS_MOUSE_MODE mouseMode;
 	
@@ -33,7 +33,7 @@ public:
 	static std::unordered_map<ushort, Vec3> _type2Col;
 	static std::unordered_map<ushort, std::array<float, 2>> radii;
 
-	static std::unordered_map<string, string> envs, prefs;
+	static std::unordered_map<std::string, std::string> envs, prefs;
 
 	static void Init(), InitEnv();
 
@@ -41,6 +41,6 @@ public:
 
 	static void DrawTitle(), DrawBar(), DrawMsgPopup();
 
-	static void Save(const string& path);
-	static bool Load(const string& path);
+	static void Save(const std::string& path);
+	static bool Load(const std::string& path);
 };

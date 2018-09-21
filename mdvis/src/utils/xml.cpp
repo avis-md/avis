@@ -1,6 +1,6 @@
 #include "xml.h"
 
-void RemoveNewLine(string& s) {
+void RemoveNewLine(std::string& s) {
 	for (int a = s.size() - 1; a > 0; a--) {
 		if (s[a] == '\t' || s[a] == '\r' || s[a] == '\n') {
 			s.replace(a, 1, " ");
@@ -8,7 +8,7 @@ void RemoveNewLine(string& s) {
 	}
 }
 
-XmlNode* Xml::Parse(const string& path) {
+XmlNode* Xml::Parse(const std::string& path) {
 	auto str = IO::GetText(path);
 	RemoveNewLine(str);
 	
@@ -23,12 +23,12 @@ XmlNode* Xml::Parse(const string& path) {
 	return node;
 }
 
-bool Xml::Read(string& s, uint& pos, XmlNode* parent) {
+bool Xml::Read(std::string& s, uint& pos, XmlNode* parent) {
 	size_t off, off2;
 	off = s.find_first_of('<', pos);
 	off2 = s.find_first_of('>', off);
 	if (off2 < off) return false;
-	if (off == string::npos) {
+	if (off == std::string::npos) {
 		pos = s.size();
 		return true;
 	}
@@ -42,7 +42,7 @@ bool Xml::Read(string& s, uint& pos, XmlNode* parent) {
 	if (!ss.size()) return false;
 	n.name = ss[0];
 	
-	string ps = "";
+	std::string ps = "";
 	for (uint a = 1; a < ss.size(); a++) {
 		if (ss[a] == "") continue;
 		auto ss2 = string_split(ss[a], '=');
@@ -72,14 +72,14 @@ bool Xml::Read(string& s, uint& pos, XmlNode* parent) {
 }
 
 #define SVV(nm, vl) nd.addchild(nm, std::to_string(vl))
-XmlNode Xml::FromVec(string nm, Vec2 v) {
+XmlNode Xml::FromVec(std::string nm, Vec2 v) {
 	XmlNode nd(nm);
 	SVV("x", v.x);
 	SVV("y", v.y);
 	return nd;
 }
 
-XmlNode Xml::FromVec(string nm, Vec3 v) {
+XmlNode Xml::FromVec(std::string nm, Vec3 v) {
 	XmlNode nd(nm);
 	SVV("x", v.x);
 	SVV("y", v.y);
@@ -87,7 +87,7 @@ XmlNode Xml::FromVec(string nm, Vec3 v) {
 	return nd;
 }
 
-XmlNode Xml::FromVec(string nm, Vec4 v) {
+XmlNode Xml::FromVec(std::string nm, Vec4 v) {
 	XmlNode nd(nm);
 	SVV("x", v.x);
 	SVV("y", v.y);
@@ -96,12 +96,12 @@ XmlNode Xml::FromVec(string nm, Vec4 v) {
 	return nd;
 }
 
-XmlNode* XmlNode::addchild(string nm, string vl) {
+XmlNode* XmlNode::addchild(std::string nm, std::string vl) {
 	children.push_back(XmlNode(nm, vl));
 	return &children.back();
 }
 
-void Xml::Write(XmlNode* node, const string& path) {
+void Xml::Write(XmlNode* node, const std::string& path) {
 	std::ofstream strm(path);
 	DoWrite(node, strm, 0);
 }

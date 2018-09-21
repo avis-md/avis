@@ -8,9 +8,9 @@ public:
 
 	const bool depth, stencil, hdr;
 
-	static void Blit(Texture* src, RenderTexture* dst, Shader* shd, string texName = "mainTex");
-	static void Blit(Texture* src, RenderTexture* dst, Material* mat, string texName = "mainTex");
-	static void Blit(GLuint src, RenderTexture* dst, GLuint shd, string texName = "mainTex");
+	static void Blit(Texture* src, RenderTexture* dst, Shader* shd, std::string texName = "mainTex");
+	static void Blit(Texture* src, RenderTexture* dst, Material* mat, std::string texName = "mainTex");
+	static void Blit(GLuint src, RenderTexture* dst, GLuint shd, std::string texName = "mainTex");
 
 	template <typename T>
 	std::vector<T> pixels(bool alpha) {
@@ -27,7 +27,7 @@ public:
 	_allowshared(RenderTexture);
 protected:
 	GLuint d_fbo;
-	void Load(string path);
+	void Load(std::string path);
 	void Load(std::istream& strm);
-	static bool Parse(string path); //just tell Texture to load as rendtex
+	static bool Parse(std::string path); //just tell Texture to load as rendtex
 };

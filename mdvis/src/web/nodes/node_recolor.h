@@ -3,17 +3,17 @@
 
 class Node_Recolor : public AnNode {
 public:
-	static const string sig;
+	static const std::string sig;
 	Node_Recolor();
     
 	void Execute() override;
-	void SaveOut(const string& path) override {}
-	void LoadOut(const string& path) override;
+	void SaveOut(const std::string& path) override {}
+	void LoadOut(const std::string& path) override;
 };
 
 class Node_Recolor_All : public Node_Recolor {
 public:
-	static const string sig;
+	static const std::string sig;
 	Node_Recolor_All();
 
 	void Execute() override;

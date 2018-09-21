@@ -21,14 +21,14 @@ enum class AN_NODE_SCN : byte {
 	OCAM,
 	NUM	
 };
-const string AN_NODE_SCNS[] = { "Camera (Set)" };
+const std::string AN_NODE_SCNS[] = { "Camera (Set)" };
 
 enum class AN_NODE_IN : byte {
 	NUM0 = 0,
 	SELPAR,
 	NUM
 };
-const string AN_NODE_INS[] = { "Sel'd Particles" };
+const std::string AN_NODE_INS[] = { "Sel'd Particles" };
 
 enum class AN_NODE_MOD {
 	NUM0 = 0x20,
@@ -37,7 +37,7 @@ enum class AN_NODE_MOD {
 	PARAM,
 	NUM
 };
-const string AN_NODE_MODS[] = { "Recolor", "Recolor All", "Set Param" };
+const std::string AN_NODE_MODS[] = { "Recolor", "Recolor All", "Set Param" };
 
 enum class AN_NODE_GEN {
 	NUM0 = 0x40,
@@ -46,7 +46,7 @@ enum class AN_NODE_GEN {
 	TRJ,
 	NUM
 };
-const string AN_NODE_GENS[] = { "Add Bonds", "Add Volume", "Trace Trajectory" };
+const std::string AN_NODE_GENS[] = { "Add Bonds", "Add Volume", "Trace Trajectory" };
 
 enum class AN_NODE_MISC {
 	NUM0 = 0x60,
@@ -54,7 +54,7 @@ enum class AN_NODE_MISC {
 	SRNG,
 	NUM
 };
-const string AN_NODE_MISCS[] = { "Plot graph", "Show Range" };
+const std::string AN_NODE_MISCS[] = { "Plot graph", "Show Range" };
 
 class AnWeb {
 public:
@@ -66,7 +66,7 @@ public:
 	static AnScript* selScript;
 	static byte selSpNode;
 
-	static string activeFile;
+	static std::string activeFile;
 	static std::vector<AnNode*> nodes;
 
 	static bool drawFull, expanded, executing, apply;
@@ -82,11 +82,11 @@ public:
 	static void Insert(AnNode* node, Vec2 pos = Vec2(100, 100));
 	static void Init(), Update(), Draw(), DrawSide(), DrawScene();
 	static void Execute(), DoExecute(), DoExecute_Srv();
-	static void Save(const string& s), SaveIn(), SaveOut();
-	static void Load(const string& s), LoadIn(), LoadOut();
+	static void Save(const std::string& s), SaveIn(), SaveOut();
+	static void Load(const std::string& s), LoadIn(), LoadOut();
 	static void CheckChanges();
 	static void SaveConn(), ClearConn(), Reconn();
-	static void OnExecLog(string s, bool e);
+	static void OnExecLog(std::string s, bool e);
 
 	static void OnSceneUpdate();
 	static void OnAnimFrame();

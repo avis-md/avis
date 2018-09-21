@@ -3,15 +3,15 @@
 
 class Node_AddBond : public AnNode {
 public:
-	static const string sig;
+	static const std::string sig;
 	Node_AddBond();
 	~Node_AddBond();
 	
 	void Execute() override;
 	void DrawSettings(float& off) override;
 	float DrawSide() override;
-	void SaveOut(const string& path) override {}
-	void LoadOut(const string& path) override;
+	void SaveOut(const std::string& path) override {}
+	void LoadOut(const std::string& path) override;
 	
 protected:
 	byte animId;

@@ -39,7 +39,7 @@ bool RayTracer::Init() {
 		program = CLWProgram::CreateFromSource(ocl::raykernel, ocl::raykernel_sz, kBuildopts, context);
 	}
 	catch (CLWException& e) {
-		OHNO("Raytracer", + string(e.what()));
+		OHNO("Raytracer", + std::string(e.what()));
 		return false;
 	}
 
@@ -97,7 +97,7 @@ void RayTracer::DrawMenu() {
 	UI::Label(expandPos - 148, off, 12, "Background", white());
 	UI::Quad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
 	off++;
-	UI2::File(expandPos - 147, off + 17, 147, "File", bgName, [](std::vector<string> res) {
+	UI2::File(expandPos - 147, off + 17, 147, "File", bgName, [](std::vector<std::string> res) {
 		SetBg(res[0]);
 		_cntt = 0;
 	});

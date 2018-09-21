@@ -16,14 +16,14 @@ void UI2::Init() {
 #undef LC
 }
 
-void UI2::LabelMul(float x, float y, float sz, const string& s) {
+void UI2::LabelMul(float x, float y, float sz, const std::string& s) {
 	auto ss = string_split(s, '\n');
 	for (size_t a = 0; a < ss.size(); a++) {
 		UI::Label(x, round(y + sz * 1.2f * a), sz, ss[a], white());
 	}
 }
 
-string UI2::EditText(float x, float y, uint w, const string& title, const string& val, bool enabled, Vec4 col) {
+std::string UI2::EditText(float x, float y, uint w, const std::string& title, const std::string& val, bool enabled, Vec4 col) {
 	UI::Label(x, y, 12, title, white());
 	w /= 2;
 	if (enabled) {
@@ -35,11 +35,11 @@ string UI2::EditText(float x, float y, uint w, const string& title, const string
 	}
 }
 
-float UI2::Slider(float x, float y, uint w, const string& title, float a, float b, float t) {
+float UI2::Slider(float x, float y, uint w, const std::string& title, float a, float b, float t) {
 	return Slider(x, y, w, title, a, b, t, std::to_string(t));
 }
 
-float UI2::Slider(float x, float y, uint w, const string& title, float a, float b, float t, const string& lbl) {
+float UI2::Slider(float x, float y, uint w, const std::string& title, float a, float b, float t, const std::string& lbl) {
 	UI::Label(x, y, 12, title, white());
 	w /= 2;
 	t = Engine::DrawSliderFill(x + w, y, w - 1.0f, 16, a, b, t, white(1, 0.5f), white());
@@ -47,7 +47,7 @@ float UI2::Slider(float x, float y, uint w, const string& title, float a, float 
 	return t;
 }
 
-void UI2::Color(float x, float y, uint w, const string& title, Vec4& col) {
+void UI2::Color(float x, float y, uint w, const std::string& title, Vec4& col) {
 	UI::Label(x, y, 12, title, white());
 	w /= 2;
 	if (Engine::Button(x + w, y, w-1.0f, 16, col) == MOUSE_RELEASE) {
@@ -58,11 +58,11 @@ void UI2::Color(float x, float y, uint w, const string& title, Vec4& col) {
 	UI::Texture(x + w * 2 - 18, y, 16, 16, Icons::colorwheel);
 }
 
-void UI2::File(float x, float y, uint w, const string& title, const string& fl, std::function<void(std::vector<string>)> func) {
+void UI2::File(float x, float y, uint w, const std::string& title, const std::string& fl, std::function<void(std::vector<std::string>)> func) {
 	UI::Label(x, y, 12, "File", white());
 	w /= 2;
 	if (Engine::Button(x + w, y, w-1.0f, 16, white(1, 0.3f), fl, 12, white(0.5f)) == MOUSE_RELEASE) {
-		std::vector<string> exts = {"*.hdr"};
+		std::vector<std::string> exts = {"*.hdr"};
 		auto res = Dialog::OpenFile(exts);
 		if (!!res.size()) {
 			func(res);
@@ -70,7 +70,7 @@ void UI2::File(float x, float y, uint w, const string& title, const string& fl, 
 	}
 }
 
-MOUSE_STATUS UI2::Button2(float x, float y, float w, const string& s, Texture* tex, Vec4 col, Vec4 col2) {
+MOUSE_STATUS UI2::Button2(float x, float y, float w, const std::string& s, Texture* tex, Vec4 col, Vec4 col2) {
 	auto ret = Engine::Button(x, y, w, 16, col);
 	UI::Texture(x + 1, y, 16, 16, tex, col2);
 	UI::font->alignment = ALIGN_TOPCENTER;
@@ -79,7 +79,7 @@ MOUSE_STATUS UI2::Button2(float x, float y, float w, const string& s, Texture* t
 	return ret;
 }
 
-void UI2::Dropdown(float x, float y, float w, const string& title, const Popups::DropdownItem& data) {
+void UI2::Dropdown(float x, float y, float w, const std::string& title, const Popups::DropdownItem& data) {
 	UI::Label(x, y, 12, title, white());
 	w /= 2;
 	if (Engine::Button(x + w, y, w - 1, 16, white(1, 0.3f), data.list[*data.target], 12, white()) == MOUSE_RELEASE) {
@@ -91,12 +91,12 @@ void UI2::Dropdown(float x, float y, float w, const string& title, const Popups:
 	UI::Texture(x + w * 2 - 16, y, 16, 16, Icons::dropdown2);
 }
 
-void UI2::Toggle(float x, float y, float w, const string& title, bool& val) {
+void UI2::Toggle(float x, float y, float w, const std::string& title, bool& val) {
 	UI::Label(x, y, 12, title, white());
 	val = Engine::Toggle(x + w - 16, y, 16, Icons::checkbox, val, white(), ORIENT_HORIZONTAL);
 }
 
-void UI2::Switch(float x, float y, float w, const string& title, int c, string* nms, int& i) {
+void UI2::Switch(float x, float y, float w, const std::string& title, int c, std::string* nms, int& i) {
 	UI::Label(x, y, 12, title, white());
 	x += w/3;
 	w *= 0.67f;

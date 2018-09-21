@@ -43,10 +43,6 @@
 
 #include "Engine.h"
 #include "hdr.h"
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 
 const char * hdr::szSignature = "#?RADIANCE";
 const char * hdr::szFormat = "FORMAT=32-bit_rle_rgbe";
@@ -54,7 +50,7 @@ const char * hdr::szFormat = "FORMAT=32-bit_rle_rgbe";
 /* HDR Function Definitions */
 unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int *h)
 {
-	Debug::Message("hdr", "Opening " + string(filename));
+	Debug::Message("hdr", "Opening " + std::string(filename));
 
     char buf[1024] = {0};
     char col[4] = {0};
@@ -68,7 +64,7 @@ unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int
 	fopen_s(&fp, filename, "rb");
 
     if (!fp) {
-        Debug::Error("hdr", "Cannot open file " + string(filename) + "!");
+        Debug::Error("hdr", "Cannot open file " + std::string(filename) + "!");
         return nullptr;
     }
 
@@ -83,7 +79,7 @@ unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int
 
     /* Next, skip past comments until we reach the portion that
      * tells us the dimensions of the image */
-    /* Check to see if each line contains the format string */
+    /* Check to see if each line contains the format std::string */
     do {
         fgets(buf, sizeof(buf), fp);
     } while (!feof(fp) && strncmp(buf, "FORMAT", 6));
@@ -93,14 +89,14 @@ unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int
         return NULL;
     }
 
-    /* Check if the format string is ok */
+    /* Check if the format std::string is ok */
     if (strncmp(buf, szFormat, sizeof(szFormat)-1) != 0) {
         fprintf(stderr, "read_hdr(): The FORMAT is not %s\n", szFormat);
         return NULL;
     }
 
     /* Now look for the -Y or +Y */
-    /* Check to see if each line contains the size string */
+    /* Check to see if each line contains the size std::string */
     do {
         fgets(buf, sizeof(buf), fp);
     } while (!feof(fp) &&

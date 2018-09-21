@@ -3,7 +3,7 @@
 
 class Node_Volume : public AnNode {
 public:
-	static const string sig;
+	static const std::string sig;
 	Node_Volume();
 
 	static void Init();

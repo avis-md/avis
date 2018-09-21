@@ -14,15 +14,15 @@ class Net {
 public:
 	static void Init();
 	
-	static std::vector<string> MyIp();
+	static std::vector<std::string> MyIp();
 	
 	static bool Listen(uint port, dataReceivedCallback callback);
 	static bool StopListen();
 
-	static bool Send(string ip, uint port, byte* data, uint dataSz);
+	static bool Send(std::string ip, uint port, byte* data, uint dataSz);
 
-	//static string IP2String(uint ip);
-	//static uint String2IP(const string& s);
+	//static std::string IP2String(uint ip);
+	//static uint String2IP(const std::string& s);
 
 	static dataReceivedCallback onDataReceived;
 

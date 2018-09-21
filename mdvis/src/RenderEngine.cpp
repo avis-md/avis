@@ -139,7 +139,7 @@ RenderTexture::~RenderTexture() {
 	glDeleteFramebuffers(1, &d_fbo);
 }
 
-void RenderTexture::Blit(Texture* src, RenderTexture* dst, Shader* shd, string texName) {
+void RenderTexture::Blit(Texture* src, RenderTexture* dst, Shader* shd, std::string texName) {
 	if (src == nullptr || dst == nullptr || shd == nullptr) {
 		Debug::Warning("Blit", "Parameter is null!");
 		return;
@@ -147,7 +147,7 @@ void RenderTexture::Blit(Texture* src, RenderTexture* dst, Shader* shd, string t
 	//Blit(src->pointer, dst, shd->pointer, texName);
 }
 
-void RenderTexture::Blit(GLuint src, RenderTexture* dst, GLuint shd, string texName) {
+void RenderTexture::Blit(GLuint src, RenderTexture* dst, GLuint shd, std::string texName) {
 	glViewport(0, 0, dst->width, dst->height);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dst->d_fbo);
@@ -173,7 +173,7 @@ void RenderTexture::Blit(GLuint src, RenderTexture* dst, GLuint shd, string texN
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
-void RenderTexture::Blit(Texture* src, RenderTexture* dst, Material* mat, string texName) {
+void RenderTexture::Blit(Texture* src, RenderTexture* dst, Material* mat, std::string texName) {
 	glViewport(0, 0, dst->width, dst->height);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dst->d_fbo);
@@ -198,15 +198,15 @@ void RenderTexture::Blit(Texture* src, RenderTexture* dst, Material* mat, string
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
-void RenderTexture::Load(string path) {
+void RenderTexture::Load(std::string path) {
 	throw std::runtime_error("RT Load (s) not implemented");
 }
 void RenderTexture::Load(std::istream& strm) {
 	throw std::runtime_error("RT Load (i) not implemented");
 }
 
-bool RenderTexture::Parse(string path) {
-	string ss(path + ".meta");
+bool RenderTexture::Parse(std::string path) {
+	std::string ss(path + ".meta");
 	std::ofstream str(ss, std::ios::out | std::ios::trunc | std::ios::binary);
 	str << "IMR";
 	return true;

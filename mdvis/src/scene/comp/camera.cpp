@@ -36,7 +36,7 @@ void Camera::ApplyGL() {
 void Camera::InitShaders() {
 	int link_result = 0;
 	GLuint vertex_shader;
-	string err = "";
+	std::string err = "";
 
 	if (!Shader::LoadShader(GL_VERTEX_SHADER, glsl::minVert, vertex_shader, &err)) {
 		Debug::Error("Cam Shader Compiler", "v! " + err);

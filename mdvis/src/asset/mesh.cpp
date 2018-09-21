@@ -32,12 +32,12 @@ Mesh::Mesh(std::istream& stream, uint offset) : AssetObject(ASSETTYPE_MESH), loa
 		char* c = new char[100];
 		stream.read(c, 6);
 		c[6] = char0;
-		if (string(c) != "KTO123") {
+		if (std::string(c) != "KTO123") {
 			Debug::Error("Mesh importer", "file not supported");
 			return;
 		}
 		stream.getline(c, 100, 0);
-		name += string(c);
+		name += std::string(c);
 		delete[](c);
 
 		char cc;
@@ -137,7 +137,7 @@ Mesh::Mesh(std::istream& stream, uint offset) : AssetObject(ASSETTYPE_MESH), loa
 	}
 }
 
-Mesh::Mesh(string p) : AssetObject(ASSETTYPE_MESH), loaded(false), vertexCount(0), triangleCount(0), materialCount(0), shapekeyCount(0) {
+Mesh::Mesh(std::string p) : AssetObject(ASSETTYPE_MESH), loaded(false), vertexCount(0), triangleCount(0), materialCount(0), shapekeyCount(0) {
 	F2ISTREAM(stream, p);
 	if (!stream.good()) {
 		std::cout << "mesh file not found!" << std::endl;
@@ -147,19 +147,19 @@ Mesh::Mesh(string p) : AssetObject(ASSETTYPE_MESH), loaded(false), vertexCount(0
 	char* c = new char[100];
 	stream.read(c, 6);
 	c[6] = char0;
-	if (string(c) != "KTO123") {
+	if (std::string(c) != "KTO123") {
 		Debug::Error("Mesh importer", "file not supported");
 		return;
 	}
 	stream.getline(c, 100, 0);
-	name += string(c);
+	name += std::string(c);
 	delete[](c);
 
 	char cc;
 	stream.read(&cc, 1);
 
 	byte b;
-	string s;
+	std::string s;
 	Vec2 v2;
 	Vec3 v3;
 
@@ -226,7 +226,7 @@ Mesh::Mesh(string p) : AssetObject(ASSETTYPE_MESH), loaded(false), vertexCount(0
 			while (b > 0) {
 				//char* cc = new char[100];
 				//stream.getline(cc, 100, char0);
-				//vertexGroups.push_back(string(cc));
+				//vertexGroups.push_back(std::string(cc));
 				std::getline(stream, s, char0);
 				vertexGroups.push_back(s);
 				b--;

@@ -11,5 +11,5 @@ public:
 	static void Refresh(PyScript* scr);
 
 protected:
-	static bool ParseType(string s, PyVar* var);
+	static bool ParseType(std::string s, PyVar* var);
 };

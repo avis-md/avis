@@ -10,10 +10,10 @@
 #define SETPATH
 #endif
 
-string CReader::gpp = "g++";
-string CReader::vcbatPath = "", CReader::mingwPath = "";
+std::string CReader::gpp = "g++";
+std::string CReader::vcbatPath = "", CReader::mingwPath = "";
 bool CReader::useMsvc, CReader::useOMP;
-string CReader::flags1, CReader::flags2;
+std::string CReader::flags1, CReader::flags2;
 
 void CReader::Init() {
 	flags1 = VisSystem::prefs["ANL_COMP_FLAGS"];
@@ -46,7 +46,7 @@ void CReader::Init() {
 	useOMP = (VisSystem::prefs["ANL_USE_OPENMP"] == "true");
 
 	if (AnWeb::hasC && !useMsvc && !IO::HasFile(IO::path + "res/noterminate.o")) {
-		string cmd = gpp + " -std=c++11 -c -o \""
+		std::string cmd = gpp + " -std=c++11 -c -o \""
 			+ IO::path + "res/noterminate.o\" \""
 			+ IO::path + "res/noterminate.cpp\"";
 		std::cout << cmd << std::endl;
@@ -55,11 +55,11 @@ void CReader::Init() {
 }
 
 bool CReader::Read(CScript* scr) {
-	string& path = scr->path;
-	string fp = IO::path + "nodes/" + path;
+	std::string& path = scr->path;
+	std::string fp = IO::path + "nodes/" + path;
 	auto ls = fp.find_last_of('/');
-	string nm = fp.substr(ls + 1);
-	string fp2 = fp.substr(0, ls + 1) + "__ccache__/";
+	std::string nm = fp.substr(ls + 1);
+	std::string fp2 = fp.substr(0, ls + 1) + "__ccache__/";
     
 	auto s = IO::GetText(fp + EXT_CS);
 
@@ -71,7 +71,7 @@ bool CReader::Read(CScript* scr) {
 		if (mt < 0) return false;
 		auto ot = IO::ModTime(fp2 + nm + ".so");
 
-		string funcNm;
+		std::string funcNm;
 
 		bool fail = false;
 #define _ER(a, b)\
@@ -89,14 +89,14 @@ bool CReader::Read(CScript* scr) {
 			remove((fp2 + nm + ".so").c_str());
 
 #ifdef PLATFORM_WIN
-			const string dlx = " __declspec(dllexport)";
+			const std::string dlx = " __declspec(dllexport)";
 #else
-			const string dlx = "";
+			const std::string dlx = "";
 #endif
 			{
 				std::ifstream strm(fp + EXT_CS);
 				std::ofstream ostrm(fp + "_temp__.cpp");
-				string s;
+				std::string s;
 				int tp = 0;
 				size_t loc = -1;
 				while (std::getline(strm, s)) {
@@ -114,7 +114,7 @@ bool CReader::Read(CScript* scr) {
 							s = rm_spaces(s);
 							int bo = s.find('(');
 							int bc = s.find(')');
-							string ib = s.substr(bo + 1, bc - bo - 1);
+							std::string ib = s.substr(bo + 1, bc - bo - 1);
 							if ((*(int32_t*)&s[0] == *(int32_t*)"void") && (ib == "" || ib == "void")) {
 								funcNm = s.substr(4, bo - 4);
 								std::ofstream ets(fp2 + nm + ".entry");
@@ -143,17 +143,17 @@ bool CReader::Read(CScript* scr) {
 
 #ifdef PLATFORM_WIN
 			if (useMsvc) {
-				string cl = "cl /nologo /c -Od ";
+				std::string cl = "cl /nologo /c -Od ";
 				if (useOMP) {
 					cl += " /openmp";
 				}
 				cl += " /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
-				const string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".so\" \"" + fp2 + nm + ".obj\"";
+				const std::string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".so\" \"" + fp2 + nm + ".obj\"";
 				RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " > \"" + fp2 + nm + "_log.txt\" && " + lk + " > \"" + fp2 + nm + "_log.txt\"");
 				scr->errorCount = ErrorView::Parse_MSVC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 			}
 			else {
-				string cmd = "g++ -std=c++11 -static-libstdc++ -shared -fPIC " + flags1;
+				std::string cmd = "g++ -std=c++11 -static-libstdc++ -shared -fPIC " + flags1;
 				if (useOMP) {
 					cmd += " -fopenmp";
 				}
@@ -163,7 +163,7 @@ bool CReader::Read(CScript* scr) {
 				scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 			}
 #else
-			string cmd = gpp + " -std=c++11 -shared -fPIC "
+			std::string cmd = gpp + " -std=c++11 -shared -fPIC "
 #ifdef PLATFORM_LNX
 				" -fno-gnu-unique "
 #endif
@@ -192,7 +192,7 @@ bool CReader::Read(CScript* scr) {
 		scr->libpath = fp2 + nm + ".so";
 		scr->lib = new DyLib(scr->libpath);
 		if (!scr->lib->is_open()) {
-			string err =
+			std::string err =
 #ifdef PLATFORM_WIN
 				std::to_string(GetLastError());
 #else
@@ -208,7 +208,7 @@ bool CReader::Read(CScript* scr) {
 
 		scr->funcLoc = (emptyFunc)scr->lib->GetSym(funcNm);
 		if (!scr->funcLoc) {
-			string err =
+			std::string err =
 #ifdef PLATFORM_WIN
 				std::to_string(GetLastError());
 #else
@@ -237,7 +237,7 @@ bool CReader::Read(CScript* scr) {
 	}
 
 	std::ifstream strm(fp + EXT_CS);
-	string ln;
+	std::string ln;
 	bool fst = true;
 	while (!strm.eof()) {
 		std::getline(strm, ln);
@@ -253,9 +253,9 @@ bool CReader::Read(CScript* scr) {
 		if (!lnsz) continue;
 		bool iso = (lns[0] == "//out");
 		if (lns[0] == "//in" || iso) {
-			std::vector<std::pair<string, string>>& cv = iso ? scr->outvars : scr->invars;
+			std::vector<std::pair<std::string, std::string>>& cv = iso ? scr->outvars : scr->invars;
 			std::vector<CVar>& _cv = iso ? scr->_outvars : scr->_invars;
-			const string ios = iso ? "output " : "input ";
+			const std::string ios = iso ? "output " : "input ";
 			_cv.push_back(CVar());
 			auto bk = &_cv.back();
 
@@ -285,7 +285,7 @@ bool CReader::Read(CScript* scr) {
 				return false;
 			}
 			
-			string::iterator eps;
+			std::string::iterator eps;
 			if ((eps = std::find(ss[1].begin(), ss[1].end(), '=')) != ss[1].end()) {
 				bk->name = ss[1].substr(0, eps - ss[1].begin());
 			}
@@ -302,7 +302,7 @@ bool CReader::Read(CScript* scr) {
 				}
 				bk->typeName = "list(" + std::to_string(lnsz-1) + bk->typeName[0] + ")";
 			}
-			cv.push_back(std::pair<string, string>(bk->name, bk->typeName));
+			cv.push_back(std::pair<std::string, std::string>(bk->name, bk->typeName));
 
 			if (AnWeb::hasC) {
 				if (!(bk->value = scr->lib->GetSym(bk->name))) {
@@ -345,7 +345,7 @@ void CReader::Refresh(CScript* scr) {
 	}
 }
 
-bool CReader::ParseType(string s, CVar* var) {
+bool CReader::ParseType(std::string s, CVar* var) {
 	if (s == "int") var->type = AN_VARTYPE::INT;
 	else if (s == "double") var->type = AN_VARTYPE::DOUBLE;
 	else return false;

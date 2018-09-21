@@ -2,7 +2,7 @@
 #include "vis/pargraphics.h"
 #include "utils/tinyfiledialogs.h"
 
-const string _opn[] = {
+const std::string _opn[] = {
 	"Open file via terminal",
 	"	Command line is: mdvis filename [args...]",
 	"	Args (default values are in brackets)",

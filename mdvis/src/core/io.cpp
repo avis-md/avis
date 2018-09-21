@@ -18,21 +18,21 @@
 #endif
 #endif
 
-string IO::path;
+std::string IO::path;
 
 std::thread IO::readstdiothread;
 bool IO::readingStdio;
 int IO::stdout_o, IO::stderr_o;
 FILE* IO::stdout_n, *IO::stderr_n;
-string IO::stdiop;
+std::string IO::stdiop;
 int IO::waitstdio;
 
-std::vector<string> IO::GetFiles(const string& folder, string ext) {
-	if (folder == "") return std::vector<string>();
-	std::vector<string> names;
+std::vector<std::string> IO::GetFiles(const std::string& folder, std::string ext) {
+	if (folder == "") return std::vector<std::string>();
+	std::vector<std::string> names;
 	auto exts = ext.size();
 #ifdef PLATFORM_WIN
-	string search_path = folder + "/*" + ext;
+	std::string search_path = folder + "/*" + ext;
 	WIN32_FIND_DATA fd;
 	HANDLE hFind = FindFirstFile(search_path.c_str(), &fd);
 	if (hFind != INVALID_HANDLE_VALUE) {
@@ -47,7 +47,7 @@ std::vector<string> IO::GetFiles(const string& folder, string ext) {
 	DIR* dir = opendir(&folder[0]);
 	struct dirent* ep;
 	while ((ep = readdir(dir))) {
-		string nm(ep->d_name);
+		std::string nm(ep->d_name);
 		if (ep->d_type == DT_REG) {
 			if (!exts || ((nm.size() > (exts + 1)) && (nm.substr(nm.size() - exts) == ext)))
 				names.push_back(nm);
@@ -57,10 +57,10 @@ std::vector<string> IO::GetFiles(const string& folder, string ext) {
 	return names;
 }
 
-void IO::GetFolders(const string& folder, std::vector<string>* names, bool hidden) {
+void IO::GetFolders(const std::string& folder, std::vector<std::string>* names, bool hidden) {
 	names->clear();
 #ifdef PLATFORM_WIN
-	string search_path = folder + "/*";
+	std::string search_path = folder + "/*";
 	WIN32_FIND_DATAW fd;
 	HANDLE hFind = FindFirstFileW(_tow(search_path).c_str(), &fd);
 	if (hFind != INVALID_HANDLE_VALUE) {
@@ -76,15 +76,15 @@ void IO::GetFolders(const string& folder, std::vector<string>* names, bool hidde
 	if (!dir) return;
 	struct dirent* ep;
 	while ((ep = readdir(dir))) {
-		string nm(ep->d_name);
+		std::string nm(ep->d_name);
 		if (nm[0] != '.' && ep->d_type == DT_DIR) {
-			names->push_back(string(ep->d_name));
+			names->push_back(std::string(ep->d_name));
 		}
 	}
 #endif
 }
 
-bool IO::HasDirectory(string szPath) {
+bool IO::HasDirectory(std::string szPath) {
 #ifdef PLATFORM_WIN
 	DWORD dwAttrib = GetFileAttributesW(_tow(szPath).c_str());
 	return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
@@ -94,7 +94,7 @@ bool IO::HasDirectory(string szPath) {
 #endif
 }
 
-void IO::MakeDirectory(string szPath) {
+void IO::MakeDirectory(std::string szPath) {
 #ifdef PLATFORM_WIN
 	SECURITY_ATTRIBUTES sa = {};
 	sa.nLength = sizeof(sa);
@@ -104,7 +104,7 @@ void IO::MakeDirectory(string szPath) {
 #endif
 }
 
-bool IO::HasFile(string szPath) {
+bool IO::HasFile(std::string szPath) {
 #ifdef PLATFORM_WIN
 	DWORD dwAttrib = GetFileAttributesW(_tow(szPath).c_str());
 	return (dwAttrib != INVALID_FILE_ATTRIBUTES);
@@ -113,7 +113,7 @@ bool IO::HasFile(string szPath) {
 #endif
 }
 
-string IO::ReadFile(const string& path) {
+std::string IO::ReadFile(const std::string& path) {
 	std::ifstream stream(path.c_str());
 	if (!stream.good()) {
 		std::cout << "not found! " << path << std::endl;
@@ -146,14 +146,14 @@ void IO::HideInput(bool hide) {
 #endif
 }
 
-string IO::GetText(const string& path) {
+std::string IO::GetText(const std::string& path) {
 	std::ifstream strm(path);
 	std::stringstream ss;
 	ss << strm.rdbuf();
 	return ss.str();
 }
 
-std::vector<byte> IO::GetBytes(const string& path) {
+std::vector<byte> IO::GetBytes(const std::string& path) {
 	std::ifstream ifs(path, std::ios::binary | std::ios::ate);
 	auto pos = ifs.tellg();
 
@@ -165,7 +165,7 @@ std::vector<byte> IO::GetBytes(const string& path) {
 	return res;
 }
 
-time_t IO::ModTime(const string& s) {
+time_t IO::ModTime(const std::string& s) {
 	struct stat stt;
 	auto rt = stat(s.c_str(), &stt);
 	if (!!rt) return -1;
@@ -179,10 +179,10 @@ time_t IO::ModTime(const string& s) {
 #define _fileno fileno
 #endif
 
-void IO::StartReadStdio(string path, stdioCallback callback) {
+void IO::StartReadStdio(std::string path, stdioCallback callback) {
 	stdiop = path;
-	string p = stdiop + ".out";
-	string p2 = stdiop + ".err";
+	std::string p = stdiop + ".out";
+	std::string p2 = stdiop + ".err";
 	readingStdio = true;
 	stdout_o = _dup(1);
 	stderr_o = _dup(2);
@@ -208,8 +208,8 @@ void IO::FlushStdio() {
 }
 
 void IO::StopReadStdio() {
-	string p = stdiop + ".out";
-	string p2 = stdiop + ".err";
+	std::string p = stdiop + ".out";
+	std::string p2 = stdiop + ".err";
 
 	fflush(stdout);
 	fflush(stderr);
@@ -225,7 +225,7 @@ void IO::StopReadStdio() {
 	remove(p2.c_str());
 }
 
-void IO::RedirectStdio2(string path) {
+void IO::RedirectStdio2(std::string path) {
 	fflush(stdout);
 	fflush(stderr);
 	stdout_o = _dup(1);
@@ -249,7 +249,7 @@ void IO::RestoreStdio2() {
 	fclose(stdout_n);
 }
 
-void IO::OpenFd(string path) {
+void IO::OpenFd(std::string path) {
 #if PLATFORM_WIN
 	std::replace(path.begin(), path.end(), '/', '\\');
 	RunCmd::Run("explorer \"" + path + "\"");
@@ -260,7 +260,7 @@ void IO::OpenFd(string path) {
 #endif
 }
 
-void IO::OpenEx(string path) {
+void IO::OpenEx(std::string path) {
 	//path = "\"" + path + "\"";
 #ifdef PLATFORM_WIN
 	ShellExecuteW(0, 0, _tow(path).c_str(), 0, 0, SW_SHOW);
@@ -301,17 +301,17 @@ void IO::InitPath() {
 	if (path.back() != '/') path += "/";
 }
 
-std::wstring IO::_tow(const string& s) {
+std::wstring IO::_tow(const std::string& s) {
 	return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>{}.from_bytes(s);
 }
 
-string IO::_frw(const std::wstring& s) {
+std::string IO::_frw(const std::wstring& s) {
 	return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>{}.to_bytes(s);
 }
 
 void IO::DoReadStdio(stdioCallback cb) {
-	string p = stdiop + ".out";
-	string p2 = stdiop + ".err";
+	std::string p = stdiop + ".out";
+	std::string p2 = stdiop + ".err";
 
 	std::ifstream strm(p);
 	std::ifstream strm2(p2);

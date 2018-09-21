@@ -50,41 +50,41 @@ struct VarVal {
 
 class AnScript {
 public:
-	string name, path, libpath;
+	std::string name, path, libpath;
 	time_t chgtime;
 	AN_SCRTYPE type;
-	std::vector<std::pair<string, string>> invars, outvars;
+	std::vector<std::pair<std::string, std::string>> invars, outvars;
 	void* progress = 0;
 
 	std::vector<ErrorView::Message> compileLog;
 	int errorCount = 0;
 
-	string desc = "";
+	std::string desc = "";
 	int descLines = 0;
 	bool ok = false;
 
 	static int StrideOf(char c);
 
 	virtual void Clear();
-	virtual string Exec() = 0;
+	virtual std::string Exec() = 0;
 protected:
 	AnScript(AN_SCRTYPE t) : type(t) {}
 };
 
 class DmScript : public AnScript {
 public:
-	DmScript(string nm) : AnScript(AN_SCRTYPE::NONE) {
+	DmScript(std::string nm) : AnScript(AN_SCRTYPE::NONE) {
 		ok = true;
 		name = nm;
 	}
 
 	void Clear() override {}
-	string Exec() override { return ""; }
+	std::string Exec() override { return ""; }
 };
 
 struct PyVar {
 public:
-	string name, typeName;
+	std::string name, typeName;
 	AN_VARTYPE type;
 	PyObject* value;
 	int dim, stride;
@@ -97,31 +97,31 @@ public:
 	std::vector<PyVar> _invars, _outvars;
 	
 	static void InitLog();
-	static string GetLog();
+	static std::string GetLog();
 	static void ClearLog();
 
 	static PyObject* mainModule, *logCatcher, *emptyString;
 
 	void Clear() override;
-	string Exec() override;
+	std::string Exec() override;
 	void Set(uint i, int v), Set(uint i, double v), Set(uint i, PyObject* v);
 
 	PyObject* pModule, *pFunc, *pArgl;
 	std::vector<PyObject*> pArgs, pRets;
 
-	static std::unordered_map<string, PyScript*> allScrs;
+	static std::unordered_map<std::string, PyScript*> allScrs;
 };
 
 struct CVar {
 public:
 	CVar() : value(0) {}
 
-	string name, typeName;
+	std::string name, typeName;
 	AN_VARTYPE type;
 
 	VarVal data;
 	void* value;
-	std::vector<string> dimNames;
+	std::vector<std::string> dimNames;
 	std::vector<int*> dimVals;
 	int stride;
 
@@ -139,7 +139,7 @@ public:
 	std::vector<CVar> _invars, _outvars;
 
 	void Clear() override;
-	string Exec() override;
+	std::string Exec() override;
 	
 	template<typename T> void Set(int i, T& val) {
 		*((T*)_invars[i].value) = val;
@@ -150,7 +150,7 @@ public:
 	emptyFunc funcLoc;
 	wrapFunc wFuncLoc;
 
-	static std::unordered_map<string, CScript*> allScrs;
+	static std::unordered_map<std::string, CScript*> allScrs;
 };
 
 class FScript : public AnScript {
@@ -167,7 +167,7 @@ public:
 	void** arr_out_dataloc;
 	
 	void Clear() override;
-	string Exec() override;
+	std::string Exec() override;
 
 	template<typename T> void Set(int i, T& val) {
 		*((T*)_invars[i].value) = val;
@@ -177,5 +177,5 @@ public:
 	
 	wrapFunc funcLoc;
 
-	static std::unordered_map<string, FScript*> allScrs;
+	static std::unordered_map<std::string, FScript*> allScrs;
 };

@@ -7,10 +7,10 @@ Node_Remap::Node_Remap() : AnNode(new DmScript(sig)) {
 	titleCol = Vec3(0.3f, 0.5f, 0.3f);
     canTile = false;
 	inputR.resize(1);
-	script->invars.push_back(std::pair<string, string>("values", "list(1f)"));
+	script->invars.push_back(std::pair<std::string, std::string>("values", "list(1f)"));
 
 	outputR.resize(1);
-	script->outvars.resize(1, std::pair<string, string>("result", "list(1f)"));
+	script->outvars.resize(1, std::pair<std::string, std::string>("result", "list(1f)"));
 	
 	conV.resize(1);
 	auto& cv = conV[0];
@@ -36,6 +36,6 @@ void Node_Remap::DrawMiddle(float& off) {
 	
 }
 
-void Node_Remap::LoadOut(const string& path) {
+void Node_Remap::LoadOut(const std::string& path) {
     Execute();
 }

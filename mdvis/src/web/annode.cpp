@@ -6,19 +6,19 @@
 #include "res/resdata.h"
 #endif
 
-const string Node_Inputs::sig = ".in";
-const string Node_Inputs_ActPar::sig = ".inact";
-const string Node_Inputs_SelPar::sig = ".insel";
-const string Node_AddBond::sig = ".abnd";
-const string Node_Camera_Out::sig = ".camo";
-const string Node_Plot::sig = ".plot";
-const string Node_Recolor::sig = ".recol";
-const string Node_Recolor_All::sig = ".recola";
-const string Node_SetParam::sig = ".param";
-const string Node_ShowRange::sig = ".srng";
-const string Node_TraceTrj::sig = ".trrj";
-const string Node_Volume::sig = ".vol";
-const string Node_Remap::sig = ".remap";
+const std::string Node_Inputs::sig = ".in";
+const std::string Node_Inputs_ActPar::sig = ".inact";
+const std::string Node_Inputs_SelPar::sig = ".insel";
+const std::string Node_AddBond::sig = ".abnd";
+const std::string Node_Camera_Out::sig = ".camo";
+const std::string Node_Plot::sig = ".plot";
+const std::string Node_Recolor::sig = ".recol";
+const std::string Node_Recolor_All::sig = ".recola";
+const std::string Node_SetParam::sig = ".param";
+const std::string Node_ShowRange::sig = ".srng";
+const std::string Node_TraceTrj::sig = ".trrj";
+const std::string Node_Volume::sig = ".vol";
+const std::string Node_Remap::sig = ".remap";
 
 Vec4 AnNode::bgCol = white(0.7f, 0.25f);
 
@@ -118,7 +118,7 @@ void AnNode::Draw() {
 					auto& vr = script->invars[i].second;
 					auto isi = (vr == "int");
 					if (isi || (vr == "float")) {
-						string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].f);
+						std::string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].f);
 						s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, true, white());
 						if (isi) inputVDef[i].i = TryParse(s, 0);
 						else inputVDef[i].f = TryParse(s, 0.0f);
@@ -222,7 +222,7 @@ float AnNode::DrawSide() {
 					auto& vr = script->invars[i].second;
 					auto isi = (vr == "int");
 					if (isi || (vr == "float")) {
-						string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].f);
+						std::string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].f);
 						s = UI::EditText(pos.x + width * 0.4f, y, width * 0.6f - 3, 16, 12, white(1, 0.5f), s, true, white());
 						if (isi) inputVDef[i].i = TryParse(s, 0);
 						else inputVDef[i].f = TryParse(s, 0.0f);
@@ -326,11 +326,11 @@ void AnNode::Save(std::ofstream& strm) {
 void AnNode::Load(std::ifstream& strm) {
 	int ic, cc, ct;
 	strm >> ic >> cc >> ct;
-	string vn, tp;
+	std::string vn, tp;
 	for (auto i = 0; i < ic; i++) {
 		strm >> vn >> tp;
 		for (uint b = 0; b < script->invars.size(); b++) {
-			string nn = script->invars[b].first;
+			std::string nn = script->invars[b].first;
 			if (nn == vn) {
 				auto t = ((CScript*)script)->_invars[b].type;
 				if (t == AN_VARTYPE::DOUBLE)
@@ -364,8 +364,8 @@ void AnNode::Load(std::ifstream& strm) {
 	canTile = !!ct;
 }
 
-void AnNode::SaveOut(const string& path) {
-	string nm = script->name;
+void AnNode::SaveOut(const std::string& path) {
+	std::string nm = script->name;
 	//std::replace(nm.begin(), nm.end(), '/', '_');
 	std::ofstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
@@ -378,8 +378,8 @@ void AnNode::SaveOut(const string& path) {
 	}
 }
 
-void AnNode::LoadOut(const string& path) {
-	string nm = script->name;
+void AnNode::LoadOut(const std::string& path) {
+	std::string nm = script->name;
 	std::ifstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
 		byte sz = 0;
@@ -441,7 +441,7 @@ void AnNode::Reconn() {
 	}
 }
 
-bool AnNode::CanConn(string lhs, string rhs) {
+bool AnNode::CanConn(std::string lhs, std::string rhs) {
 	if (rhs[0] == '*' && lhs.substr(0, 4) != "list") return true;
 	auto s = lhs.size();
 	if (s != rhs.size()) return false;
@@ -454,7 +454,7 @@ bool AnNode::CanConn(string lhs, string rhs) {
 void AnNode::CatchExp(char* c) {
 	auto ss = string_split(c, '\n');
 	for (auto& s : ss) {
-		log.push_back(std::pair<byte, string>(2, s));
+		log.push_back(std::pair<byte, std::string>(2, s));
 	}
 
 	ErrorView::Message msg{};
@@ -586,12 +586,12 @@ void PyNode::CatchExp(char* c) {
 			break;
 		}
 		else {
-			log.push_back(std::pair<byte, string>(0, s));
+			log.push_back(std::pair<byte, std::string>(0, s));
 			i++;
 		}
 	}
 	auto n = ss.size() - 1;
-	log.push_back(std::pair<byte, string>(2, ss[n-1]));
+	log.push_back(std::pair<byte, std::string>(2, ss[n-1]));
 	ErrorView::Message msg{};
 	msg.name = script->name;
 	msg.path = script->path;
@@ -786,7 +786,7 @@ void FNode::Execute() {
 }
 
 void FNode::CatchExp(char* c) {
-	string s = c;
+	std::string s = c;
 	if (s.back() == -1) {
 		AnNode::CatchExp(c);
 		return;
@@ -798,8 +798,8 @@ void FNode::CatchExp(char* c) {
 	if (string_find(s, "At line ") == 0) {
 		if ((msg.linenum = atoi(c + 8)) > 0) {
 			auto lc = strchr(c, '\n');
-			log.push_back(std::pair<byte, string>(2, lc + 1));
-			string s(c + 9, (size_t)lc - (size_t)c - 20); //_temp__.f90\n
+			log.push_back(std::pair<byte, std::string>(2, lc + 1));
+			std::string s(c + 9, (size_t)lc - (size_t)c - 20); //_temp__.f90\n
 			msg.msg.resize(1, lc + 1);
 			msg.msg.push_back("Fortran runtime error caught by handler");
 			ErrorView::execMsgs.push_back(msg);
@@ -808,7 +808,7 @@ void FNode::CatchExp(char* c) {
 	}
 	else if (s.back() == 1) {
 		s.pop_back();
-		log.push_back(std::pair<byte, string>(2, s));
+		log.push_back(std::pair<byte, std::string>(2, s));
 		msg.msg.resize(1, s);
 		auto scr = (FScript*)script;
 		if (scr->pre > -1) {

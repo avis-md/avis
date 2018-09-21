@@ -6,16 +6,16 @@ class CReader {
 public:
 	static void Init();
 
-	static void Compile(string path);
+	static void Compile(std::string path);
 	static bool Read(CScript* scr);
 	static void Refresh(CScript* scr);
 
 	friend class CScript;
 	friend class FReader;
 protected:
-	static string gpp;
-	static string vcbatPath, mingwPath;
+	static std::string gpp;
+	static std::string vcbatPath, mingwPath;
 	static bool useMsvc, useOMP;
-	static string flags1, flags2;
-	static bool ParseType(string s, CVar* var);
+	static std::string flags1, flags2;
+	static bool ParseType(std::string s, CVar* var);
 };

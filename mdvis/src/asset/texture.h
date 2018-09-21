@@ -3,8 +3,8 @@
 
 class Texture : public AssetObject {
 public:
-	Texture(const string& path, bool mipmap = true, TEX_FILTERING filter = TEX_FILTER_BILINEAR, byte aniso = 5, TEX_WRAPING wrap = TEX_WRAP_REPEAT);
-	Texture(const string& path, bool mipmap, TEX_FILTERING filter, byte aniso, GLenum wrapx, GLenum wrapy);
+	Texture(const std::string& path, bool mipmap = true, TEX_FILTERING filter = TEX_FILTER_BILINEAR, byte aniso = 5, TEX_WRAPING wrap = TEX_WRAP_REPEAT);
+	Texture(const std::string& path, bool mipmap, TEX_FILTERING filter, byte aniso, GLenum wrapx, GLenum wrapy);
 	Texture(const byte* data, const uint dataSz, TEX_FILTERING filter = TEX_FILTER_BILINEAR, TEX_WRAPING wrap = TEX_WRAP_CLAMP);
 	~Texture() { glDeleteTextures(1, &pointer); }
 	bool loaded;
@@ -16,10 +16,10 @@ public:
 	Int2 tileSize = Int2(1, 1);
 	float tileSpeed = 2;
 
-	static byte* LoadPixels(const string& path, byte& chn, uint& w, uint& h);
+	static byte* LoadPixels(const std::string& path, byte& chn, uint& w, uint& h);
 	static byte* LoadPixels(const byte* data, const uint dataSz, uint& w, uint& h);
 
-	static void ToPNG(std::vector<byte>& data, uint w, uint h, const string& loc);
+	static void ToPNG(std::vector<byte>& data, uint w, uint h, const std::string& loc);
 
 	friend class AssetManager;
 	friend class RenderTexture;

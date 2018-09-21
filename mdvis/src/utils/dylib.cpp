@@ -3,7 +3,7 @@
 #endif
 #include "dylib.h"
 
-DyLib::DyLib(string s) {
+DyLib::DyLib(std::string s) {
 #ifdef PLATFORM_WIN
 	lib = LoadLibrary(&s[0]);
 #else
@@ -19,7 +19,7 @@ DyLib::~DyLib() {
 #endif
 }
 
-void DyLib::ForceUnload(DyLib* lib, string path) {
+void DyLib::ForceUnload(DyLib* lib, std::string path) {
 #ifndef PLATFORM_WIN
 	for (;;) {
 		dlclose(lib->lib);
@@ -29,7 +29,7 @@ void DyLib::ForceUnload(DyLib* lib, string path) {
 #endif
 }
 
-void* DyLib::GetSym(string s) {
+void* DyLib::GetSym(std::string s) {
 #ifdef PLATFORM_WIN
 	return GetProcAddress((HMODULE)lib, &s[0]);
 #else

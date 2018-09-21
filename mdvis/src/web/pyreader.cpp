@@ -10,13 +10,13 @@ void PyReader::Init() {
 #ifdef PLATFORM_OSX
 	if (dlsym(RTLD_DEFAULT, "Py_Initialize")) {
 #endif
-	static string pyenv = VisSystem::envs["PYENV"];
+	static std::string pyenv = VisSystem::envs["PYENV"];
 #ifdef PLATFORM_WIN
 	size_t psz;
 	getenv_s(&psz, 0, 0, "PATH");
 	char* pbuf = new char[psz];
 	getenv_s(&psz, pbuf, psz, "PATH");
-	_putenv_s("PATH", &(pyenv + "\\;" + string(pbuf))[0]);
+	_putenv_s("PATH", &(pyenv + "\\;" + std::string(pbuf))[0]);
 	delete[](pbuf);
 
 	static std::wstring pyenvw = IO::_tow(pyenv);
@@ -41,7 +41,7 @@ void PyReader::Init() {
 		AnWeb::hasPy = true;
 		PyScript::InitLog();
 	} catch (char*) {
-		string env = "";
+		std::string env = "";
 #ifdef PLATFORM_WIN
 		char* buf;
 		size_t sz = 0;
@@ -64,10 +64,10 @@ void PyReader::Init() {
 
 bool PyReader::Read(PyScript* scr) {
 	PyScript::ClearLog();
-	string& path = scr->path;
-	string mdn = path;
+	std::string& path = scr->path;
+	std::string mdn = path;
 	std::replace(mdn.begin(), mdn.end(), '/', '.');
-	string spath = IO::path + "nodes/" + path + EXT_PS;
+	std::string spath = IO::path + "nodes/" + path + EXT_PS;
 	scr->chgtime = IO::ModTime(spath);
 	if (AnWeb::hasPy) {
 		auto mdl = scr->pModule ? PyImport_ReloadModule(scr->pModule) : PyImport_ImportModule(mdn.c_str());
@@ -91,7 +91,7 @@ bool PyReader::Read(PyScript* scr) {
 	}
 	//extract io variables
 	std::ifstream strm(spath);
-	string ln;
+	std::string ln;
 	while (!strm.eof()) {
 		std::getline(strm, ln);
 		while (ln[0] == '#' && ln[1] == '#' && ln[2] == ' ') {
@@ -100,7 +100,7 @@ bool PyReader::Read(PyScript* scr) {
 			std::getline(strm, ln);
 		}
 
-		string ln2 = ln.substr(0, 4);
+		std::string ln2 = ln.substr(0, 4);
 		if (ln2 == "#in ") {
 			auto ss = string_split(ln, ' ');
 			auto sz = ss.size() - 1;
@@ -115,7 +115,7 @@ bool PyReader::Read(PyScript* scr) {
 			}
 			std::getline(strm, ln);
 			auto c1 = ln.find_first_of('('), c2 = ln.find_first_of(')');
-			if (c1 == string::npos || c2 == string::npos || c2 <= c1) {
+			if (c1 == std::string::npos || c2 == std::string::npos || c2 <= c1) {
 				Debug::Warning("PyReader::ParseType", "braces for input function not found!");
 				return false;
 			}
@@ -128,10 +128,10 @@ bool PyReader::Read(PyScript* scr) {
 			scr->pArgs.resize(sz, 0);
 			for (uint i = 0; i < sz; i++) {
 				auto ns = ss[i].find_first_not_of(' ');
-				auto ss2 = (ns == string::npos) ? ss[i] : ss[i].substr(ns);
+				auto ss2 = (ns == std::string::npos) ? ss[i] : ss[i].substr(ns);
 				auto tn = scr->_invars[i].typeName;
 				scr->_invars[i].name = ss2;
-				scr->invars.push_back(std::pair<string, string>(scr->_invars[i].name, tn));
+				scr->invars.push_back(std::pair<std::string, std::string>(scr->_invars[i].name, tn));
 				if (*((int32_t*)&tn[0]) == *((int32_t*)"list")) {
 					//scr->pArgs[i] = AnConv::PyArr(1, tn[6]);
 				}
@@ -147,7 +147,7 @@ bool PyReader::Read(PyScript* scr) {
 			}
 			std::getline(strm, ln);
 			bk.name = ln.substr(0, ln.find_first_of(' '));
-			scr->outvars.push_back(std::pair<string, string>(bk.name, bk.typeName));
+			scr->outvars.push_back(std::pair<std::string, std::string>(bk.name, bk.typeName));
 			if (AnWeb::hasPy) scr->pRets.push_back(PyObject_GetAttrString(scr->pModule, bk.name.c_str()));
 			else scr->pRets.push_back(nullptr);
 		}
@@ -172,7 +172,7 @@ void PyReader::Refresh(PyScript* scr) {
 	}
 }
 
-bool PyReader::ParseType(string s, PyVar* var) {
+bool PyReader::ParseType(std::string s, PyVar* var) {
 	if (s.substr(0, 3) == "int") var->type = AN_VARTYPE::INT;
 	else if (s.substr(0, 6) == "double") var->type = AN_VARTYPE::DOUBLE;
 	else if (s.substr(0, 4) == "list") {

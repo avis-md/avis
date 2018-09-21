@@ -6,8 +6,8 @@
 
 class Shader {
 public:
-	static bool LoadShader(GLenum shaderType, string source, GLuint& shader, string* err = nullptr);
+	static bool LoadShader(GLenum shaderType, std::string source, GLuint& shader, std::string* err = nullptr);
 
-	static GLuint FromVF(const string& vert, const string& frag);
-	static GLuint FromF(GLuint vert, const string& frag);
+	static GLuint FromVF(const std::string& vert, const std::string& frag);
+	static GLuint FromF(GLuint vert, const std::string& frag);
 };

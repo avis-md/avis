@@ -11,7 +11,7 @@
 
 int ParMenu::activeMenu = 0;
 int ParMenu::activeSubMenu[] = {};
-string ParMenu::menuNames[];
+std::string ParMenu::menuNames[];
 bool ParMenu::expanded = true;
 float ParMenu::expandPos = 150;
 bool ParMenu::showSplash = true;
@@ -20,7 +20,7 @@ uint ParMenu::selCnt;
 byte ParMenu::drawTypeAll, ParMenu::_drawTypeAll;
 bool ParMenu::visibleAll;
 
-std::vector<string> ParMenu::recentFiles, ParMenu::recentFilesN;
+std::vector<std::string> ParMenu::recentFiles, ParMenu::recentFilesN;
 
 float _off = 0;
 
@@ -310,7 +310,7 @@ void ParMenu::DrawSplash() {
 	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 104, 12, "Build hash: " + VisSystem::version_hash, white());
 	UI::font->Align(ALIGN_TOPLEFT);
 
-	string sub = "";
+	std::string sub = "";
 
 	auto ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63, 140, 54, white(0.3f), _("User Manual"), 12, white(), true);
 	if (ms & MOUSE_HOVER_FLAG) {
@@ -354,7 +354,7 @@ void ParMenu::DrawSplash() {
 						break;
 					}
 					showSplash = false;
-					ParLoader::OnOpenFile(std::vector<string>{ recentFiles[i] });
+					ParLoader::OnOpenFile(std::vector<std::string>{ recentFiles[i] });
 				}
 			}
 		}
@@ -467,7 +467,7 @@ void ParMenu::DrawSelPopup() {
 		UI::Quad(expandPos - 148, off, 146, 16, white(1, 0.3f));
 		//UI::Label(expandPos - 132, off, 12, rli.name, white());
 		if (Engine::Button(expandPos - 130, off, 128, 16, white(0), rli.name, 12, white()) == MOUSE_RELEASE && Popups::type == POPUP_TYPE::RESNM) {
-			*(string*)Popups::data = string(rli.name);
+			*(std::string*)Popups::data = std::string(rli.name);
 			Popups::type = POPUP_TYPE::NONE;
 		}
 		if (Popups::type == POPUP_TYPE::RESID || Popups::type == POPUP_TYPE::ATOMID) {
@@ -521,7 +521,7 @@ void ParMenu::LoadRecents() {
 	recentFilesN.clear();
 	std::ifstream strm(IO::path + ".recentfiles");
 	if (strm.is_open()) {
-		string s;
+		std::string s;
 		while (std::getline(strm, s, '\n')) {
 			if (!!s.size()) {
 				recentFiles.push_back(s);
@@ -531,7 +531,7 @@ void ParMenu::LoadRecents() {
 	}
 }
 
-void ParMenu::SaveRecents(const string& entry) {
+void ParMenu::SaveRecents(const std::string& entry) {
 	auto at = std::find(recentFiles.begin(), recentFiles.end(), entry);
 	if (at != recentFiles.end()) {
 		recentFiles.erase(at);

@@ -25,14 +25,14 @@ constexpr uint32_t HASH(const char* s) {
 
 class Localizer {
 public:
-    static void Init(const string& nm);
+    static void Init(const std::string& nm);
 
 	static bool useDict;
 
-    static void MakeMap(string path);
-    static void _MakeMap(string path, std::map<uint32_t, string>& strs);
+    static void MakeMap(std::string path);
+    static void _MakeMap(std::string path, std::map<uint32_t, std::string>& strs);
 
-	static void Merge(string path, std::map<uint32_t, string> strs);
+	static void Merge(std::string path, std::map<uint32_t, std::string> strs);
 
-    static std::unordered_map<uint32_t, string> dict;
+    static std::unordered_map<uint32_t, std::string> dict;
 };

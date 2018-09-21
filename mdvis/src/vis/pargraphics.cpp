@@ -21,7 +21,7 @@ float ParGraphics::reflStr = 2, ParGraphics::reflStrDecay = 2, ParGraphics::spec
 Vec4 ParGraphics::bgCol = Vec4(1, 1, 1, 1);
 
 int ParGraphics::reflId = 0, ParGraphics::_reflId = -1;
-std::vector<string> ParGraphics::reflNms;
+std::vector<std::string> ParGraphics::reflNms;
 Popups::DropdownItem ParGraphics::reflItms((uint*)&reflId, nullptr);
 
 bool ParGraphics::useGradCol = false;
@@ -40,8 +40,8 @@ std::vector<uint> ParGraphics::hlIds, ParGraphics::selIds;
 std::vector<std::pair<uint, std::pair<uint, byte>>> ParGraphics::drawLists, ParGraphics::drawListsB;
 
 uint ParGraphics::usePBR = 1;
-string ParGraphics::_usePBRNms[] = {"", "", "\0"};
-const Popups::DropdownItem ParGraphics::_usePBRItems = Popups::DropdownItem(&ParGraphics::usePBR, (string*)&ParGraphics::_usePBRNms[0]);
+std::string ParGraphics::_usePBRNms[] = {"", "", "\0"};
+const Popups::DropdownItem ParGraphics::_usePBRItems = Popups::DropdownItem(&ParGraphics::usePBR, (std::string*)&ParGraphics::_usePBRNms[0]);
 
 Vec3 ParGraphics::rotCenter = Vec3();
 uint ParGraphics::rotCenterTrackId = -1;
@@ -139,7 +139,7 @@ void ParGraphics::Init() {
 	std::ifstream strm(IO::path + "backgrounds/default");
 	strm >> reflId;
 	strm.close();
-	std::vector<string> fds;
+	std::vector<std::string> fds;
 	IO::GetFolders(IO::path + "backgrounds/", &fds);
 	for (auto& fd : fds) {
 		if (IO::HasFile(IO::path + "backgrounds/" + fd + "/diffuse.hdr") &&
@@ -831,7 +831,7 @@ void ParGraphics::DrawColMenu() {
 		UI2::Dropdown(exps - 147, off, 146, "Param", di);
 		off += 20;
 		Color::DrawH2(exps - 115, off + 8, 16, 17*5 - 16, gradCols);
-		static const string ii[] = { "0.0", "0.5", "1.0" };
+		static const std::string ii[] = { "0.0", "0.5", "1.0" };
 		for (int a = 0; a < 3; a++) {
 			UI2::Color(exps - 140, off + 34 * (2 - a), 138, ii[a], gradCols[a]);
 			UI::Texture(exps - 95, off + 34 * a, 16, 16, Icons::left, white(1, 0.4f));
@@ -843,7 +843,7 @@ void ParGraphics::DrawColMenu() {
 		Engine::PushStencil(exps - 148, off + 1, 147, Display::height*0.5f - off - 2);
 		off++;
 		for (int x = 0; x < 256; x++) {
-			string nm = (x < Particles::defColPalleteSz) ? string((char*)&Particles::defColPallete[x], 2) : std::to_string(x);
+			std::string nm = (x < Particles::defColPalleteSz) ? std::string((char*)&Particles::defColPallete[x], 2) : std::to_string(x);
 			Vec3& col = Particles::colorPallete[x];
 			Vec4& colt = Particles::_colorPallete[x];
 			UI2::Color(exps - 145, off, 143, nm, colt);

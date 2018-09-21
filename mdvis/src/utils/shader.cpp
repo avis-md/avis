@@ -1,6 +1,6 @@
 #include "shader.h"
 
-bool Shader::LoadShader(GLenum shaderType, string source, GLuint& shader, string* err) {
+bool Shader::LoadShader(GLenum shaderType, std::string source, GLuint& shader, std::string* err) {
 
 	int compile_result = 0;
 
@@ -27,7 +27,7 @@ bool Shader::LoadShader(GLenum shaderType, string source, GLuint& shader, string
 				std::vector<char> shader_log(info_log_length);
 				glGetShaderInfoLog(shader, info_log_length, NULL, &shader_log[0]);
 				shader = 0;
-				*err += string(&shader_log[0]);
+				*err += std::string(&shader_log[0]);
 				//LOGI(&shader_log[0]);
 				Debug::Error("Shader", *err);
 			}
@@ -39,9 +39,9 @@ bool Shader::LoadShader(GLenum shaderType, string source, GLuint& shader, string
 	return true;
 }
 
-GLuint Shader::FromVF(const string& vert, const string& frag) {
+GLuint Shader::FromVF(const std::string& vert, const std::string& frag) {
 	GLuint vertex_shader;
-	string err = "";
+	std::string err = "";
 	if (vert == "" || frag == "") {
 		Debug::Error("Shader Compiler", "vert or frag is empty!");
 	}
@@ -58,9 +58,9 @@ GLuint Shader::FromVF(const string& vert, const string& frag) {
 	return pointer;
 }
 
-GLuint Shader::FromF(GLuint vert, const string& frag) {
+GLuint Shader::FromF(GLuint vert, const std::string& frag) {
 	GLuint vertex_shader = vert, fragment_shader;
-	string err;
+	std::string err;
 
 	if (!vert || frag == "") {
 		Debug::Error("Shader Compiler", "vert or frag is empty!");
@@ -86,7 +86,7 @@ GLuint Shader::FromF(GLuint vert, const string& frag) {
 		glGetProgramiv(pointer, GL_INFO_LOG_LENGTH, &info_log_length);
 		std::vector<char> program_log(info_log_length);
 		glGetProgramInfoLog(pointer, info_log_length, NULL, &program_log[0]);
-		Debug::Error("Shader", "Link error: " + string(&program_log[0]));
+		Debug::Error("Shader", "Link error: " + std::string(&program_log[0]));
 		glDeleteProgram(pointer);
 		return 0;
 	}

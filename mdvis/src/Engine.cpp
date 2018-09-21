@@ -69,7 +69,7 @@ GLint Engine::drawQuadLocsC[] = { 0 };
 
 void Engine::InitShaders() {
 	GLuint vs;
-	string err;
+	std::string err;
 	Shader::LoadShader(GL_VERTEX_SHADER, glsl::coreVert, vs, &err);
 	if (!vs) {
 		 OHNO("Engine", "Cannot load coreVert shader! " + err);
@@ -171,7 +171,7 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h) {
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4) {
 	return Button(x, y, w, h, normalVec4, Lerp(normalVec4, white(), 0.5f), Lerp(normalVec4, black(), 0.5f));
 }
-MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, string label, float labelSize, Vec4 labelVec4, bool labelCenter, Font* labelFont) {
+MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, std::string label, float labelSize, Vec4 labelVec4, bool labelCenter, Font* labelFont) {
 	return Button(x, y, w, h, normalVec4, Lerp(normalVec4, white(), 0.5f), Lerp(normalVec4, black(), 0.5f), label, labelSize, labelFont, labelVec4, labelCenter);
 }
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4) {
@@ -219,7 +219,7 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Texture* texture
 	}
 	return (inside && (UI::_layer == UI::_layerMax)) ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
 }
-MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, string label, float labelSize, Font* labelFont, Vec4 labelVec4, bool labelCenter) {
+MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, std::string label, float labelSize, Font* labelFont, Vec4 labelVec4, bool labelCenter) {
 	MOUSE_STATUS b = Button(x, y, w, h, normalVec4, highlightVec4, pressVec4);
 	ALIGNMENT al = labelFont->alignment;
 	labelFont->alignment = labelCenter? ALIGN_MIDCENTER : ALIGN_MIDLEFT;

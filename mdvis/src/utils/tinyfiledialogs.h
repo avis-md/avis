@@ -108,7 +108,7 @@ extern int tinyfd_verbose; /* 0 (default) or 1 : on unix, prints the command lin
 #ifdef _WIN32
 /* for UTF-16 use the functions at the end of this files */
 extern int tinyfd_winUtf8; /* 0 (MBCS) or 1 (default UTF-8)*/ //edit: changed UTF-8 to default
-/* on windows string char can be 0:MBCS or 1:UTF-8
+/* on windows std::string char can be 0:MBCS or 1:UTF-8
 unless your code is really prepared for UTF-8 on windows, leave this on MBSC.
 Or you can use the UTF-16 (wchar) prototypes at the end of ths file.*/
 #endif
@@ -184,7 +184,7 @@ char const * tinyfd_colorChooser(
 	char const * const aDefaultHexRGB , /* NULL or "#FF0000" */
 	unsigned char const aDefaultRGB[3] , /* { 0 , 255 , 255 } */
 	unsigned char aoResultRGB[3] ) ; /* { 0 , 0 , 0 } */
-		/* returns the hexcolor as a string "#FF0000" */
+		/* returns the hexcolor as a std::string "#FF0000" */
 		/* aoResultRGB also contains the result */
 		/* aDefaultRGB is used only if aDefaultHexRGB is NULL */
 		/* aDefaultRGB and aoResultRGB can be the same array */

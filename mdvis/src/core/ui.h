@@ -10,12 +10,12 @@ public:
 	static void Texture(float x, float y, float w, float h, ::Texture* texture, DRAWTEX_SCALING scl = DRAWTEX_STRETCH, float miplevel = 0);
 	static void Texture(float x, float y, float w, float h, ::Texture* texture, float alpha, DRAWTEX_SCALING scl = DRAWTEX_STRETCH, float miplevel = 0);
 	static void Texture(float x, float y, float w, float h, ::Texture* texture, Vec4 tint, DRAWTEX_SCALING scl = DRAWTEX_STRETCH, float miplevel = 0);
-	static void Label(float x, float y, float s, string str, Vec4 col = black(), float maxw = -1, Font* fnt = font);
+	static void Label(float x, float y, float s, std::string str, Vec4 col = black(), float maxw = -1, Font* fnt = font);
 	static void Label(float x, float y, float s, const char* str, uint sz, Vec4 col = black(), float maxw = -1, Font* fnt = font);
 
 	//Draws an editable text box. EditText does not work on recursive functions.
-	static string EditText(float x, float y, float w, float h, float s, Vec4 bcol, const string& str, bool delayed = false, Vec4 fcol = black(), bool* changed = nullptr, string str2 = "", Font* fnt = font, Vec4 hcol = Vec4(0, 120.0f / 255, 215.0f / 255, 1), Vec4 acol = white(), bool ser = true);
-	static string EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, const string& str, char repl, bool delayed = false, Vec4 fcol = black(), bool* changed = nullptr, Font* fnt = font, Vec4 hcol = Vec4(0, 120.0f / 255, 215.0f / 255, 1), Vec4 acol = white(), bool ser = true);
+	static std::string EditText(float x, float y, float w, float h, float s, Vec4 bcol, const std::string& str, bool delayed = false, Vec4 fcol = black(), bool* changed = nullptr, std::string str2 = "", Font* fnt = font, Vec4 hcol = Vec4(0, 120.0f / 255, 215.0f / 255, 1), Vec4 acol = white(), bool ser = true);
+	static std::string EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, const std::string& str, char repl, bool delayed = false, Vec4 fcol = black(), bool* changed = nullptr, Font* fnt = font, Vec4 hcol = Vec4(0, 120.0f / 255, 215.0f / 255, 1), Vec4 acol = white(), bool ser = true);
 
 	static bool _isDrawingLoop;
 	static void PreLoop();
@@ -44,7 +44,7 @@ public:
 
 	static bool focused, editingText;
 	static uint _editTextCursorPos, _editTextCursorPos2;
-	static string _editTextString;
+	static std::string _editTextString;
 	static float _editTextBlinkTime;
 
 	static Style _defaultStyle;

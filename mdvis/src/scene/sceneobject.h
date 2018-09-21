@@ -9,7 +9,7 @@ public:
 		p->transform.Init(p, pos, rot, scale);
 		return p;
 	}
-	static pSceneObject New(string s = "New Object", Vec3 pos = Vec3(), Quat rot = Quat(), Vec3 scale = Vec3(1, 1, 1)) {
+	static pSceneObject New(std::string s = "New Object", Vec3 pos = Vec3(), Quat rot = Quat(), Vec3 scale = Vec3(1, 1, 1)) {
 		auto p = pSceneObject(new SceneObject(s, pos, rot, scale));
 		p->transform.Init(p, pos, rot, scale);
 		return p;
@@ -63,7 +63,7 @@ public:
 	_allowshared(SceneObject);
 protected:
 	SceneObject(Vec3 pos, Quat rot = Quat(), Vec3 scale = Vec3(1, 1, 1));
-	SceneObject(string s = "New Object", Vec3 pos = Vec3(), Quat rot = Quat(), Vec3 scale = Vec3(1, 1, 1));
+	SceneObject(std::string s = "New Object", Vec3 pos = Vec3(), Quat rot = Quat(), Vec3 scale = Vec3(1, 1, 1));
 	SceneObject(byte* data);
 
 	static pSceneObject _FromId(const std::vector<pSceneObject>& objs, ulong id);

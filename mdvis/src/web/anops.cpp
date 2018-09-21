@@ -7,10 +7,10 @@ byte AnOps::connectStatus;
 float AnOps::expandPos;
 
 bool AnOps::remote = false;
-string AnOps::user = "chokopan", AnOps::ip = "192.168.0.180", AnOps::pw;
+std::string AnOps::user = "chokopan", AnOps::ip = "192.168.0.180", AnOps::pw;
 ushort AnOps::port = 22;
-string AnOps::path = "/Users/chokopan/mdvis";
-string AnOps::message = "disconnected";
+std::string AnOps::path = "/Users/chokopan/mdvis";
+std::string AnOps::message = "disconnected";
 
 std::thread* AnOps::conThread;
 
@@ -126,7 +126,7 @@ void AnOps::Connect() {
 	message = "scanning runtime";
 
 	
-	string pth;
+	std::string pth;
 	AnWeb::hasC_s = ssh.HasCmd("g++", pth);
 	Debug::Message("AnOps", "g++ location: " + pth);
 	AnWeb::hasPy_s = ssh.HasCmd("python", pth);
@@ -158,7 +158,7 @@ void AnOps::SendNodes(bool cp) {
 	ssh.WaitFor("<>", 500);
 }
 
-void AnOps::DoSendNodes(string p, string rp) {
+void AnOps::DoSendNodes(std::string p, std::string rp) {
 	auto fs = IO::GetFiles(p, ".cpp");
 	auto fs2 = IO::GetFiles(p, ".py");
 	fs.insert(fs.end(), fs2.begin(), fs2.end());

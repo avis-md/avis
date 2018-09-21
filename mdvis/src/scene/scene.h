@@ -29,7 +29,7 @@ class Scene {
 public:
 	Scene();
 
-	string sceneName;
+	std::string sceneName;
 
 	/*! The current active scene.
 	In Lait versions, this value cannot be changed.
@@ -54,7 +54,7 @@ public:
 
 protected:
 	static std::ifstream* strm;
-	static std::vector<string> sceneNames;
+	static std::vector<std::string> sceneNames;
 	static std::vector<long> scenePoss;
 
 	static void ReadD0();

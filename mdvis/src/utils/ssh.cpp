@@ -74,15 +74,15 @@ void SSH::Disconnect() {
 	libssh2_session_free(session);
 }
 
-string SSH::Read(uint maxlen) {
+std::string SSH::Read(uint maxlen) {
 	char* c = new char[maxlen];
 	auto sz = libssh2_channel_read(channel, c, maxlen);
-	string s(c, sz);
+	std::string s(c, sz);
 	delete[](c);
 	return s;
 }
 
-bool SSH::Write(string s) {
+bool SSH::Write(std::string s) {
 	s += "\n";
 	auto sz = libssh2_channel_write(channel, &s[0], s.size());
 	return sz == s.size();
@@ -93,8 +93,8 @@ void SSH::Flush() {
 	WaitFor("##", 200);
 }
 
-bool SSH::WaitFor(string s, uint rate, uint timeout) {
-	string o = "";
+bool SSH::WaitFor(std::string s, uint rate, uint timeout) {
+	std::string o = "";
 	uint t = 0;
 	auto ms = s.size();
 	while(t < timeout) {
@@ -131,8 +131,8 @@ void SSH::DisableSFTP() {
 	}
 }
 
-std::vector<string> SSH::ListFiles(const string& path) {
-	std::vector<string> res;
+std::vector<std::string> SSH::ListFiles(const std::string& path) {
+	std::vector<std::string> res;
 	auto hnd = libssh2_sftp_opendir(sftpChannel, path.c_str());
 	if (hnd) {
 		for (;;) {
@@ -140,7 +140,7 @@ std::vector<string> SSH::ListFiles(const string& path) {
 			LIBSSH2_SFTP_ATTRIBUTES attr;
 			auto rc = libssh2_sftp_readdir_ex(hnd, mem, 512, lentry, 512, &attr);
 			if (rc > 0) {
-				res.push_back(string(mem, rc));
+				res.push_back(std::string(mem, rc));
 			}
 			else break;
 		}
@@ -148,10 +148,10 @@ std::vector<string> SSH::ListFiles(const string& path) {
 	return res;
 }
 
-bool SSH::HasFile(const string& path) {
+bool SSH::HasFile(const std::string& path) {
 	auto cmd = "echo '!''<'; test -e " + path + " && echo 'file found!!''>' || echo '!''>'";
 	Write(cmd);
-	string s;
+	std::string s;
 	for (;;) {
 		s += Read(500);
 		Engine::Sleep(100);
@@ -168,7 +168,7 @@ bool SSH::HasFile(const string& path) {
 	}
 }
 
-void SSH::GetFile(const string& from, const string& to) {
+void SSH::GetFile(const std::string& from, const std::string& to) {
 	Flush();
 	auto hnd = libssh2_sftp_open(sftpChannel, &from[0], LIBSSH2_FXF_READ, 0);
 	std::ofstream strm(to, std::ios::binary);
@@ -187,13 +187,13 @@ void SSH::GetFile(const string& from, const string& to) {
 	}
 }
 
-void SSH::MkDir(const string& path) {
+void SSH::MkDir(const std::string& path) {
 	libssh2_sftp_mkdir(sftpChannel, &path[0], LIBSSH2_SFTP_S_IRWXU |
 		LIBSSH2_SFTP_S_IRGRP | LIBSSH2_SFTP_S_IXGRP |
 		LIBSSH2_SFTP_S_IROTH | LIBSSH2_SFTP_S_IXOTH);
 }
 
-void SSH::SendFile(const string& from, const string& to) {
+void SSH::SendFile(const std::string& from, const std::string& to) {
 	Flush();
 	std::ifstream strm(from, std::ios::binary); 
 	auto hnd = libssh2_sftp_open(sftpChannel, &to[0], 
@@ -202,7 +202,7 @@ void SSH::SendFile(const string& from, const string& to) {
 	if (!hnd || !strm) {
 		char* err;
 		libssh2_session_last_error(session, &err, 0, 0);
-		Debug::Warning("SSH", "Failed to send file: " + string(err));
+		Debug::Warning("SSH", "Failed to send file: " + std::string(err));
 		return;
 	}
 	else {
@@ -225,10 +225,10 @@ void SSH::SendFile(const string& from, const string& to) {
 	}
 }
 
-bool SSH::HasCmd(string cmd, string& path) {
+bool SSH::HasCmd(std::string cmd, std::string& path) {
 	cmd = "echo \"<\"\"<\"; command -v " + cmd + "; echo \">\"\">\"";
 	Write(cmd);
-	string s;
+	std::string s;
 	for (;;) {
 		s += Read(100);
 		Engine::Sleep(100);

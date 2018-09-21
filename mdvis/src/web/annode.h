@@ -23,7 +23,7 @@ public:
 	Vec2 pos;
 	uint id;
 	static float width;
-	string title;
+	std::string title;
 	Vec3 titleCol = Vec3(0.35f, 0.35f, 0.35f);
 	static Vec4 bgCol;
 
@@ -36,7 +36,7 @@ public:
 	bool logExpanded = true;
 	byte logMask = 7;
 	int logOffset = 0;
-	std::vector<std::pair<byte, string>> log;
+	std::vector<std::pair<byte, std::string>> log;
 
 	std::vector<std::pair<AnNode*, uint>> inputR, outputR;
 	std::vector<union AnVarBase> inputVDef;
@@ -44,11 +44,11 @@ public:
 
 	struct ConnInfo {
 		bool cond;
-		string mynm;
-		string mytp;
+		std::string mynm;
+		std::string mytp;
 		AnNode* tar;
-		string tarnm;
-		string tartp;
+		std::string tarnm;
+		std::string tartp;
 	};
 	std::vector<ConnInfo> _connInfo;
 	
@@ -73,13 +73,13 @@ public:
 	virtual void Execute() = 0;
 	void ConnectTo(uint id, AnNode* tar, uint tarId); //out -> in
 	void Save(std::ofstream& strm), Load(std::ifstream& strm);
-	virtual void SaveIn(const string& path) {};
-	virtual void LoadIn(const string& path) {};
-	virtual void SaveOut(const string& path);
-	virtual void LoadOut(const string& path);
+	virtual void SaveIn(const std::string& path) {};
+	virtual void LoadIn(const std::string& path) {};
+	virtual void SaveOut(const std::string& path);
+	virtual void LoadOut(const std::string& path);
 	virtual void SaveConn(), ClearConn(), Reconn();
 
-	static bool CanConn(string lhs, string rhs);
+	static bool CanConn(std::string lhs, std::string rhs);
 
 	virtual void CatchExp(char* c);
 

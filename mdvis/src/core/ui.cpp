@@ -13,7 +13,7 @@ Font* UI::font, *UI::font2;
 bool UI::focused = true, UI::editingText = false;
 uint UI::_editTextCursorPos = 0;
 uint UI::_editTextCursorPos2 = 0;
-string UI::_editTextString = "";
+std::string UI::_editTextString = "";
 float UI::_editTextBlinkTime = 0;
 
 UI::Style UI::_defaultStyle = {};
@@ -246,9 +246,9 @@ void UI::Texture(float x, float y, float w, float h, ::Texture* texture, Vec4 ti
 	}
 }
 
-string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, const string& str2, bool delayed, Vec4 fcol, bool* changed, string str22, Font* font, Vec4 hcol, Vec4 acol, bool ser) {
+std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, const std::string& str2, bool delayed, Vec4 fcol, bool* changed, std::string str22, Font* font, Vec4 hcol, Vec4 acol, bool ser) {
 	Engine::PushStencil(x, y, w, h);
-	string str = str2;
+	std::string str = str2;
 	if (!str22.size()) str22 = str2;
 	GetEditTextId();
 	bool isActive = (UI::IsSameId(_activeEditText, _editingEditText) && (_activeEditTextId == _editingEditTextId));
@@ -361,9 +361,9 @@ string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol, cons
 	//#endif
 }
 
-string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, const string& str2, char repl, bool delayed, Vec4 fcol, bool* changed, Font* font, Vec4 hcol, Vec4 acol, bool ser) {
-	string str = str2;
-	string pstr = "";
+std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, const std::string& str2, char repl, bool delayed, Vec4 fcol, bool* changed, Font* font, Vec4 hcol, Vec4 acol, bool ser) {
+	std::string str = str2;
+	std::string pstr = "";
 	GetEditTextId();
 	bool isActive = (UI::IsSameId(_activeEditText, _editingEditText) && (_activeEditTextId == _editingEditTextId));
 
@@ -485,7 +485,7 @@ Vec3 AU(Vec3 vec) {
 	return vec;
 }
 
-void UI::Label(float x, float y, float s, string st, Vec4 col, float maxw, Font* font) {
+void UI::Label(float x, float y, float s, std::string st, Vec4 col, float maxw, Font* font) {
 	Label(x, y, s, &st[0], st.size(), col, maxw, font);
 }
 

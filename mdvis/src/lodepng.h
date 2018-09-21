@@ -26,8 +26,7 @@ freely, subject to the following restrictions:
 #ifndef LODEPNG_H
 #define LODEPNG_H
 
-#define _ITERATOR_DEBUG_LEVEL 0
-#include <string.h> /*for size_t*/
+#include <stdint.h>
 
 extern const char* LODEPNG_VERSION_STRING;
 
@@ -65,7 +64,7 @@ the custom_zlib field of the compress and decompress settings*/
 #ifndef LODEPNG_NO_COMPILE_ANCILLARY_CHUNKS
 #define LODEPNG_COMPILE_ANCILLARY_CHUNKS
 #endif
-/*ability to convert error numerical codes to English text string*/
+/*ability to convert error numerical codes to English text std::string*/
 #ifndef LODEPNG_NO_COMPILE_ERROR_TEXT
 #define LODEPNG_COMPILE_ERROR_TEXT
 #endif
@@ -455,8 +454,8 @@ typedef struct LodePNGInfo
   size_t itext_num; /*the amount of international texts in this PNG*/
   char** itext_keys; /*the English keyword of the text chunk (e.g. "Comment")*/
   char** itext_langtags; /*language tag for this text's language, ISO/IEC 646 string, e.g. ISO 639 language tag*/
-  char** itext_transkeys; /*keyword translated to the international language - UTF-8 string*/
-  char** itext_strings; /*the actual international text - UTF-8 string*/
+  char** itext_transkeys; /*keyword translated to the international language - UTF-8 std::string*/
+  char** itext_strings; /*the actual international text - UTF-8 std::string*/
 
   /*time chunk (tIME)*/
   unsigned time_defined; /*set to 1 to make the encoder generate a tIME chunk*/
@@ -689,7 +688,7 @@ it may be corrupt data.
 */
 unsigned lodepng_chunk_length(const unsigned char* chunk);
 
-/*puts the 4-byte type in null terminated string*/
+/*puts the 4-byte type in null terminated std::string*/
 void lodepng_chunk_type(char type[5], const unsigned char* chunk);
 
 /*check if the type is the given type*/

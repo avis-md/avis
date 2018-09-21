@@ -5,7 +5,7 @@
 
 class Node_Remap : public AnNode {
 public:
-	static const string sig;
+	static const std::string sig;
 	Node_Remap();
     
 	std::vector<float> vals;
@@ -14,6 +14,6 @@ public:
 
 	void Execute() override;
 	void DrawMiddle(float& off) override;
-	void SaveOut(const string& path) override {}
-	void LoadOut(const string& path) override;
+	void SaveOut(const std::string& path) override {}
+	void LoadOut(const std::string& path) override;
 };

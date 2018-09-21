@@ -6,7 +6,7 @@ class ParMenu {
 public:
 	static int activeMenu;
 	static int activeSubMenu[5];
-	static string menuNames[5];
+	static std::string menuNames[5];
 	static bool expanded;
 	static float expandPos;
 	static bool showSplash;
@@ -15,7 +15,7 @@ public:
 	static byte drawTypeAll, _drawTypeAll;
 	static bool visibleAll;
 
-	static std::vector<string> recentFiles, recentFilesN;
+	static std::vector<std::string> recentFiles, recentFilesN;
 
 	static void Init();
 	static void Draw(), Draw_List(float off), DrawStart(), DrawSplash();
@@ -23,5 +23,5 @@ public:
 	static void SelClear(), SelInv(), SelAll();
 	static void DrawSelPopup();
 
-	static void LoadRecents(), SaveRecents(const string& entry), RemoveRecent(uint i);
+	static void LoadRecents(), SaveRecents(const std::string& entry), RemoveRecent(uint i);
 };

@@ -123,7 +123,7 @@ void ChokoLait::_InitVars() {
 	GLint GlewInitResult = glewInit();
 	if (GLEW_OK != GlewInitResult)
 	{
-		Debug::Error("System", "Glew error: " + string((const char*)glewGetErrorString(GlewInitResult)));
+		Debug::Error("System", "Glew error: " + std::string((const char*)glewGetErrorString(GlewInitResult)));
 		abort();
 	}
 

@@ -115,7 +115,7 @@ misrepresented as being the original software.
  #include <commdlg.h>
  #define TINYFD_NOCCSUNICODE
  #define SLASH "\\"
- int tinyfd_winUtf8 = 1; /* on windows string char can be 0:MBCS or 1:UTF-8 */
+ int tinyfd_winUtf8 = 1; /* on windows std::string char can be 0:MBCS or 1:UTF-8 */
 #else
  #include <limits.h>
  #include <unistd.h>
@@ -3109,7 +3109,7 @@ char const * tinyfd_selectFolderDialog(
 }
 
 
-/* returns the hexcolor as a string "#FF0000" */
+/* returns the hexcolor as a std::string "#FF0000" */
 /* aoResultRGB also contains the result */
 /* aDefaultRGB is used only if aDefaultHexRGB is NULL */
 /* aDefaultRGB and aoResultRGB can be the same array */
@@ -6849,7 +6849,7 @@ frontmost of process \\\"Python\\\" to true' ''');");
 }
 
 
-/* returns the hexcolor as a string "#FF0000" */
+/* returns the hexcolor as a std::string "#FF0000" */
 /* aoResultRGB also contains the result */
 /* aDefaultRGB is used only if aDefaultHexRGB is NULL */
 /* aDefaultRGB and aoResultRGB can be the same array */

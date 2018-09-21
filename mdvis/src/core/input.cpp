@@ -9,7 +9,7 @@ float Input::mouseScroll = 0;
 byte Input::mouse0State = 0;
 byte Input::mouse1State = 0;
 byte Input::mouse2State = 0;
-string Input::inputString = "";
+std::string Input::inputString = "";
 
 Vec2 Input::mousePos = Vec2(0, 0);
 Vec2 Input::mousePosRelative = Vec2(0, 0);
@@ -20,7 +20,7 @@ Vec2 Input::mouseDownPos = Vec2(0, 0);
 bool Input::keyStatusOld[] = {};
 bool Input::keyStatusNew[] = {};
 
-string Input::_inputString = "";
+std::string Input::_inputString = "";
 float Input::_mouseScroll = 0;
 
 void Input::RegisterCallbacks() {
@@ -29,7 +29,7 @@ void Input::RegisterCallbacks() {
 }
 
 void Input::TextCallback(GLFWwindow* w, uint i) {
-	_inputString += string((char*)&i, 1);
+	_inputString += std::string((char*)&i, 1);
 }
 
 bool Input::KeyDown(InputKey k) {

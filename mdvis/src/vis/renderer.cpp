@@ -10,7 +10,7 @@ bool VisRenderer::imgUseAlpha = true, VisRenderer::vidUseAlpha;
 uint VisRenderer::imgW = 2048, VisRenderer::imgH = 2048, VisRenderer::vidW = 1024, VisRenderer::vidH = 600;
 float VisRenderer::resLerp = -1;
 
-string VisRenderer::outputFolder =
+std::string VisRenderer::outputFolder =
 #ifdef PLATFORM_WIN
 "C:/tmp/mdvis/";
 #else

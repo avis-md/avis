@@ -66,14 +66,14 @@ Vec3 Color::Rgb2Hsv(Vec4 col) {
 	return o;
 }
 
-string Color::Col2Hex(Vec4 col) {
+std::string Color::Col2Hex(Vec4 col) {
 	byte bs[] = { (byte)(col.r * 255), (byte)(col.g * 255), (byte)(col.b * 255), (byte)(col.a * 255) };
 	return Col2Hex(bs);
 }
 
-string Color::Col2Hex(byte* bs) {
+std::string Color::Col2Hex(byte* bs) {
 	const char* hx = "0123456789ABCDEF";
-	string res = "XXXXXXXX";
+	std::string res = "XXXXXXXX";
 	for (byte a = 0; a < 4; a++) {
 		auto i = bs[a];
 		res[a * 2] = hx[i >> 4];
@@ -110,7 +110,7 @@ void Color::DrawPicker(bool hasA) {
 	Hsv2Rgb(hsv.x, hsv.y, hsv.z, bs[0], bs[1], bs[2]);
 	bs[3] = 255;
 
-	string hx = Col2Hex(bs);
+	std::string hx = Col2Hex(bs);
 
 	hx = UI::EditText(Popups::pos.x + 5, Popups::pos.y + 130, 120, 16, 12, white(1, 0.5f), hx, true, white());
 

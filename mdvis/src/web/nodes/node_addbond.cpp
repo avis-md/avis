@@ -11,8 +11,8 @@ Node_AddBond::Node_AddBond() : AnNode(new DmScript(sig)) {
 	titleCol = Vec3(0.3f, 0.5f, 0.3f);
 	canTile = false;
 	inputR.resize(2);
-	script->invars.push_back(std::pair<string, string>("pair counts", "list(1i)"));
-	script->invars.push_back(std::pair<string, string>("bonds", "list(1i)"));
+	script->invars.push_back(std::pair<std::string, std::string>("pair counts", "list(1i)"));
+	script->invars.push_back(std::pair<std::string, std::string>("bonds", "list(1i)"));
 
 	Particles::anim.conns2.resize(1);
 	Particles::particles_Conn2.resize(1);
@@ -61,6 +61,6 @@ float Node_AddBond::DrawSide() {
 	return f;
 }
 
-void Node_AddBond::LoadOut(const string& path) {
+void Node_AddBond::LoadOut(const std::string& path) {
 	Execute();
 }

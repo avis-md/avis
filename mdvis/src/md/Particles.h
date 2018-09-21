@@ -9,7 +9,7 @@ struct Residue {
 
 	uint maxOff;
 	bool visible, expanded;
-	string name;
+	std::string name;
 	uint offset, offset_b;
 	uint cnt, cnt_b;
 	byte type, drawType;
@@ -21,7 +21,7 @@ struct ResidueList { //residues with the same name
 	
 	uint maxOff;
 	bool visible, visibleAll = true, expanded;
-	string name;
+	std::string name;
 	std::vector<Residue> residues;
 	uint residueSz = 0;
 	byte drawType;
@@ -82,7 +82,7 @@ public:
 
 	static int particles_ParamSz;
 	static paramdata* particles_Params[10];
-	static string particles_ParamNms[11];
+	static std::string particles_ParamNms[11];
 
 	static std::vector<conninfo> particles_Conn2;
 

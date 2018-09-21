@@ -1,7 +1,7 @@
 #include "dialog.h"
 #include "tinyfiledialogs.h"
 
-std::vector<string> Dialog::OpenFile(std::vector<string> pattern, bool mul) {
+std::vector<std::string> Dialog::OpenFile(std::vector<std::string> pattern, bool mul) {
 	auto ps = pattern.size();
 	std::vector<const char*> pts(ps);
 	for (size_t a = 0; a < ps; a++) {
@@ -9,11 +9,11 @@ std::vector<string> Dialog::OpenFile(std::vector<string> pattern, bool mul) {
 	}
 	auto cres = tinyfd_openFileDialog("Open File", NULL, ps, &pts[0], NULL, mul);
 	if (cres) {
-		auto s = string(cres);
+		auto s = std::string(cres);
 #ifdef PLATFORM_WIN
 		std::replace(s.begin(), s.end(), '\\', '/');
 #endif
 		return string_split(s, '|', true);
 	}
-	return std::vector<string>();
+	return std::vector<std::string>();
 }
