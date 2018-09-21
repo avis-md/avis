@@ -1,4 +1,5 @@
 #include "Particles.h"
+#include "parloader.h"
 #include "web/anweb.h"
 #include "md/Protein.h"
 
@@ -274,7 +275,9 @@ void Particles::Serialize(XmlNode* nd) {
 	SVS(trajectory, trjFile);
 	SerializeVis(n->addchild("visibility"));
 	SerializeDM(n->addchild("drawmode"));
-	nd->name = "Proteins";
+
+	n = nd->addchild("proteins");
+
 }
 
 void Particles::SerializeVis(XmlNode* nd) {
@@ -288,5 +291,46 @@ void Particles::SerializeDM(XmlNode* nd) {
 	nd->value = "par_dm.bin";
 	std::ofstream strm(VisSystem::currentSavePath + "_data/par_dm.bin", std::ios::binary);
 	_StreamWrite(&residueListSz, &strm, 4);
+
+}
+
+void Particles::Deserialize(XmlNode* nd) {
+	for (auto& n : nd->children) {
+		if (n.name == "Particles") {
+			for (auto& n2 : n.children) {
+				if (n2.name == "atoms") {
+					for (auto& n3 : n2.children) {
+						if (n3.name == "configuration") {
+							ParLoader::directLoad = true;
+							ParLoader::OnOpenFile(std::vector<std::string>{ n3.value });
+						}
+						else if (!!particleSz) {
+							if (n3.name == "trajectory") {
+								ParLoader::directLoad = true;
+								ParLoader::OnOpenFile(std::vector<std::string>{ n3.value });
+							}
+							else if (n3.name == "visibility") {
+								DeserializeVis(&n3);
+							}
+							else if (n3.name == "drawmode") {
+								DeserializeVis(&n3);
+							}
+						}
+					}
+				}
+			}
+
+			return;
+		}
+	}
+}
+
+void Particles::DeserializeVis(XmlNode* nd) {
+	std::ifstream strm(VisSystem::currentSavePath + "_data/" + nd->value, std::ios::binary);
+
+}
+
+void Particles::DeserializeDM(XmlNode* nd) {
+	std::ifstream strm(VisSystem::currentSavePath + "_data/" + nd->value, std::ios::binary);
 
 }

@@ -359,7 +359,7 @@ void ParMenu::DrawSplash() {
 			}
 		}
 		if (Engine::Button(pos.x, pos.y + pos.w - 17, 170, 17, white(1, 0.3f), _("Recover last session"), 12, white(), true) == MOUSE_RELEASE) {
-			if (VisSystem::Load(IO::path + ".recovery"))
+			if (VisSystem::Load(IO::path + ".recover"))
 				showSplash = false;
 		}
 	}

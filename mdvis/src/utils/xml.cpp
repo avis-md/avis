@@ -8,6 +8,20 @@ void RemoveNewLine(std::string& s) {
 	}
 }
 
+std::string rm_st_ed_spaces(std::string& s) {
+	auto l = s.find_first_not_of(' ');
+	if (l == std::string::npos) return "";
+	return s.substr(l, s.find_last_not_of(' ') - l + 1);
+}
+
+bool NodeHasChild(std::string& s, int first) {
+	for (int a = first; a < s.size(); a++) {
+		if (s[a] == '<') return true;
+		else if (s[a] > 0x20) return false;
+	}
+	return false;
+}
+
 XmlNode* Xml::Parse(const std::string& path) {
 	auto str = IO::GetText(path);
 	RemoveNewLine(str);
@@ -57,8 +71,8 @@ bool Xml::Read(std::string& s, uint& pos, XmlNode* parent) {
 	else {
 		auto ep = string_find(s, "</" + n.name + ">", off2);
 		if (ep == -1) return false;
-		if (s[off2 + 1] != ' ') {
-			n.value = s.substr(off2 + 1, ep - off2 - 1);
+		if (!NodeHasChild(s, off2 + 1)) {
+			n.value = rm_st_ed_spaces(s.substr(off2 + 1, ep - off2 - 1));
 		}
 		else {
 			while (pos < (uint)ep) {

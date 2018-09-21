@@ -284,5 +284,15 @@ void VisSystem::Save(const std::string& path) {
 }
 
 bool VisSystem::Load(const std::string& path) {
-	return false;
+	Debug::Message("System", "Loading: " + path);
+	currentSavePath = path;
+	auto xml = Xml::Parse(path + ".xml");
+	if (!xml) {
+		Debug::Warning("System", "save file xml is corrupt!");
+		return false;
+	}
+	auto n = &xml->children[0];
+	Particles::Deserialize(n);
+	Debug::Message("System", "Load complete");
+	return true;
 }

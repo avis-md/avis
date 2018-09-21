@@ -110,6 +110,10 @@ public:
 	static void SerializeVis(XmlNode* nd);
 	static void SerializeDM(XmlNode* nd);
 
+	static void Deserialize(XmlNode* nd);
+	static void DeserializeVis(XmlNode* nd);
+	static void DeserializeDM(XmlNode* nd);
+
 	static GLuint posVao;
 	static GLuint posBuffer; //xyz
 	static GLuint connBuffer; //uint uint
