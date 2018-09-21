@@ -69,4 +69,3 @@ enum GBUFFERS : byte {
 #include "asset/mesh.h"
 #include "asset/texture.h"
 #include "asset/texture3d.h"
-#include "asset/rendertexture.h"

@@ -21,6 +21,7 @@ float VisSystem::glass = 0.9f;
 uint VisSystem::renderMs, VisSystem::uiMs;
 
 float VisSystem::lastSave;
+std::string VisSystem::currentSavePath;
 
 std::vector<MenuItem> VisSystem::menuItems[];
 
@@ -271,11 +272,14 @@ void VisSystem::DrawMsgPopup() {
 void VisSystem::Save(const std::string& path) {
 	if (!Particles::particleSz) return;
 	Debug::Message("System", "Saving...");
+	currentSavePath = path;
+	IO::MakeDirectory(path + "_data/");
 	XmlNode head("MDVis_State_File");
 	head.params.emplace("hash", version_hash);
 	head.children.reserve(10);
+	Particles::Serialize(head.addchild());
 	ParGraphics::Serialize(head.addchild());
-	Xml::Write(&head, path);
+	Xml::Write(&head, path + ".xml");
 	Debug::Message("System", "Save complete");
 }
 

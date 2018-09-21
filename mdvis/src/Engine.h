@@ -1,9 +1,7 @@
 #pragma once
 
 /*
-ChokoLait Interface for ChokoEngine (c) Chokomancarr 2018
-
-See https://chokomancarr.github.io/ChokoLait/ for documentation and examples.
+forked from ChokoEngine -- Chokomancarr 2018
 */
 
 #include "../../appversion.h"
@@ -14,6 +12,8 @@ See https://chokomancarr.github.io/ChokoLait/ for documentation and examples.
 
 #define STRINGMRGDO(a,b) a ## b
 #define STRINGMRG(a,b) STRINGMRGDO(a,b)
+
+#define push_val(var, nm, val) auto var = nm; nm = val;
 
 #define OHNO(nm, msg) Debug::Error(#nm, "Something happened that should not! Please contact the monkey!\n  Information the monkey needs: " msg)
 
@@ -96,21 +96,6 @@ Vec2 Ds2(Vec2);
 
 #include "core/math.h"
 
-class MatFunc {
-public:
-	static Mat4x4 FromTRS(const Vec3& t, const Quat& r, const Vec3& s);
-};
-class QuatFunc {
-public:
-	static Quat Inverse(const Quat&);
-	static Vec3 ToEuler(const Quat&);
-	static Mat4x4 ToMatrix(const Quat&);
-	static Quat FromAxisAngle(Vec3, float);
-	static Quat LookAt(const Vec3&, const Vec3&);
-};
-
-#define push_val(var, nm, val) auto var = nm; nm = val;
-
 #ifdef PLATFORM_WIN
 #define stat _stat
 #else
@@ -125,6 +110,7 @@ std::istream _varname(_f2i_ifstream.rdbuf());
 #include "utils/net.h"
 #include "utils/xml.h"
 #include "utils/strext.h"
+#include "utils/glmext.h"
 
 #include "core/mvp.h"
 #include "core/bbox.h"
@@ -155,39 +141,18 @@ typedef Ref<obj> r ## obj;
 _canref(Component);
 _canref(Transform);
 _canref(SceneObject);
-_canref(Animator);
-_canref(Armature);
 _canref(Camera);
-_canref(Light);
-_canref(MeshFilter);
-_canref(MeshRenderer);
-_canref(ParticleSystem);
-_canref(ReflectionProbe);
-_canref(ReflectiveQuad);
-_canref(SceneScript);
-_canref(SkinnedMeshRenderer);
-_canref(TextureRenderer);
-_canref(VoxelRenderer);
-_canref(InverseKinematics);
-_canref(AudioSource);
-_canref(AudioListener);
 
 //AssetObjects.h
 class AssetItem;
 class AssetManager;
 _canref(AssetObject);
 
-_canref(Animation);
-_canref(AnimClip);
 _canref(Background);
-_canref(CameraEffect);
-_canref(CubeMap);
-_canref(Material);
 _canref(Mesh);
 _canref(Shader);
 _canref(Texture);
 _canref(RenderTexture);
-_canref(AudioClip);
 
 #pragma endregion
 

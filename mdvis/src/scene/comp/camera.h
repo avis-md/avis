@@ -19,10 +19,10 @@ public:
 	float nearClip;
 	float farClip;
 	GLuint target;
-	rRenderTexture targetRT; //oh well
-	std::vector<rCameraEffect> effects;
+	//rRenderTexture targetRT; //oh well
+	//std::vector<rCameraEffect> effects;
 
-	void Render(RenderTexture* target = nullptr, onBlitFunc func = nullptr);
+	void Render(onBlitFunc func = nullptr);
 
 	uint GetIdAt(uint x, uint y);
 	

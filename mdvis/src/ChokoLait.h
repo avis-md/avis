@@ -1,9 +1,7 @@
 #pragma once
 
 /*
-ChokoLait Interface for ChokoEngine (c) Chokomancarr 2018
-
-See https://chokomancarr.github.io/ChokoLait/ for documentation and examples.
+forked from ChokoLait -- Chokomancarr 2018
 */
 
 #include "Engine.h"

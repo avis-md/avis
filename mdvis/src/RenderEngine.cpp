@@ -107,112 +107,6 @@ void Camera::GenGBuffer2() {
 	}
 }
 
-
-RenderTexture::RenderTexture(uint w, uint h, RT_FLAGS flags, const GLvoid* pixels, GLenum pixelFormat, GLenum minFilter, GLenum magFilter, GLenum wrapS, GLenum wrapT) : Texture(), depth(!!(flags & RT_FLAG_DEPTH)), stencil(!!(flags & RT_FLAG_STENCIL)), hdr(!!(flags & RT_FLAG_HDR)) {
-	width = w;
-	height = h;
-	_texType = TEX_TYPE_RENDERTEXTURE;
-
-	glGenFramebuffers(1, &d_fbo);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_fbo);
-
-	glGenTextures(1, &pointer);
-
-	glBindTexture(GL_TEXTURE_2D, pointer);
-	glTexImage2D(GL_TEXTURE_2D, 0, hdr? GL_RGBA32F : GL_RGBA, w, h, 0, pixelFormat, hdr? GL_FLOAT : GL_UNSIGNED_BYTE, pixels);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pointer, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
-
-	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
-	glDrawBuffers(1, DrawBuffers);
-	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if (Status != GL_FRAMEBUFFER_COMPLETE) {
-		Debug::Error("RenderTexture", "FB error:" + std::to_string(Status));
-	}
-	else loaded = true;
-}
-
-RenderTexture::~RenderTexture() {
-	glDeleteFramebuffers(1, &d_fbo);
-}
-
-void RenderTexture::Blit(Texture* src, RenderTexture* dst, Shader* shd, std::string texName) {
-	if (src == nullptr || dst == nullptr || shd == nullptr) {
-		Debug::Warning("Blit", "Parameter is null!");
-		return;
-	}
-	//Blit(src->pointer, dst, shd->pointer, texName);
-}
-
-void RenderTexture::Blit(GLuint src, RenderTexture* dst, GLuint shd, std::string texName) {
-	glViewport(0, 0, dst->width, dst->height);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dst->d_fbo);
-	float zero[] = { 0,0,1,1 };
-	glClearBufferfv(GL_COLOR, 0, zero);
-	glDisable(GL_DEPTH_TEST);
-	glDepthMask(false);
-	glDisable(GL_BLEND);
-
-	glUseProgram(shd);
-	GLint loc = glGetUniformLocation(shd, "mainTex");
-	glUniform1i(loc, 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, src);
-	glBindVertexArray(Camera::emptyVao);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	glBindVertexArray(0);
-	glUseProgram(0);
-
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-}
-
-void RenderTexture::Blit(Texture* src, RenderTexture* dst, Material* mat, std::string texName) {
-	glViewport(0, 0, dst->width, dst->height);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dst->d_fbo);
-	float zero[] = { 0,0,0,0 };
-	glClearBufferfv(GL_COLOR, 0, zero);
-	glDisable(GL_DEPTH_TEST);
-	glDepthMask(false);
-	glDisable(GL_BLEND);
-
-	//mat->SetTexture(texName, src);
-	//Mat4x4 dm = Mat4x4();
-	//mat->ApplyGL(dm, dm);
-	
-	glBindVertexArray(Camera::emptyVao);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	glBindVertexArray(0);
-	glUseProgram(0);
-
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-}
-
-void RenderTexture::Load(std::string path) {
-	throw std::runtime_error("RT Load (s) not implemented");
-}
-void RenderTexture::Load(std::istream& strm) {
-	throw std::runtime_error("RT Load (i) not implemented");
-}
-
-bool RenderTexture::Parse(std::string path) {
-	std::string ss(path + ".meta");
-	std::ofstream str(ss, std::ios::out | std::ios::trunc | std::ios::binary);
-	str << "IMR";
-	return true;
-}
-
-
 void Camera::InitGBuffer(uint w, uint h) {
 	_InitGBuffer(&d_fbo, &d_colfbo, d_texs, &d_depthTex, &d_idTex, &d_colTex, (float)w, (float)h);
 
@@ -246,20 +140,7 @@ GLuint Camera::emptyVao = 0;
 const float Camera::fullscreenVerts[] = { -1, -1,  -1, 1,  1, -1,  1, 1 };
 const int Camera::fullscreenIndices[] = { 0, 1, 2, 1, 3, 2 };
 GLuint Camera::rectIdBuf = 0;
-/*
-GLuint Camera::d_probeMaskProgram = 0;
-GLuint Camera::d_probeProgram = 0;
-GLuint Camera::d_blurProgram = 0;
-GLuint Camera::d_blurSBProgram = 0;
-GLuint Camera::d_skyProgram = 0;
-GLuint Camera::d_pLightProgram = 0;
-GLuint Camera::d_sLightProgram = 0;
-GLuint Camera::d_sLightCSProgram = 0;
-GLuint Camera::d_sLightRSMProgram = 0;
-GLuint Camera::d_sLightRSMFluxProgram = 0;
-GLuint Camera::d_reflQuadProgram = 0;
-GLint Camera::d_skyProgramLocs[9];
-*/
+
 uint Camera::GetIdAt(uint x, uint y) {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, d_fbo);
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
@@ -272,10 +153,10 @@ uint Camera::GetIdAt(uint x, uint y) {
 	return pixel[0];
 }
 
-void Camera::Render(RenderTexture* tar, onBlitFunc func) {
+void Camera::Render(onBlitFunc func) {
 	active = this;
-	uint t_w = (uint)roundf((tar ? tar->width : Display::width) * quality);
-	uint t_h = (uint)roundf((tar ? tar->height : Display::height) * quality);
+	uint t_w = (uint)roundf(Display::width * quality);
+	uint t_h = (uint)roundf(Display::height * quality);
 	if ((d_w != t_w) || (d_h != t_h)) {
 		if (!!d_fbo) {
 			glDeleteFramebuffers(1, &d_fbo);

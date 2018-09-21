@@ -72,6 +72,8 @@ public:
 	static uint residueListSz;
 	static uint particleSz;
 
+	static std::string cfgFile, trjFile;
+
 	static char* particles_Name, *particles_ResName; //10 chars per name
 	static glm::dvec3* particles_Pos, *particles_Vel;
 	static short* particles_Typ;
@@ -103,6 +105,10 @@ public:
 
 	static void Init(), Clear(), GenTexBufs(), UpdateBufs(), UpdateColorTex(), UpdateRadBuf();
 	static void AddParam(), RmParam(int i);
+
+	static void Serialize(XmlNode* nd);
+	static void SerializeVis(XmlNode* nd);
+	static void SerializeDM(XmlNode* nd);
 
 	static GLuint posVao;
 	static GLuint posBuffer; //xyz

@@ -395,6 +395,7 @@ void ParLoader::DoOpen() {
 
 	VisSystem::SetMsg("Loaded file(s) in " + std::to_string((milliseconds() - t)*0.001f).substr(0, 5) + "s");
 	ParMenu::SaveRecents(droppedFiles[0]);
+	Particles::cfgFile = droppedFiles[0];
 	ParLoader::parDirty = true;
 	busy = false;
 	fault = false;
@@ -436,6 +437,7 @@ void ParLoader::DoOpenAnim() {
 
 	anm.frameCount = info.frames;
 
+	Particles::trjFile = droppedFiles[0];
 	anm.reading = false;
 	busy = false;
 	fault = false;

@@ -82,7 +82,7 @@ void VisRenderer::ToImage() {
 	ParGraphics::hlIds.clear();
 	if (imgUseAlpha) ParGraphics::bgCol.a = 0;
 
-	cam->Render(nullptr, []() {
+	cam->Render([]() {
 		auto& cm = ChokoLait::mainCamera->object->transform;
 		ParGraphics::Rerender(cm.position(), cm.forward(), (float)imgW, (float)imgH);
 	});

@@ -189,7 +189,7 @@ void ChokoLait::Update(emptyCallbackFunc func) {
 void ChokoLait::Paint(emptyCallbackFunc rendFunc, emptyCallbackFunc paintFunc) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	mainCamera->Render(nullptr, rendFunc);
+	mainCamera->Render(rendFunc);
 
 	MVP::Switch(false);
 	MVP::Clear();

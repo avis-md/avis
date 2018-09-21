@@ -143,7 +143,6 @@
     <ClCompile Include="src\live\livesyncer.cpp" />
     <ClCompile Include="src\live\lj256.cpp" />
     <ClCompile Include="src\lodepng.cpp" />
-    <ClCompile Include="src\asset\rendertexture.cpp" />
     <ClCompile Include="src\asset\texture.cpp" />
     <ClCompile Include="src\asset\texture3d.cpp" />
     <ClCompile Include="src\ChokoLait.cpp" />
@@ -217,7 +216,7 @@
     <ClCompile Include="src\utils\fft.cpp" />
     <ClCompile Include="src\utils\net.cpp" />
     <ClCompile Include="src\RenderEngine.cpp" />
-    <ClCompile Include="src\Types.cpp" />
+    <ClCompile Include="src\utils\glmext.cpp" />
     <ClCompile Include="src\utils\plot.cpp" />
     <ClCompile Include="src\utils\random.cpp" />
     <ClCompile Include="src\utils\rect.cpp" />
@@ -232,6 +231,7 @@
   <ItemGroup>
     <ClInclude Include="src\asset\mesh.h" />
     <ClInclude Include="src\core\ui3.h" />
+    <ClInclude Include="src\utils\glmext.h" />
     <ClInclude Include="src\utils\shader.h" />
     <ClInclude Include="src\hdr.h" />
     <ClInclude Include="src\live\livesyncer.h" />
@@ -239,7 +239,6 @@
     <ClInclude Include="src\live\syncer_info.h" />
     <ClInclude Include="src\lodepng.h" />
     <ClInclude Include="src\AssetObjects.h" />
-    <ClInclude Include="src\asset\rendertexture.h" />
     <ClInclude Include="src\asset\texture.h" />
     <ClInclude Include="src\asset\texture3d.h" />
     <ClInclude Include="src\asset\assetobject.h" />
@@ -324,7 +323,6 @@
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\utils\net.h" />
     <ClInclude Include="src\SceneObjects.h" />
-    <ClInclude Include="src\SceneScriptResolver.h" />
     <ClInclude Include="src\scene\object.h" />
     <ClInclude Include="src\utils\color.h" />
     <ClInclude Include="src\utils\fft.h" />

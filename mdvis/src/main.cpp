@@ -339,8 +339,6 @@ int main(int argc, char **argv) {
 		
 		AnWeb::Load(IO::path + "nodes/test.web");
 
-		VisSystem::Save(IO::path + "test.xml");
-
 		while (ChokoLait::alive()) {
 			if (!Display::width || !Display::height)
 				glfwPollEvents();

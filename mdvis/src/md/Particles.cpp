@@ -30,6 +30,8 @@ std::vector<ResidueList> Particles::residueLists;
 uint Particles::residueListSz;
 uint Particles::particleSz;
 
+std::string Particles::cfgFile, Particles::trjFile;
+
 char* Particles::particles_Name, *Particles::particles_ResName;
 glm::dvec3* Particles::particles_Pos, *Particles::particles_Vel;
 short* Particles::particles_Typ;
@@ -261,4 +263,30 @@ void Particles::RmParam(int i) {
 	}
 	particles_ParamSz--;
 	particles_ParamNms[particles_ParamSz] = "";
+}
+
+void Particles::Serialize(XmlNode* nd) {
+	nd->name = "Particles";
+#define SVS(nm, vl) n->addchild(#nm, vl)
+#define SV(nm, vl) SVS(nm, std::to_string(vl))
+	auto n = nd->addchild("atoms");
+	SVS(configuration, cfgFile);
+	SVS(trajectory, trjFile);
+	SerializeVis(n->addchild("visibility"));
+	SerializeDM(n->addchild("drawmode"));
+	nd->name = "Proteins";
+}
+
+void Particles::SerializeVis(XmlNode* nd) {
+	nd->value = "par_vis.bin";
+	std::ofstream strm(VisSystem::currentSavePath + "_data/par_vis.bin", std::ios::binary);
+	_StreamWrite(&residueListSz, &strm, 4);
+
+}
+
+void Particles::SerializeDM(XmlNode* nd) {
+	nd->value = "par_dm.bin";
+	std::ofstream strm(VisSystem::currentSavePath + "_data/par_dm.bin", std::ios::binary);
+	_StreamWrite(&residueListSz, &strm, 4);
+
 }
