@@ -3,7 +3,14 @@
         {
             "name": "Mac",
             "includePath": [
-                "${workspaceFolder}/src"
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/../radeonrays/Calc/inc",
+                "${workspaceFolder}/../radeonrays/CLW",
+                "${workspaceFolder}/../radeonrays/RadeonRays/include",
+                "usr/include/freetype2/",
+                "/usr/local/include/freetype2/",
+                "/usr/include/python2.7/",
+                "/usr/local/include/python2.7"
             ],
             "defines": [],
             "macFrameworkPath": [
