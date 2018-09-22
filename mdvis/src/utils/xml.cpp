@@ -8,7 +8,7 @@ void RemoveNewLine(std::string& s) {
 	}
 }
 
-std::string rm_st_ed_spaces(std::string& s) {
+std::string rm_st_ed_spaces(const std::string& s) {
 	auto l = s.find_first_not_of(' ');
 	if (l == std::string::npos) return "";
 	return s.substr(l, s.find_last_not_of(' ') - l + 1);
@@ -92,7 +92,6 @@ XmlNode Xml::FromVec(std::string nm, Vec2 v) {
 	SVV("y", v.y);
 	return nd;
 }
-
 XmlNode Xml::FromVec(std::string nm, Vec3 v) {
 	XmlNode nd(nm);
 	SVV("x", v.x);
@@ -100,7 +99,6 @@ XmlNode Xml::FromVec(std::string nm, Vec3 v) {
 	SVV("z", v.y);
 	return nd;
 }
-
 XmlNode Xml::FromVec(std::string nm, Vec4 v) {
 	XmlNode nd(nm);
 	SVV("x", v.x);
@@ -108,6 +106,29 @@ XmlNode Xml::FromVec(std::string nm, Vec4 v) {
 	SVV("z", v.z);
 	SVV("w", v.w);
 	return nd;
+}
+
+#define GT(nm, vl) if (n.name == #nm) vl = TryParse(n.value, 0.0f)
+void Xml::ToVec(XmlNode* nd, Vec2& v) {
+	for (auto& n : nd->children) {
+		GT(x, v.x);
+		else GT(y, v.y);
+	}
+}
+void Xml::ToVec(XmlNode* nd, Vec3& v) {
+	for (auto& n : nd->children) {
+		GT(x, v.x);
+		else GT(y, v.y);
+		else GT(z, v.z);
+	}
+}
+void Xml::ToVec(XmlNode* nd, Vec4& v) {
+	for (auto& n : nd->children) {
+		GT(x, v.x);
+		else GT(y, v.y);
+		else GT(z, v.z);
+		else GT(w, v.w);
+	}
 }
 
 XmlNode* XmlNode::addchild(std::string nm, std::string vl) {

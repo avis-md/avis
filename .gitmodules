@@ -1,0 +1,3 @@
+[submodule "radeonrays"]
+	path = radeonrays
+	url = https://github.com/chokomancarr/RadeonRays_SDK

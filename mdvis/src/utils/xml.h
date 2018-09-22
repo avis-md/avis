@@ -18,6 +18,10 @@ public:
 	static XmlNode FromVec(std::string nm, Vec3 v);
 	static XmlNode FromVec(std::string nm, Vec4 v);
 
+	static void ToVec(XmlNode* n, Vec2& v);
+	static void ToVec(XmlNode* n, Vec3& v);
+	static void ToVec(XmlNode* n, Vec4& v);
+
 	static void Write(XmlNode* node, const std::string& path);
 protected:
 	static bool Read(std::string& s, uint& pos, XmlNode* parent);

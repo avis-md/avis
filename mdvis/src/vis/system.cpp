@@ -293,6 +293,7 @@ bool VisSystem::Load(const std::string& path) {
 	}
 	auto n = &xml->children[0];
 	Particles::Deserialize(n);
+	ParGraphics::Deserialize(n);
 	Debug::Message("System", "Load complete");
 	return true;
 }

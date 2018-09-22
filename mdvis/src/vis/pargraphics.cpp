@@ -130,6 +130,22 @@ void ParGraphics::Eff::Serialize(XmlNode* nd) {
 #undef SV
 }
 
+void ParGraphics::Eff::Deserialize(XmlNode* nd) {
+#define GT(nm, vl) if (n.name == #nm) vl = TryParse(n.value, vl)
+#define GTV(nm, vl) if (n.name == #nm) Xml::ToVec(&n, vl)
+	for (auto& n1 : nd->children) {
+		if (n1.name == "SSAO") {
+			for (auto& n : n1.children) {
+				GT(samples, ssaoSamples);
+				else GT(radies, ssaoRad);
+				else GT(strength, ssaoStr);
+				else GT(blur, ssaoBlur);
+			}
+		}
+	}
+#undef GT
+#undef GTV
+}
 
 void ParGraphics::Init() {
 	const GLuint _clipBindId = 11;
@@ -1020,4 +1036,46 @@ void ParGraphics::Serialize(XmlNode* nd) {
 #undef SV
 	Eff::Serialize(nd->addchild("Effects"));
 	Shadows::Serialize(nd->addchild("Shadows"));
+}
+
+void ParGraphics::Deserialize(XmlNode* nd) {
+#define SW(nm) if (n3.name == #nm) { for (auto& n4 : n3.children)
+#define GT(nm, vl) if (n4.name == #nm) vl = TryParse(n4.value, vl)
+#define GTV(nm, vl) if (n4.name == #nm) Xml::ToVec(&n4, vl)
+	for (auto& n : nd->children) {
+		if (n.name == "PGraphics") {
+			for (auto& n2 : n.children) {
+				if (n2.name == "Graphics") {
+					for (auto& n3 : n2.children) {
+						SW(Lighting) {
+							GT(shading, usePBR);
+							else GT(sky, reflId);
+							else GT(skystr, reflStr);
+							else GT(skyfall, reflStrDecay);
+							else GT(specstr, specStr);
+							else GTV(bgcol, bgCol);
+						}}
+						else SW(Camera) {
+							auto cm = ChokoLait::mainCamera.raw();
+							GT(target, rotCenterTrackId);
+							else GTV(center, rotCenter);
+							else GT(rotw, rotW);
+							else GT(rotz, rotZ);
+							else GT(scale, rotScale);
+							else GT(quality, cm->quality);
+							else if (n4.name == "usequality2") cm->useGBuffer2 = (n4.value == "1");
+							else GT(quality2, cm->quality2);
+						}}
+					}
+				}
+				else if (n2.name == "Effects") Eff::Deserialize(&n2);
+				else if (n2.name == "Shadows") Shadows::Deserialize(&n2);
+			}
+
+			return;
+		}
+	}
+#undef SW
+#undef GT
+#undef GTV
 }

@@ -3,9 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 build/
+radeonrays/
 
 #additional
 *.o
+*.mod
 .DS_Store
 githash.h
 

@@ -169,6 +169,7 @@ float Shadows::DrawMenu(float off) {
 	SV(bias);
 	SV(rw);
 	SV(rz);
+#undef SV
 
 	UI::Quad(expandPos - 148, off - 1, 147, 17 * 5 + 2, white(0.9f, 0.1f));
 	UI::Label(expandPos - 147, off, 12, "Shadows", white());
@@ -181,6 +182,7 @@ float Shadows::DrawMenu(float off) {
 	if (DF(show) || DF(str) || DF(bias) || DF(rw) || DF(rz)) {
 		Scene::dirty = true;
 	}
+#undef DF
 
 	return off + 17 * 5 + 1;
 }
@@ -192,4 +194,18 @@ void Shadows::Serialize(XmlNode* nd) {
 	SV(bias, bias); SV(rw, rw); SV(rz, rz);
 #undef SVS
 #undef SV
+}
+
+void Shadows::Deserialize(XmlNode* nd) {
+#define GT(nm, vl) if (n.name == #nm) vl = TryParse(n.value, vl)
+#define GTV(nm, vl) if (n.name == #nm) Xml::ToVec(&n, vl)
+	for (auto& n : nd->children) {
+		GT(quality, quality);
+		else GT(strength, str);
+		else GT(bias, bias);
+		else GT(rw, rw);
+		else GT(rz, rz);
+	}
+#undef GT
+#undef GTV
 }
