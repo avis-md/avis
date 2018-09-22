@@ -23,6 +23,7 @@ bool NodeHasChild(std::string& s, int first) {
 }
 
 XmlNode* Xml::Parse(const std::string& path) {
+	if (!IO::HasFile(path)) return nullptr;
 	auto str = IO::GetText(path);
 	RemoveNewLine(str);
 	

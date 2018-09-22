@@ -190,6 +190,7 @@ float Shadows::DrawMenu(float off) {
 void Shadows::Serialize(XmlNode* nd) {
 #define SVS(nm, vl) nd->addchild(#nm, vl)
 #define SV(nm, vl) SVS(nm, std::to_string(vl))
+	SVS(enabled, show? "1" : "0");
 	SV(quality, quality); SV(strength, str);
 	SV(bias, bias); SV(rw, rw); SV(rz, rz);
 #undef SVS
@@ -200,7 +201,8 @@ void Shadows::Deserialize(XmlNode* nd) {
 #define GT(nm, vl) if (n.name == #nm) vl = TryParse(n.value, vl)
 #define GTV(nm, vl) if (n.name == #nm) Xml::ToVec(&n, vl)
 	for (auto& n : nd->children) {
-		GT(quality, quality);
+		if (n.name == "enabled") show = (n.value == "1");
+		else GT(quality, quality);
 		else GT(strength, str);
 		else GT(bias, bias);
 		else GT(rw, rw);

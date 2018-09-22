@@ -279,6 +279,7 @@ void VisSystem::Save(const std::string& path) {
 	head.children.reserve(10);
 	Particles::Serialize(head.addchild());
 	ParGraphics::Serialize(head.addchild());
+	AnWeb::Serialize(head.addchild());
 	Xml::Write(&head, path + ".xml");
 	Debug::Message("System", "Save complete");
 }
@@ -294,6 +295,7 @@ bool VisSystem::Load(const std::string& path) {
 	auto n = &xml->children[0];
 	Particles::Deserialize(n);
 	ParGraphics::Deserialize(n);
+	AnWeb::Deserialize(n);
 	Debug::Message("System", "Load complete");
 	return true;
 }

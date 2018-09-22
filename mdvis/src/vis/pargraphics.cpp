@@ -124,6 +124,7 @@ void ParGraphics::Eff::Serialize(XmlNode* nd) {
 	auto n = nd->addchild("SSAO");
 #define SVS(nm, vl) n->addchild(#nm, vl)
 #define SV(nm, vl) SVS(nm, std::to_string(vl))
+	SVS(enabled, useSSAO? "1" : "0");
 	SV(samples, ssaoSamples); SV(radius, ssaoRad);
 	SV(strength, ssaoStr); SV(blur, ssaoBlur);
 #undef SVS
@@ -136,7 +137,8 @@ void ParGraphics::Eff::Deserialize(XmlNode* nd) {
 	for (auto& n1 : nd->children) {
 		if (n1.name == "SSAO") {
 			for (auto& n : n1.children) {
-				GT(samples, ssaoSamples);
+				if (n.name == "enabled") useSSAO = (n.value == "1");
+				else GT(samples, ssaoSamples);
 				else GT(radies, ssaoRad);
 				else GT(strength, ssaoStr);
 				else GT(blur, ssaoBlur);

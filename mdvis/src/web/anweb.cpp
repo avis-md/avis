@@ -5,6 +5,7 @@
 #include "ui/icons.h"
 #include "md/Particles.h"
 #include "vis/pargraphics.h"
+#include "vis/system.h"
 #endif
 
 //#define NO_REDIR_LOG
@@ -209,7 +210,7 @@ void AnWeb::Draw() {
 			selScript = nullptr;
 		}
 		else {
-			for (auto nn = nodes.begin(); nn != nodes.end(); nn++) {
+			for (auto nn = nodes.begin() + 1; nn != nodes.end(); nn++) {
 				auto& n = *nn;
 				if (n->op == ANNODE_OP::REMOVE) {
 					if ((nn + 1) != nodes.end()) {
@@ -458,31 +459,38 @@ void AnWeb::DoExecute_Srv() {
 #define nl << "\n"
 #define wrs(s) _StreamWrite(s.c_str(), &strm, s.size() + 1);
 void AnWeb::Save(const std::string& s) {
-	std::ofstream strm(s, std::ios::binary);
-	auto sz = (uint32_t)nodes.size();
-	_StreamWrite(&sz, &strm, 4);
-	int i = 0;
-	for (auto n : nodes) {
-		n->id = i++;
-		_StreamWrite(&n->script->type, &strm, 1);
-		wrs(n->script->name);
-		strm.write((n->canTile ? "\x01" : "\x00"), 1);
-		n->SaveConn();
-		sz = n->_connInfo.size();
-		_StreamWrite(&sz, &strm, 2);
-		for (auto& c : n->_connInfo) {
-			strm.write((c.cond ? "\x01" : "\x00"), 1);
+#define SVS(nm, vl) n->addchild(#nm, vl)
+#define SV(nm, vl) SVS(nm, std::to_string(vl))
+	XmlNode head = {};
+	head.name = "MDVis_Graph_File";
+	for (auto nd : nodes) {
+		auto n = head.addchild("node");
+		SV(type, (int)nd->script->type);
+		SVS(name, nd->script->name);
+		SV(tile, nd->canTile);
+		nd->SaveConn();
+		auto nc = n->addchild("conns");
+		for (size_t a = 0; a < nd->_connInfo.size(); a++) {
+			auto& c = nd->_connInfo[a];
+			auto n = nc->addchild("item");
+			SV(connd, c.cond);
 			if (c.cond) {
-				wrs(c.mynm);
-				wrs(c.mytp);
-				_StreamWrite(&c.tar->id, &strm, 1);
-				wrs(c.tarnm);
-				wrs(c.tartp);
+				SVS(name, c.mynm);
+				SVS(type, c.mytp);
+				SV(tarid, c.tar->id);
+				SVS(tarname, c.tarnm);
+				SVS(tartype, c.tartp);
+			}
+			else {
+				auto& tp = nd->script->invars[a].second;
+				if (tp == "int") SV(value, nd->inputVDef[a].i);
+				else if (tp == "double") SV(value, nd->inputVDef[a].d);
 			}
 		}
 	}
-	strm.close();
-	SaveIn();
+	Xml::Write(&head, s);
+#undef SVS
+#undef SV
 }
 
 void AnWeb::SaveIn() {
@@ -528,70 +536,90 @@ byte GB(std::istream& strm) {
 }
 
 void AnWeb::Load(const std::string& s) {
-	std::ifstream strm(s, std::ios::binary);
-	if (!strm.is_open()) {
+	XmlNode* head = Xml::Parse(s);
+	if (!head) {
 		Debug::Warning("AnWeb", "Cannot open save file!");
 		return;
 	}
-	uint32_t sz;
-	_Strm2Val(strm, sz);
-	nodes.resize(sz);
+	nodes.clear(); //memory leaking!
+	AnNode* n;
 	AN_SCRTYPE tp;
 	std::string nm;
-	for (uint a = 0; a < sz; a++) {
-		auto& n = nodes[a];
-		tp = (AN_SCRTYPE)GB(strm);
-		std::getline(strm, nm, char0);
-		switch (tp) {
-		case AN_SCRTYPE::NONE:
-#define ND(scr) if (nm == scr::sig) n = new scr(); else
-			ND(Node_Inputs)
-			ND(Node_Inputs_ActPar)
-			ND(Node_Inputs_SelPar)
-			ND(Node_AddBond)
-			//ND(Node_AddVolume)
-			ND(Node_TraceTrj)
-			ND(Node_Camera_Out)
-			ND(Node_Recolor)
-			ND(Node_Recolor_All)
-			ND(Node_SetParam)
-			ND(Node_Volume)
-			ND(Node_Plot)
-			ND(Node_ShowRange)
-			Debug::Warning("AnWeb::Load", "Unknown node name: " + nm);
-#undef ND
-			break;
-		case AN_SCRTYPE::C:
-			n = new CNode(CScript::allScrs[nm]);
-			break;
-		case AN_SCRTYPE::PYTHON:
-			n = new PyNode(PyScript::allScrs[nm]);
-			break;
-		case AN_SCRTYPE::FORTRAN:
-			n = new FNode(FScript::allScrs[nm]);
-			break;
-		default:
-			Debug::Warning("AnWeb::Load", "Unknown node type: " + std::to_string((byte)tp));
-			break;
-		}
-		n->canTile = !!GB(strm);
-		uint16_t csz;
-		_Strm2Val(strm, csz);
-		n->_connInfo.resize(csz);
-		for (uint16_t q = 0; q < csz; q++) {
-			auto& c = n->_connInfo[q];
-			c.cond = !!GB(strm);
-			if (c.cond) {
-				std::getline(strm, c.mynm, char0);
-				std::getline(strm, c.mytp, char0);
-				c.tar = nodes[GB(strm)];
-				std::getline(strm, c.tarnm, char0);
-				std::getline(strm, c.tartp, char0);
+	int cnt = 0;
+	for (auto& nd : head->children[0].children) {
+		if (nd.name != "node") continue;
+		for (auto& c : nd.children) {
+			if (c.name == "type") tp = (AN_SCRTYPE)TryParse(c.value, 0);
+			else if (c.name == "name") {
+				nm = c.value;
+				switch (tp) {
+				case AN_SCRTYPE::NONE:
+		#define ND(scr) if (nm == scr::sig) n = new scr(); else
+					ND(Node_Inputs)
+					ND(Node_Inputs_ActPar)
+					ND(Node_Inputs_SelPar)
+					ND(Node_AddBond)
+					//ND(Node_AddVolume)
+					ND(Node_TraceTrj)
+					ND(Node_Camera_Out)
+					ND(Node_Recolor)
+					ND(Node_Recolor_All)
+					ND(Node_SetParam)
+					ND(Node_Volume)
+					ND(Node_Plot)
+					ND(Node_ShowRange)
+					Debug::Warning("AnWeb::Load", "Unknown node name: " + nm);
+		#undef ND
+					break;
+				case AN_SCRTYPE::C:
+					n = new CNode(CScript::allScrs[nm]);
+					break;
+				case AN_SCRTYPE::PYTHON:
+					n = new PyNode(PyScript::allScrs[nm]);
+					break;
+				case AN_SCRTYPE::FORTRAN:
+					n = new FNode(FScript::allScrs[nm]);
+					break;
+				default:
+					Debug::Warning("AnWeb::Load", "Unknown node type: " + std::to_string((byte)tp));
+					break;
+				}
+				n->id = cnt++;
+				nodes.push_back(n);
 			}
+			else if (c.name == "tile") n->canTile = (c.value == "1");
+			
+#define GTS(nm, vl) if (cc.name == #nm) vl = cc.value
+#define GT(nm, vl) if (cc.name == #nm) vl = TryParse(cc.value, vl)
+			else if (c.name == "conns") {
+				for (auto& c1 : c.children) {
+					if (c1.name != "item") continue;
+					AnNode::ConnInfo ci;
+					for (auto& cc : c1.children) {
+						if (cc.name == "connd") ci.cond = (cc.value == "1");
+						else if (ci.cond) {
+							GTS(name, ci.mynm);
+							else GTS(type, ci.mytp);
+							else if (cc.name == "tarid") {
+								auto i = TryParse(cc.value, -1U);
+								if (i < cnt - 1) ci.tar = nodes[i];
+							}
+							else GTS(tarname, ci.tarnm);
+							else GTS(tartype, ci.tartp);
+						}
+						else {
+							//
+						}
+					}
+					n->_connInfo.push_back(ci);
+				}
+			}
+#undef GTS
+#undef GT
 		}
+		n->Reconn();
+		activeFile = s;
 	}
-	Reconn();
-	activeFile = s;
 }
 
 void AnWeb::LoadIn() {
@@ -635,6 +663,35 @@ void AnWeb::Reconn() {
 	for (auto n : nodes) {
 		n->Reconn();
 	}
+}
+
+void AnWeb::Serialize(XmlNode* n) {
+	n->name = "Analysis";
+	n->addchild("graph", "graph.anl");
+	Save(VisSystem::currentSavePath + "_data/graph.anl");
+#define SVS(nm, vl) n->addchild(#nm, vl)
+#define SV(nm, vl) SVS(nm, std::to_string(vl))
+	SV(focus, drawFull);
+#undef SVS
+#undef SV
+}
+
+void AnWeb::Deserialize(XmlNode* nd) {
+#define GT(nm, vl) if (n.name == #nm) vl = TryParse(n.value, vl)
+#define GTV(nm, vl) if (n.name == #nm) Xml::ToVec(&n, vl)
+	for (auto& n2 : nd->children) {
+		if (n2.name == "Analysis") {
+			for (auto& n : n2.children) {
+				if (n.name == "graph") {
+					Load(VisSystem::currentSavePath + "_data/" + n.value);
+				}
+				else if (n.name == "focus") drawFull = (n.value == "1");
+			}
+			return;
+		}
+	}
+#undef GT
+#undef GTV
 }
 
 void AnWeb::OnSceneUpdate() {

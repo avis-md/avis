@@ -88,6 +88,9 @@ public:
 	static void SaveConn(), ClearConn(), Reconn();
 	static void OnExecLog(std::string s, bool e);
 
+	static void Serialize(XmlNode* nd);
+	static void Deserialize(XmlNode* nd);
+
 	static void OnSceneUpdate();
 	static void OnAnimFrame();
 };

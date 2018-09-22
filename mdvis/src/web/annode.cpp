@@ -117,11 +117,11 @@ void AnNode::Draw() {
 				if (!inputR[i].first) {
 					auto& vr = script->invars[i].second;
 					auto isi = (vr == "int");
-					if (isi || (vr == "float")) {
-						std::string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].f);
+					if (isi || (vr == "double")) {
+						std::string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].d);
 						s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, true, white());
 						if (isi) inputVDef[i].i = TryParse(s, 0);
-						else inputVDef[i].f = TryParse(s, 0.0f);
+						else inputVDef[i].d = TryParse(s, 0.0);
 					}
 					else {
 						UI::Label(pos.x + width * 0.33f, y, 12, script->invars[i].second, white(0.3f));
@@ -402,7 +402,7 @@ void AnNode::SaveConn() {
 		cn.mynm = script->invars[a].first;
 		cn.mytp = script->invars[a].second;
 		auto ra = inputR[a].first;
-		cn.cond = cn.tar = ra;
+		cn.cond = ra;
 		if (cn.cond) {
 			cn.tarnm = ra->script->outvars[inputR[a].second].first;
 			cn.tartp = ra->script->outvars[inputR[a].second].second;
