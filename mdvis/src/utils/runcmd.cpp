@@ -1,6 +1,7 @@
 #include "runcmd.h"
 
 void RunCmd::Run(std::string cmd) {
+	Debug::Message("Cmd", cmd);
 #ifdef PLATFORM_WIN
 	STARTUPINFO si = {};
 	PROCESS_INFORMATION pi;

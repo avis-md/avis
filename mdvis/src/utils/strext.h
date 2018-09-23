@@ -9,6 +9,7 @@ int constexpr strlen_c(const char* str)
 namespace std {
 	std::string to_string(Vec2 v);
 	std::string to_string(Vec3 v);
+	std::string to_string(glm::dvec3 v);
 	std::string to_string(Vec4 v);
 	std::string to_string(Quat v);
 }

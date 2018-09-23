@@ -14,8 +14,8 @@
 #include "md/Protein.h"
 #include "md/parloader.h"
 #include "md/Gromacs.h"
+#include "md/pdb.h"
 //#include "md/CDV.h"
-//#include "md/pdb.h"
 //#include "md/XYZ.h"
 //#include "md/mdvbin.h"
 //#include "md/lammps.h"
@@ -34,9 +34,6 @@
 bool __debug = false;
 float autoSaveTime = 30;
 
-CubeMarcher* cm;
-Mat4x4 _mv, _p;
-
 void rendFunc() {
 	auto& cm = ChokoLait::mainCamera->object->transform;
 	ParGraphics::Rerender(cm.position(), cm.forward(), (float)Display::width, (float)Display::height);
@@ -53,17 +50,10 @@ void rendFunc() {
 		MVP::Mul(_p);
 	}
 	if (RayTracer::resTex) RayTracer::Render();
-	_mv = MVP::modelview();
-	_p = MVP::projection();
 	AnWeb::OnSceneUpdate();
 }
 
 void updateFunc() {
-	if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime)) {
-		VisSystem::lastSave = Time::time;
-		VisSystem::Save(IO::path + ".recover");
-	}
-
 	if (ParLoader::parDirty) {
 		ParLoader::parDirty = false;
 		Particles::UpdateBufs();
@@ -72,6 +62,11 @@ void updateFunc() {
 			ParGraphics::UpdateDrawLists();
 		}
 		VisSystem::lastSave = Time::time;
+	}
+
+	if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime)) {
+		VisSystem::lastSave = Time::time;
+		VisSystem::Save(IO::path + ".recover");
 	}
 
 	ParGraphics::Update();
@@ -115,12 +110,12 @@ void paintfunc() {
 		AnWeb::Draw();
 	else {
 		ParMenu::Draw();
-		if (!Particles::particleSz || LiveSyncer::activeRunner) {
-			LiveSyncer::DrawSide();
-		}
-		else {
+		//if (!Particles::particleSz || LiveSyncer::activeRunner) {
+			//LiveSyncer::DrawSide();
+		//}
+		//else {
 			AnWeb::DrawSide();
-		}
+		//}
 
 		if (ParGraphics::zoomFade > 0) {
 			auto zf = min(ParGraphics::zoomFade * 2, 1.0f);
@@ -170,9 +165,9 @@ void paintfunc() {
 			id--;
 			UI::Quad(Input::mousePos.x + 14, Input::mousePos.y + 2, 120, 60, white(0.8f, 0.1f));
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Particle " + std::to_string(id), white());
-			//UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, &Particles::particles_ResName[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
-			//UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, &Particles::particles_Name[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
-			//UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, std::to_string(Particles::particles_Pos[id]), font, white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, &Particles::particles_ResName[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, &Particles::particles_Name[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, std::to_string(Particles::particles_Pos[id]), white());
 
 		}
 		else {
@@ -256,8 +251,8 @@ int main(int argc, char **argv) {
 		//glfwSetWindowIcon(Display::window, 1, &icon);
 		//delete[](icon.pixels);
 
-#define INITS(nm) nm::Init()
-#define INIT(nm) Debug::Message("System", "Initializing " #nm); INITS(nm)
+#define INITS(nm, ...) nm::Init(__VA_ARGS__)
+#define INIT(nm, ...) Debug::Message("System", "Initializing " #nm); INITS(nm, __VA_ARGS__)
 		INIT(Font);
 		INIT(UI);
 		INIT(UI2);
@@ -278,7 +273,7 @@ int main(int argc, char **argv) {
 		INIT(Shadows);
 		INIT(AnWeb);
 		INIT(AnNode);
-		Effects::Init(0xffff);
+		INIT(Effects, 0xffff);
 		ParMenu::LoadRecents();
 		//SSH::Init();
 
@@ -305,9 +300,9 @@ int main(int argc, char **argv) {
 		imp->funcs.back().first.push_back(#_ext); \
 		imp->funcs.back().second = _fnc::Read; \
 		ParLoader::importers.push_back(imp); \
-		ParLoader::exts.push_back(#_ext);
+		ParLoader::exts.push_back("*" #_ext);
 
-		//NEWIMP(Protein DataBank, pdb, .pdb, PDB);
+		NEWIMP(Protein DataBank, pdb, .pdb, PDB);
 		//NEWIMP(XYZ coords, xyz, .xyz, XYZ);
 		//NEWIMP(CDView, cdv, .cdv, CDV);
 		//NEWIMP(Binary, bin, .bin, MDVBin);
@@ -319,17 +314,9 @@ int main(int argc, char **argv) {
 			ParLoader::OnOpenFile(fls);
 		}
 
-		LiveRunner* runner = new LiveRunner();
-		runner->initNm = "Init";
-		runner->loopNm = "Loop";
-		runner->path = IO::path + "bin/liverunners/lj256/win32/lj256.dll";
-		runner->name = "LJ256";
-		LiveSyncer::runners.push_back(runner);
-
 		Display::Resize(1024, 768, false);
 
 		auto lastMillis = Time::millis;
-		bool dirty = false;
 
 		ChokoLait::mainCamera->object->transform.localPosition(Vec3(0, 0, -1));
 		ChokoLait::mainCamera->quality = 1;
@@ -342,7 +329,7 @@ int main(int argc, char **argv) {
 				glfwPollEvents();
 			else {
 				ChokoLait::Update(updateFunc);
-				dirty = Scene::dirty;
+				bool dirty = Scene::dirty;
 				ChokoLait::Paint(rendFunc, paintfunc);
 				auto m = Time::millis;
 				VisSystem::uiMs = (uint)(m - lastMillis);

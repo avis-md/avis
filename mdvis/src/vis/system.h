@@ -17,7 +17,7 @@ public:
 	static uint renderMs, uiMs;
 
 	static float lastSave;
-	static std::string currentSavePath;
+	static std::string currentSavePath, currentSavePath2;
 
 	static std::vector<MenuItem> menuItems[10];
 

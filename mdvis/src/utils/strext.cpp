@@ -1,24 +1,13 @@
 #include "Engine.h"
 
-#ifdef PLATFORM_ADR
-namespace std {
-	int stoi(const std::string& s) {
-		return 1;
-	}
-	float stof(const std::string& s) {
-		return 1.0f;
-	}
-	unsigned long stoul(const std::string& s) {
-		return 0UL;
-	}
-}
-#endif
-
 namespace std {
 	std::string to_string(Vec2 v) {
 		return "(" + to_string(v.x) + ", " + to_string(v.y) + ")";
 	}
 	std::string to_string(Vec3 v) {
+		return "(" + to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ")";
+	}
+	std::string to_string(glm::dvec3 v) {
 		return "(" + to_string(v.x) + ", " + to_string(v.y) + ", " + to_string(v.z) + ")";
 	}
 	std::string to_string(Vec4 v) {

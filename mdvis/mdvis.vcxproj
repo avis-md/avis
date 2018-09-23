@@ -246,6 +246,7 @@
   <ItemGroup>
     <ClCompile Include="src\asset\mesh.cpp" />
     <ClCompile Include="src\core\ui3.cpp" />
+    <ClCompile Include="src\md\pdb.cpp" />
     <ClCompile Include="src\utils\shader.cpp" />
     <ClCompile Include="src\hdr.cpp" />
     <ClCompile Include="src\live\livesyncer.cpp" />

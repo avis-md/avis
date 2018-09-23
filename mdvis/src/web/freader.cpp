@@ -4,6 +4,12 @@
 #include "utils/runcmd.h"
 #endif
 
+#ifdef PLATFORM_WIN
+#define SETPATH "path=%path%;" + CReader::mingwPath + "&&" + 
+#else
+#define SETPATH
+#endif
+
 //#define _GEN_DEBUG
 
 void FReader::Init() {
@@ -137,12 +143,7 @@ bool FReader::Read(FScript* scr) {
 			#endif
 			"-fPIC \"" + IO::path + "res/noterminate.o\" -o \""
 				+ fp2 + nm + ".so\" \"" + fp + "_temp__.f90\" -lgfortran 2> \"" + fp2 + nm + "_log.txt\"";
-			std::cout << cmd << std::endl;
-			#ifdef PLATFORM_WIN
-				RunCmd::Run("path=%path%;" + CReader::mingwPath + " && " + cmd);
-			#else
-				RunCmd::Run(cmd);
-			#endif
+			RunCmd::Run(SETPATH cmd);
 			scr->errorCount = ErrorView::Parse_GFortran(fp2 + nm + "_log.txt", fp + "_temp__.f90", nm + ".f90", scr->compileLog);
 			for (auto& m : scr->compileLog) {
 				m.path = fp + ".f90";

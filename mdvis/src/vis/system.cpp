@@ -11,6 +11,7 @@
 #include "live/livesyncer.h"
 #include "utils/dialog.h"
 #include "utils/xml.h"
+#include "utils/runcmd.h"
 
 std::string VisSystem::version_hash =
 #include "../../githash.h"
@@ -21,7 +22,7 @@ float VisSystem::glass = 0.9f;
 uint VisSystem::renderMs, VisSystem::uiMs;
 
 float VisSystem::lastSave;
-std::string VisSystem::currentSavePath;
+std::string VisSystem::currentSavePath, VisSystem::currentSavePath2;
 
 std::vector<MenuItem> VisSystem::menuItems[];
 
@@ -281,13 +282,25 @@ void VisSystem::Save(const std::string& path) {
 	ParGraphics::Serialize(head.addchild());
 	AnWeb::Serialize(head.addchild());
 	Xml::Write(&head, path + ".xml");
+	Debug::Message("System", "Compressing...");
+	auto l = path.find_last_of('/');
+	auto s = path.substr(0, l);
+	auto nm = path.substr(l + 1);
+	std::string quiet = (Debug::suppress > 0) ? "-qq " : "";
+	RunCmd::Run("cd \"" + s + "\" && zip -m -r " + quiet + nm + ".zip " + nm + ".xml " + nm + "_data");
 	Debug::Message("System", "Save complete");
 }
 
 bool VisSystem::Load(const std::string& path) {
 	Debug::Message("System", "Loading: " + path);
 	currentSavePath = path;
-	auto xml = Xml::Parse(path + ".xml");
+	auto l = path.find_last_of('/');
+	auto s = path.substr(0, l);
+	auto nm = path.substr(l + 1);
+	currentSavePath2 = path + "_temp__/" + nm;
+	std::string quiet = (Debug::suppress > 0) ? "-qq " : "";
+	RunCmd::Run("cd \"" + s + "\" && unzip " + quiet + "-d " + nm + "_temp__/ " + nm + ".zip");
+	auto xml = Xml::Parse(path + "_temp__/" + nm + ".xml");
 	if (!xml) {
 		Debug::Warning("System", "save file xml is corrupt!");
 		return false;
@@ -296,6 +309,7 @@ bool VisSystem::Load(const std::string& path) {
 	Particles::Deserialize(n);
 	ParGraphics::Deserialize(n);
 	AnWeb::Deserialize(n);
+	RunCmd::Run("cd \"" + s + "\" && rm -r " + nm + "_temp__/");
 	Debug::Message("System", "Load complete");
 	return true;
 }

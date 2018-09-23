@@ -268,8 +268,26 @@ void Particles::Serialize(XmlNode* nd) {
 #define SVS(nm, vl) n->addchild(#nm, vl)
 #define SV(nm, vl) SVS(nm, std::to_string(vl))
 	auto n = nd->addchild("atoms");
-	SVS(configuration, cfgFile);
-	SVS(trajectory, trjFile);
+	auto l = VisSystem::currentSavePath.find_last_of('/') + 1;
+	auto s = VisSystem::currentSavePath.substr(0, l);
+	auto s2 = cfgFile.substr(0, l);
+	if (s == s2) {
+		SVS(configuration, cfgFile.substr(l));
+		n->children[0].params.emplace("relative", "1");
+	}
+	else {
+		SVS(configuration, cfgFile);
+		n->children[0].params.emplace("relative", "0");
+	}
+	s2 = trjFile.substr(0, l);
+	if (s == s2) {
+		SVS(trajectory, trjFile.substr(l));
+		n->children[1].params.emplace("relative", "1");
+	}
+	else {
+		SVS(trajectory, trjFile);
+		n->children[1].params.emplace("relative", "0");
+	}
 	SerializeVis(n->addchild("visibility"));
 	SerializeDM(n->addchild("drawmode"));
 
@@ -281,36 +299,65 @@ void Particles::SerializeVis(XmlNode* nd) {
 	nd->value = "par_vis.bin";
 	std::ofstream strm(VisSystem::currentSavePath + "_data/par_vis.bin", std::ios::binary);
 	_StreamWrite(&residueListSz, &strm, 4);
-
+	for (auto& rls : residueLists) {
+		char c = rls.visible ? 1 : 0;
+		c += rls.expanded ? 2 : 0;
+		strm.write(&c, 1);
+		_StreamWrite(&rls.residueSz, &strm, 4);
+		for (auto& rl : rls.residues) {
+			c = rl.visible ? 1 : 0;
+			c += rl.expanded ? 2 : 0;
+			strm.write(&c, 1);
+		}
+	}
 }
 
 void Particles::SerializeDM(XmlNode* nd) {
 	nd->value = "par_dm.bin";
 	std::ofstream strm(VisSystem::currentSavePath + "_data/par_dm.bin", std::ios::binary);
 	_StreamWrite(&residueListSz, &strm, 4);
-
+	for (auto& rls : residueLists) {
+		strm.write((char*)&rls.drawType, 1);
+		_StreamWrite(&rls.residueSz, &strm, 4);
+		for (auto& rl : rls.residues) {
+			strm.write((char*)&rl.drawType, 1);
+		}
+	}
 }
 
 void Particles::Deserialize(XmlNode* nd) {
+	auto l = VisSystem::currentSavePath.find_last_of('/') + 1;
+	auto s = VisSystem::currentSavePath.substr(0, l);
 	for (auto& n : nd->children) {
 		if (n.name == "Particles") {
 			for (auto& n2 : n.children) {
 				if (n2.name == "atoms") {
 					for (auto& n3 : n2.children) {
-						if (n3.name == "configuration") {
+						if (n3.name == "configuration" && n3.value != "") {
 							ParLoader::directLoad = true;
-							ParLoader::OnOpenFile(std::vector<std::string>{ n3.value });
+							if (n3.params["relative"] == "1")
+								ParLoader::OnOpenFile(std::vector<std::string>{ s + n3.value });
+							else
+								ParLoader::OnOpenFile(std::vector<std::string>{ n3.value });
+							//
+							while (ParLoader::busy);;
 						}
 						else if (!!particleSz) {
-							if (n3.name == "trajectory") {
+							if (n3.name == "trajectory" && n3.value != "") {
 								ParLoader::directLoad = true;
-								ParLoader::OnOpenFile(std::vector<std::string>{ n3.value });
+								if (n3.params["relative"] == "1")
+									ParLoader::OnOpenFile(std::vector<std::string>{ s + n3.value });
+								else
+									ParLoader::OnOpenFile(std::vector<std::string>{ n3.value });
+
+								//
+								while (ParLoader::busy);;
 							}
 							else if (n3.name == "visibility") {
 								DeserializeVis(&n3);
 							}
 							else if (n3.name == "drawmode") {
-								DeserializeVis(&n3);
+								DeserializeDM(&n3);
 							}
 						}
 					}
@@ -323,11 +370,48 @@ void Particles::Deserialize(XmlNode* nd) {
 }
 
 void Particles::DeserializeVis(XmlNode* nd) {
-	std::ifstream strm(VisSystem::currentSavePath + "_data/" + nd->value, std::ios::binary);
-
+	std::ifstream strm(VisSystem::currentSavePath2 + "_data/" + nd->value, std::ios::binary);
+	uint32_t tmp;
+	_Strm2Val(strm, tmp);
+	if (tmp != residueListSz) {
+		Debug::Warning("Particles::DeserializeVis", "residue list count is incorrect!");
+		return;
+	}
+	for (auto& rls : residueLists) {
+		char c;
+		_Strm2Val(strm, c);
+		rls.visible = !!(c & 1);
+		rls.expanded = !!(c & 2);
+		_Strm2Val(strm, tmp);
+		if (tmp != rls.residueSz) {
+			Debug::Warning("Particles::DeserializeVis", "residue count is incorrect!");
+			return;
+		}
+		for (auto& rl : rls.residues) {
+			_Strm2Val(strm, c);
+			rl.visible = !!(c & 1);
+			rl.expanded = !!(c & 2);
+		}
+	}
 }
 
 void Particles::DeserializeDM(XmlNode* nd) {
-	std::ifstream strm(VisSystem::currentSavePath + "_data/" + nd->value, std::ios::binary);
-
+	std::ifstream strm(VisSystem::currentSavePath2 + "_data/" + nd->value, std::ios::binary);
+	uint32_t tmp;
+	_Strm2Val(strm, tmp);
+	if (tmp != residueListSz) {
+		Debug::Warning("Particles::DeserializeDM", "residue list count is incorrect!");
+		return;
+	}
+	for (auto& rls : residueLists) {
+		_Strm2Val(strm, rls.drawType);
+		_Strm2Val(strm, tmp);
+		if (tmp != rls.residueSz) {
+			Debug::Warning("Particles::DeserializeDM", "residue count is incorrect!");
+			return;
+		}
+		for (auto& rl : rls.residues) {
+			_Strm2Val(strm, rl.drawType);
+		}
+	}
 }
