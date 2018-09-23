@@ -20,11 +20,13 @@ public:
 	static bool useConCol;
 	static Vec4 conCol;
 	
-	static GLuint reflProg, reflCProg, parProg, parConProg, parConLineProg;
-	static GLint reflProgLocs[15], reflCProgLocs[10], parProgLocs[10], parConProgLocs[10], parConLineProgLocs[10];
-
-	static GLuint selHlProg, colProg;
-	static GLint selHlProgLocs[4], colProgLocs[10];
+	PROGDEF_H(reflProg, 15);
+	PROGDEF_H(reflCProg, 10);
+	PROGDEF_H(parProg, 10);
+	PROGDEF_H(parConProg, 10);
+	PROGDEF_H(parConLineProg, 10);
+	PROGDEF_H(selHlProg, 5);
+	PROGDEF_H(colProg, 10);
 
 	static std::vector<uint> hlIds, selIds;
 	static std::vector<std::pair<uint, std::pair<uint, byte>>> drawLists, drawListsB;

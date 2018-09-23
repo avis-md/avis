@@ -160,6 +160,8 @@ bool PyReader::Read(PyScript* scr) {
 		Debug::Warning("PyReader", "Script has no output parameters!");
 	}
 
+	PyScript::allScrs.emplace(path, scr);
+
 	return true;
 }
 

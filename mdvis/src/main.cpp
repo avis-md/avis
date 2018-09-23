@@ -326,7 +326,7 @@ int main(int argc, char **argv) {
 		runner->name = "LJ256";
 		LiveSyncer::runners.push_back(runner);
 
-		Display::Resize(800, 600, false);
+		Display::Resize(1024, 768, false);
 
 		auto lastMillis = Time::millis;
 		bool dirty = false;

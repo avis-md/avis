@@ -1,7 +1,7 @@
 #pragma once
 #include "AssetObjects.h"
 
-class Mesh : public AssetObject {
+class Mesh {
 public:
 	//Mesh(); //until i figure out normal recalc algorithm
 	bool loaded;
@@ -22,13 +22,10 @@ public:
 	void RecalculateBoundingBox();
 
 	friend class Engine;
-	friend class MeshFilter;
-	friend class MeshRenderer;
 	_allowshared(Mesh);
 protected:
 	Mesh(std::istream& strm, uint offset = 0);
 	Mesh(std::string path);
-	Mesh(byte* mem);
 
 	void CalcTangents();
 	void InitVao();

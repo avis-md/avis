@@ -402,7 +402,7 @@ void AnNode::SaveConn() {
 		cn.mynm = script->invars[a].first;
 		cn.mytp = script->invars[a].second;
 		auto ra = inputR[a].first;
-		cn.cond = ra;
+		cn.cond = cn.tar = ra;
 		if (cn.cond) {
 			cn.tarnm = ra->script->outvars[inputR[a].second].first;
 			cn.tartp = ra->script->outvars[inputR[a].second].second;
@@ -445,7 +445,7 @@ bool AnNode::CanConn(std::string lhs, std::string rhs) {
 	if (rhs[0] == '*' && lhs.substr(0, 4) != "list") return true;
 	auto s = lhs.size();
 	if (s != rhs.size()) return false;
-	for (int a = 0; a < s; a++) {
+	for (size_t a = 0; a < s; a++) {
 		if (lhs[a] != rhs[a] && rhs[a] != '*') return false;
 	}
 	return true;
@@ -580,7 +580,7 @@ void PyNode::CatchExp(char* c) {
 	auto ss = string_split(c, '\n');
 	if (ss.size() == 1 && ss[0] == "") return;
 
-	int i = 0;
+	size_t i = 0;
 	for (auto& s : ss) {
 		if (s == "Traceback (most recent call last):") {
 			break;
@@ -598,7 +598,7 @@ void PyNode::CatchExp(char* c) {
 	msg.severe = true;
 	msg.msg.resize(n - i - 1);
 	msg.msg[0] = ss[n-1];
-	for (int a = i + 1; a < n - 1; a++) {
+	for (size_t a = i + 1; a < n - 1; a++) {
 		msg.msg[a - i] = ss[a];
 	}
 	auto loc = string_find(ss[n - 3], ", line ");
@@ -730,7 +730,7 @@ void FNode::Execute() {
 			{
 				auto nd = cv.dimVals.size();
 				int32_t* dims = new int32_t[nd];
-				for (int a = 0; a < nd; a++) dims[nd - a - 1] = *cv.dimVals[a];
+				for (size_t a = 0; a < nd; a++) dims[nd - a - 1] = *cv.dimVals[a];
 				*scr->arr_in_shapeloc = dims;
 				*scr->arr_in_dataloc = *(void**)cv.value;
 				scr->_inarr_pre[i]();

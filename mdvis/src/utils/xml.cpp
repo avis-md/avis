@@ -15,7 +15,7 @@ std::string rm_st_ed_spaces(const std::string& s) {
 }
 
 bool NodeHasChild(std::string& s, int first) {
-	for (int a = first; a < s.size(); a++) {
+	for (size_t a = first; a < s.size(); a++) {
 		if (s[a] == '<') return true;
 		else if (s[a] > 0x20) return false;
 	}

@@ -18,8 +18,9 @@ float Shadows::box[] = {};
 uint Shadows::_sz = 1024;
 Mat4x4 Shadows::_p, Shadows::_ip;
 
-GLuint Shadows::_fbo, Shadows::_dtex, Shadows::_prog;
-GLint Shadows::_progLocs[] = {};
+GLuint Shadows::_fbo, Shadows::_dtex;
+
+PROGDEF(Shadows::_prog);
 
 void Shadows::Init() {
 	cam = ChokoLait::mainCamera().get();
@@ -46,8 +47,7 @@ void Shadows::Init() {
 	glBindTexture(GL_TEXTURE_2D, _dtex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, 2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _dtex, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	SetTexParams<>(0, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 
 	//GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
@@ -174,7 +174,7 @@ float Shadows::DrawMenu(float off) {
 	UI::Quad(expandPos - 148, off - 1, 147, 17 * 5 + 2, white(0.9f, 0.1f));
 	UI::Label(expandPos - 147, off, 12, "Shadows", white());
 	show = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, show, white(), ORIENT_HORIZONTAL);
-	str = UI2::Slider(expandPos - 147, off + 17, 147, "Strength", 0, 5, str);
+	str = UI2::Slider(expandPos - 147, off + 17, 147, "Strength", 0, 1, str);
 	bias = UI2::Slider(expandPos - 147, off + 17 * 2, 147, "Bias", 0, 1, bias);
 	rw = UI2::Slider(expandPos - 147, off + 17 * 3, 147, "Angle W", 0, 360, rw);
 	rz = UI2::Slider(expandPos - 147, off + 17 * 4, 147, "Angle Y", -90, 90, rz);

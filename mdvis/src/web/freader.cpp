@@ -239,7 +239,7 @@ bool FReader::Read(FScript* scr) {
 			std::getline(strm, ln);
 			auto ss = string_split(ln, ' ', true);
 			auto sss = ss.size();
-			int atn = 0;
+			size_t atn = 0;
 			while (ss[atn].back() == ',') {
 				ss[atn].pop_back();
 				atn++;

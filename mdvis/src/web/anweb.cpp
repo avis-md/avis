@@ -542,7 +542,7 @@ void AnWeb::Load(const std::string& s) {
 		return;
 	}
 	nodes.clear(); //memory leaking!
-	AnNode* n;
+	AnNode* n = nullptr;
 	AN_SCRTYPE tp;
 	std::string nm;
 	int cnt = 0;
@@ -582,7 +582,7 @@ void AnWeb::Load(const std::string& s) {
 					break;
 				default:
 					Debug::Warning("AnWeb::Load", "Unknown node type: " + std::to_string((byte)tp));
-					break;
+					continue;
 				}
 				n->id = cnt++;
 				nodes.push_back(n);
@@ -601,7 +601,7 @@ void AnWeb::Load(const std::string& s) {
 							GTS(name, ci.mynm);
 							else GTS(type, ci.mytp);
 							else if (cc.name == "tarid") {
-								auto i = TryParse(cc.value, -1U);
+								auto i = TryParse(cc.value, 0xffff);
 								if (i < cnt - 1) ci.tar = nodes[i];
 							}
 							else GTS(tarname, ci.tarnm);

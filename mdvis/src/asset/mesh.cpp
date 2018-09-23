@@ -3,7 +3,7 @@
 #define F2ISTREAM(_varname, _pathname) std::ifstream _f2i_ifstream((_pathname).c_str(), std::ios::in | std::ios::binary); \
 std::istream _varname(_f2i_ifstream.rdbuf());
 
-Mesh::Mesh(const std::vector<Vec3>& verts, const std::vector<Vec3>& norms, const std::vector<int>& tris, std::vector<Vec2> uvs) : AssetObject(ASSETTYPE_MESH) {
+Mesh::Mesh(const std::vector<Vec3>& verts, const std::vector<Vec3>& norms, const std::vector<int>& tris, std::vector<Vec2> uvs) {
 	vertices = std::vector<Vec3>(verts);
 	vertexCount = verts.size();
 	normals = std::vector<Vec3>(norms);
@@ -25,7 +25,7 @@ Mesh::Mesh(const std::vector<Vec3>& verts, const std::vector<Vec3>& norms, const
 	InitVao();
 }
 
-Mesh::Mesh(std::istream& stream, uint offset) : AssetObject(ASSETTYPE_MESH), loaded(false), vertexCount(0), triangleCount(0), materialCount(0) {
+Mesh::Mesh(std::istream& stream, uint offset) : loaded(false), vertexCount(0), triangleCount(0), materialCount(0) {
 	if (stream.good()) {
 		stream.seekg(offset);
 
@@ -37,7 +37,6 @@ Mesh::Mesh(std::istream& stream, uint offset) : AssetObject(ASSETTYPE_MESH), loa
 			return;
 		}
 		stream.getline(c, 100, 0);
-		name += std::string(c);
 		delete[](c);
 
 		char cc;
@@ -137,7 +136,7 @@ Mesh::Mesh(std::istream& stream, uint offset) : AssetObject(ASSETTYPE_MESH), loa
 	}
 }
 
-Mesh::Mesh(std::string p) : AssetObject(ASSETTYPE_MESH), loaded(false), vertexCount(0), triangleCount(0), materialCount(0), shapekeyCount(0) {
+Mesh::Mesh(std::string p) : loaded(false), vertexCount(0), triangleCount(0), materialCount(0), shapekeyCount(0) {
 	F2ISTREAM(stream, p);
 	if (!stream.good()) {
 		std::cout << "mesh file not found!" << std::endl;
@@ -152,7 +151,6 @@ Mesh::Mesh(std::string p) : AssetObject(ASSETTYPE_MESH), loaded(false), vertexCo
 		return;
 	}
 	stream.getline(c, 100, 0);
-	name += std::string(c);
 	delete[](c);
 
 	char cc;
@@ -365,10 +363,6 @@ void Mesh::CalcTangents() {
 	for (uint a = 0; a < vertexCount; a++) {
 		if (tC[a] > 0) tangents[a] = glm::normalize(tangents[a] / ((float)tC[a]));
 	}
-}
-
-Mesh::Mesh(byte* mem) : AssetObject(ASSETTYPE_MESH), triangleCount(0), materialCount(0) {
-
 }
 
 void Mesh::InitVao() {

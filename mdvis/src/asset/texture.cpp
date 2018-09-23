@@ -189,7 +189,7 @@ void Texture::ToPNG(std::vector<byte>& data, uint w, uint h, const std::string& 
 Texture::Texture(const std::string& path, bool mipmap, TEX_FILTERING filter, byte aniso, TEX_WRAPING warp) :
 	Texture(path, mipmap, filter, aniso, (warp == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT, (warp == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT) {}
 
-Texture::Texture(const std::string& path, bool mipmap, TEX_FILTERING filter, byte aniso, GLenum wrapx, GLenum wrapy) : AssetObject(ASSETTYPE_TEXTURE), _mipmap(mipmap), _filter(filter), _aniso(aniso) {
+Texture::Texture(const std::string& path, bool mipmap, TEX_FILTERING filter, byte aniso, GLenum wrapx, GLenum wrapy) : _mipmap(mipmap), _filter(filter), _aniso(aniso) {
 	std::string sss = path.substr(path.find_last_of('.') + 1, std::string::npos);
 	byte *data;
 	std::vector<byte> dataV;
@@ -227,17 +227,15 @@ Texture::Texture(const std::string& path, bool mipmap, TEX_FILTERING filter, byt
 	if (chn == 3) glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, rgb, GL_UNSIGNED_BYTE, data);
 	else glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, rgba, GL_UNSIGNED_BYTE, data);
 	if (mipmap) glGenerateMipmap(GL_TEXTURE_2D);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (mipmap && (filter == TEX_FILTER_TRILINEAR)) ? GL_LINEAR_MIPMAP_LINEAR : (filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapx);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapy);
+	SetTexParams<>(aniso, wrapx, wrapy,
+		(mipmap && (filter == TEX_FILTER_TRILINEAR)) ? GL_LINEAR_MIPMAP_LINEAR : (filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR,
+		(filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	if (dataV.size() == 0) delete[](data);
 	loaded = true;
 }
 
-Texture::Texture(const byte* data, const uint dataSz, TEX_FILTERING filter, TEX_WRAPING wrap) : AssetObject(ASSETTYPE_TEXTURE) {
+Texture::Texture(const byte* data, const uint dataSz, TEX_FILTERING filter, TEX_WRAPING wrap) {
 	std::vector<byte> dataV;
 	uint err = lodepng::decode(dataV, width, height, data, dataSz);
 	if (!!err) {
@@ -249,11 +247,10 @@ Texture::Texture(const byte* data, const uint dataSz, TEX_FILTERING filter, TEX_
 	glGenTextures(1, &pointer);
 	glBindTexture(GL_TEXTURE_2D, pointer);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &dataV[0]);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (wrap == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (wrap == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+	SetTexParams<>(1, (wrap == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT,
+		(wrap == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT,
+		(filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR,
+		(filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	loaded = true;
 }

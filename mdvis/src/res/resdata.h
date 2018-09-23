@@ -57,7 +57,6 @@
 #include "_res/vis_prot.h"
 #include "_res/pro_col.h"
 #include "_res/pro_grad.h"
-#include "_res/bg_splash.h"
 #include "_res/details.h"
 #include "_res/icon.h"
 #include "_res/loading.h"

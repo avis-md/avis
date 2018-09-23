@@ -30,11 +30,13 @@ Vec4 ParGraphics::gradCols[] = { blue(), green(), red() };
 bool ParGraphics::useConCol;
 Vec4 ParGraphics::conCol = white();
 
-GLuint ParGraphics::reflProg, ParGraphics::reflCProg, ParGraphics::parProg, ParGraphics::parConProg, ParGraphics::parConLineProg;
-GLint ParGraphics::reflProgLocs[] = {}, ParGraphics::reflCProgLocs[] = {}, ParGraphics::parProgLocs[] = {}, ParGraphics::parConProgLocs[] = {}, ParGraphics::parConLineProgLocs[] = {};
-
-GLuint ParGraphics::selHlProg, ParGraphics::colProg;
-GLint ParGraphics::selHlProgLocs[] = {}, ParGraphics::colProgLocs[] = {};
+PROGDEF(ParGraphics::reflProg);
+PROGDEF(ParGraphics::reflCProg);
+PROGDEF(ParGraphics::parProg);
+PROGDEF(ParGraphics::parConProg);
+PROGDEF(ParGraphics::parConLineProg);
+PROGDEF(ParGraphics::selHlProg);
+PROGDEF(ParGraphics::colProg);
 
 std::vector<uint> ParGraphics::hlIds, ParGraphics::selIds;
 std::vector<std::pair<uint, std::pair<uint, byte>>> ParGraphics::drawLists, ParGraphics::drawListsB;
@@ -169,7 +171,7 @@ void ParGraphics::Init() {
 	reflItms.list = &reflNms[0];
 
 	bg = new Texture(IO::path + "res/bg.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
-	splash = new Texture(res::bg_splash_png, res::bg_splash_png_sz);
+	splash = new Texture(IO::path + "res/bg_splash.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	GLuint mv;
 	Shader::LoadShader(GL_VERTEX_SHADER, glsl::minVert, mv);
 	reflProg = Shader::FromF(mv, glsl::reflFrag);
@@ -415,47 +417,39 @@ void ParGraphics::Update() {
 		}
 		if (s0 != rotScale || rz0 != rotZ || rw0 != rotW || center0 != rotCenter) Scene::dirty = true;
 
-		if (reflId != _reflId) {
-			_reflId = reflId;
-			auto pth = IO::path + "backgrounds/" + reflNms[reflId] + "/";
-			if (!!refl) {
-				glDeleteTextures(1, &refl);
-				glDeleteTextures(1, &reflE);
-			}
-			uint _w, _h;
-			byte* d = hdr::read_hdr((pth + "specular.hdr").c_str(), &_w, &_h);
-			float* dv = new float[_w*_h * 3];
-			if (d) {
-				hdr::to_float(d, _w, _h, dv);
-				//byte* d = Texture::LoadPixels(IO::path + "res/?.png", chn, _w, _h);
-				glGenTextures(1, &refl);
-				glBindTexture(GL_TEXTURE_2D, refl);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-				glBindTexture(GL_TEXTURE_2D, 0);
-				delete[](d);
-				delete[](dv);
-			}
-			d = hdr::read_hdr((pth + "diffuse.hdr").c_str(), &_w, &_h);
-			if (d) {
-				dv = new float[_w*_h * 3];
-				hdr::to_float(d, _w, _h, dv);
-				delete[](d);
-				glGenTextures(1, &reflE);
-				glBindTexture(GL_TEXTURE_2D, reflE);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-				glBindTexture(GL_TEXTURE_2D, 0);
-				delete[](dv);
-			}
+	}
+	if (reflId != _reflId) {
+		_reflId = reflId;
+		auto pth = IO::path + "backgrounds/" + reflNms[reflId] + "/";
+		if (!!refl) {
+			glDeleteTextures(1, &refl);
+			glDeleteTextures(1, &reflE);
+		}
+		uint _w, _h;
+		byte* d = hdr::read_hdr((pth + "specular.hdr").c_str(), &_w, &_h);
+		float* dv = new float[_w*_h * 3];
+		if (d) {
+			hdr::to_float(d, _w, _h, dv);
+			//byte* d = Texture::LoadPixels(IO::path + "res/?.png", chn, _w, _h);
+			glGenTextures(1, &refl);
+			glBindTexture(GL_TEXTURE_2D, refl);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv);
+			SetTexParams<>(0, GL_REPEAT, GL_MIRRORED_REPEAT);
+			glBindTexture(GL_TEXTURE_2D, 0);
+			delete[](d);
+			delete[](dv);
+		}
+		d = hdr::read_hdr((pth + "diffuse.hdr").c_str(), &_w, &_h);
+		if (d) {
+			dv = new float[_w*_h * 3];
+			hdr::to_float(d, _w, _h, dv);
+			delete[](d);
+			glGenTextures(1, &reflE);
+			glBindTexture(GL_TEXTURE_2D, reflE);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv);
+			SetTexParams<>(0, GL_REPEAT, GL_MIRRORED_REPEAT);
+			glBindTexture(GL_TEXTURE_2D, 0);
+			delete[](dv);
 		}
 	}
 }
@@ -1041,7 +1035,7 @@ void ParGraphics::Serialize(XmlNode* nd) {
 }
 
 void ParGraphics::Deserialize(XmlNode* nd) {
-#define SW(nm) if (n3.name == #nm) { for (auto& n4 : n3.children)
+#define SW(nm) if (n3.name == #nm) for (auto& n4 : n3.children)
 #define GT(nm, vl) if (n4.name == #nm) vl = TryParse(n4.value, vl)
 #define GTV(nm, vl) if (n4.name == #nm) Xml::ToVec(&n4, vl)
 	for (auto& n : nd->children) {
@@ -1056,7 +1050,7 @@ void ParGraphics::Deserialize(XmlNode* nd) {
 							else GT(skyfall, reflStrDecay);
 							else GT(specstr, specStr);
 							else GTV(bgcol, bgCol);
-						}}
+						}
 						else SW(Camera) {
 							auto cm = ChokoLait::mainCamera.raw();
 							GT(target, rotCenterTrackId);
@@ -1067,13 +1061,15 @@ void ParGraphics::Deserialize(XmlNode* nd) {
 							else GT(quality, cm->quality);
 							else if (n4.name == "usequality2") cm->useGBuffer2 = (n4.value == "1");
 							else GT(quality2, cm->quality2);
-						}}
+						}
 					}
 				}
 				else if (n2.name == "Effects") Eff::Deserialize(&n2);
 				else if (n2.name == "Shadows") Shadows::Deserialize(&n2);
 			}
-
+			
+			rotWs = rotW;
+			rotZs = rotZ;
 			return;
 		}
 	}

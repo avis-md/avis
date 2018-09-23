@@ -113,9 +113,9 @@ void ErrorView::Draw() {
 		}
 		descId = -1;
 	}
-	UI::Texture(5, Display::height - 17, 16, 16, Icons::compile);
+	UI::Texture(5, Display::height - 17.0f, 16, 16, Icons::compile);
 	auto csz = compileMsgs.size();
-	UI::Label(22, Display::height - 17, 12, std::to_string(csz), (!csz) ? white(0.8f) : red());
+	UI::Label(22, Display::height - 17.0f, 12, std::to_string(csz), (!csz) ? white(0.8f) : red());
 	if (Engine::Button(40, Display::height - 17, 35, 16, white(0), white(0.2f), black(0.2f)) == MOUSE_RELEASE) {
 		if (show && showExec) show = false;
 		else {

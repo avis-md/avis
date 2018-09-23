@@ -144,7 +144,7 @@ void CVar::Write(std::ofstream& strm) {
 			if (totalSz > 0) {
 				auto po = strm.tellp();
 				strm.write(*((char**)value), totalSz * stride);
-				ulong wt = (ulong)(strm.tellp() - po);
+				int wt = (int)(strm.tellp() - po);
 				if (wt < totalSz * stride || strm.bad()) {
 					Debug::Error("CVar", "not enough bytes written!");
 				}

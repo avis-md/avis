@@ -16,8 +16,9 @@ public:
 	static uint _sz;
 	static Mat4x4 _p, _ip;
 
-	static GLuint _fbo, _dtex, _prog;
-	static GLint _progLocs[10];
+	static GLuint _fbo, _dtex;
+
+	PROGDEF_H(_prog, 10);
 
 	static void Init();
 	static void UpdateBox();
