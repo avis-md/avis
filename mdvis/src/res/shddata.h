@@ -24,3 +24,4 @@
 #include "_shd/voxelFrag.h"
 #include "_shd/voxelVert.h"
 #include "_shd/bezierVert.h"
+#include "_shd/ssaoFrag.h"

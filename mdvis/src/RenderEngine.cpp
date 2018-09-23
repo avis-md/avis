@@ -185,14 +185,11 @@ void Camera::Render(onBlitFunc func) {
 	if (Scene::dirty) {
 		d_texs[0] = d_idTex;
 
-
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, d_fbo);
 		glClearBufferfv(GL_COLOR, 0, zero);
 		glClearBufferfv(GL_COLOR, 1, zero);
 		glClearBufferfv(GL_DEPTH, 0, &one);
-		//glClearBufferfv(GL_COLOR, 2, zero);
-		//glClearBufferfv(GL_COLOR, 3, zero);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 		glDepthMask(true);
@@ -200,8 +197,6 @@ void Camera::Render(onBlitFunc func) {
 		MVP::Switch(true);
 		MVP::Clear();
 		ApplyGL();
-		//MVP::Push();
-		//MVP::Scale(2, 2, 1);
 		MVP::Switch(false);
 		MVP::Clear();
 		glViewport(0, 0, d_w, d_h);

@@ -16,6 +16,8 @@ public:
 	static uint _sz;
 	static Mat4x4 _p, _ip;
 
+	static bool isPass;
+
 	static GLuint _fbo, _dtex;
 
 	PROGDEF_H(_prog, 10);

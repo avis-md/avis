@@ -1,18 +1,21 @@
+///this is a script to test the
+///ability of instant reloading
+
 #include <iostream>
 #include <cmath>
 
-//in cnt
-double* ivec = 0;
 //out cnt
-double* ovec = 0;
+double* vec = 0;
+
 //var
-int cnt = 0;
+int cnt = 100;
+
+double ff = 1;
 
 //entry
 void Execute() {
-	if (ovec) delete[](ovec);
-	ovec = new double[cnt]{};
+	if (!vec) vec = new double[100]{};
 	for (int a = 0; a < cnt; a++)
-		ovec[a] = ivec[a] * std::exp(-a*2.0/cnt);
-	printf("C says hello!");
+		vec[a] = sinf(ff + a * 0.0314159f * 2);
+	ff += 2;
 }

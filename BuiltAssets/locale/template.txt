@@ -42,6 +42,18 @@
 <Request A Feature
 >
 
+1028121507
+<Miscellaneous
+>
+
+1041002558
+<Custom
+>
+
+1048311803
+<Analysis
+>
+
 1131603698
 <Use Dynamic Quality
 >
@@ -62,8 +74,16 @@
 <Particles
 >
 
+1564708765
+<Modifiers
+>
+
 1586509152
 <Scale
+>
+
+1630997161
+<Generators
 >
 
 1675706879
@@ -80,6 +100,10 @@
 
 1824619073
 <User Manual
+>
+
+1889851620
+<Recover last session
 >
 
 1987687796
@@ -118,6 +142,10 @@
 <Render
 >
 
+2452924276
+<Done
+>
+
 2562468540
 <Quality
 >
@@ -134,12 +162,32 @@
 <Proteins
 >
 
+2775412296
+<Inputs
+>
+
+3561949391
+<Save
+>
+
+3688342295
+<Run
+>
+
 3962531119
 <No Recent Files
 >
 
+4019566549
+<Edit
+>
+
 4087223699
 <Atoms
+>
+
+4152870407
+<Run All
 >
 
 4237822132

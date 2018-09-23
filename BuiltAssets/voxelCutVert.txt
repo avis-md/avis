@@ -1,0 +1,13 @@
+#version 330
+
+uniform mat4x4 _MV;
+uniform mat4x4 _P;
+
+out vec2 v2f_uv;
+void main() {
+	float y = -1;
+	if (gl_VertexID == 2 || gl_VertexID > 3) y = 1;
+	float x = mod(gl_VertexID, 2)*2-1;
+	gl_Position = _P * _MV * vec4(x, y, 0.0, 1.0);
+	v2f_uv = vec2(x, y) * 0.5 + 0.5;
+}

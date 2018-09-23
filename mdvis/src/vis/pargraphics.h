@@ -51,7 +51,7 @@ public:
 
 	static bool dragging;
 	static byte dragMode;
-	static Vec3 scrX, scrY;
+	static Vec3 scrX, scrY, scrZ;
 
 	static bool animate, seek;
 	static float animOff;

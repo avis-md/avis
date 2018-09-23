@@ -9,10 +9,7 @@ jmp_buf __noterm_env;
 void (*__noterm_ftFunc)();
 void (*__noterm_cFunc)();
 
-extern "C"
-#ifdef _WIN32
-__declspec(dllexport)
-#endif
+extern "C" __declspec(dllexport)
 void _gfortran_runtime_error_at (const char * c, const char * w, ...) {
     char buffer[1024];
     va_list args;

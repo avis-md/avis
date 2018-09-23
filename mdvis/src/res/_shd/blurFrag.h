@@ -23,7 +23,6 @@ void main () {
 		else uv2 = uv + vec2(0, xx*mul/screenSize.y);
 		fragCol += (texture(mainTex, uv2) * kernal[a]);
 	}
-	//fragCol = texture(mainTex, uv);
 }
 )";
 }

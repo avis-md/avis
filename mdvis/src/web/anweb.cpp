@@ -685,7 +685,7 @@ void AnWeb::Deserialize(XmlNode* nd) {
 		if (n2.name == "Analysis") {
 			for (auto& n : n2.children) {
 				if (n.name == "graph") {
-					Load(VisSystem::currentSavePath2 + "_data/" + n.value);
+					Load(VisSystem::currentSavePath2 + n.value);
 				}
 				else if (n.name == "focus") drawFull = (n.value == "1");
 			}

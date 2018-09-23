@@ -2,6 +2,8 @@
 #include "Engine.h"
 #include "ui/popups.h"
 
+#define EXT_SVFL ".zip"
+
 enum class VIS_MOUSE_MODE : byte {
 	ROTATE,
 	PAN,

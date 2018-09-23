@@ -370,7 +370,11 @@ void Particles::Deserialize(XmlNode* nd) {
 }
 
 void Particles::DeserializeVis(XmlNode* nd) {
-	std::ifstream strm(VisSystem::currentSavePath2 + "_data/" + nd->value, std::ios::binary);
+	std::ifstream strm(VisSystem::currentSavePath2 + nd->value, std::ios::binary);
+	if (!strm.is_open()) {
+		Debug::Warning("Particles::DeserializeVis", "cannot open file!");
+		return;
+	}
 	uint32_t tmp;
 	_Strm2Val(strm, tmp);
 	if (tmp != residueListSz) {
@@ -396,7 +400,11 @@ void Particles::DeserializeVis(XmlNode* nd) {
 }
 
 void Particles::DeserializeDM(XmlNode* nd) {
-	std::ifstream strm(VisSystem::currentSavePath2 + "_data/" + nd->value, std::ios::binary);
+	std::ifstream strm(VisSystem::currentSavePath2 + nd->value, std::ios::binary);
+	if (!strm.is_open()) {
+		Debug::Warning("Particles::DeserializeDM", "cannot open file!");
+		return;
+	}
 	uint32_t tmp;
 	_Strm2Val(strm, tmp);
 	if (tmp != residueListSz) {

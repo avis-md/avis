@@ -18,6 +18,8 @@ float Shadows::box[] = {};
 uint Shadows::_sz = 1024;
 Mat4x4 Shadows::_p, Shadows::_ip;
 
+bool Shadows::isPass = false;
+
 GLuint Shadows::_fbo, Shadows::_dtex;
 
 PROGDEF(Shadows::_prog);
@@ -111,14 +113,11 @@ void Shadows::UpdateBox() {
 }
 
 void Shadows::Rerender() {
+	isPass = true;
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
 	float one = 1;
 	glClearBufferfv(GL_DEPTH, 0, &one);
-	//glEnable(GL_DEPTH_TEST);
-	//glDepthFunc(GL_LEQUAL);
-	//glDepthMask(true);
-	//glDisable(GL_BLEND);
 	MVP::Switch(true);
 	MVP::Clear();
 	MVP::Mul(_p);
@@ -129,6 +128,7 @@ void Shadows::Rerender() {
 	ParGraphics::Rerender(cpos, glm::normalize(pos - cpos), (float)_sz, (float)_sz);
 	glViewport(0, 0, Display::actualWidth, Display::actualHeight);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->d_fbo);
+	isPass = false;
 }
 
 void Shadows::Reblit() {

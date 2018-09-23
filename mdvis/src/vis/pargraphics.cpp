@@ -59,7 +59,7 @@ Vec4 ParGraphics::clippingPlanes[] = {};
 
 float ParGraphics::zoomFade = 0;
 
-Vec3 ParGraphics::scrX, ParGraphics::scrY;
+Vec3 ParGraphics::scrX, ParGraphics::scrY, ParGraphics::scrZ;
 
 bool ParGraphics::dragging = false;
 byte ParGraphics::dragMode = 0;
@@ -389,7 +389,6 @@ void ParGraphics::Update() {
 				else if ((VisSystem::mouseMode == VIS_MOUSE_MODE::PAN) || (((VisSystem::mouseMode == VIS_MOUSE_MODE::ROTATE) && (dragMode == 2)))) {
 					rotCenter -= 5.0f * scrX * (Input::mouseDelta.x / Display::width);
 					rotCenter += 5.0f * scrY * (Input::mouseDelta.y / Display::height);
-					rotScale = Clamp(rotScale, -6.0f, 2.0f);
 				}
 			}
 		}
@@ -404,10 +403,15 @@ void ParGraphics::Update() {
 				Scene::dirty = true;
 			}
 			if (Input::mouseScroll != 0 && VisSystem::InMainWin(Input::mousePos)) {
-				rotScale += 0.05f * Input::mouseScroll;
-				rotScale = Clamp(rotScale, -6.0f, 2.0f);
+				if (Input::KeyHold(Key_LeftShift)) {
+					rotCenter -= 0.1f * scrZ * Input::mouseScroll / powf(2, rotScale);
+				}
+				else {
+					rotScale += 0.05f * Input::mouseScroll;
+					rotScale = Clamp(rotScale, -6.0f, 2.0f);
+					zoomFade = 2;
+				}
 				ChokoLait::mainCamera->applyGBuffer2 = true;
-				zoomFade = 2;
 			}
 			else {
 				if (Input::KeyDown(Key_Escape)) {
@@ -509,16 +513,17 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 			rotCenter = Particles::particles_Pos[rotCenterTrackId];
 		}
 		MVP::Translate(-rotCenter.x, -rotCenter.y, -rotCenter.z);
-		lastMVP = MVP::projection() * MVP::modelview();
+		auto _mv = MVP::modelview();
+		auto _p = MVP::projection();
 
 		UpdateClipping();
 
-		auto _mv = MVP::modelview();
-		auto _p = MVP::projection();
-		if (dragging) {
-			auto imvp = glm::inverse(_p * _mv);
+		if (!Shadows::isPass) {
+			lastMVP = _p * _mv;
+			auto imvp = glm::inverse(lastMVP);
 			scrX = Vec3(imvp * Vec4(1, 0, 0, 0));
 			scrY = Vec3(imvp * Vec4(0, 1, 0, 0));
+			scrZ = glm::normalize(glm::cross(scrY, scrX));
 		}
 
 		auto ql = ChokoLait::mainCamera->quality;

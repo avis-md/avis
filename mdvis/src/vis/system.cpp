@@ -7,6 +7,7 @@
 #include "ui/icons.h"
 #include "ui/help.h"
 #include "ui/ui_ext.h"
+#include "ui/localizer.h"
 #include "res/resdata.h"
 #include "live/livesyncer.h"
 #include "utils/dialog.h"
@@ -26,7 +27,7 @@ std::string VisSystem::currentSavePath, VisSystem::currentSavePath2;
 
 std::vector<MenuItem> VisSystem::menuItems[];
 
-std::string VisSystem::message = "Hello";
+std::string VisSystem::message;
 std::string VisSystem::message2 = "";
 bool VisSystem::hasMessage2 = false;
 byte VisSystem::messageSev = 0;
@@ -52,8 +53,9 @@ std::unordered_map<ushort, std::array<float, 2>> VisSystem::radii;
 std::unordered_map<std::string, std::string> VisSystem::envs, VisSystem::prefs;
 
 void VisSystem::Init() {
+	message = _("Hello!");
 	radii.clear();
-	std::ifstream strm(IO::path + "radii.txt");
+	std::ifstream strm(IO::path + "config/radii.txt");
 	if (strm.is_open()) {
 		std::string s;
 		while (!strm.eof()) {
@@ -67,7 +69,7 @@ void VisSystem::Init() {
 		}
 		strm.close();
 	}
-	strm.open(IO::path + "bondlengths.txt");
+	strm.open(IO::path + "config/bondlengths.txt");
 	_bondLengths.clear();
 	if (strm.is_open()) {
 		std::string s;
@@ -85,7 +87,7 @@ void VisSystem::Init() {
 		}
 		strm.close();
 	}
-	strm.open(IO::path + "colors.txt");
+	strm.open(IO::path + "config/colors.txt");
 	_type2Col.clear();
 	if (strm.is_open()) {
 		std::string s;
@@ -116,20 +118,27 @@ void VisSystem::Init() {
 
 	auto& mi = menuItems[0];
 	mi.resize(5);
-	mi[0].Set(Icons::newfile, "New", Particles::Clear);
-	mi[1].Set(Icons::openfile, "Open", []() {
-		ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
+	mi[0].Set(Icons::newfile, _("New"), Particles::Clear);
+	mi[1].Set(Icons::openfile, _("Open"), []() {
+		auto res = Dialog::OpenFile({ "*" EXT_SVFL })[0];
+		res = res.substr(0, res.find_last_of('.'));
+		VisSystem::Load(res);
 	});
-	mi[2].Set(0, "Open Recent", 0);
+	mi[2].Set(0, _("Open Recent"), 0);
 	auto& mic = mi[2].child;
 	mic.resize(2);
 	mic[0].Set(0, "boo", 0);
 	mic[1].Set(0, "foo", 0);
-	mi[3].Set(Icons::openfile, "Append", 0);
-	mi[4].Set(Icons::vis_atom, "Splash Screen", []() {
-		ParMenu::showSplash = true;
+	mi[3].Set(Icons::openfile, _("Import"), []() {
+		ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
 	});
-
+	mi[4].Set(Icons::openfile, _("Import Recent"), []() {
+		ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
+	});
+	auto& mic2 = mi[4].child;
+	mic2.resize(2);
+	mic2[0].Set(0, "boo", 0);
+	mic2[1].Set(0, "foo", 0);
 	auto& mi2 = menuItems[3];
 	mi2.resize(5);
 	mi2[0].Set(0, "Image (GLSL)", []() {
@@ -141,16 +150,18 @@ void VisSystem::Init() {
 	mi2[4].Set(0, "Options", 0);
 
 	auto& mi3 = menuItems[4];
-	mi3.resize(1);
+	mi3.resize(2);
 	mi3[0].Set(0, "User Manual", []() {
-		//HelpMenu::show = true;
 		IO::OpenEx(IO::path + "docs/index.html");
+	});
+	mi3[1].Set(Icons::vis_atom, "Splash Screen", []() {
+		ParMenu::showSplash = true;
 	});
 }
 
 void VisSystem::InitEnv() {
 	envs.clear();
-	std::ifstream strm(IO::path + "env.txt");
+	std::ifstream strm(IO::path + "config/env.txt");
 	if (strm.is_open()) {
 		std::string s;
 		while (std::getline(strm, s)) {
@@ -163,7 +174,7 @@ void VisSystem::InitEnv() {
 	}
 	strm.close();
 	prefs.clear();
-	strm.open(IO::path + "preferences.txt");
+	strm.open(IO::path + "config/preferences.txt");
 	if (strm.is_open()) {
 		std::string s;
 		while (std::getline(strm, s)) {
@@ -183,15 +194,13 @@ bool VisSystem::InMainWin(const Vec2& pos) {
 
 void VisSystem::DrawTitle() {
 	UI::Quad(0,0, (float)Display::width, 18, white(0.95f, 0.05f));
-	const std::string menu[] = {"File", "Edit", "Options", "Render", "Help"};
-	const uint menusp[] = {0, 30, 62, 115, 170, 210};
+	const std::string menu[] = {_("File"), _("Edit"), _("Options"), _("Render"), _("Help")};
 	for (uint i = 0; i < 5; i++) {
-		if (Engine::Button(2.0f + menusp[i], 1, menusp[i + 1] - menusp[i] - 1.0f, 16, white(0), menu[i], 12, white(), true) == MOUSE_RELEASE) {
+		if (Engine::Button(2.0f + 60 * i, 1, 59, 16, white(0), menu[i], 12, white(), true) == MOUSE_RELEASE) {
 			Popups::type = POPUP_TYPE::MENU;
-			Popups::pos = Vec2(2 + menusp[i], 17);
+			Popups::pos = Vec2(2 + 60 * i, 17);
 			Popups::data = menuItems + i;
 		}
-		//UI::Label(5 + menusp[i], 1, 12, menu[i], white());
 	}
 	UI::Quad(Display::width * 0.6f, 1, Display::width * 0.3f, 16, white(1, 0.2f));
 	UI::Label(Display::width * 0.6f + 2, 1, 12, message, (!messageSev) ? white(0.5f) : ((messageSev==1)? yellow(0.8f) : red(0.8f)));
@@ -283,33 +292,48 @@ void VisSystem::Save(const std::string& path) {
 	AnWeb::Serialize(head.addchild());
 	Xml::Write(&head, path + ".xml");
 	Debug::Message("System", "Compressing...");
-	auto l = path.find_last_of('/');
-	auto s = path.substr(0, l);
-	auto nm = path.substr(l + 1);
 	std::string quiet = (Debug::suppress > 0) ? "-qq " : "";
-	RunCmd::Run("cd \"" + s + "\" && zip -m -r " + quiet + nm + ".zip " + nm + ".xml " + nm + "_data");
+#ifdef PLATFORM_WIN
+#define EXPPATH "path=%path%;\"" + IO::path + "\"&&"
+#else
+#define EXPPATH
+#endif
+	RunCmd::Run(EXPPATH "zip -m -r " + quiet + " \"" + path + EXT_SVFL "\" \"" + path + ".xml\" \"" + path + "_data\"");
 	Debug::Message("System", "Save complete");
 }
 
 bool VisSystem::Load(const std::string& path) {
 	Debug::Message("System", "Loading: " + path);
+	Particles::Clear();
 	currentSavePath = path;
 	auto l = path.find_last_of('/');
 	auto s = path.substr(0, l);
 	auto nm = path.substr(l + 1);
-	currentSavePath2 = path + "_temp__/" + nm;
+	currentSavePath2 = path + "_temp__/";
 	std::string quiet = (Debug::suppress > 0) ? "-qq " : "";
-	RunCmd::Run("cd \"" + s + "\" && unzip " + quiet + "-d " + nm + "_temp__/ " + nm + ".zip");
-	auto xml = Xml::Parse(path + "_temp__/" + nm + ".xml");
+#ifdef PLATFORM_WIN
+#define EXPPATH "path=%path%;\"" + IO::path + "\"&&"
+#else
+#define EXPPATH
+#endif
+	auto res = RunCmd::Run(EXPPATH "unzip -o -j " + quiet + "-d \"" + path + "_temp__/\" \"" + path + EXT_SVFL "\"");
+	if (!!res) {
+		Debug::Warning("System", "extracting save file failed!");
+		return false;
+	}
+	auto xml = Xml::Parse(currentSavePath2 + nm + ".xml");
 	if (!xml) {
 		Debug::Warning("System", "save file xml is corrupt!");
-		return false;
+		goto cleanup;
 	}
 	auto n = &xml->children[0];
 	Particles::Deserialize(n);
 	ParGraphics::Deserialize(n);
 	AnWeb::Deserialize(n);
-	RunCmd::Run("cd \"" + s + "\" && rm -r " + nm + "_temp__/");
 	Debug::Message("System", "Load complete");
+	RunCmd::Run(EXPPATH "rm -r \"" + currentSavePath2 + "\"");
 	return true;
+cleanup:
+	RunCmd::Run(EXPPATH "rm -r \"" + currentSavePath2 + "\"");
+	return false;
 }

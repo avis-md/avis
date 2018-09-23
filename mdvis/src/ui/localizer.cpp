@@ -3,7 +3,7 @@
 bool Localizer::useDict = false;
 
 void Localizer::Init(const std::string& nm) {
-	if (nm == "EN") return;
+	if (nm == "" || nm == "EN") return;
     auto path = IO::path + "locale/" + nm + "/locale.txt";
     std::ifstream strm(path);
     if (!strm.is_open()) {

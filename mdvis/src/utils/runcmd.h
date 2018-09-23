@@ -3,5 +3,5 @@
 
 class RunCmd {
 public:
-	static void Run(std::string cmd);
+	static int Run(std::string cmd);
 };
