@@ -42,5 +42,5 @@ public:
     static void* data;
 
     static void Draw(), DrawMenu(), DrawDropdown();
-	static bool DoDrawMenu(std::vector<MenuItem>* mn, float x, float y);
+	static bool DoDrawMenu(std::vector<MenuItem>* mn, float x, float y, size_t* act);
 };

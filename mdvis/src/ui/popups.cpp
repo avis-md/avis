@@ -45,9 +45,36 @@ void Popups::Draw() {
 
 void Popups::DrawMenu() {
 	auto mn = (std::vector<MenuItem>*)data;
-	if (DoDrawMenu(mn, pos.x, pos.y)) {
+	size_t actc[10] = {};
+	if (DoDrawMenu(mn, pos.x, pos.y, actc)) {
 		type = POPUP_TYPE::NONE;
 	}
+}
+
+bool Popups::DoDrawMenu(std::vector<MenuItem>* mn, float x, float y, size_t* act) {
+	auto sz = mn->size();
+	UI::Quad(x - 1, y, 122, 18 * sz + 1.0f, black(0.7f));
+	UI::Quad(x, y, 120, 18.0f * sz, white(1, 0.1f));
+	for (size_t a = 0; a < sz; a++) {
+		auto& i = mn->at(a);
+		auto st = Engine::Button(x + 1, y + 18 * a + 1, 118, 16, white(0), white(1, 0.2f), white(1, 0.05f));
+		UI::Quad(x + 2, y + 18 * a + 1, 16, 16, i.icon);
+		UI::Label(x + 22, y + 18 * a + 1, 12, i.label, white((!st) ? 0.7f : 1));
+		if ((st & MOUSE_HOVER_FLAG) && i.child.size()) {
+			*act = a+1;
+		}
+		if (st == MOUSE_RELEASE) {
+			type = POPUP_TYPE::NONE;
+			if (i.callback) i.callback();
+		}
+	}
+	if (*act > 0) {
+		if (DoDrawMenu(&mn->at(*act-1).child, x + 119, y + 18 * (*act-1) + 1, act+1))
+			*act = 0;
+	}
+	bool clk = (Input::mouse0State == 1) && !Engine::Button(x - 1, y, 122, 18 * sz + 3.0f);
+	bool hvr = !Rect(x - 30, y - 30, 182, 18 * sz + 63.0f).Inside(Input::mousePos);
+	return ((clk || hvr) && !*act);
 }
 
 void Popups::DrawDropdown() {
@@ -64,26 +91,4 @@ void Popups::DrawDropdown() {
 	if ((Input::mouse0State == 1) && !Engine::Button(pos.x, pos.y, pos2.x, 16.0f*n)) {
 		Popups::type = POPUP_TYPE::NONE;
 	}
-}
-
-bool Popups::DoDrawMenu(std::vector<MenuItem>* mn, float x, float y) {
-	auto sz = mn->size();
-	UI::Quad(x - 1, y, 122, 18 * sz + 1.0f, black(0.7f));
-	UI::Quad(x, y, 120, 18.0f * sz, white(1, 0.1f));
-	for (size_t a = 0; a < sz; a++) {
-		auto& i = mn->at(a);
-		auto st = Engine::Button(x + 1, y + 18 * a + 1, 118, 16, white(0), white(1, 0.2f), white(1, 0.05f));
-		UI::Quad(x + 2, y + 18 * a + 1, 16, 16, i.icon);
-		UI::Label(x + 22, y + 18 * a + 1, 12, i.label, white((!st) ? 0.7f : 1));
-		if ((st | MOUSE_HOVER_FLAG) && i.child.size()) {
-			
-		}
-		if (st == MOUSE_RELEASE) {
-			type = POPUP_TYPE::NONE;
-			if (i.callback) i.callback();
-		}
-	}
-	bool clk = (Input::mouse0State == 1) && !Engine::Button(x - 1, y, 122, 18 * sz + 3.0f);
-	bool hvr = !Rect(x - 30, y - 30, 182, 18 * sz + 63.0f).Inside(Input::mousePos);
-	return (clk || hvr);
 }

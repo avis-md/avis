@@ -204,7 +204,7 @@ void Camera::Render(onBlitFunc func) {
 		if (func) func();
 
 		d_texs[0] = d_colTex;
-		glViewport(0, 0, Display::actualWidth, Display::actualHeight);
+		glViewport(0, 0, Display::frameWidth, Display::frameHeight);
 	}
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(false);

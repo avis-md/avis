@@ -380,6 +380,9 @@ void AnWeb::DoExecute() {
 				serr += " thrown!\x01";
 				err = &serr[0];
 			}
+			catch (...) {
+				err = "Unknown error thrown!\x01";
+			}
 		}
 
 #ifndef NO_REDIR_LOG

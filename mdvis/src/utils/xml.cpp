@@ -97,7 +97,7 @@ XmlNode Xml::FromVec(std::string nm, Vec3 v) {
 	XmlNode nd(nm);
 	SVV("x", v.x);
 	SVV("y", v.y);
-	SVV("z", v.y);
+	SVV("z", v.z);
 	return nd;
 }
 XmlNode Xml::FromVec(std::string nm, Vec4 v) {

@@ -12,7 +12,9 @@
                 "/usr/include/python2.7/",
                 "/usr/local/include/python2.7"
             ],
-            "defines": [],
+            "defines": [
+                "PLATFORM_OSX"
+            ],
             "macFrameworkPath": [
                 "/System/Library/Frameworks",
                 "/Library/Frameworks"

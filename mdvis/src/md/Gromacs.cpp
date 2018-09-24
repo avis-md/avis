@@ -80,6 +80,7 @@ bool Gromacs::ReadGro2(ParInfo* info, std::ifstream& strm, size_t isz) {
 	char buf[100] = {};
 	isz = 10 + 2 * isz;
 	while (strm.getline(buf, 100)) {
+		info->trajectory.progress = 0.01f;
 		ps = new double[info->num * 3];
 		strm.ignore(100, '\n');
 		for (uint32_t i = 0; i < info->num; i++) {

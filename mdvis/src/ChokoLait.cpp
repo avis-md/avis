@@ -1,6 +1,7 @@
 #include "ChokoLait.h"
 
 //#define USE_DEBUG_CONTEXT
+//#define SIMULATE_FRAMESCALE 2
 
 #ifdef USE_DEBUG_CONTEXT
 void APIENTRY glDebugOutput(GLenum source,
@@ -234,12 +235,16 @@ void ChokoLait::MotionGL(GLFWwindow* window, double x, double y) {
 }
 
 void ChokoLait::ReshapeGL(GLFWwindow* window, int w, int h) {
+#ifdef SIMULATE_FRAMESCALE
+	w /= SIMULATE_FRAMESCALE;
+	h /= SIMULATE_FRAMESCALE;
+#endif
 	Display::width = (int)(w * Display::dpiScl);
 	Display::height = (int)(h * Display::dpiScl);
 	Display::actualWidth = w;
 	Display::actualHeight = h;
-	glfwGetFramebufferSize(window, &w, &h);
-	glViewport(0, 0, w, h);
+	glfwGetFramebufferSize(window, &Display::frameWidth, &Display::frameHeight);
+	glViewport(0, 0, Display::frameWidth, Display::frameHeight);
 }
 
 void ChokoLait::DropGL(GLFWwindow* window, int w, const char** c) {

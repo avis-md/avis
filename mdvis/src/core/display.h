@@ -13,6 +13,7 @@ class Display {
 public:
 	static int width, height;
 	static int actualWidth, actualHeight;
+	static int frameWidth, frameHeight;
 	static glm::mat3 uiMatrix;
 	static bool uiMatrixIsI;
 

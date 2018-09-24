@@ -40,7 +40,7 @@ void CReader::Init() {
 		}
 	}
 #else
-	gpp = VisSystem::envs["ANL_GPP_PATH"];
+	gpp = VisSystem::envs["GPP"];
 	AnWeb::hasC = true;
 #endif
 	useOMP = (VisSystem::prefs["ANL_USE_OPENMP"] == "true");

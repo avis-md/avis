@@ -225,7 +225,8 @@ void ParLoader::DoOpen() {
 	Particles::particles_Col = new byte[info.num];
 	Particles::particles_Rad = new float[info.num];
 	Particles::particles_Res = new Int2[info.num];
-	ParGraphics::rotCenter = Vec3(info.bounds[0] + info.bounds[1], 
+	if (!VisSystem::currentSavePath.size())
+		ParGraphics::rotCenter = Vec3(info.bounds[0] + info.bounds[1], 
 		info.bounds[2] + info.bounds[3], 
 		info.bounds[4] + info.bounds[5]) * 0.5f;
 

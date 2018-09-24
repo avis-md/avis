@@ -120,9 +120,10 @@ void VisSystem::Init() {
 	mi.resize(5);
 	mi[0].Set(Icons::newfile, _("New"), Particles::Clear);
 	mi[1].Set(Icons::openfile, _("Open"), []() {
-		auto res = Dialog::OpenFile({ "*" EXT_SVFL })[0];
-		res = res.substr(0, res.find_last_of('.'));
-		VisSystem::Load(res);
+		auto res = Dialog::OpenFile({ "*" EXT_SVFL });
+		if (!!res.size()) {
+			VisSystem::Load(res[0].substr(0, res[0].find_last_of('.')));
+		}
 	});
 	mi[2].Set(0, _("Open Recent"), 0);
 	auto& mic = mi[2].child;
@@ -299,6 +300,7 @@ void VisSystem::Save(const std::string& path) {
 #define EXPPATH
 #endif
 	RunCmd::Run(EXPPATH "zip -m -r " + quiet + " \"" + path + EXT_SVFL "\" \"" + path + ".xml\" \"" + path + "_data\"");
+	currentSavePath = "";
 	Debug::Message("System", "Save complete");
 }
 
@@ -326,14 +328,18 @@ bool VisSystem::Load(const std::string& path) {
 		Debug::Warning("System", "save file xml is corrupt!");
 		goto cleanup;
 	}
-	auto n = &xml->children[0];
-	Particles::Deserialize(n);
-	ParGraphics::Deserialize(n);
-	AnWeb::Deserialize(n);
-	Debug::Message("System", "Load complete");
-	RunCmd::Run(EXPPATH "rm -r \"" + currentSavePath2 + "\"");
-	return true;
+	else {
+		auto n = &xml->children[0];
+		Particles::Deserialize(n);
+		ParGraphics::Deserialize(n);
+		AnWeb::Deserialize(n);
+		Debug::Message("System", "Load complete");
+		RunCmd::Run(EXPPATH "rm -r \"" + currentSavePath2 + "\"");
+		currentSavePath = "";
+		return true;
+	}
 cleanup:
 	RunCmd::Run(EXPPATH "rm -r \"" + currentSavePath2 + "\"");
+	currentSavePath = "";
 	return false;
 }

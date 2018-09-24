@@ -99,10 +99,10 @@ void ParGraphics::Eff::Apply() {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->target);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->d_tfbo[cnt % 2]);
 	
-	glViewport(0, 0, Display::actualWidth, Display::actualHeight);
+	glViewport(0, 0, Display::frameWidth, Display::frameHeight);
 
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
-	glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::actualWidth, Display::actualHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::frameWidth, Display::frameHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 }
 
 float ParGraphics::Eff::DrawMenu(float off) {
@@ -240,11 +240,13 @@ void ParGraphics::Init() {
 
 	hlIds.resize(1);
 	ChokoLait::mainCamera->onBlit = Reblit;
+	ChokoLait::mainCamera->useGBuffer2 = true;
+	ChokoLait::mainCamera->quality2 = 0.5f;
 
-	Eff::ssaoSamples = 20;
+	Eff::ssaoSamples = 30;
 	Eff::ssaoRad = 0.015f;
 	Eff::ssaoStr = 1;
-	Eff::ssaoBlur = 6.5f;
+	Eff::ssaoBlur = 0;
 }
 
 void ParGraphics::UpdateDrawLists() {
@@ -704,14 +706,13 @@ void ParGraphics::Recolor() {
 	glBindVertexArray(0);
 
 	Protein::Recolor();
-	glViewport(0, 0, Display::actualWidth, Display::actualHeight);
+	glViewport(0, 0, Display::frameWidth, Display::frameWidth);
 }
 
 void ParGraphics::Reblit() {
 	auto cam = ChokoLait::mainCamera().get();
 	if (!AnWeb::drawFull || Scene::dirty) tfboDirty = true;
 	if (tfboDirty) {
-		//glViewport(0, 0, Display::width, Display::height);
 		float zero[] = { 0,0,0,0 };
 		glClearBufferfv(GL_COLOR, 0, zero);
 		if (!!Particles::particleSz) {
@@ -797,7 +798,7 @@ void ParGraphics::BlitHl() {
 	glUseProgram(selHlProg);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	glUniform2f(selHlProgLocs[0], (float)Display::actualWidth, (float)Display::actualHeight);
+	glUniform2f(selHlProgLocs[0], (float)Display::frameWidth, (float)Display::frameHeight);
 	glUniform1i(selHlProgLocs[2], 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_idTex);

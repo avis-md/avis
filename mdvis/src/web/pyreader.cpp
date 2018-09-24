@@ -8,6 +8,7 @@
 
 void PyReader::Init() {
 #ifdef PLATFORM_OSX
+	//auto lib = dlopen("/Library/Frameworks/Python.framework/Versions/3.6/Python", RTLD_NOW | RTLD_GLOBAL);
 	if (dlsym(RTLD_DEFAULT, "Py_Initialize")) {
 #endif
 	static std::string pyenv = VisSystem::envs["PYENV"];
