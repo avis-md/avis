@@ -41,10 +41,21 @@ public:
 	static float rotWs, rotZs;
 	static float rotScale;
 
-	static bool useClipping;
+	static enum class CLIPPING {
+		NONE,
+		PLANE,
+		CUBE
+	} clippingType, _clippingType;
+	static struct ClipPlane {
+		Vec3 center;
+		Vec3 norm = Vec3(1, 0, 0);
+		float size = 0.1f;
+	} clipPlane;
+	static struct ClipCube {
+		Vec3 center;
+		Vec3 size = Vec3(1);
+	} clipCube;
 	static GLuint clipUbo;
-	static Vec3 clipCenter;
-	static Vec3 clipSize;
 	static Vec4 clippingPlanes[6];
 
 	static float zoomFade;

@@ -51,10 +51,10 @@ float ParGraphics::rotW = 0, ParGraphics::rotZ = 0;
 float ParGraphics::rotWs = 0, ParGraphics::rotZs = 0;
 float ParGraphics::rotScale = 0;
 
-bool ParGraphics::useClipping = false;
+ParGraphics::CLIPPING ParGraphics::clippingType, ParGraphics::_clippingType;
+ParGraphics::ClipPlane ParGraphics::clipPlane = {};
+ParGraphics::ClipCube ParGraphics::clipCube = {};
 GLuint ParGraphics::clipUbo;
-Vec3 ParGraphics::clipCenter = Vec3();
-Vec3 ParGraphics::clipSize = Vec3(1, 1, 1) * 4.0f;
 Vec4 ParGraphics::clippingPlanes[] = {};
 
 float ParGraphics::zoomFade = 0;
@@ -460,20 +460,53 @@ void ParGraphics::Update() {
 	}
 }
 
+#define TTF(f, t) *(Vec3*)&f = t
 void ParGraphics::UpdateClipping() {
-	if (useClipping) {
-		auto mv = MVP::modelview();
-		auto cs = Vec4(clipCenter, 1);
+	auto mv = MVP::modelview();
+	switch (clippingType) {
+	case CLIPPING::NONE:
+		for (int a = 0; a < 6; a++) {
+			clippingPlanes[a] = Vec4();
+		}
+		break;
+	case CLIPPING::PLANE:
+	{
+		auto nl = glm::length(clipPlane.norm);
+		if (nl > 0)
+			clipPlane.norm /= nl;
+		Vec4 cents[2] = {}, dirs[2] = {};
+		TTF(dirs[0], clipPlane.norm);
+		TTF(dirs[1], -clipPlane.norm);
+		TTF(cents[0], clipPlane.center + clipPlane.norm * clipPlane.size * 0.5f);
+		TTF(cents[1], clipPlane.center - clipPlane.norm * clipPlane.size * 0.5f);
+		cents[0].w = cents[1].w = 1;
+		dirs[0] = glm::normalize(mv * dirs[0]);
+		dirs[1] = glm::normalize(mv * dirs[1]);
+		clippingPlanes[0] = dirs[0];
+		clippingPlanes[1] = dirs[1];
+		for (int a = 0; a < 2; a++) {
+			cents[a] = mv * cents[a];
+			cents[a] /= cents[a].w;
+			clippingPlanes[a].w = glm::dot((Vec3)cents[a], (Vec3)clippingPlanes[a]);
+		}
+		for (int a = 2; a < 6; a++) {
+			clippingPlanes[a] = Vec4();
+		}
+		break;
+	}
+	case CLIPPING::CUBE:
+	{
+		auto cs = Vec4(clipCube.center, 1);
 		Vec4 cents[6], dirs[3];
 		dirs[0] = Vec4(1, 0, 0, 0);
 		dirs[1] = Vec4(0, 1, 0, 0);
 		dirs[2] = Vec4(0, 0, 1, 0);
-		cents[0] = cs - dirs[0] * clipSize.x * 0.5f;
-		cents[1] = cs + dirs[0] * clipSize.x * 0.5f;
-		cents[2] = cs - dirs[1] * clipSize.y * 0.5f;
-		cents[3] = cs + dirs[1] * clipSize.y * 0.5f;
-		cents[4] = cs - dirs[2] * clipSize.z * 0.5f;
-		cents[5] = cs + dirs[2] * clipSize.z * 0.5f;
+		cents[0] = cs - dirs[0] * clipCube.size.x * 0.5f;
+		cents[1] = cs + dirs[0] * clipCube.size.x * 0.5f;
+		cents[2] = cs - dirs[1] * clipCube.size.y * 0.5f;
+		cents[3] = cs + dirs[1] * clipCube.size.y * 0.5f;
+		cents[4] = cs - dirs[2] * clipCube.size.z * 0.5f;
+		cents[5] = cs + dirs[2] * clipCube.size.z * 0.5f;
 		for (int a = 0; a < 3; a++) {
 			dirs[a] = glm::normalize(mv * dirs[a]);
 		}
@@ -488,17 +521,15 @@ void ParGraphics::UpdateClipping() {
 			cents[a] /= cents[a].w;
 			clippingPlanes[a].w = glm::dot((Vec3)cents[a], (Vec3)clippingPlanes[a]);
 		}
+		break;
 	}
-	else {
-		for (int a = 0; a < 6; a++) {
-			clippingPlanes[a] = Vec4();
-		}
 	}
 
 	glBindBuffer(GL_UNIFORM_BUFFER, clipUbo);
 	GLvoid* p = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-	memcpy(p, &clippingPlanes[0][0], sizeof(Vec4)*4);
+	memcpy(p, &clippingPlanes[0][0], sizeof(Vec4)*6);
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
+	Scene::dirty = true;
 }
 
 void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
@@ -923,20 +954,15 @@ void ParGraphics::DrawMenu() {
 	if (Engine::Button(expandPos - 18, off, 16, 16, white(1, 0.5f)) == MOUSE_RELEASE) {
 		
 	}
-	rotCenter.x = TryParse(UI2::EditText(expandPos - 147, off + 17, 147, _("Center") + " X", std::to_string(rotCenter.x), !htr, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.0f);
-	rotCenter.y = TryParse(UI2::EditText(expandPos - 147, off + 17 * 2, 147, _("Center") + " Y", std::to_string(rotCenter.y), !htr, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
-	rotCenter.z = TryParse(UI2::EditText(expandPos - 147, off + 17 * 3, 147, _("Center") + " Z", std::to_string(rotCenter.z), !htr, Vec4(0.4f, 0.4f, 0.6f, 1)), 0.0f);
+	rotCenter = UI2::EditVec(expandPos - 147, off + 17, 147, _("Center"), rotCenter, !htr);
 
 	rotZs = rotZ = TryParse(UI2::EditText(expandPos - 147, off + 17 * 4, 147, _("Rotation") + " W", std::to_string(rotZ), true, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.0f);
 	rotWs = rotW = TryParse(UI2::EditText(expandPos - 147, off + 17 * 5, 147, _("Rotation") + " Y", std::to_string(rotW), true, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
 
 	rotScale = TryParse(UI2::EditText(expandPos - 147, off + 17 * 6, 147, _("Scale"), std::to_string(rotScale)), 0.0f);
 
-	//UI::Label(expandPos - 147, off + 17 * 7, 12, "Quality", white());
 	auto cm = ChokoLait::mainCamera.raw();
 	auto ql = cm->quality;
-	//ql = Engine::DrawSliderFill(expandPos - 80, off + 17 * 7, 78, 16, 0.25f, 1.5f, ql, white(1, 0.5f), white());
-	//UI::Label(expandPos - 78, off + 17 * 7, 12, std::to_string(int(ql * 100)) + "%", black(0.6f));
 	ql = UI2::Slider(expandPos - 147, off + 17 * 7, 147, _("Quality"), 0.25f, 1.5f, ql, std::to_string(int(ql * 100)) + "%");
 	if (Engine::Button(expandPos - 91, off + 17 * 7, 16, 16, Icons::refresh) == MOUSE_RELEASE)
 		ql = 1;
@@ -958,10 +984,8 @@ void ParGraphics::DrawMenu() {
 
 	if (a2) {
 		UI::Quad(expandPos - 149, off - 2, 148, 18, white(0.9f, 0.1f));
-		UI::Label(expandPos - 147, off - 1, 12, _("Quality 2"), white());
 		ql = cm->quality2;
-		ql = Engine::DrawSliderFill(expandPos - 80, off - 1, 78, 16, 0.25f, 1, ql, white(1, 0.5f), white());
-		UI::Label(expandPos - 78, off - 1, 12, std::to_string(int(ql * 100)) + "%", black(0.6f));
+		ql = UI2::Slider(expandPos - 147, off - 1, 147, _("Quality") + " 2", 0.25f, 1.0f, ql, std::to_string(int(ql * 100)) + "%");
 		if (ql != cm->quality2) {
 			cm->quality2 = ql;
 			Scene::dirty = true;
@@ -969,6 +993,49 @@ void ParGraphics::DrawMenu() {
 		off += 17;
 	}
 
+	const int ns[] = { 1, 8, 7 };
+	UI::Label(expandPos - 148, off, 12, _("Clipping"), white());
+	UI::Quad(expandPos - 149, off + 17, 148, 17 * ns[(int)clippingType] + 2, white(0.9f, 0.1f));
+	off += 18;
+	static std::string nms[] = { _("None"), _("Slice"), _("Cube") };
+	static Popups::DropdownItem di = Popups::DropdownItem((uint*)&clippingType, nms);
+	UI2::Dropdown(expandPos - 147, off, 146, _("Mode"), di);
+	if (_clippingType != clippingType) {
+		_clippingType = clippingType;
+		UpdateClipping();
+	}
+	off += 17;
+	switch (clippingType) {
+	case CLIPPING::NONE: break;
+	case CLIPPING::PLANE:
+	{
+		auto c = clipPlane.center;
+		auto n = clipPlane.norm;
+		auto s = clipPlane.size;
+		clipPlane.center = UI2::EditVec(expandPos - 147, off, 147, _("Center"), clipPlane.center, true);
+		off += 17 * 3;
+		clipPlane.norm = UI2::EditVec(expandPos - 147, off, 147, _("Normal"), clipPlane.norm, true);
+		off += 17 * 3;
+		clipPlane.size = TryParse(UI2::EditText(expandPos - 147, off, 147, _("Thickness"), std::to_string(clipPlane.size)), 0.0f);
+		off += 17;
+		if (c != clipPlane.center || n != clipPlane.norm || s != clipPlane.size) UpdateClipping();
+		break;
+	}
+	case CLIPPING::CUBE:
+	{
+		auto c = clipCube.center;
+		auto s = clipCube.size;
+		clipCube.center = UI2::EditVec(expandPos - 147, off, 147, _("Center"), clipCube.center, true);
+		off += 17 * 3;
+		clipCube.size = UI2::EditVec(expandPos - 147, off, 147, _("Size"), clipCube.size, true);
+		off += 17 * 3;
+		if (c != clipCube.center || s != clipCube.size) UpdateClipping();
+		break;
+	}
+	}
+
+	off += 2;
+	
 	off = Eff::DrawMenu(off);
 
 	Shadows::DrawMenu(off + 1);

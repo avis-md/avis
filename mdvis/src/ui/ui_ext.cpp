@@ -118,3 +118,11 @@ void UI2::Bezier(Vec2 p1, Vec2 t1, Vec2 t2, Vec2 p2, Vec4 col, int reso) {
 	glDrawArrays(GL_LINE_STRIP, 0, reso);
 	glUseProgram(0);
 }
+
+Vec3 UI2::EditVec(float x, float y, float w, const std::string& t, Vec3 v, bool ena) {
+	Vec3 res;
+	res.x = TryParse(UI2::EditText(x, y, w, t + " X", std::to_string(v.x), ena, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.0f);
+	res.y = TryParse(UI2::EditText(x, y + 17, w, t + " Y", std::to_string(v.y), ena, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
+	res.z = TryParse(UI2::EditText(x, y + 34, w, t + " Z", std::to_string(v.z), ena, Vec4(0.4f, 0.4f, 0.6f, 1)), 0.0f);
+	return res;
+}
