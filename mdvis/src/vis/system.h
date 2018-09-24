@@ -42,6 +42,7 @@ public:
 
 	static bool InMainWin(const Vec2& pos);
 
+	static void UpdateTitle();
 	static void DrawTitle(), DrawBar(), DrawMsgPopup();
 
 	static void Save(const std::string& path);

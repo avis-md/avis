@@ -169,7 +169,7 @@ void UI::Quad(float x, float y, float w, float h, Vec4 col) {
 }
 
 void UI::Quad(float x, float y, float w, float h, GLuint tex, Vec4 col, Vec2 uv0, Vec2 uv1, Vec2 uv2, Vec2 uv3) {
-	if (col.a <= 0) return;
+	if (!tex || col.a <= 0) return;
 	Vec3 quadPoss[4];
 	quadPoss[0].x = x;		quadPoss[0].y = y;
 	quadPoss[1].x = x + w;	quadPoss[1].y = y;

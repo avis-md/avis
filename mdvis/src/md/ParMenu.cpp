@@ -148,7 +148,6 @@ void ParMenu::Draw_List(float off) {
 	if (!!selCnt && Particles::particles_Conn.visible) {
 		DrawConnMenu(Particles::particles_Conn, 1, off, 148);
 	}
-	//UI::Quad(1, off-1, expandPos - 2, Display::height - 37.0f, white(0.9f, 0.1f));
 	Engine::BeginStencil(0, off, expandPos, Display::height - 18 - off);
 	if (Rect(0, off, expandPos, Display::height - 18 - off).Inside(Input::mousePos)) {
 		_off -= Input::mouseScroll * 20;
@@ -358,19 +357,19 @@ void ParMenu::DrawSplash() {
 				}
 			}
 		}
-		if (Engine::Button(pos.x, pos.y + pos.w - 17, 170, 17, white(1, 0.3f), _("Recover last session"), 12, white(), true) == MOUSE_RELEASE) {
-			if (VisSystem::Load(IO::path + ".recover"))
-				showSplash = false;
-		}
 	}
 	else UI::Label(pos.x + 2, pos.y + 1, 12, _("No Recent Files"), white());
 	if (Engine::Button(pos.x + pos.z - 70, pos.y, 70, 16, white(1, 0.3f), _("Browse"), 12, white(), true) == MOUSE_RELEASE) {
 		ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
 	}
+	if (Engine::Button(pos.x, pos.y + pos.w - 17, 170, 17, white(1, 0.3f), _("Recover last session"), 12, white(), true) == MOUSE_RELEASE) {
+		if (VisSystem::Load(IO::path + ".recover"))
+			showSplash = false;
+	}
 	if (sub.size()) {
 		UI::Label(Display::width*0.5f - 190, pos.y + pos.w + 1, 12, sub, white(0.7f));
 	}
- 	if ((Input::KeyDown(Key_Escape) && UI::_layer == UI::_layerMax) || (Input::mouse0State == 1 && !Rect(Display::width*0.5f - 200, Display::height*0.5f - 150, 400, 300).Inside(Input::mousePos))) {
+ 	if ((Input::KeyDown(Key_Escape) && UI::_layer == UI::_layerMax) || (Input::mouse0State == 1 && !Rect(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250).Inside(Input::mousePos))) {
 		showSplash = false;
 	}
 }
@@ -529,6 +528,7 @@ void ParMenu::LoadRecents() {
 			}
 		}
 	}
+	VisSystem::UpdateTitle();
 }
 
 void ParMenu::SaveRecents(const std::string& entry) {
@@ -544,17 +544,19 @@ void ParMenu::SaveRecents(const std::string& entry) {
 	}
 	recentFiles.insert(recentFiles.begin(), entry);
 	recentFilesN.insert(recentFilesN.begin(), entry.substr(entry.find_last_of('/') + 1));
-	std::ofstream strm(IO::path + ".recentfiles");
-	for (auto& s : recentFiles) {
-		strm << s << "\n";
-	}
+	WriteRecents();
 }
 
 void ParMenu::RemoveRecent(uint i) {
 	recentFiles.erase(recentFiles.begin() + i);
 	recentFilesN.erase(recentFilesN.begin() + i);
+	WriteRecents();
+}
+
+void ParMenu::WriteRecents() {
 	std::ofstream strm(IO::path + ".recentfiles");
 	for (auto& s : recentFiles) {
 		strm << s << "\n";
 	}
+	VisSystem::UpdateTitle();
 }

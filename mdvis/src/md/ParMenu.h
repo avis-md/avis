@@ -23,5 +23,5 @@ public:
 	static void SelClear(), SelInv(), SelAll();
 	static void DrawSelPopup();
 
-	static void LoadRecents(), SaveRecents(const std::string& entry), RemoveRecent(uint i);
+	static void LoadRecents(), SaveRecents(const std::string& entry), RemoveRecent(uint i), WriteRecents();
 };

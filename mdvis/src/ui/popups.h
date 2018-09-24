@@ -40,6 +40,7 @@ public:
     static POPUP_TYPE type;
     static Vec2 pos, pos2;
     static void* data;
+	static int selectedMenu;
 
     static void Draw(), DrawMenu(), DrawDropdown();
 	static bool DoDrawMenu(std::vector<MenuItem>* mn, float x, float y, size_t* act);

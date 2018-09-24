@@ -1,10 +1,12 @@
 #include "popups.h"
 #include "vis/pargraphics.h"
 #include "md/ParMenu.h"
+#include "ui/icons.h"
 
 POPUP_TYPE Popups::type = POPUP_TYPE::NONE;
 Vec2 Popups::pos, Popups::pos2;
 void* Popups::data = 0;
+int Popups::selectedMenu;
 
 void Popups::Draw() {
     if (type == POPUP_TYPE::NONE) return;
@@ -45,7 +47,7 @@ void Popups::Draw() {
 
 void Popups::DrawMenu() {
 	auto mn = (std::vector<MenuItem>*)data;
-	size_t actc[10] = {};
+	static size_t actc[10] = {};
 	if (DoDrawMenu(mn, pos.x, pos.y, actc)) {
 		type = POPUP_TYPE::NONE;
 	}
@@ -58,13 +60,20 @@ bool Popups::DoDrawMenu(std::vector<MenuItem>* mn, float x, float y, size_t* act
 	for (size_t a = 0; a < sz; a++) {
 		auto& i = mn->at(a);
 		auto st = Engine::Button(x + 1, y + 18 * a + 1, 118, 16, white(0), white(1, 0.2f), white(1, 0.05f));
-		UI::Quad(x + 2, y + 18 * a + 1, 16, 16, i.icon);
-		UI::Label(x + 22, y + 18 * a + 1, 12, i.label, white((!st) ? 0.7f : 1));
-		if ((st & MOUSE_HOVER_FLAG) && i.child.size()) {
-			*act = a+1;
+		if (i.icon != GLuint(-1)) {
+			UI::Quad(x + 2, y + 18 * a + 1, 16, 16, i.icon);
+			UI::Label(x + 22, y + 18 * a + 1, 12, i.label, white((!st) ? 0.7f : 1));
+		}
+		else UI::Label(x + 2, y + 18 * a + 1, 12, i.label, white((!st) ? 0.7f : 1));
+		if (!!i.child.size()) {
+			UI::Texture(x + 119 - 14, y + 18 * a + 3, 12, 12, Icons::right, white(0.2f));
+			if ((st & MOUSE_HOVER_FLAG)) {
+				*act = a + 1;
+			}
 		}
 		if (st == MOUSE_RELEASE) {
 			type = POPUP_TYPE::NONE;
+			selectedMenu = a;
 			if (i.callback) i.callback();
 		}
 	}

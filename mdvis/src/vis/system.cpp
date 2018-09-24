@@ -136,10 +136,6 @@ void VisSystem::Init() {
 	mi[4].Set(Icons::openfile, _("Import Recent"), []() {
 		ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
 	});
-	auto& mic2 = mi[4].child;
-	mic2.resize(2);
-	mic2[0].Set(0, "boo", 0);
-	mic2[1].Set(0, "foo", 0);
 	auto& mi2 = menuItems[3];
 	mi2.resize(5);
 	mi2[0].Set(0, "Image (GLSL)", []() {
@@ -191,6 +187,20 @@ void VisSystem::InitEnv() {
 bool VisSystem::InMainWin(const Vec2& pos) {
 	if (AnWeb::drawFull) return false;
 	else return (pos.x > ParMenu::expandPos + 16) && (pos.x < Display::width - ((!Particles::particleSz || LiveSyncer::activeRunner)? LiveSyncer::expandPos : AnWeb::expandPos)) && (pos.y < Display::height - 18);
+}
+
+void VisSystem::UpdateTitle() {
+	auto& c = menuItems[0][4].child;
+	auto s = ParMenu::recentFiles.size();
+	c.resize(s);
+	for (size_t i = 0; i < s; i++) {
+		c[i].Set(0, ParMenu::recentFilesN[i], []() {
+			const char* cc[1] = { ParMenu::recentFiles[Popups::selectedMenu].c_str() };
+			ParLoader::OnDropFile(1, cc);
+			Popups::type = POPUP_TYPE::NONE;
+		});
+		c[i].icon = GLuint(-1);
+	}
 }
 
 void VisSystem::DrawTitle() {
@@ -255,7 +265,7 @@ void VisSystem::DrawBar() {
 		UI::Label(Display::width - 155.0f, Display::height - 16.0f, 12, std::to_string(Particles::anim.activeFrame + 1) + "/" + std::to_string(Particles::anim.frameCount), white());
 	}
 	else
-		UI::Label(172, Display::height - 16.0f, 12, "No Animation Data", white(0.5f));
+		UI::Label(172, Display::height - 16.0f, 12, _("No Animation Data"), white(0.5f));
 
 	byte sel = (byte)mouseMode;
 	for (byte b = 0; b < 3; b++) {

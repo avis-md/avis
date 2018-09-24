@@ -64,9 +64,10 @@ void updateFunc() {
 		VisSystem::lastSave = Time::time;
 	}
 
-	if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime)) {
+	if (!!Particles::particleSz && (autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime)) {
 		VisSystem::lastSave = Time::time;
 		VisSystem::Save(IO::path + ".recover");
+		VisSystem::SetMsg("autosaved at t=" + std::to_string((int)Time::time) + "s");
 	}
 
 	ParGraphics::Update();
@@ -314,7 +315,7 @@ int main(int argc, char **argv) {
 			ParLoader::OnOpenFile(fls);
 		}
 
-		Display::Resize(1024, 768, false);
+		Display::Resize(1024, 600, false);
 
 		auto lastMillis = Time::millis;
 
@@ -339,7 +340,6 @@ int main(int argc, char **argv) {
 			}
 		}
 		glfwDestroyWindow(Display::window);
-		//*/
 #ifndef NOCATCH
 	}
 	catch (...) {
