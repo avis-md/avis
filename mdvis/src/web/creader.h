@@ -15,7 +15,7 @@ public:
 protected:
 	static std::string gpp;
 	static std::string vcbatPath, mingwPath;
-	static bool useMsvc, useOMP;
+	static bool useMsvc, useOMP, useOMP2;
 	static std::string flags1, flags2;
 	static bool ParseType(std::string s, CVar* var);
 };

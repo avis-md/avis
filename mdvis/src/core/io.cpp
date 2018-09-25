@@ -116,7 +116,7 @@ bool IO::HasFile(std::string szPath) {
 std::string IO::ReadFile(const std::string& path) {
 	std::ifstream stream(path.c_str());
 	if (!stream.good()) {
-		std::cout << "not found! " << path << std::endl;
+		Debug::Warning("IO", "Cannot read file: \"" + path + "\"!");
 		return "";
 	}
 	std::stringstream buffer;

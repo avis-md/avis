@@ -12,7 +12,7 @@
 
 std::string CReader::gpp = "g++";
 std::string CReader::vcbatPath = "", CReader::mingwPath = "";
-bool CReader::useMsvc, CReader::useOMP;
+bool CReader::useMsvc, CReader::useOMP, CReader::useOMP2;
 std::string CReader::flags1, CReader::flags2;
 
 void CReader::Init() {
@@ -41,15 +41,19 @@ void CReader::Init() {
 	}
 #else
 	gpp = VisSystem::envs["GPP"];
-	AnWeb::hasC = true;
+	auto res = RunCmd::Run(gpp + " -v &> /dev/null");
+	if (res == 0)
+		AnWeb::hasC = true;
+	else
+		Debug::Warning("CReader", "C++ compiler \"" + gpp + "\" not available!");
 #endif
 	useOMP = (VisSystem::prefs["ANL_USE_OPENMP"] == "true");
+	useOMP2 = (VisSystem::prefs["ANL_USE_OPENMP_LIB"] == "true");
 
 	if (AnWeb::hasC && !useMsvc && !IO::HasFile(IO::path + "res/noterminate.o")) {
 		std::string cmd = gpp + " -std=c++11 -c -o \""
 			+ IO::path + "res/noterminate.o\" \""
 			+ IO::path + "res/noterminate.cpp\"";
-		std::cout << cmd << std::endl;
 		RunCmd::Run(SETPATH cmd);
 	}
 }
@@ -156,9 +160,9 @@ bool CReader::Read(CScript* scr) {
 				std::string cmd = "g++ -std=c++11 -static-libstdc++ -shared -fPIC " + flags1;
 				if (useOMP) {
 					cmd += " -fopenmp";
+					if (useOMP2) cmd += " -lomp";
 				}
 				cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + IO::path + "res/noterminate.o\" \"" + fp + "_temp__.cpp\" -Wl,--export-all-symbols 2> \"" + fp2 + nm + "_log.txt\"";
-				std::cout << cmd << std::endl;
 				RunCmd::Run("path=%path%;" + mingwPath + " && " + cmd);
 				scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 			}
@@ -170,13 +174,13 @@ bool CReader::Read(CScript* scr) {
 				+ flags1;
 			if (useOMP) {
 #ifdef PLATFORM_OSX
-				cmd += " -Xpreprocessor -fopenmp -lomp";
+				cmd += " -Xpreprocessor -fopenmp";
 #else
 				cmd += " -fopenmp";
 #endif
+				if (useOMP2) cmd += " -lomp";
 			}
 			cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\" 2> " + fp2 + nm + "_log.txt";
-			std::cout << cmd << std::endl;
 			RunCmd::Run(cmd);
 			scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 #endif

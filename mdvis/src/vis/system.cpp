@@ -206,13 +206,17 @@ void VisSystem::UpdateTitle() {
 void VisSystem::DrawTitle() {
 	UI::Quad(0,0, (float)Display::width, 18, white(0.95f, 0.05f));
 	const std::string menu[] = {_("File"), _("Edit"), _("Options"), _("Render"), _("Help")};
+	bool iso = Popups::type == POPUP_TYPE::MENU && Popups::data >= menuItems && Popups::data < (menuItems + 5) && UI::_layerMax == UI::_layer+1;
+	UI::ignoreLayers = iso; 
 	for (uint i = 0; i < 5; i++) {
-		if (Engine::Button(2.0f + 60 * i, 1, 59, 16, white(0), menu[i], 12, white(), true) == MOUSE_RELEASE) {
+		auto st = Engine::Button(2.0f + 60 * i, 1, 59, 16, white(0), menu[i], 12, white(), true);
+		if (st == MOUSE_RELEASE || (!!(st & MOUSE_HOVER_FLAG) && iso)) {
 			Popups::type = POPUP_TYPE::MENU;
 			Popups::pos = Vec2(2 + 60 * i, 17);
 			Popups::data = menuItems + i;
 		}
 	}
+	UI::ignoreLayers = false;
 	UI::Quad(Display::width * 0.6f, 1, Display::width * 0.3f, 16, white(1, 0.2f));
 	UI::Label(Display::width * 0.6f + 2, 1, 12, message, (!messageSev) ? white(0.5f) : ((messageSev==1)? yellow(0.8f) : red(0.8f)));
 	if (hasMessage2 && Engine::Button(Display::width * 0.9f - 16, 1, 16, 16, Icons::details, white(0.8f)) == MOUSE_RELEASE) {
@@ -226,10 +230,6 @@ void VisSystem::DrawTitle() {
 
 void VisSystem::DrawBar() {
 	UI::Quad(0, Display::height - 18.0f, (float)Display::width, 18, white(0.9f, 0.1f));
-	//UI::Label(2, Display::height - 16.0f, 12, "Render: " + std::to_string(renderMs) + "ms  UI: " + std::to_string(uiMs) + "ms", white(0.5f));
-
-
-
 	if (Particles::anim.frameCount > 1) {
 		if (!LiveSyncer::activeRunner) {
 			if (!UI::editingText) {

@@ -26,6 +26,7 @@ void Debug::Warning(std::string c, std::string s) {
 		SetConsoleTextAttribute(winHandle, winTextAttr);
 #else
 		std::cout << "\033[0m";
+		std::flush(std::cout);
 #endif
 	}
 }
@@ -41,6 +42,7 @@ void Debug::Error(std::string c, std::string s) {
 	SetConsoleTextAttribute(winHandle, winTextAttr);
 #else
 	std::cout << "\033[0m";
+	std::flush(std::cout);
 #endif
 #ifdef PLATFORM_WIN
 	__debugbreak();

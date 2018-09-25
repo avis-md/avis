@@ -18,7 +18,7 @@
 //#include "md/CDV.h"
 //#include "md/XYZ.h"
 //#include "md/mdvbin.h"
-//#include "md/lammps.h"
+#include "md/lammps.h"
 //#include "md/dlpoly.h"
 #include "vis/cubemarcher.h"
 #include "vis/pargraphics.h"
@@ -307,7 +307,7 @@ int main(int argc, char **argv) {
 		//NEWIMP(XYZ coords, xyz, .xyz, XYZ);
 		//NEWIMP(CDView, cdv, .cdv, CDV);
 		//NEWIMP(Binary, bin, .bin, MDVBin);
-		//NEWIMP(Lammps, lmp, .atom, Lammps);
+		NEWIMP(Lammps, lmp, .atom, Lammps);
 		//NEWIMP(DLPoly, dlp, .000, DLPoly);
 
 		if (fls.size()) {

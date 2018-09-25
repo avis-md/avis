@@ -997,7 +997,7 @@ void ParGraphics::DrawMenu() {
 	UI::Label(expandPos - 148, off, 12, _("Clipping"), white());
 	UI::Quad(expandPos - 149, off + 17, 148, 17 * ns[(int)clippingType] + 2, white(0.9f, 0.1f));
 	off += 18;
-	static std::string nms[] = { _("None"), _("Slice"), _("Cube") };
+	static std::string nms[] = { _("None"), _("Slice"), _("Cube"), "" };
 	static Popups::DropdownItem di = Popups::DropdownItem((uint*)&clippingType, nms);
 	UI2::Dropdown(expandPos - 147, off, 146, _("Mode"), di);
 	if (_clippingType != clippingType) {
