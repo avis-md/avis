@@ -52,8 +52,8 @@ bool Lammps::Read(ParInfo* info) {
     info->name = new char[sz * info->nameSz]{};
     info->type = new uint16_t[sz]{};
     info->resId = new uint16_t[sz]{};
-    info->pos = new float[sz * 3]{};
-    info->vel = new float[sz * 3]{};
+    info->pos = new double[sz * 3]{};
+    info->vel = new double[sz * 3]{};
     
     strm.getline(buf, 100);
     SEQ(BOX BOUNDS);
@@ -100,8 +100,8 @@ bool Lammps::Read(ParInfo* info) {
     }
     
     auto trj = &info->trajectory;
-    std::vector<float*> poss = {};
-    float* _ps;
+    std::vector<double*> poss = {};
+    double* _ps;
     do {
         for (int a = 0; a < 10; a++) {
             do {
@@ -112,12 +112,12 @@ bool Lammps::Read(ParInfo* info) {
             } while (buf[0] == 0);
         }
 
-        _ps = new float[info->num * 3];
+        _ps = new double[info->num * 3];
         
         for (uint32_t a = 0; a < info->num; a++) {
             uint32_t x = a;
             for (auto t : attrs) {
-                float tmp;
+                double tmp;
                 std::string dummy;
                 switch (t) {
                     CS(id, strm >> x;)
@@ -139,9 +139,9 @@ bool Lammps::Read(ParInfo* info) {
 out:
     if (!!trj->frames) {
         trj->frames++;
-	    trj->poss = new float*[trj->frames];
-        _ps = new float[info->num*3];
-        memcpy(_ps, info->pos, info->num*3*sizeof(float));
+	    trj->poss = new double*[trj->frames];
+        _ps = new double[info->num*3];
+        memcpy(_ps, info->pos, info->num*3*sizeof(double));
         trj->poss[0] = _ps;
 	    memcpy(trj->poss + 1, &poss[0], trj->frames * sizeof(uintptr_t));
     }

@@ -55,6 +55,7 @@ public:
 	static GLuint _vao, _vboV, _vboU, _tvbo;
 
 	static byte _layer, _layerMax;
+	static bool ignoreLayers;
 
 	PROGDEF_H(quadProgC, 5)
 	PROGDEF_H(quadProgT, 5)

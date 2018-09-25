@@ -136,8 +136,6 @@ byte* Texture::LoadPixels(const std::string& path, byte& chn, uint& w, uint& h) 
 	std::string sss = path.substr(path.find_last_of('.'), std::string::npos);
 	byte *data;
 	std::vector<byte> dataV;
-	//std::cout << "opening image at " << path << std::endl;
-	//GLenum rgb = GL_RGB, rgba = GL_RGBA;
 	if (sss == ".bmp") {
 		if (!LoadBMP(path, w, h, chn, &data)) {
 			std::cout << "load bmp failed! " << path << std::endl;

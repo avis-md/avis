@@ -18,7 +18,10 @@ void FReader::Init() {
 		AnWeb::hasFt = true;
 	}
 #else
-	AnWeb::hasFt = true;
+	if (AnWeb::hasC)
+		AnWeb::hasFt = true;
+	else
+		Debug::Warning("CReader", "GFortran compiler depends on C++ compiler!");
 #endif
 }
 

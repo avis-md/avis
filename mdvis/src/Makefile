@@ -34,10 +34,10 @@ CXXFLAGS = -O0 -g -std=c++11 -fvisibility=hidden -I../src/ -I/usr/include/freety
 LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
 LIBS = $(WEAK_LIB) $(PYLIB) -lpthread -lm $(GLLIB) -lz $(LIBS2)
 
-OBJS = obj/hdr.o obj/lodepng.o obj/AudioEngine.o obj/ChokoLait.o obj/Engine.o obj/main.o obj/RenderEngine.o
+OBJS = obj/hdr.o obj/lodepng.o obj/ChokoLait.o obj/Engine.o obj/main.o obj/RenderEngine.o
 OBJS += obj/asset/mesh.o obj/asset/rendertexture.o obj/asset/texture.o obj/asset/texture3d.o
 OBJS += obj/core/bbox.o obj/core/debug.o obj/core/display.o obj/core/font.o obj/core/input.o obj/core/io.o obj/core/mvp.o obj/core/time.o obj/core/ui.o obj/core/ui3.o
-OBJS += obj/md/Protein.o obj/md/Gromacs.o obj/md/ParMenu.o obj/md/Particles.o obj/md/parloader.o obj/md/pdb.o #obj/md/CDV.o obj/md/mdvbin.o obj/md/XYZ.o obj/md/lammps.o obj/md/dlpoly.o
+OBJS += obj/md/Protein.o obj/md/Gromacs.o obj/md/ParMenu.o obj/md/Particles.o obj/md/parloader.o obj/md/pdb.o obj/md/lammps.o #obj/md/CDV.o obj/md/mdvbin.o obj/md/XYZ.o obj/md/dlpoly.o
 OBJS += obj/web/anbrowse.o obj/web/anconv.o obj/web/annode.o obj/web/anops.o obj/web/anscript.o obj/web/anweb.o obj/web/creader.o obj/web/pyreader.o obj/web/freader.o obj/web/errorview.o
 OBJS += obj/web/nodes/node_inputs.o obj/web/nodes/node_plot.o obj/web/nodes/node_volume.o obj/web/nodes/node_gromacs.o obj/web/nodes/node_recolor.o obj/web/nodes/node_addbond.o obj/web/nodes/node_camera.o obj/web/nodes/node_setparam.o obj/web/nodes/node_showrange.o obj/web/nodes/node_tracetrj.o
 OBJS += obj/scene/object.o obj/scene/scene.o obj/scene/sceneobject.o obj/scene/transform.o obj/scene/comp/camera.o obj/scene/comp/component.o
@@ -48,7 +48,7 @@ OBJS += obj/live/livesyncer.o live/lj256.o
 OBJS += obj/ocl/raytracer.o
 OBJS += obj/xdrfile/xdrfile.o obj/xdrfile/xdrfile_trr.o obj/xdrfile/xdrfile_xtc.o
 
-HEADERS = hdr.h lodepng.h AssetObjects.h AudioEngine.h ChokoLait.h Engine.h SceneObjects.h
+HEADERS = hdr.h lodepng.h AssetObjects.h ChokoLait.h Engine.h SceneObjects.h
 HEADERS += asset/mesh.h asset/rendertexture.h asset/texture.h asset/texture3d.h
 HEADERS += core/bbox.h core/debug.h core/display.h core/font.h core/input.h core/io.h core/math.h core/mvp.h core/time.h core/ui.h core/ui3.h
 HEADERS += md/Protein.h md/Gromacs.h md/CDV.h md/ParMenu.h md/Particles.h md/mdvbin.h md/parloader.h md/XYZ.h md/pdb.h md/lammps.h md/dlpoly.h
@@ -70,7 +70,9 @@ endif
 	$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
 ifeq ($(UNAME_S),Darwin)
 	install_name_tool -add_rpath "@executable_path" ../build/mdvis
-	#install_name_tool -change /Library/Frameworks/Python.framework/Versions/3.6/Python /fake/Python ../build/mdvis
+	install_name_tool -change $(shell python3-config --exec)/Python @rpath/../3.6/Python ../build/mdvis
+	cp ../build/mdvis ../build/mdvis_clean
+	cd ../build && rm .pyregfin && ./regpython.sh
 endif
 
 obj/%.o: $(HEADERS)

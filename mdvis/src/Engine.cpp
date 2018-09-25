@@ -175,7 +175,7 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4,
 	return Button(x, y, w, h, normalVec4, Lerp(normalVec4, white(), 0.5f), Lerp(normalVec4, black(), 0.5f), label, labelSize, labelFont, labelVec4, labelCenter);
 }
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4) {
-	if (!UI::focused || (UI::_layer < UI::_layerMax) ||(Input::mouse0State != 0 && !Rect(x, y, w, h).Inside(Input::mouseDownPos))) {
+	if (!UI::focused || (UI::_layer < UI::_layerMax && !UI::ignoreLayers) ||(Input::mouse0State != 0 && !Rect(x, y, w, h).Inside(Input::mouseDownPos))) {
 		UI::Quad(x, y, w, h, normalVec4);
 		return MOUSE_NONE;
 	}
@@ -194,11 +194,11 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4,
 		UI::Quad(x, y, w, h, inside ? pressVec4 : normalVec4);
 		break;
 	}
-	return (inside && (UI::_layer == UI::_layerMax)) ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
+	return (inside && (UI::_layer == UI::_layerMax || UI::ignoreLayers)) ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
 }
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Texture* texture, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, float uvx, float uvy, float uvw, float uvh) {
 	if (!texture || !texture->loaded) return MOUSE_NONE;
-	if (!UI::focused || (UI::_layer < UI::_layerMax) || (Input::mouse0State != 0 && !Rect(x, y, w, h).Inside(Input::mouseDownPos))) {
+	if (!UI::focused || (UI::_layer < UI::_layerMax && !UI::ignoreLayers) || (Input::mouse0State != 0 && !Rect(x, y, w, h).Inside(Input::mouseDownPos))) {
 		UI::Quad(x, y, w, h, texture->pointer, normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
 		return MOUSE_NONE;
 	}
@@ -217,7 +217,7 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Texture* texture
 		UI::Quad(x, y, w, h, texture->pointer , inside ? pressVec4 : normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
 		break;
 	}
-	return (inside && (UI::_layer == UI::_layerMax)) ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
+	return (inside && (UI::_layer == UI::_layerMax || UI::ignoreLayers)) ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
 }
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, std::string label, float labelSize, Font* labelFont, Vec4 labelVec4, bool labelCenter) {
 	MOUSE_STATUS b = Button(x, y, w, h, normalVec4, highlightVec4, pressVec4);

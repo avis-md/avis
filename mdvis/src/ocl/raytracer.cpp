@@ -51,7 +51,7 @@ bool RayTracer::Init() {
 		//api = RR::CreateFromOpenClContext(context, id, queue, IO::path);
 	}
 	catch (std::runtime_error& err) {
-		std::cout << err.what() << std::endl;
+		 Debug::Warning("RayTracer::InitRR", err.what());
 	}
 	return true;
 }

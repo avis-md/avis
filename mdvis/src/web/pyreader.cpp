@@ -76,8 +76,6 @@ bool PyReader::Read(PyScript* scr) {
 		if (!mdl) {
 			Debug::Warning("PyReader", "Failed to read python file " + path + EXT_PS "!");
 			PyErr_Print();
-			//
-			std::cout << PyScript::GetLog() << std::endl;
 			return false;
 		}
 		scr->pModule = mdl;

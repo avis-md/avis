@@ -26,6 +26,7 @@ GLuint UI::_vboU = 0;
 GLuint UI::_tvbo = 0;
 
 byte UI::_layer, UI::_layerMax;
+bool UI::ignoreLayers = false;
 
 PROGDEF(UI::quadProgC)
 PROGDEF(UI::quadProgT)

@@ -20,8 +20,13 @@ ANL_CL_FLAGS=
 ANL_LINK_FLAGS=
 
 # Enables the OpenMP flag when compiling nodes.
-# Installation of OpenMP libraries is required.
+# Installation of OpenMP is required.
 ANL_USE_OPENMP=true
+
+# Additionally links against the OpenMP library.
+# Installation of OpenMP library is required
+# This value is ignored if ANL_USE_OPENMP if false.
+ANL_USE_OPENMP_LIB=false
 
 # Enables instant-reload of scripts when they are modified.
 # Might be a source for instability.
