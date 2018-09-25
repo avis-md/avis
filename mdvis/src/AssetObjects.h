@@ -54,15 +54,6 @@ enum CAM_CLEARTYPE : byte {
 	CAM_CLEAR_SKY
 };
 
-enum GBUFFERS : byte {
-	GBUFFER_DIFFUSE,
-	GBUFFER_NORMAL,
-	GBUFFER_SPEC_GLOSS,
-	GBUFFER_EMISSION_AO,
-	GBUFFER_Z,
-	GBUFFER_NUM_TEXTURES
-};
-
 #pragma endregion
 
 #include "asset/mesh.h"

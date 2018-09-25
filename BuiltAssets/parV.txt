@@ -12,6 +12,17 @@ uniform vec2 screenSize;
 uniform samplerBuffer radTex;
 uniform float radScl;
 
+layout (std140) uniform clipping {
+    vec4 clip_planes[6];
+};
+bool clipped(vec3 pos) {
+    for (int a = 0; a < 6; a++) {
+        if (dot(pos, clip_planes[a].xyz) > clip_planes[a].w)
+            return true;
+    }
+    return false;
+}
+
 flat out int v2f_id;
 out vec3 v2f_pos;
 out float v2f_scl;
@@ -20,6 +31,11 @@ out float v2f_rad;
 void main(){
     vec4 wpos = _MV*vec4(pos, 1);
     wpos /= wpos.w;
+    if (clipped(wpos.xyz)) {
+        gl_PointSize = 0;
+        return;
+    }
+    
     gl_Position = _P*wpos;
     v2f_pos = wpos.xyz;
     v2f_id = gl_VertexID + 1;

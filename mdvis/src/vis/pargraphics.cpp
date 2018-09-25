@@ -85,19 +85,20 @@ void ParGraphics::Eff::Apply() {
 	auto cam = ChokoLait::mainCamera().get();
 	byte cnt = 0;
 	if (tfboDirty) {
-		//cnt += Effects::Blur(cam->d_tfbo[0], cam->d_tfbo[1], cam->d_ttexs[0], cam->d_ttexs[1], _rad*20, Display::width, Display::height);
-		if (useSSAO) cnt += Effects::SSAO(cam->d_tfbo[0], cam->d_tfbo[1], cam->d_tfbo[2], cam->d_ttexs[0], cam->d_ttexs[1], cam->d_ttexs[2], cam->d_texs[1], cam->d_depthTex, ssaoStr, ssaoSamples, ssaoRad, ssaoBlur, Display::width, Display::height);
+		//cnt += Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1], _rad*20, Display::width, Display::height);
+		if (useSSAO) cnt += Effects::SSAO(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[2], cam->blitTexs[0], cam->blitTexs[1], cam->blitTexs[2],
+			cam->texs.normTex, cam->texs.depthTex, ssaoStr, ssaoSamples, ssaoRad, ssaoBlur, Display::width, Display::height);
 
 		if ((cnt % 2) == 1) {
-			std::swap(cam->d_tfbo[0], cam->d_tfbo[1]);
-			std::swap(cam->d_ttexs[0], cam->d_ttexs[1]);
+			std::swap(cam->blitFbos[0], cam->blitFbos[1]);
+			std::swap(cam->blitTexs[0], cam->blitTexs[1]);
 			cnt = 0;
 		}
-		if (AnWeb::drawFull) cnt += Effects::Blur(cam->d_tfbo[0], cam->d_tfbo[1], cam->d_ttexs[0], cam->d_ttexs[1], 1.0f, Display::width, Display::height);
+		if (AnWeb::drawFull) cnt += Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1], 1.0f, Display::width, Display::height);
 	}
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->target);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->d_tfbo[cnt % 2]);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->blitFbos[cnt % 2]);
 	
 	glViewport(0, 0, Display::frameWidth, Display::frameHeight);
 
@@ -195,7 +196,7 @@ void ParGraphics::Init() {
 	i = 0;
 	LC(_MV); LC(_P); LC(camPos);
 	LC(camFwd); LC(orthoSz); LC(screenSize);
-	LC(radTex); LC(radScl);
+	LC(radTex); LC(radScl); LC(id2col); LC(colList);
 	auto bid = glGetUniformBlockIndex(parProg, "clipping");
 	glUniformBlockBinding(parProg, bid, _clipBindId);
 #undef LC
@@ -205,7 +206,8 @@ void ParGraphics::Init() {
 	i = 0;
 	LC(_MV); LC(_P); LC(camPos); LC(camFwd);
 	LC(screenSize); LC(posTex); LC(connTex);
-	LC(id2); LC(radScl), LC(orthoSz);
+	LC(id2); LC(radScl); LC(orthoSz);
+	LC(id2col); LC(colList); LC(usegrad);
 #undef LC
 
 	parConLineProg = Shader::FromVF(IO::GetText(IO::path + "parConV_line.txt"), IO::GetText(IO::path + "parConF_line.txt"));
@@ -370,6 +372,7 @@ void ParGraphics::Update() {
 			}
 			else if (Input::mouse0State == MOUSE_HOLD && !dragging && VisSystem::InMainWin(Input::mouseDownPos)) {
 				dragging = true;
+				if (!ChokoLait::mainCamera->applyGBuffer2) Scene::dirty = true;
 				ChokoLait::mainCamera->applyGBuffer2 = true;
 			}
 			else if (dragging) {
@@ -581,6 +584,12 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 			glUniform1i(parProgLocs[6], 1);
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
+			glUniform1i(parProgLocs[8], 2);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
+			glUniform1i(parProgLocs[9], 3);
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 
 			glBindVertexArray(Particles::posVao);
 			for (auto& p : drawLists) {
@@ -626,7 +635,14 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					glUniform1ui(parConProgLocs[7], 1);
 					glUniform1f(parConProgLocs[8], con.scale);
 					glUniform1f(parConProgLocs[9], osz);
+					glUniform1i(parConProgLocs[10], 3);
+					glActiveTexture(GL_TEXTURE3);
+					glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
+					glUniform1i(parConProgLocs[11], 4);
+					glActiveTexture(GL_TEXTURE4);
+					glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 					glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
+					glUniform1i(parConProgLocs[12], 0);
 				}
 			}
 			uint id2 = 4;
@@ -676,6 +692,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 	}
 }
 
+/*
 void ParGraphics::Recolor() {
 	auto cam = ChokoLait::mainCamera.raw();
 
@@ -739,20 +756,21 @@ void ParGraphics::Recolor() {
 	Protein::Recolor();
 	glViewport(0, 0, Display::frameWidth, Display::frameWidth);
 }
+*/
 
 void ParGraphics::Reblit() {
 	auto cam = ChokoLait::mainCamera().get();
 	if (!AnWeb::drawFull || Scene::dirty) tfboDirty = true;
 	if (tfboDirty) {
-		float zero[] = { 0,0,0,0 };
-		glClearBufferfv(GL_COLOR, 0, zero);
 		if (!!Particles::particleSz) {
 			if (RayTracer::resTex) {
 				UI::Quad(0, 0, (float)Display::width, (float)Display::height, RayTracer::resTex);
 			}
 			else {
-				Recolor();
-				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->d_tfbo[0]);
+				//Recolor();
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[0]);
+				float zero[] = { 0,0,0,0 };
+				glClearBufferfv(GL_COLOR, 0, zero);
 				BlitSky();
 			}
 		}
@@ -812,11 +830,11 @@ void ParGraphics::BlitSky() {
 		glUniform3f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b);
 	}
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, cam->d_colTex);
+	glBindTexture(GL_TEXTURE_2D, cam->texs.colTex);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, cam->d_texs[1]);
+	glBindTexture(GL_TEXTURE_2D, cam->texs.normTex);
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, cam->d_depthTex);
+	glBindTexture(GL_TEXTURE_2D, cam->texs.depthTex);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glBindVertexArray(Camera::emptyVao);
@@ -832,7 +850,7 @@ void ParGraphics::BlitHl() {
 	glUniform2f(selHlProgLocs[0], (float)Display::frameWidth, (float)Display::frameHeight);
 	glUniform1i(selHlProgLocs[2], 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_idTex);
+	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->texs.idTex);
 	glBindVertexArray(Camera::emptyVao);
 
 	if (!!selIds.size()) {

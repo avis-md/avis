@@ -1,7 +1,7 @@
 #version 330 core
 
-flat in uint v2f_id1;
-flat in uint v2f_id2;
+flat in int v2f_id1;
+flat in int v2f_id2;
 in vec3 v2f_wpos1;
 in vec3 v2f_wpos2;
 in float v2f_scl;
@@ -9,19 +9,24 @@ in float v2f_scl;
 uniform mat4 _P;
 uniform vec2 screenSize;
 uniform uint id2;
+uniform samplerBuffer id2col;
+uniform sampler2D colList;
+uniform int usegrad;
 
-layout (location=0) out uvec4 outColor; //rgba
-layout (location=1) out vec4 outNormal; //xyz []
-layout (location=2) out vec4 outSpec; //spec gloss
-layout (location=3) out vec4 outEmi; //emi occlu
+layout (location=0) out vec4 outColor;
+layout (location=1) out uvec4 outId;
+layout (location=2) out vec4 outNormal;
 
-void Output(uvec4 col, vec3 norm, vec3 spec, float gloss, vec4 emi) {
-    outColor = col;
-    outNormal.rgb = normalize(norm);
-    outNormal.a = 0;
-    outSpec.rgb = spec;
-    outSpec.a = gloss;
-    outEmi = emi;
+float length2 (vec3 v) {
+	return v.x*v.x + v.y*v.y + v.z*v.z;
+}
+
+void SetColor(int id1, int id2, float f) {
+    int cd1 = int(texelFetch(id2col, id1-1).r * 255);
+    int cd2 = int(texelFetch(id2col, id2-1).r * 255);
+    vec4 cl1 = texture(colList, vec2((mod(cd1, 16) + 0.5) / 16.0, ((cd1 / 16) + 0.5) / 16.0));
+    vec4 cl2 = texture(colList, vec2((mod(cd2, 16) + 0.5) / 16.0, ((cd2 / 16) + 0.5) / 16.0));
+    outColor = mix(cl1, cl2, f);
 }
 
 vec2 lli(vec3 p1, vec3 p2, vec3 d1, vec3 d2) {
@@ -45,39 +50,37 @@ float len2(vec3 v) {
 
 void main()
 {
-	vec3 td = normalize(v2f_wpos2 - v2f_wpos1);
+    vec3 td = normalize(v2f_wpos2 - v2f_wpos1);
     float lm = length(v2f_wpos2 - v2f_wpos1);
     float L = length(v2f_wpos2 - v2f_wpos1);
-	float r = 0.008 * v2f_scl;
+    float r = 0.008 * v2f_scl;
     //*
     vec4 ndc = vec4(
         (gl_FragCoord.x / screenSize.x - 0.5) * 2.0,
         (gl_FragCoord.y / screenSize.y - 0.5) * 2.0,
         (gl_FragCoord.z - 0.5) * 2.0,
         1.0);
-    
+
     vec4 wPos = inverse(_P) * ndc;
     wPos /= wPos.w;
-    
+
     ndc.z = -1;
     vec4 wPos2 = inverse(_P) * ndc;
     wPos2 /= wPos2.w;
-    
+
     vec3 fwd = normalize((wPos - wPos2).xyz);
-    
-	vec2 lts = lli(wPos2.xyz, v2f_wpos1, fwd, td);
-	vec3 p1 = v2f_wpos1 + lts.y * td;
-	vec3 p2 = wPos2.xyz + lts.x * fwd;
-    
+
+    vec2 lts = lli(wPos2.xyz, v2f_wpos1, fwd, td);
+    vec3 p1 = v2f_wpos1 + lts.y * td;
+    vec3 p2 = wPos2.xyz + lts.x * fwd;
+
     float lp12 = length(p1 - p2);
-	if (lp12 > r) {
+    if (lp12 > r) {
         discard;
-        gl_FragDepth = gl_FragCoord.z;
-        Output(uvec4(0, 0, 0, 0), vec3(0, 0, 0), vec3(0, 0, 0), 0, vec4(0, 1, 0, 0));
     }
     else {
         float p232 = r*r - lp12*lp12;
-		float p23 = sqrt(p232);
+        float p23 = sqrt(p232);
         vec3 d1 = cross(td, normalize(p2 - p1));
         
         if (lp12 < 0.0001) {
@@ -85,19 +88,19 @@ void main()
             d1 = normalize(cross(td, td1));
         }
         
-		float rtd = dot(fwd, td);
-		float phi = 1;
-		if (rtd < 0.9999 && rtd > -0.9999) {
-			phi = dot(fwd, d1);
-			if (phi < 0) phi *= -1;
-		}
+        float rtd = dot(fwd, td);
+        float phi = 1;
+        if (rtd < 0.9999 && rtd > -0.9999) {
+            phi = dot(fwd, d1);
+            if (phi < 0) phi *= -1;
+        }
         float lf = p23 / phi;
         
         vec3 pf = p2 - fwd * lf;
         
-		float l3f2 = lf * lf - p232;
+        float l3f2 = lf * lf - p232;
         float l3f = 0;
-		if (l3f2 > 0)
+        if (l3f2 > 0)
             l3f = sqrt(l3f2);
         
         vec3 td2 = td;
@@ -107,15 +110,16 @@ void main()
         float lc2 = len2(cf - v2f_wpos1);
         if ((dot(cf - v2f_wpos1, td) < 0) || (lc2 > lm*lm)) {
             discard;
-            gl_FragDepth = gl_FragCoord.z;
-			Output(uvec4(0, 0, 0, 0), vec3(0, 0, 0), vec3(0, 0, 0), 0, vec4(0, 1, 0, 0));
         }
-        uint id = (sqrt(lc2)/lm > 0.5) ? v2f_id2 : v2f_id1;
+        int id = (sqrt(lc2)/lm > 0.5) ? v2f_id2 : v2f_id1;
         
         vec4 ndc2 = _P * vec4(pf, 1);
         ndc2 /= ndc2.w;
         gl_FragDepth = ndc2.z * 0.5 + 0.5;
         
-        Output(uvec4(id, id2, 0, 0), pf - cf, vec3(0.3, 0.3, 0.3), 0.5, vec4(0, 0, 0, 0));
-	}
+        float et = sqrt(lc2)/lm;
+        SetColor(v2f_id1, v2f_id2, mix(round(et), et, usegrad));
+        outId = uvec4(id, id2, 0, 0);
+        outNormal.xyz = normalize(pf - cf);
+    }
 }

@@ -23,7 +23,7 @@ public:
 	PROGDEF_H(reflProg, 15);
 	PROGDEF_H(reflCProg, 10);
 	PROGDEF_H(parProg, 10);
-	PROGDEF_H(parConProg, 10);
+	PROGDEF_H(parConProg, 15);
 	PROGDEF_H(parConLineProg, 10);
 	PROGDEF_H(selHlProg, 5);
 	PROGDEF_H(colProg, 10);
@@ -100,7 +100,7 @@ public:
 	static void Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h);
 
 	//colPallete to gbuffer
-	static void Recolor();
+	//static void Recolor();
 
 	//gbuffers to screen
 	static void Reblit();

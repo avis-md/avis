@@ -90,6 +90,7 @@ void Particles::UpdateColorTex() {
 	glBindTexture(GL_TEXTURE_2D, colorPalleteTex);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 16, 16, GL_RGB, GL_FLOAT, colorPallete);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	Scene::dirty = true;
 }
 
 void Particles::Clear() {

@@ -1,6 +1,11 @@
 #pragma once
 #include "Engine.h"
 
+enum GBUFFER : GLenum {
+	GBUFFER_COLOR = GL_COLOR_ATTACHMENT0,
+	GBUFFER_ID,
+	GBUFFER_NORMAL
+};
 const byte NUM_EXTRA_TEXS = 3;
 
 typedef void(*onBlitFunc)();
@@ -27,9 +32,11 @@ public:
 	uint GetIdAt(uint x, uint y);
 	
 	onBlitFunc onPreBlit, onBlit;
-	GLuint d_fbo, d_colfbo, d_texs[4], d_idTex, d_depthTex, d_colTex;
-	GLuint d_fbo2, d_texs2[4], d_depthTex2, _d_fbo, _d_texs[4], _d_depthTex;
-	GLuint d_tfbo[NUM_EXTRA_TEXS], d_ttexs[NUM_EXTRA_TEXS];
+	struct TexGroup {
+		GLuint fbo, colTex, idTex, normTex, depthTex;
+		void Clear();
+	} texs, texs2, _texs;
+	GLuint blitFbos[NUM_EXTRA_TEXS], blitTexs[NUM_EXTRA_TEXS];
 	uint d_w, d_h, d_w2, d_h2, _d_w, _d_h, _w, _h;
 	bool useGBuffer2, applyGBuffer2;
 	void GenGBuffer2();

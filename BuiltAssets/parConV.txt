@@ -11,8 +11,8 @@ uniform usamplerBuffer connTex;
 uniform float radScl;
 uniform float orthoSz;
 
-flat out uint v2f_id1;
-flat out uint v2f_id2;
+flat out int v2f_id1;
+flat out int v2f_id2;
 out vec3 v2f_wpos1;
 out vec3 v2f_wpos2;
 out float v2f_scl;
@@ -33,8 +33,8 @@ void main(){
 
     uint id1 = texelFetch(connTex, pid * 2).r;
     uint id2 = texelFetch(connTex, pid * 2 + 1).r;
-    v2f_id1 = id1 + 1U;
-    v2f_id2 = id2 + 1U;
+    v2f_id1 = int(id1) + 1;
+    v2f_id2 = int(id2) + 1;
 	vec3 pos1 = texelFetch(posTex, int(id1)).rgb;
 	vec3 pos2 = texelFetch(posTex, int(id2)).rgb;
 	if (len2(pos2 - pos1) > maxDst2) {
