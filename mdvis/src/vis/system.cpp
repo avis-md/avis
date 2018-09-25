@@ -344,7 +344,11 @@ bool VisSystem::Load(const std::string& path) {
 		ParGraphics::Deserialize(n);
 		AnWeb::Deserialize(n);
 		Debug::Message("System", "Load complete");
-		RunCmd::Run(EXPPATH "rm -r \"" + currentSavePath2 + "\"");
+#ifdef PLATFORM_WIN
+		RunCmd::Run("rd /S /Q \"" + currentSavePath2 + "\"");
+#else
+		RunCmd::Run("rm -r \"" + currentSavePath2 + "\"");
+#endif
 		currentSavePath = "";
 		return true;
 	}
