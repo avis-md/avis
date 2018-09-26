@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <cstring>
 
 #ifndef NO_EXPORT_IMP
 #ifdef _WIN32

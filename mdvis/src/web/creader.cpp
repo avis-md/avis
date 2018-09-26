@@ -41,7 +41,7 @@ void CReader::Init() {
 	}
 #else
 	gpp = VisSystem::envs["GPP"];
-	auto res = RunCmd::Run(gpp + " -v &> /dev/null");
+	auto res = RunCmd::Run("command -v " + gpp + " &> /dev/null");
 	if (res == 0)
 		AnWeb::hasC = true;
 	else
@@ -51,7 +51,7 @@ void CReader::Init() {
 	useOMP2 = (VisSystem::prefs["ANL_USE_OPENMP_LIB"] == "true");
 
 	if (AnWeb::hasC && !useMsvc && !IO::HasFile(IO::path + "res/noterminate.o")) {
-		std::string cmd = gpp + " -std=c++11 -c -o \""
+		std::string cmd = gpp + " -std=c++11 -fPIC -c -o \""
 			+ IO::path + "res/noterminate.o\" \""
 			+ IO::path + "res/noterminate.cpp\"";
 		RunCmd::Run(SETPATH cmd);

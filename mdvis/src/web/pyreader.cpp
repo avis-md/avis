@@ -7,8 +7,12 @@
 #endif
 
 void PyReader::Init() {
-#ifdef PLATFORM_OSX
+#ifndef PLATFORM_WIN
+#ifdef PLATFORM_LNX
+	//auto lib = dlopen("libpython3.6m.so", RTLD_LAZY | RTLD_GLOBAL);
+#else
 	//auto lib = dlopen("/Library/Frameworks/Python.framework/Versions/3.6/Python", RTLD_NOW | RTLD_GLOBAL);
+#endif
 	if (dlsym(RTLD_DEFAULT, "Py_Initialize")) {
 #endif
 	static std::string pyenv = VisSystem::envs["PYENV"];
@@ -56,7 +60,7 @@ void PyReader::Init() {
 #endif
 		Debug::Warning("Python", "Cannot initialize python! PYTHONPATH env is: " + env);
 	}
-#ifdef PLATFORM_OSX
+#ifndef PLATFORM_WIN
 	} else {
 		Debug::Warning("Python", "Python3.6 framework not loaded!");
 	}

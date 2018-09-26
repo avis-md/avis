@@ -142,7 +142,7 @@ bool FReader::Read(FScript* scr) {
 			#ifdef PLATFORM_WIN
 				"-static-libstdc++ -static-libgcc -Wl,--export-all-symbols "
 			#else
-				"-lc++ "
+				//"-lc++ "
 			#endif
 			"-fPIC \"" + IO::path + "res/noterminate.o\" -o \""
 				+ fp2 + nm + ".so\" \"" + fp + "_temp__.f90\" -lgfortran 2> \"" + fp2 + nm + "_log.txt\"";

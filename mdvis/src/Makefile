@@ -13,20 +13,21 @@ RRAYL := -L$(RRAYPRE)/build/Calc -L$(RRAYPRE)/build/CLW -L../build
 
 ifeq ($(UNAME_S),Linux)
 	OSFLAG += -D PLATFORM_LNX
-	LDFLAGS2 += -Wl,-rpath='$$ORIGIN' -static-libstdc++
-	GLLIB += -ljpeg -lssh2 -lOpenCL `pkg-config --static --libs gl glew glfw3 freetype2`
-	PYLIB += $(shell python3-config --libs)
+	LDFLAGS2 += -Wl,-rpath='$$ORIGIN' -static-libstdc++ -Wl,--warn-unresolved-symbols
+	GLLIB += /usr/lib/x86_64-linux-gnu/libjpeg.a -lssh2 -lOpenCL `pkg-config --static --libs gl glew glfw3 freetype2`
+	#PYLIB += $(shell python3-config --configdir)/libpython3.6m.a -lexpat
+	PYLIB += -L../build -lpython3
 	NUMPY +=  -I/usr/local/lib/python3.6/dist-packages/numpy/core/include
 endif
 ifeq ($(UNAME_S),Darwin)
 	OSFLAG += -D PLATFORM_OSX
 	GLLIB += -framework OpenGL -framework OpenCL /usr/local/Cellar/glew/2.1.0/lib/libGLEW.a /usr/local/Cellar/jpeg/9c/lib/libjpeg.a /usr/local/Cellar/freetype/2.9.1/lib/libfreetype.a /usr/local/Cellar/libpng/1.6.34/lib/libpng.a -lbz2 -lglfw3 -framework Cocoa -framework IOKit -framework CoreVideo
 	LIBS2 += /usr/local/Cellar/libssh2/1.8.0/lib/libssh2.a /usr/local/Cellar/openssl/1.0.2o_1/lib/libcrypto.a
-	LIBS2 += $(RRAYL) -lCalc -lCLW -lRadeonRays
 	WEAK_LIB += -weak_library
 	PYLIB += $(shell python3-config --configdir)/libpython3.6m.a
 	NUMPY +=  -I/usr/local/lib/python3.6/site-packages/numpy/core/include
 endif
+LIBS2 += $(RRAYL) -lCalc -lCLW -lRadeonRays
 
 C = gcc
 CXX = g++
@@ -66,8 +67,13 @@ HEADERSX = xdrfile/xdrfile.h xdrfile/xdrfile_trr.h xdrfile/xdrfile_xtc.h
 ../build/mdvis: $(OBJS)
 ifeq ($(UNAME_S),Darwin)
 	cp $(RRAYPRE)/build/bin/libRadeonRays.dylib ../build/libRadeonRays.dylib
-endif
 	$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
+endif
+ifeq ($(UNAME_S),Linux)
+	cp $(RRAYPRE)/build/bin/libRadeonRays.so ../build/libRadeonRays.so
+	$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
+	# | grep -v "reference to \`Py"
+endif
 ifeq ($(UNAME_S),Darwin)
 	install_name_tool -add_rpath "@executable_path" ../build/mdvis
 	install_name_tool -change $(shell python3-config --exec)/Python @rpath/../3.6/Python ../build/mdvis
