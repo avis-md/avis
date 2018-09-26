@@ -5,21 +5,24 @@ in float v2f_chpos;
 
 uniform int proId;
 
-layout (location=0) out ivec4 outId; //rgba
-layout (location=1) out vec4 outNormal; //xyz []
-layout (location=2) out vec4 outSpec; //spec gloss
-layout (location=3) out vec4 outEmi; //emi occlu
+uniform vec3 col;
+uniform int usegrad;
+uniform vec4 gradcols[3];
 
-void Output(ivec4 col, vec3 norm, vec3 spec, float gloss, vec4 emi) {
-	outId = col;
-	outNormal.rgb = normalize(norm);
-	outNormal.a = 0;
-	outSpec.rgb = spec;
-	outSpec.a = gloss;
-	outEmi = emi;
+layout (location=0) out vec4 outColor;
+layout (location=1) out uvec4 outId;
+layout (location=2) out vec4 outNormal;
+
+vec3 gradfill(float f) {
+	return (gradcols[0].rgb * clamp(2 - 4 * f, 0, 1)
+		+ gradcols[1].rgb * clamp(2 - abs(2 - 4 * f), 0, 1)
+		+ gradcols[2].rgb * clamp(4 * f - 2, 0, 1));
 }
 
 void main()
 {
-	Output(ivec4(int(v2f_chpos*65535),proId + 65536,0,0), v2f_normal.xyz, vec3(0.2, 0.2, 1), 1, vec4(0, 0, 0, 0));
+	outColor.rgb = mix(col, gradfill(v2f_chpos), usegrad);
+	outColor.a = 1;
+	outId = uvec4(uint(v2f_chpos*65535),proId + 65536,0,0);
+	outNormal.xyz = normalize(v2f_normal);
 }
