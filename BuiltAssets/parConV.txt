@@ -11,6 +11,17 @@ uniform usamplerBuffer connTex;
 uniform float radScl;
 uniform float orthoSz;
 
+layout (std140) uniform clipping {
+    vec4 clip_planes[6];
+};
+bool clipped(vec3 pos) {
+    for (int a = 0; a < 6; a++) {
+        if (dot(pos, clip_planes[a].xyz) > clip_planes[a].w)
+            return true;
+    }
+    return false;
+}
+
 flat out int v2f_id1;
 flat out int v2f_id2;
 out vec3 v2f_wpos1;
@@ -70,6 +81,11 @@ void main(){
 
 	wpos = _MV*vec4(pos2, 1);
     v2f_wpos2 = wpos.xyz / wpos.w;
+	if (clipped(v2f_wpos1) || clipped(v2f_wpos2)) {
+		gl_Position = vec4(-1, -1, -1, 1);
+		return;
+	}
+
     spos = _P*wpos;
 	vec2 spos2 = spos.xy / spos.w;
 	if (orthoSz < 0) {

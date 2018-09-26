@@ -133,9 +133,7 @@ void VisSystem::Init() {
 	mi[3].Set(Icons::openfile, _("Import"), []() {
 		ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
 	});
-	mi[4].Set(Icons::openfile, _("Import Recent"), []() {
-		ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
-	});
+	mi[4].Set(Icons::openfile, _("Import Recent"), 0);
 	auto& mi2 = menuItems[3];
 	mi2.resize(5);
 	mi2[0].Set(0, "Image (GLSL)", []() {

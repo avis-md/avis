@@ -210,6 +210,8 @@ void ParGraphics::Init() {
 	LC(screenSize); LC(posTex); LC(connTex);
 	LC(id2); LC(radScl); LC(orthoSz);
 	LC(id2col); LC(colList); LC(usegrad);
+	bid = glGetUniformBlockIndex(parConProg, "clipping");
+	glUniformBlockBinding(parConProg, bid, _clipBindId);
 #undef LC
 
 	parConLineProg = Shader::FromVF(IO::GetText(IO::path + "parConV_line.txt"), IO::GetText(IO::path + "parConF_line.txt"));
