@@ -150,8 +150,8 @@ void ParMenu::Draw_List(float off) {
 	}
 	Engine::BeginStencil(0, off, expandPos, Display::height - 18 - off);
 	if (Rect(0, off, expandPos, Display::height - 18 - off).Inside(Input::mousePos)) {
-		_off -= Input::mouseScroll * 20;
-		_off = min(_off, 0.0f);
+		_off += Input::mouseScroll * 20;
+		_off = max(_off, 0.0f);
 	}
 	off -= _off;
 	float mof = off;

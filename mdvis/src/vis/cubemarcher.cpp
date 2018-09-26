@@ -148,7 +148,7 @@ void CubeMarcher::Draw(const Mat4x4& _mv, const Mat4x4& _p) {
 	glBindTexture(GL_TEXTURE_BUFFER, lookupTex);
 	glUniform1i(dph, 3);
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_depthTex);
+	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->texs.depthTex);
 	glUniform4f(cl, 1, 0, 0, 1);
 	glDrawArrays(GL_POINTS, 0, _res*_res*_res);
 	glBindVertexArray(0);

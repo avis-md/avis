@@ -127,7 +127,7 @@ void Shadows::Rerender() {
 	glViewport(0, 0, _sz, _sz);
 	ParGraphics::Rerender(cpos, glm::normalize(pos - cpos), (float)_sz, (float)_sz);
 	glViewport(0, 0, Display::frameWidth, Display::frameHeight);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->d_fbo);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->texs.fbo);
 	isPass = false;
 }
 
@@ -139,10 +139,10 @@ void Shadows::Reblit() {
 	glUniform2f(_progLocs[1], (float)Display::actualWidth, (float)Display::actualHeight);
 	glUniform1i(_progLocs[2], 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, cam->d_texs[1]);
+	glBindTexture(GL_TEXTURE_2D, cam->texs.normTex);
 	glUniform1i(_progLocs[3], 1);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, cam->d_depthTex);
+	glBindTexture(GL_TEXTURE_2D, cam->texs.depthTex);
 	glUniform1i(_progLocs[4], 2);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, _dtex);

@@ -78,7 +78,7 @@ byte Effects::SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLui
 	glBindTexture(GL_TEXTURE_2D, tx3);
 	glUniform1i(ssaoProg2Locs[2], 2);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->d_depthTex);
+	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->texs.depthTex);
 	glUniform1f(ssaoProg2Locs[3], str);
 	glUniform2f(ssaoProg2Locs[4], (float)w, (float)h);
 

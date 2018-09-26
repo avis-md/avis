@@ -41,6 +41,8 @@ public:
 	static float rotWs, rotZs;
 	static float rotScale;
 
+	static Mesh* arrowMesh;
+
 	static enum class CLIPPING {
 		NONE,
 		PLANE,
@@ -90,7 +92,8 @@ public:
 		static void Deserialize(XmlNode* nd);
 	};
 
-	static void Init(), UpdateDrawLists();
+	static void Init(), InitClippingMesh();
+	static void UpdateDrawLists();
 
 	static void FillRad(byte* rads);
 

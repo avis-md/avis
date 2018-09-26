@@ -47,7 +47,6 @@ void main () {
         fragCol.rgb = bgCol;
     }
     else if (length(nCol.xyz) == 0) {
-        //fragCol.rgb = bgCol;
         fragCol.rgb = dCol.rgb;
     }
     else {

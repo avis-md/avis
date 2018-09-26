@@ -14,8 +14,7 @@
 byte Protein::proCnt = 0;
 Protein* Protein::pros;
 
-GLuint Protein::shad, Protein::colShad;
-GLint Protein::shadLocs[], Protein::colShadLocs[];
+PROGDEF(Protein::shad);
 
 Protein::Protein() : cnt(0), chainReso(8), loopReso(20), expanded(false), visible(true), drawGrad(false) {}
 
@@ -71,14 +70,9 @@ void Protein::Init() {
 	LC(loopReso);
 	LC(proId);
 	LC(beziery);
-#undef LC
-	colShad = Shader::FromVF(glsl::minVert, glsl::colererFragPro);
-	i = 0;
-#define LC(nm) colShadLocs[i++] = glGetUniformLocation(colShad, #nm);
-	LC(idTex);
-	LC(screenSize);
-	LC(proId);
 	LC(col);
+	LC(usegrad);
+	LC(gradcols);
 #undef LC
 }
 
@@ -223,7 +217,7 @@ bool Protein::Refresh() {
 void Protein::ApplyChain() {
 	for (uint i = 0; i < cnt * 3; i++) {
 		auto& p1 = Particles::particles_Pos[chain[i * 2]];
-		for (uint j = 0; j < cnt * 3; i++) {
+		for (uint j = 0; j < cnt * 3; j++) {
 			if (j < (i - 3) || j >(i + 3)) {
 				auto& p2 = Particles::particles_Pos[chain[j * 2]];
 				if (glm::length2(p1 - p2) < 33) {
@@ -267,40 +261,16 @@ void Protein::Draw() {
         glUniform1i(shadLocs[6], p.loopReso);
 		glUniform1i(shadLocs[7], b);
 		glUniform1f(shadLocs[8], p.smoothness);
+		glUniform3f(shadLocs[9], p.tint.r, p.tint.g, p.tint.b);
+		glUniform1i(shadLocs[10], p.drawGrad);
+		glUniform4fv(shadLocs[11], 3, &ParGraphics::gradCols[0][0]);
 
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glBindVertexArray(Camera::emptyVao);
         glDrawArrays(GL_TRIANGLES, 0, 6 * (p.cnt * 3 - 1) * p.chainReso * p.loopReso);
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        //*/
         glBindVertexArray(0);
         glUseProgram(0);
     }
 	glDisable(GL_CULL_FACE);
-}
-
-void Protein::Recolor() {
-	if (!proCnt) return;
-	auto cam = ChokoLait::mainCamera.raw();
-
-	glUseProgram(colShad);
-	glUniform1i(colShadLocs[0], 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, cam->d_idTex);
-	glUniform2f(colShadLocs[1], Display::width * cam->quality, Display::height * cam->quality);
-
-	for (byte b = 0; b < proCnt; b++) {
-		auto& p = pros[b];
-		if (p.drawGrad) continue;
-		glUniform1i(colShadLocs[2], b);
-		glUniform4f(colShadLocs[3], p.tint.r, p.tint.g, p.tint.b, 1);
-
-		glBindVertexArray(Camera::emptyVao);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-	}
-
-	glUseProgram(0);
-	glBindVertexArray(0);
 }
 
 void Protein::DrawMenu(float off) {
@@ -335,6 +305,16 @@ void Protein::DrawMenu(float off) {
 		}
 		if (Engine::Button(exp - 18, off, 16, 16, p.visible ? Icons::visible : Icons::hidden) == MOUSE_RELEASE) {
 			p.visible = !p.visible;
+			Scene::dirty = true;
+		}
+		static bool _drawGrad;
+		if (_drawGrad != p.drawGrad) {
+			_drawGrad = p.drawGrad;
+			Scene::dirty = true;
+		}
+		static Vec4 _tint;
+		if (_tint != p.tint) {
+			_tint = p.tint;
 			Scene::dirty = true;
 		}
 		off += 17;

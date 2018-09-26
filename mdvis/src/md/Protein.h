@@ -48,8 +48,7 @@ public:
 
     static void Init(), Clear();
     static bool Refresh();
-    static void Draw(), Recolor(), DrawMenu(float off);
+    static void Draw(), DrawMenu(float off);
 
-    static GLuint shad, colShad;
-    static GLint shadLocs[10], colShadLocs[6];
+    PROGDEF_H(shad, 15);
 };

@@ -51,6 +51,8 @@ float ParGraphics::rotW = 0, ParGraphics::rotZ = 0;
 float ParGraphics::rotWs = 0, ParGraphics::rotZs = 0;
 float ParGraphics::rotScale = 0;
 
+Mesh* ParGraphics::arrowMesh;
+
 ParGraphics::CLIPPING ParGraphics::clippingType, ParGraphics::_clippingType;
 ParGraphics::ClipPlane ParGraphics::clipPlane = {};
 ParGraphics::ClipCube ParGraphics::clipCube = {};
@@ -249,6 +251,25 @@ void ParGraphics::Init() {
 	Eff::ssaoRad = 0.015f;
 	Eff::ssaoStr = 1;
 	Eff::ssaoBlur = 0;
+
+	InitClippingMesh();
+}
+
+void ParGraphics::InitClippingMesh() {
+	Vec3 pts[14];
+	for (int a = 0; a < 4; a++) {
+		pts[a] = Vec3(cosf(a*PI/2), sinf(a*PI/2), 0) * 0.05f;
+		pts[a+4] = pts[a];
+		pts[a+8] = pts[a]*3.0f;
+		pts[a+8].z = pts[a+4].z = 0.5f;
+	}
+	pts[13] = Vec3(0, 0, 0.6f);
+	int ids[36] = {
+		0,4,1,4,5,1,	1,5,2,5,6,2,
+		2,6,3,6,7,3,	3,7,0,7,4,0,
+		8,12,9, 9,12,10, 10,12,11, 11,12,9
+	};
+	arrowMesh = new Mesh(13, pts, 0, 36, ids);
 }
 
 void ParGraphics::UpdateDrawLists() {
@@ -691,72 +712,6 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		}
 	}
 }
-
-/*
-void ParGraphics::Recolor() {
-	auto cam = ChokoLait::mainCamera.raw();
-
-	if (Particles::palleteDirty) {
-		glBindBuffer(GL_ARRAY_BUFFER, Particles::colIdBuffer);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, Particles::particleSz * sizeof(byte), Particles::particles_Col);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		Particles::palleteDirty = false;
-	}
-
-	glViewport(0, 0, int(Display::width * cam->quality), int(Display::height * cam->quality));
-
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, cam->d_colfbo);
-
-
-	glUseProgram(colProg);
-	glUniform1i(colProgLocs[0], 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, cam->d_idTex);
-	glUniform1i(colProgLocs[1], 1);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, cam->d_texs[2]);
-	glUniform2f(colProgLocs[2], Display::width * cam->quality, Display::height * cam->quality);
-	glUniform1i(colProgLocs[3], 2);
-	glActiveTexture(GL_TEXTURE2);
-	if (useGradCol) {
-		auto prm = Particles::particles_Params[gradColParam];
-		if (prm->dirty) prm->Update();
-		glBindTexture(GL_TEXTURE_BUFFER, prm->texBuf);
-	}
-	else glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
-	glUniform1i(colProgLocs[4], 3);
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
-	glUniform1i(colProgLocs[5], useGradCol? 1 : 0);
-	glUniform4fv(colProgLocs[6], 3, &gradCols[0][0]);
-	glUniform1ui(colProgLocs[7], 0);
-	auto col = Particles::particles_Conn.col;
-	glUniform4f(colProgLocs[8], col.r, col.g, col.b, Particles::particles_Conn.usecol? 1.0f : 0.0f);
-	
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-	glBindVertexArray(Camera::emptyVao);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	uint a = 5;
-	for (auto& c2 : Particles::particles_Conn2) {
-		if (c2.usecol) {
-			glUniform1ui(colProgLocs[7], a);
-			glUniform4f(colProgLocs[8], c2.col.r, c2.col.g, c2.col.b, 1);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-		}
-		a++;
-	}
-
-	glUseProgram(0);
-	glBindVertexArray(0);
-
-	Protein::Recolor();
-	glViewport(0, 0, Display::frameWidth, Display::frameWidth);
-}
-*/
 
 void ParGraphics::Reblit() {
 	auto cam = ChokoLait::mainCamera().get();
