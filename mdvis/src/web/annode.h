@@ -24,7 +24,7 @@ public:
 	uint id;
 	static float width;
 	std::string title;
-	Vec3 titleCol = Vec3(0.35f, 0.35f, 0.35f);
+	Vec3 titleCol = Vec3(0.35f);
 	static Vec4 bgCol;
 
 	bool expanded = true;

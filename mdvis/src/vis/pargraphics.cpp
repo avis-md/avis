@@ -473,8 +473,8 @@ void ParGraphics::Update() {
 			SetTexParams<>(0, GL_REPEAT, GL_MIRRORED_REPEAT);
 			glBindTexture(GL_TEXTURE_2D, 0);
 			delete[](d);
-			delete[](dv);
 		}
+		delete[](dv);
 		d = hdr::read_hdr((pth + "diffuse.hdr").c_str(), &_w, &_h);
 		if (d) {
 			dv = new float[_w*_h * 3];

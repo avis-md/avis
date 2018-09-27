@@ -232,21 +232,88 @@ float AnNode::DrawSide() {
 			UI::Quad(pos.x, y, width, 2.0f + 17 * cnt, bgCol);
 			for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 				UI::Label(pos.x + 2, y, 12, script->invars[i].first, white());
-				if (!inputR[i].first) {
-					auto& vr = script->invars[i].second;
-					auto isi = (vr == "int");
-					if (isi || (vr == "float")) {
-						std::string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].f);
-						s = UI::EditText(pos.x + width * 0.4f, y, width * 0.6f - 3, 16, 12, white(1, 0.5f), s, true, white());
-						if (isi) inputVDef[i].i = TryParse(s, 0);
-						else inputVDef[i].f = TryParse(s, 0.0f);
+				auto& vr = script->invars[i].second;
+				auto isi = (vr == "int");
+				if (isi || (vr == "double")) {
+					if (script->invaropts[i].isEnum) {
+						static Popups::DropdownItem di;
+						if (Engine::Button(pos.x + width * 0.33f, y, width * 0.67f - 5, 16, white(1, 0.3f), script->invaropts[i].enums[inputVDef[i].i], 12, white()) == MOUSE_RELEASE) {
+							di.list = &script->invaropts[i].enums[0];
+							di.target = (uint*)&inputVDef[i].i;
+							Popups::type = POPUP_TYPE::DROPDOWN;
+							Popups::pos = Vec2(pos.x + width * 0.33f, y + 16);
+							Popups::pos2.x = width * 0.67f - 5;
+							Popups::data = &di;
+						}
+						UI::Texture(pos.x + width - 26, y, 16, 16, Icons::dropdown2);
 					}
 					else {
-						UI::Label(pos.x + width * 0.4f, y, 12, script->invars[i].second, white(0.3f));
+						std::string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].d);
+						s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 5, 16, 12, white(1, 0.5f), s, true, white());
+						if (isi) inputVDef[i].i = TryParse(s, 0);
+						else inputVDef[i].d = TryParse(s, 0.0);
 					}
 				}
 				else {
-					UI::Label(pos.x + width * 0.4f, y, 12, "<connected>", yellow());
+					auto& rf = inputR[i].first;
+					auto& rs = inputR[i].second;
+					static AnNode* tmp, *opt;
+					static int opi;
+					static Popups::DropdownItem di;
+					static std::vector<std::string> ss = { "None" };
+					static std::vector<int> ssi;
+					static uint si;
+					bool isme = (opt == this && opi == i);
+					std::string tt = isme ? 
+						(tmp? "Select variable" : "Select node") :
+						(rf ? rf->script->outvars[rs].first : "no input");
+					if (Engine::Button(pos.x + width * 0.33f, y, width * 0.67f - 5, 16, white(1, 0.3f), tt, 12, white(1, (rf && !isme)? 1 : 0.5f)) == MOUSE_RELEASE) {
+						tmp = nullptr; opt = this; opi = i;
+						ss.resize(2);
+						ss[1] = "Parameter";
+						for (int a = 0; a < id; a++)
+							ss.push_back(AnWeb::nodes[a]->title);
+						ss.push_back("");
+						di.list = &ss[0];
+						di.target = &si;
+						si = 0;
+						Popups::type = POPUP_TYPE::DROPDOWN;
+						Popups::pos = Vec2(pos.x + width * 0.33f, y + 16);
+						Popups::pos2.x = width * 0.67f - 5;
+						Popups::data = &di;
+					}
+					UI::Texture(pos.x + width - 21, y, 16, 16, Icons::dropdown2);
+					if (opt == this && opi == i) {
+						if (Popups::type == POPUP_TYPE::NONE) {
+							if (!di.seld) opt = nullptr;
+							else if (!si) rf = nullptr;
+							else if (!tmp) {
+								if (si > 1) { //TODO: implement parameters
+									rf = nullptr;
+									tmp = AnWeb::nodes[si-2];
+									ss.resize(1);
+									ssi.clear();
+									int k = 0;
+									for (auto& v : tmp->script->outvars) {
+										if (CanConn(v.second, script->invars[i].second)) {
+											ss.push_back(v.first);
+											ssi.push_back(k);
+										}
+										k++;
+									}
+									ss.push_back("");
+									di.list = &ss[0];
+									di.target = &si;
+									si = 0;
+									Popups::type = POPUP_TYPE::DROPDOWN;
+								}
+							}
+							else {
+								tmp->ConnectTo(ssi[si - 1], this, i);
+								opt = 0;
+							}
+						}
+					}
 				}
 			}
 		}

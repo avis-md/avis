@@ -58,7 +58,7 @@ void UI2::Color(float x, float y, uint w, const std::string& title, Vec4& col) {
 	UI::Texture(x + w * 2 - 18, y, 16, 16, Icons::colorwheel);
 }
 
-void UI2::File(float x, float y, uint w, const std::string& title, const std::string& fl, std::function<void(std::vector<std::string>)> func) {
+void UI2::File(float x, float y, uint w, const std::string& title, const std::string& fl, filecallback func) {
 	UI::Label(x, y, 12, "File", white());
 	w /= 2;
 	if (Engine::Button(x + w, y, w-1.0f, 16, white(1, 0.3f), fl, 12, white(0.5f)) == MOUSE_RELEASE) {

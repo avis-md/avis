@@ -35,6 +35,7 @@ public:
 
 		uint* target;
 		std::string* list;
+		bool seld;
 	};
 
     static POPUP_TYPE type;

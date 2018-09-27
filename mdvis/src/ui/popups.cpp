@@ -95,9 +95,11 @@ void Popups::DrawDropdown() {
 		if (Engine::Button(pos.x, pos.y + 16*a, pos2.x, 16, white(1, 0.2f), dt->list[a], 12, white()) == MOUSE_RELEASE) {
 			(*dt->target) = a;
 			Popups::type = POPUP_TYPE::NONE;
+			dt->seld = true;
 		}
 	}
 	if ((Input::mouse0State == 1) && !Engine::Button(pos.x, pos.y, pos2.x, 16.0f*n)) {
 		Popups::type = POPUP_TYPE::NONE;
+		dt->seld = false;
 	}
 }

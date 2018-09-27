@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine.h"
 
+//TODO: enable copy without pointers
 class Mesh {
 public:
 	Mesh(int vsz, Vec3* pos, Vec3* norm, int tsz, int* tri, bool sv = false);
@@ -11,7 +12,5 @@ public:
 
 	uint vertCount, triCount;
 
-	friend class Engine;
-protected:
 	GLuint vao, vbos[2], veo;
 };
