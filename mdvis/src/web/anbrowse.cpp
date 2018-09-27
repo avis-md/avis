@@ -23,11 +23,18 @@ void AnBrowse::DoScan(Folder* fo, const std::string& path, const std::string& in
 	for (auto f : ff) { \
 		if (cond) {\
 			Debug::Message("AnBrowse", "  file: " + f);\
-			auto scr = new hd##Script();\
-			fo->scripts.push_back(scr);\
-			scr->name = f.substr(0, f.size() - sz);\
-			scr->path = incPath + scr->name;\
-			scr->ok = hd##Reader::Read(scr);\
+			f = f.substr(0, f.size() - sz);\
+			auto iter = hd##Script::allScrs.find(f);\
+			if (iter != hd##Script::allScrs.end())\
+				Debug::Warning("AnBrowse", "Script name \"" + f + "\" already exists!");\
+			else {\
+				auto scr = new hd##Script();\
+				fo->scripts.push_back(scr);\
+				scr->name = f;\
+				scr->path = incPath + scr->name;\
+				scr->ok = hd##Reader::Read(scr);\
+				hd##Script::allScrs.emplace(f, scr);\
+			}\
 		}\
 	}
 

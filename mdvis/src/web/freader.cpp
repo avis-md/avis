@@ -299,9 +299,6 @@ bool FReader::Read(FScript* scr) {
 		}
 	}
 
-
-	FScript::allScrs.emplace(path, scr);
-
 	return true;
 }
 

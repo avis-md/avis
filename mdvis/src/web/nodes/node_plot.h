@@ -19,5 +19,7 @@ protected:
 	byte style;
 	int xid, yid;
 
-	std::vector<float> valXs, valYs;
+	std::vector<float> valXs;
+	std::vector<std::vector<float>> valYs;
+	std::vector<float*> _valYs;
 };

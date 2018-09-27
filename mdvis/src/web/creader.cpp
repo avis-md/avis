@@ -359,8 +359,6 @@ bool CReader::Read(CScript* scr) {
 		Debug::Warning("CReader", "Script has no output parameters!");
 	}
 
-	CScript::allScrs.emplace(path, scr);
-
 	return true;
 }
 

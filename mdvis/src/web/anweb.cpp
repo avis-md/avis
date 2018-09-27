@@ -9,7 +9,7 @@
 #include "vis/system.h"
 #endif
 
-//#define NO_REDIR_LOG
+#define NO_REDIR_LOG
 
 bool AnWeb::lazyLoad = true;
 
@@ -207,6 +207,8 @@ void AnWeb::Draw() {
 				}
 				else pn->canTile = false;
 				nodes.insert(nodes.begin() + iter + 1, pn);
+				for (int a = 0; a < nodes.size(); a++)
+					nodes[a]->id = a;
 			}
 			selScript = nullptr;
 		}
@@ -478,10 +480,10 @@ void AnWeb::Save(const std::string& s) {
 		for (size_t a = 0; a < nd->_connInfo.size(); a++) {
 			auto& c = nd->_connInfo[a];
 			auto n = nc->addchild("item");
+			SVS(name, c.mynm);
+			SVS(type, c.mytp);
 			SV(connd, c.cond);
 			if (c.cond) {
-				SVS(name, c.mynm);
-				SVS(type, c.mytp);
 				SV(tarid, c.tar->id);
 				SVS(tarname, c.tarnm);
 				SVS(tartype, c.tartp);
@@ -601,11 +603,11 @@ void AnWeb::Load(const std::string& s) {
 					if (c1.name != "item") continue;
 					AnNode::ConnInfo ci;
 					for (auto& cc : c1.children) {
-						if (cc.name == "connd") ci.cond = (cc.value == "1");
+						GTS(name, ci.mynm);
+						else GTS(type, ci.mytp);
+						else if (cc.name == "connd") ci.cond = (cc.value == "1");
 						else if (ci.cond) {
-							GTS(name, ci.mynm);
-							else GTS(type, ci.mytp);
-							else if (cc.name == "tarid") {
+							if (cc.name == "tarid") {
 								auto i = TryParse(cc.value, 0xffff);
 								if (i < cnt - 1) ci.tar = nodes[i];
 							}

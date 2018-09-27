@@ -29,7 +29,7 @@ void Node_Plot::DrawHeader(float& y) {
 void Node_Plot::DrawFooter(float& y) {
 	UI::Quad(pos.x, y, width, width, bgCol);
 	if (valXs.size()) {
-		plt::plot(pos.x + 12, y + 2, width - 14, width - 14, &valXs[0], &valYs[0], valXs.size(), UI::font, 10, white(1, 0.8f));
+		plt::plot(pos.x + 12, y + 2, width - 14, width - 14, &valXs[0], &_valYs[0], valXs.size(), _valYs.size(), UI::font, 10, white(1, 0.8f));
 	}
 	y += width;
 }
@@ -38,10 +38,17 @@ void Node_Plot::Execute() {
 #ifndef IS_ANSERVER
 	if (!inputR[0].first) return;
 	CVar& cv = inputR[0].first->conV[inputR[0].second];
+	if (!cv.value) return;
 	auto ds = cv.dimVals.size();
-	auto& sz = *cv.dimVals[0];
+	auto sz = *cv.dimVals[0];
+	auto sz2 = (cv.dimVals.size() > 1)? *cv.dimVals[1] : 1;
 	valXs.resize(sz);
-	valYs.resize(sz);
+	valYs.resize(sz2);
+	_valYs.resize(sz2);
+	for (int a = 0; a < sz2; a++) {
+		valYs[a].resize(sz);
+		_valYs[a] = &valYs[a][0];
+	}
 	if (ds == 1 || xid == -1) {
 		for (int i = 0; i < sz; i++) {
 			valXs[i] = (float)i;
@@ -71,32 +78,33 @@ void Node_Plot::Execute() {
 		}
 	}
 	if (ds == 2 && yid == -1) {
-		for (int i = 0; i < sz; i++) {
-			valYs[i] = (float)i;
+#define cs(_c, _t) case _c:\
+			for (int i = 0; i < sz; i++) {\
+				valYs[j][i] = (float)(*(_t**)cv.value)[i*sz2 + j];\
+			} break
+		for (int j = 0; j < sz2; j++) {
+			switch (cv.typeName[6]) {
+				cs('s', short);
+				cs('i', int);
+				cs('d', double);
+			default:
+				Debug::Warning("Plot", "Unexpected data type " + cv.typeName + "!");
+				valXs.clear();
+				return;
+			}
 		}
 	}
 	else {
+		_valYs.resize(1);
 		int j = (ds == 1) ? 0 : yid;
 		switch (cv.typeName[6]) {
-		case 's':
-			for (int i = 0; i < sz; i++) {
-				valYs[i] = (float)(*(short**)cv.value)[i*ds + j];
-			}
-			break;
-		case 'i':
-			for (int i = 0; i < sz; i++) {
-				valYs[i] = (float)(*(int**)cv.value)[i*ds + j];
-			}
-			break;
-		case 'd':
-			for (int i = 0; i < sz; i++) {
-				valYs[i] = (float)(*(double**)cv.value)[i*ds + j];
-			}
-			break;
+			cs('s', short);
+			cs('i', int);
+			cs('d', double);
 		default:
 			Debug::Warning("Plot", "Unexpected data type " + cv.typeName + "!");
 			valXs.clear();
-			break;
+			return;
 		}
 	}
 #endif

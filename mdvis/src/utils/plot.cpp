@@ -13,6 +13,20 @@ float plt::remapdata::Eval(float f) {
 }
 
 void plt::plot(float x, float y, float w, float h, float* dx, float* dy, uint cnt, Font* font, uint sz, Vec4 col) {
+	float* dy2[1] = { dy };
+	plot(x, y, w, h, dx, dy2, cnt, 1, font, sz, col);
+}
+
+void plt::plot(float x, float y, float w, float h, float* dx, float** dy, uint cnt, uint cnt2, Font* font, uint sz, Vec4 col) {
+	const float cols[] = {
+		0, 0, 0,
+		1, 0, 0,
+		0, 1, 0,
+		0, 0, 1,
+		1, 0.5f, 0,
+		0, 1, 1
+	};
+	
 	UI::Quad(x, y, w, h, black());
 	x += 2;
 	y += 2;
@@ -21,25 +35,29 @@ void plt::plot(float x, float y, float w, float h, float* dx, float* dy, uint cn
 	UI::Quad(x, y, w, h, white());
 
 	Vec3* poss = new Vec3[cnt];
-	float x1 = *dx, x2 = *dx, y1 = *dy, y2 = *dy;
-	for (uint i = 0; i < cnt; i++) {
-		if (x1 > dx[i]) x1 = dx[i];
-		if (x2 < dx[i]) x2 = dx[i];
-		if (y1 > dy[i]) y1 = dy[i];
-		if (y2 < dy[i]) y2 = dy[i];
+	float x1 = *dx, x2 = *dx, y1 = **dy, y2 = **dy;
+	for (uint j = 0; j < cnt2; j++) {
+		for (uint i = 0; i < cnt; i++) {
+			if (x1 > dx[i]) x1 = dx[i];
+			if (x2 < dx[i]) x2 = dx[i];
+			if (y1 > dy[j][i]) y1 = dy[j][i];
+			if (y2 < dy[j][i]) y2 = dy[j][i];
+		}
 	}
-	for (uint i = 0; i < cnt; i++) {
-		poss[i].x = ((x + ((dx[i] - x1) / (x2 - x1)) * w) / Display::width) * 2 - 1;
-		poss[i].y = 1 - ((y + (1 - (dy[i] - y1) / (y2 - y1)) * h) / Display::height) * 2;
-	}
-	UI::SetVao(cnt, poss);
+	for (uint j = 0; j < cnt2; j++) {
+		for (uint i = 0; i < cnt; i++) {
+			poss[i].x = ((x + ((dx[i] - x1) / (x2 - x1)) * w) / Display::width) * 2 - 1;
+			poss[i].y = 1 - ((y + (1 - (dy[j][i] - y1) / (y2 - y1)) * h) / Display::height) * 2;
+		}
+		UI::SetVao(cnt, poss);
 
-	glUseProgram(Engine::defProgram);
-	glUniform4f(Engine::defColLoc, 0.0f, 0.0f, 0.0f, 1.0f);
-	glBindVertexArray(UI::_vao);
-	glDrawArrays(GL_LINE_STRIP, 0, cnt);
-	glBindVertexArray(0);
-	glUseProgram(0);
+		glUseProgram(Engine::defProgram);
+		glUniform4f(Engine::defColLoc, cols[j*3], cols[j*3+1], cols[j*3+2], 1.0f);
+		glBindVertexArray(UI::_vao);
+		glDrawArrays(GL_LINE_STRIP, 0, cnt);
+		glBindVertexArray(0);
+		glUseProgram(0);
+	}
 
 	delete[](poss);
 

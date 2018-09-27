@@ -443,15 +443,21 @@ void AnNode::Reconn() {
 							if (ra->script->outvars[b].first == cn.tarnm) {
 								if (ra->script->outvars[b].second == cn.tartp) {
 									ra->ConnectTo(b, this, a);
-									break;
+									goto got;
 								}
 							}
 						}
 					}
-					break;
+					else goto got;
 				}
 			}
 		}
+		Debug::Message("AnNode", "skipping connection " + cn.tarnm + " -> " + cn.mynm);
+		for (size_t a = 0, sz = inputR.size(); a < sz; a++)
+			std::cout << script->invars[a].first << " " << script->invars[a].second << std::endl;
+		for (size_t b = 0, sz2 = cn.tar->outputR.size(); b < sz2; b++)
+			std::cout << cn.tar->script->outvars[b].first << " " << cn.tar->script->outvars[b].second << std::endl;
+		got:;
 	}
 }
 
@@ -652,10 +658,11 @@ void CNode::Execute() {
 				scr->Set(i, *(double*)cv.value);
 				break;
 			case AN_VARTYPE::LIST:
-				scr->Set(i, *(float**)cv.value);
+				scr->Set(i, *(uintptr_t*)cv.value);
 				
 				for (uint j = 0; j < mv.dimVals.size(); j++) {
-					*mv.dimVals[j] = *cv.dimVals[j];
+					auto loc = mv.dimVals[j];
+					*loc = *cv.dimVals[j];
 				}
 				break;
 			default:
