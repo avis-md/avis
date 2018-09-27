@@ -15,6 +15,10 @@
 #include "ocl/raytracer.h"
 #include "res/shddata.h"
 
+#define SCL_MIN -7.0f
+#define SCL_MAX 2.0f
+
+
 Texture* ParGraphics::bg = nullptr, *ParGraphics::splash = nullptr, *ParGraphics::logo = nullptr;
 GLuint ParGraphics::refl, ParGraphics::reflE;
 float ParGraphics::reflStr = 2, ParGraphics::reflStrDecay = 2, ParGraphics::specStr = 0.2f;
@@ -381,7 +385,7 @@ void ParGraphics::Update() {
 	if (!!Particles::particleSz && !UI::editingText && !UI::_layerMax) {
 		rotW = Clamp<float>(rotW, -90, 90);
 		rotZ = Repeat<float>(rotZ, 0, 360);
-		rotScale = Clamp(rotScale, -6.0f, 2.0f);
+		rotScale = Clamp(rotScale, SCL_MIN, SCL_MAX);
 
 		float s0 = rotScale;
 		float rz0 = rotZ;
@@ -436,7 +440,7 @@ void ParGraphics::Update() {
 				}
 				else {
 					rotScale += 0.05f * Input::mouseScroll;
-					rotScale = Clamp(rotScale, -6.0f, 2.0f);
+					rotScale = Clamp(rotScale, SCL_MIN, SCL_MAX);
 					zoomFade = 2;
 				}
 				ChokoLait::mainCamera->applyGBuffer2 = true;

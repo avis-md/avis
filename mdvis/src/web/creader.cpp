@@ -255,6 +255,7 @@ bool CReader::Read(CScript* scr) {
 		auto lns = string_split(ln, ' ', true);
 		int lnsz = lns.size();
 		if (!lnsz) continue;
+		bool ien = (lnsz > 1)? (lns[1] == "enum") : false; 
 		bool iso = (lns[0] == "//out");
 		if (lns[0] == "//in" || iso) {
 			std::vector<std::pair<std::string, std::string>>& cv = iso ? scr->outvars : scr->invars;
@@ -280,9 +281,23 @@ bool CReader::Read(CScript* scr) {
 				_ER("CReader", "Plain " + ios + " must be of non-pointer type!");
 				return false;
 			}
-			if (!ira && lnsz > 1) {
-				_ER("CReader", "" + ios + " with specified size must be of pointer type!");
+			else if (ien && (bk->typeName != "int" || ira)) {
+				_ER("CReader", "" + ios + " enum must be of int type!");
 				return false;
+			}
+			else if (ien && lnsz < 3) {
+				_ER("CReader", "" + ios + " enum has no options!");
+				return false;
+			}
+			if (!ira) {
+				if (lnsz > 1 && !ien) {
+					_ER("CReader", "" + ios + " with specified size must be of pointer type!");
+					return false;
+				}
+				else if (ien && iso) {
+					_ER("CReader", "" + ios + " cannot be an enum!");
+					return false;
+				}
 			}
 			if (!ira && !ParseType(bk->typeName, bk)) {
 				_ER("CReader", "arg type \"" + bk->typeName + "\" not recognized!");
@@ -307,6 +322,15 @@ bool CReader::Read(CScript* scr) {
 				bk->typeName = "list(" + std::to_string(lnsz-1) + bk->typeName[0] + ")";
 			}
 			cv.push_back(std::pair<std::string, std::string>(bk->name, bk->typeName));
+			if (!iso) {
+				scr->invaropts.push_back(VarOpt());
+				auto& opt = scr->invaropts.back();
+				opt.isEnum = ien;
+				if (ien) {
+					opt.enums.insert(opt.enums.end(), lns.begin() + 2, lns.end());
+					opt.enums.push_back("");
+				}
+			}
 
 			if (AnWeb::hasC) {
 				if (!(bk->value = scr->lib->GetSym(bk->name))) {

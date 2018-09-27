@@ -61,7 +61,8 @@
         "typeindex": "cpp",
         "__string": "cpp",
         "optional": "cpp",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "iostream": "cpp"
     },
     "python.linting.pylintEnabled": false
 }

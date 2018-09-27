@@ -118,10 +118,24 @@ void AnNode::Draw() {
 					auto& vr = script->invars[i].second;
 					auto isi = (vr == "int");
 					if (isi || (vr == "double")) {
-						std::string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].d);
-						s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, true, white());
-						if (isi) inputVDef[i].i = TryParse(s, 0);
-						else inputVDef[i].d = TryParse(s, 0.0);
+						if (script->invaropts[i].isEnum) {
+							static Popups::DropdownItem di;
+							if (Engine::Button(pos.x + width/2, y, width/2 - 10, 16, white(1, 0.3f), script->invaropts[i].enums[inputVDef[i].i], 12, white()) == MOUSE_RELEASE) {
+								di.list = &script->invaropts[i].enums[0];
+								di.target = (uint*)&inputVDef[i].i;
+								Popups::type = POPUP_TYPE::DROPDOWN;
+								Popups::pos = Vec2(pos.x + width/2, y + 16);
+								Popups::pos2.x = width/2 - 10;
+								Popups::data = &di;
+							}
+							UI::Texture(pos.x + width - 26, y, 16, 16, Icons::dropdown2);
+						}
+						else {
+							std::string s = std::to_string(isi ? inputVDef[i].i : inputVDef[i].d);
+							s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, true, white());
+							if (isi) inputVDef[i].i = TryParse(s, 0);
+							else inputVDef[i].d = TryParse(s, 0.0);
+						}
 					}
 					else {
 						UI::Label(pos.x + width * 0.33f, y, 12, script->invars[i].second, white(0.3f));

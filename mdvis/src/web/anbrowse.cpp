@@ -51,7 +51,7 @@ void AnBrowse::DoScan(Folder* fo, const std::string& path, const std::string& in
 void AnBrowse::Scan() {
 	Debug::Message("AnBrowse", "Scanning nodes folder...");
 	folder = Folder(_("Custom"));
-	DoScan(&folder, IO::path + "nodes", "");
+	DoScan(&folder, IO::path + "nodes/", "");
 	ErrorView::Refresh();
 }
 

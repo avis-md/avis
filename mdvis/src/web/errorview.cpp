@@ -150,9 +150,9 @@ void ErrorView::Draw() {
 			if (Engine::Button(0, y + a * 17, (float)Display::width, 17, white((a == descId) ? 0.1f : 0), white(0.2f), black(0.1f)) == MOUSE_RELEASE) {
 				if (Input::dbclick) {
 #ifdef PLATFORM_WIN
-					RunCmd::Run("\"" + IO::path + "nodes/" + err.path + "\"");
+					RunCmd::Run("\"" + err.path + "\"");
 #else
-					RunCmd::Run("open " + IO::path + "nodes/" + err.path);
+					RunCmd::Run("open " + err.path);
 #endif
 				}
 				else if (descId == a) descId = -1;

@@ -31,7 +31,7 @@ struct MenuItem {
 class Popups {
 public:
 	struct DropdownItem {
-		DropdownItem(uint* a, std::string* b) : target(a), list(b) {}
+		DropdownItem(uint* a = 0, std::string* b = 0) : target(a), list(b) {}
 
 		uint* target;
 		std::string* list;

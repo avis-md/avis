@@ -19,7 +19,7 @@ enum class AN_VARTYPE : byte {
 	LIST,
 	ID_RSL,
 	ID_RES,
-	ID_PAR,
+	ID_PAR
 };
 
 union _VarVal {
@@ -48,12 +48,19 @@ struct VarVal {
 	std::vector<int> dims;
 };
 
+struct VarOpt {
+	bool isEnum;
+	std::vector<std::string> enums;
+
+};
+
 class AnScript {
 public:
 	std::string name, path, libpath;
 	time_t chgtime;
 	AN_SCRTYPE type;
 	std::vector<std::pair<std::string, std::string>> invars, outvars;
+	std::vector<VarOpt> invaropts;
 	void* progress = 0;
 
 	std::vector<ErrorView::Message> compileLog;
