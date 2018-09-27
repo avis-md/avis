@@ -116,7 +116,7 @@ void ErrorView::Draw() {
 	UI::Texture(5, Display::height - 17.0f, 16, 16, Icons::compile);
 	auto csz = compileMsgs.size();
 	UI::Label(22, Display::height - 17.0f, 12, std::to_string(csz), (!csz) ? white(0.8f) : red());
-	if (Engine::Button(40, Display::height - 17, 35, 16, white(0), white(0.2f), black(0.2f)) == MOUSE_RELEASE) {
+	if (Engine::Button(40, Display::height - 17.0f, 35, 16, white(0), white(0.2f), black(0.2f)) == MOUSE_RELEASE) {
 		if (show && showExec) show = false;
 		else {
 			show = true;
@@ -124,9 +124,9 @@ void ErrorView::Draw() {
 		}
 		descId = -1;
 	}
-	UI::Texture(42, Display::height - 17, 16, 16, Icons::exec);
+	UI::Texture(42, Display::height - 17.0f, 16, 16, Icons::exec);
 	auto msz = execMsgs.size();
-	UI::Label(58, Display::height - 17, 12, std::to_string(msz), (!msz) ? white(0.8f) : red());
+	UI::Label(58, Display::height - 17.0f, 12, std::to_string(msz), (!msz) ? white(0.8f) : red());
 
 	if (show) {
 		float y = Display::height - 18.0f - windowSize;
@@ -140,7 +140,7 @@ void ErrorView::Draw() {
 			showExec = true;
 			descId = -1;
 		}
-		if (Engine::Button(Display::width - 18, y, 16, 16, Icons::cross) == MOUSE_RELEASE) {
+		if (Engine::Button(Display::width - 18.0f, y, 16, 16, Icons::cross) == MOUSE_RELEASE) {
 			show = false;
 		}
 		y += 19;

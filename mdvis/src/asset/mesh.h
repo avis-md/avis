@@ -12,7 +12,6 @@ public:
 	uint vertCount, triCount;
 
 	friend class Engine;
-	_allowshared(Mesh);
 protected:
 	GLuint vao, vbos[2], veo;
 };

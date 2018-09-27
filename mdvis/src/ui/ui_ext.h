@@ -15,7 +15,7 @@ public:
 	static float Slider(float x, float y, uint w, const std::string& title, float a, float b, float t, const std::string& lbl);
 	static void Color(float x, float y, uint w, const std::string& title, Vec4& col);
 	static void File(float x, float y, uint w, const std::string& title, const std::string& fl, std::function<void(std::vector<std::string>)> func);
-	static MOUSE_STATUS Button2(float x, float y, float w, const std::string& s, Texture* tex, Vec4 col = white(1, 0.4f), Vec4 col2 = white());
+	static MOUSE_STATUS Button2(float x, float y, float w, const std::string& s, const Texture& tex, Vec4 col = white(1, 0.4f), Vec4 col2 = white());
 	static void Dropdown(float x, float y, float w, const std::string& title, const Popups::DropdownItem& data);
 	static void Toggle(float x, float y, float w, const std::string& title, bool& val);
 	static void Switch(float x, float y, float w, const std::string& title, int c, std::string* nms, int& i);

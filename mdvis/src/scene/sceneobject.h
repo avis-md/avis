@@ -60,7 +60,6 @@ public:
 
 	friend class MeshFilter;
 	friend class Scene;
-	_allowshared(SceneObject);
 protected:
 	SceneObject(Vec3 pos, Quat rot = Quat(), Vec3 scale = Vec3(1, 1, 1));
 	SceneObject(std::string s = "New Object", Vec3 pos = Vec3(), Quat rot = Quat(), Vec3 scale = Vec3(1, 1, 1));

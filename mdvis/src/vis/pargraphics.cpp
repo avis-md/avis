@@ -19,7 +19,7 @@
 #define SCL_MAX 2.0f
 
 
-Texture* ParGraphics::bg = nullptr, *ParGraphics::splash = nullptr, *ParGraphics::logo = nullptr;
+Texture ParGraphics::bg, ParGraphics::splash, ParGraphics::logo;
 GLuint ParGraphics::refl, ParGraphics::reflE;
 float ParGraphics::reflStr = 2, ParGraphics::reflStrDecay = 2, ParGraphics::specStr = 0.2f;
 Vec4 ParGraphics::bgCol = Vec4(1, 1, 1, 1);
@@ -177,8 +177,8 @@ void ParGraphics::Init() {
 	reflNms.push_back("\0");
 	reflItms.list = &reflNms[0];
 
-	bg = new Texture(IO::path + "res/bg.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
-	splash = new Texture(IO::path + "res/bg_splash.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
+	bg = Texture(IO::path + "res/bg.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
+	splash = Texture(IO::path + "res/bg_splash.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	GLuint mv;
 	Shader::LoadShader(GL_VERTEX_SHADER, glsl::minVert, mv);
 	reflProg = Shader::FromF(mv, glsl::reflFrag);

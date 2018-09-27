@@ -245,15 +245,13 @@ void AnWeb::Draw() {
 		}
 	}
 	if (selScript) {
-		Texture* icon = 0;
+		Texture icon = icon = Icons::lang_ft;
 		if ((uintptr_t)selScript == 1)
 			icon = Icons::lightning;
 		else if (selScript->type == AN_SCRTYPE::C)
 			icon = Icons::lang_c;
 		else if (selScript->type == AN_SCRTYPE::PYTHON)
 			icon = Icons::lang_py;
-		else
-			icon = Icons::lang_ft;
 		UI::Texture(Input::mousePos.x - 16, Input::mousePos.y - 16, 32, 32, icon, white(0.3f));
 	}
 

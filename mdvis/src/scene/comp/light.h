@@ -45,7 +45,6 @@ public:
 
 	friend class Camera;
 	friend class Engine;
-	_allowshared(Light);
 protected:
 	Light(std::ifstream& stream, SceneObject* o, long pos = -1);
 

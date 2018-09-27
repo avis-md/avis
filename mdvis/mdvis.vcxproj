@@ -330,7 +330,6 @@
     <ClCompile Include="src\utils\plot.cpp" />
     <ClCompile Include="src\utils\random.cpp" />
     <ClCompile Include="src\utils\rect.cpp" />
-    <ClCompile Include="src\utils\solidify.cpp" />
     <ClCompile Include="src\utils\spline.cpp" />
     <ClCompile Include="src\utils\stream.cpp" />
     <ClCompile Include="src\utils\strext.cpp" />

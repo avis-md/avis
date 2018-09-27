@@ -89,7 +89,7 @@ public:
 protected:
 	AnNode(AnScript* scr);
 
-	static Texture* tex_circle_open, *tex_circle_conn;
+	static Texture tex_circle_open, tex_circle_conn;
 };
 
 class PyNode : public AnNode {

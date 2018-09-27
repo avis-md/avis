@@ -116,13 +116,11 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 			if (Engine::Button(2.0f + 5 * layer, off, 150.0f, 16.0f, white(1, 0.35f)) == MOUSE_RELEASE) {
 				AnWeb::selScript = fs;
 			}
-			Texture* icon = 0;
+			Texture& icon = Icons::lang_ft;
 			if (fs->type == AN_SCRTYPE::C)
 				icon = Icons::lang_c;
 			else if (fs->type == AN_SCRTYPE::PYTHON)
 				icon = Icons::lang_py;
-			else
-				icon = Icons::lang_ft;
 			UI::Texture(2.0f + 5 * layer, off, 16.0f, 16.0f, icon);
 			UI::Label(22.0f + 5 * layer, off, 12.0f, fs->name, white());
 			if (!fs->ok) {

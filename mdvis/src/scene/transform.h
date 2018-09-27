@@ -32,7 +32,6 @@ public:
 
 	friend class SceneObject;
 	friend class Armature;
-	_allowshared(Transform);
 private:
 	Transform() {}
 	void Init(pSceneObject& sc, Vec3 pos, Quat rot, Vec3 scl);

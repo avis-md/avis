@@ -198,52 +198,37 @@ void UI::Quad(float x, float y, float w, float h, GLuint tex, Vec4 col, Vec2 uv0
 	glUseProgram(0);
 }
 
-void UI::Texture(float x, float y, float w, float h, ::Texture* texture, DRAWTEX_SCALING scl, float miplevel) {
+void UI::Texture(float x, float y, float w, float h, const ::Texture& texture, DRAWTEX_SCALING scl, float miplevel) {
 	UI::Texture(x, y, w, h, texture, white(), scl, miplevel);
 }
-void UI::Texture(float x, float y, float w, float h, ::Texture* texture, float alpha, DRAWTEX_SCALING scl, float miplevel) {
+void UI::Texture(float x, float y, float w, float h, const ::Texture& texture, float alpha, DRAWTEX_SCALING scl, float miplevel) {
 	UI::Texture(x, y, w, h, texture, white(alpha), scl, miplevel);
 }
-void UI::Texture(float x, float y, float w, float h, ::Texture* texture, Vec4 tint, DRAWTEX_SCALING scl, float miplevel) {
-	if (!texture || !texture->loaded) return;
-	auto tex = texture->pointer;
-	if (!texture->tiled) {
-		if (scl == DRAWTEX_STRETCH)
-			UI::Quad(x, y, w, h, tex, tint, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));
-		else if (scl == DRAWTEX_FIT) {
-			float w2h = ((float)texture->width) / texture->height;
-			if (w / h > w2h)
-				UI::Quad(x + 0.5f*(w - h*w2h), y, h*w2h, h, tex, tint, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));
-			else
-				UI::Quad(x, y + 0.5f*(h - w / w2h), w, w / w2h, tex, tint, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));
-		}
-		else if (scl == DRAWTEX_CROP) {
-			float w2h = ((float)texture->width) / texture->height;
-			if (w / h > w2h) {
-				float dh = (1 - ((h * texture->width / w) / texture->height)) / 2;
-				UI::Quad(x, y, w, h, tex, tint, Vec2(0, 1-dh), Vec2(1, 1-dh), Vec2(0, dh), Vec2(1, dh));
-			}
-			else {
-				float dw = (1 - ((w * texture->height / h) / texture->width)) / 2;
-				UI::Quad(x, y, w, h, tex, tint, Vec2(dw, 1), Vec2(1 - dw, 1), Vec2(dw, 0), Vec2(1 - dw, 0));
-			}
+void UI::Texture(float x, float y, float w, float h, const ::Texture& texture, Vec4 tint, DRAWTEX_SCALING scl, float miplevel) {
+	if (!texture) return;
+	auto tex = texture.pointer;
+	if (scl == DRAWTEX_STRETCH)
+		UI::Quad(x, y, w, h, tex, tint, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));
+	else if (scl == DRAWTEX_FIT) {
+		float w2h = ((float)texture.width) / texture.height;
+		if (w / h > w2h)
+			UI::Quad(x + 0.5f*(w - h*w2h), y, h*w2h, h, tex, tint, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));
+		else
+			UI::Quad(x, y + 0.5f*(h - w / w2h), w, w / w2h, tex, tint, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));
+	}
+	else if (scl == DRAWTEX_CROP) {
+		float w2h = ((float)texture.width) / texture.height;
+		if (w / h > w2h) {
+			float dh = (1 - ((h * texture.width / w) / texture.height)) / 2;
+			UI::Quad(x, y, w, h, tex, tint, Vec2(0, 1-dh), Vec2(1, 1-dh), Vec2(0, dh), Vec2(1, dh));
 		}
 		else {
-			UI::Quad(x, y, w, h, tex, tint);
+			float dw = (1 - ((w * texture.height / h) / texture.width)) / 2;
+			UI::Quad(x, y, w, h, tex, tint, Vec2(dw, 1), Vec2(1 - dw, 1), Vec2(dw, 0), Vec2(1 - dw, 0));
 		}
 	}
 	else {
-		int ix = (int)floor(Repeat<float>(Time::time * texture->tileSpeed, 0.0f, (float)texture->tileSize.x));
-		int iy = (int)floor(Repeat<float>(Time::time * texture->tileSpeed / texture->tileSize.x, 0.0f, (float)texture->tileSize.y));
-		ix = min(ix, texture->tileSize.x - 1);
-		iy = min(iy, texture->tileSize.y - 1);
-		const float dx = 1.0f / texture->tileSize.x;
-		const float dy = 1.0f / texture->tileSize.y;
-		const float x1 = dx * ix;
-		const float x2 = dx * (ix + 1);
-		const float y1 = 1 - dy * (iy + 1);
-		const float y2 = 1 - dy * (iy);
-		UI::Quad(x, y, w, h, tex, tint, Vec2(x1, y2), Vec2(x2, y2), Vec2(x1, y1), Vec2(x2, y1));
+		UI::Quad(x, y, w, h, tex, tint);
 	}
 }
 

@@ -21,8 +21,8 @@ struct MenuItem {
 	std::vector<MenuItem> child;
 	CBK callback;
 
-	void Set(Texture* tex, const std::string& str, CBK cb) {
-		icon = tex? tex->pointer : 0;
+	void Set(const Texture& tex, const std::string& str, CBK cb) {
+		icon = tex? tex.pointer : 0;
 		label = str;
 		callback = cb;
 	}

@@ -1,24 +1,24 @@
 #include "icons.h"
 #include "res/resdata.h"
 
-Texture* Icons::expand, *Icons::collapse, *Icons::play, *Icons::playall, *Icons::pause,
-*Icons::left, *Icons::right, *Icons::up, *Icons::down, *Icons::cross, *Icons::visible, *Icons::hidden, *Icons::circle,
-*Icons::select, *Icons::deselect, *Icons::flipselect,
-*Icons::toolRot, *Icons::toolMov, *Icons::toolSel,
-*Icons::refresh, *Icons::checkbox, *Icons::browse, *Icons::dropdown2,
-*Icons::zoomIn, *Icons::zoomOut,
-*Icons::lang_c, *Icons::lang_py, *Icons::lang_ft, *Icons::lightning,
-*Icons::icon_anl, *Icons::log, *Icons::newfile, *Icons::openfile,
-*Icons::dm_none, *Icons::dm_point, *Icons::dm_ball, *Icons::dm_vdw, *Icons::dm_line, *Icons::dm_stick, *Icons::dm_lineball, *Icons::dm_stickball,
-*Icons::colorwheel,
-*Icons::vis_atom, *Icons::vis_prot,
-*Icons::pro_col, *Icons::pro_grad,
-*Icons::details, *Icons::compile, *Icons::exec;
+Texture Icons::expand, Icons::collapse, Icons::play, Icons::playall, Icons::pause,
+Icons::left, Icons::right, Icons::up, Icons::down, Icons::cross, Icons::visible, Icons::hidden, Icons::circle,
+Icons::select, Icons::deselect, Icons::flipselect,
+Icons::toolRot, Icons::toolMov, Icons::toolSel,
+Icons::refresh, Icons::checkbox, Icons::browse, Icons::dropdown2,
+Icons::zoomIn, Icons::zoomOut,
+Icons::lang_c, Icons::lang_py, Icons::lang_ft, Icons::lightning,
+Icons::icon_anl, Icons::log, Icons::newfile, Icons::openfile,
+Icons::dm_none, Icons::dm_point, Icons::dm_ball, Icons::dm_vdw, Icons::dm_line, Icons::dm_stick, Icons::dm_lineball, Icons::dm_stickball,
+Icons::colorwheel,
+Icons::vis_atom, Icons::vis_prot,
+Icons::pro_col, Icons::pro_grad,
+Icons::details, Icons::compile, Icons::exec;
 
-#define TEXN(nm) new Texture(res::nm ## _png, res::nm ## _png_sz)
-#define TEX(nm) nm = new Texture(res::nm ## _png, res::nm ## _png_sz)
-#define TEXNP(nm) new Texture(res::nm ## _png, res::nm ## _png_sz, TEX_FILTER_POINT)
-#define TEXP(nm) nm = new Texture(res::nm ## _png, res::nm ## _png_sz, TEX_FILTER_POINT)
+#define TEXN(nm) Texture(res::nm ## _png, res::nm ## _png_sz)
+#define TEX(nm) nm = Texture(res::nm ## _png, res::nm ## _png_sz)
+#define TEXNP(nm) Texture(res::nm ## _png, res::nm ## _png_sz, TEX_FILTER_POINT)
+#define TEXP(nm) nm = Texture(res::nm ## _png, res::nm ## _png_sz, TEX_FILTER_POINT)
 
 void Icons::Init() {
 	TEXP(expand);
@@ -72,7 +72,7 @@ void Icons::Init() {
 	TEX(exec);
 }
 
-Texture* Icons::OfDM(byte b) {
+const Texture& Icons::OfDM(byte b) {
 	switch (b) {
 		case 0x01: return dm_point;
 		case 0x02: return dm_ball;

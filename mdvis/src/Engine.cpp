@@ -196,10 +196,10 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4,
 	}
 	return (inside && (UI::_layer == UI::_layerMax || UI::ignoreLayers)) ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
 }
-MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Texture* texture, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, float uvx, float uvy, float uvw, float uvh) {
-	if (!texture || !texture->loaded) return MOUSE_NONE;
+MOUSE_STATUS Engine::Button(float x, float y, float w, float h, const Texture& texture, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, float uvx, float uvy, float uvw, float uvh) {
+	if (!texture) return MOUSE_NONE;
 	if (!UI::focused || (UI::_layer < UI::_layerMax && !UI::ignoreLayers) || (Input::mouse0State != 0 && !Rect(x, y, w, h).Inside(Input::mouseDownPos))) {
-		UI::Quad(x, y, w, h, texture->pointer, normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
+		UI::Quad(x, y, w, h, texture.pointer, normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
 		return MOUSE_NONE;
 	}
 	bool inside = Rect(x, y, w, h).Inside(Input::mousePos);
@@ -210,11 +210,11 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Texture* texture
 	switch (Input::mouse0State) {
 	case 0:
 	case MOUSE_UP:
-		UI::Quad(x, y, w, h, texture->pointer, inside ? highlightVec4 : normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
+		UI::Quad(x, y, w, h, texture.pointer, inside ? highlightVec4 : normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
 		break;
 	case MOUSE_DOWN:
 	case MOUSE_HOLD:
-		UI::Quad(x, y, w, h, texture->pointer , inside ? pressVec4 : normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
+		UI::Quad(x, y, w, h, texture.pointer , inside ? pressVec4 : normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
 		break;
 	}
 	return (inside && (UI::_layer == UI::_layerMax || UI::ignoreLayers)) ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
@@ -234,7 +234,7 @@ bool Engine::Toggle(float x, float y, float s, Vec4 col, bool t) {
 		t = !t;
 	return t;
 }
-bool Engine::Toggle(float x, float y, float s, Texture* texture, bool t, Vec4 col, ORIENTATION o) {
+bool Engine::Toggle(float x, float y, float s, const Texture& texture, bool t, Vec4 col, ORIENTATION o) {
 	byte b;
 	if (o == ORIENT_NONE)
 		b = Button(x, y, s, s, texture, col, Lerp(col, white(), 0.5f), Lerp(col, black(), 0.5f));
@@ -295,11 +295,11 @@ Vec2 Engine::DrawSliderFill2D(float x, float y, float w, float h, Vec2 min, Vec2
 	return v;
 }
 
-void Engine::DrawProgressBar(float x, float y, float w, float h, float progress, Vec4 background, Texture* foreground, Vec4 tint, int padding, byte clip) {
+void Engine::DrawProgressBar(float x, float y, float w, float h, float progress, Vec4 background, const Texture& foreground, Vec4 tint, int padding, byte clip) {
 	UI::Quad(x, y, w, h, background);
 	progress = Clamp(progress, 0.0f, 100.0f)*0.01f;
 	float tx = (clip == 0) ? 1 : ((clip == 1) ? progress : w*progress / h);
-	UI::Quad(x + padding, y + padding, w*progress - 2 * padding, h - 2 * padding, foreground->pointer, tint, Vec2(0, 1), Vec2(tx, 1), Vec2(0, 0), Vec2(tx, 0));
+	UI::Quad(x + padding, y + padding, w*progress - 2 * padding, h - 2 * padding, foreground.pointer, tint, Vec2(0, 1), Vec2(tx, 1), Vec2(0, 0), Vec2(tx, 0));
 }
 
 void Engine::RotateUI(float aa, Vec2 point) {

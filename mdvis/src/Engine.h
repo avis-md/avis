@@ -122,15 +122,6 @@ std::istream _varname(_f2i_ifstream.rdbuf());
 
 #pragma region class names
 
-//we really shouldn't be doing this
-#if defined(PLATFORM_WIN)
-#define _allowshared(T) friend class std::_Ref_count_obj<T>
-#elif defined(PLATFORM_OSX)
-#define _allowshared(T)
-#else
-#define _allowshared(T) friend class __gnu_cxx::new_allocator<T>
-#endif
-
 template <class T> class Ref;
 
 #define _canref(obj) class obj; \
@@ -306,15 +297,15 @@ public:
 	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4);
 	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4, std::string label, float labelSize, Vec4 labelCol, bool labelCenter = false, Font* labelFont = UI::font);
 	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4);
-	static MOUSE_STATUS Button(float x, float y, float w, float h, Texture* texture, Vec4 normalVec4 = white(0.8f), Vec4 highlightVec4 = white(), Vec4 pressVec4 = white(1, 0.5f), float uvx = 0, float uvy = 0, float uvw = 1, float uvh = 1);
+	static MOUSE_STATUS Button(float x, float y, float w, float h, const Texture& texture, Vec4 normalVec4 = white(0.8f), Vec4 highlightVec4 = white(), Vec4 pressVec4 = white(1, 0.5f), float uvx = 0, float uvy = 0, float uvw = 1, float uvh = 1);
 	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, std::string label, float labelSize, Font* labelFont, Vec4 labelVec4, bool labelCenter = false);
 	static bool Toggle(float x, float y, float s, Vec4 col, bool t);
-	static bool Toggle(float x, float y, float s, Texture* texture, bool t, Vec4 col=white(), ORIENTATION o = ORIENT_NONE);
+	static bool Toggle(float x, float y, float s, const Texture& texture, bool t, Vec4 col=white(), ORIENTATION o = ORIENT_NONE);
 	static float DrawSliderFill(float x, float y, float w, float h, float min, float max, float val, Vec4 background, Vec4 foreground);
 	static float DrawSliderFillY(float x, float y, float w, float h, float min, float max, float val, Vec4 background, Vec4 foreground);
 	static Vec2 DrawSliderFill2D(float x, float y, float w, float h, Vec2 min, Vec2 max, Vec2 val, Vec4 background, Vec4 foreground);
 	//scaleType: 0=scale, 1=clip, 2=tile
-	static void DrawProgressBar(float x, float y, float w, float h, float progress, Vec4 background, Texture* foreground, Vec4 tint, int padding, byte scaleType);
+	static void DrawProgressBar(float x, float y, float w, float h, float progress, Vec4 background, const Texture& foreground, Vec4 tint, int padding, byte scaleType);
 
 	static void RotateUI(float a, Vec2 point);
 	static void ResetUIMatrix();

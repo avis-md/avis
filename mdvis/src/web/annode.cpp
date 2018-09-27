@@ -22,13 +22,13 @@ const std::string Node_Remap::sig = ".remap";
 
 Vec4 AnNode::bgCol = white(0.7f, 0.25f);
 
-Texture* AnNode::tex_circle_open = nullptr, *AnNode::tex_circle_conn = nullptr;
+Texture AnNode::tex_circle_open, AnNode::tex_circle_conn;
 float AnNode::width = 220;
 
 void AnNode::Init() {
 #ifndef IS_ANSERVER
-	tex_circle_open = new Texture(res::node_open_png, res::node_open_png_sz);
-	tex_circle_conn = new Texture(res::node_conn_png, res::node_conn_png_sz);
+	tex_circle_open = Texture(res::node_open_png, res::node_open_png_sz);
+	tex_circle_conn = Texture(res::node_conn_png, res::node_conn_png_sz);
 
 	Node_Volume::Init();
 #endif

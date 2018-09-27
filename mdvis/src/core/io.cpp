@@ -43,7 +43,7 @@ std::vector<std::string> IO::GetFiles(const std::string& folder, std::string ext
 		} while (FindNextFile(hFind, &fd));
 		FindClose(hFind);
 	}
-#else //if defined(PLATFORM_ADR)
+#else
 	DIR* dir = opendir(&folder[0]);
 	struct dirent* ep;
 	while ((ep = readdir(dir))) {
