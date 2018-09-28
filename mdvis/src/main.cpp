@@ -118,15 +118,7 @@ void paintfunc() {
 			AnWeb::DrawSide();
 		//}
 
-		if (ParGraphics::zoomFade > 0) {
-			auto zf = min(ParGraphics::zoomFade * 2, 1.0f);
-			UI::Quad(Display::width * 0.5f - 150.0f, Display::height - 100.0f, 300, 20, white(zf * 0.9f, 0.15f));
-			UI::Texture(Display::width * 0.5f - 150.0f, Display::height - 98.0f, 16, 16, Icons::zoomOut, white(zf));
-			UI::Texture(Display::width * 0.5f + 134.0f, Display::height - 98.0f, 16, 16, Icons::zoomIn, white(zf));
-			UI::Quad(Display::width * 0.5f - 130.0f, Display::height - 91.0f, 260, 2, white(zf, 0.8f));
-			UI::Quad(Display::width * 0.5f - 133.0f + 260 * InverseLerp(-6.0f, 2.0f, ParGraphics::rotScale), Display::height - 98.0f, 6, 16, white(zf));
-			ParGraphics::zoomFade -= Time::delta;
-		}
+		ParGraphics::DrawOverlay();
 	}
 	VisSystem::DrawBar();
 

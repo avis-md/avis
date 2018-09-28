@@ -14,9 +14,15 @@
 #include "utils/xml.h"
 #include "utils/runcmd.h"
 
+#ifdef PLATFORM_WIN
+#define EXPPATH "path=%path%;\"" + IO::path + "\"&&"
+#else
+#define EXPPATH
+#endif
+
 std::string VisSystem::version_hash =
 #include "../../githash.h"
-;
+"";
 
 Vec4 VisSystem::accentColor = Vec4(1, 0.75f, 0, 1);
 float VisSystem::glass = 0.9f;
@@ -302,17 +308,13 @@ void VisSystem::Save(const std::string& path) {
 	Xml::Write(&head, path + ".xml");
 	Debug::Message("System", "Compressing...");
 	std::string quiet = (Debug::suppress > 0) ? "-qq " : "";
-#ifdef PLATFORM_WIN
-#define EXPPATH "path=%path%;\"" + IO::path + "\"&&"
-#else
-#define EXPPATH
-#endif
-	RunCmd::Run(EXPPATH "zip -m -r " + quiet + " \"" + path + EXT_SVFL "\" \"" + path + ".xml\" \"" + path + "_data\"");
+	RunCmd::Run(EXPPATH "zip -m -j -r " + quiet + " \"" + path + EXT_SVFL "\" \"" + path + ".xml\" \"" + path + "_data\"");
 	currentSavePath = "";
 	Debug::Message("System", "Save complete");
 }
 
 bool VisSystem::Load(const std::string& path) {
+	bool success = false;
 	Debug::Message("System", "Loading: " + path);
 	Particles::Clear();
 	currentSavePath = path;
@@ -321,15 +323,10 @@ bool VisSystem::Load(const std::string& path) {
 	auto nm = path.substr(l + 1);
 	currentSavePath2 = path + "_temp__/";
 	std::string quiet = (Debug::suppress > 0) ? "-qq " : "";
-#ifdef PLATFORM_WIN
-#define EXPPATH "path=%path%;\"" + IO::path + "\"&&"
-#else
-#define EXPPATH
-#endif
 	auto res = RunCmd::Run(EXPPATH "unzip -o -j " + quiet + "-d \"" + path + "_temp__/\" \"" + path + EXT_SVFL "\"");
 	if (!!res) {
 		Debug::Warning("System", "extracting save file failed!");
-		return false;
+		goto cleanup;
 	}
 	auto xml = Xml::Parse(currentSavePath2 + nm + ".xml");
 	if (!xml) {
@@ -342,16 +339,10 @@ bool VisSystem::Load(const std::string& path) {
 		ParGraphics::Deserialize(n);
 		AnWeb::Deserialize(n);
 		Debug::Message("System", "Load complete");
-#ifdef PLATFORM_WIN
-		RunCmd::Run("rd /S /Q \"" + currentSavePath2 + "\"");
-#else
-		RunCmd::Run("rm -r \"" + currentSavePath2 + "\"");
-#endif
-		currentSavePath = "";
-		return true;
+		success = true;
 	}
 cleanup:
-	RunCmd::Run(EXPPATH "rm -r \"" + currentSavePath2 + "\"");
+	IO::RmDirectory(currentSavePath2);
 	currentSavePath = "";
-	return false;
+	return success;
 }

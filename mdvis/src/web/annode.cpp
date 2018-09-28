@@ -286,7 +286,7 @@ float AnNode::DrawSide() {
 					if (opt == this && opi == i) {
 						if (Popups::type == POPUP_TYPE::NONE) {
 							if (!di.seld) opt = nullptr;
-							else if (!si) rf = nullptr;
+							else if (!si) rf = opt = nullptr;
 							else if (!tmp) {
 								if (si > 1) { //TODO: implement parameters
 									rf = nullptr;

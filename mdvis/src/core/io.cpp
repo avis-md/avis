@@ -84,32 +84,40 @@ void IO::GetFolders(const std::string& folder, std::vector<std::string>* names, 
 #endif
 }
 
-bool IO::HasDirectory(std::string szPath) {
+bool IO::HasDirectory(std::string path) {
 #ifdef PLATFORM_WIN
-	DWORD dwAttrib = GetFileAttributesW(_tow(szPath).c_str());
+	DWORD dwAttrib = GetFileAttributesW(_tow(path).c_str());
 	return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 #else
 	struct stat st;
-	return !stat(&szPath[0], &st);
+	return !stat(&path[0], &st);
 #endif
 }
 
-void IO::MakeDirectory(std::string szPath) {
+void IO::MakeDirectory(std::string path) {
 #ifdef PLATFORM_WIN
 	SECURITY_ATTRIBUTES sa = {};
 	sa.nLength = sizeof(sa);
-	CreateDirectoryW(_tow(szPath).c_str(), &sa);
+	CreateDirectoryW(_tow(path).c_str(), &sa);
 #else
-	mkdir(&szPath[0], 0777);
+	mkdir(&path[0], 0777);
 #endif
 }
 
-bool IO::HasFile(std::string szPath) {
+void IO::RmDirectory(std::string path) {
 #ifdef PLATFORM_WIN
-	DWORD dwAttrib = GetFileAttributesW(_tow(szPath).c_str());
+	RunCmd::Run("rmdir /Q /S \"" + path + "\"");
+#else
+	RunCmd::Run("rm -r \"" + path + "\"");
+#endif
+}
+
+bool IO::HasFile(std::string path) {
+#ifdef PLATFORM_WIN
+	DWORD dwAttrib = GetFileAttributesW(_tow(path).c_str());
 	return (dwAttrib != INVALID_FILE_ATTRIBUTES);
 #else
-	return (access(&szPath[0], F_OK ) != -1);
+	return (access(&path[0], F_OK ) != -1);
 #endif
 }
 

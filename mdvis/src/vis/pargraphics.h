@@ -108,6 +108,8 @@ public:
 	//gbuffers to screen
 	static void Reblit();
 
+	static void DrawOverlay();
+
 	static void DrawColMenu();
 	static void DrawMenu();
 	static void DrawPopupDM();

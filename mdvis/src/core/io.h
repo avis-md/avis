@@ -11,6 +11,7 @@ public:
 	static void GetFolders(const std::string& path, std::vector<std::string>* names, bool hidden = false);
 	static bool HasDirectory(std::string path);
 	static void MakeDirectory(std::string path);
+	static void RmDirectory(std::string path);
 	static bool HasFile(std::string path);
 	static std::string ReadFile(const std::string& path);
 	static void HideInput(bool hide);
