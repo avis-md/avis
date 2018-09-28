@@ -29,3 +29,4 @@ int string_find(const string& s, const string& s2, int start = -1);
 int TryParse(string str, int defVal);
 uint TryParse(string str, uint defVal);
 float TryParse(string str, float defVal);
+double TryParse(string str, double defVal);

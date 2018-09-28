@@ -608,7 +608,12 @@ void AnWeb::Load(const std::string& s) {
 							else GTS(tartype, ci.tartp);
 						}
 						else {
-							//
+							if (cc.name == "value") {
+								auto k = n->_connInfo.size();
+								auto& vd = n->inputVDef[k];
+								if (n->script->invars[k].second == "int") vd.i = TryParse(cc.value, -1);
+								else vd.d = TryParse(cc.value, -1.0);
+							}
 						}
 					}
 					n->_connInfo.push_back(ci);

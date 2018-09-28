@@ -135,8 +135,7 @@ void AnNode::Draw() {
 						}
 						case VarOpt::RANGE: {
 							float res = (float)(isi ? inputVDef[i].i : inputVDef[i].d);
-							res = Engine::DrawSliderFill(pos.x + width*0.33f, y, width*0.67f - 6, 16, opt.range.x, opt.range.y, res, white(1, 0.5f), white());
-							UI::Label(pos.x + width*0.33f + 2, y, 12, std::to_string(res), white(1, 0.2f));
+							res = UI2::Slider(pos.x + width*0.33f, y, width*0.67f - 6, opt.range.x, opt.range.y, res);
 							if (isi) inputVDef[i].i = (int)round(res);
 							else inputVDef[i].d = res;
 							break;
@@ -283,8 +282,7 @@ float AnNode::DrawSide() {
 					}
 					case VarOpt::RANGE: {
 						float res = (float)(isi ? inputVDef[i].i : inputVDef[i].d);
-						res = Engine::DrawSliderFill(pos.x + width*0.33f, y, width*0.67f - 6, 16, opt.range.x, opt.range.y, res, white(1, 0.5f), white());
-						UI::Label(pos.x + width*0.33f + 2, y, 12, std::to_string(res), white(1, 0.2f));
+						res = UI2::Slider(pos.x + width*0.33f, y, width*0.67f - 6, opt.range.x, opt.range.y, res);
 						if (isi) inputVDef[i].i = (int)round(res);
 						else inputVDef[i].d = res;
 						break;
@@ -833,19 +831,6 @@ void CNode::Execute() {
 
 void CNode::Reconn() {
 	AnNode::Reconn();
-	auto scr = (CScript*)script;
-	inputV.resize(scr->invars.size());
-	outputV.resize(scr->outvars.size());
-	inputVDef.resize(scr->invars.size());
-	for (uint i = 0; i < scr->invars.size(); i++) {
-		inputV[i] = scr->_invars[i].value;
-		if (scr->_invars[i].type == AN_VARTYPE::DOUBLE) inputVDef[i].d = 0;
-		else inputVDef[i].i = 0;
-	}
-	for (uint i = 0; i < scr->outvars.size(); i++) {
-		outputV[i] = scr->_outvars[i].value;
-		conV[i] = scr->_outvars[i];
-	}
 }
 
 void CNode::CatchExp(char* c) {

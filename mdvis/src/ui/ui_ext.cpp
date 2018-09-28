@@ -47,6 +47,12 @@ float UI2::Slider(float x, float y, uint w, const std::string& title, float a, f
 	return t;
 }
 
+float UI2::Slider(float x, float y, uint w, float a, float b, float t) {
+	t = Engine::DrawSliderFill(x, y, w, 16, a, b, t, white(1, 0.5f), white());
+	UI::Label(x + 2, y, 12, std::to_string(t), white(1, 0.2f));
+	return t;
+}
+
 void UI2::Color(float x, float y, uint w, const std::string& title, Vec4& col) {
 	UI::Label(x, y, 12, title, white());
 	w /= 2;
