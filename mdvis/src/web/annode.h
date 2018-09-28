@@ -38,7 +38,9 @@ public:
 	int logOffset = 0;
 	std::vector<std::pair<byte, std::string>> log;
 
-	std::vector<std::pair<AnNode*, uint>> inputR, outputR;
+	typedef std::pair<AnNode*, uint> nodecon;
+	std::vector<nodecon> inputR;
+	std::vector<std::vector<nodecon>> outputR;
 	std::vector<union AnVarBase> inputVDef;
 	std::vector<CVar> conV;
 
@@ -71,7 +73,6 @@ public:
 	virtual void DrawScene() {}
 	void DrawToolbar();
 	virtual void Execute() = 0;
-	void ConnectTo(uint id, AnNode* tar, uint tarId); //out -> in
 	void Save(std::ofstream& strm), Load(std::ifstream& strm);
 	virtual void SaveIn(const std::string& path) {};
 	virtual void LoadIn(const std::string& path) {};
@@ -80,6 +81,8 @@ public:
 	virtual void SaveConn(), ClearConn(), Reconn();
 
 	static bool CanConn(std::string lhs, std::string rhs);
+	void ConnectTo(uint id, AnNode* tar, uint tarId); //out -> in
+	void Disconnect(uint id, bool out);
 
 	virtual void CatchExp(char* c);
 

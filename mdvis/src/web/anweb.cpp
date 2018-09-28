@@ -220,12 +220,7 @@ void AnWeb::Draw() {
 						if (!n->canTile && (*(nn + 1))->canTile)
 							(*(nn + 1))->canTile = false;
 					}
-					for (uint i = 0; i < n->inputR.size(); i++) {
-						if (n->inputR[i].first) n->inputR[i].first->outputR[n->inputR[i].second].first = nullptr;
-					}
-					for (uint i = 0; i < n->outputR.size(); i++) {
-						if (n->outputR[i].first) n->outputR[i].first->inputR[n->outputR[i].second].first = nullptr;
-					}
+					n->ClearConn();
 					delete(n);
 					nodes.erase(nn);
 					break;
@@ -245,7 +240,7 @@ void AnWeb::Draw() {
 		}
 	}
 	if (selScript) {
-		Texture icon = icon = Icons::lang_ft;
+		Texture icon = Icons::lang_ft;
 		if ((uintptr_t)selScript == 1)
 			icon = Icons::lightning;
 		else if (selScript->type == AN_SCRTYPE::C)
@@ -381,7 +376,7 @@ void AnWeb::DoExecute() {
 				err = &serr[0];
 			}
 			catch (...) {
-				err = "Unknown error thrown!\x01";
+				err = (char*)"Unknown error thrown!\x01";
 			}
 		}
 

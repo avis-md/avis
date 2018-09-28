@@ -49,9 +49,13 @@ struct VarVal {
 };
 
 struct VarOpt {
-	bool isEnum;
+	enum {
+		NONE,
+		ENUM,
+		RANGE
+	} type;
 	std::vector<std::string> enums;
-
+	Vec2 range;
 };
 
 class AnScript {

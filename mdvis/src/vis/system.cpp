@@ -309,6 +309,7 @@ void VisSystem::Save(const std::string& path) {
 	Debug::Message("System", "Compressing...");
 	std::string quiet = (Debug::suppress > 0) ? "-qq " : "";
 	RunCmd::Run(EXPPATH "zip -m -j -r " + quiet + " \"" + path + EXT_SVFL "\" \"" + path + ".xml\" \"" + path + "_data\"");
+	IO::RmDirectory(path + "_data/");
 	currentSavePath = "";
 	Debug::Message("System", "Save complete");
 }

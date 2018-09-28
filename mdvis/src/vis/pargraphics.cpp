@@ -597,7 +597,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 			p1 /= p1.w;
 			Vec4 p2 = _p * Vec4(1, 1, -1, 1);
 			p2 /= p2.w;
-			osz = glm::length(p2 - p1);
+			osz = glm::length(p2 - p1)/2;
 		}
 
 		if (!RayTracer::resTex) {
@@ -620,7 +620,6 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 
 			glBindVertexArray(Particles::posVao);
 			for (auto& p : drawLists) {
-				//glPolygonMode(GL_FRONT_AND_BACK, (p.second.second == 0x0f) ? GL_POINT : GL_FILL);
 				if (p.second.second == 1) glUniform1f(parProgLocs[7], -1);
 				else if (p.second.second == 0x0f) glUniform1f(parProgLocs[7], 0);
 				else if (p.second.second == 2) glUniform1f(parProgLocs[7], 0.2f);

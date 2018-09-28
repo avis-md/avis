@@ -256,6 +256,7 @@ bool CReader::Read(CScript* scr) {
 		int lnsz = lns.size();
 		if (!lnsz) continue;
 		bool ien = (lnsz > 1)? (lns[1] == "enum") : false; 
+		bool irg = (lnsz > 1)? (lns[1] == "range") : false;
 		bool iso = (lns[0] == "//out");
 		if (lns[0] == "//in" || iso) {
 			std::vector<std::pair<std::string, std::string>>& cv = iso ? scr->outvars : scr->invars;
@@ -289,8 +290,12 @@ bool CReader::Read(CScript* scr) {
 				_ER("CReader", "" + ios + " enum has no options!");
 				return false;
 			}
+			else if (irg && lnsz != 4) {
+				_ER("CReader", "" + ios + " range must have 2 parameters!");
+				return false;
+			}
 			if (!ira) {
-				if (lnsz > 1 && !ien) {
+				if (lnsz > 1 && !ien && !irg) {
 					_ER("CReader", "" + ios + " with specified size must be of pointer type!");
 					return false;
 				}
@@ -298,9 +303,15 @@ bool CReader::Read(CScript* scr) {
 					_ER("CReader", "" + ios + " cannot be an enum!");
 					return false;
 				}
+				else if (irg && iso) {
+					_ER("CReader", "" + ios + " cannot be ranged!");
+					return false;
+				}
 			}
 			if (!ira && !ParseType(bk->typeName, bk)) {
-				_ER("CReader", "arg type \"" + bk->typeName + "\" not recognized!");
+				std::string add = "";
+				if (bk->typeName == "float") add = " Did you mean \"double\"?";
+				_ER("CReader", "arg type \"" + bk->typeName + "\" not recognized!" + add);
 				return false;
 			}
 			
@@ -325,10 +336,13 @@ bool CReader::Read(CScript* scr) {
 			if (!iso) {
 				scr->invaropts.push_back(VarOpt());
 				auto& opt = scr->invaropts.back();
-				opt.isEnum = ien;
+				opt.type = ien? VarOpt::ENUM : (irg? VarOpt::RANGE : VarOpt::NONE);
 				if (ien) {
 					opt.enums.insert(opt.enums.end(), lns.begin() + 2, lns.end());
 					opt.enums.push_back("");
+				}
+				else if (irg) {
+					opt.range = Vec2(TryParse(lns[2], 0.0f), TryParse(lns[3], 1.0f));
 				}
 			}
 

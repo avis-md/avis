@@ -154,10 +154,16 @@ enum MOUSE_STATUS : byte {
 	MOUSE_DOWN,
 	MOUSE_HOLD,
 	MOUSE_UP,
+	MOUSE_R_DOWN,
+	MOUSE_R_HOLD,
+	MOUSE_R_UP,
 	MOUSE_HOVER_FLAG = 0x10,
 	MOUSE_CLICK, //use for buttons
 	MOUSE_PRESS, //use for buttons
-	MOUSE_RELEASE  //use for buttons
+	MOUSE_RELEASE,  //use for buttons
+	MOUSE_R_CLICK, //use for buttons
+	MOUSE_R_PRESS, //use for buttons
+	MOUSE_R_RELEASE,  //use for buttons
 };
 
 enum ALIGNMENT : byte {
