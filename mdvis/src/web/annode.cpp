@@ -44,6 +44,10 @@ bool AnNode::Select() {
 #endif
 }
 
+float AnNode::GetHeaderSz() {
+	return (showDesc ? (17 * script->descLines) : 0) + (showSett ? setSz : 0) + hdrSz;
+}
+
 Vec2 AnNode::DrawConn() {
 #ifndef IS_ANSERVER
 	if (script->ok) {
@@ -71,7 +75,10 @@ void AnNode::Draw() {
 #ifndef IS_ANSERVER
 	const float connrad = 6;
 
-	auto cnt = (script->invars.size() + script->outvars.size());
+	auto cnt = script->outvars.size();
+	for (auto& i : inputR) {
+		if (i.use) cnt++;
+	}
 	UI::Quad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 18, pos.y + 1, 12, title, white());
@@ -89,6 +96,10 @@ void AnNode::Draw() {
 			y += 2;
 			for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 				bool hi = inputR[i].first;
+				if (!inputR[i].use) {
+					if (hi) Disconnect(i, false);
+					continue;
+				}
 				if (!AnWeb::selConnNode || (AnWeb::selConnIdIsOut && AnWeb::selConnNode != this)) {
 					if (Engine::Button(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, hi ? tex_circle_conn : tex_circle_open, white(), Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f)) == MOUSE_RELEASE) {
 						if (!AnWeb::selConnNode) {
@@ -118,36 +129,7 @@ void AnNode::Draw() {
 					auto& vr = script->invars[i].second;
 					auto isi = (vr == "int");
 					if (isi || (vr == "double")) {
-						auto& opt = script->invaropts[i];
-						switch (opt.type) {
-						case VarOpt::ENUM: {
-							static Popups::DropdownItem di;
-							if (Engine::Button(pos.x + width*0.33f, y, width*0.67f - 6, 16, white(1, 0.3f), script->invaropts[i].enums[inputVDef[i].i], 12, white()) == MOUSE_RELEASE) {
-								di.list = &script->invaropts[i].enums[0];
-								di.target = (uint*)&inputVDef[i].i;
-								Popups::type = POPUP_TYPE::DROPDOWN;
-								Popups::pos = Vec2(pos.x + width/2, y + 16);
-								Popups::pos2.x = width/2 - 10;
-								Popups::data = &di;
-							}
-							UI::Texture(pos.x + width - 26, y, 16, 16, Icons::dropdown2);
-							break;
-						}
-						case VarOpt::RANGE: {
-							float res = (float)(isi ? inputVDef[i].i : inputVDef[i].d);
-							res = UI2::Slider(pos.x + width*0.33f, y, width*0.67f - 6, opt.range.x, opt.range.y, res);
-							if (isi) inputVDef[i].i = (int)round(res);
-							else inputVDef[i].d = res;
-							break;
-						}
-						default: {
-							std::string s = isi ? std::to_string(inputVDef[i].i) : std::to_string(inputVDef[i].d);
-							s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, true, white());
-							if (isi) inputVDef[i].i = TryParse(s, 0);
-							else inputVDef[i].d = TryParse(s, 0.0);
-							break;
-						}
-						}
+						DrawDefVal(i, y);
 					}
 					else {
 						UI::Label(pos.x + width*0.33f, y, 12, script->invars[i].second, white(0.3f));
@@ -219,26 +201,6 @@ void AnNode::Draw() {
 #endif
 }
 
-float AnNode::GetHeaderSz() {
-	return (showDesc? (17 * script->descLines) : 0) + (showSett? setSz : 0) + hdrSz;
-}
-
-void AnNode::DrawHeader(float& off) {
-	if (showDesc) {
-		UI::Quad(pos.x, off, width, 17.0f * script->descLines, bgCol);
-		UI::alpha = 0.7f;
-		UI2::LabelMul(pos.x + 5, off + 1, 12, script->desc);
-		UI::alpha = 1;
-		off += 17 * script->descLines;
-	}
-	if (showSett) {
-		float offo = off;
-		DrawSettings(off);
-		setSz = off - offo;
-	}
-	else setSz = 0;
-}
-
 float AnNode::DrawSide() {
 #ifndef IS_ANSERVER
 	auto cnt = (script->invars.size());
@@ -265,36 +227,7 @@ float AnNode::DrawSide() {
 				auto& vr = script->invars[i].second;
 				auto isi = (vr == "int");
 				if (isi || (vr == "double")) {
-					auto& opt = script->invaropts[i];
-					switch (opt.type) {
-					case VarOpt::ENUM: {
-						static Popups::DropdownItem di;
-						if (Engine::Button(pos.x + width*0.33f, y, width*0.67f - 6, 16, white(1, 0.3f), script->invaropts[i].enums[inputVDef[i].i], 12, white()) == MOUSE_RELEASE) {
-							di.list = &script->invaropts[i].enums[0];
-							di.target = (uint*)&inputVDef[i].i;
-							Popups::type = POPUP_TYPE::DROPDOWN;
-							Popups::pos = Vec2(pos.x + width/2, y + 16);
-							Popups::pos2.x = width/2 - 10;
-							Popups::data = &di;
-						}
-						UI::Texture(pos.x + width - 26, y, 16, 16, Icons::dropdown2);
-						break;
-					}
-					case VarOpt::RANGE: {
-						float res = (float)(isi ? inputVDef[i].i : inputVDef[i].d);
-						res = UI2::Slider(pos.x + width*0.33f, y, width*0.67f - 6, opt.range.x, opt.range.y, res);
-						if (isi) inputVDef[i].i = (int)round(res);
-						else inputVDef[i].d = res;
-						break;
-					}
-					default: {
-						std::string s = isi ? std::to_string(inputVDef[i].i) : std::to_string(inputVDef[i].d);
-						s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, true, white());
-						if (isi) inputVDef[i].i = TryParse(s, 0);
-						else inputVDef[i].d = TryParse(s, 0.0);
-						break;
-					}
-					}
+					DrawDefVal(i, y);
 				}
 				else {
 					auto& rf = inputR[i].first;
@@ -306,10 +239,10 @@ float AnNode::DrawSide() {
 					static std::vector<int> ssi;
 					static uint si;
 					bool isme = (opt == this && opi == i);
-					std::string tt = isme ? 
-						(tmp? "Select variable" : "Select node") :
+					std::string tt = isme ?
+						(tmp ? "Select variable" : "Select node") :
 						(rf ? rf->script->outvars[rs].first : "no input");
-					if (Engine::Button(pos.x + width * 0.33f, y, width * 0.67f - 5, 16, white(1, 0.3f), tt, 12, white(1, (rf && !isme)? 1 : 0.5f)) == MOUSE_RELEASE) {
+					if (Engine::Button(pos.x + width * 0.33f, y, width * 0.67f - 5, 16, white(1, 0.3f), tt, 12, white(1, (rf && !isme) ? 1 : 0.5f)) == MOUSE_RELEASE) {
 						tmp = nullptr; opt = this; opi = i;
 						ss.resize(2);
 						ss[1] = "Parameter";
@@ -332,7 +265,7 @@ float AnNode::DrawSide() {
 							else if (!tmp) {
 								if (si > 1) { //TODO: implement parameters
 									rf = nullptr;
-									tmp = AnWeb::nodes[si-2];
+									tmp = AnWeb::nodes[si - 2];
 									ss.resize(1);
 									ssi.clear();
 									int k = 0;
@@ -360,15 +293,69 @@ float AnNode::DrawSide() {
 			}
 		}
 		if (AnWeb::executing) UI::Quad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));
-		
+
 		DrawFooter(y);
-		
+
 		return y - pos.y + 1 + DrawLog(y);
 	}
 	else return y - pos.y + 1 + DrawLog(y);
 #else
 	return 0;
 #endif
+}
+
+void AnNode::DrawDefVal(int i, float y) {
+	auto isi = (script->invars[i].second == "int");
+	auto& opt = script->invaropts[i];
+	auto old = inputVDef[i].data;
+	switch (opt.type) {
+	case VarOpt::ENUM: {
+		static Popups::DropdownItem di;
+		if (Engine::Button(pos.x + width*0.33f, y, width*0.67f - 6, 16, white(1, 0.3f), script->invaropts[i].enums[inputVDef[i].i], 12, white()) == MOUSE_RELEASE) {
+			di.list = &script->invaropts[i].enums[0];
+			di.target = (uint*)&inputVDef[i].i;
+			Popups::type = POPUP_TYPE::DROPDOWN;
+			Popups::pos = Vec2(pos.x + width / 2, y + 16);
+			Popups::pos2.x = width / 2 - 10;
+			Popups::data = &di;
+		}
+		UI::Texture(pos.x + width - 26, y, 16, 16, Icons::dropdown2);
+		break;
+	}
+	case VarOpt::RANGE: {
+		float res = (float)(isi ? inputVDef[i].i : inputVDef[i].d);
+		res = UI2::Slider(pos.x + width*0.33f, y, width*0.67f - 6, opt.range.x, opt.range.y, res);
+		if (isi) inputVDef[i].i = (int)round(res);
+		else inputVDef[i].d = res;
+		break;
+	}
+	default: {
+		std::string s = isi ? std::to_string(inputVDef[i].i) : std::to_string(inputVDef[i].d);
+		s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, true, white());
+		if (isi) inputVDef[i].i = TryParse(s, 0);
+		else inputVDef[i].d = TryParse(s, 0.0);
+		break;
+	}
+	}
+	if (inputVDef[i].data != old) {
+		OnValChange(i);
+	}
+}
+
+void AnNode::DrawHeader(float& off) {
+	if (showDesc) {
+		UI::Quad(pos.x, off, width, 17.0f * script->descLines, bgCol);
+		UI::alpha = 0.7f;
+		UI2::LabelMul(pos.x + 5, off + 1, 12, script->desc);
+		UI::alpha = 1;
+		off += 17 * script->descLines;
+	}
+	if (showSett) {
+		float offo = off;
+		DrawSettings(off);
+		setSz = off - offo;
+	}
+	else setSz = 0;
 }
 
 float AnNode::DrawLog(float off) {
@@ -423,8 +410,8 @@ void AnNode::DrawToolbar() {
 AnNode::AnNode(AnScript* scr) : script(scr), canTile(false) {
 	if (!scr) return;
 	title = scr->name;
-	inputR.resize(scr->invars.size(), nodecon());
-	outputR.resize(scr->outvars.size(), std::vector<nodecon>());
+	inputR.resize(scr->invars.size());
+	outputR.resize(scr->outvars.size());
 	conV.resize(outputR.size());
 }
 
@@ -526,7 +513,7 @@ void AnNode::ClearConn() {
 		Disconnect(i, false);
 	}
 	inputR.clear();
-	inputR.resize(script->invars.size(), nodecon());
+	inputR.resize(script->invars.size());
 	for (size_t i = 0; i < outputR.size(); i++) {
 		Disconnect(i, true);
 	}

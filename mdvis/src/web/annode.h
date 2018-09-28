@@ -12,6 +12,7 @@ union AnVarBase {
 	int i;
 	float f;
 	double d;
+	uint64_t data;
 };
 
 class AnNode {
@@ -38,7 +39,12 @@ public:
 	int logOffset = 0;
 	std::vector<std::pair<byte, std::string>> log;
 
-	typedef std::pair<AnNode*, uint> nodecon;
+	struct nodecon {
+		AnNode* first;
+		uint second;
+		bool use;
+		nodecon(AnNode* f = 0, uint s = 0, bool use = true) : first(f), second(s), use(true) {}
+	};
 	std::vector<nodecon> inputR;
 	std::vector<std::vector<nodecon>> outputR;
 	std::vector<union AnVarBase> inputVDef;
@@ -57,9 +63,11 @@ public:
 	static void Init();
 
 	bool Select();
+	virtual float GetHeaderSz();
 	virtual Vec2 DrawConn();
 	virtual void Draw();
-	virtual float GetHeaderSz();
+	virtual float DrawSide();
+	void DrawDefVal(int i, float y);
 	float hdrSz;
 	virtual void DrawHeader(float& off);
 	float midSz;
@@ -68,7 +76,6 @@ public:
 	virtual void DrawFooter(float& off) {}
 	float setSz;
 	virtual void DrawSettings(float& off) {}
-	virtual float DrawSide();
 	float DrawLog(float off);
 	virtual void DrawScene() {}
 	void DrawToolbar();
@@ -89,6 +96,7 @@ public:
 	virtual void OnSceneUpdate() {}
 	virtual void OnAnimFrame() {}
 	virtual void OnConn(bool o, int i) {}
+	virtual void OnValChange(int i) {}
 protected:
 	AnNode(AnScript* scr);
 

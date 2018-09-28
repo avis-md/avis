@@ -8,22 +8,12 @@
 Node_Plot::Node_Plot() : AnNode(new DmScript(sig)) {
 	title = "Plot Data";
 	canTile = true;
-	inputR.resize(1);
+	inputR.resize(3, nodecon(0, 0, false));
+	inputVDef.resize(3);
 	script->invars.push_back(std::pair<std::string, std::string>("array", "list(**)"));
-}
-
-void Node_Plot::DrawHeader(float& y) {
-	if (inputR[0].first && useids) {
-		UI::Quad(pos.x, y, width, 34, bgCol);
-		auto xo = xid, yo = yid;
-		xid = TryParse(UI2::EditText(pos.x + 2, y, (uint)width - 4U, "X axis index", std::to_string(xid)), 0);
-		yid = TryParse(UI2::EditText(pos.x + 2, y + 17, (uint)width - 4U, "Y axis index", std::to_string(yid)), 0);
-		auto s = *inputR[0].first->conV[inputR[0].second].dimVals[1];
-		xid = Clamp(xid, -1, (int)s - 1);
-		yid = Clamp(yid, -1, (int)s - 1);
-		if (xid != xo || yid != yo) Execute();
-		y += 34;
-	}
+	script->invars.push_back(std::pair<std::string, std::string>("X ID", "int"));
+	script->invars.push_back(std::pair<std::string, std::string>("Y ID", "int"));
+	script->invaropts.resize(3);
 }
 
 void Node_Plot::DrawFooter(float& y) {
@@ -37,11 +27,17 @@ void Node_Plot::DrawFooter(float& y) {
 void Node_Plot::Execute() {
 #ifndef IS_ANSERVER
 	if (!inputR[0].first) return;
+	auto xid = inputR[1].first ? *(int*)inputR[1].first->conV[inputR[1].second].value : inputVDef[1].i;
+	auto yid = inputR[2].first ? *(int*)inputR[2].first->conV[inputR[2].second].value : inputVDef[2].i;
 	CVar& cv = inputR[0].first->conV[inputR[0].second];
 	if (!cv.value) return;
 	auto ds = cv.dimVals.size();
 	auto sz = *cv.dimVals[0];
 	auto sz2 = (cv.dimVals.size() > 1)? *cv.dimVals[1] : 1;
+	if (sz > 1) {
+		xid = Clamp(xid, -1, sz2 - 1);
+		yid = Clamp(yid, -1, sz2 - 1);
+	}
 	valXs.resize(sz);
 	valYs.resize(sz2);
 	_valYs.resize(sz2);
@@ -93,8 +89,13 @@ void Node_Plot::Execute() {
 				return;
 			}
 		}
+#undef cs
 	}
 	else {
+#define cs(_c, _t) case _c:\
+			for (int i = 0; i < sz; i++) {\
+				valYs[0][i] = (float)(*(_t**)cv.value)[i*sz2 + j];\
+			} break
 		_valYs.resize(1);
 		int j = (ds == 1) ? 0 : yid;
 		switch (cv.typeName[6]) {
@@ -115,20 +116,21 @@ void Node_Plot::LoadOut(const std::string& path) {
 }
 
 void Node_Plot::OnConn(bool o, int i) {
-	auto& cv = inputR[0].first->conV[inputR[0].second];
-	auto sz = cv.dimVals.size();
-	if (sz == 1) useids = false;
-	else if (sz == 2) {
-		auto v = *cv.dimVals[1];
-		if (v > 1) {
-			useids = true;
-			if (xid >= v) xid = v - 1;
-			if (yid >= v) yid = v - 1;
-			if (xid == yid) xid--;
+	if (i == 0) {
+		auto& cv = inputR[0].first->conV[inputR[0].second];
+		auto sz = cv.dimVals.size();
+		if (sz == 1) useids = false;
+		else if (sz == 2) {
+			auto v = *cv.dimVals[1];
+			useids = (v > 1);
 		}
-		else useids = false;
+		else {
+			Debug::Warning("Node::Plot", "Data of 3+ dimensions cannot be plotted!");
+		}
+		inputR[1].use = inputR[2].use = useids;
 	}
-	else {
-		Debug::Warning("Node::Plot", "Data of 3+ dimensions cannot be plotted!");
-	}
+}
+
+void Node_Plot::OnValChange(int i) {
+	Execute();
 }
