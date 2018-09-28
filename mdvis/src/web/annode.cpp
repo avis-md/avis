@@ -729,7 +729,8 @@ void CNode::Execute() {
 				
 				for (uint j = 0; j < mv.dimVals.size(); j++) {
 					auto loc = mv.dimVals[j];
-					*loc = *cv.dimVals[j];
+					if (loc)
+						*loc = *cv.dimVals[j];
 				}
 				break;
 			default:

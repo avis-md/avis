@@ -328,18 +328,20 @@ bool VisSystem::Load(const std::string& path) {
 		Debug::Warning("System", "extracting save file failed!");
 		goto cleanup;
 	}
-	auto xml = Xml::Parse(currentSavePath2 + nm + ".xml");
-	if (!xml) {
-		Debug::Warning("System", "save file xml is corrupt!");
-		goto cleanup;
-	}
 	else {
-		auto n = &xml->children[0];
-		Particles::Deserialize(n);
-		ParGraphics::Deserialize(n);
-		AnWeb::Deserialize(n);
-		Debug::Message("System", "Load complete");
-		success = true;
+		auto xml = Xml::Parse(currentSavePath2 + nm + ".xml");
+		if (!xml) {
+			Debug::Warning("System", "save file xml is corrupt!");
+			goto cleanup;
+		}
+		else {
+			auto n = &xml->children[0];
+			Particles::Deserialize(n);
+			ParGraphics::Deserialize(n);
+			AnWeb::Deserialize(n);
+			Debug::Message("System", "Load complete");
+			success = true;
+		}
 	}
 cleanup:
 	IO::RmDirectory(currentSavePath2);
