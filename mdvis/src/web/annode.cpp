@@ -242,7 +242,7 @@ float AnNode::DrawSide() {
 					std::string tt = isme ?
 						(tmp ? "Select variable" : "Select node") :
 						(rf ? rf->script->outvars[rs].first : "no input");
-					if (Engine::Button(pos.x + width * 0.33f, y, width * 0.67f - 5, 16, white(1, 0.3f), tt, 12, white(1, (rf && !isme) ? 1 : 0.5f)) == MOUSE_RELEASE) {
+					UI2::Dropdown(pos.x + width * 0.33f, y, width * 0.67f - 5, di, [&](){
 						tmp = nullptr; opt = this; opi = i;
 						ss.resize(2);
 						ss[1] = "Parameter";
@@ -252,12 +252,7 @@ float AnNode::DrawSide() {
 						di.list = &ss[0];
 						di.target = &si;
 						si = 0;
-						Popups::type = POPUP_TYPE::DROPDOWN;
-						Popups::pos = Vec2(pos.x + width * 0.33f, y + 16);
-						Popups::pos2.x = width * 0.67f - 5;
-						Popups::data = &di;
-					}
-					UI::Texture(pos.x + width - 21, y, 16, 16, Icons::dropdown2);
+					}, tt, white(1, (rf && !isme) ? 1 : 0.5f));
 					if (opt == this && opi == i) {
 						if (Popups::type == POPUP_TYPE::NONE) {
 							if (!di.seld) opt = nullptr;
@@ -311,15 +306,10 @@ void AnNode::DrawDefVal(int i, float y) {
 	switch (opt.type) {
 	case VarOpt::ENUM: {
 		static Popups::DropdownItem di;
-		if (Engine::Button(pos.x + width*0.33f, y, width*0.67f - 6, 16, white(1, 0.3f), script->invaropts[i].enums[inputVDef[i].i], 12, white()) == MOUSE_RELEASE) {
+		UI2::Dropdown(pos.x + width*0.33f, y, width*0.67f - 6, di, [&]() {
 			di.list = &script->invaropts[i].enums[0];
 			di.target = (uint*)&inputVDef[i].i;
-			Popups::type = POPUP_TYPE::DROPDOWN;
-			Popups::pos = Vec2(pos.x + width / 2, y + 16);
-			Popups::pos2.x = width / 2 - 10;
-			Popups::data = &di;
-		}
-		UI::Texture(pos.x + width - 26, y, 16, 16, Icons::dropdown2);
+		}, script->invaropts[i].enums[inputVDef[i].i]);
 		break;
 	}
 	case VarOpt::RANGE: {

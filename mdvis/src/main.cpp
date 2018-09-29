@@ -101,22 +101,22 @@ void updateFunc() {
 
 void paintfunc() {
 	bool stealFocus = false;
+	UI2::sepw = 0.5f;
 
 	if (!Particles::particleSz) {
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		ParMenu::DrawStart();
 	}
 
-	if (AnWeb::drawFull)
+	if (AnWeb::drawFull) {
+		UI2::sepw = 0.33f;
 		AnWeb::Draw();
+		UI2::sepw = 0.5f;
+	}
 	else {
 		ParMenu::Draw();
-		//if (!Particles::particleSz || LiveSyncer::activeRunner) {
-			//LiveSyncer::DrawSide();
-		//}
-		//else {
-			AnWeb::DrawSide();
-		//}
+		UI2::sepw = 0.33f;
+		AnWeb::DrawSide();
+		UI2::sepw = 0.5f;
 
 		ParGraphics::DrawOverlay();
 	}
@@ -178,6 +178,7 @@ void paintfunc() {
 #ifdef MAKE_RES
 #include "makeres.h"
 int main(int argc, char **argv) {
+	IO::InitPath();
 	MakeRes::Do();
 	std::getline(std::cin, *(new std::string()));
 	return 0;

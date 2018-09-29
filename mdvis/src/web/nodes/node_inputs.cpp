@@ -67,6 +67,16 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)) {
 	}
 }
 
+void Node_Inputs::DrawHeader(float& off) {
+	AnNode::DrawHeader(off);
+
+	UI::Quad(pos.x, off, width, 17, bgCol);
+	static std::string ss[] = { "Visible", "Clipped", "" };
+	static Popups::DropdownItem di(&filter, &ss[0], true);
+	UI2::Dropdown(pos.x + 5, off, width - 10, "Filter", di);
+	off += 17;
+}
+
 void Node_Inputs::Execute() {
 #ifndef IS_ANSERVER
 	conV[0].value = &Particles::anim.poss[frame];

@@ -31,7 +31,7 @@ uint VisSystem::renderMs, VisSystem::uiMs;
 float VisSystem::lastSave;
 std::string VisSystem::currentSavePath, VisSystem::currentSavePath2;
 
-std::vector<MenuItem> VisSystem::menuItems[];
+std::vector<Popups::MenuItem> VisSystem::menuItems[];
 
 std::string VisSystem::message;
 std::string VisSystem::message2 = "";
@@ -131,28 +131,28 @@ void VisSystem::Init() {
 			VisSystem::Load(res[0].substr(0, res[0].find_last_of('.')));
 		}
 	});
-	mi[2].Set(Texture(), _("Open Recent"), 0);
+	mi[2].Set(0, _("Open Recent"), 0);
 	auto& mic = mi[2].child;
 	mic.resize(2);
-	mic[0].Set(Texture(), "boo", 0);
-	mic[1].Set(Texture(), "foo", 0);
+	mic[0].Set(0, "boo", 0);
+	mic[1].Set(0, "foo", 0);
 	mi[3].Set(Icons::openfile, _("Import"), []() {
 		ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
 	});
 	mi[4].Set(Icons::openfile, _("Import Recent"), 0);
 	auto& mi2 = menuItems[3];
 	mi2.resize(5);
-	mi2[0].Set(Texture(), "Image (GLSL)", []() {
+	mi2[0].Set(0, "Image (GLSL)", []() {
 		VisRenderer::ToImage();
 	});
-	mi2[1].Set(Texture(), "Image (Raytraced)", 0);
-	mi2[2].Set(Texture(), "Movie (GLSL)", 0);
-	mi2[3].Set(Texture(), "Movie (Raytraced)", 0);
-	mi2[4].Set(Texture(), "Options", 0);
+	mi2[1].Set(0, "Image (Raytraced)", 0);
+	mi2[2].Set(0, "Movie (GLSL)", 0);
+	mi2[3].Set(0, "Movie (Raytraced)", 0);
+	mi2[4].Set(0, "Options", 0);
 
 	auto& mi3 = menuItems[4];
 	mi3.resize(2);
-	mi3[0].Set(Texture(), "User Manual", []() {
+	mi3[0].Set(0, "User Manual", []() {
 		IO::OpenEx(IO::path + "docs/index.html");
 	});
 	mi3[1].Set(Icons::vis_atom, "Splash Screen", []() {
@@ -198,7 +198,7 @@ void VisSystem::UpdateTitle() {
 	auto s = ParMenu::recentFiles.size();
 	c.resize(s);
 	for (size_t i = 0; i < s; i++) {
-		c[i].Set(Texture(), ParMenu::recentFilesN[i], []() {
+		c[i].Set(0, ParMenu::recentFilesN[i], []() {
 			const char* cc[1] = { ParMenu::recentFiles[Popups::selectedMenu].c_str() };
 			ParLoader::OnDropFile(1, cc);
 			Popups::type = POPUP_TYPE::NONE;

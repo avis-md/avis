@@ -13,29 +13,28 @@ enum class POPUP_TYPE : byte {
 	SYSMSG
 };
 
-struct MenuItem {
-	typedef void(*CBK)();
-
-	GLuint icon = 0;
-	std::string label;
-	std::vector<MenuItem> child;
-	CBK callback;
-
-	void Set(const Texture& tex, const std::string& str, CBK cb) {
-		icon = tex? tex.pointer : 0;
-		label = str;
-		callback = cb;
-	}
-};
-
 class Popups {
 public:
+	struct MenuItem {
+		typedef void(*CBK)();
+
+		GLuint icon = 0;
+		std::string label;
+		std::vector<MenuItem> child;
+		CBK callback;
+
+		void Set(const Texture& tex, const std::string& str, CBK cb) {
+			icon = tex ? tex.pointer : 0;
+			label = str;
+			callback = cb;
+		}
+	};
 	struct DropdownItem {
-		DropdownItem(uint* a = 0, std::string* b = 0) : target(a), list(b) {}
+		DropdownItem(uint* a = 0, std::string* b = 0, bool f = false) : target(a), list(b), flags(f) {}
 
 		uint* target;
 		std::string* list;
-		bool seld;
+		bool seld, flags;
 	};
 
     static POPUP_TYPE type;

@@ -21,7 +21,7 @@ public:
 	static float lastSave;
 	static std::string currentSavePath, currentSavePath2;
 
-	static std::vector<MenuItem> menuItems[10];
+	static std::vector<Popups::MenuItem> menuItems[10];
 
 	static std::string message, message2;
 	static bool hasMessage2;

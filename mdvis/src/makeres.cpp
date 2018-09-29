@@ -4,7 +4,7 @@
 
 void MakeRes::Do() {
 	const char* hx = "0123456789ABCDEF";
-	auto fls = IO::GetFiles(IO::path + "res/", ".png");
+	auto fls = IO::GetFiles(IO::path + "res/", "*.png");
 	auto sz = (IO::path + "res").size();
 	std::ofstream strma(IO::path + "res/src/resdata.h", std::ios::app);
 	//strma << "#pragma once\n";

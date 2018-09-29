@@ -54,9 +54,9 @@ void UI::Init() {
 	font = new Font(IO::path + "res/font.ttf");
 	font2 = new Font(IO::path + "res/font2.ttf");
 	if (!font) {
-		Debug::Warning("UI", "failed to open default font (/res/font.ttf)!");
+		Debug::Error("UI", "failed to open default font (/res/font.ttf)!");
 		if (font2) font = font2;
-		else Debug::Warning("UI", "failed to open alternate font (/res/font2.ttf)!");
+		else Debug::Warning("UI", "failed to open alternate font (/res/font2.ttf)! Non-ascii text will not work!");
 	}
 	else if (!font2) font2 = font;
 }
@@ -98,14 +98,12 @@ void UI::SetVao(uint sz, void* verts, void* uvs) {
 		_vboSz = sz;
 		InitVao();
 	}
-	//auto e = glGetError();
 	glBindBuffer(GL_ARRAY_BUFFER, _vboV);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sz * sizeof(Vec3), verts);
 	if (uvs) {
 		glBindBuffer(GL_ARRAY_BUFFER, _vboU);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sz * sizeof(Vec2), uvs);
 	}
-	//e = glGetError();
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
@@ -117,19 +115,11 @@ bool UI::IsSameId(uintptr_t* left, uintptr_t* right) {
 }
 
 void UI::GetEditTextId() {
-	//#ifdef PLATFORM_WIN
 	memset(_activeEditText, 0, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
 	Debug::StackTrace(UI_MAX_EDIT_TEXT_FRAMES, (void**)_activeEditText);
-	//UI_Trace(drawFuncLoc, 2, _activeEditText);
 	if (IsSameId(_activeEditText, _lastEditText)) _activeEditTextId++;
 	else _activeEditTextId = 0;
-
 	memcpy(_lastEditText, _activeEditText, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
-	//#endif
-}
-
-bool UI::IsActiveEditText() {
-	return false;
 }
 
 void UI::PreLoop() {

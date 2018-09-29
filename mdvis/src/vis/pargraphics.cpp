@@ -881,6 +881,7 @@ void ParGraphics::DrawColMenu() {
 		UI::Quad(exps - 148, off, 147, Display::height*0.5f - off, white(0.9f, 0.1f));
 		Engine::PushStencil(exps - 148, off + 1, 147, Display::height*0.5f - off - 2);
 		off++;
+		UI2::sepw = 0.33f;
 		for (int x = 0; x < 256; x++) {
 			std::string nm = (x < Particles::defColPalleteSz) ? std::string((char*)&Particles::defColPallete[x], 2) : std::to_string(x);
 			Vec3& col = Particles::colorPallete[x];
@@ -892,6 +893,7 @@ void ParGraphics::DrawColMenu() {
 			}
 			off += 17;
 		}
+		UI2::sepw = 0.5f;
 		off += 2;
 		Engine::PopStencil();
 	}

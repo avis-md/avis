@@ -5,6 +5,8 @@
 [av] */
 class UI {
 public:
+	static void Init(), IncLayer();
+
 	static void Quad(float x, float y, float w, float h, Vec4 col);
 	static void Quad(float x, float y, float w, float h, GLuint tex, Vec4 col = white(), Vec2 uv0 = Vec2(0, 1), Vec2 uv1 = Vec2(1, 1), Vec2 uv2 = Vec2(0, 0), Vec2 uv3 = Vec2(1, 0));
 	static void Texture(float x, float y, float w, float h, const ::Texture& texture, DRAWTEX_SCALING scl = DRAWTEX_STRETCH, float miplevel = 0);
@@ -23,7 +25,6 @@ public:
 	static ushort _activeEditTextId, _editingEditTextId;
 
 	static void GetEditTextId();
-	static bool IsActiveEditText();
 	static bool IsSameId(uintptr_t* left, uintptr_t* right);
 
 	struct StyleColor {
@@ -56,9 +57,7 @@ public:
 
 	static byte _layer, _layerMax;
 	static bool ignoreLayers;
-
+	
 	PROGDEF_H(quadProgC, 5)
 	PROGDEF_H(quadProgT, 5)
-
-	static void Init(), IncLayer();
 };

@@ -6,6 +6,9 @@
 
 PROGDEF(UI2::bezierProg)
 
+float UI2::sepw = 0.5f;
+#define sepw2 (1-sepw)
+
 void UI2::Init() {
 	bezierProg = Shader::FromVF(glsl::bezierVert, glsl::coreFrag3);
 #define LC(nm) bezierProgLocs[i++] = glGetUniformLocation(bezierProg, #nm) 
@@ -25,12 +28,11 @@ void UI2::LabelMul(float x, float y, float sz, const std::string& s) {
 
 std::string UI2::EditText(float x, float y, uint w, const std::string& title, const std::string& val, bool enabled, Vec4 col) {
 	UI::Label(x, y, 12, title, white());
-	w /= 2;
 	if (enabled) {
-		return UI::EditText(x + w, y, w - 1.0f, 16, 12, col, val, true, white());
+		return UI::EditText(x + w*sepw, y, w*sepw2 - 1.0f, 16, 12, col, val, true, white());
 	}
 	else {
-		Engine::Button(x + w, y, w - 1.0f, 16, col, val, 12, white(0.5f));
+		Engine::Button(x + w*sepw, y, w*sepw2 - 1.0f, 16, col, val, 12, white(0.5f));
 		return val;
 	}
 }
@@ -41,10 +43,7 @@ float UI2::Slider(float x, float y, uint w, const std::string& title, float a, f
 
 float UI2::Slider(float x, float y, uint w, const std::string& title, float a, float b, float t, const std::string& lbl) {
 	UI::Label(x, y, 12, title, white());
-	w /= 2;
-	t = Engine::DrawSliderFill(x + w, y, w - 1.0f, 16, a, b, t, white(1, 0.5f), white());
-	UI::Label(x + w + 2, y, 12, lbl, white(1, 0.2f));
-	return t;
+	return Slider(x + w*sepw, y, w*sepw2 - 1.0f, a, b, t);
 }
 
 float UI2::Slider(float x, float y, uint w, float a, float b, float t) {
@@ -55,19 +54,17 @@ float UI2::Slider(float x, float y, uint w, float a, float b, float t) {
 
 void UI2::Color(float x, float y, uint w, const std::string& title, Vec4& col) {
 	UI::Label(x, y, 12, title, white());
-	w /= 2;
-	if (Engine::Button(x + w, y, w-1.0f, 16, col) == MOUSE_RELEASE) {
+	if (Engine::Button(x + w*sepw, y, w*sepw2 - 1.0f, 16, col) == MOUSE_RELEASE) {
 		Popups::type = POPUP_TYPE::COLORPICK;
-		Popups::pos = Vec2(x + w, y + 16);
+		Popups::pos = Vec2(x + w*sepw, y + 16);
 		Popups::data = &col;
 	}
-	UI::Texture(x + w * 2 - 18, y, 16, 16, Icons::colorwheel);
+	UI::Texture(x + w - 18, y, 16, 16, Icons::colorwheel);
 }
 
 void UI2::File(float x, float y, uint w, const std::string& title, const std::string& fl, filecallback func) {
 	UI::Label(x, y, 12, "File", white());
-	w /= 2;
-	if (Engine::Button(x + w, y, w-1.0f, 16, white(1, 0.3f), fl, 12, white(0.5f)) == MOUSE_RELEASE) {
+	if (Engine::Button(x + w*sepw, y, w*sepw2 - 1.0f, 16, white(1, 0.3f), fl, 12, white(0.5f)) == MOUSE_RELEASE) {
 		std::vector<std::string> exts = {"*.hdr"};
 		auto res = Dialog::OpenFile(exts);
 		if (!!res.size()) {
@@ -87,14 +84,45 @@ MOUSE_STATUS UI2::Button2(float x, float y, float w, const std::string& s, const
 
 void UI2::Dropdown(float x, float y, float w, const std::string& title, const Popups::DropdownItem& data) {
 	UI::Label(x, y, 12, title, white());
-	w /= 2;
-	if (Engine::Button(x + w, y, w - 1, 16, white(1, 0.3f), data.list[*data.target], 12, white()) == MOUSE_RELEASE) {
+	Dropdown(x + w*sepw, y, w*sepw2 - 1, data);
+}
+
+void UI2::Dropdown(float x, float y, float w, const Popups::DropdownItem& data, std::function<void()> func, std::string label, Vec4 col) {
+	if (label[0] == 1) {
+		if (!data.flags)
+			label = data.list[*data.target];
+		else {
+			if (!*data.target) label = "None";
+			else {
+				int a = 0; int j = 0;
+				while (data.list[a] != "") {
+					if ((*data.target & (1 << a))>0) {
+						if (!j) {
+							label = data.list[a];
+							j = 1;
+						}
+						else if (j < 3) {
+							label += ", " + data.list[a];
+							j++;
+						}
+						else {
+							label += ", ...";
+							break;
+						}
+					}
+					a++;
+				}
+			}
+		}
+	}
+	if (Engine::Button(x, y, w, 16, white(1, 0.3f), label, 12, col) == MOUSE_RELEASE) {
+		if (func) func();
 		Popups::type = POPUP_TYPE::DROPDOWN;
-		Popups::pos = Vec2(x + w, y + 16);
-		Popups::pos2.x = w - 1;
+		Popups::pos = Vec2(x, y + 16);
+		Popups::pos2.x = w;
 		Popups::data = (Popups::DropdownItem*)&data;
 	}
-	UI::Texture(x + w * 2 - 16, y, 16, 16, Icons::dropdown2);
+	UI::Texture(x + w - 16, y, 16, 16, Icons::dropdown2);
 }
 
 void UI2::Toggle(float x, float y, float w, const std::string& title, bool& val) {
@@ -104,9 +132,8 @@ void UI2::Toggle(float x, float y, float w, const std::string& title, bool& val)
 
 void UI2::Switch(float x, float y, float w, const std::string& title, int c, std::string* nms, int& i) {
 	UI::Label(x, y, 12, title, white());
-	x += w/3;
-	w *= 0.67f;
-	float dw = w / c;
+	x += w*sepw;
+	float dw = w*sepw2 / c;
 	for (int a = 0; a < c; a++) {
 		if (Engine::Button(x + dw * a, y, dw - 1, 16, white(1, (a == i) ? 0.1f : 0.3f), nms[a], 12, white(), true) == MOUSE_RELEASE) {
 			i = a;

@@ -20,7 +20,7 @@ public:
 		colorwheel,
 		vis_atom, vis_prot,
 		pro_col, pro_grad,
-		details, compile, exec;
+		details, compile, exec, tick;
 	
 	static const Texture& OfDM(byte b);
 };

@@ -6,9 +6,16 @@ public:
 	static const std::string sig;
 	Node_Inputs();
 
+	enum class FILTER : int {
+		VIS = 1,
+		CLP = 2
+	};
+	uint filter;
+
 	static uint frame;
 
-	float DrawSide() override { return 0; }
+	void DrawHeader(float& off) override;
+
 	void Execute() override;
 
 	void SaveIn(const std::string& path) override;
