@@ -129,7 +129,7 @@ void LiveSyncer::DoRun() {
 	auto& anm = Particles::anim;
 	while (status > IDLE) {
 		if (status == LOOP) {
-			if (anm.activeFrame == 1) {
+			if (anm.currentFrame == 1) {
 				info.pos = (float*)anm.poss[2];
 				info.vel = (float*)anm.vels[2];
 			}
@@ -141,7 +141,7 @@ void LiveSyncer::DoRun() {
 			if (!activeRunner->loopFunc(&info))
 				status = FAIL;
 			else if (info.fill) {
-				tarFrm = (anm.activeFrame == 1) ? 2 : 1;
+				tarFrm = (anm.currentFrame == 1) ? 2 : 1;
 				applyFrm = true;
 				while (applyFrm && (status > IDLE));
 			}

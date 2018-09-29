@@ -29,10 +29,10 @@ struct ResidueList { //residues with the same name
 };
 
 struct AnimData {
-	AnimData () : reading(false), frameCount(0), activeFrame(0) {}
+	AnimData () : reading(false), frameCount(0), currentFrame(0) {}
 
 	bool reading, dynamicBonds;
-	uint frameCount, activeFrame;
+	uint frameCount, currentFrame;
 	glm::dvec3** poss, **vels;
 	uint* connCounts;
 	Int2** conns;
@@ -94,7 +94,7 @@ public:
 	static void IncFrame(bool loop);
 	static void SetFrame(uint frm);
 
-	static float boundingBox[6];
+	static double boundingBox[6];
 
 	static Vec3 colorPallete[256];
 	static ushort defColPallete[256];

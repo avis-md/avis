@@ -6,6 +6,8 @@ public:
 	static const std::string sig;
 	Node_Inputs();
 
+	static uint frame;
+
 	float DrawSide() override { return 0; }
 	void Execute() override;
 

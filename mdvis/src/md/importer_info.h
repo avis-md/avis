@@ -54,7 +54,7 @@ struct ParInfo {
 		byte helixPitch;
 	}* secStructs; //OPT
 	uint16_t secStructNum;
-	float bounds[6];
+	double bounds[6];
 	TrjInfo trajectory; //OPT
 	char error[100]; //OPT
 };

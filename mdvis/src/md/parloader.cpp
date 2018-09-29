@@ -221,7 +221,7 @@ void ParLoader::DoOpen() {
 	Particles::particles_Pos = (glm::dvec3*)info.pos;
 	Particles::particles_Vel = (glm::dvec3*)info.vel;
 	Particles::particles_Typ = (short*)info.type;
-	memcpy(Particles::boundingBox, info.bounds, 6 * sizeof(float));
+	memcpy(Particles::boundingBox, info.bounds, 6 * sizeof(double));
 	Particles::particles_Col = new byte[info.num];
 	Particles::particles_Rad = new float[info.num];
 	Particles::particles_Res = new Int2[info.num];

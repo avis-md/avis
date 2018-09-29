@@ -7,6 +7,7 @@
 #endif
 
 const std::string Node_Inputs::sig = ".in";
+const std::string Node_Info::sig = ".info";
 const std::string Node_AddBond::sig = ".abnd";
 const std::string Node_Camera_Out::sig = ".camo";
 const std::string Node_Plot::sig = ".plot";
@@ -17,6 +18,7 @@ const std::string Node_ShowRange::sig = ".srng";
 const std::string Node_TraceTrj::sig = ".trrj";
 const std::string Node_Volume::sig = ".vol";
 const std::string Node_Remap::sig = ".remap";
+const std::string Node_Gromacs::sig = ".gro";
 
 Vec4 AnNode::bgCol = white(0.7f, 0.25f);
 
@@ -445,6 +447,12 @@ bool AnNode::ReadFrame(int f) {
 	return true;
 }
 
+void AnNode::RemoveFrames() {
+	for (auto& a : conVAll) {
+		a.clear();
+	}
+}
+
 #define sp << " "
 #define nl << "\n"
 void AnNode::Save(std::ofstream& strm) {
@@ -573,10 +581,6 @@ void AnNode::Reconn() {
 			}
 		}
 		Debug::Message("AnNode", "skipping connection " + cn.tarnm + " -> " + cn.mynm);
-		for (size_t a = 0, sz = inputR.size(); a < sz; a++)
-			std::cout << script->invars[a].first << " " << script->invars[a].second << std::endl;
-		for (size_t b = 0, sz2 = cn.tar->outputR.size(); b < sz2; b++)
-			std::cout << cn.tar->script->outvars[b].first << " " << cn.tar->script->outvars[b].second << std::endl;
 		got:;
 	}
 }
@@ -662,25 +666,12 @@ PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 		auto& ovi = outputV[i] = scr->_outvars[i];
 		conV[i].type = ovi.type;
 		conV[i].typeName = ovi.typeName;
-		switch (ovi.type) {
-		case AN_VARTYPE::INT:
-			conV[i].value = &outputVC[i].val.i;
-			break;
-		case AN_VARTYPE::DOUBLE:
-			conV[i].value = &outputVC[i].val.d;
-			break;
-		case AN_VARTYPE::LIST:
+		if (ovi.type == AN_VARTYPE::LIST) {
 			conV[i].dimVals.resize(ovi.dim);
 			outputVC[i].dims.resize(ovi.dim);
-			for (int j = 0; j < outputV[i].dim; j++)
-				conV[i].dimVals[j] = &outputVC[i].dims[j];
-			conV[i].value = &outputVC[i].val.arr.p;
-			break;
-		default:
-			OHNO("AnVar", "Unexpected scr_vartype " + std::to_string((int)(ovi.type)));
-			throw "";
 		}
 	}
+	RemoveFrames();
 }
 
 void PyNode::Execute() {
@@ -761,6 +752,29 @@ void PyNode::WriteFrame(int f) {
 	for (int a = 0; a < conV.size(); a++) {
 		conVAll[a][f] = outputVC[a];
 		conVAll[a][f].val.arr.p = &conVAll[a][f].val.arr.data[0];
+	}
+}
+
+void PyNode::RemoveFrames() {
+	AnNode::RemoveFrames();
+	auto scr = (PyScript*)script;
+	for (uint i = 0; i < scr->outvars.size(); i++) {
+		switch (scr->_outvars[i].type) {
+		case AN_VARTYPE::INT:
+			conV[i].value = &outputVC[i].val.i;
+			break;
+		case AN_VARTYPE::DOUBLE:
+			conV[i].value = &outputVC[i].val.d;
+			break;
+		case AN_VARTYPE::LIST:
+			for (int j = 0; j < outputV[i].dim; j++)
+				conV[i].dimVals[j] = &outputVC[i].dims[j];
+			conV[i].value = &outputVC[i].val.arr.p;
+			break;
+		default:
+			OHNO("AnVar", "Unexpected scr_vartype " + std::to_string((int)(scr->_outvars[i].type)));
+			throw "";
+		}
 	}
 }
 
@@ -864,7 +878,6 @@ void CNode::WriteFrame(int f) {
 	auto scr = (CScript*)script;
 	for (int a = 0; a < conV.size(); a++) {
 		auto& c = conV[a];
-		conVAll[a].resize(f + 1);
 		auto& ca = conVAll[a][f];
 		switch (c.type) {
 		case AN_VARTYPE::INT:
@@ -890,6 +903,13 @@ void CNode::WriteFrame(int f) {
 	}
 }
 
+void CNode::RemoveFrames() {
+	AnNode::RemoveFrames();
+	auto scr = (CScript*)script;
+	for (uint i = 0; i < scr->outvars.size(); i++) {
+		conV[i] = scr->_outvars[i];
+	}
+}
 
 void CNode::Reconn() {
 	AnNode::Reconn();
@@ -996,6 +1016,14 @@ void FNode::Execute() {
 
 void FNode::WriteFrame(int f) {
 
+}
+
+void FNode::RemoveFrames() {
+	AnNode::RemoveFrames();
+	auto scr = (FScript*)script;
+	for (uint i = 0; i < scr->outvars.size(); i++) {
+		conV[i] = scr->_outvars[i];
+	}
 }
 
 void FNode::CatchExp(char* c) {

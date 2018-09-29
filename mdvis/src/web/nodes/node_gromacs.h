@@ -3,6 +3,7 @@
 
 class Node_Gromacs : public Node_Inputs {
 public:
+	static const std::string sig;
 	Node_Gromacs();
 
 	std::string file;

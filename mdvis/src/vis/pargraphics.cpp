@@ -371,7 +371,7 @@ void ParGraphics::Update() {
 			Particles::IncFrame(true);
 		}
 		else {
-			auto af = Particles::anim.activeFrame;
+			auto af = Particles::anim.currentFrame;
 			auto dt = Time::delta + animOff;
 			auto df = dt * animTarFps;
 			auto dfi = (uint)floor(df);

@@ -50,6 +50,6 @@ void Node_Recolor_All::Execute() {
 
 void Node_Recolor_All::OnAnimFrame() {
 	if (!data.size()) return;
-	Particles::particles_Col = &data[Particles::particleSz * Particles::anim.activeFrame];
+	Particles::particles_Col = &data[Particles::particleSz * Particles::anim.currentFrame];
 	Particles::palleteDirty = true;
 }

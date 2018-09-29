@@ -26,9 +26,10 @@ const std::string AN_NODE_SCNS[] = { "Camera (Set)" };
 enum class AN_NODE_IN : byte {
 	NUM0 = 0,
 	PARS,
+	PINFO,
 	NUM
 };
-const std::string AN_NODE_INS[] = { "Particle data" };
+const std::string AN_NODE_INS[] = { "Particle data", "Particle info" };
 
 enum class AN_NODE_MOD {
 	NUM0 = 0x20,
@@ -82,7 +83,7 @@ public:
 	static void Insert(AnNode* node, Vec2 pos = Vec2(100, 100));
 	static void Init(), Update(), Draw(), DrawSide(), DrawScene();
 	static void Execute(bool all), DoExecute(bool all), _DoExecute(), DoExecute_Srv();
-	static void WriteFrame(uint f), ReadFrame(uint f);
+	static void ApplyFrameCount(int f), WriteFrame(uint f), ReadFrame(uint f), RemoveFrames();
 	static void Save(const std::string& s), SaveIn(), SaveOut();
 	static void Load(const std::string& s), LoadIn(), LoadOut();
 	static void CheckChanges();
@@ -97,11 +98,11 @@ public:
 };
 
 #include "anbrowse.h"
+#include "nodes/node_inputs.h"
+#include "nodes/node_info.h"
 #include "nodes/node_addbond.h"
 //#include "nodes/node_volume.h"
 #include "nodes/node_camera.h"
-#include "nodes/node_gromacs.h"
-#include "nodes/node_inputs.h"
 #include "nodes/node_plot.h"
 #include "nodes/node_recolor.h"
 #include "nodes/node_setparam.h"
@@ -109,3 +110,4 @@ public:
 #include "nodes/node_tracetrj.h"
 #include "nodes/node_volume.h"
 #include "nodes/node_remap.h"
+#include "nodes/node_gromacs.h"

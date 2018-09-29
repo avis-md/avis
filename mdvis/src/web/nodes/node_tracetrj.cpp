@@ -24,7 +24,7 @@ void Node_TraceTrj::Execute() {
 void Node_TraceTrj::DrawScene() {
 	if (!has || (pathSz != Particles::anim.frameCount) || pathSz == 1) return;
 
-	auto fc = traceAll? Particles::anim.activeFrame + 1 : Particles::anim.frameCount;
+	auto fc = traceAll? Particles::anim.currentFrame + 1 : Particles::anim.frameCount;
 	
 	Engine::DrawLinesW(&path[0], fc, black(), 4);
 }

@@ -104,12 +104,12 @@ bool PDB::Read(ParInfo* info) {
 	bnd[2] = bnd[3] = (float)info->pos[1];
 	bnd[4] = bnd[5] = (float)info->pos[2];
 	for (uint32_t i = 1; i < sz; i++) {
-		bnd[0] = std::min(bnd[0], (float)info->pos[i * 3]);
-		bnd[1] = std::max(bnd[1], (float)info->pos[i * 3]);
-		bnd[2] = std::min(bnd[2], (float)info->pos[i * 3 + 1]);
-		bnd[3] = std::max(bnd[3], (float)info->pos[i * 3 + 1]);
-		bnd[4] = std::min(bnd[4], (float)info->pos[i * 3 + 2]);
-		bnd[5] = std::max(bnd[5], (float)info->pos[i * 3 + 2]);
+		bnd[0] = std::min(bnd[0], info->pos[i * 3]);
+		bnd[1] = std::max(bnd[1], info->pos[i * 3]);
+		bnd[2] = std::min(bnd[2], info->pos[i * 3 + 1]);
+		bnd[3] = std::max(bnd[3], info->pos[i * 3 + 1]);
+		bnd[4] = std::min(bnd[4], info->pos[i * 3 + 2]);
+		bnd[5] = std::max(bnd[5], info->pos[i * 3 + 2]);
 	}
 	return true;
 }

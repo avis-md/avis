@@ -241,7 +241,7 @@ void VisSystem::DrawBar() {
 					Particles::IncFrame(false);
 				}
 				if (Input::KeyDown(Key_LeftArrow)) {
-					if (!!Particles::anim.activeFrame) Particles::SetFrame(Particles::anim.activeFrame - 1);
+					if (!!Particles::anim.currentFrame) Particles::SetFrame(Particles::anim.currentFrame - 1);
 				}
 			}
 			if ((!UI::editingText && Input::KeyDown(Key_Space)) || Engine::Button(150, Display::height - 17.0f, 16, 16, Icons::right, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
@@ -254,7 +254,7 @@ void VisSystem::DrawBar() {
 		fps = TryParse(UI::EditText(170, Display::height - 17.0f, 50, 16, 12, white(1, 0.4f), std::to_string(fps), true, white(), nullptr, std::to_string(fps) + " fps"), 0);
 		fps = Clamp(fps, 0, 1000);
 
-		float al = float(Particles::anim.activeFrame) / (Particles::anim.frameCount - 1);
+		float al = float(Particles::anim.currentFrame) / (Particles::anim.frameCount - 1);
 		al = Engine::DrawSliderFill(225, Display::height - 13.0f, Display::width - 385.0f, 9, 0, 1, al, white(0.5f), VisSystem::accentColor);
 		UI::Quad(222 + (Display::width - 385.0f) * al, Display::height - 17.0f, 6, 16, white());
 
@@ -266,7 +266,7 @@ void VisSystem::DrawBar() {
 			Particles::SetFrame((uint)roundf(al * (Particles::anim.frameCount - 1)));
 		}
 
-		UI::Label(Display::width - 155.0f, Display::height - 16.0f, 12, std::to_string(Particles::anim.activeFrame + 1) + "/" + std::to_string(Particles::anim.frameCount), white());
+		UI::Label(Display::width - 155.0f, Display::height - 16.0f, 12, std::to_string(Particles::anim.currentFrame + 1) + "/" + std::to_string(Particles::anim.frameCount), white());
 	}
 	else
 		UI::Label(172, Display::height - 16.0f, 12, _("No Animation Data"), white(0.5f));

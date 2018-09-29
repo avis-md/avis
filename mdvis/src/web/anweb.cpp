@@ -75,8 +75,8 @@ void AnWeb::Update() {
 	}
 	if (apply) {
 		apply = false;
-		auto frm = Particles::anim.activeFrame;
-		Particles::anim.activeFrame = -1;
+		auto frm = Particles::anim.currentFrame;
+		Particles::anim.currentFrame = -1;
 		Particles::SetFrame(frm);
 	}
 
@@ -183,6 +183,7 @@ void AnWeb::Draw() {
 						SW(SCN::OCAM, Node_Camera_Out);
 
 						SW(IN::PARS, Node_Inputs);
+						SW(IN::PINFO, Node_Info);
 
 						SW(MOD::RECOL, Node_Recolor);
 						SW(MOD::RECOLA, Node_Recolor_All);
@@ -207,7 +208,7 @@ void AnWeb::Draw() {
 				}
 				else pn->canTile = false;
 				nodes.insert(nodes.begin() + iter + 1, pn);
-				for (int a = 0; a < nodes.size(); a++)
+				for (size_t a = 0; a < nodes.size(); a++)
 					nodes[a]->id = a;
 			}
 			selScript = nullptr;
@@ -272,7 +273,7 @@ void AnWeb::Draw() {
 
 void AnWeb::DrawSide() {
 #ifndef IS_ANSERVER
-	UI::Quad(Display::width - expandPos, 18, 180.0f, Display::height - 18.0f, white(0.9f, 0.15f));
+	UI::Quad(Display::width - expandPos, 18, 180.0f, Display::height - 36.0f, white(0.9f, 0.15f));
 	if (expanded) {
 		float w = 180;
 		AnNode::width = w - 2;
@@ -290,13 +291,11 @@ void AnWeb::DrawSide() {
 		UI::Texture(Display::width - expandPos + 1, 38, 16, 16, Icons::play);
 		UI::Texture(Display::width - expandPos + 72, 38, 16, 16, Icons::playall);
 
-		//Engine::BeginStencil(Display::width - w, 0, 150, Display::height);
 		Vec2 poss(Display::width - expandPos + 1, 17 * 3 + 4);
 		for (auto n : nodes) {
 			n->pos = poss;
 			poss.y += n->DrawSide();
 		}
-		//Engine::EndStencil();
 		UI::Quad(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, white(0.9f, 0.15f));
 		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
@@ -345,16 +344,18 @@ void AnWeb::DoExecute(bool all) {
 	ErrorView::execMsgs.clear();
 	
 	if (all) {
-		auto frm = Particles::anim.activeFrame;
+		ApplyFrameCount(Particles::anim.frameCount);
 		for (uint a = 0; a < Particles::anim.frameCount; a++) {
-			Particles::anim.activeFrame = frm;
-			Particles::particles_Pos = Particles::anim.poss[a];
+			Node_Inputs::frame = a;
 			_DoExecute();
 			AnWeb::WriteFrame(a);
 		}
-		Particles::anim.activeFrame = frm;
 	}
-	else _DoExecute();
+	else {
+		RemoveFrames();
+		Node_Inputs::frame = Particles::anim.currentFrame;
+		_DoExecute();
+	}
 
 	executing = false;
 	apply = true;
@@ -471,6 +472,11 @@ void AnWeb::DoExecute_Srv() {
 #endif
 }
 
+void AnWeb::ApplyFrameCount(int f) {
+	for (auto& n : nodes)
+		n->ApplyFrameCount(f);
+}
+
 void AnWeb::WriteFrame(uint f) {
 	for (auto& n : nodes)
 		n->WriteFrame(f);
@@ -481,6 +487,13 @@ void AnWeb::ReadFrame(uint f) {
 		if (!n->ReadFrame(f)) return;
 	}
 }
+
+void AnWeb::RemoveFrames() {
+	for (auto& n : nodes) {
+		n->RemoveFrames();
+	}
+}
+
 
 #define sp << " "
 #define nl << "\n"
@@ -568,7 +581,7 @@ void AnWeb::Load(const std::string& s) {
 		Debug::Warning("AnWeb", "Cannot open save file!");
 		return;
 	}
-	nodes.clear(); //memory leaking!
+	nodes.clear();
 	AnNode* n = nullptr;
 	AN_SCRTYPE tp;
 	std::string nm;
@@ -583,6 +596,7 @@ void AnWeb::Load(const std::string& s) {
 				case AN_SCRTYPE::NONE:
 		#define ND(scr) if (nm == scr::sig) n = new scr(); else
 					ND(Node_Inputs)
+					ND(Node_Info)
 					ND(Node_AddBond)
 					//ND(Node_AddVolume)
 					ND(Node_TraceTrj)
@@ -731,7 +745,7 @@ void AnWeb::OnSceneUpdate() {
 }
 
 void AnWeb::OnAnimFrame() {
-	ReadFrame(Particles::anim.activeFrame);
+	ReadFrame(Particles::anim.currentFrame);
 	for (auto n : nodes) {
 		n->OnAnimFrame();
 	}

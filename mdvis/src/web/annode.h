@@ -86,6 +86,7 @@ public:
 	void ApplyFrameCount(int f);
 	virtual void WriteFrame(int f) {};
 	bool ReadFrame(int f);
+	virtual void RemoveFrames();
 
 	void Save(std::ofstream& strm), Load(std::ifstream& strm);
 	virtual void SaveIn(const std::string& path) {};
@@ -121,6 +122,7 @@ public:
 	
 	void Execute() override;
 	void WriteFrame(int f) override;
+	void RemoveFrames() override;
 
 	void CatchExp(char* c) override;
 };
@@ -133,6 +135,7 @@ public:
 
 	void Execute() override;
 	void WriteFrame(int f) override;
+	void RemoveFrames() override;
 
 	void Reconn() override;
 
@@ -144,9 +147,10 @@ public:
 	FNode(FScript*);
 
 	std::vector<void*> inputV, outputV;
-
+	
 	void Execute() override;
 	void WriteFrame(int f) override;
+	void RemoveFrames() override;
 
 	void CatchExp(char* c) override;
 };

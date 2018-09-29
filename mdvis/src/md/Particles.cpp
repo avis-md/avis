@@ -49,7 +49,7 @@ std::vector<Particles::conninfo> Particles::particles_Conn2;
 
 AnimData Particles::anim;
 
-float Particles::boundingBox[] = {};
+double Particles::boundingBox[] = {};
 
 Vec3 Particles::colorPallete[] = {};
 ushort Particles::defColPallete[] = {};
@@ -129,7 +129,7 @@ void Particles::Clear() {
 			delete[](c.second);
 		}
 		*/
-		anim.frameCount = anim.activeFrame = 0;
+		anim.frameCount = anim.currentFrame = 0;
 
 		Protein::Clear();
 	}
@@ -213,18 +213,18 @@ void Particles::UpdateConBufs2() {
 }
 
 void Particles::IncFrame(bool loop) {
-	if (anim.activeFrame >= anim.frameCount - 1) {
+	if (anim.currentFrame >= anim.frameCount - 1) {
 		if (loop) SetFrame(0);
 		else return;
 	}
-	else SetFrame(anim.activeFrame + 1);
+	else SetFrame(anim.currentFrame + 1);
 }
 
 void Particles::SetFrame(uint frm) {
-	if (frm == anim.activeFrame) return;
+	if (frm == anim.currentFrame) return;
 	else {
-		anim.activeFrame = frm;
-		particles_Pos = anim.poss[anim.activeFrame];
+		anim.currentFrame = frm;
+		particles_Pos = anim.poss[anim.currentFrame];
 		std::vector<Vec3> poss(particleSz);
 #pragma omp parallel for
 		for (int a = 0; a < (int)particleSz; a++) {

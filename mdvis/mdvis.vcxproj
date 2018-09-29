@@ -302,6 +302,7 @@
     <ClCompile Include="src\web\nodes\node_addbond.cpp" />
     <ClCompile Include="src\web\nodes\node_camera.cpp" />
     <ClCompile Include="src\web\nodes\node_gromacs.cpp" />
+    <ClCompile Include="src\web\nodes\node_info.cpp" />
     <ClCompile Include="src\web\nodes\node_inputs.cpp" />
     <ClCompile Include="src\web\nodes\node_plot.cpp" />
     <ClCompile Include="src\web\nodes\node_recolor.cpp" />
@@ -404,6 +405,7 @@
     <ClInclude Include="src\web\nodes\node_addbond.h" />
     <ClInclude Include="src\web\nodes\node_camera.h" />
     <ClInclude Include="src\web\nodes\node_gromacs.h" />
+    <ClInclude Include="src\web\nodes\node_info.h" />
     <ClInclude Include="src\web\nodes\node_inputs.h" />
     <ClInclude Include="src\web\nodes\node_plot.h" />
     <ClInclude Include="src\web\nodes\node_recolor.h" />
