@@ -1044,9 +1044,12 @@ void ParGraphics::DrawPopupDM() {
 	UI::Texture(Popups::pos.x, Popups::pos.y, 16, 16, Icons::OfDM(dt));
 	UI::Quad(Popups::pos.x, Popups::pos.y + 16, 111, 35, white(1, 0.3f));
 
+	static const Texture as[] = { Icons::dm_none, Icons::dm_point, Icons::dm_ball, Icons::dm_vdw };
+	static const Texture bs[] = { Icons::dm_none, Icons::dm_line, Icons::dm_stick };
+
 	UI::Label(Popups::pos.x + 2, Popups::pos.y + 18, 12, _("Atoms"), white());
 	for (byte i = 0; i < 4; i++) {
-		if (Engine::Button(Popups::pos.x + 42 + 17 * i, Popups::pos.y + 18, 16, 16, (&Icons::dm_none)[i], (i == a)? yellow() : white(0.8f)) == MOUSE_RELEASE) {
+		if (Engine::Button(Popups::pos.x + 42 + 17 * i, Popups::pos.y + 18, 16, 16, as[i], (i == a)? yellow() : white(0.8f)) == MOUSE_RELEASE) {
 			if (dt == 255) dt = 0;
 			dt = (dt & 0xf0) | i;
 			if (!dt) dt = 0x10;
@@ -1054,16 +1057,12 @@ void ParGraphics::DrawPopupDM() {
 		}
 	}
 	UI::Label(Popups::pos.x + 2, Popups::pos.y + 35, 12, _("Bonds"), white());
-	if (Engine::Button(Popups::pos.x + 42, Popups::pos.y + 35, 16, 16, Icons::dm_none, (!b) ? yellow() : white(0.8f)) == MOUSE_RELEASE) {
-		if (dt == 255) dt = 0;
-		dt &= 0x0f;
-		if (a == 0) dt = 1;
-	}
-	for (byte i = 0; i < 2; i++) {
-		if (Engine::Button(Popups::pos.x + 59 + 17 * i, Popups::pos.y + 35, 16, 16, (&Icons::dm_line)[i], ((i+1) == b)? yellow() : white(0.8f)) == MOUSE_RELEASE) {
+	for (byte i = 0; i < 3; i++) {
+		if (Engine::Button(Popups::pos.x + 42 + 17 * i, Popups::pos.y + 35, 16, 16, bs[i], ((i+1) == b)? yellow() : white(0.8f)) == MOUSE_RELEASE) {
 			if (dt == 255) dt = 0; 
-			dt = (dt & 0x0f) | (i << 4) + 0x10;
-			if (a == 3) dt = (i << 4) + 0x12;
+			dt = (dt & 0x0f) | (i << 4);
+			if (a == 0 && i == 0) dt = 1;
+			else if (a == 3) dt = (i << 4) + 0x02;
 		}
 	}
 

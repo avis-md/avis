@@ -25,10 +25,10 @@ const std::string AN_NODE_SCNS[] = { "Camera (Set)" };
 
 enum class AN_NODE_IN : byte {
 	NUM0 = 0,
-	SELPAR,
+	PARS,
 	NUM
 };
-const std::string AN_NODE_INS[] = { "Sel'd Particles" };
+const std::string AN_NODE_INS[] = { "Particle data" };
 
 enum class AN_NODE_MOD {
 	NUM0 = 0x20,
@@ -81,7 +81,8 @@ public:
 	static void Insert(AnScript* scr, Vec2 pos = Vec2(100, 100));
 	static void Insert(AnNode* node, Vec2 pos = Vec2(100, 100));
 	static void Init(), Update(), Draw(), DrawSide(), DrawScene();
-	static void Execute(), DoExecute(), DoExecute_Srv();
+	static void Execute(bool all), DoExecute(bool all), _DoExecute(), DoExecute_Srv();
+	static void WriteFrame(uint f), ReadFrame(uint f);
 	static void Save(const std::string& s), SaveIn(), SaveOut();
 	static void Load(const std::string& s), LoadIn(), LoadOut();
 	static void CheckChanges();

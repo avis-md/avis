@@ -50,6 +50,8 @@ public:
 	std::vector<union AnVarBase> inputVDef;
 	std::vector<CVar> conV;
 
+	std::vector<std::vector<VarVal>> conVAll;
+
 	struct ConnInfo {
 		bool cond;
 		std::string mynm;
@@ -79,13 +81,20 @@ public:
 	float DrawLog(float off);
 	virtual void DrawScene() {}
 	void DrawToolbar();
+
 	virtual void Execute() = 0;
+	void ApplyFrameCount(int f);
+	virtual void WriteFrame(int f) {};
+	bool ReadFrame(int f);
+
 	void Save(std::ofstream& strm), Load(std::ifstream& strm);
 	virtual void SaveIn(const std::string& path) {};
 	virtual void LoadIn(const std::string& path) {};
 	virtual void SaveOut(const std::string& path);
 	virtual void LoadOut(const std::string& path);
 	virtual void SaveConn(), ClearConn(), Reconn();
+
+	bool HasConnI(int i), HasConnO(int i);
 
 	static bool CanConn(std::string lhs, std::string rhs);
 	void ConnectTo(uint id, AnNode* tar, uint tarId); //out -> in
@@ -111,6 +120,7 @@ public:
 	std::vector<VarVal> outputVC;
 	
 	void Execute() override;
+	void WriteFrame(int f) override;
 
 	void CatchExp(char* c) override;
 };
@@ -122,6 +132,8 @@ public:
 	std::vector<void*> inputV, outputV;
 
 	void Execute() override;
+	void WriteFrame(int f) override;
+
 	void Reconn() override;
 
 	void CatchExp(char* c) override;
@@ -134,6 +146,7 @@ public:
 	std::vector<void*> inputV, outputV;
 
 	void Execute() override;
+	void WriteFrame(int f) override;
 
 	void CatchExp(char* c) override;
 };

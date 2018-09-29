@@ -7,8 +7,6 @@
 #endif
 
 const std::string Node_Inputs::sig = ".in";
-const std::string Node_Inputs_ActPar::sig = ".inact";
-const std::string Node_Inputs_SelPar::sig = ".insel";
 const std::string Node_AddBond::sig = ".abnd";
 const std::string Node_Camera_Out::sig = ".camo";
 const std::string Node_Plot::sig = ".plot";
@@ -125,7 +123,7 @@ void AnNode::Draw() {
 					UI::Texture(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, hi ? tex_circle_conn : tex_circle_open, red(0.3f));
 				}
 				UI::Label(pos.x + 10, y, 12, script->invars[i].first, white());
-				if (!inputR[i].first) {
+				if (!HasConnI(i)) {
 					auto& vr = script->invars[i].second;
 					auto isi = (vr == "int");
 					if (isi || (vr == "double")) {
@@ -151,7 +149,7 @@ void AnNode::Draw() {
 			y += 2;
 
 			for (uint i = 0; i < script->outvars.size(); i++, y += 17) {
-				bool ho = !!outputR[i].size();
+				bool ho = HasConnO(i);
 				if (!AnWeb::selConnNode || ((!AnWeb::selConnIdIsOut) && (AnWeb::selConnNode != this))) {
 					if (Engine::Button(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, ho ? tex_circle_conn : tex_circle_open, white(), Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f)) == MOUSE_RELEASE) {
 						if (!AnWeb::selConnNode) {
@@ -411,8 +409,40 @@ AnNode::AnNode(AnScript* scr) : script(scr), canTile(false) {
 	if (!scr) return;
 	title = scr->name;
 	inputR.resize(scr->invars.size());
-	outputR.resize(scr->outvars.size());
-	conV.resize(outputR.size());
+	auto osz = scr->outvars.size();
+	outputR.resize(osz);
+	conV.resize(osz);
+	conVAll.resize(osz);
+}
+
+void AnNode::ApplyFrameCount(int f) {
+	for (auto& a : conVAll) {
+		a.resize(f);
+	}
+}
+
+bool AnNode::ReadFrame(int f) {
+	if (!conVAll.size()) return true;
+ 	for (int a = 0; a < conV.size(); a++) {
+		auto& c = conV[a];
+		if (conVAll[a].size() <= f) return false;
+		auto& ca = conVAll[a][f];
+		switch (c.type) {
+		case AN_VARTYPE::INT:
+			c.value = &ca.val.i;
+			break;
+		case AN_VARTYPE::DOUBLE:
+			c.value = &ca.val.d;
+			break;
+		case AN_VARTYPE::LIST:
+			for (int b = 0; b < c.dimVals.size(); b++) {
+				c.dimVals[b] = &ca.dims[b];
+			}
+			c.value = &ca.val.arr.p;
+			break;
+		}
+	}
+	return true;
 }
 
 #define sp << " "
@@ -551,6 +581,13 @@ void AnNode::Reconn() {
 	}
 }
 
+bool AnNode::HasConnI(int i) {
+	return inputR[i].first;
+}
+bool AnNode::HasConnO(int i) {
+	return !!outputR[i].size();
+}
+
 bool AnNode::CanConn(std::string lhs, std::string rhs) {
 	if (rhs[0] == '*' && lhs.substr(0, 4) != "list") return true;
 	auto s = lhs.size();
@@ -650,7 +687,7 @@ void PyNode::Execute() {
 	auto scr = (PyScript*)script;
 	for (uint i = 0; i < script->invars.size(); i++) {
 		auto& mv = scr->_invars[i];
-		if (inputR[i].first) {
+		if (HasConnI(i)) {
 			auto& cv = inputR[i].first->conV[inputR[i].second];
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
@@ -720,6 +757,13 @@ void PyNode::Execute() {
 	}
 }
 
+void PyNode::WriteFrame(int f) {
+	for (int a = 0; a < conV.size(); a++) {
+		conVAll[a][f] = outputVC[a];
+		conVAll[a][f].val.arr.p = &conVAll[a][f].val.arr.data[0];
+	}
+}
+
 void PyNode::CatchExp(char* c) {
 	if (!c[0]) return;
 	auto ss = string_split(c, '\n');
@@ -773,7 +817,7 @@ void CNode::Execute() {
 	auto scr = (CScript*)script;
 	for (uint i = 0; i < scr->invars.size(); i++) {
 		auto& mv = scr->_invars[i];
-		if (inputR[i].first) {
+		if (HasConnI(i)) {
 			auto& cv = inputR[i].first->conV[inputR[i].second];
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
@@ -816,6 +860,37 @@ void CNode::Execute() {
 	script->Exec();
 }
 
+void CNode::WriteFrame(int f) {
+	auto scr = (CScript*)script;
+	for (int a = 0; a < conV.size(); a++) {
+		auto& c = conV[a];
+		conVAll[a].resize(f + 1);
+		auto& ca = conVAll[a][f];
+		switch (c.type) {
+		case AN_VARTYPE::INT:
+			ca.val.i = *(int*)scr->_outvars[a].value;
+			break;
+		case AN_VARTYPE::DOUBLE:
+			ca.val.i = *(double*)scr->_outvars[a].value;
+			break;
+		case AN_VARTYPE::LIST: {
+			int n = 1;
+			auto ds = conV[a].dimVals.size();
+			ca.dims.resize(ds);
+			for (size_t d = 0; d < ds; d++) {
+				n *= ca.dims[d] = *conV[a].dimVals[d];
+			}
+			n *= scr->_outvars[a].stride;
+			ca.val.arr.data.resize(n);
+			memcpy(&ca.val.arr.data[0], *(char**)scr->_outvars[a].value, n);
+			ca.val.arr.p = &ca.val.arr.data[0];
+			break;
+		}
+		}
+	}
+}
+
+
 void CNode::Reconn() {
 	AnNode::Reconn();
 }
@@ -851,7 +926,7 @@ void FNode::Execute() {
 	for (uint i = 0; i < scr->invars.size(); i++) {
 		scr->pre = i;
 		auto& mv = scr->_invars[i];
-		if (inputR[i].first) {
+		if (HasConnI(i)) {
 			auto& cv = inputR[i].first->conV[inputR[i].second];
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
@@ -917,6 +992,10 @@ void FNode::Execute() {
 		}
 	}
 	scr->post = -1;
+}
+
+void FNode::WriteFrame(int f) {
+
 }
 
 void FNode::CatchExp(char* c) {

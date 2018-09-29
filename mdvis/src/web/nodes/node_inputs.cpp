@@ -9,7 +9,7 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)) {
 	script->desc = "Particle coordinates and trajectory";
 	script->descLines = 2;
 	
-	title = "All Particles";
+	title = "Particle Data";
 	titleCol = Vec3(0.3f, 0.3f, 0.5f);
 	canTile = true;
 	auto v = std::pair<std::string, std::string>();
@@ -116,56 +116,4 @@ void Node_Inputs::LoadIn(const std::string& path) {
 	else {
 		Debug::Error("Node", "cannot open input file!");
 	}
-}
-
-Node_Inputs_ActPar::Node_Inputs_ActPar() : Node_Inputs() {
-	title = "Selected Particles";
-	script->name = sig;
-	script->desc = "Particle data for all frames";
-	script->descLines = 1;
-
-	for (uint i = 0; i < 4; i++)
-		conV[i].dimVals[0] = new int(0);
-}
-
-void Node_Inputs_ActPar::Execute() {
-
-}
-
-Node_Inputs_SelPar::Node_Inputs_SelPar() : Node_Inputs() {
-	title = "Particles of";
-	script->name = sig;
-	script->desc = "Particle data of Name/ID";
-	script->descLines = 1;
-
-	for (uint i = 0; i < 4; i++)
-		conV[i].dimVals[0] = new int(0);
-}
-
-void Node_Inputs_SelPar::DrawHeader(float& off) {
-	AnNode::DrawHeader(off);
-	UI::Quad(pos.x, off, width, 35, bgCol);
-	std::string nms[] = { "ResNm", "ResID", "AtomID" };
-	std::string nmfs[] = { "Residue Name", "Residue ID", "Atom ID" };
-	UI2::Switch(pos.x + 2, off + 1, width - 2, "type", 3, nms, (int&)type);
-	UI::Label(pos.x + 2, off + 18, 12, nmfs[(int)type], white());
-	std::string tv = (type == SELTYPE::RSL)? tv_resNm : 
-		(type == SELTYPE::RES)? std::to_string(tv_resId) : 
-			std::to_string(tv_atomId);
-	std::string tv2 = (type == SELTYPE::RSL)? tv_resNm : 
-		(type == SELTYPE::RES)? std::to_string(tv_resId) + " (" + tv_resNm + ")" : 
-			std::to_string(tv_atomId) + " (" + std::string(Particles::particles_Name, PAR_MAX_NAME_LEN) + ")";
-	tv = UI::EditText(pos.x + width / 2, off + 18, width/2 - 18, 16, 12, white(1, 0.3f), tv, true, white(), 0, tv2);
-	if (Engine::Button(pos.x + width - 17, off + 18, 16, 16, white(1, 0.5f)) == MOUSE_RELEASE) {
-		Popups::type = (POPUP_TYPE)((int)POPUP_TYPE::RESNM + (int)type);
-		Popups::data = (type == SELTYPE::RSL)? (void*)&tv_resNm : (void*)((type == SELTYPE::RES)? &tv_resId : &tv_atomId);
-	}
-	if (type == SELTYPE::RSL) tv_resNm = tv;
-	else if (type == SELTYPE::RES) tv_resId = TryParse(tv, 0U);
-	else tv_atomId = TryParse(tv, 0U);
-	off += 35;
-}
-
-void Node_Inputs_SelPar::Execute() {
-
 }

@@ -182,7 +182,7 @@ void AnWeb::Draw() {
 					switch (selSpNode) {
 						SW(SCN::OCAM, Node_Camera_Out);
 
-						SW(IN::SELPAR, Node_Inputs_SelPar);
+						SW(IN::PARS, Node_Inputs);
 
 						SW(MOD::RECOL, Node_Recolor);
 						SW(MOD::RECOLA, Node_Recolor_All);
@@ -258,12 +258,12 @@ void AnWeb::Draw() {
 	if (Engine::Button(200, 1, 70.0f, 16.0f, white(1, 0.4f), _("Save"), 12.0f, white(), true) == MOUSE_RELEASE)
 		Save(IO::path + "nodes/rdf.anl");
 
-	if (Engine::Button(275, 1, 70, 16, white(1, executing ? 0.2f : 0.4f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
-
-	}
 	bool canexec = (!AnOps::remote || (AnOps::connectStatus == 255));
+	if (Engine::Button(275, 1, 70, 16, white(1, (!canexec || executing) ? 0.2f : 0.4f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
+		if (canexec) AnWeb::Execute(false);
+	}
 	if (Engine::Button(350, 1, 107, 16, white(1, (!canexec || executing) ? 0.2f : 0.4f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
-		if (canexec) AnWeb::Execute();
+		if (canexec) AnWeb::Execute(true);
 	}
 	UI::Texture(275, 1, 16, 16, Icons::play);
 	UI::Texture(350, 1, 16, 16, Icons::playall);
@@ -282,10 +282,10 @@ void AnWeb::DrawSide() {
 			drawFull = true;
 
 		if (Engine::Button(Display::width - expandPos + 1, 38, 70, 16, white(1, executing ? 0.2f : 0.4f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
-
+			AnWeb::Execute(false);
 		}
 		if (Engine::Button(Display::width - expandPos + 72, 38, 107, 16, white(1, executing ? 0.2f : 0.4f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
-			AnWeb::Execute();
+			AnWeb::Execute(true);
 		}
 		UI::Texture(Display::width - expandPos + 1, 38, 16, 16, Icons::play);
 		UI::Texture(Display::width - expandPos + 72, 38, 16, 16, Icons::playall);
@@ -319,7 +319,7 @@ void AnWeb::DrawScene() {
 #endif
 }
 
-void AnWeb::Execute() {
+void AnWeb::Execute(bool all) {
 	if (!Particles::particleSz) return;
 	if (!executing) {
 		executing = true;
@@ -334,15 +334,36 @@ void AnWeb::Execute() {
 		}
 		else
 #endif
-			execThread = new std::thread(DoExecute);
+			execThread = new std::thread(DoExecute, all);
 	}
 }
 
-void AnWeb::DoExecute() {
+void AnWeb::DoExecute(bool all) {
 	for (auto n : nodes) {
 		n->log.clear();
 	}
 	ErrorView::execMsgs.clear();
+	
+	if (all) {
+		auto frm = Particles::anim.activeFrame;
+		for (uint a = 0; a < Particles::anim.frameCount; a++) {
+			Particles::anim.activeFrame = frm;
+			Particles::particles_Pos = Particles::anim.poss[a];
+			_DoExecute();
+			AnWeb::WriteFrame(a);
+		}
+		Particles::anim.activeFrame = frm;
+	}
+	else _DoExecute();
+
+	executing = false;
+	apply = true;
+#ifndef NO_REDIR_LOG
+	remove((IO::path + "nodes/__tmpstd").c_str());
+#endif
+}
+
+void AnWeb::_DoExecute() {
 	char* err = 0;
 	static std::string pylog;
 	for (auto n : nodes) {
@@ -409,11 +430,6 @@ void AnWeb::DoExecute() {
 		}
 	}
 	execNode = nullptr;
-	executing = false;
-	apply = true;
-#ifndef NO_REDIR_LOG
-	remove((IO::path + "nodes/__tmpstd").c_str());
-#endif
 }
 
 void AnWeb::OnExecLog(std::string s, bool e) {
@@ -453,6 +469,17 @@ void AnWeb::DoExecute_Srv() {
 	executing = false;
 	apply = true;
 #endif
+}
+
+void AnWeb::WriteFrame(uint f) {
+	for (auto& n : nodes)
+		n->WriteFrame(f);
+}
+
+void AnWeb::ReadFrame(uint f) {
+	for (auto& n : nodes) {
+		if (!n->ReadFrame(f)) return;
+	}
 }
 
 #define sp << " "
@@ -556,8 +583,6 @@ void AnWeb::Load(const std::string& s) {
 				case AN_SCRTYPE::NONE:
 		#define ND(scr) if (nm == scr::sig) n = new scr(); else
 					ND(Node_Inputs)
-					ND(Node_Inputs_ActPar)
-					ND(Node_Inputs_SelPar)
 					ND(Node_AddBond)
 					//ND(Node_AddVolume)
 					ND(Node_TraceTrj)
@@ -706,6 +731,7 @@ void AnWeb::OnSceneUpdate() {
 }
 
 void AnWeb::OnAnimFrame() {
+	ReadFrame(Particles::anim.activeFrame);
 	for (auto n : nodes) {
 		n->OnAnimFrame();
 	}

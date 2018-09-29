@@ -13,6 +13,7 @@ public:
 	
 	void OnConn(bool o, int i) override;
 	void OnValChange(int i) override;
+	void OnAnimFrame() override;
 
 protected:
 	bool useids;

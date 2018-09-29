@@ -19,6 +19,7 @@ Node_Plot::Node_Plot() : AnNode(new DmScript(sig)) {
 void Node_Plot::DrawFooter(float& y) {
 	UI::Quad(pos.x, y, width, width, bgCol);
 	if (valXs.size()) {
+		auto& vy = valYs;
 		plt::plot(pos.x + 12, y + 2, width - 14, width - 14, &valXs[0], &_valYs[0], valXs.size(), _valYs.size(), UI::font, 10, white(1, 0.8f));
 	}
 	y += width;
@@ -132,5 +133,9 @@ void Node_Plot::OnConn(bool o, int i) {
 }
 
 void Node_Plot::OnValChange(int i) {
+	Execute();
+}
+
+void Node_Plot::OnAnimFrame() {
 	Execute();
 }

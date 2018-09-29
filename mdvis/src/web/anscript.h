@@ -17,9 +17,6 @@ enum class AN_VARTYPE : byte {
 	INT,
 	DOUBLE,
 	LIST,
-	ID_RSL,
-	ID_RES,
-	ID_PAR
 };
 
 union _VarVal {
