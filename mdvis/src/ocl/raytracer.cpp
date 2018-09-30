@@ -40,7 +40,8 @@ bool RayTracer::Init() {
 	const char* kBuildopts(" -cl-mad-enable -cl-fast-relaxed-math -cl-std=CL1.2 -I.");
 
 	try {
-		program = CLWProgram::CreateFromSource(ocl::raykernel, ocl::raykernel_sz, kBuildopts, context);
+		auto kernel = IO::GetText(IO::path + "res/kernel.cl");
+		program = CLWProgram::CreateFromSource(kernel.c_str(), kernel.size(), kBuildopts, context);
 	}
 	catch (CLWException& e) {
 		FAIL(e.what());
@@ -111,14 +112,13 @@ void RayTracer::Refine() {
 	// Shading
 	RR::Event* e = nullptr;
 
-	/*
 	for (int a = 0; a < 2; a++) {
 		ShadeKernel(out_buff, isect_buffer_cl, col_buff, ray_buffer_cl, 1 + samples);
 		delete(ray_buffer);
 		ray_buffer = CreateFromOpenClBuffer(api, ray_buffer_cl);
 		api->QueryIntersection(ray_buffer, wh, isect_buffer, nullptr, &e);
 		e->Wait();
-	}*/
+	}
 	ShadeKernel(out_buff, isect_buffer_cl, col_buff, ray_buffer_cl, ++samples);
 	delete(ray_buffer);
 
@@ -192,11 +192,11 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 	struct Cam
 	{
 		// Camera coordinate frame
-		Vec3 forward = Vec3(0, 0, 1);
-		Vec3 up = Vec3(0, 1, 0);
-		Vec3 p = Vec3(0, 1, 5);
+		RR::float3 forward = RR::float3(0, 0, 1);
+		RR::float3 up = RR::float3(0, 1, 0);
+		RR::float3 p = RR::float3(0, 1, 5);
 		// Near and far Z
-		Vec2 zcap = Vec2(1, 1000);
+		RR::float2 zcap = RR::float2(1, 1000);
 	} cam = Cam();
 	CLWBuffer<Cam> cambuf = CLWBuffer<Cam>::Create(context, CL_MEM_READ_ONLY, 1, &cam);
 
@@ -218,7 +218,7 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 }
 
 void RayTracer::SetObjs() {
-	auto res = TO::LoadObj(g_objshapes, g_objmaterials, (IO::path + "res/sharo.obj").c_str(), (IO::path + "res/").c_str());
+	auto res = TO::LoadObj(g_objshapes, g_objmaterials, (IO::path + "res/sharo.objm").c_str(), (IO::path + "res/").c_str());
 	if (res != "")
 	{
 		throw std::runtime_error(res);

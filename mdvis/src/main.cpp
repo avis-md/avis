@@ -180,7 +180,7 @@ void paintfunc() {
 	if (ParMenu::showSplash) ParMenu::DrawSplash();
 	HelpMenu::Draw();
 
-	UI::Quad(0, 0, Display::width / 2, Display::height / 2, RayTracer::resTex);
+	UI::Quad(0, 0, Display::width, Display::height, RayTracer::resTex);
 }
 
 #ifdef MAKE_RES

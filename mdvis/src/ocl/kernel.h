@@ -181,7 +181,8 @@ __kernel void Shading(//scene
 
 		uint rnd = (uint)(k + rng);
 		float4 col = ocol[k];
-
+	
+		/*
         if (shape_id != -1 && prim_id != -1)// && occl[k] == -1)
         {
             // Calculate position and normal of the intersection point
@@ -249,10 +250,10 @@ __kernel void Shading(//scene
             accum[k * 3 + 2] += max(col.z, 0.0f);
             ray[k].o = 0;
 		}
-        
-		out[k * 4] = clamp(accum[k * 3] / smps, 0.0f, 1.0f) * 255;
-		out[k * 4 + 1] = clamp(accum[k * 3 + 1] / smps, 0.0f, 1.0f) * 255;
-		out[k * 4 + 2] = clamp(accum[k * 3 + 2] / smps, 0.0f, 1.0f) * 255;
+        */
+		out[k * 4] = ray[k].d.x*255;//clamp(accum[k * 3] / smps, 0.0f, 1.0f) * 255;
+		out[k * 4 + 1] = ray[k].d.y*255;//clamp(accum[k * 3 + 1] / smps, 0.0f, 1.0f) * 255;
+		out[k * 4 + 2] = 0;//clamp(accum[k * 3 + 2] / smps, 0.0f, 1.0f) * 255;
 		out[k * 4 + 3] = 255;
     }
 }
