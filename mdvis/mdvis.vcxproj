@@ -245,6 +245,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\asset\mesh.cpp" />
+    <ClCompile Include="src\asset\tetrahedron.cpp" />
     <ClCompile Include="src\core\ui3.cpp" />
     <ClCompile Include="src\md\lammps.cpp" />
     <ClCompile Include="src\md\pdb.cpp" />
@@ -341,6 +342,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\asset\mesh.h" />
+    <ClInclude Include="src\asset\tetrahedron.h" />
     <ClInclude Include="src\core\ui3.h" />
     <ClInclude Include="src\tmp\tiny_obj_loader.h" />
     <ClInclude Include="src\utils\glmext.h" />

@@ -217,12 +217,37 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 	return ray_buf;
 }
 
+#include "asset/tetrahedron.h"
+
 void RayTracer::SetObjs() {
-	auto res = TO::LoadObj(g_objshapes, g_objmaterials, (IO::path + "res/sharo.objm").c_str(), (IO::path + "res/").c_str());
-	if (res != "")
+	//auto res = TO::LoadObj(g_objshapes, g_objmaterials, (IO::path + "res/sharo.objm").c_str(), (IO::path + "res/").c_str());
+	//if (res != "")
 	{
-		throw std::runtime_error(res);
+	//	throw std::runtime_error(res);
 	}
+
+	Tetrahedron tet = Tetrahedron();
+	//for (int a = 0; a < 3; a++)
+		//tet.Subdivide();
+	tet.ToSphere(0.5f);
+
+
+	g_objshapes.push_back(TO::shape_t());
+	auto& msh = g_objshapes.back().mesh;
+	auto tsz = tet.verts.size();
+	msh.positions.resize(tsz*3);
+	memcpy(&msh.positions[0], &tet.verts[0][0], tsz * sizeof(Vec3));
+	msh.normals.resize(tsz);
+	memcpy(&msh.normals[0], &tet.norms[0][0], tsz * sizeof(Vec3));
+	auto isz = tet.tris.size();
+	msh.indices.resize(isz);
+	memcpy(&msh.indices[0], &tet.tris[0], isz * sizeof(int));
+	msh.material_ids.resize(isz/3, 0);
+
+	g_objmaterials.push_back(TO::material_t());
+	g_objmaterials[0].diffuse[0] = 0;
+	g_objmaterials[0].diffuse[1] = 0;
+	g_objmaterials[0].diffuse[2] = 0;
 
 	std::vector<float> verts;
 	std::vector<float> normals;
@@ -250,6 +275,9 @@ void RayTracer::SetObjs() {
 		indents.push_back(indent);
 		indent += mesh.indices.size();
 	}
+
+	return;
+
 	g_positions = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, verts.size(), verts.data());
 	g_normals = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, normals.size(), normals.data());
 	g_indices = CLWBuffer<int>::Create(context, CL_MEM_READ_ONLY, inds.size(), inds.data());

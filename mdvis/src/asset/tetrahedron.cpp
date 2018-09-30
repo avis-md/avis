@@ -1,45 +1,55 @@
 #include "tetrahedron.h"
 
-Mesh Tetrahedron::New(float rad, int quality) {
-	int nvert = 4 + 6 * quality + 2 * quality * (quality + 1);
-	int ntri = 0;
-	for (int a = 0; a <= quality; a++) {
-		ntri += 2 * a + 1;
-	}
-	ntri *= 4;
-	std::vector<Vec3> verts(nvert);
-	std::vector<int> tris(ntri * 3);
-
+Tetrahedron::Tetrahedron() {
 	const float c = 1 / std::sqrtf(2);
-	verts[0] = Vec3(1, 0, -c);
-	verts[1] = Vec3(-1, 0, -c);
-	verts[2] = Vec3(0, 1, c);
-	verts[3] = Vec3(0, -1, c);
+	verts = { Vec3(1, 0, -c),
+		Vec3(-1, 0, -c),
+		Vec3(0, 1, c),
+		Vec3(0, -1, c) };
 
-	std::array<int, 3> bt[] = {
-		{0, 2, 1}, {1, 2, 3},
-		{2, 0, 3}, {3, 0, 1}
-	};
+	tris = { 0, 2, 1, 
+		1, 2, 3, 
+		2, 0, 3, 
+		3, 0, 1 };
+}
 
-	std::array<int, 2> be[] = {
-		{0, 1}, {0, 2},
-		{1, 3}, {1, 2},
-		{2, 3}, {2, 0},
-		{3, 1}, {3, 0}
-	};
+#define mrg(a, b) ((int64_t)a << 32) + (int64_t)b
 
-	std::unordered_map<Int2, Int2> voff;
+void Tetrahedron::Subdivide() {
+	auto vsz = verts.size();
+	auto tsz = tris.size();
+	tris.resize(tsz * 4);
 
-	int off = 4;
-	for (int a = 0; a < 8; a++) {
-		int vi1 = be[a][0];
-		int vi2 = be[a][1];
-		Vec3 v1 = verts[vi1];
-		Vec3 v2 = verts[vi2];
-		voff.emplace(Int2(vi1, vi2), Int2(off, 1));
-		for (int b = 0; b < quality; b++) {
-			verts[off++] = Lerp(v1, v2, (b+1.0f)/(quality+1));
+	std::unordered_map<int64_t, int> map;
+	for (size_t a = 0; a < tsz/3; a++) {
+		int* vs = &tris[a*3];
+		int vn[3];
+		for (int b = 0; b < 3; b++) {
+			auto vs0 = vs[b];
+			auto vs1 = vs[(b==2)? 0 : b+1];
+			int in = map[mrg(vs0, vs1)];
+			if (!in) {
+				verts.push_back(Lerp(verts[vs0], verts[vs1], 0.5f));
+				vn[b] = vsz;
+				map[mrg(vs0, vs1)] = map[mrg(vs1, vs0)] = ++vsz;
+			}
+			else {
+				vn[b] = in - 1;
+			}
 		}
-		voff.emplace(Int2(vi2, vi1), Int2(off - 1, -1));
+
+		int tt[] = { vs[0], vn[0], vn[2], vs[1], vn[1], vn[0], 
+			vs[2], vn[2], vn[0], vn[0], vn[1], vn[2] };
+
+		memcpy(&tris[a*12], tt, 12*sizeof(int));
+	}
+}
+
+void Tetrahedron::ToSphere(float rad) {
+	auto vsz = verts.size();
+	norms.resize(vsz);
+	for (size_t a = 0; a < vsz; a++) {
+		norms[a] = glm::normalize(verts[a]);
+		verts[a] = norms[a] * rad;
 	}
 }
