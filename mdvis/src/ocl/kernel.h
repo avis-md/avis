@@ -154,12 +154,8 @@ __kernel void Shading(//scene
                 __global int* ids,
                 __global float* colors,
                 __global int* indents,
-                //intersection
                 __global Intersection* isect,
-                //__global const int* occl,
-                //light pos
                 float weight,
-                float4 light,
                 int width,
                 int height,
                 __global unsigned char* out, //actual color
@@ -242,9 +238,9 @@ __kernel void Shading(//scene
 			}
         }
         else {
-            float3 bgc = (float3)(1, 1, 1);//SkyAt(normalize(ray[k].d.xyz), bg);
+            float3 bgc = SkyAt(normalize(ray[k].d.xyz), bg);
             if (col.w < 0.5f) {
-                col.xyz = (float3)(0, 0, 0);
+                col.xyz = bgc;//(float3)(0, 0, 0);
             }
             else
                 col.xyz *= bgc * (1 - acos(ray[k].d.y)/3.14159f);

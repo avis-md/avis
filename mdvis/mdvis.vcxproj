@@ -123,7 +123,7 @@
       <AdditionalIncludeDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include;C:\Intel\OpenCL\sdk\include;C:\Anaconda\include;C:\Anaconda\Lib\site-packages\numpy\core\include;../radeonrays/RadeonRays/include/;../radeonrays/CLW/;./src</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;GLEW_STATIC;USE_OPENCL;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;GLEW_STATIC;USE_OPENCL;RR_EMBED_KERNELS;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OpenMPSupport>true</OpenMPSupport>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>SyncCThrow</ExceptionHandling>
@@ -248,6 +248,7 @@
     <ClCompile Include="src\core\ui3.cpp" />
     <ClCompile Include="src\md\lammps.cpp" />
     <ClCompile Include="src\md\pdb.cpp" />
+    <ClCompile Include="src\tmp\tiny_obj_loader.cpp" />
     <ClCompile Include="src\utils\shader.cpp" />
     <ClCompile Include="src\hdr.cpp" />
     <ClCompile Include="src\live\livesyncer.cpp" />
@@ -341,6 +342,7 @@
   <ItemGroup>
     <ClInclude Include="src\asset\mesh.h" />
     <ClInclude Include="src\core\ui3.h" />
+    <ClInclude Include="src\tmp\tiny_obj_loader.h" />
     <ClInclude Include="src\utils\glmext.h" />
     <ClInclude Include="src\utils\shader.h" />
     <ClInclude Include="src\hdr.h" />

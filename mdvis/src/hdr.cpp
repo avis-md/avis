@@ -134,7 +134,7 @@ unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int
         return NULL;
     }
 
-    imagergbe = (unsigned char *)calloc((*w) * (*h) * 4, sizeof(unsigned char));
+    imagergbe = new unsigned char[(*w) * (*h) * 4];
 	if (imagergbe == nullptr) {
 		std::cerr << "Cannot alloc buffer for reading hdr!" << std::endl;
 		abort();

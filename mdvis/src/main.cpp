@@ -49,7 +49,8 @@ void rendFunc() {
 		MVP::Clear();
 		MVP::Mul(_p);
 	}
-	if (RayTracer::resTex) RayTracer::Render();
+	if (RayTracer::resTex)
+		RayTracer::Refine();
 	AnWeb::OnSceneUpdate();
 }
 
@@ -97,6 +98,11 @@ void updateFunc() {
 	if (RayTracer::resTex) {
 		
 	}
+
+
+	if (Input::KeyDown(Key_X) && Input::KeyHold(Key_LeftShift))
+		if (!RayTracer::resTex)
+			RayTracer::SetScene();
 }
 
 void paintfunc() {
@@ -173,6 +179,8 @@ void paintfunc() {
 	VisRenderer::Draw();
 	if (ParMenu::showSplash) ParMenu::DrawSplash();
 	HelpMenu::Draw();
+
+	UI::Quad(0, 0, Display::width / 2, Display::height / 2, RayTracer::resTex);
 }
 
 #ifdef MAKE_RES
@@ -254,7 +262,7 @@ int main(int argc, char **argv) {
 		INIT(CReader);
 		INIT(PyReader);
 		INIT(FReader);
-		//INIT(RayTracer);
+		INIT(RayTracer);
 		INIT(Color);
 		INIT(Icons);
 		INIT(CubeMarcher);
