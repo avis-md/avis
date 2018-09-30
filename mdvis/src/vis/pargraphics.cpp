@@ -724,7 +724,7 @@ void ParGraphics::Reblit() {
 	if (tfboDirty) {
 		if (!!Particles::particleSz) {
 			if (RayTracer::resTex) {
-				UI::Quad(0, 0, (float)Display::width, (float)Display::height, RayTracer::resTex);
+				UI::Quad(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), RayTracer::resTex);
 			}
 			else {
 				//Recolor();
@@ -762,7 +762,7 @@ void ParGraphics::BlitSky() {
 	if (!usePBR) {
 		glUseProgram(reflCProg);
 		glUniformMatrix4fv(reflCProgLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
-		glUniform2f(reflCProgLocs[1], (float)Display::width, (float)Display::height);
+		glUniform2f(reflCProgLocs[1], static_cast<float>(Display::width), static_cast<float>(Display::height));
 		glUniform1i(reflCProgLocs[2], 0);
 		glUniform1i(reflCProgLocs[3], 1);
 		glUniform1i(reflCProgLocs[4], 3);
@@ -774,7 +774,7 @@ void ParGraphics::BlitSky() {
 	else {
 		glUseProgram(reflProg);
 		glUniformMatrix4fv(reflProgLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
-		glUniform2f(reflProgLocs[1], (float)Display::width, (float)Display::height);
+		glUniform2f(reflProgLocs[1], static_cast<float>(Display::width), static_cast<float>(Display::height));
 		glUniform1i(reflProgLocs[2], 0);
 		glUniform1i(reflProgLocs[3], 1);
 		glUniform1i(reflProgLocs[5], 3);

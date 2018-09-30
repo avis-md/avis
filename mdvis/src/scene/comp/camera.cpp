@@ -25,7 +25,7 @@ void Camera::ApplyGL() {
 		float hw = Display::height * 1.0f / Display::width;
 		MVP::Mul(glm::ortho(-1.0f, 1.0f, -hw, hw, 0.01f, 500.0f));
 	} else {
-		MVP::Mul(glm::perspectiveFov(fov * deg2rad, (float)Display::width, (float)Display::height, 0.01f, 500.0f));
+		MVP::Mul(glm::perspectiveFov(fov * deg2rad, static_cast<float>(Display::width), static_cast<float>(Display::height), 0.01f, 500.0f));
 	}
 	MVP::Scale(1, 1, -1);
 	MVP::Mul(QuatFunc::ToMatrix(q));

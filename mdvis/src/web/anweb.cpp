@@ -164,13 +164,13 @@ void AnWeb::Draw() {
 				if ((uintptr_t)selScript > 1) {
 					switch (selScript->type) {
 					case AN_SCRTYPE::PYTHON:
-						pn = new PyNode((PyScript*)selScript);
+						pn = new PyNode(dynamic_cast<PyScript*>(selScript));
 						break;
 					case AN_SCRTYPE::C:
-						pn = new CNode((CScript*)selScript);
+						pn = new CNode(dynamic_cast<CScript*>(selScript));
 						break;
 					case AN_SCRTYPE::FORTRAN:
-						pn = new FNode((FScript*)selScript);
+						pn = new FNode(dynamic_cast<FScript*>(selScript));
 						break;
 					default:
 						Debug::Error("AnWeb::Draw", "Unhandled script type: " + std::to_string((int)selScript->type));

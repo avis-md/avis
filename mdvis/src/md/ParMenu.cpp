@@ -29,7 +29,7 @@ void ParMenu::Init() {
 	menuNames[1] = _("Colors");
 	menuNames[2] = _("Graphics");
 	menuNames[3] = _("Render");
-	menuNames[4] = "Information";
+	menuNames[4] = _("Information");
 }
 
 void ParMenu::Draw() {
@@ -285,7 +285,7 @@ loopout:
 }
 
 void ParMenu::DrawStart() {
-	UI::Texture(0, 0, (float)Display::width, (float)Display::height, ParGraphics::bg, DRAWTEX_CROP);
+	UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::bg, DRAWTEX_CROP);
 	if (ParLoader::busy) {
 		UI::Quad(Display::width * 0.5f - 50, Display::height * 0.6f, 100, 6, white(0.8f, 0.2f));
 		UI::Quad(Display::width * 0.5f - 50, Display::height * 0.6f, 100 * *ParLoader::loadProgress, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
@@ -302,7 +302,7 @@ void ParMenu::DrawStart() {
 
 void ParMenu::DrawSplash() {
 	UI::IncLayer();
-	UI::Quad(0, 0, (float)Display::width, (float)Display::height, black(0.7f));
+	UI::Quad(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), black(0.7f));
 	UI::Texture(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, ParGraphics::splash);
 	UI::font->Align(ALIGN_TOPRIGHT);
 	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 120, 12, VERSIONSTRING, white());

@@ -208,7 +208,7 @@ void VisSystem::UpdateTitle() {
 }
 
 void VisSystem::DrawTitle() {
-	UI::Quad(0,0, (float)Display::width, 18, white(0.95f, 0.05f));
+	UI::Quad(0,0, static_cast<float>(Display::width), 18, white(0.95f, 0.05f));
 	const std::string menu[] = {_("File"), _("Edit"), _("Options"), _("Render"), _("Help")};
 	bool iso = Popups::type == POPUP_TYPE::MENU && Popups::data >= menuItems && Popups::data < (menuItems + 5) && UI::_layerMax == UI::_layer+1;
 	UI::ignoreLayers = iso; 
@@ -233,7 +233,7 @@ void VisSystem::DrawTitle() {
 }
 
 void VisSystem::DrawBar() {
-	UI::Quad(0, Display::height - 18.0f, (float)Display::width, 18, white(0.9f, 0.1f));
+	UI::Quad(0, Display::height - 18.0f, static_cast<float>(Display::width), 18, white(0.9f, 0.1f));
 	if (Particles::anim.frameCount > 1) {
 		if (!LiveSyncer::activeRunner) {
 			if (!UI::editingText) {
@@ -281,7 +281,7 @@ void VisSystem::DrawBar() {
 
 void VisSystem::DrawMsgPopup() {
 	UI::IncLayer();
-	UI::Quad(0, 0, (float)Display::width, (float)Display::height, black(0.7f));
+	UI::Quad(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), black(0.7f));
 	
 	UI::Quad(Display::width * 0.5f - 200, Display::height * 0.5f - 50, 400, 100, white(0.95f, 0.15f));
 

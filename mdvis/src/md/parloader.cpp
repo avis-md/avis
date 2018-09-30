@@ -447,7 +447,7 @@ void ParLoader::DoOpenAnim() {
 void ParLoader::DrawOpenDialog() {
 	if (!showDialog) return;
 	UI::IncLayer();
-	UI::Quad(0, 0, (float)Display::width, (float)Display::height, black(0.7f));
+	UI::Quad(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), black(0.7f));
 
 	float woff = roundf(Display::width*0.5f - 200 - _impPos / 2);
 	float hoff = roundf(Display::height * 0.5f - 150);
