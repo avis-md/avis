@@ -201,9 +201,9 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 	CLWBuffer<Cam> cambuf = CLWBuffer<Cam>::Create(context, CL_MEM_READ_ONLY, 1, &cam);
 
 	//run kernel
-	CLWBuffer<RR::ray> primRays = CLWBuffer<RR::ray>::Create(context, CL_MEM_READ_WRITE, Display::width * Display::height);
+	CLWBuffer<RR::ray> ray_buf = CLWBuffer<RR::ray>::Create(context, CL_MEM_READ_WRITE, Display::width * Display::height);
 	CLWKernel kernel = program.GetKernel("GeneratePerspectiveRays");
-	kernel.SetArg(0, primRays);
+	kernel.SetArg(0, ray_buf);
 	kernel.SetArg(1, cambuf);
 	kernel.SetArg(2, Display::width);
 	kernel.SetArg(3, Display::height);
@@ -214,7 +214,7 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 	context.Launch2D(0, gs, ls, kernel);
 	context.Flush(0);
 
-	return primRays;
+	return ray_buf;
 }
 
 void RayTracer::SetObjs() {
