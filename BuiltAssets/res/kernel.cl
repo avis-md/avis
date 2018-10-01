@@ -151,7 +151,7 @@ __kernel void Shading(//scene
                 __global float* colors,
                 __global int* indents,
                 __global Intersection* isect,
-                float weight,
+                float exposure,
                 int width,
                 int height,
                 __global unsigned char* out, //actual color
@@ -235,10 +235,10 @@ __kernel void Shading(//scene
                 }
             }
             else {
-                float3 bgc = SkyAt(normalize(ray[k].d.xyz), bg);
+                float3 bgc = SkyAt(normalize(ray[k].d.xyz), bg)*2;
                 
                 if (col.w < 0.5f) {
-                    col.xyz = bgc;//(float3)(0, 0, 0);
+                    col.xyz = (float3)(1, 1, 1) * 0.1f;
                 }
                 else
                     col.xyz *= bgc;
@@ -249,9 +249,9 @@ __kernel void Shading(//scene
                 ocol[k].w = -1;
             }
         }
-        out[k * 4] = clamp(accum[k * 3] / smps, 0.0f, 1.0f) * 255;
-        out[k * 4 + 1] = clamp(accum[k * 3 + 1] / smps, 0.0f, 1.0f) * 255;
-        out[k * 4 + 2] = clamp(accum[k * 3 + 2] / smps, 0.0f, 1.0f) * 255;
+        out[k * 4] = clamp(accum[k * 3] / smps * 255, 0.0f, 255.0f);
+        out[k * 4 + 1] = clamp(accum[k * 3 + 1] / smps * 255, 0.0f, 255.0f);
+        out[k * 4 + 2] = clamp(accum[k * 3 + 2] / smps * 255, 0.0f, 255.0f);
         out[k * 4 + 3] = 255;
     }
 }
