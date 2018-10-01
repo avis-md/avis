@@ -316,7 +316,7 @@ int main(int argc, char **argv) {
 			ParLoader::OnOpenFile(fls);
 		}
 
-		Display::Resize(1024, 600, false);
+		Display::Resize(512, 512, false);
 
 		auto lastMillis = Time::millis;
 

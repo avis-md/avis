@@ -3,6 +3,12 @@
 #include "kernel.h"
 #include "tmp/tiny_obj_loader.h"
 
+RadeonRays::matrix RadeonRays::MatFunc::Glm2RR(const glm::mat4& mat) {
+	auto m = glm::transpose(mat);
+	return *(RadeonRays::matrix*)&m;
+}
+
+
 namespace TO = tinyobj;
 
 GLuint RayTracer::resTex = 0;
@@ -127,7 +133,7 @@ void RayTracer::Refine() {
 	// Update texture data
 	glBindTexture(GL_TEXTURE_2D, resTex);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Display::width, Display::height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-	glBindTexture(GL_TEXTURE_2D, NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	clEnqueueUnmapMemObject(queue, (cl_mem)out_buff, pixels, 0, NULL, NULL);
 
@@ -227,27 +233,31 @@ void RayTracer::SetObjs() {
 	}
 
 	Tetrahedron tet = Tetrahedron();
-	//for (int a = 0; a < 3; a++)
-		//tet.Subdivide();
+	for (int a = 0; a < 5; a++)
+		tet.Subdivide();
 	tet.ToSphere(0.5f);
 
+	for (auto& v : tet.verts) {
+		v.y += 1;
+	}
 
+	//*
 	g_objshapes.push_back(TO::shape_t());
 	auto& msh = g_objshapes.back().mesh;
 	auto tsz = tet.verts.size();
 	msh.positions.resize(tsz*3);
 	memcpy(&msh.positions[0], &tet.verts[0][0], tsz * sizeof(Vec3));
-	msh.normals.resize(tsz);
+	msh.normals.resize(tsz*3);
 	memcpy(&msh.normals[0], &tet.norms[0][0], tsz * sizeof(Vec3));
 	auto isz = tet.tris.size();
 	msh.indices.resize(isz);
 	memcpy(&msh.indices[0], &tet.tris[0], isz * sizeof(int));
 	msh.material_ids.resize(isz/3, 0);
-
 	g_objmaterials.push_back(TO::material_t());
 	g_objmaterials[0].diffuse[0] = 0;
 	g_objmaterials[0].diffuse[1] = 0;
 	g_objmaterials[0].diffuse[2] = 0;
+	//*/
 
 	std::vector<float> verts;
 	std::vector<float> normals;
@@ -276,8 +286,6 @@ void RayTracer::SetObjs() {
 		indent += mesh.indices.size();
 	}
 
-	return;
-
 	g_positions = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, verts.size(), verts.data());
 	g_normals = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, normals.size(), normals.data());
 	g_indices = CLWBuffer<int>::Create(context, CL_MEM_READ_ONLY, inds.size(), inds.data());
@@ -292,19 +300,27 @@ void RayTracer::SetObjs() {
 	delete[](d);
 	delete[](dv);
 
-	for (int id = 0; id < g_objshapes.size(); ++id)
-	{
+	int id = 0;
+	//for (int id = 0; id < g_objshapes.size(); ++id)
+	//{
 		auto& objshape = g_objshapes[id];
 		float* vertdata = objshape.mesh.positions.data();
 		int nvert = objshape.mesh.positions.size() / 3;
 		int* indices = objshape.mesh.indices.data();
 		int nfaces = objshape.mesh.indices.size() / 3;
 		RR::Shape* shape = api->CreateMesh(vertdata, nvert, 3 * sizeof(float), indices, 0, nullptr, nfaces);
-
 		assert(shape != nullptr);
 		api->AttachShape(shape);
-		shape->SetId(id);
-	}
+		shape->SetId(id++);
+		float x = 0, y = -0.5f, z = 0;
+		float s = 0.8f;
+		Mat4x4 mat = Mat4x4(s, 0, 0, 0, 0, s, 0, 0, 0, 0, s, 0, x, y, z, s);
+		shape = api->CreateInstance(shape);
+		auto m = RR::MatFunc::Glm2RR(mat);
+		shape->SetTransform(m, RR::inverse(m));
+		api->AttachShape(shape);
+		shape->SetId(id++);
+	//}
 
 	api->Commit();
 }
@@ -319,7 +335,7 @@ void RayTracer::ShadeKernel(CLWBuffer<byte> out_buff, const CLWBuffer<RR::Inters
 	kernel.SetArg(3, g_colors);
 	kernel.SetArg(4, g_indent);
 	kernel.SetArg(5, isect);
-	kernel.SetArg(6, 1);
+	kernel.SetArg(6, 2.0f);
 	kernel.SetArg(7, Display::width);
 	kernel.SetArg(8, Display::height);
 	kernel.SetArg(9, out_buff);

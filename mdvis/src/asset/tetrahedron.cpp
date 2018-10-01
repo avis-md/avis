@@ -18,18 +18,20 @@ Tetrahedron::Tetrahedron() {
 void Tetrahedron::Subdivide() {
 	auto vsz = verts.size();
 	auto tsz = tris.size();
+	verts.resize(vsz + tsz/2);
+	auto triso = tris;
 	tris.resize(tsz * 4);
 
 	std::unordered_map<int64_t, int> map;
 	for (size_t a = 0; a < tsz/3; a++) {
-		int* vs = &tris[a*3];
+		int* vs = &triso[a*3];
 		int vn[3];
 		for (int b = 0; b < 3; b++) {
 			auto vs0 = vs[b];
 			auto vs1 = vs[(b==2)? 0 : b+1];
 			int in = map[mrg(vs0, vs1)];
 			if (!in) {
-				verts.push_back(Lerp(verts[vs0], verts[vs1], 0.5f));
+				verts[vsz] = Lerp(verts[vs0], verts[vs1], 0.5f);
 				vn[b] = vsz;
 				map[mrg(vs0, vs1)] = map[mrg(vs1, vs0)] = ++vsz;
 			}
@@ -39,10 +41,11 @@ void Tetrahedron::Subdivide() {
 		}
 
 		int tt[] = { vs[0], vn[0], vn[2], vs[1], vn[1], vn[0], 
-			vs[2], vn[2], vn[0], vn[0], vn[1], vn[2] };
+			vs[2], vn[2], vn[1], vn[0], vn[1], vn[2] };
 
 		memcpy(&tris[a*12], tt, 12*sizeof(int));
 	}
+	assert(vsz == verts.size());
 }
 
 void Tetrahedron::ToSphere(float rad) {

@@ -13,7 +13,8 @@
                 "/usr/local/include/python2.7"
             ],
             "defines": [
-                "PLATFORM_OSX"
+                "PLATFORM_OSX",
+                "USE_OPENCL"
             ],
             "macFrameworkPath": [
                 "/System/Library/Frameworks",
@@ -41,7 +42,8 @@
                 "${workspaceFolder}/src"
             ],
             "defines": [
-                "PLATFORM_LNX"
+                "PLATFORM_LNX",
+                "USE_OPENCL"
             ],
             "compilerPath": "/usr/bin/g++",
             "cStandard": "c11",

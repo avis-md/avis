@@ -11,6 +11,13 @@
 
 namespace RR = RadeonRays;
 
+namespace RadeonRays {
+	class MatFunc {
+	public:
+		static RadeonRays::matrix Glm2RR(const glm::mat4& mat);
+	};
+}
+
 class RayTracer {
 public:
 

@@ -341,7 +341,7 @@ void Particles::Deserialize(XmlNode* nd) {
 							else
 								ParLoader::OnOpenFile(std::vector<std::string>{ n3.value });
 							//
-							while (ParLoader::busy);;
+							while (ParLoader::busy){}
 						}
 						else if (!!particleSz) {
 							if (n3.name == "trajectory" && n3.value != "") {
@@ -352,7 +352,7 @@ void Particles::Deserialize(XmlNode* nd) {
 									ParLoader::OnOpenFile(std::vector<std::string>{ n3.value });
 
 								//
-								while (ParLoader::busy);;
+								while (ParLoader::busy){}
 							}
 							else if (n3.name == "visibility") {
 								DeserializeVis(&n3);
