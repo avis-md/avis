@@ -11,6 +11,8 @@ RadeonRays::matrix RadeonRays::MatFunc::Glm2RR(const glm::mat4& mat) {
 
 namespace TO = tinyobj;
 
+int RayTracer::maxRefl = 3;
+
 GLuint RayTracer::resTex = 0;
 CLWBuffer<float> RayTracer::accum;
 int RayTracer::samples = 0;
@@ -84,6 +86,10 @@ CLWBuffer<float> g_colors;
 CLWBuffer<int> g_indent;
 
 void RayTracer::SetScene() {
+	if (!api) {
+		Debug::Message("System", "Initializing RayTracer");
+		Init();
+	}
 	const int wh = Display::width * Display::height;
 	accum = CLWBuffer<float>::Create(context, CL_MEM_READ_WRITE, 3 * wh);
 
@@ -108,24 +114,20 @@ void RayTracer::Refine() {
 	// Intersection
 	api->QueryIntersection(ray_buffer, wh, isect_buffer, nullptr, nullptr);
 
-	float* zeros = new float[4 * wh]{};
-
-	auto out_buff = CLWBuffer<byte>::Create(context, CL_MEM_WRITE_ONLY, 4 * wh, zeros);
-	auto col_buff = CLWBuffer<float>::Create(context, CL_MEM_READ_WRITE, 4 * wh, zeros);
-
-	delete[](zeros);
+	auto out_buff = CLWBuffer<byte>::Create(context, CL_MEM_WRITE_ONLY, 4 * wh);
+	auto col_buff = CLWBuffer<float>::Create(context, CL_MEM_READ_WRITE, 4 * wh);
 
 	// Shading
 	RR::Event* e = nullptr;
 
-	for (int a = 0; a < 2; a++) {
-		ShadeKernel(out_buff, isect_buffer_cl, col_buff, ray_buffer_cl, 1 + samples);
+	for (int a = 0; a < maxRefl-1; a++) {
+		ShadeKernel(out_buff, isect_buffer_cl, col_buff, ray_buffer_cl, 1 + samples, a==0);
 		delete(ray_buffer);
 		ray_buffer = CreateFromOpenClBuffer(api, ray_buffer_cl);
 		api->QueryIntersection(ray_buffer, wh, isect_buffer, nullptr, &e);
 		e->Wait();
 	}
-	ShadeKernel(out_buff, isect_buffer_cl, col_buff, ray_buffer_cl, ++samples);
+	ShadeKernel(out_buff, isect_buffer_cl, col_buff, ray_buffer_cl, ++samples, false);
 	delete(ray_buffer);
 
 	void* pixels = clEnqueueMapBuffer(queue, (cl_mem)out_buff, true, CL_MAP_READ, 0, 4 * wh, 0, NULL, NULL, NULL);
@@ -226,23 +228,25 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 #include "asset/tetrahedron.h"
 
 void RayTracer::SetObjs() {
-	//auto res = TO::LoadObj(g_objshapes, g_objmaterials, (IO::path + "res/sharo.objm").c_str(), (IO::path + "res/").c_str());
-	//if (res != "")
+	auto res = TO::LoadObj(g_objshapes, g_objmaterials, (IO::path + "res/sharo.objm").c_str(), (IO::path + "res/").c_str());
+	if (res != "")
 	{
-	//	throw std::runtime_error(res);
+		throw std::runtime_error(res);
 	}
-
+	
 	Tetrahedron tet = Tetrahedron();
 	for (int a = 0; a < 5; a++)
 		tet.Subdivide();
-	tet.ToSphere(0.5f);
+	tet.ToSphere(0.2f);
 
 	for (auto& v : tet.verts) {
+		v.x += 0.5f;
 		v.y += 1;
 	}
 
-	//*
+	/*
 	g_objshapes.push_back(TO::shape_t());
+	g_objshapes.back().name = "ball";
 	auto& msh = g_objshapes.back().mesh;
 	auto tsz = tet.verts.size();
 	msh.positions.resize(tsz*3);
@@ -253,10 +257,6 @@ void RayTracer::SetObjs() {
 	msh.indices.resize(isz);
 	memcpy(&msh.indices[0], &tet.tris[0], isz * sizeof(int));
 	msh.material_ids.resize(isz/3, 0);
-	g_objmaterials.push_back(TO::material_t());
-	g_objmaterials[0].diffuse[0] = 0;
-	g_objmaterials[0].diffuse[1] = 0;
-	g_objmaterials[0].diffuse[2] = 0;
 	//*/
 
 	std::vector<float> verts;
@@ -300,9 +300,8 @@ void RayTracer::SetObjs() {
 	delete[](d);
 	delete[](dv);
 
-	int id = 0;
-	//for (int id = 0; id < g_objshapes.size(); ++id)
-	//{
+	for (int id = 0; id < g_objshapes.size(); ++id)
+	{
 		auto& objshape = g_objshapes[id];
 		float* vertdata = objshape.mesh.positions.data();
 		int nvert = objshape.mesh.positions.size() / 3;
@@ -310,22 +309,14 @@ void RayTracer::SetObjs() {
 		int nfaces = objshape.mesh.indices.size() / 3;
 		RR::Shape* shape = api->CreateMesh(vertdata, nvert, 3 * sizeof(float), indices, 0, nullptr, nfaces);
 		assert(shape != nullptr);
+		shape->SetId(id);
 		api->AttachShape(shape);
-		shape->SetId(id++);
-		float x = 0, y = -0.5f, z = 0;
-		float s = 0.8f;
-		Mat4x4 mat = Mat4x4(s, 0, 0, 0, 0, s, 0, 0, 0, 0, s, 0, x, y, z, s);
-		shape = api->CreateInstance(shape);
-		auto m = RR::MatFunc::Glm2RR(mat);
-		shape->SetTransform(m, RR::inverse(m));
-		api->AttachShape(shape);
-		shape->SetId(id++);
-	//}
+	}
 
 	api->Commit();
 }
 
-void RayTracer::ShadeKernel(CLWBuffer<byte> out_buff, const CLWBuffer<RR::Intersection>& isect, CLWBuffer<float>& col_buff, CLWBuffer<RR::ray>& ray_buff, const int smps)
+void RayTracer::ShadeKernel(CLWBuffer<byte> out_buff, const CLWBuffer<RR::Intersection>& isect, CLWBuffer<float>& col_buff, CLWBuffer<RR::ray>& ray_buff, const int smps, const bool isprim)
 {
 	//run kernel
 	CLWKernel kernel = program.GetKernel("Shading");
@@ -335,7 +326,7 @@ void RayTracer::ShadeKernel(CLWBuffer<byte> out_buff, const CLWBuffer<RR::Inters
 	kernel.SetArg(3, g_colors);
 	kernel.SetArg(4, g_indent);
 	kernel.SetArg(5, isect);
-	kernel.SetArg(6, 2.0f);
+	kernel.SetArg(6, isprim? 1 : 0);
 	kernel.SetArg(7, Display::width);
 	kernel.SetArg(8, Display::height);
 	kernel.SetArg(9, out_buff);

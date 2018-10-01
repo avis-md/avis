@@ -4,6 +4,8 @@
 
 class PyReader {
 public:
+	static bool initd;
+
 	static void Init();
 	
 	static bool Read(PyScript* scr);

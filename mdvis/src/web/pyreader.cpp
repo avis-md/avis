@@ -6,7 +6,10 @@
 #include <dlfcn.h>
 #endif
 
+bool PyReader::initd = false;
+
 void PyReader::Init() {
+	initd = true;
 #ifndef PLATFORM_WIN
 #ifdef PLATFORM_LNX
 	//auto lib = dlopen("libpython3.6m.so", RTLD_LAZY | RTLD_GLOBAL);

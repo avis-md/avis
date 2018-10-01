@@ -31,6 +31,8 @@ public:
 
 	static void DrawMenu();
 
+	static int maxRefl;
+
 	static GLuint resTex;
 	static CLWBuffer<float> accum;
 	static int samples;
@@ -42,5 +44,5 @@ private:
 
 	static CLWBuffer<RR::ray> GeneratePrimaryRays();
 	static void SetObjs();
-	static void ShadeKernel(CLWBuffer<byte> out_buff, const CLWBuffer<RR::Intersection>& isect, CLWBuffer<float>& col_buff, CLWBuffer<RR::ray>& ray_buff, const int smps);
+	static void ShadeKernel(CLWBuffer<byte> out_buff, const CLWBuffer<RR::Intersection>& isect, CLWBuffer<float>& col_buff, CLWBuffer<RR::ray>& ray_buff, const int smps, const bool isprim);
 };

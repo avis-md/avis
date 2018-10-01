@@ -3,6 +3,7 @@
 //#define MAKE_RES
 //#define MAKE_LOCL
 #define NOCATCH
+#define DELAYLOAD
 
 #include "ui/ui_ext.h"
 #include "ui/localizer.h"
@@ -253,26 +254,30 @@ int main(int argc, char **argv) {
 		//glfwSetWindowIcon(Display::window, 1, &icon);
 		//delete[](icon.pixels);
 
-#define INITS(nm, ...) nm::Init(__VA_ARGS__)
-#define INIT(nm, ...) Debug::Message("System", "Initializing " #nm); INITS(nm, __VA_ARGS__)
+#define INIT(nm, ...) Debug::Message("System", "Initializing " #nm); nm::Init(__VA_ARGS__)
+#ifdef DELAYLOAD
+#define LINIT(nm, ...) Debug::Message("System", "Skipping " #nm);
+#else
+#define LINIT INIT
+#endif
 		INIT(Font);
 		INIT(UI);
 		INIT(UI2);
 		INIT(UI3);
 		INIT(CReader);
-		INIT(PyReader);
+		LINIT(PyReader);
 		INIT(FReader);
-		INIT(RayTracer);
+		LINIT(RayTracer);
 		INIT(Color);
 		INIT(Icons);
-		INIT(CubeMarcher);
+		LINIT(CubeMarcher);
 		INIT(VisSystem);
 		INIT(Particles);
 		INIT(ParMenu);
 		INIT(ParLoader);
 		INIT(ParGraphics);
 		INIT(Protein);
-		INIT(Shadows);
+		LINIT(Shadows);
 		INIT(AnWeb);
 		INIT(AnNode);
 		INIT(Effects, 0xffff);
@@ -304,7 +309,7 @@ int main(int argc, char **argv) {
 		ParLoader::importers.push_back(imp); \
 		ParLoader::exts.push_back("*" #_ext);
 
-		NEWIMP(Protein DataBank, pdb, .pdb, PDB);
+		NEWIMP(Protein DataBank, pdb, .pdb, PDB); 
 		//NEWIMP(XYZ coords, xyz, .xyz, XYZ);
 		//NEWIMP(CDView, cdv, .cdv, CDV);
 		//NEWIMP(Binary, bin, .bin, MDVBin);
@@ -316,7 +321,7 @@ int main(int argc, char **argv) {
 			ParLoader::OnOpenFile(fls);
 		}
 
-		Display::Resize(512, 512, false);
+		Display::Resize(1024, 600, false);
 
 		auto lastMillis = Time::millis;
 

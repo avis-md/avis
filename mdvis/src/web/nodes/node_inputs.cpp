@@ -6,7 +6,7 @@
 
 uint Node_Inputs::frame = 0;
 
-Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)) {
+Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)), filter(0) {
 	DmScript* scr = (DmScript*)script;
 	script->desc = "Particle coordinates and trajectory";
 	script->descLines = 2;
@@ -90,7 +90,6 @@ void Node_Inputs::Execute() {
 void Node_Inputs::SaveIn(const std::string& path) {
 	Execute();
 	std::string nm = script->name;
-	//std::replace(nm.begin(), nm.end(), '/', '_');
 	std::ofstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
 		for (uint i = 0; i < 4; i++)
@@ -100,7 +99,6 @@ void Node_Inputs::SaveIn(const std::string& path) {
 
 void Node_Inputs::LoadIn(const std::string& path) {
 	std::string nm = script->name;
-	//std::replace(nm.begin(), nm.end(), '/', '_');
 	std::ifstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
 		for (uint i = 0; i < 4; i++)

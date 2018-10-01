@@ -18,10 +18,11 @@ void AnBrowse::DoScan(Folder* fo, const std::string& path, const std::string& in
 		auto nm = f.substr(f.find_last_of('/') + 1);
 		fo->saves.push_back(nm.substr(0, nm.size() - EXT_ANSV_SZ));
 	}
-#define READ(ext, sz, cond, hd)\
+#define READ(ext, sz, cond, hd, pre)\
 	ff = IO::GetFiles(path, ext);\
 	for (auto f : ff) { \
 		if (cond) {\
+			pre\
 			Debug::Message("AnBrowse", "  file: " + f);\
 			f = f.substr(0, f.size() - sz);\
 			auto iter = hd##Script::allScrs.find(f);\
@@ -38,9 +39,12 @@ void AnBrowse::DoScan(Folder* fo, const std::string& path, const std::string& in
 		}\
 	}
 
-	READ(EXT_PS, EXT_PS_SZ, f.substr(0, 2) != "__", Py);
-	READ(EXT_CS, EXT_CS_SZ, 1, C);
-	READ(EXT_FS, EXT_FS_SZ, 1, F);
+	READ(EXT_PS, EXT_PS_SZ, f.substr(0, 2) != "__", Py, if (!PyReader::initd) {
+		Debug::Message("System", "Initializing PyReader");
+		PyReader::Init();
+	});
+	READ(EXT_CS, EXT_CS_SZ, 1, C,);
+	READ(EXT_FS, EXT_FS_SZ, 1, F,);
 
 	std::vector<std::string> fd;
 	IO::GetFolders(path, &fd);
