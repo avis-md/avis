@@ -7,7 +7,7 @@ VisRenderer::VID_TYPE VisRenderer::vidType;
 VisRenderer::STATUS VisRenderer::status;
 
 bool VisRenderer::imgUseAlpha = true, VisRenderer::vidUseAlpha;
-uint VisRenderer::imgW = 2048, VisRenderer::imgH = 2048, VisRenderer::vidW = 1024, VisRenderer::vidH = 600;
+uint VisRenderer::imgW = 4096, VisRenderer::imgH = 4096, VisRenderer::vidW = 1024, VisRenderer::vidH = 600;
 float VisRenderer::resLerp = -1;
 
 std::string VisRenderer::outputFolder =
@@ -76,8 +76,10 @@ void VisRenderer::ToImage() {
 	auto h = Display::height;
 	auto w2 = Display::actualWidth;
 	auto h2 = Display::actualHeight;
-	Display::width = Display::actualWidth = imgW;
-	Display::height = Display::actualHeight = imgH;
+	auto w3 = Display::frameWidth;
+	auto h3 = Display::frameHeight;
+	Display::width = Display::actualWidth = Display::frameWidth = imgW;
+	Display::height = Display::actualHeight = Display::frameHeight = imgH;
 	cam->target = res_fbo;
 	ParGraphics::hlIds.clear();
 	if (imgUseAlpha) ParGraphics::bgCol.a = 0;
@@ -91,6 +93,8 @@ void VisRenderer::ToImage() {
 	Display::height = h;
 	Display::actualWidth = w2;
 	Display::actualHeight = h2;
+	Display::frameWidth = w3;
+	Display::frameHeight = h3;
 	cam->target = 0;
 	ParGraphics::bgCol.a = 1;
 	Scene::dirty = true;

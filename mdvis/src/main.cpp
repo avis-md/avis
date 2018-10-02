@@ -39,7 +39,7 @@ void rendFunc() {
 	auto& cm = ChokoLait::mainCamera->object->transform;
 	ParGraphics::Rerender(cm.position(), cm.forward(), static_cast<float>(Display::width), static_cast<float>(Display::height));
 #define bb(i) static_cast<float>(Particles::boundingBox[i])
-	UI3::Cube(bb(0), bb(1), bb(2), bb(3), bb(4), bb(5), black());
+	//UI3::Cube(bb(0), bb(1), bb(2), bb(3), bb(4), bb(5), black());
 	if (!!Particles::particleSz && Shadows::show) {
 		Shadows::UpdateBox();
 		Mat4x4 _p = MVP::projection();
@@ -101,9 +101,9 @@ void updateFunc() {
 	}
 
 
-	if (Input::KeyDown(Key_X) && Input::KeyHold(Key_LeftShift))
-		if (!RayTracer::resTex)
-			RayTracer::SetScene();
+	//if (Input::KeyDown(Key_X) && Input::KeyHold(Key_LeftShift))
+	//	if (!RayTracer::resTex)
+	//		RayTracer::SetScene();
 }
 
 void paintfunc() {
@@ -194,12 +194,16 @@ int main(int argc, char **argv) {
 #else
 int main(int argc, char **argv) {
 #endif
-
+	std::cout << R"(Thanks for trying out this program! :)
+You can view a copy of all logs in Log.txt.
+Raw compile output for each script is in __[]cache__/name_log.txt.
+The hash for this program is )" << VisSystem::version_hash
+	<< "\n(I may need this hash to fix bugs)"
+	<< "\n----------------------------------------------" << std::endl;
 #ifndef NOCATCH
 	try {
 #endif
 		Time::startMillis = milliseconds();
-
 		std::vector<std::string> fls;
 		bool _s = false, _x = false;
 		std::string _xs = "";
@@ -234,7 +238,11 @@ int main(int argc, char **argv) {
 				fls.push_back(argv[a]);
 			}
 		}
-		if (!__debug) Debug::suppress = 1;
+		if (!__debug) {
+			Debug::suppress = 1;
+			//
+			std::cout << "Starting in silent mode. You can enable all logs using the --debug switch." << std::endl;
+		}
 		ChokoLait::Init(800, 800);
 
 #ifdef MAKE_LOCL

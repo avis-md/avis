@@ -35,6 +35,10 @@ void Node_AddBond::Execute() {
 	CVar& cv2 = inputR[1].first->conV[inputR[1].second];
 	if (*cv1.dimVals[0] != Particles::anim.frameCount) return;
 	auto& c2 = Particles::anim.conns2[animId];
+	if (c2.first) delete[](c2.first);
+	c2.first = new uint[Particles::anim.frameCount];
+	if (c2.second) delete[](c2.second);
+	c2.second = new Int2*[Particles::anim.frameCount];
 	uint off = 0;
 	for (uint i = 0; i < Particles::anim.frameCount; i++) {
 		c2.first[i] = (*((int**)cv1.value))[i];

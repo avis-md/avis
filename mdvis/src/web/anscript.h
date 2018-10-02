@@ -73,7 +73,7 @@ public:
 
 	static int StrideOf(char c);
 
-	virtual void Clear();
+	virtual bool Clear();
 	virtual std::string Exec() = 0;
 protected:
 	AnScript(AN_SCRTYPE t) : type(t) {}
@@ -86,7 +86,7 @@ public:
 		name = nm;
 	}
 
-	void Clear() override {}
+	bool Clear() override { return true; }
 	std::string Exec() override { return ""; }
 };
 
@@ -110,7 +110,7 @@ public:
 
 	static PyObject* mainModule, *logCatcher, *emptyString;
 
-	void Clear() override;
+	bool Clear() override;
 	std::string Exec() override;
 	void Set(uint i, int v), Set(uint i, double v), Set(uint i, PyObject* v);
 
@@ -146,7 +146,7 @@ public:
 
 	std::vector<CVar> _invars, _outvars;
 
-	void Clear() override;
+	bool Clear() override;
 	std::string Exec() override;
 	
 	template<typename T> void Set(int i, T& val) {
@@ -174,7 +174,7 @@ public:
 	int32_t** arr_out_shapeloc;
 	void** arr_out_dataloc;
 	
-	void Clear() override;
+	bool Clear() override;
 	std::string Exec() override;
 
 	template<typename T> void Set(int i, T& val) {

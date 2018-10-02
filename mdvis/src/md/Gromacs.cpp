@@ -110,11 +110,11 @@ bool Gromacs::ReadTrj(TrjInfo* info) {
 
 	int step;
 	float t, lambda;
-	float* _ps;
-	std::vector<float*> poss;
+	double* _ps;
+	std::vector<double*> poss;
 	bool ok;
 	do {
-		_ps = new float[info->parNum * 3];
+		_ps = new double[info->parNum * 3];
 		ok = read_trr(file, &natoms, &step, &t, &lambda, 0, _ps, 0, 0);
 		if (!!ok) {
 			delete[](_ps);

@@ -29,10 +29,14 @@ XmlNode* Xml::Parse(const std::string& path) {
 	
 	XmlNode* node = new XmlNode();
 	uint pos = 0, sz = str.size();
+	int very_big_number = 10000;
 	while (pos < sz) {
 		if (!Read(str, pos, node)) {
 			delete(node);
 			return nullptr;
+		}
+		if (--very_big_number <= 0) {
+			Debug::Warning("Xml", "Parse loop is overrunning! x" + std::to_string(1-very_big_number));
 		}
 	}
 	return node;
@@ -76,8 +80,12 @@ bool Xml::Read(std::string& s, uint& pos, XmlNode* parent) {
 			n.value = rm_st_ed_spaces(s.substr(off2 + 1, ep - off2 - 1));
 		}
 		else {
+			int very_big_number = 10000;
 			while (pos < (uint)ep) {
 				Read(s, pos, &n);
+				if (--very_big_number <= 0) {
+					Debug::Warning("Xml", "Parse.Read loop is overrunning! x" + std::to_string(1-very_big_number));
+				}
 			}
 		}
 		pos = ep + n.name.size() + 2;

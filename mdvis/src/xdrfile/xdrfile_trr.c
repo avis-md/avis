@@ -172,7 +172,7 @@ static int do_trnheader(XDRFILE *xd,mybool bRead,t_trnheader *sh)
 }
 
 static int do_htrn(XDRFILE *xd,mybool bRead,t_trnheader *sh,
-				   matrix box,float *x,rvec *v,rvec *f)
+				   matrix box,double *x,rvec *v,rvec *f)
 {
 	double pvd[DIM*DIM];
 	double *dx=NULL;
@@ -426,7 +426,7 @@ static int do_htrn(XDRFILE *xd,mybool bRead,t_trnheader *sh,
 }
 
 static int do_trn(XDRFILE *xd,mybool bRead,int *step,float *t,float *lambda,
-				  matrix box,int *natoms,float *x,rvec *v,rvec *f)
+				  matrix box,int *natoms,double *x,rvec *v,rvec *f)
 {
     t_trnheader *sh;
     int result;
@@ -498,13 +498,13 @@ int read_trr_natoms_2(XDRFILE *xd,int *natoms)
 }
 
 int write_trr(XDRFILE *xd,int natoms,int step,float t,float lambda,
-			  matrix box,float *x,rvec *v,rvec *f)
+			  matrix box,double *x,rvec *v,rvec *f)
 {
 	return do_trn(xd,0,&step,&t,&lambda,box,&natoms,x,v,f);
 }
 
 int read_trr(XDRFILE *xd,int *natoms,int *step,float *t,float *lambda,
-			 matrix box,float *x,rvec *v,rvec *f)
+			 matrix box,double *x,rvec *v,rvec *f)
 {
 	return do_trn(xd,1,step,t,lambda,box,natoms,x,v,f);
 }

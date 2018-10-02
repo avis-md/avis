@@ -72,7 +72,7 @@ byte ParGraphics::dragMode = 0;
 
 bool ParGraphics::animate = false, ParGraphics::seek = false;
 float ParGraphics::animOff;
-int ParGraphics::animTarFps = 5;
+int ParGraphics::animTarFps = 30;
 bool ParGraphics::tfboDirty = true;
 Mat4x4 ParGraphics::lastMVP;
 
@@ -250,8 +250,8 @@ void ParGraphics::Init() {
 
 	hlIds.resize(1);
 	ChokoLait::mainCamera->onBlit = Reblit;
-	ChokoLait::mainCamera->useGBuffer2 = true;
-	ChokoLait::mainCamera->quality2 = 0.5f;
+	//ChokoLait::mainCamera->useGBuffer2 = true;
+	//ChokoLait::mainCamera->quality2 = 0.5f;
 
 	Eff::ssaoSamples = 30;
 	Eff::ssaoRad = 0.015f;
@@ -667,8 +667,9 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					glUniform1i(parConProgLocs[11], 4);
 					glActiveTexture(GL_TEXTURE4);
 					glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
-					glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
 					glUniform1i(parConProgLocs[12], 0);
+
+					glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
 				}
 			}
 			uint id2 = 4;
@@ -704,7 +705,16 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
 					glUniform1ui(parConProgLocs[7], id2);
 					glUniform1f(parConProgLocs[8], c2.scale);
-					glDrawArrays(GL_POINTS, 0, c2.cnt);
+					glUniform1f(parConProgLocs[9], osz);
+					glUniform1i(parConProgLocs[10], 3);
+					glActiveTexture(GL_TEXTURE3);
+					glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
+					glUniform1i(parConProgLocs[11], 4);
+					glActiveTexture(GL_TEXTURE4);
+					glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
+					glUniform1i(parConProgLocs[12], 0);
+					glDrawArrays(GL_TRIANGLES, 0, c2.cnt*12);
+
 				}
 			}
 

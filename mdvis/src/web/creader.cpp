@@ -332,6 +332,9 @@ bool CReader::Read(CScript* scr) {
 				}
 				bk->typeName = "list(" + std::to_string(lnsz-1) + bk->typeName[0] + ")";
 			}
+			else {
+				bk->data.val.d = 0;
+			}
 			cv.push_back(std::pair<std::string, std::string>(bk->name, bk->typeName));
 			if (!iso) {
 				scr->invaropts.push_back(VarOpt());

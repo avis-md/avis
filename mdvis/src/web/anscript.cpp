@@ -2,12 +2,13 @@
 
 //#define NO_PYLOG
 
-void AnScript::Clear() {
+bool AnScript::Clear() {
 	invars.clear();
 	outvars.clear();
 	desc = "";
 	descLines = 0;
 	ok = false;
+	return true;
 }
 
 int AnScript::StrideOf(char c) {
@@ -66,7 +67,7 @@ void PyScript::ClearLog() {
 	PyObject_SetAttrString(logCatcher, "value", emptyString);
 }
 
-void PyScript::Clear() {
+bool PyScript::Clear() {
 	AnScript::Clear();
 	_invars.clear();
 	_outvars.clear();
@@ -79,6 +80,7 @@ void PyScript::Clear() {
 			if (r) Py_DECREF(r);
 		}
 	}
+	return true;
 }
 
 std::string PyScript::Exec() {
@@ -200,14 +202,16 @@ void CVar::Read(std::ifstream& strm) {
 
 std::unordered_map<std::string, CScript*> CScript::allScrs;
 
-void CScript::Clear() {
+bool CScript::Clear() {
 	AnScript::Clear();
 	_invars.clear();
 	_outvars.clear();
 	if (AnWeb::hasC) {
-		DyLib::ForceUnload(lib, libpath);
+		if (!DyLib::ForceUnload(lib, libpath))
+			return false;
 		delete(lib);
 	}
+	return true;
 }
 
 std::string CScript::Exec() {
@@ -228,14 +232,16 @@ std::string CScript::Exec() {
 
 std::unordered_map<std::string, FScript*> FScript::allScrs;
 
-void FScript::Clear() {
+bool FScript::Clear() {
 	AnScript::Clear();
 	_invars.clear();
 	_outvars.clear();
 	if (AnWeb::hasFt) {
-		DyLib::ForceUnload(lib, libpath);
+		if (!DyLib::ForceUnload(lib, libpath))
+			return false;
 		delete(lib);
 	}
+	return true;
 }
 
 std::string FScript::Exec() {

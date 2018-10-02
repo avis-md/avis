@@ -19,13 +19,16 @@ DyLib::~DyLib() {
 #endif
 }
 
-void DyLib::ForceUnload(DyLib* lib, std::string path) {
+bool DyLib::ForceUnload(DyLib* lib, std::string path) {
 #ifndef PLATFORM_WIN
-	for (;;) {
+	for (int tries = 0; tries < 10; tries++) {
 		dlclose(lib->lib);
+		sleep(10);
 		if (!dlopen(path.c_str(), RTLD_LAZY | RTLD_NOLOAD))
-			break;
+			return true;
 	}
+	Debug::Warning("DyLib", "failed to force unloading of \"" + path + "\"!");
+	return false;
 #endif
 }
 

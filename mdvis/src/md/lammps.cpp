@@ -111,6 +111,8 @@ bool Lammps::Read(ParInfo* info) {
                 }
             } while (buf[0] == 0);
         }
+        
+		info->trajectory.progress = 0.01f;
 
         _ps = new double[info->num * 3];
         

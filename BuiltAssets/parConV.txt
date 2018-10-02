@@ -57,7 +57,7 @@ void main(){
 	vec4 unitVec = _MV*vec4(1, 0, 0, 0);
 	v2f_scl = length(unitVec) * radScl;
 
-	float rad = 0.004 * radScl;
+	float rad = 0.004 * radScl * 2;
 
 	
 	vec4 wpos = _MV*vec4(pos1, 1);

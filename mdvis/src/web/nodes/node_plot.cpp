@@ -14,6 +14,7 @@ Node_Plot::Node_Plot() : AnNode(new DmScript(sig)) {
 	script->invars.push_back(std::pair<std::string, std::string>("X ID", "int"));
 	script->invars.push_back(std::pair<std::string, std::string>("Y ID", "int"));
 	script->invaropts.resize(3);
+	inputVDef[1].i = inputVDef[2].i = -1;
 }
 
 void Node_Plot::DrawFooter(float& y) {
@@ -128,7 +129,7 @@ void Node_Plot::OnConn(bool o, int i) {
 		else {
 			Debug::Warning("Node::Plot", "Data of 3+ dimensions cannot be plotted!");
 		}
-		inputR[1].use = inputR[2].use = useids;
+		//inputR[1].use = inputR[2].use = useids;
 	}
 }
 

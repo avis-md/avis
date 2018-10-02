@@ -1,17 +1,17 @@
 module test
- USE ISO_C_BINDING
+ use iso_c_binding
  implicit none
-    
 !in
-    real*8, allocatable, target :: darr (:,:)
-    
+    real*8, allocatable, target :: inarray (:,:)
+!in
+    integer :: axis
 !out
     real*8, allocatable, target :: myarray (:)
-    
+
  contains
 !entry
     subroutine Execute()
-        print*, 'hello from fortran!', shape(darr)
+        myarray = inarray(axis,:)
+        print*, "Fortran says hello!"
     end subroutine Execute
-    
 end module test

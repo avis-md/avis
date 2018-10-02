@@ -63,7 +63,16 @@ std::vector<emptyCallbackFunc> ChokoLait::focusFuncs;
 
 void _dieded(int i) {
 	Debug::Error("System", "Abort trap!");
-	throw "abort trap!";
+	void* buf[10];
+	Debug::StackTrace(10, buf);
+#ifndef PLATFORM_WIN
+	auto bs = backtrace_symbols(buf, 10);
+	std::cout << "Dumping stack trace..." << std::endl;
+	for (int a = 0; a < 10; a++) {
+		std::cout << bs[a] << std::endl;
+	}
+#endif
+	exit(-1);	
 }
 void _sigfpe(int i) {
 	Debug::Error("System", "FP exception!");
@@ -85,10 +94,11 @@ void ChokoLait::_InitVars() {
 
 #endif
 	signal(SIGABRT, &_dieded);
+	/* this is a very very bad idea i guess
 	signal(SIGFPE, &_sigfpe);
 	signal(SIGSEGV, &_sigseg);
 	signal(SIGTERM, &_sigtrm);
-
+	*/
 	IO::InitPath();
 	Debug::Init();
 

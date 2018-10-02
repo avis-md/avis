@@ -8,8 +8,15 @@ uint Node_Inputs::frame = 0;
 
 Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)), filter(0) {
 	DmScript* scr = (DmScript*)script;
-	script->desc = "Particle coordinates and trajectory";
-	script->descLines = 2;
+	script->desc = R"(Particle coordinates and trajectory
+ positions: [atomId, xyz]
+ velocities: [atomId, xyz]
+ positions (all): [frame, atomId, xyz]
+ velocities (all): [frame, atomId, xyz]
+ types: [atomid]
+ * type is the ascii of the atom name,
+   so C is 67, O is 79 etc.)";
+	script->descLines = 8;
 	
 	title = "Particle Data";
 	titleCol = Vec3(0.3f, 0.3f, 0.5f);

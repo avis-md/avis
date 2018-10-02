@@ -5,7 +5,7 @@ class DyLib {
 public:
 	DyLib(std::string nm);
 	~DyLib();
-	static void ForceUnload(DyLib* lib, std::string nm);
+	static bool ForceUnload(DyLib* lib, std::string nm);
 
 	void* GetSym(std::string nm);
 	bool is_open();

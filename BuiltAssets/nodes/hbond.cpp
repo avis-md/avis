@@ -44,7 +44,7 @@ void Execute() {
 		progress = i * 1.0f / fcnt;
 		pairCounts[i] = 0;
 		double* pos = positions + pcnt * i * 3;
-#pragma omp parallel for
+//#pragma omp parallel for
 		for (int m = 0; m < pcnt; m++) {
 			//progress += 1.0f / (fcnt * pcnt);
 			if (!ISA(types[m], "H")) continue;
@@ -59,7 +59,7 @@ void Execute() {
 				if (fabsf(dx) < cutoff && fabsf(dy) < cutoff && fabsf(dz) < cutoff) {
 					double d = (dx*dx+dy*dy+dz*dz);
 					if (d < cut2 && d > cut2m) {
-#pragma omp critical
+//#pragma omp critical
 						{
 							pairCounts[i]++;
 							vcons.push_back(m);

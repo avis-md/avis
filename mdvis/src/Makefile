@@ -13,7 +13,7 @@ RRAYL := -L$(RRAYPRE)/build/Calc -L$(RRAYPRE)/build/CLW -L../build
 
 ifeq ($(UNAME_S),Linux)
 	OSFLAG += -D PLATFORM_LNX
-	LDFLAGS2 += -Wl,-rpath='$$ORIGIN' -static-libstdc++ -Wl,--warn-unresolved-symbols
+	LDFLAGS2 += -Wl,-rpath='$$ORIGIN' -static-libstdc++
 	GLLIB += /usr/lib/x86_64-linux-gnu/libjpeg.a -lssh2 -lOpenCL `pkg-config --static --libs gl glew glfw3 freetype2`
 	#PYLIB += $(shell python3-config --configdir)/libpython3.6m.a -lexpat
 	PYLIB += -L../build -lpython3
@@ -73,11 +73,10 @@ endif
 ifeq ($(UNAME_S),Linux)
 	cp $(RRAYPRE)/build/bin/libRadeonRays.so ../build/libRadeonRays.so
 	$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
-	# | grep -v "reference to \`Py"
 endif
 ifeq ($(UNAME_S),Darwin)
 	install_name_tool -add_rpath "@executable_path" ../build/mdvis
-	install_name_tool -change $(shell python3-config --exec)/Python @rpath/../3.6/Python ../build/mdvis
+	install_name_tool -change $(shell python3-config --exec)/Python /tmpp/Python ../build/mdvis
 	cp ../build/mdvis ../build/mdvis_clean
 	cd ../build && rm .pyregfin && ./regpython.sh
 endif
