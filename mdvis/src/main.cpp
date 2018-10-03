@@ -16,7 +16,7 @@
 #include "md/parloader.h"
 #include "md/Gromacs.h"
 #include "md/pdb.h"
-//#include "md/CDV.h"
+#include "md/CDV.h"
 //#include "md/XYZ.h"
 //#include "md/mdvbin.h"
 #include "md/lammps.h"
@@ -66,10 +66,13 @@ void updateFunc() {
 		VisSystem::lastSave = Time::time;
 	}
 
-	if (!!Particles::particleSz && (autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime)) {
-		VisSystem::lastSave = Time::time;
-		VisSystem::Save(IO::path + ".recover");
-		VisSystem::SetMsg("autosaved at t=" + std::to_string((int)Time::time) + "s");
+	if (!!Particles::particleSz) {
+		Particles::anim.Update();
+		if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime)) {
+			VisSystem::lastSave = Time::time;
+			VisSystem::Save(IO::path + ".recover");
+			VisSystem::SetMsg("autosaved at t=" + std::to_string((int)Time::time) + "s");
+		}
 	}
 
 	ParGraphics::Update();
@@ -294,34 +297,51 @@ The hash for this program is )" << VisSystem::version_hash
 
 		AnBrowse::Scan();
 
-		ParImporter* imp = new ParImporter();
-		imp->name = "Gromacs";
-		imp->sig = "gro";
-		imp->funcs.push_back(std::pair<std::vector<std::string>, ParImporter::loadsig>());
-		imp->funcs.back().first.push_back(".gro");
-		imp->funcs.back().second = Gromacs::Read;
-		imp->trjFuncs.push_back(std::pair<std::vector<std::string>, ParImporter::loadtrjsig>());
-		imp->trjFuncs.back().first.push_back(".trr");
-		imp->trjFuncs.back().second = Gromacs::ReadTrj;
+		ParImporter imp = ParImporter();
+		imp.name = "Gromacs";
+		imp.sig = "gro";
+		ParImporter::Func fnc = {};
+		fnc.type = ParImporter::Func::FUNC_TYPE::CONFIG;
+		fnc.exts.push_back(".gro");
+		fnc.func = Gromacs::Read;
+		imp.funcs.push_back(fnc);
+		fnc = {};
+		fnc.type = ParImporter::Func::FUNC_TYPE::TRAJ;
+		fnc.exts.push_back(".trr");
+		fnc.trjFunc = Gromacs::ReadTrj;
+		imp.funcs.push_back(fnc);
 		ParLoader::importers.push_back(imp);
 
 		ParLoader::exts = std::vector<std::string>({ "*.gro", "*.trr" });
 
 #define NEWIMP(_nm, _sig, _ext, _fnc) \
-		imp = new ParImporter(); \
-		imp->name = #_nm; \
-		imp->sig = #_sig; \
-		imp->funcs.push_back(std::pair<std::vector<std::string>, ParImporter::loadsig>()); \
-		imp->funcs.back().first.push_back(#_ext); \
-		imp->funcs.back().second = _fnc::Read; \
-		ParLoader::importers.push_back(imp); \
+		imp.name = _nm; \
+		imp.sig = #_sig; \
+		fnc = {}; \
+		fnc.type = ParImporter::Func::FUNC_TYPE::CONFIG;\
+		fnc.exts.push_back(#_ext);\
+		fnc.func = _fnc;\
+		imp.funcs.push_back(fnc);\
 		ParLoader::exts.push_back("*" #_ext);
+#define SETFRM(_ext, _fnc) \
+		fnc = {}; \
+		fnc.type = ParImporter::Func::FUNC_TYPE::FRAME;\
+		fnc.exts.push_back(#_ext);\
+		fnc.frmFunc = _fnc;\
+		imp.funcs.push_back(fnc);\
+		ParLoader::exts.push_back("*" #_ext);
+#define PUSHIMP ParLoader::importers.push_back(imp); \
+		imp = {};
 
-		NEWIMP(Protein DataBank, pdb, .pdb, PDB); 
+		NEWIMP("Protein DataBank", pdb, .pdb, PDB::Read);
+		PUSHIMP
 		//NEWIMP(XYZ coords, xyz, .xyz, XYZ);
-		//NEWIMP(CDView, cdv, .cdv, CDV);
+		NEWIMP("CDView", cdv, .cdv, CDV::Read)
+		SETFRM(.cdv, CDV::ReadFrame)
+		PUSHIMP
 		//NEWIMP(Binary, bin, .bin, MDVBin);
-		NEWIMP(Lammps, lmp, .atom, Lammps);
+		NEWIMP("Lammps", lmp, .atom, Lammps::Read)
+		PUSHIMP
 		//NEWIMP(DLPoly, dlp, .000, DLPoly);
 
 		if (fls.size()) {

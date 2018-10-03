@@ -197,7 +197,7 @@ void ParLoader::Scan() {
 
 #define ISNUM(c) (c >= '0' && c <= '9')
 void ParLoader::ScanFrames(const std::string& first) {
-	if (Particles::anim.frameCount <= 1) return;
+	if (Particles::anim.frameCount > 1) return;
 	auto ps = first.find_last_of('/');
 	auto nm = first.substr(ps + 1);
 	int n1, n2 = 0;
@@ -214,9 +214,28 @@ void ParLoader::ScanFrames(const std::string& first) {
 			break;
 		}
 	}
+
 	int st = std::stoi(nm.substr(n2 + 1, n1 - n2));
 	auto nm1 = first.substr(0, ps + 2 + n2);
 	auto nm2 = nm.substr(n1 + 1);
+
+	uint i = 0;
+	for (auto& p : importers) {
+		int id2 = 0;
+		for (auto& pr : p.funcs) {
+			if ((pr.type == ParImporter::Func::FUNC_TYPE::FRAME) && 
+				(std::find(pr.exts.begin(), pr.exts.end(), nm2) != pr.exts.end())) {
+				Particles::anim.impId = i;
+				Particles::anim.funcId = id2;
+				goto found;
+			}
+			id2++;
+		}
+		i++;
+	}
+	return;
+	found:
+
 	uint frms = 0;
 	std::vector<std::string> nms;
 	do {
@@ -231,7 +250,8 @@ void ParLoader::ScanFrames(const std::string& first) {
 	if (frms <= 1) return;
 	Particles::anim.AllocFrames(frms);
 	for (uint f = 0; f < frms; f++) {
-		Particles::anim.status[f] = Particles::AnimData::FRAME_STATUS::UNLOADED;
+		//Particles::anim.status[f] = Particles::AnimData::FRAME_STATUS::UNLOADED;
+		Particles::anim.paths[f] = nms[f];
 	}
 }
 
@@ -269,6 +289,11 @@ void ParLoader::DoOpen() {
 				fault = true;
 				return;
 			}
+		}
+		else {
+			Debug::Warning("ParLoader", "No importer set!");
+			busy = false;
+			return;
 		}
 	}
 	catch (char* c) {
@@ -452,6 +477,9 @@ void ParLoader::DoOpen() {
 	VisSystem::SetMsg("Loaded file(s) in " + std::to_string((milliseconds() - t)*0.001f).substr(0, 5) + "s");
 	ParMenu::SaveRecents(droppedFiles[0]);
 	Particles::cfgFile = droppedFiles[0];
+
+	ScanFrames(info.path);
+
 	parDirty = true;
 	busy = false;
 	fault = false;
@@ -514,7 +542,7 @@ void ParLoader::OpenFrameNow(uint f, const std::string& path) {
 	vel.resize(Particles::particleSz);
 	FrmInfo info(path.c_str(), Particles::particleSz, &pos[0][0], &vel[0][0]);
 	fault = !importers[anm.impId].funcs[anm.funcId].frmFunc(&info);
-	anm.status[f] = fault? Particles::AnimData::FRAME_STATUS::LOADED : Particles::AnimData::FRAME_STATUS::BAD;
+	anm.status[f] = fault? Particles::AnimData::FRAME_STATUS::BAD : Particles::AnimData::FRAME_STATUS::LOADED;
 
 	anm.reading = false;
 	busy = false;
@@ -700,24 +728,22 @@ void ParLoader::FindImpId(bool force) {
 	impId = -1;
 	int id = 0;
 	auto sz = droppedFiles[0].size();
-	if (force) {
-		for (auto& imp : importers) {
-			int id2 = 0;
-			for (auto& pr : imp.funcs) {
-				if (force || ((pr.type != ParImporter::Func::FUNC_TYPE::CONFIG) == loadAsTrj)) {
-					for (auto& s : pr.exts) {
-						if (EndsWith(droppedFiles[0], s)) {
-							impId = id;
-							funcId = id2;
-							if (force) loadAsTrj = (pr.type != ParImporter::Func::FUNC_TYPE::CONFIG);
-							return;
-						}
+	for (auto& imp : importers) {
+		int id2 = 0;
+		for (auto& pr : imp.funcs) {
+			if (force || ((pr.type != ParImporter::Func::FUNC_TYPE::CONFIG) == loadAsTrj)) {
+				for (auto& s : pr.exts) {
+					if (EndsWith(droppedFiles[0], s)) {
+						impId = id;
+						funcId = id2;
+						if (force) loadAsTrj = (pr.type != ParImporter::Func::FUNC_TYPE::CONFIG);
+						return;
 					}
 				}
-				id2++;
 			}
-			id++;
+			id2++;
 		}
+		id++;
 	}
 }
 

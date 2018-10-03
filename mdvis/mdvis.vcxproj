@@ -247,6 +247,7 @@
     <ClCompile Include="src\asset\mesh.cpp" />
     <ClCompile Include="src\asset\tetrahedron.cpp" />
     <ClCompile Include="src\core\ui3.cpp" />
+    <ClCompile Include="src\md\CDV.cpp" />
     <ClCompile Include="src\md\lammps.cpp" />
     <ClCompile Include="src\md\pdb.cpp" />
     <ClCompile Include="src\tmp\tiny_obj_loader.cpp" />

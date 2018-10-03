@@ -37,15 +37,15 @@ struct TrjInfo {
 
 struct FrmInfo {
 	const char* const path; //IN
-	const uint32_t parNum; //IN
-	float progress; //OPT
-	const double* pos;
-	const double* vel;
+	uint32_t const parNum; //IN
+	double* const pos;
+	double* const vel;
+	char error[100];
 
 	FrmInfo(const char* const path, 
 			const uint32_t parNum, 
-			const double* pos,
-			const double* vel)
+			double* const pos,
+			double* const vel)
 	: path(path), parNum(parNum), pos(pos), vel(vel) {}
 };
 

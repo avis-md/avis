@@ -3,11 +3,14 @@
 #include "web/anweb.h"
 #include "md/Protein.h"
 
+uint Particles::AnimData::maxFramesInMem = 20;
+
 void Particles::AnimData::AllocFrames(uint frames) {
 	frameCount = frames;
 	status.resize(frames, FRAME_STATUS::UNLOADED);
 	poss.resize(frames);
 	vels.resize(frames);
+	paths.resize(frames);
 }
 
 void Particles::AnimData::Clear() {
@@ -17,12 +20,61 @@ void Particles::AnimData::Clear() {
 	vels.clear();
 	conns.clear();
 	conns2.clear();
+	paths.clear();
+}
+
+void Particles::AnimData::Seek(uint f) {
+	if (status[f] != FRAME_STATUS::LOADED) {
+		if (status[f] == FRAME_STATUS::UNLOADED) {
+			status[f] = Particles::AnimData::FRAME_STATUS::READING;
+			ParLoader::OpenFrameNow(f, paths[f]);
+			while (status[f] == FRAME_STATUS::READING)
+				;;
+		}
+		if (status[f] == FRAME_STATUS::BAD) return;
+	}
+	currentFrame = f;
+	UpdateMemRange();
 }
 
 void Particles::AnimData::Update() {
-	for (uint a = 0; a < maxFramesInMem; a++) {
-		auto f = frameMemPos + a;
-		if (f == frameCount) return;
+	if (frameCount <= 1) return;
+
+	if (maxFramesInMem < frameCount) {
+		for (uint a = 0; a < frameMemPos; a++) {
+			if (status[a] == FRAME_STATUS::LOADED) {
+				std::vector<glm::dvec3>().swap(poss[a]);
+				std::vector<glm::dvec3>().swap(vels[a]);
+				status[a] = FRAME_STATUS::UNLOADED;
+			}
+		}
+		for (uint a = frameMemPos + maxFramesInMem; a < frameCount; a++) {
+			if (status[a] == FRAME_STATUS::LOADED) {
+				std::vector<glm::dvec3>().swap(poss[a]);
+				std::vector<glm::dvec3>().swap(vels[a]);
+				status[a] = FRAME_STATUS::UNLOADED;
+			}
+		}
+	}
+
+	for (uint f = currentFrame; f < frameMemPos + maxFramesInMem; f++) {
+		if (f >= frameCount) break;
+		auto& st = status[f];
+		if (st == FRAME_STATUS::READING || st == FRAME_STATUS::BAD) return;
+		if (st == FRAME_STATUS::UNLOADED) {
+			st = FRAME_STATUS::READING;
+			ParLoader::OpenFrame(f, paths[f]);
+			return;
+		}
+	}
+	for (int f = currentFrame - 1; f >= (int)frameMemPos; f--) {
+		auto& st = status[f];
+		if (st == FRAME_STATUS::READING || st == FRAME_STATUS::BAD) return;
+		if (st == FRAME_STATUS::UNLOADED) {
+			st = FRAME_STATUS::READING;
+			ParLoader::OpenFrame(f, paths[f]);
+			return;
+		}
 	}
 }
 
@@ -30,7 +82,7 @@ void Particles::AnimData::UpdateMemRange() {
 	frameMemPos = (uint)std::max((int)currentFrame - (int)maxFramesInMem/2, 0);
 	auto mx = frameMemPos + maxFramesInMem;
 	mx = std::min(mx, frameCount);
-	frameMemPos = (uint)std::max((int)frameMemPos - (int)maxFramesInMem, 0);
+	frameMemPos = (uint)std::max((int)mx - (int)maxFramesInMem, 0);
 }
 
 
@@ -78,7 +130,7 @@ std::string Particles::particles_ParamNms[] = {};
 
 std::vector<Particles::conninfo> Particles::particles_Conn2;
 
-Particles::AnimData Particles::anim = Particles::AnimData();
+Particles::AnimData Particles::anim = {};
 
 double Particles::boundingBox[] = {};
 
@@ -233,7 +285,7 @@ void Particles::IncFrame(bool loop) {
 void Particles::SetFrame(uint frm) {
 	if (frm == anim.currentFrame) return;
 	else {
-		anim.currentFrame = frm;
+		anim.Seek(frm);
 		particles_Pos = &anim.poss[anim.currentFrame][0];
 		std::vector<Vec3> poss(particleSz);
 #pragma omp parallel for

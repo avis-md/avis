@@ -82,7 +82,6 @@ public:
 	struct AnimData {
 		enum class FRAME_STATUS {
 			UNLOADED,
-			PENDING,
 			READING,
 			LOADED,
 			BAD
@@ -91,7 +90,7 @@ public:
 		AnimData () {}
 
 		bool reading = false, dynamicBonds;
-		uint maxFramesInMem = 1000;
+		static uint maxFramesInMem;
 		uint frameMemPos;
 		uint frameCount = 0, currentFrame = 0;
 		std::vector<std::string> paths;
@@ -104,6 +103,7 @@ public:
 
 		void AllocFrames(uint frames);
 		void Clear();
+		void Seek(uint f);
 		void Update();
 		void UpdateMemRange();
 	private:

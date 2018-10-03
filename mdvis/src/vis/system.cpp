@@ -256,23 +256,25 @@ void VisSystem::DrawBar() {
 
 		auto ssz = Particles::anim.frameCount;
 		float al = float(Particles::anim.currentFrame) / (ssz - 1);
-		al = Engine::DrawSliderFill(225, Display::height - 13.0f, Display::width - 385.0f, 9, 0, 1, al, white(1, 0.2f), white(0));
-		size_t l0 = std::find(Particles::anim.status.begin(), Particles::anim.status.end(), Particles::AnimData::FRAME_STATUS::LOADED) - Particles::anim.status.begin();
-		size_t l1 = l0;
-		size_t lb = ~0;
-		for (size_t p = 0; p < ssz; p++) {
-			using fs = Particles::AnimData::FRAME_STATUS;
-			auto st = Particles::anim.status[p];
-			if (p > l0 && l1 == l0 && st != fs::LOADED) l1 = p;
-			if (st == fs::BAD) lb = p;
-		}
-		if (l1 == l0) l1 = ssz;
-		auto dp = 1.0f / ssz;
-		UI::Quad(225 + (Display::width - 385.0f) * dp * l0, Display::height - 13.0f, (Display::width - 385.0f) * dp * (l1-l0+1), 9, white(1, 0.5f));
-		if (lb != ~0) {
-			UI::Quad(225 + (Display::width - 385.0f) * dp * lb - 2, Display::height - 13.0f, 4, 9, white(1, 0.5f));
-		}
+		al = Engine::DrawSliderFill(225, Display::height - 13.0f, Display::width - 385.0f, 9, 0, 1, al, white(1, 0.3f), white(0));
 
+		using fs = Particles::AnimData::FRAME_STATUS;
+		fs sold = Particles::anim.status[0];
+		auto pw = float(Display::width - 385.0f) / ssz;
+		size_t p0 = 0;
+		for (size_t p = 0; p <= ssz; p++) {
+			auto st = (p == ssz)? fs::UNLOADED : Particles::anim.status[p];
+			if (st == fs::READING) st = fs::UNLOADED;
+			if (sold != st || (p == ssz)) {
+				if (sold == fs::LOADED)
+					UI::Quad(225 + pw * p0, Display::height - 13.0f, pw * (p-p0), 9, white(1, 0.5f));
+				else if (sold == fs::BAD)
+					UI::Quad(225 + pw * p0, Display::height - 13.0f, pw * (p - p0), 9, red(1, 0.5f));
+				sold = st;
+				p0 = p;
+			}
+		}
+		
 		UI::Quad(222 + (Display::width - 385.0f) * al, Display::height - 17.0f, 6, 16, white());
 		if ((Engine::Button(225, Display::height - 13.0f, Display::width - 385.0f, 9) & 0x0f) == MOUSE_DOWN)
 			ParGraphics::seek = true;

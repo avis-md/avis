@@ -1,14 +1,10 @@
 #include "CDV.h"
-#include <sys/stat.h>
-#include <iomanip>
+#include <algorithm>
+#include <fstream>
+#include <string>
+#include <vector>
 
-inline bool file_exists(const std::string& name) {
-#ifndef _WIN32
-#define _stat stat
-#endif
-	struct _stat buf;
-	return (_stat(name.c_str(), &buf) == 0);
-}
+#define SETERR(msg) memcpy(info->error, msg, sizeof(msg))
 
 bool CDV::Read(ParInfo* info) {
 	char buf[500]{};
@@ -26,7 +22,7 @@ bool CDV::Read(ParInfo* info) {
 
 	std::string s;
 	while (std::getline(strm, s)) {
-		pi = (uint32_t)std::stoi(string_split(s, ' ')[0]);
+		pi = (uint32_t)std::stoi(s.substr(0, s.find(' ')));
 		sz = std::max(sz, pi + 1);
 	}
 
@@ -57,79 +53,34 @@ bool CDV::Read(ParInfo* info) {
 			strm >> vl;
 			info->pos[id * 3 + 2] = vl / 10;
 	}
-
-	if (info->trajectory.maxFrames > 0) {
-		info->trajectory.parNum = sz;
-		ReadTrj(&info->trajectory);
-	}
 	return true;
 }
 
-#define ISNUM(c) (c >= '0' && c <= '9')
-
-bool CDV::ReadTrj(TrjInfo* info) {
-	std::string nmf = std::string(info->first);
-	auto ps = nmf.find_last_of('/');
-	auto nm = nmf.substr(ps + 1);
-	int n1, n2 = 0;
-	for (uint a = 0; a < nm.size() - 1; a++) {
-		if (nm[a + 1] == '.' && ISNUM(nm[a])) {
-			n1 = a;
-			break;
-		}
-	}
-	for (int a = n1 - 1; a >= 0; a--) {
-		if (!ISNUM(nm[a])) {
-			n2 = a;
-			break;
-		}
-	}
-	int st = std::stoi(nm.substr(n2 + 1, n1 - n2));
-	auto nm1 = nmf.substr(0, ps + 2 + n2);
-	auto nm2 = nm.substr(n1 + 1);
-	uint16_t frms = 0;
-	std::vector<string> nms;
-	do {
-		std::stringstream sstrm;
-		sstrm << std::setw(n1 - n2) << std::setfill('0') << st;
-		std::string nm = nm1 + sstrm.str() + nm2;
-		if (!file_exists(nm)) break;
-		nms.push_back(nm);
-		frms++;
-		st += info->frameSkip;
-	} while (frms != info->maxFrames);
-
-	std::vector<float*> poss;
-	poss.reserve(frms);
-	string s;
-	uint16_t id;
-	string dm;
-	float vl;
-	for (auto& nm : nms) {
-		info->progress = info->frames * 1.0f / frms;
-		std::ifstream strm(nm);
-		if (!strm.is_open()) break;
-		poss.push_back(new float[info->parNum * 3]);
-		auto ps = poss.back();
-
-		std::getline(strm, s);
-		std::getline(strm, s);
-		for (uint j = 0; j < info->parNum; j++) {
-			strm >> id >> dm;
-			strm >> vl;
-			ps[id * 3] = vl / 10;
-			strm >> vl;
-			ps[id * 3 + 1] = vl / 10;
-			strm >> vl;
-			ps[id * 3 + 2] = vl / 10;
-		}
-		info->frames++;
-	}
-	info->poss = new float*[info->frames];
-	memcpy(info->poss, &poss[0], info->frames * sizeof(float*));
-
-	if (!info->frames) {
+bool CDV::ReadFrame(FrmInfo* info) {
+	std::string s;
+	std::ifstream strm(info->path);
+	if (!strm.is_open()) {
+		SETERR("Cannot open file for reading!");
 		return false;
 	}
-	else return true;
+	std::getline(strm, s);
+	std::getline(strm, s);
+
+	uint16_t id;
+	std::string rd;
+	double vl;
+	for (uint32_t i = 0; i < info->parNum; i++) {
+		strm >> id >> rd;
+		if (id >= info->parNum) {
+			SETERR("Index exceeds particle count!");
+			return false;
+		}
+		strm >> vl;
+		info->pos[id * 3] = vl / 10;
+		strm >> vl;
+		info->pos[id * 3 + 1] = vl / 10;
+		strm >> vl;
+		info->pos[id * 3 + 2] = vl / 10;
+	}
+	return true;
 }
