@@ -6,6 +6,7 @@
 #include "web/anweb.h"
 #include "ui/icons.h"
 #include "utils/rawvector.h"
+#include <iomanip>
 
 #define EndsWith(s, s2) s.substr(sz - s2.size()) == s2
 
@@ -17,7 +18,7 @@ int ParLoader::maxframes = -1;
 bool ParLoader::useConn, ParLoader::useConnCache, ParLoader::hasConnCache, ParLoader::oldConnCache, ParLoader::ovwConnCache;
 std::string ParLoader::connCachePath;
 
-std::vector<ParImporter*> ParLoader::importers;
+std::vector<ParImporter> ParLoader::importers;
 std::vector<std::string> ParLoader::exts;
 
 bool ParLoader::showDialog = false, ParLoader::busy = false, ParLoader::fault = false, ParLoader::directLoad = false;
@@ -64,27 +65,25 @@ void ParLoader::Scan() {
 		std::ofstream ostrm(fd + f + "/import.log");
 		std::ifstream strm(fd + f + "/config.txt");
 		if (strm.is_open()) {
-			ParImporter* imp = new ParImporter();
+			ParImporter imp = ParImporter();
 			std::string s, libname;
 			while (std::getline(strm, s)) {
 				auto lc = s.find_first_of('=');
 				if (lc != std::string::npos) {
 					auto tp = s.substr(0, lc);
 					auto vl = s.substr(lc + 1);
-					if (tp == "name") imp->name = vl;
-					else if (tp == "signature") imp->sig = vl;
+					if (tp == "name") imp.name = vl;
+					else if (tp == "signature") imp.sig = vl;
 					else if (tp == "file") {
-						imp->lib = new DyLib(fd + f + OSFD + vl + LIBEXT);
-						if (!imp->lib) {
+						imp.lib = new DyLib(fd + f + OSFD + vl + LIBEXT);
+						if (!imp.lib) {
 							ostrm << "Importer lib file not found!";
-							goto err;
 						}
 					}
 				}
 				else {
-					if (!imp->lib) {
+					if (!imp.lib) {
 						ostrm << "Importer lib file must be defined before configurations!";
-						goto err;
 					}
 					s = _RMSP(s);
 					auto lc = s.find('{');
@@ -93,7 +92,7 @@ void ParLoader::Scan() {
 						if (tp == "configuration") {
 							std::getline(strm, s);
 							s = _RMSP(s);
-							std::pair<std::vector<std::string>, ParImporter::loadsig> pr;
+							ParImporter::Func pr;
 							int vlc = 0;
 							while (s != "}") {
 								auto lc = s.find_first_of('=');
@@ -101,29 +100,59 @@ void ParLoader::Scan() {
 								auto tp = s.substr(0, lc);
 								auto vl = s.substr(lc + 1);
 								if (tp == "func") {
-									if (!(pr.second = (ParImporter::loadsig)imp->lib->GetSym(vl))) {
+									if (!(pr.func = (ParImporter::loadsig)imp.lib->GetSym(vl))) {
 										ostrm << "Importer function \"" << vl << "\" not found!";
-										goto err;
 									}
+									pr.type = ParImporter::Func::FUNC_TYPE::CONFIG;
 									vlc++;
 								}
 								else if (tp == "exts") {
 									auto ob = vl.find('[');
 									auto cb = vl.find(']');
-									pr.first = string_split(vl.substr(ob + 1, cb - ob - 1), ',');
+									pr.exts = string_split(vl.substr(ob + 1, cb - ob - 1), ',');
 									vlc++;
 								}
 								std::getline(strm, s);
 								s = _RMSP(s);
 							}
 							if (vlc == 2) {
-								imp->funcs.push_back(pr);
+								imp.funcs.push_back(pr);
+							}
+						}
+						else if (tp == "frame") {
+							std::getline(strm, s);
+							s = _RMSP(s);
+							ParImporter::Func pr;
+							int vlc = 0;
+							while (s != "}") {
+								auto lc = s.find_first_of('=');
+								if (lc == std::string::npos) continue;
+								auto tp = s.substr(0, lc);
+								auto vl = s.substr(lc + 1);
+								if (tp == "func") {
+									if (!(pr.frmFunc = (ParImporter::loadfrmsig)imp.lib->GetSym(vl))) {
+										ostrm << "Importer function \"" << vl << "\" not found!";
+									}
+									ParImporter::Func::FUNC_TYPE::TRAJ;
+									vlc++;
+								}
+								else if (tp == "exts") {
+									auto ob = vl.find('[');
+									auto cb = vl.find(']');
+									pr.exts = string_split(vl.substr(ob + 1, cb - ob - 1), ',');
+									vlc++;
+								}
+								std::getline(strm, s);
+								s = _RMSP(s);
+							}
+							if (vlc == 2) {
+								imp.funcs.push_back(pr);
 							}
 						}
 						else if (tp == "trajectory") {
 							std::getline(strm, s);
 							s = _RMSP(s);
-							std::pair<std::vector<std::string>, ParImporter::loadtrjsig> pr;
+							ParImporter::Func pr;
 							int vlc = 0;
 							while (s != "}") {
 								auto lc = s.find_first_of('=');
@@ -131,41 +160,78 @@ void ParLoader::Scan() {
 								auto tp = s.substr(0, lc);
 								auto vl = s.substr(lc + 1);
 								if (tp == "func") {
-									if (!(pr.second = (ParImporter::loadtrjsig)imp->lib->GetSym(vl))) {
+									if (!(pr.trjFunc = (ParImporter::loadtrjsig)imp.lib->GetSym(vl))) {
 										ostrm << "Importer function \"" << vl << "\" not found!";
-										goto err;
 									}
+									ParImporter::Func::FUNC_TYPE::TRAJ;
 									vlc++;
 								}
 								else if (tp == "exts") {
 									auto ob = vl.find('[');
 									auto cb = vl.find(']');
-									pr.first = string_split(vl.substr(ob + 1, cb - ob - 1), ',');
+									pr.exts = string_split(vl.substr(ob + 1, cb - ob - 1), ',');
 									vlc++;
 								}
 								std::getline(strm, s);
 								s = _RMSP(s);
 							}
 							if (vlc == 2) {
-								imp->trjFuncs.push_back(pr);
+								imp.funcs.push_back(pr);
 							}
 						}
 					}
 				}
 			}
-			if (!imp->name.size() || !imp->sig.size() || !imp->lib || !imp->funcs.size() || !imp->trjFuncs.size()) {
+			if (!imp.name.size() || !imp.sig.size() || !imp.lib || !imp.funcs.size()) {
 				ostrm << "Config contents incomplete!";
-				goto err;
 			}
 			importers.push_back(imp);
-			for (auto& a : imp->funcs) {
-				exts.insert(exts.end(), a.first.begin(), a.first.end());
+			for (auto& a : imp.funcs) {
+				exts.insert(exts.end(), a.exts.begin(), a.exts.end());
 			}
 			ostrm << "ok";
 			continue;
-		err:
-			delete(imp);
 		}
+	}
+}
+
+#define ISNUM(c) (c >= '0' && c <= '9')
+void ParLoader::ScanFrames(const std::string& first) {
+	if (Particles::anim.frameCount <= 1) return;
+	auto ps = first.find_last_of('/');
+	auto nm = first.substr(ps + 1);
+	int n1, n2 = 0;
+	for (uint a = 0; a < nm.size() - 1; a++) {
+		if (nm[a + 1] == '.' && ISNUM(nm[a])) {
+			n1 = a;
+			break;
+		}
+	}
+	if (!n1) return;
+	for (int a = n1 - 1; a >= 0; a--) {
+		if (!ISNUM(nm[a])) {
+			n2 = a;
+			break;
+		}
+	}
+	int st = std::stoi(nm.substr(n2 + 1, n1 - n2));
+	auto nm1 = first.substr(0, ps + 2 + n2);
+	auto nm2 = nm.substr(n1 + 1);
+	uint frms = 0;
+	std::vector<std::string> nms;
+	do {
+		std::stringstream sstrm;
+		sstrm << std::setw(n1 - n2) << std::setfill('0') << st;
+		std::string nm = nm1 + sstrm.str() + nm2;
+		if (!IO::HasFile(nm)) break;
+		nms.push_back(nm);
+		frms++;
+		st += frameskip;
+	} while (frms != maxframes);
+	if (frms <= 1) return;
+	Particles::anim.AllocFrames(frms);
+	for (uint f = 0; f < frms; f++) {
+		Particles::anim.status[f] = Particles::AnimData::FRAME_STATUS::UNLOADED;
 	}
 }
 
@@ -190,7 +256,7 @@ void ParLoader::DoOpen() {
 
 	try {
 		if (impId > -1) {
-			if (!importers[impId]->funcs[funcId].second(&info)) {
+			if (!importers[impId].funcs[funcId].func(&info)) {
 				if (!info.error[0]) {
 					Debug::Warning("ParLoader", "Unspecified importer error!");
 					VisSystem::SetMsg("Unspecified import error", 2);
@@ -357,8 +423,6 @@ void ParLoader::DoOpen() {
 		}
 	}
 
-	Particles::particleSz = info.num;
-
 	auto& anm = Particles::anim;
 	anm.Clear();
 	if (info.trajectory.frames > 0) {
@@ -375,6 +439,7 @@ void ParLoader::DoOpen() {
 				memcpy(&anm.vels[i][0], trj.vels[i], info.num * sizeof(glm::dvec3));
 				delete[](trj.vels[i]);
 			}
+			anm.status[i] = Particles::AnimData::FRAME_STATUS::LOADED;
 		}
 		delete[](trj.poss);
 		if (trj.vels) delete[](trj.vels);
@@ -390,6 +455,8 @@ void ParLoader::DoOpen() {
 	parDirty = true;
 	busy = false;
 	fault = false;
+
+	Particles::particleSz = info.num;
 }
 
 void ParLoader::DoOpenAnim() {
@@ -403,7 +470,7 @@ void ParLoader::DoOpenAnim() {
 	info.parNum = Particles::particleSz;
 	info.maxFrames = maxframes;
 
-	if (impId > -1) importers[impId]->trjFuncs[funcId].second(&info);
+	if (impId > -1) importers[impId].funcs[funcId].trjFunc(&info);
 
 	if (!info.frames) {
 		busy = false;
@@ -420,6 +487,7 @@ void ParLoader::DoOpenAnim() {
 			memcpy(&anm.vels[i][0], info.poss[i], info.parNum * sizeof(glm::dvec3));
 			delete[](info.poss[i]);
 		}
+		anm.status[i] = Particles::AnimData::FRAME_STATUS::LOADED;
 	}
 	delete[](info.poss);
 	if (info.vels) delete[](info.vels);
@@ -428,6 +496,28 @@ void ParLoader::DoOpenAnim() {
 	anm.reading = false;
 	busy = false;
 	fault = false;
+}
+
+void ParLoader::OpenFrame(uint f, const std::string& path) {
+	std::thread(OpenFrameNow, f, path).detach();
+}
+
+void ParLoader::OpenFrameNow(uint f, const std::string& path) {
+	busy = true;
+	auto& anm = Particles::anim;
+	anm.reading = true;
+	anm.status[f] = Particles::AnimData::FRAME_STATUS::READING;
+
+	auto& pos = anm.poss[f];
+	auto& vel = anm.vels[f];
+	pos.resize(Particles::particleSz);
+	vel.resize(Particles::particleSz);
+	FrmInfo info(path.c_str(), Particles::particleSz, &pos[0][0], &vel[0][0]);
+	fault = !importers[anm.impId].funcs[anm.funcId].frmFunc(&info);
+	anm.status[f] = fault? Particles::AnimData::FRAME_STATUS::LOADED : Particles::AnimData::FRAME_STATUS::BAD;
+
+	anm.reading = false;
+	busy = false;
 }
 
 void ParLoader::DrawOpenDialog() {
@@ -444,13 +534,13 @@ void ParLoader::DrawOpenDialog() {
 		UI::Label(woff + 402, hoff, 12, "Choose Importer", white());
 		uint i = 1;
 		for (auto& p : importers) {
-			if (Engine::Button(woff + 401, hoff + 17 * i, 298, 16, (impId == i - 1) ? Vec4(0.5f, 0.4f, 0.2f, 1) : white(0.4f), p->name, 12, white()) == MOUSE_RELEASE) {
+			if (Engine::Button(woff + 401, hoff + 17 * i, 298, 16, (impId == i - 1) ? Vec4(0.5f, 0.4f, 0.2f, 1) : white(0.4f), p.name, 12, white()) == MOUSE_RELEASE) {
 				impId = i - 1;
 				funcId = 0;
 				int id2 = 0;
 				auto sz = droppedFiles[0].size();
-				for (auto& pr : p->funcs) {
-					for (auto& s : pr.first) {
+				for (auto& pr : p.funcs) {
+					for (auto& s : pr.exts) {
 						if (EndsWith(droppedFiles[0], s)) {
 							funcId = id2;
 							goto found;
@@ -479,7 +569,7 @@ void ParLoader::DrawOpenDialog() {
 
 	UI::Label(woff + 2, hoff + 17 * 2, 12, "Importer", white(), 326);
 	if (impId > -1)
-		UI::Label(woff + 60, hoff + 34, 12, importers[impId]->name + " (" + importers[impId]->sig + ")", white(0.5f), 326);
+		UI::Label(woff + 60, hoff + 34, 12, importers[impId].name + " (" + importers[impId].sig + ")", white(0.5f), 326);
 	if (Engine::Button(woff + 339, hoff + 34, 60, 16, white(1, 0.4f), _showImp ? "<<" : ">>", 12, white(), true) == MOUSE_RELEASE) {
 		_showImp = !_showImp;
 	}
@@ -488,16 +578,18 @@ void ParLoader::DrawOpenDialog() {
 		auto& ii = importers[impId];
 		uint i = 0;
 		if (loadAsTrj) {
-			for (auto& f : ii->trjFuncs) {
-				if (Engine::Button(woff + 60 + 50 * i, hoff + 17 * 3, 45, 16, (funcId == i) ? Vec4(0.5f, 0.4f, 0.2f, 1) : white(0.4f), f.first[0], 12, white(), true) == MOUSE_RELEASE) {
+			for (auto& f : ii.funcs) {
+				if (f.type == ParImporter::Func::FUNC_TYPE::CONFIG) continue;
+				if (Engine::Button(woff + 60 + 50 * i, hoff + 17 * 3, 45, 16, (funcId == i) ? Vec4(0.5f, 0.4f, 0.2f, 1) : white(0.4f), f.exts[0], 12, white(), true) == MOUSE_RELEASE) {
 					funcId = i;
 				}
 				i++;
 			}
 		}
 		else {
-			for (auto& f : ii->funcs) {
-				if (Engine::Button(woff + 60 + 50 * i, hoff + 17 * 3, 45, 16, (funcId == i)? Vec4(0.5f, 0.4f, 0.2f, 1) : white(0.4f), f.first[0], 12, white(), true) == MOUSE_RELEASE) {
+			for (auto& f : ii.funcs) {
+				if (f.type != ParImporter::Func::FUNC_TYPE::CONFIG) continue;
+				if (Engine::Button(woff + 60 + 50 * i, hoff + 17 * 3, 45, 16, (funcId == i)? Vec4(0.5f, 0.4f, 0.2f, 1) : white(0.4f), f.exts[0], 12, white(), true) == MOUSE_RELEASE) {
 					funcId = i;
 				}
 				i++;
@@ -609,61 +701,17 @@ void ParLoader::FindImpId(bool force) {
 	int id = 0;
 	auto sz = droppedFiles[0].size();
 	if (force) {
-		if (!loadAsTrj) {
-			for (auto imp : importers) {
-				int id2 = 0;
-				for (auto& pr : imp->funcs) {
-					for (auto& s : pr.first) {
-						if (EndsWith(droppedFiles[0], s)) {
-							impId = id;
-							funcId = id2;
-							return;
-						}
-					}
-					id2++;
-				}
-				id++;
-			}
-		}
-		else {
-			for (auto imp : importers) {
-				int id2 = 0;
-				for (auto& pr : imp->trjFuncs) {
-					for (auto& s : pr.first) {
-						if (EndsWith(droppedFiles[0], s)) {
-							impId = id;
-							funcId = id2;
-							return;
-						}
-					}
-					id2++;
-				}
-				id++;
-			}
-		}
-	}
-	else {
-		for (auto imp : importers) {
+		for (auto& imp : importers) {
 			int id2 = 0;
-			for (auto& pr : imp->funcs) {
-				for (auto& s : pr.first) {
-					if (EndsWith(droppedFiles[0], s)) {
-						impId = id;
-						funcId = id2;
-						loadAsTrj = false;
-						return;
-					}
-				}
-				id2++;
-			}
-			id2 = 0;
-			for (auto& pr : imp->trjFuncs) {
-				for (auto& s : pr.first) {
-					if (EndsWith(droppedFiles[0], s)) {
-						impId = id;
-						funcId = id2;
-						loadAsTrj = true;
-						return;
+			for (auto& pr : imp.funcs) {
+				if (force || ((pr.type != ParImporter::Func::FUNC_TYPE::CONFIG) == loadAsTrj)) {
+					for (auto& s : pr.exts) {
+						if (EndsWith(droppedFiles[0], s)) {
+							impId = id;
+							funcId = id2;
+							if (force) loadAsTrj = (pr.type != ParImporter::Func::FUNC_TYPE::CONFIG);
+							return;
+						}
 					}
 				}
 				id2++;

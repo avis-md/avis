@@ -19,6 +19,20 @@ void Particles::AnimData::Clear() {
 	conns2.clear();
 }
 
+void Particles::AnimData::Update() {
+	for (uint a = 0; a < maxFramesInMem; a++) {
+		auto f = frameMemPos + a;
+		if (f == frameCount) return;
+	}
+}
+
+void Particles::AnimData::UpdateMemRange() {
+	frameMemPos = (uint)std::max((int)currentFrame - (int)maxFramesInMem/2, 0);
+	auto mx = frameMemPos + maxFramesInMem;
+	mx = std::min(mx, frameCount);
+	frameMemPos = (uint)std::max((int)frameMemPos - (int)maxFramesInMem, 0);
+}
+
 
 Particles::paramdata::paramdata() {
 	data = new float[particleSz]{};
@@ -64,7 +78,7 @@ std::string Particles::particles_ParamNms[] = {};
 
 std::vector<Particles::conninfo> Particles::particles_Conn2;
 
-Particles::AnimData Particles::anim;
+Particles::AnimData Particles::anim = Particles::AnimData();
 
 double Particles::boundingBox[] = {};
 

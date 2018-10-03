@@ -41,6 +41,12 @@ struct FrmInfo {
 	float progress; //OPT
 	const double* pos;
 	const double* vel;
+
+	FrmInfo(const char* const path, 
+			const uint32_t parNum, 
+			const double* pos,
+			const double* vel)
+	: path(path), parNum(parNum), pos(pos), vel(vel) {}
 };
 
 /*

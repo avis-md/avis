@@ -88,17 +88,24 @@ public:
 			BAD
 		};
 
-		AnimData () : reading(false), frameCount(0), currentFrame(0) {}
-		void AllocFrames(uint frames);
-		void Clear();
+		AnimData () {}
 
-		bool reading, dynamicBonds;
-		uint frameCount, currentFrame;
+		bool reading = false, dynamicBonds;
+		uint maxFramesInMem = 1000;
+		uint frameMemPos;
+		uint frameCount = 0, currentFrame = 0;
+		std::vector<std::string> paths;
 		std::vector<FRAME_STATUS> status;
 		std::vector<std::vector<glm::dvec3>> poss, vels;
 		std::vector<Particles::conndata> conns;
 		std::vector<std::vector<Particles::conndata>> conns2;
 		
+		int impId, funcId;
+
+		void AllocFrames(uint frames);
+		void Clear();
+		void Update();
+		void UpdateMemRange();
 	private:
 		AnimData(const AnimData&) = delete;
 	} static anim;

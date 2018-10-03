@@ -7,11 +7,25 @@
 
 struct ParImporter {
 	typedef bool(*loadsig)(ParInfo*);
+	typedef bool(*loadfrmsig)(FrmInfo*);
 	typedef bool(*loadtrjsig)(TrjInfo*);
+	struct Func {
+		std::string name;
+		enum class FUNC_TYPE {
+			CONFIG,
+			FRAME,
+			TRAJ
+		} type;
+		std::vector<std::string> exts;
+		loadsig func;
+		loadfrmsig frmFunc;
+		loadtrjsig trjFunc;
+	};
+
 	std::string name, sig;
 	DyLib* lib;
-	std::vector<std::pair<std::vector<std::string>, loadsig>> funcs;
-	std::vector<std::pair<std::vector<std::string>, loadtrjsig>> trjFuncs;
+
+	std::vector<Func> funcs;
 };
 
 class ParLoader {
@@ -26,7 +40,7 @@ public:
 	static bool useConn, useConnCache, hasConnCache, oldConnCache, ovwConnCache;
 	static std::string connCachePath;
 
-	static std::vector<ParImporter*> importers;
+	static std::vector<ParImporter> importers;
 	static std::vector<std::string> exts;
 	
 	static bool showDialog, busy, fault, directLoad;
@@ -39,8 +53,13 @@ public:
 	static bool _showImp;
 	static float _impPos, _impScr;
 
+	static void ScanFrames(const std::string& first);
+
 	static void DoOpen();
 	static void DoOpenAnim();
+
+	static void OpenFrame(uint f, const std::string& path);
+	static void OpenFrameNow(uint f, const std::string& path);
 
 	static void DrawOpenDialog();
 

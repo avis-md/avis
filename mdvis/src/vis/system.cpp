@@ -254,10 +254,26 @@ void VisSystem::DrawBar() {
 		fps = TryParse(UI::EditText(170, Display::height - 17.0f, 50, 16, 12, white(1, 0.4f), std::to_string(fps), true, white(), nullptr, std::to_string(fps) + " fps"), 0);
 		fps = Clamp(fps, 0, 1000);
 
-		float al = float(Particles::anim.currentFrame) / (Particles::anim.frameCount - 1);
-		al = Engine::DrawSliderFill(225, Display::height - 13.0f, Display::width - 385.0f, 9, 0, 1, al, white(0.5f), VisSystem::accentColor);
-		UI::Quad(222 + (Display::width - 385.0f) * al, Display::height - 17.0f, 6, 16, white());
+		auto ssz = Particles::anim.frameCount;
+		float al = float(Particles::anim.currentFrame) / (ssz - 1);
+		al = Engine::DrawSliderFill(225, Display::height - 13.0f, Display::width - 385.0f, 9, 0, 1, al, white(1, 0.2f), white(0));
+		size_t l0 = std::find(Particles::anim.status.begin(), Particles::anim.status.end(), Particles::AnimData::FRAME_STATUS::LOADED) - Particles::anim.status.begin();
+		size_t l1 = l0;
+		size_t lb = ~0;
+		for (size_t p = 0; p < ssz; p++) {
+			using fs = Particles::AnimData::FRAME_STATUS;
+			auto st = Particles::anim.status[p];
+			if (p > l0 && l1 == l0 && st != fs::LOADED) l1 = p;
+			if (st == fs::BAD) lb = p;
+		}
+		if (l1 == l0) l1 = ssz;
+		auto dp = 1.0f / ssz;
+		UI::Quad(225 + (Display::width - 385.0f) * dp * l0, Display::height - 13.0f, (Display::width - 385.0f) * dp * (l1-l0+1), 9, white(1, 0.5f));
+		if (lb != ~0) {
+			UI::Quad(225 + (Display::width - 385.0f) * dp * lb - 2, Display::height - 13.0f, 4, 9, white(1, 0.5f));
+		}
 
+		UI::Quad(222 + (Display::width - 385.0f) * al, Display::height - 17.0f, 6, 16, white());
 		if ((Engine::Button(225, Display::height - 13.0f, Display::width - 385.0f, 9) & 0x0f) == MOUSE_DOWN)
 			ParGraphics::seek = true;
 		else ParGraphics::seek = ParGraphics::seek && Input::mouse0;
