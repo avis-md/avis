@@ -28,7 +28,9 @@ bool EQ(char* c1, char* c2) {
     break;
 
 bool Lammps::Read(ParInfo* info) {
-	std::ifstream strm(info->path);
+	std::ifstream strm(info->path, std::ios::ate);
+    auto maxspos = strm.tellg();
+    strm.seekg(std::ios::beg);
 	if (!strm.is_open())
 		SETERR("Cannot open file!");
 
@@ -112,8 +114,7 @@ bool Lammps::Read(ParInfo* info) {
             } while (buf[0] == 0);
         }
         
-		info->trajectory.progress = 0.01f;
-
+        trj->progress = ((float)strm.tellg()) / maxspos;
         _ps = new double[info->num * 3];
         
         for (uint32_t a = 0; a < info->num; a++) {

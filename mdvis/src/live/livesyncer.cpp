@@ -130,12 +130,12 @@ void LiveSyncer::DoRun() {
 	while (status > IDLE) {
 		if (status == LOOP) {
 			if (anm.currentFrame == 1) {
-				info.pos = (float*)anm.poss[2];
-				info.vel = (float*)anm.vels[2];
+				//info.pos = (float*)anm.poss[2];
+				//info.vel = (float*)anm.vels[2];
 			}
 			else {
-				info.pos = (float*)anm.poss[1];
-				info.vel = (float*)anm.vels[1];
+				//info.pos = (float*)anm.poss[1];
+				//info.vel = (float*)anm.vels[1];
 			}
 			info.fill = false;
 			if (!activeRunner->loopFunc(&info))

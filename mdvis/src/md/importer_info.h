@@ -29,18 +29,31 @@ struct TrjInfo {
 	uint16_t maxFrames; //IN
 	uint16_t frameSkip; //IN
 	float progress;
-	byte padding[3];
 	uint16_t frames;
 	double** poss;
 	double** vels;
 	char error[100];
 };
 
+struct FrmInfo {
+	const char* const path; //IN
+	const uint32_t parNum; //IN
+	float progress; //OPT
+	const double* pos;
+	const double* vel;
+};
+
+/*
+info struct for the Load Configuration function.
+Notes:
+  trajectory is for data in the SAME file containing the configuration data.
+  DO NOT open other files to load their trajectories. It will be done by the system.
+  The waiting screen will not clear until this function returns.
+*/
 struct ParInfo {
 	const char* path; //IN
 	byte nameSz; //IN
 	float progress; //OPT
-	byte padding[6];
 	uint32_t num;
 	char* resname;
 	char* name;

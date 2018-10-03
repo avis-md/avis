@@ -28,20 +28,6 @@ struct ResidueList { //residues with the same name
 	bool selected;
 };
 
-struct AnimData {
-	AnimData () : reading(false), frameCount(0), currentFrame(0) {}
-
-	bool reading, dynamicBonds;
-	uint frameCount, currentFrame;
-	glm::dvec3** poss, **vels;
-	uint* connCounts;
-	Int2** conns;
-	std::vector<std::pair<uint*, Int2**>> conns2;
-	
-private:
-	AnimData(const AnimData&);
-};
-
 class Particles {
 public:
 	struct conninfo {
@@ -56,7 +42,10 @@ public:
 		Vec4 col = white();
 		bool visible = true;
 	};
-
+	struct conndata {
+		uint count;
+		std::vector<Int2> ids;
+	};
 	struct paramdata {
 		paramdata();
 		~paramdata();
@@ -90,7 +79,29 @@ public:
 
 	static void UpdateConBufs2();
 
-	static AnimData anim;
+	struct AnimData {
+		enum class FRAME_STATUS {
+			UNLOADED,
+			PENDING,
+			READING,
+			LOADED,
+			BAD
+		};
+
+		AnimData () : reading(false), frameCount(0), currentFrame(0) {}
+		void AllocFrames(uint frames);
+		void Clear();
+
+		bool reading, dynamicBonds;
+		uint frameCount, currentFrame;
+		std::vector<FRAME_STATUS> status;
+		std::vector<std::vector<glm::dvec3>> poss, vels;
+		std::vector<Particles::conndata> conns;
+		std::vector<std::vector<Particles::conndata>> conns2;
+		
+	private:
+		AnimData(const AnimData&) = delete;
+	} static anim;
 	static void IncFrame(bool loop);
 	static void SetFrame(uint frm);
 

@@ -360,38 +360,28 @@ void ParLoader::DoOpen() {
 	Particles::particleSz = info.num;
 
 	auto& anm = Particles::anim;
+	anm.Clear();
 	if (info.trajectory.frames > 0) {
 		auto& trj = info.trajectory;
 		anm.reading = true;
 
-		anm.poss = new glm::dvec3*[trj.frames];
-		anm.poss[0] = new glm::dvec3[trj.frames * info.num];
-		anm.vels = new glm::dvec3*[trj.frames];
-		anm.vels[0] = new glm::dvec3[trj.frames * info.num];
+		anm.AllocFrames(trj.frames);
 		for (uint16_t i = 0; i < trj.frames; i++) {
-			anm.poss[i] = anm.poss[0] + info.num * i;
-			memcpy(anm.poss[i], trj.poss[i], info.num * sizeof(glm::dvec3));
+			anm.poss[i].resize(info.num);
+			memcpy(&anm.poss[i][0], trj.poss[i], info.num * sizeof(glm::dvec3));
 			delete[](trj.poss[i]);
-			anm.vels[i] = anm.vels[0] + info.num * i;
+			anm.vels[i].resize(info.num);
 			if (trj.vels) {
-				memcpy(anm.vels[i], trj.vels[i], info.num * sizeof(glm::dvec3));
+				memcpy(&anm.vels[i][0], trj.vels[i], info.num * sizeof(glm::dvec3));
 				delete[](trj.vels[i]);
 			}
 		}
 		delete[](trj.poss);
 		if (trj.vels) delete[](trj.vels);
-
-		anm.frameCount = trj.frames;
 		anm.reading = false;
 	}
 	else {
-		anm.reading = true;
-		anm.poss = new glm::dvec3*[1];
-		anm.poss[0] = (glm::dvec3*)info.pos;
-		anm.vels = new glm::dvec3*[1];
-		anm.vels[0] = (glm::dvec3*)info.vel;
 		anm.frameCount = 1;
-		anm.reading = false;
 	}
 
 	VisSystem::SetMsg("Loaded file(s) in " + std::to_string((milliseconds() - t)*0.001f).substr(0, 5) + "s");
@@ -406,6 +396,7 @@ void ParLoader::DoOpenAnim() {
 	busy = true;
 	auto& anm = Particles::anim;
 	anm.reading = true;
+	anm.Clear();
 
 	TrjInfo info = {};
 	info.first = droppedFiles[0].c_str();
@@ -419,24 +410,19 @@ void ParLoader::DoOpenAnim() {
 		fault = true;
 	}
 
-	anm.poss = new glm::dvec3*[info.frames];
-	anm.poss[0] = new glm::dvec3[info.frames * info.parNum];
-	anm.vels = new glm::dvec3*[info.frames];
-	anm.vels[0] = new glm::dvec3[info.frames * info.parNum];
+	anm.AllocFrames(info.frames);
 	for (uint16_t i = 0; i < info.frames; i++) {
-		anm.poss[i] = anm.poss[0] + info.parNum * i;
-		memcpy(anm.poss[i], info.poss[i], info.parNum * sizeof(glm::dvec3));
+		anm.poss[i].resize(info.parNum);
+		memcpy(&anm.poss[i][0], info.poss[i], info.parNum * sizeof(glm::dvec3));
 		delete[](info.poss[i]);
-		anm.poss[i] = anm.poss[0] + info.parNum * i;
+		anm.vels[i].resize(info.parNum);
 		if (info.vels) {
-			memcpy(anm.poss[i], info.poss[i], info.parNum * sizeof(glm::dvec3));
+			memcpy(&anm.vels[i][0], info.poss[i], info.parNum * sizeof(glm::dvec3));
 			delete[](info.poss[i]);
 		}
 	}
 	delete[](info.poss);
 	if (info.vels) delete[](info.vels);
-
-	anm.frameCount = info.frames;
 
 	Particles::trjFile = droppedFiles[0];
 	anm.reading = false;

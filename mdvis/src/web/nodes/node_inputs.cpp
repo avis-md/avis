@@ -88,8 +88,8 @@ void Node_Inputs::Execute() {
 #ifndef IS_ANSERVER
 	conV[0].value = &Particles::anim.poss[frame];
 	conV[1].value = &Particles::anim.vels[frame];
-	conV[2].value = Particles::anim.poss;
-	conV[3].value = Particles::anim.vels;
+
+	
 	conV[4].value = &Particles::particles_Typ;
 #endif
 }

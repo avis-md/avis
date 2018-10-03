@@ -3,6 +3,23 @@
 #include "web/anweb.h"
 #include "md/Protein.h"
 
+void Particles::AnimData::AllocFrames(uint frames) {
+	frameCount = frames;
+	status.resize(frames, FRAME_STATUS::UNLOADED);
+	poss.resize(frames);
+	vels.resize(frames);
+}
+
+void Particles::AnimData::Clear() {
+	frameCount = currentFrame = 0;
+	status.clear();
+	poss.clear();
+	vels.clear();
+	conns.clear();
+	conns2.clear();
+}
+
+
 Particles::paramdata::paramdata() {
 	data = new float[particleSz]{};
 	glGenBuffers(1, &buf);
@@ -47,7 +64,7 @@ std::string Particles::particles_ParamNms[] = {};
 
 std::vector<Particles::conninfo> Particles::particles_Conn2;
 
-AnimData Particles::anim;
+Particles::AnimData Particles::anim;
 
 double Particles::boundingBox[] = {};
 
@@ -112,24 +129,7 @@ void Particles::Clear() {
 		*/
 		residueListSz = particleSz = Particles::particles_Conn.cnt = 0;
 
-		if (anim.poss) {
-			delete[](anim.poss[0]);
-			delete[](anim.vels[0]);
-			delete[](anim.poss);
-			delete[](anim.vels);
-			if (anim.conns) {
-				delete[](anim.conns[0]);
-				delete[](anim.conns);
-			}
-		}
-		/*
-		for (auto& c : anim.conns2) {
-			delete[](c.first);
-			delete[](c.second[0]);
-			delete[](c.second);
-		}
-		*/
-		anim.frameCount = anim.currentFrame = 0;
+		anim.Clear();
 
 		Protein::Clear();
 	}
@@ -157,12 +157,8 @@ void Particles::GenTexBufs() {
 
 void Particles::UpdateBufs() {
 	for (auto& a : anim.conns2) {
-		if (a.first) {
-			delete[](a.first);
-			delete[](a.second);
-		}
-		a.first = new uint[anim.frameCount]{};
-		a.second = new Int2*[anim.frameCount]{};
+		a.clear();
+		a.resize(anim.frameCount);
 	}
 
 	std::vector<Vec3> poss(particleSz);
@@ -224,7 +220,7 @@ void Particles::SetFrame(uint frm) {
 	if (frm == anim.currentFrame) return;
 	else {
 		anim.currentFrame = frm;
-		particles_Pos = anim.poss[anim.currentFrame];
+		particles_Pos = &anim.poss[anim.currentFrame][0];
 		std::vector<Vec3> poss(particleSz);
 #pragma omp parallel for
 		for (int a = 0; a < (int)particleSz; a++) {
@@ -233,17 +229,15 @@ void Particles::SetFrame(uint frm) {
 		glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(Vec3), &poss[0]);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		bool has = false;
 		for (int i = anim.conns2.size() - 1; i >= 0; i--) {
 			auto& c2 = anim.conns2[i];
-			if (!c2.first) continue;
+			if (!c2.size()) continue;
 			auto& c = particles_Conn2[i];
-			c.cnt = c2.first[frm];
-			c.ids = c2.second[frm];
-			has = true;
+			c.cnt = c2[frm].count;
+			c.ids = &c2[frm].ids[0];
 		}
-		if (has) UpdateConBufs2();
 		AnWeb::OnAnimFrame();
+		if (!!anim.conns2.size()) UpdateConBufs2();
 		Scene::active->dirty = true;
 	}
 }

@@ -34,11 +34,11 @@ bool CDV::Read(ParInfo* info) {
 	info->name = new char[sz * info->nameSz]{};
 	info->type = new uint16_t[sz];
 	info->resId = new uint16_t[sz];
-	info->pos = new float[sz * 3];
-	info->vel = new float[sz * 3];
+	info->pos = new double[sz * 3];
+	info->vel = new double[sz * 3];
 
 	uint16_t id, rd;
-	float vl;
+	double vl;
 
 	strm.clear();
 	strm.seekg(0, std::ios::beg);
