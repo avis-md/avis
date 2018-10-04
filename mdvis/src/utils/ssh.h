@@ -31,7 +31,7 @@ public:
 	void Flush();
 	bool WaitFor(std::string s, uint rate, uint timeout = -1);
 	void EnableSFTP(), DisableSFTP();
-	void MkDir(const std::string& path);
+	bool MkDir(const std::string& path);
 	std::vector<std::string> ListFiles(const std::string& path);
 	bool HasFile(const std::string& path);
 	void GetFile(const std::string& from, const std::string& to), SendFile(const std::string& from, const std::string& to);

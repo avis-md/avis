@@ -1,6 +1,7 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "ssh.h"
 #include "utils/net.h"
+#include <netdb.h>
 
 void SSH::Init() {
 	int res = libssh2_init(0);
@@ -16,13 +17,36 @@ SSH SSH::Connect(const SSHConfig& conf) {
 	ssh.ok = false;
 	Debug::Message("SSH", "Starting session...");
 	
+	struct sockaddr* sin;
+	socklen_t ssz;
+	
+	if (conf.ip[0] > '0') {
+		struct addrinfo hints = {}, *result;
+		hints.ai_family = AF_INET;
+		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_flags = AI_PASSIVE;
+		hints.ai_protocol = 0;
+		hints.ai_canonname = nullptr;
+		hints.ai_addr = nullptr;
+		hints.ai_next = nullptr;
+		if (!!getaddrinfo(&conf.ip[0], &std::to_string(conf.port)[0], &hints, &result)) {
+			Debug::Warning("SSH", "resolve address fail!");
+			return ssh;
+		}
+		sin = result->ai_addr;
+		ssz = result->ai_addrlen;
+		//conf.ip = std::string(result->ai_addr, result->ai_addrlen);
+	}
+	else {
+		static sockaddr_in sn;
+		sn.sin_family = AF_INET;
+		sn.sin_port = htons(conf.port);
+		sn.sin_addr.s_addr = inet_addr(&conf.ip[0]);
+		sin = (struct sockaddr*)&sn;
+	}
 	ssh.sock = socket(AF_INET, SOCK_STREAM, 0);
-	sockaddr_in sin;
-	sin.sin_family = AF_INET;
-	sin.sin_port = htons(conf.port);
-	sin.sin_addr.s_addr = inet_addr(&conf.ip[0]);
-	if (!!connect(ssh.sock, (struct sockaddr*)&sin, sizeof(sin))) {
-		Debug::Warning("SSH", "connect to port fail!");
+	if (!!connect(ssh.sock, sin, ssz)) {
+		Debug::Warning("SSH", "connect to host fail!");
 		return ssh;
 	}
 
@@ -187,10 +211,14 @@ void SSH::GetFile(const std::string& from, const std::string& to) {
 	}
 }
 
-void SSH::MkDir(const std::string& path) {
-	libssh2_sftp_mkdir(sftpChannel, &path[0], LIBSSH2_SFTP_S_IRWXU |
+bool SSH::MkDir(const std::string& path) {
+	libssh2_session_set_blocking(session, 1);
+	auto ret = libssh2_sftp_mkdir(sftpChannel, &path[0], LIBSSH2_SFTP_S_IRWXU |
 		LIBSSH2_SFTP_S_IRGRP | LIBSSH2_SFTP_S_IXGRP |
 		LIBSSH2_SFTP_S_IROTH | LIBSSH2_SFTP_S_IXOTH);
+	libssh2_session_set_blocking(session, 0);
+	std::cout << ret << std::endl;//LIBSSH2_ERROR_SOCKET_NONE;
+	return !ret;
 }
 
 void SSH::SendFile(const std::string& from, const std::string& to) {

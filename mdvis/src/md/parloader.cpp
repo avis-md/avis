@@ -133,7 +133,6 @@ void ParLoader::Scan() {
 									if (!(pr.frmFunc = (ParImporter::loadfrmsig)imp.lib->GetSym(vl))) {
 										ostrm << "Importer function \"" << vl << "\" not found!";
 									}
-									ParImporter::Func::FUNC_TYPE::TRAJ;
 									vlc++;
 								}
 								else if (tp == "exts") {
@@ -163,7 +162,6 @@ void ParLoader::Scan() {
 									if (!(pr.trjFunc = (ParImporter::loadtrjsig)imp.lib->GetSym(vl))) {
 										ostrm << "Importer function \"" << vl << "\" not found!";
 									}
-									ParImporter::Func::FUNC_TYPE::TRAJ;
 									vlc++;
 								}
 								else if (tp == "exts") {
