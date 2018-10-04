@@ -2,8 +2,12 @@
 #include "ChokoLait.h"
 #include "Particles.h"
 #include "utils/dylib.h"
+#include "utils/ssh.h"
 #define NO_EXPORT_IMP
 #include "importer_info.h"
+
+#define SRV_APP 2
+#define SRV_APP_STR #SRV_APP
 
 struct ParImporter {
 	typedef bool(*loadsig)(ParInfo*);
@@ -40,6 +44,12 @@ public:
 	static bool useConn, useConnCache, hasConnCache, oldConnCache, ovwConnCache;
 	static std::string connCachePath;
 
+	static bool isSrv, srvusepass;
+	static std::string srvuser, srvhost;
+	static int srvport;
+	static std::string srvkey, srvpass;
+	static SSH srv;
+
 	static std::vector<ParImporter> importers;
 	static std::vector<std::string> exts;
 	
@@ -53,13 +63,15 @@ public:
 	static bool _showImp;
 	static float _impPos, _impScr;
 
+	static void SrvConnect(), SrvDisconnect();
+
 	static void ScanFrames(const std::string& first);
 
 	static void DoOpen();
 	static void DoOpenAnim();
 
 	static void OpenFrame(uint f, const std::string& path);
-	static void OpenFrameNow(uint f, const std::string& path);
+	static void OpenFrameNow(uint f, std::string path);
 
 	static void DrawOpenDialog();
 

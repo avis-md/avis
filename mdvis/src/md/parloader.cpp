@@ -5,6 +5,8 @@
 #include "md/ParMenu.h"
 #include "web/anweb.h"
 #include "ui/icons.h"
+#include "ui/popups.h"
+#include "ui/ui_ext.h"
 #include "utils/rawvector.h"
 #include <iomanip>
 
@@ -17,6 +19,12 @@ uint ParLoader::frameskip = 1;
 int ParLoader::maxframes = -1;
 bool ParLoader::useConn, ParLoader::useConnCache, ParLoader::hasConnCache, ParLoader::oldConnCache, ParLoader::ovwConnCache;
 std::string ParLoader::connCachePath;
+
+bool ParLoader::isSrv = false, ParLoader::srvusepass = false;
+std::string ParLoader::srvuser, ParLoader::srvhost;
+int ParLoader::srvport;
+std::string ParLoader::srvkey, ParLoader::srvpass;
+SSH ParLoader::srv;
 
 std::vector<ParImporter> ParLoader::importers;
 std::vector<std::string> ParLoader::exts;
@@ -33,6 +41,13 @@ float ParLoader::_impPos = 0, ParLoader::_impScr = 0;
 
 void ParLoader::Init() {
 	ChokoLait::dropFuncs.push_back(OnDropFile);
+
+	//
+	srvuser = "chokopan";
+	srvhost = "gpu01";
+	srvport = 22;
+	srvkey = "~/.ssh/id_rsa.pub";
+	srvpass = "";
 }
 
 #if defined(PLATFORM_WIN)
@@ -193,6 +208,29 @@ void ParLoader::Scan() {
 	}
 }
 
+void ParLoader::SrvConnect() {
+	SSHConfig config;
+	config.user = srvuser;
+	config.ip = srvhost;
+	config.port = srvport;
+	config.auth = srvusepass ? SSH_Auth::PASSWORD : SSH_Auth::PUBKEY;
+	if (!srvusepass) {
+		config.keyPath1 = IO::ResolveUserPath(srvkey);
+		config.keyPath2 = config.keyPath1.substr(0, config.keyPath1.find_last_of('.'));
+	}
+	config.pw = srvpass;
+	srv = SSH::Connect(config);
+	if (srv.ok) Debug::Message("ParLoader", "Connected to host");
+	else Debug::Warning("ParLoader", "Failed to connect to host!");
+}
+
+void ParLoader::SrvDisconnect() {
+	if (srv.ok) {
+		srv.Disconnect();
+		Debug::Message("ParLoader", "Disconnected from host");
+	}
+}
+
 #define ISNUM(c) (c >= '0' && c <= '9')
 void ParLoader::ScanFrames(const std::string& first) {
 	if (Particles::anim.frameCount > 1) return;
@@ -240,7 +278,10 @@ void ParLoader::ScanFrames(const std::string& first) {
 		std::stringstream sstrm;
 		sstrm << std::setw(n1 - n2) << std::setfill('0') << st;
 		std::string nm = nm1 + sstrm.str() + nm2;
-		if (!IO::HasFile(nm)) break;
+		if (isSrv) {
+			if (!srv.HasFile(nm)) break;
+		}
+		else if (!IO::HasFile(nm)) break;
 		nms.push_back(nm);
 		frms++;
 		st += frameskip;
@@ -254,16 +295,23 @@ void ParLoader::ScanFrames(const std::string& first) {
 }
 
 void ParLoader::DoOpen() {
+	std::replace(droppedFiles[0].begin(), droppedFiles[0].end(), '\\', '/');
+	std::string nm = droppedFiles[0].substr(droppedFiles[0].find_last_of('/') + 1);
+
+	auto path = droppedFiles[0];
+	if (isSrv) {
+		path = IO::path + "tmp/" + nm;
+		srv.GetFile(droppedFiles[0], path);
+	}
+
 	busy = true;
 	ParInfo info = {};
-	info.path = info.trajectory.first = droppedFiles[0].c_str();
+	info.path = info.trajectory.first = path.c_str();
 	info.nameSz = PAR_MAX_NAME_LEN;
 	loadProgress = &info.progress;
 	loadProgress2 = &info.trajectory.progress;
 	loadFrames = &info.trajectory.frames;
 	loadName = "Reading file(s)";
-	std::replace(droppedFiles[0].begin(), droppedFiles[0].end(), '\\', '/');
-	std::string nm = droppedFiles[0].substr(droppedFiles[0].find_last_of('/') + 1);
 	VisSystem::SetMsg("Reading " + nm);
 
 	auto t = milliseconds();
@@ -283,6 +331,7 @@ void ParLoader::DoOpen() {
 					Debug::Warning("ParLoader", "Importer error: " + std::string(info.error));
 					VisSystem::SetMsg(info.error, 2);
 				}
+				if (isSrv) remove(path.c_str());
 				busy = false;
 				fault = true;
 				return;
@@ -290,17 +339,22 @@ void ParLoader::DoOpen() {
 		}
 		else {
 			Debug::Warning("ParLoader", "No importer set!");
+			if (isSrv) remove(path.c_str());
 			busy = false;
+			fault = true;
 			return;
 		}
 	}
 	catch (char* c) {
 		Debug::Warning("ParLoader", "Importer exception: " + std::string(c));
 		VisSystem::SetMsg("Importer threw " + std::string(c), 2);
+		if (isSrv) remove(path.c_str());
 		busy = false;
 		fault = true;
 		return;
 	}
+
+	if (isSrv) remove(path.c_str());
 
 	*loadProgress2 = 0;
 	loadFrames = nullptr;
@@ -334,7 +388,7 @@ void ParLoader::DoOpen() {
 
 	if (useConn) {
 		if (useConnCache && hasConnCache && !ovwConnCache) {
-			strm = new std::ifstream(droppedFiles[0] + ".conn", std::ios::binary);
+			strm = new std::ifstream(path + ".conn", std::ios::binary);
 			char buf[100];
 			strm->getline(buf, 100, '\n');
 			strm->read((char*)(&conn.cnt), 4);
@@ -432,7 +486,7 @@ void ParLoader::DoOpen() {
 	if (strm) delete(strm);
 
 	if (useConnCache && (!hasConnCache || ovwConnCache)) {
-		std::ofstream ostrm(droppedFiles[0] + ".conn", std::ios::binary);
+		std::ofstream ostrm(path + ".conn", std::ios::binary);
 		ostrm << __DATE__ << " " << __TIME__ << "\n";
 		_StreamWrite(&conn.cnt, &ostrm, 4);
 		_StreamWrite(conn.ids, &ostrm, conn.cnt * sizeof(Int2));
@@ -476,7 +530,8 @@ void ParLoader::DoOpen() {
 	ParMenu::SaveRecents(droppedFiles[0]);
 	Particles::cfgFile = droppedFiles[0];
 
-	ScanFrames(info.path);
+	frameskip = FindNextOff(droppedFiles[0]);
+	ScanFrames(droppedFiles[0]);
 
 	parDirty = true;
 	busy = false;
@@ -528,11 +583,28 @@ void ParLoader::OpenFrame(uint f, const std::string& path) {
 	std::thread(OpenFrameNow, f, path).detach();
 }
 
-void ParLoader::OpenFrameNow(uint f, const std::string& path) {
+void ParLoader::OpenFrameNow(uint f, std::string path) {
+	using FS = Particles::AnimData::FRAME_STATUS;
 	busy = true;
 	auto& anm = Particles::anim;
 	anm.reading = true;
-	anm.status[f] = Particles::AnimData::FRAME_STATUS::READING;
+	anm.status[f] = FS::READING;
+
+	if (isSrv) {
+		if (srv.ok) {
+			auto pl = path.find_last_of('/');
+			auto nm = path.substr(pl + 1);
+			auto p2 = IO::path + "tmp/" + nm;
+			srv.GetFile(path, p2);
+			path = p2;
+		}
+		else {
+			anm.reading = false;
+			busy = false;
+			anm.status[f] = FS::BAD;
+			return;
+		}
+	}
 
 	auto& pos = anm.poss[f];
 	auto& vel = anm.vels[f];
@@ -540,10 +612,11 @@ void ParLoader::OpenFrameNow(uint f, const std::string& path) {
 	vel.resize(Particles::particleSz);
 	FrmInfo info(path.c_str(), Particles::particleSz, &pos[0][0], &vel[0][0]);
 	fault = !importers[anm.impId].funcs[anm.funcId].frmFunc(&info);
-	anm.status[f] = fault? Particles::AnimData::FRAME_STATUS::BAD : Particles::AnimData::FRAME_STATUS::LOADED;
+	anm.status[f] = fault? FS::BAD : FS::LOADED;
 
 	anm.reading = false;
 	busy = false;
+	if (isSrv) remove(path.c_str());
 }
 
 void ParLoader::DrawOpenDialog() {
@@ -585,13 +658,68 @@ void ParLoader::DrawOpenDialog() {
 	UI::Quad(woff, hoff, 400, 300, white(0.8f, 0.15f));
 	UI::Quad(woff, hoff, 400, 16, white(0.9f, 0.1f));
 	UI::Label(woff + 2, hoff, 12, loadAsTrj ? "Load Trajectory" : "Load Configuration", white());
-	UI::Label(woff + 2, hoff + 17, 12, "File(s)", white());
-	std::string nm = droppedFiles[0];
-	if (Engine::Button(woff + 60, hoff + 17, 339, 16, white(1, 0.4f)) == MOUSE_RELEASE) {
+	hoff += 17;
 
+	UI2::sepw = 0.33f;
+	static std::string opts[] = { "Local", "Remote", "" };
+	static uint issv = isSrv;
+	static Popups::DropdownItem di(&issv, &opts[0]);
+	UI2::Dropdown(woff + 2, hoff, 170, "Location", di);
+	isSrv = !!issv;
+	if (isSrv) {
+		UI2::sepw = 0.25f;
+		static std::string opts2[] = { "Public Key", "Password", "" };
+		static uint ispw = srvusepass;
+		static Popups::DropdownItem di2(&ispw, &opts2[0]);
+		srvusepass = !!ispw;
+		UI2::Dropdown(woff + 180, hoff, 120, "Auth", di2);
+
+		if (srv.ok) {
+			if (Engine::Button(woff + 319, hoff, 80, 16, red(1, 0.5f), "Disconnect", 12, white(), true) == MOUSE_RELEASE) {
+				SrvDisconnect();
+			}
+		}
+		else {
+			if (Engine::Button(woff + 319, hoff, 80, 16, green(1, 0.5f), "Connect", 12, white(), true) == MOUSE_RELEASE) {
+				SrvConnect();
+			}
+		}
+
+		hoff += 17;
+		srvuser = UI2::EditText(woff + 2, hoff, 130, "Host", srvuser, !srv.ok);
+		UI2::sepw = 0.12f;
+		srvhost = UI2::EditText(woff + 135, hoff, 150, "@", srvhost, !srv.ok);
+		UI2::sepw = 0.2f;
+		srvport = TryParse(UI2::EditText(woff + 290, hoff, 80, "-p", std::to_string(srvport), !srv.ok), 22);
+		hoff += 17;
+		UI2::sepw = 0.3f;
+		if (srvusepass) {
+			srvpass = UI2::EditPass(woff + 2, hoff, 250, "Password", srvpass, !srv.ok);
+		}
+		else {
+			srvkey = UI2::EditText(woff + 2, hoff, 250, "Public Key", srvkey, !srv.ok);
+			srvpass = "";
+		}
 	}
-	UI::Label(woff + 62, hoff + 17, 12, nm, white(0.7f), 326);
-	UI::Texture(woff + 383, hoff + 17, 16, 16, Icons::browse);
+	else if (srv.ok) SrvDisconnect();
+	hoff += 17;
+	UI2::sepw = 0.1f;
+	static bool hsf = true;
+	static auto ff = droppedFiles[0];
+	if (ff != droppedFiles[0]) {
+		ff = droppedFiles[0];
+		if (isSrv) {
+			if (srv.ok)
+				hsf = srv.HasFile(ff);
+			else hsf = false;
+		}
+		else {
+			hsf = IO::HasFile(ff);
+		}
+	}
+	droppedFiles[0] = UI2::EditText(woff + 2, hoff, 381, "File", droppedFiles[0], true, hsf? white(1, 0.5f) : red(1, 0.5f));
+	
+	Engine::Button(woff + 383, hoff, 16, 16, Icons::browse);
 
 	UI::Label(woff + 2, hoff + 17 * 2, 12, "Importer", white(), 326);
 	if (impId > -1)
@@ -622,7 +750,6 @@ void ParLoader::DrawOpenDialog() {
 			}
 		}
 	}
-	//if (Particles::particleSz) {
 		auto l = Engine::Toggle(woff + 5, hoff + 17 * 4, 16, Icons::checkbox, loadAsTrj, white(), ORIENT_HORIZONTAL);
 		if (l != loadAsTrj) {
 			loadAsTrj = l;
@@ -631,7 +758,7 @@ void ParLoader::DrawOpenDialog() {
 		UI::Label(woff + 34, hoff + 17 * 4, 12, "As Trajectory", white(), 326);
 		additive = Engine::Toggle(woff + 201, hoff + 17 * 4, 16, Icons::checkbox, additive, white(), ORIENT_HORIZONTAL);
 		UI::Label(woff + 230, hoff + 17 * 4, 12, "Additive", white(), 326);
-	//}
+
 	UI::Label(woff + 2, hoff + 17 * 5, 12, "Options", white(), 326);
 	useConn = Engine::Toggle(woff + 5, hoff + 17 * 6, 16, Icons::checkbox, useConn, white(), ORIENT_HORIZONTAL);
 	UI::Label(woff + 25, hoff + 17 * 6, 12, "Bonds", white(), 326);
@@ -646,16 +773,18 @@ void ParLoader::DrawOpenDialog() {
 			}
 		}
 	}
-
+	/*
 	std::string line = "";
 	if (loadAsTrj) line += "-trj ";
 	if (additive) line += "-a";
 	if (maxframes > 0) line += "-n" + std::to_string(maxframes) + " ";
 	UI::Label(woff + 2, hoff + 300 - 17 * 2, 12, "Command line : " + line, white(), 326);
+	*/
 	if (Engine::Button(woff + 300, hoff + 283, 48, 16, yellow(1, 0.4f), "Cancel", 12, white(), true) == MOUSE_RELEASE) {
 		showDialog = false;
+		ff = "";
 	}
-	if (Engine::Button(woff + 350, hoff + 283, 49, 16, white(0.4f), "Load", 12, white(), true) == MOUSE_RELEASE) {
+	if (hsf && (!isSrv || srv.ok) && Engine::Button(woff + 350, hoff + 283, 49, 16, white(0.4f), "Load", 12, white(), true) == MOUSE_RELEASE) {
 		if (loadAsTrj) {
 			std::thread td(DoOpenAnim);
 			td.detach();
@@ -666,7 +795,10 @@ void ParLoader::DrawOpenDialog() {
 			td.detach();
 		}
 		showDialog = false;
+		ff = "";
 	}
+	
+	UI2::sepw = 0.5f;
 }
 
 bool ParLoader::OnDropFile(int i, const char** c) {
@@ -685,7 +817,7 @@ void ParLoader::OnOpenFile(const std::vector<std::string>& files) {
 	loadAsTrj = !!Particles::particleSz;
 	ParMenu::showSplash = false;
 	FindImpId();
-	frameskip = FindNextOff(files[0]);
+	//frameskip = FindNextOff(files[0]);
 
 	useConn = true;
 	hasConnCache = false;
@@ -752,7 +884,7 @@ uint ParLoader::FindNextOff(std::string path) {
 	auto ls = path.find_last_of('/') + 1;
 	std::string nm = path.substr(ls);
 	path = path.substr(0, ls);
-	auto fls = IO::GetFiles(path, ext);
+	auto fls = isSrv? srv.ListFiles(path) : IO::GetFiles(path, ext);
 	auto sz = nm.size();
 	auto off = sz - 1;
 	while (nm[off] >= '0' && nm[off] <= '9') {

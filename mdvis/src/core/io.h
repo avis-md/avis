@@ -18,6 +18,8 @@ public:
 	static std::string GetText(const std::string& path);
 	static std::vector<byte> GetBytes(const std::string& path);
 
+	static std::string ResolveUserPath(const std::string& path);
+
 	static time_t ModTime(const std::string& path);
 
 	static void StartReadStdio(std::string path, stdioCallback callback);
@@ -30,7 +32,7 @@ public:
 	static void OpenFd(std::string path);
 	static void OpenEx(std::string path);
 
-	static std::string path;
+	static std::string path, userPath;
 
 	static void InitPath();
 	static std::wstring _tow(const std::string& s);

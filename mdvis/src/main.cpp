@@ -196,18 +196,6 @@ int main(int argc, char **argv) {
 	return 0;
 #else
 int main(int argc, char **argv) {
-	SSH::Init();
-	SSHConfig config;
-	config.ip = "gpu01";
-	config.port = 22;
-	config.user = "chokopan";
-	config.auth = SSH_Auth::PUBKEY;
-	config.keyPath2 = "/Users/chokopan/.ssh/id_rsa";
-	config.keyPath1 = config.keyPath2 + ".pub";
-	config.pw = "";
-	auto ssh = SSH::Connect(config);
-	ssh.EnableSFTP();
-	while(1);
 #endif
 	std::cout << R"(Thanks for trying out this program! :)
 You can view a copy of all logs in Log.txt.
@@ -283,6 +271,8 @@ The hash for this program is )" << VisSystem::version_hash
 #else
 #define LINIT INIT
 #endif
+		IO::MakeDirectory(IO::path + "tmp/");
+
 		INIT(Font);
 		INIT(UI);
 		INIT(UI2);
@@ -304,8 +294,8 @@ The hash for this program is )" << VisSystem::version_hash
 		INIT(AnWeb);
 		INIT(AnNode);
 		INIT(Effects, 0xffff);
+		INIT(SSH);
 		ParMenu::LoadRecents();
-		//SSH::Init();
 
 		AnBrowse::Scan();
 

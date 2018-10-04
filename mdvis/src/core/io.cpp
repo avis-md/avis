@@ -18,7 +18,7 @@
 #endif
 #endif
 
-std::string IO::path;
+std::string IO::path, IO::userPath;
 
 std::thread IO::readstdiothread;
 bool IO::readingStdio;
@@ -173,6 +173,14 @@ std::vector<byte> IO::GetBytes(const std::string& path) {
 	return res;
 }
 
+std::string IO::ResolveUserPath(const std::string& path) {
+	if (path[0] == '~') {
+		if (path[1] == '/')
+			return userPath + path.substr(1);
+	}
+	return path;
+}
+
 time_t IO::ModTime(const std::string& s) {
 	struct stat stt;
 	auto rt = stat(s.c_str(), &stt);
@@ -307,6 +315,14 @@ void IO::InitPath() {
 	path = path.substr(0, path.find_last_of('/') + 1);
 #endif
 	if (path.back() != '/') path += "/";
+
+#ifdef PLATFORM_WIN
+	userPath = "~";
+#else
+	RunCmd::Run("cd&&pwd > /tmp/mdvis_userpath.txt");
+	std::ifstream strm("/tmp/mdvis_userpath.txt");
+	std::getline(strm, userPath);
+#endif
 }
 
 std::wstring IO::_tow(const std::string& s) {

@@ -14,6 +14,7 @@ public:
 
 	static void LabelMul(float x, float y, float sz, const std::string& s);
 	static std::string EditText(float x, float y, uint w, const std::string& title, const std::string& val, bool enabled = true, Vec4 col = white(1, 0.5f));
+	static std::string EditPass(float x, float y, uint w, const std::string& title, const std::string& val, bool enabled = true, Vec4 col = white(1, 0.5f));
 	static float Slider(float x, float y, uint w, const std::string& title, float a, float b, float t);
 	static float Slider(float x, float y, uint w, const std::string& title, float a, float b, float t, const std::string& lbl);
 	static float Slider(float x, float y, uint w, float a, float b, float t);

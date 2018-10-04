@@ -347,11 +347,11 @@ void ParMenu::DrawSplash() {
 					break;
 				}
 				else if (ms == MOUSE_RELEASE) {
-					if (!IO::HasFile(recentFiles[i])) {
+					/*if (!IO::HasFile(recentFiles[i])) {
 						RemoveRecent(i);
 						VisSystem::SetMsg("File does not exist!", 1);
 						break;
-					}
+					}*/
 					showSplash = false;
 					ParLoader::OnOpenFile(std::vector<std::string>{ recentFiles[i] });
 				}

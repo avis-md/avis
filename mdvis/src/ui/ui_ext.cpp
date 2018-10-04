@@ -37,6 +37,17 @@ std::string UI2::EditText(float x, float y, uint w, const std::string& title, co
 	}
 }
 
+std::string UI2::EditPass(float x, float y, uint w, const std::string& title, const std::string& val, bool enabled, Vec4 col) {
+	UI::Label(x, y, 12, title, white());
+	if (enabled) {
+		return UI::EditTextPass(x + w*sepw, y, w*sepw2 - 1.0f, 16, 12, col, val, '*', true, white());
+	}
+	else {
+		Engine::Button(x + w*sepw, y, w*sepw2 - 1.0f, 16, col, "****", 12, white(0.5f));
+		return val;
+	}
+}
+
 float UI2::Slider(float x, float y, uint w, const std::string& title, float a, float b, float t) {
 	return Slider(x, y, w, title, a, b, t, std::to_string(t));
 }

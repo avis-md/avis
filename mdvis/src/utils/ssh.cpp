@@ -79,6 +79,7 @@ SSH SSH::Connect(const SSHConfig& conf) {
 		Debug::Warning("SSH", "open session fail!");
 		return ssh;
 	}
+	libssh2_session_set_blocking(ssh.session, 1);
 	if (!!libssh2_channel_request_pty(ssh.channel, "vanilla")) {
 		Debug::Warning("SSH", "request pty fail!");
 		return ssh;
@@ -88,6 +89,8 @@ SSH SSH::Connect(const SSHConfig& conf) {
 		return ssh;
 	}
 	Debug::Message("SSH", "Connected to " + conf.user + "@" + conf.ip + ":" + std::to_string(conf.port) + ".");
+	ssh.EnableSFTP();
+	ssh.GetUserPath();
 	ssh.ok = true;
 	return ssh;
 }
@@ -96,6 +99,24 @@ void SSH::Disconnect() {
 	if (channel) libssh2_channel_free(channel);
 	libssh2_session_disconnect(session, "logout");
 	libssh2_session_free(session);
+	ok = false;
+}
+
+void SSH::GetUserPath() {
+	std::string tpf = "/tmp/mdvis_userpath.txt";
+	Write("cd && pwd > " + tpf);
+	auto res = GetFile(tpf);
+	userPath = std::string(&res[0], res.size());
+	while (userPath.back() == '\n') userPath.pop_back();
+	Debug::Message("SSH", "User path is \"" + userPath + "\"");
+}
+
+std::string SSH::ResolveUserPath(const std::string& path) {
+	if (path[0] == '~') {
+		if (path[1] == '/')
+			return userPath + path.substr(1);
+	}
+	return path;
 }
 
 std::string SSH::Read(uint maxlen) {
@@ -155,7 +176,8 @@ void SSH::DisableSFTP() {
 	}
 }
 
-std::vector<std::string> SSH::ListFiles(const std::string& path) {
+std::vector<std::string> SSH::ListFiles(std::string path) {
+	path = ResolveUserPath(path);
 	std::vector<std::string> res;
 	auto hnd = libssh2_sftp_opendir(sftpChannel, path.c_str());
 	if (hnd) {
@@ -164,7 +186,9 @@ std::vector<std::string> SSH::ListFiles(const std::string& path) {
 			LIBSSH2_SFTP_ATTRIBUTES attr;
 			auto rc = libssh2_sftp_readdir_ex(hnd, mem, 512, lentry, 512, &attr);
 			if (rc > 0) {
-				res.push_back(std::string(mem, rc));
+				std::string s(mem, rc);
+				if (s != "." && s != "..")
+					res.push_back(s);
 			}
 			else break;
 		}
@@ -172,57 +196,54 @@ std::vector<std::string> SSH::ListFiles(const std::string& path) {
 	return res;
 }
 
-bool SSH::HasFile(const std::string& path) {
-	auto cmd = "echo '!''<'; test -e " + path + " && echo 'file found!!''>' || echo '!''>'";
-	Write(cmd);
-	std::string s;
-	for (;;) {
-		s += Read(500);
-		Engine::Sleep(100);
-		auto pos0 = string_find(s, "!<");
-		auto pos1 = string_find(s, "!>");
-		if (pos0 == -1) s = "";
-		if (pos1 == -1) continue;
-		if (pos1 > (pos0 + 5)) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
+bool SSH::HasFile(std::string path) {
+	path = ResolveUserPath(path);
+	LIBSSH2_SFTP_ATTRIBUTES info = {};
+	auto res = libssh2_sftp_stat(sftpChannel, path.c_str(), &info);
+	return !res;
 }
 
-void SSH::GetFile(const std::string& from, const std::string& to) {
-	Flush();
+std::vector<char> SSH::GetFile(std::string from) {
+	from = ResolveUserPath(from);
 	auto hnd = libssh2_sftp_open(sftpChannel, &from[0], LIBSSH2_FXF_READ, 0);
-	std::ofstream strm(to, std::ios::binary);
-	if (!hnd || !strm) {
-		return;
-	}
-	else {
+	std::vector<char> res;
+	auto sz = 0;
+	if (hnd) {
 		char mem[4096];
 		for (;;) {
 			auto wc = libssh2_sftp_read(hnd, mem, 4096);
 			if (wc <= 0) break;
-			strm.write(mem, wc);
+			res.resize(sz + wc);
+			memcpy(&res[sz], mem, wc);
+			sz += wc;
 		}
 		libssh2_sftp_close(hnd);
-		strm.close();
+	}
+	return res;
+}
+
+void SSH::GetFile(std::string from, std::string to) {
+	if (!HasFile(from)) return;
+	from = ResolveUserPath(from);
+	to = IO::ResolveUserPath(to);
+	auto res = GetFile(from);
+	if (!res.size()) return;
+	std::ofstream strm(to, std::ios::binary);
+	if (strm) {
+		strm.write(&res[0], res.size());
 	}
 }
 
 bool SSH::MkDir(const std::string& path) {
-	libssh2_session_set_blocking(session, 1);
 	auto ret = libssh2_sftp_mkdir(sftpChannel, &path[0], LIBSSH2_SFTP_S_IRWXU |
 		LIBSSH2_SFTP_S_IRGRP | LIBSSH2_SFTP_S_IXGRP |
 		LIBSSH2_SFTP_S_IROTH | LIBSSH2_SFTP_S_IXOTH);
-	libssh2_session_set_blocking(session, 0);
-	std::cout << ret << std::endl;//LIBSSH2_ERROR_SOCKET_NONE;
 	return !ret;
 }
 
-void SSH::SendFile(const std::string& from, const std::string& to) {
-	Flush();
+void SSH::SendFile(std::string from, std::string to) {
+	from = IO::ResolveUserPath(from);
+	to = ResolveUserPath(to);
 	std::ifstream strm(from, std::ios::binary); 
 	auto hnd = libssh2_sftp_open(sftpChannel, &to[0], 
 		LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT | LIBSSH2_FXF_TRUNC | 
