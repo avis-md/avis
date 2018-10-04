@@ -140,6 +140,13 @@ void VisSystem::Init() {
 		ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
 	});
 	mi[4].Set(Icons::openfile, _("Import Recent"), 0);
+
+	auto& mi1 = menuItems[2];
+	mi1.resize(3);
+	mi1[0].Set(0, "Help I'm", 0);
+	mi1[1].Set(0, "Trapped in", 0);
+	mi1[2].Set(0, "Line " + std::to_string(__LINE__), 0);
+
 	auto& mi2 = menuItems[3];
 	mi2.resize(5);
 	mi2[0].Set(0, "Image (GLSL)", []() {

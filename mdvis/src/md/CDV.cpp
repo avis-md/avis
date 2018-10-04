@@ -9,6 +9,10 @@
 bool CDV::Read(ParInfo* info) {
 	char buf[500]{};
 	std::ifstream strm(info->path);
+	if (!strm) {
+		SETERR("Cannot open file!");
+		return false;
+	}
 	std::streampos sps;
 	do {
 		sps = strm.tellg();
@@ -60,7 +64,7 @@ bool CDV::ReadFrame(FrmInfo* info) {
 	std::string s;
 	std::ifstream strm(info->path);
 	if (!strm.is_open()) {
-		SETERR("Cannot open file for reading!");
+		SETERR("Cannot open file!");
 		return false;
 	}
 	std::getline(strm, s);

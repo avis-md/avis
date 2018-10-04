@@ -26,10 +26,7 @@ void Particles::AnimData::Clear() {
 void Particles::AnimData::Seek(uint f) {
 	if (status[f] != FRAME_STATUS::LOADED) {
 		if (status[f] == FRAME_STATUS::UNLOADED) {
-			status[f] = Particles::AnimData::FRAME_STATUS::READING;
 			ParLoader::OpenFrameNow(f, paths[f]);
-			while (status[f] == FRAME_STATUS::READING)
-				;;
 		}
 		if (status[f] == FRAME_STATUS::BAD) return;
 	}
@@ -42,6 +39,7 @@ void Particles::AnimData::Update() {
 
 	if (maxFramesInMem < frameCount) {
 		for (uint a = 0; a < frameMemPos; a++) {
+			if (a + frameCount - frameMemPos < maxFramesInMem) continue;
 			if (status[a] == FRAME_STATUS::LOADED) {
 				std::vector<glm::dvec3>().swap(poss[a]);
 				std::vector<glm::dvec3>().swap(vels[a]);
@@ -57,8 +55,8 @@ void Particles::AnimData::Update() {
 		}
 	}
 
-	for (uint f = currentFrame; f < frameMemPos + maxFramesInMem; f++) {
-		if (f >= frameCount) break;
+	for (uint ff = currentFrame; ff < frameMemPos + maxFramesInMem; ff++) {
+		auto f = Repeat(ff, 0U, frameCount);
 		auto& st = status[f];
 		if (st == FRAME_STATUS::READING || st == FRAME_STATUS::BAD) return;
 		if (st == FRAME_STATUS::UNLOADED) {
@@ -80,9 +78,9 @@ void Particles::AnimData::Update() {
 
 void Particles::AnimData::UpdateMemRange() {
 	frameMemPos = (uint)std::max((int)currentFrame - (int)maxFramesInMem/2, 0);
-	auto mx = frameMemPos + maxFramesInMem;
-	mx = std::min(mx, frameCount);
-	frameMemPos = (uint)std::max((int)mx - (int)maxFramesInMem, 0);
+	//auto mx = frameMemPos + maxFramesInMem;
+	//mx = std::min(mx, frameCount);
+	//frameMemPos = (uint)std::max((int)mx - (int)maxFramesInMem, 0);
 }
 
 
@@ -286,6 +284,7 @@ void Particles::SetFrame(uint frm) {
 	if (frm == anim.currentFrame) return;
 	else {
 		anim.Seek(frm);
+		if (anim.status[frm] != AnimData::FRAME_STATUS::LOADED) return;
 		particles_Pos = &anim.poss[anim.currentFrame][0];
 		std::vector<Vec3> poss(particleSz);
 #pragma omp parallel for

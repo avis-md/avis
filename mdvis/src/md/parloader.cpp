@@ -297,20 +297,24 @@ void ParLoader::ScanFrames(const std::string& first) {
 void ParLoader::DoOpen() {
 	std::replace(droppedFiles[0].begin(), droppedFiles[0].end(), '\\', '/');
 	std::string nm = droppedFiles[0].substr(droppedFiles[0].find_last_of('/') + 1);
-
 	auto path = droppedFiles[0];
+
+	busy = true;
+	ParInfo info = {};
+	loadProgress = &info.progress;
+	loadProgress2 = &info.trajectory.progress;
+	loadFrames = &info.trajectory.frames;
+
 	if (isSrv) {
+		*loadProgress = 0.001f;
+		loadName = "Downloading";
 		path = IO::path + "tmp/" + nm;
 		srv.GetFile(droppedFiles[0], path);
 	}
 
-	busy = true;
-	ParInfo info = {};
 	info.path = info.trajectory.first = path.c_str();
 	info.nameSz = PAR_MAX_NAME_LEN;
-	loadProgress = &info.progress;
-	loadProgress2 = &info.trajectory.progress;
-	loadFrames = &info.trajectory.frames;
+	
 	loadName = "Reading file(s)";
 	VisSystem::SetMsg("Reading " + nm);
 
@@ -584,6 +588,10 @@ void ParLoader::OpenFrame(uint f, const std::string& path) {
 }
 
 void ParLoader::OpenFrameNow(uint f, std::string path) {
+	while (busy)
+		;;
+	//std::cout << f << " " << path << " --- ";
+	std::flush(std::cout);
 	using FS = Particles::AnimData::FRAME_STATUS;
 	busy = true;
 	auto& anm = Particles::anim;
@@ -615,8 +623,9 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 	anm.status[f] = fault? FS::BAD : FS::LOADED;
 
 	anm.reading = false;
-	busy = false;
 	if (isSrv) remove(path.c_str());
+	//std::cout << "done" << std::endl;
+	busy = false;
 }
 
 void ParLoader::DrawOpenDialog() {
@@ -659,13 +668,19 @@ void ParLoader::DrawOpenDialog() {
 	UI::Quad(woff, hoff, 400, 16, white(0.9f, 0.1f));
 	UI::Label(woff + 2, hoff, 12, loadAsTrj ? "Load Trajectory" : "Load Configuration", white());
 	hoff += 17;
+	
+	static bool hsf = true;
+	static std::string ff = "";
 
 	UI2::sepw = 0.33f;
 	static std::string opts[] = { "Local", "Remote", "" };
 	static uint issv = isSrv;
 	static Popups::DropdownItem di(&issv, &opts[0]);
 	UI2::Dropdown(woff + 2, hoff, 170, "Location", di);
-	isSrv = !!issv;
+	if (isSrv != !!issv) {
+		isSrv = !!issv;
+		ff = "";
+	}
 	if (isSrv) {
 		UI2::sepw = 0.25f;
 		static std::string opts2[] = { "Public Key", "Password", "" };
@@ -682,6 +697,7 @@ void ParLoader::DrawOpenDialog() {
 		else {
 			if (Engine::Button(woff + 319, hoff, 80, 16, green(1, 0.5f), "Connect", 12, white(), true) == MOUSE_RELEASE) {
 				SrvConnect();
+				ff = "";
 			}
 		}
 
@@ -704,8 +720,6 @@ void ParLoader::DrawOpenDialog() {
 	else if (srv.ok) SrvDisconnect();
 	hoff += 17;
 	UI2::sepw = 0.1f;
-	static bool hsf = true;
-	static auto ff = droppedFiles[0];
 	if (ff != droppedFiles[0]) {
 		ff = droppedFiles[0];
 		if (isSrv) {
@@ -716,6 +730,7 @@ void ParLoader::DrawOpenDialog() {
 		else {
 			hsf = IO::HasFile(ff);
 		}
+		if (hsf) FindImpId();
 	}
 	droppedFiles[0] = UI2::EditText(woff + 2, hoff, 381, "File", droppedFiles[0], true, hsf? white(1, 0.5f) : red(1, 0.5f));
 	
@@ -780,11 +795,14 @@ void ParLoader::DrawOpenDialog() {
 	if (maxframes > 0) line += "-n" + std::to_string(maxframes) + " ";
 	UI::Label(woff + 2, hoff + 300 - 17 * 2, 12, "Command line : " + line, white(), 326);
 	*/
-	if (Engine::Button(woff + 300, hoff + 283, 48, 16, yellow(1, 0.4f), "Cancel", 12, white(), true) == MOUSE_RELEASE) {
+	hoff = roundf(Display::height * 0.5f + 150 - 17);
+
+	if (Engine::Button(woff + 300, hoff, 48, 16, yellow(1, 0.4f), "Cancel", 12, white(), true) == MOUSE_RELEASE) {
 		showDialog = false;
 		ff = "";
 	}
-	if (hsf && (!isSrv || srv.ok) && Engine::Button(woff + 350, hoff + 283, 49, 16, white(0.4f), "Load", 12, white(), true) == MOUSE_RELEASE) {
+	bool cn = hsf && (!isSrv || srv.ok);
+	if ((Engine::Button(woff + 350, hoff, 49, 16, white(0.4f), "Load", 12, white(cn? 1 : 0.2f), true) == MOUSE_RELEASE) && cn) {
 		if (loadAsTrj) {
 			std::thread td(DoOpenAnim);
 			td.detach();
