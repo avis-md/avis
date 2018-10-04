@@ -61,30 +61,48 @@ rCamera ChokoLait::mainCamera = rCamera();
 std::vector<dropFileFunc> ChokoLait::dropFuncs;
 std::vector<emptyCallbackFunc> ChokoLait::focusFuncs;
 
-void _dieded(int i) {
-	Debug::Error("System", "Abort trap!");
-	void* buf[10];
-	Debug::StackTrace(10, buf);
+#define _CHOKOLAIT_MAGIC 0x30cd84
+uint CHOKOLAIT_MAGIC = _CHOKOLAIT_MAGIC;
+
+void _printstack() {
+	Debug::Error("System", "Dumping stack trace...");
+	void* buf[50];
+	uint c = Debug::StackTrace(50, buf);
 #ifndef PLATFORM_WIN
-	auto bs = backtrace_symbols(buf, 10);
-	std::cout << "Dumping stack trace..." << std::endl;
-	for (int a = 0; a < 10; a++) {
-		std::cout << bs[a] << std::endl;
+	auto bs = backtrace_symbols(buf, c);
+	for (uint a = 0; a < c; a++) {
+		Debug::Error("System", bs[a]);
 	}
 #endif
+}
+
+void _dieded(int i) {
+	if (CHOKOLAIT_MAGIC != _CHOKOLAIT_MAGIC) exit(-2);
+	CHOKOLAIT_MAGIC = 0;
+	Debug::Error("System", "Abort trap!");
+	_printstack();
 	exit(-1);	
 }
 void _sigfpe(int i) {
+	if (CHOKOLAIT_MAGIC != _CHOKOLAIT_MAGIC) exit(-2);
+	CHOKOLAIT_MAGIC = 0;
 	Debug::Error("System", "FP exception!");
-	throw "floating-point exception!";
+	_printstack();
+	exit(-1);
 }
 void _sigseg(int i) {
+	if (CHOKOLAIT_MAGIC != _CHOKOLAIT_MAGIC) exit(-2);
+	CHOKOLAIT_MAGIC = 0;
 	Debug::Error("System", "Segmentation fault!");
-	throw "segmentation error!";
+	_printstack();
+	exit(-1);
 }
 void _sigtrm(int i) {
+	if (CHOKOLAIT_MAGIC != _CHOKOLAIT_MAGIC) exit(-2);
+	CHOKOLAIT_MAGIC = 0;
 	Debug::Error("System", "Termination request!");
-	throw "termination request!";
+	_printstack();
+	exit(-1);
 }
 
 void ChokoLait::_InitVars() {
@@ -94,11 +112,9 @@ void ChokoLait::_InitVars() {
 
 #endif
 	signal(SIGABRT, &_dieded);
-	/* this is a very very bad idea i guess
 	signal(SIGFPE, &_sigfpe);
 	signal(SIGSEGV, &_sigseg);
 	signal(SIGTERM, &_sigtrm);
-	*/
 	IO::InitPath();
 	Debug::Init();
 
