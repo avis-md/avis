@@ -236,7 +236,7 @@ void ParLoader::ScanFrames(const std::string& first) {
 	if (Particles::anim.frameCount > 1) return;
 	auto ps = first.find_last_of('/');
 	auto nm = first.substr(ps + 1);
-	int n1, n2 = 0;
+	int n1 = 0, n2 = 0;
 	for (uint a = 0; a < nm.size() - 1; a++) {
 		if (nm[a + 1] == '.' && ISNUM(nm[a])) {
 			n1 = a;
@@ -525,6 +525,8 @@ void ParLoader::DoOpen() {
 		delete[](trj.poss);
 		if (trj.vels) delete[](trj.vels);
 		anm.reading = false;
+
+		anm.maxFramesInMem = 10000000;
 	}
 	else {
 		anm.frameCount = 1;

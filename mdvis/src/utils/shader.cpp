@@ -44,6 +44,7 @@ GLuint Shader::FromVF(const std::string& vert, const std::string& frag) {
 	std::string err = "";
 	if (vert == "" || frag == "") {
 		Debug::Error("Shader Compiler", "vert or frag is empty!");
+		return 0;
 	}
 	
 	if (!LoadShader(GL_VERTEX_SHADER, vert, vertex_shader, &err)) {
@@ -64,6 +65,7 @@ GLuint Shader::FromF(GLuint vert, const std::string& frag) {
 
 	if (!vert || frag == "") {
 		Debug::Error("Shader Compiler", "vert or frag is empty!");
+		return 0;
 	}
 
 	if (!LoadShader(GL_FRAGMENT_SHADER, frag, fragment_shader, &err)) {

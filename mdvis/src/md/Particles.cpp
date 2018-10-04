@@ -36,6 +36,7 @@ void Particles::AnimData::Seek(uint f) {
 
 void Particles::AnimData::Update() {
 	if (frameCount <= 1) return;
+	if (maxFramesInMem > 1000000) return;
 
 	if (maxFramesInMem < frameCount) {
 		for (uint a = 0; a < frameMemPos; a++) {
