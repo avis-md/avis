@@ -543,6 +543,10 @@ void ParLoader::DoOpen() {
 	busy = false;
 	fault = false;
 
+	//temp
+	if (!isSrv)
+		anm.maxFramesInMem = anm.frameCount;
+
 	Particles::particleSz = info.num;
 }
 

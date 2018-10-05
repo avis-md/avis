@@ -6,7 +6,7 @@ struct XmlNode {
 	std::unordered_map<std::string, std::string> params;
 	std::vector<XmlNode> children;
 
-	XmlNode(std::string nm = "", std::string vl = "") : name(nm), value(vl) {}
+	XmlNode(std::string nm = "", std::string vl = "") : name(nm), value(vl), params({}), children(0) {}
 
 	XmlNode* addchild(std::string nm = "", std::string vl = "");
 };

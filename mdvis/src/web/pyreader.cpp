@@ -118,6 +118,9 @@ bool PyReader::Read(PyScript* scr) {
 					Debug::Warning("PyReader::ParseType", "input arg type \"" + bk.typeName + "\" not recognized!");
 					return false;
 				}
+				scr->invaropts.push_back(VarOpt());
+				auto& opt = scr->invaropts.back();
+				opt.type = VarOpt::NONE;
 			}
 			std::getline(strm, ln);
 			auto c1 = ln.find_first_of('('), c2 = ln.find_first_of(')');

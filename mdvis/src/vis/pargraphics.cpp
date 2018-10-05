@@ -1139,16 +1139,16 @@ void ParGraphics::Serialize(XmlNode* nd) {
 void ParGraphics::SerializeCol(XmlNode* n) {
 	auto pm = n->addchild("Params");
 	for (int a = 0; a < Particles::particles_ParamSz; a++) {
-		auto n = pm->addchild("item");
-		SVS(name, Particles::particles_ParamNms[a]);
+		pm->addchild("item")
+			->addchild("name", Particles::particles_ParamNms[a]);
 	}
 	SV(usegrad, (int)useGradCol);
-	{
-		auto n = pm->addchild("grad");
-		for (int a = 0; a < 3; a++) {
-			n->children.push_back(Xml::FromVec(std::to_string(a), gradCols[a]));
-		}
+	/*
+	auto gr = pm->addchild("grad");
+	for (int a = 0; a < 3; a++) {
+		gr->children.push_back(Xml::FromVec(std::to_string(a), gradCols[a]));
 	}
+	*/
 	SV(useconcol, (int)useConCol); SV(usecongradcol, (int)useConGradCol);
 	n->children.push_back(Xml::FromVec("concol", conCol));
 }
