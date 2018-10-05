@@ -117,6 +117,7 @@ void ChokoLait::_InitVars() {
 	signal(SIGTERM, &_sigtrm);
 	IO::InitPath();
 	Debug::Init();
+	Debug::Message("IO", "Path is " + IO::path);
 
 	Debug::Message("System", "Opening GL context");
 	if (!glfwInit()) {

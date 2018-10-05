@@ -190,6 +190,5 @@ string IO::InitPath() {
 	string path2 = cpath;
 #endif
 	path = path2;
-	Debug::Message("IO", "Path set to " + path);
 	return path2;
 }

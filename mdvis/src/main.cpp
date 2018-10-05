@@ -197,12 +197,6 @@ int main(int argc, char **argv) {
 #else
 int main(int argc, char **argv) {
 #endif
-	std::cout << R"(Thanks for trying out this program! :)
-You can view a copy of all logs in Log.txt.
-Raw compile output for each script is in __[]cache__/name_log.txt.
-The hash for this program is )" << VisSystem::version_hash
-	<< "\n(I may need this hash to fix bugs)"
-	<< "\n----------------------------------------------" << std::endl;
 #ifndef NOCATCH
 	try {
 #endif
@@ -217,8 +211,20 @@ The hash for this program is )" << VisSystem::version_hash
 #define ISS(str) (!strcmp(argv[a], #str))
 					if ISS(debug)
 						__debug = true;
+					else if ISS(version) {
+						std::cout << VERSIONSTRING << std::endl
+							<< "hash: " << VisSystem::version_hash << std::endl;
+						return 0;
+					}
 					else if ISS(help) {
-						std::cout << res::helpText;
+						std::cout << "MDVIS\n" << VERSIONSTRING "\n"
+							<< res::helpText << std::endl;
+						return 0;
+					}
+					else if ISS(path) {
+						Debug::suppress = 1;
+						IO::InitPath();
+						std::cout << IO::path << std::endl;
 						return 0;
 					}
 					else {
@@ -230,8 +236,14 @@ The hash for this program is )" << VisSystem::version_hash
 					argv[a] ++;
 					if ISS(s)
 						_s = true;
+					else if ISS(v) {
+						std::cout << VERSIONSTRING << std::endl
+							<< "hash: " << VisSystem::version_hash << std::endl;
+						if (argc == 2)
+							return 0;
+					}
 					else {
-						std::cout << "Unknown option " << argv[a] - 1 << ". Type --help for usage guide.";
+						std::cout << "Unknown option " << argv[a] - 1 << ". Type --help for usage guide." << std::endl;
 						return -2;
 					}
 #undef ISS
@@ -241,6 +253,12 @@ The hash for this program is )" << VisSystem::version_hash
 				fls.push_back(argv[a]);
 			}
 		}
+		std::cout << R"(Thanks for trying out this program! :)
+You can view a copy of all logs in Log.txt.
+Raw compile output for each script is in __[]cache__/name_log.txt.
+The hash for this program is )" << VisSystem::version_hash
+		<< "\n(I may need this hash to fix bugs)"
+		<< "\n----------------------------------------------" << std::endl;
 		if (!__debug) {
 			Debug::suppress = 1;
 			//

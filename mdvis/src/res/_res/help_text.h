@@ -2,16 +2,17 @@
 #include <string>
 
 namespace res {
-    const std::string helpText = R"(MDVIS 0.01
+    const std::string helpText = R"(
 THIS PROGRAM IS UNDER DEVELOPMENT
 Usage
-    mdvis [switches] [files] [options]
+    mdvis [files] [switches] [options]
+    Files are loaded in order, so configuration files should come before trajectory files.
+    The order of arguments is not important.
 Switches
-    --help      : Displays this text and exits
-    --debug     : Enables all log messages
-    --imp       : Displays all available importers and formats
+    --help      : Print this text and exit
+    --debug     : Show all log messages in the console
 Opening file(s)
     mdvis myFile.xyz [-s]
-    -s          : loads with default settings without showing loader dialog
+    -s          : load with default settings without showing the loader dialog
 )";
 }

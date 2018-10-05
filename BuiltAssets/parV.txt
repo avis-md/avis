@@ -39,7 +39,7 @@ void main(){
     gl_Position = _P*wpos;
     v2f_pos = wpos.xyz;
     v2f_id = gl_VertexID + 1;
-	if (radScl <= 0) v2f_rad = 0.008 * 2;
+	if (radScl <= 0) v2f_rad = 0.008 * 1.5f;
 	else {
 		v2f_rad = 0.1 * texelFetch(radTex,gl_VertexID).r * radScl;
 		if (v2f_rad == 0) v2f_rad = 0.17 * radScl;
