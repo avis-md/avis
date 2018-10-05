@@ -1,7 +1,11 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "ssh.h"
 #include "utils/net.h"
+#ifdef PLATFORM_WIN
+#include <WS2tcpip.h>
+#else
 #include <netdb.h>
+#endif
 
 void SSH::Init() {
 	int res = libssh2_init(0);
@@ -131,11 +135,6 @@ bool SSH::Write(std::string s) {
 	s += "\n";
 	auto sz = libssh2_channel_write(channel, &s[0], s.size());
 	return sz == s.size();
-}
-
-void SSH::Flush() {
-	Write("echo '#''#'");
-	WaitFor("##", 200);
 }
 
 bool SSH::WaitFor(std::string s, uint rate, uint timeout) {

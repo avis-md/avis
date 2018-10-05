@@ -5,6 +5,7 @@
 #endif
 #include <libssh2.h>
 #include <libssh2_sftp.h>
+#undef ssize_t
 
 enum class SSH_Auth {
 	PUBKEY,
@@ -30,7 +31,6 @@ public:
 	std::string ResolveUserPath(const std::string& s);
 	std::string Read(uint maxlen);
 	bool Write(std::string s);
-	void Flush();
 	bool WaitFor(std::string s, uint rate, uint timeout = -1);
 	void EnableSFTP(), DisableSFTP();
 	bool MkDir(const std::string& path);

@@ -109,8 +109,6 @@ void AnOps::Connect() {
 		message = "failed to connect";
 		return;
 	}
-
-	ssh.Flush();
 	ssh.EnableSFTP();
 
 	message = "initializing files";
@@ -121,7 +119,6 @@ void AnOps::Connect() {
 	}
 	ssh.Write("cd " + path);
 	ssh.Write("mkdir nodes; rm -f nodes/*; mkdir -p ser/in; mkdir ser/out");
-	ssh.Flush();
 
 	message = "scanning runtime";
 
@@ -181,7 +178,6 @@ void AnOps::SendIn() {
 	for (auto& i : ins) {
 		ssh.SendFile(IO::path + "nodes/__tmp__/in/" + i, path + "/ser/in/" + i);
 	}
-	ssh.Flush();
 	for (auto& i : ins) {
 		ssh.Write("chmod +r ser/in/" + i);
 	}
