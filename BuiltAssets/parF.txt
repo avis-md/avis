@@ -10,6 +10,8 @@ in float v2f_rad;
 uniform vec2 screenSize;
 uniform samplerBuffer id2col;
 uniform sampler2D colList;
+uniform vec4 gradCols[3];
+uniform int colUseGrad;
 
 layout (location=0) out vec4 outColor;
 layout (location=1) out uvec4 outId;
@@ -19,9 +21,19 @@ float length2 (vec3 v) {
 	return v.x*v.x + v.y*v.y + v.z*v.z;
 }
 
+vec3 gradfill(float f) {
+	return (gradCols[0].rgb * clamp(2 - 4 * f, 0, 1)
+		+ gradCols[1].rgb * clamp(2 - abs(2 - 4 * f), 0, 1)
+		+ gradCols[2].rgb * clamp(4 * f - 2, 0, 1));
+}
+
 void SetColor(int id) {
     int cd = int(texelFetch(id2col, id-1).r * 255);
-    outColor = texture(colList, vec2((mod(cd, 16) + 0.5) / 16.0, ((cd / 16) + 0.5) / 16.0));
+    if (colUseGrad == 1)
+        outColor.rgb = gradfill(cd/255.0f);
+    else
+        outColor.rgb = texture(colList, vec2((mod(cd, 16) + 0.5) / 16.0, ((cd / 16) + 0.5) / 16.0)).rgb;
+    outColor.a = 1;
 }
 
 void main()

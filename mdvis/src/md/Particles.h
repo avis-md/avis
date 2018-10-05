@@ -51,7 +51,8 @@ public:
 		~paramdata();
 
 		bool dirty = false;
-		float* data;
+		bool timed = false;
+		std::vector<float> data;
 		GLuint buf, texBuf;
 		
 		void Update();
@@ -121,7 +122,7 @@ public:
 	static GLuint colorPalleteTex;
 	static bool palleteDirty;
 
-	static void Init(), Clear(), GenTexBufs(), UpdateBufs(), UpdateColorTex(), UpdateRadBuf();
+	static void Init(), Clear(), GenTexBufs(), Update(), UpdateBufs(), UpdateColorTex(), UpdateRadBuf();
 	static void AddParam(), RmParam(int i);
 
 	static void Serialize(XmlNode* nd);

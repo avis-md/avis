@@ -29,8 +29,8 @@ Node_Info::Node_Info() :AnNode(new DmScript(sig)) {
 
 void Node_Info::Execute() {
 	conV[0].value = &Particles::particleSz;
-	conV[1].value = &Particles::anim.currentFrame;
-	conV[2].value = &Node_Inputs::frame;
+	conV[1].value = &Particles::anim.frameCount;
+	conV[2].value = &Particles::anim.currentFrame;
 	static double* bbx = &Particles::boundingBox[0];
 	conV[3].value = &bbx;
 }

@@ -31,7 +31,7 @@ Popups::DropdownItem ParGraphics::reflItms((uint*)&reflId, nullptr);
 bool ParGraphics::useGradCol = false;
 uint ParGraphics::gradColParam;
 Vec4 ParGraphics::gradCols[] = { blue(), green(), red() };
-bool ParGraphics::useConCol;
+bool ParGraphics::useConCol, ParGraphics::useConGradCol;
 Vec4 ParGraphics::conCol = white();
 
 PROGDEF(ParGraphics::reflProg);
@@ -203,6 +203,7 @@ void ParGraphics::Init() {
 	LC(_MV); LC(_P); LC(camPos);
 	LC(camFwd); LC(orthoSz); LC(screenSize);
 	LC(radTex); LC(radScl); LC(id2col); LC(colList);
+	LC(gradCols); LC(colUseGrad);
 	auto bid = glGetUniformBlockIndex(parProg, "clipping");
 	glUniformBlockBinding(parProg, bid, _clipBindId);
 #undef LC
@@ -213,7 +214,9 @@ void ParGraphics::Init() {
 	LC(_MV); LC(_P); LC(camPos); LC(camFwd);
 	LC(screenSize); LC(posTex); LC(connTex);
 	LC(id2); LC(radScl); LC(orthoSz);
-	LC(id2col); LC(colList); LC(usegrad);
+	LC(id2col); LC(colList); 
+	LC(gradCols); LC(colUseGrad);
+	LC(usegrad); LC(onecol);
 	bid = glGetUniformBlockIndex(parConProg, "clipping");
 	glUniformBlockBinding(parConProg, bid, _clipBindId);
 #undef LC
@@ -613,10 +616,17 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 			glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
 			glUniform1i(parProgLocs[8], 2);
 			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
-			glUniform1i(parProgLocs[9], 3);
-			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
+			if (!useGradCol) {
+				glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
+				glUniform1i(parProgLocs[9], 3);
+				glActiveTexture(GL_TEXTURE3);
+				glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
+			}
+			else {
+				glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[gradColParam]->texBuf);
+				glUniform4fv(parProgLocs[10], 3, &gradCols[0][0]);
+			}
+			glUniform1i(parProgLocs[11], useGradCol);
 
 			glBindVertexArray(Particles::posVao);
 			for (auto& p : drawLists) {
@@ -663,11 +673,19 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					glUniform1f(parConProgLocs[9], osz);
 					glUniform1i(parConProgLocs[10], 3);
 					glActiveTexture(GL_TEXTURE3);
-					glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
-					glUniform1i(parConProgLocs[11], 4);
-					glActiveTexture(GL_TEXTURE4);
-					glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
-					glUniform1i(parConProgLocs[12], 0);
+					if (!useGradCol) {
+						glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
+						glUniform1i(parConProgLocs[11], 4);
+						glActiveTexture(GL_TEXTURE4);
+						glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
+					}
+					else {
+						glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[gradColParam]->texBuf);
+						glUniform4fv(parConProgLocs[12], 3, &gradCols[0][0]);
+					}
+					glUniform1i(parConProgLocs[13], useGradCol);
+					glUniform1i(parConProgLocs[14], useConGradCol);
+					glUniform4f(parConProgLocs[15], conCol.r, conCol.g, conCol.b, useConCol? 1 : 0);
 
 					glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
 				}
@@ -870,8 +888,10 @@ void ParGraphics::DrawColMenu() {
 	UI::Label(exps - 148, off, 12, "Coloring", white());
 	off += 17;
 	UI::alpha = (Particles::particles_ParamSz > 0)? 1 : 0.5f;
+	auto ug = useGradCol;
 	UI2::Toggle(exps - 148, off, 147, _("Gradient Fill"), useGradCol);
 	if (Particles::particles_ParamSz == 0) useGradCol = false;
+	if (ug != useGradCol) Scene::dirty = true;
 	UI::alpha = 1;
 	off += 17;
 	if (useGradCol) {
@@ -896,24 +916,34 @@ void ParGraphics::DrawColMenu() {
 			std::string nm = (x < Particles::defColPalleteSz) ? std::string((char*)&Particles::defColPallete[x], 2) : std::to_string(x);
 			Vec3& col = Particles::colorPallete[x];
 			Vec4& colt = Particles::_colorPallete[x];
-			UI2::Color(exps - 145, off, 143, nm, colt);
+			UI2::Color(exps - 145, off + 17*x, 143, nm, colt);
 			if (col != Vec3(colt)) {
 				col = colt;
 				Particles::UpdateColorTex();
 			}
-			off += 17;
 		}
 		UI2::sepw = 0.5f;
-		off += 2;
+		off = Display::height*0.5f;
 		Engine::PopStencil();
 	}
+	bool uc = useConCol;
 	UI2::Toggle(exps - 148, off, 147, "Custom Bond Colors", useConCol);
 	if (useConCol) {
+		static auto cc = conCol;
 		UI2::Color(exps - 147, off + 17, 146, "Bond Color", conCol);
+		if (cc != conCol) {
+			cc = conCol;
+			Scene::dirty = true;
+		}
 		off += 35;
 	}
-	else off += 18;
-
+	else {
+		auto ucg = useConGradCol;
+		UI2::Toggle(exps - 148, off + 17, 147, "Blend Colors", useConGradCol);
+		if (ucg != useConGradCol) Scene::dirty = true;
+		off += 35;
+	}
+	if (uc != useConCol) Scene::dirty = true;
 }
 
 void ParGraphics::DrawMenu() {
@@ -1084,12 +1114,12 @@ void ParGraphics::DrawPopupDM() {
 	//if (dto != dt) ParGraphics::UpdateDrawLists();
 }
 
+#define SVS(nm, vl) n->addchild(#nm, vl)
+#define SV(nm, vl) SVS(nm, std::to_string(vl))
 void ParGraphics::Serialize(XmlNode* nd) {
 	nd->name = "PGraphics";
 	auto gp = nd->addchild("Graphics");
 	auto n = gp->addchild("Lighting");
-#define SVS(nm, vl) n->addchild(#nm, vl)
-#define SV(nm, vl) SVS(nm, std::to_string(vl))
 	SV(shading, (int)usePBR); SV(sky, reflId); SV(skystr, reflStr);
 	SV(skyfall, reflStrDecay), SV(specstr, specStr);
 	n->children.push_back(Xml::FromVec("bgcol", bgCol));
@@ -1102,11 +1132,28 @@ void ParGraphics::Serialize(XmlNode* nd) {
 	SV(quality, cm->quality);
 	SVS(usequality2, cm->useGBuffer2? "1" : "0");
 	SV(quality2, cm->quality2);
-#undef SVS
-#undef SV
+	SerializeCol(nd->addchild("Colors"));
 	Eff::Serialize(nd->addchild("Effects"));
 	Shadows::Serialize(nd->addchild("Shadows"));
 }
+void ParGraphics::SerializeCol(XmlNode* n) {
+	auto pm = n->addchild("Params");
+	for (int a = 0; a < Particles::particles_ParamSz; a++) {
+		auto n = pm->addchild("item");
+		SVS(name, Particles::particles_ParamNms[a]);
+	}
+	SV(usegrad, (int)useGradCol);
+	{
+		auto n = pm->addchild("grad");
+		for (int a = 0; a < 3; a++) {
+			n->children.push_back(Xml::FromVec(std::to_string(a), gradCols[a]));
+		}
+	}
+	SV(useconcol, (int)useConCol); SV(usecongradcol, (int)useConGradCol);
+	n->children.push_back(Xml::FromVec("concol", conCol));
+}
+#undef SVS
+#undef SV
 
 void ParGraphics::Deserialize(XmlNode* nd) {
 #define SW(nm) if (n3.name == #nm) for (auto& n4 : n3.children)
@@ -1138,6 +1185,7 @@ void ParGraphics::Deserialize(XmlNode* nd) {
 						}
 					}
 				}
+				else if (n2.name == "Colors") DeserializeCol(&n2);
 				else if (n2.name == "Effects") Eff::Deserialize(&n2);
 				else if (n2.name == "Shadows") Shadows::Deserialize(&n2);
 			}
@@ -1149,5 +1197,32 @@ void ParGraphics::Deserialize(XmlNode* nd) {
 	}
 #undef SW
 #undef GT
+#undef GTV
+}
+void ParGraphics::DeserializeCol(XmlNode* nd) {
+#define GTS(nm, vl) if (n.name == #nm) vl = n.value
+#define GT(nm, vl) if (n.name == #nm) vl = TryParse(n.value, vl)
+#define GTB(nm, vl) if (n.name == #nm) vl = (n.value == "1")
+#define GTV(nm, vl) if (n.name == #nm) Xml::ToVec(&n, vl)
+	for (auto& n : nd->children) {
+		if (n.name == "Params") {
+			auto& ps = Particles::particles_ParamSz;
+			for (auto& n2 : n.children) {
+				if (n2.name == "item") {
+					for (auto& n : n2.children) {
+						Particles::AddParam();
+						GTS(name, Particles::particles_ParamNms[ps-1]);
+					}
+				}
+			}
+		}
+		else GTB(usegrad, useGradCol);
+		else GTB(useconcol, useConCol);
+		else GTB(usecongradcol, useConGradCol);
+		else GTV(concol, conCol);
+	}
+#undef GTS
+#undef GT
+#undef GTB
 #undef GTV
 }

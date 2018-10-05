@@ -45,9 +45,11 @@ Rect* Engine::stencilRect = nullptr;
 
 GLuint Engine::quadBuffer;
 
+std::mutex Engine::stateLock;
+int Engine::stateLockId;
+
 void Engine::Init() {
 	Engine::_mainThreadId = std::this_thread::get_id();
-	
 
 	InitShaders();
 

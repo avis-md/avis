@@ -564,6 +564,8 @@ void ParLoader::DoOpenAnim() {
 		fault = true;
 	}
 
+	Engine::stateLockId = 1;
+	Engine::stateLock.lock();
 	anm.AllocFrames(info.frames);
 	for (uint16_t i = 0; i < info.frames; i++) {
 		anm.poss[i].resize(info.parNum);
@@ -576,6 +578,7 @@ void ParLoader::DoOpenAnim() {
 		}
 		anm.status[i] = Particles::AnimData::FRAME_STATUS::LOADED;
 	}
+	anm.maxFramesInMem = 10000000;
 	delete[](info.poss);
 	if (info.vels) delete[](info.vels);
 
@@ -583,6 +586,9 @@ void ParLoader::DoOpenAnim() {
 	anm.reading = false;
 	busy = false;
 	fault = false;
+	
+	Engine::stateLock.unlock();
+	Engine::stateLockId = 0;
 }
 
 void ParLoader::OpenFrame(uint f, const std::string& path) {

@@ -24,13 +24,14 @@ void Particles::AnimData::Clear() {
 }
 
 void Particles::AnimData::Seek(uint f) {
+	currentFrame = f;
+	if (frameCount <= 1) return;
 	if (status[f] != FRAME_STATUS::LOADED) {
 		if (status[f] == FRAME_STATUS::UNLOADED) {
 			ParLoader::OpenFrameNow(f, paths[f]);
 		}
 		if (status[f] == FRAME_STATUS::BAD) return;
 	}
-	currentFrame = f;
 	UpdateMemRange();
 }
 
@@ -86,7 +87,6 @@ void Particles::AnimData::UpdateMemRange() {
 
 
 Particles::paramdata::paramdata() {
-	data = new float[particleSz]{};
 	glGenBuffers(1, &buf);
 	glBindBuffer(GL_ARRAY_BUFFER, buf);
 	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(float), 0, GL_STATIC_DRAW);
@@ -98,15 +98,17 @@ Particles::paramdata::paramdata() {
 }
 
 Particles::paramdata::~paramdata() {
-	delete[](data);
 	glDeleteBuffers(1, &buf);
 	glDeleteTextures(1, &texBuf);
 }
 
 void Particles::paramdata::Update() {
+	if (!data.size()) return;
+	float* d = timed? &data[particleSz*anim.currentFrame] : &data[0];
 	glBindBuffer(GL_ARRAY_BUFFER, buf);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(float), data);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(float), d);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	dirty = false;
 }
 
 std::vector<ResidueList> Particles::residueLists;
@@ -181,17 +183,10 @@ void Particles::Clear() {
 		
 		delete[](particles_Name);
 		delete[](particles_ResName);
-		//delete[](particles_Pos);
-		//delete[](particles_Vel);
 		delete[](particles_Typ);
 		delete[](particles_Col);
 		std::free(particles_Conn.ids);
 		particles_Pos = 0;
-		/*
-		for (auto& c : particles_Conn2) {
-			delete[](c.ids);
-		}
-		*/
 		residueListSz = particleSz = Particles::particles_Conn.cnt = 0;
 
 		anim.Clear();
@@ -218,6 +213,16 @@ void Particles::GenTexBufs() {
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, radBuffer);
 
 	glBindTexture(GL_TEXTURE_BUFFER, 0);
+}
+
+void Particles::Update() {
+	for (int a = 0; a < particles_ParamSz; a++) {
+		auto& p = particles_Params[a];
+		if (p->dirty) {
+			p->Update();
+		}
+	}
+	anim.Update();
 }
 
 void Particles::UpdateBufs() {
@@ -284,24 +289,33 @@ void Particles::IncFrame(bool loop) {
 void Particles::SetFrame(uint frm) {
 	if (frm == anim.currentFrame) return;
 	else {
-		anim.Seek(frm);
-		if (anim.status[frm] != AnimData::FRAME_STATUS::LOADED) return;
-		particles_Pos = &anim.poss[anim.currentFrame][0];
-		std::vector<Vec3> poss(particleSz);
-#pragma omp parallel for
-		for (int a = 0; a < (int)particleSz; a++) {
-			poss[a] = (Vec3)particles_Pos[a];
+		if (anim.currentFrame != -1) {
+			anim.Seek(frm);
+			if (anim.status[frm] != AnimData::FRAME_STATUS::LOADED) return;
+			particles_Pos = &anim.poss[anim.currentFrame][0];
+			std::vector<Vec3> poss(particleSz);
+	#pragma omp parallel for
+			for (int a = 0; a < (int)particleSz; a++) {
+				poss[a] = (Vec3)particles_Pos[a];
+			}
+			glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(Vec3), &poss[0]);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			for (int a = 0; a < particles_ParamSz; a++) {
+				auto& p = particles_Params[a];
+				if (p->timed) {
+					p->Update();
+				}
+			}
+			for (int i = anim.conns2.size() - 1; i >= 0; i--) {
+				auto& c2 = anim.conns2[i];
+				if (!c2.size()) continue;
+				auto& c = particles_Conn2[i];
+				c.cnt = c2[frm].count;
+				c.ids = &c2[frm].ids[0];
+			}
 		}
-		glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(Vec3), &poss[0]);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		for (int i = anim.conns2.size() - 1; i >= 0; i--) {
-			auto& c2 = anim.conns2[i];
-			if (!c2.size()) continue;
-			auto& c = particles_Conn2[i];
-			c.cnt = c2[frm].count;
-			c.ids = &c2[frm].ids[0];
-		}
+		else anim.Seek(frm);
 		AnWeb::OnAnimFrame();
 		if (!!anim.conns2.size()) UpdateConBufs2();
 		Scene::active->dirty = true;
@@ -396,6 +410,7 @@ void Particles::Deserialize(XmlNode* nd) {
 					for (auto& n3 : n2.children) {
 						if (n3.name == "configuration" && n3.value != "") {
 							ParLoader::directLoad = true;
+							ParLoader::busy = true;
 							if (n3.params["relative"] == "1")
 								ParLoader::OnOpenFile(std::vector<std::string>{ s + n3.value });
 							else
@@ -410,9 +425,8 @@ void Particles::Deserialize(XmlNode* nd) {
 									ParLoader::OnOpenFile(std::vector<std::string>{ s + n3.value });
 								else
 									ParLoader::OnOpenFile(std::vector<std::string>{ n3.value });
-
 								//
-								while (ParLoader::busy){}
+								//while (ParLoader::busy){}
 							}
 							else if (n3.name == "visibility") {
 								DeserializeVis(&n3);

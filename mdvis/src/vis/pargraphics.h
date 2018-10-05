@@ -17,13 +17,13 @@ public:
 	static bool useGradCol;
 	static uint gradColParam;
 	static Vec4 gradCols[3];
-	static bool useConCol;
+	static bool useConCol, useConGradCol;
 	static Vec4 conCol;
 	
 	PROGDEF_H(reflProg, 15);
 	PROGDEF_H(reflCProg, 10);
-	PROGDEF_H(parProg, 10);
-	PROGDEF_H(parConProg, 15);
+	PROGDEF_H(parProg, 15);
+	PROGDEF_H(parConProg, 20);
 	PROGDEF_H(parConLineProg, 10);
 	PROGDEF_H(selHlProg, 5);
 	PROGDEF_H(colProg, 10);
@@ -115,8 +115,10 @@ public:
 	static void DrawPopupDM();
 
 	static void Serialize(XmlNode* nd);
+	static void SerializeCol(XmlNode* nd);
 
 	static void Deserialize(XmlNode* nd);
+	static void DeserializeCol(XmlNode* nd);
 
 protected:
 	static void BlitSky();

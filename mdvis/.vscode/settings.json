@@ -62,7 +62,9 @@
         "__string": "cpp",
         "optional": "cpp",
         "cmath": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "__mutex_base": "cpp",
+        "mutex": "cpp"
     },
     "python.linting.pylintEnabled": false
 }

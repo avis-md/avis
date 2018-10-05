@@ -29,7 +29,7 @@ enum class AN_NODE_IN : byte {
 	PINFO,
 	NUM
 };
-const std::string AN_NODE_INS[] = { "Particle data", "Particle info" };
+const std::string AN_NODE_INS[] = { "Particle data", "System info" };
 
 enum class AN_NODE_MOD {
 	NUM0 = 0x20,

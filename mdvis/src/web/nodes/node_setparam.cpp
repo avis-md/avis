@@ -7,17 +7,41 @@ Node_SetParam::Node_SetParam() : AnNode(new DmScript(sig)), paramId(0), di(&para
 	titleCol = Vec3(0.3f, 0.5f, 0.3f);
     canTile = false;
 	inputR.resize(1);
-	script->invars.push_back(std::pair<std::string, std::string>("values", "list(1f)"));
+	script->invars.push_back(std::pair<std::string, std::string>("values", "list(*d)"));
 }
 
 void Node_SetParam::Execute() {
     if (!inputR[0].first) return;
+	if (!Particles::particles_ParamSz) {
+		throw((char*)"Input param error\nNo params available!");
+	}
 	CVar& cv = inputR[0].first->conV[inputR[0].second];
-	auto& sz = *cv.dimVals[0];
-	if (sz != Particles::particleSz) return;
+	auto dm = cv.dimVals.size();
+	auto& prm = Particles::particles_Params[paramId];
+	if (dm > 2) {
+		throw((char*)"Input dimension error\nInput must be 1 or 2 dimensions!");
+	}
+	auto sz = *cv.dimVals[0];
+	auto tsz = 1;
+	prm->timed = false;
+	if (dm == 2) {
+		tsz = sz;
+		sz = *cv.dimVals[1];
+		if (tsz != Particles::anim.frameCount)
+			throw((char*)"Input length error\nInput must be for each frame!");
+		prm->timed = true;
+	}
+	if (sz != Particles::particleSz)
+		throw((char*)"Input length error\nInput must be for each particle!");
 
-    Particles::particles_Params[paramId]->data = *((float**)cv.value);
-    Particles::particles_Params[paramId]->dirty = true;
+    auto& tar = prm->data;
+	auto src = *((double**)cv.value);
+	tar.resize(tsz*sz);
+#pragma omp parallel for
+	for (int a = 0; a < sz*tsz; a++) {
+		tar[a] = (float)src[a];
+	}
+	prm->dirty = true;
 }
 
 void Node_SetParam::DrawHeader(float& off) {
@@ -28,5 +52,5 @@ void Node_SetParam::DrawHeader(float& off) {
 }
 
 void Node_SetParam::LoadOut(const std::string& path) {
-    Execute();
+	Execute();
 }

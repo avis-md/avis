@@ -33,7 +33,7 @@
 #include "res/resdata.h"
 
 bool __debug = false;
-float autoSaveTime = 30;
+float autoSaveTime = 10;
 
 void rendFunc() {
 	auto& cm = ChokoLait::mainCamera->object->transform;
@@ -67,7 +67,7 @@ void updateFunc() {
 	}
 
 	if (!!Particles::particleSz) {
-		Particles::anim.Update();
+		Particles::Update();
 		if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime)) {
 			VisSystem::lastSave = Time::time;
 			VisSystem::Save(IO::path + ".recover");
@@ -362,6 +362,7 @@ The hash for this program is )" << VisSystem::version_hash
 		glfwShowWindow(Display::window);
 
 		while (ChokoLait::alive()) {
+			Engine::stateLock.lock();
 			if (!Display::width || !Display::height)
 				glfwPollEvents();
 			else {
@@ -374,6 +375,9 @@ The hash for this program is )" << VisSystem::version_hash
 					VisSystem::renderMs = VisSystem::uiMs;
 				lastMillis = m;
 			}
+			Engine::stateLock.unlock();
+			while (Engine::stateLockId > 0)
+				;;
 		}
 		glfwDestroyWindow(Display::window);
 #ifndef NOCATCH

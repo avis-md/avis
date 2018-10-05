@@ -11,7 +11,10 @@ uniform vec2 screenSize;
 uniform uint id2;
 uniform samplerBuffer id2col;
 uniform sampler2D colList;
+uniform vec4 gradCols[3];
+uniform int colUseGrad;
 uniform int usegrad;
+uniform vec4 onecol;
 
 layout (location=0) out vec4 outColor;
 layout (location=1) out uvec4 outId;
@@ -21,12 +24,21 @@ float length2 (vec3 v) {
 	return v.x*v.x + v.y*v.y + v.z*v.z;
 }
 
+vec3 gradfill(float f) {
+	return (gradCols[0].rgb * clamp(2 - 4 * f, 0, 1)
+		+ gradCols[1].rgb * clamp(2 - abs(2 - 4 * f), 0, 1)
+		+ gradCols[2].rgb * clamp(4 * f - 2, 0, 1));
+}
+
 void SetColor(int id1, int id2, float f) {
     int cd1 = int(texelFetch(id2col, id1-1).r * 255);
     int cd2 = int(texelFetch(id2col, id2-1).r * 255);
-    vec4 cl1 = texture(colList, vec2((mod(cd1, 16) + 0.5) / 16.0, ((cd1 / 16) + 0.5) / 16.0));
-    vec4 cl2 = texture(colList, vec2((mod(cd2, 16) + 0.5) / 16.0, ((cd2 / 16) + 0.5) / 16.0));
-    outColor = mix(cl1, cl2, f);
+    vec3 cl1 = (colUseGrad == 1)? gradfill(cd1 / 255.0f)
+        : texture(colList, vec2((mod(cd1, 16) + 0.5) / 16.0, ((cd1 / 16) + 0.5) / 16.0)).rgb;
+    vec3 cl2 = (colUseGrad == 1)? gradfill(cd2 / 255.0f)
+        : texture(colList, vec2((mod(cd2, 16) + 0.5) / 16.0, ((cd2 / 16) + 0.5) / 16.0)).rgb;
+    outColor.rgb = mix(mix(cl1, cl2, f), onecol.rgb, onecol.a);
+    outColor.a = 1;
 }
 
 vec2 lli(vec3 p1, vec3 p2, vec3 d1, vec3 d2) {
@@ -53,7 +65,7 @@ void main()
     vec3 td = normalize(v2f_wpos2 - v2f_wpos1);
     float lm = length(v2f_wpos2 - v2f_wpos1);
     float L = length(v2f_wpos2 - v2f_wpos1);
-    float r = 0.008 * v2f_scl * 2;
+    float r = 0.008 * v2f_scl * 1.5f;
     //*
     vec4 ndc = vec4(
         (gl_FragCoord.x / screenSize.x - 0.5) * 2.0,

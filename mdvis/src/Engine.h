@@ -336,6 +336,9 @@ public:
 
 	static std::vector<Rect> stencilRects;
 	static Rect* stencilRect;
+
+	static std::mutex stateLock;
+	static int stateLockId;
 };
 
 #include "SceneObjects.h"
