@@ -5,11 +5,12 @@
 #include "ui/localizer.h"
 #include "ui/icons.h"
 #include "md/Particles.h"
+#include "md/parloader.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
 #endif
 
-//#define NO_REDIR_LOG
+#define NO_REDIR_LOG
 
 bool AnWeb::lazyLoad = true;
 
@@ -22,8 +23,11 @@ byte AnWeb::selSpNode = 0;
 std::string AnWeb::activeFile = "";
 std::vector<AnNode*> AnWeb::nodes;
 
-bool AnWeb::drawFull = false, AnWeb::expanded = true, AnWeb::executing = false, AnWeb::apply = false;
+bool AnWeb::drawFull = false, AnWeb::expanded = true;
+bool AnWeb::executing = false;
+bool AnWeb::apply = false;
 float AnWeb::maxScroll, AnWeb::scrollPos = 0, AnWeb::expandPos = 0;
+int AnWeb::execFrame;
 
 std::thread* AnWeb::execThread = nullptr;
 AnNode* AnWeb::execNode = nullptr;
@@ -33,10 +37,18 @@ bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
 
 void AnWeb::Init() {
 	Insert(new Node_Inputs());
+	Insert(new Node_Info());
 	for (int a = 0; a < 10; a++) {
 		AnBrowse::mscFdExpanded[a] = true;
 	}
 	ChokoLait::focusFuncs.push_back(CheckChanges);
+}
+
+void AnWeb::Clear() {
+	for (auto n : nodes) {
+		delete n;
+	}
+	nodes.clear();
 }
 
 void AnWeb::Insert(AnScript* scr, Vec2 pos) {
@@ -282,11 +294,20 @@ void AnWeb::DrawSide() {
 		if (Engine::Button(Display::width - expandPos + 109, 20, 70, 16, white(1, 0.4f), _("Edit"), 12, white(), true) == MOUSE_RELEASE)
 			drawFull = true;
 
-		if (Engine::Button(Display::width - expandPos + 1, 38, 70, 16, white(1, executing ? 0.2f : 0.4f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
+		bool ce = executing || ParLoader::busy;
+		if (Engine::Button(Display::width - expandPos + 1, 38, 70, 16, white(1, ce ? 0.2f : 0.4f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
 			AnWeb::Execute(false);
 		}
-		if (Engine::Button(Display::width - expandPos + 72, 38, 107, 16, white(1, executing ? 0.2f : 0.4f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
-			AnWeb::Execute(true);
+		if (!execFrame) {
+			if (Engine::Button(Display::width - expandPos + 72, 38, 107, 16, white(1, ce ? 0.2f : 0.4f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
+				AnWeb::Execute(true);
+			}
+		}
+		else {
+			UI::Quad(Display::width - expandPos + 72, 38, 107, 16, white(1, 0.2f));
+			UI::font->Align(ALIGN_TOPCENTER);
+			UI::Label(Display::width - expandPos + 72 + 54, 39, 12, std::to_string(execFrame), white(0.8f));
+			UI::font->Align(ALIGN_TOPLEFT);
 		}
 		UI::Texture(Display::width - expandPos + 1, 38, 16, 16, Icons::play);
 		UI::Texture(Display::width - expandPos + 72, 38, 16, 16, Icons::playall);
@@ -321,11 +342,12 @@ void AnWeb::DrawScene() {
 void AnWeb::Execute(bool all) {
 	if (!Particles::particleSz) return;
 	if (!executing) {
-		executing = true;
 		if (execThread) {
 			if (execThread->joinable()) execThread->join();
 			delete(execThread);
 		}
+		executing = true;
+		execFrame = all? 1 : 0;
 #ifndef IS_ANSERVER
 		if (AnOps::remote) {
 			Save(activeFile);
@@ -346,10 +368,12 @@ void AnWeb::DoExecute(bool all) {
 	if (all) {
 		ApplyFrameCount(Particles::anim.frameCount);
 		for (uint a = 0; a < Particles::anim.frameCount; a++) {
+			execFrame = a+1;
 			Node_Inputs::frame = a;
 			_DoExecute();
 			AnWeb::WriteFrame(a);
 		}
+		execFrame = 0;
 	}
 	else {
 		RemoveFrames();

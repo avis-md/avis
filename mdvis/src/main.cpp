@@ -394,8 +394,7 @@ The hash for this program is )" << VisSystem::version_hash
 				lastMillis = m;
 			}
 			Engine::stateLock.unlock();
-			while (Engine::stateLockId > 0)
-				;;
+			while (Engine::stateLockId > 0){}
 		}
 		glfwDestroyWindow(Display::window);
 #ifndef NOCATCH

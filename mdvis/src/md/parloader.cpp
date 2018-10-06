@@ -600,8 +600,7 @@ void ParLoader::OpenFrame(uint f, const std::string& path) {
 }
 
 void ParLoader::OpenFrameNow(uint f, std::string path) {
-	while (busy)
-		;;
+	while (busy){}
 	//std::cout << f << " " << path << " --- ";
 	std::flush(std::cout);
 	using FS = Particles::AnimData::FRAME_STATUS;

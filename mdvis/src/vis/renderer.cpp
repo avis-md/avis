@@ -6,8 +6,10 @@ VisRenderer::IMG_TYPE VisRenderer::imgType;
 VisRenderer::VID_TYPE VisRenderer::vidType;
 VisRenderer::STATUS VisRenderer::status;
 
+#define RESO 4096
+
 bool VisRenderer::imgUseAlpha = true, VisRenderer::vidUseAlpha;
-uint VisRenderer::imgW = 4096, VisRenderer::imgH = 4096, VisRenderer::vidW = 1024, VisRenderer::vidH = 600;
+uint VisRenderer::imgW = RESO, VisRenderer::imgH = RESO, VisRenderer::vidW = 1024, VisRenderer::vidH = 600;
 float VisRenderer::resLerp = -1;
 
 std::string VisRenderer::outputFolder =

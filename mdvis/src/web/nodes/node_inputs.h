@@ -22,4 +22,11 @@ public:
 	void LoadIn(const std::string& path) override;
 	void SaveOut(const std::string& path) override {}
 	void LoadOut(const std::string& path) override {}
+
+protected:
+	std::vector<glm::dvec3> vpos, vvel;
+	std::vector<short> vtyp;
+
+	double* poss, *vels;
+	short* typs;
 };

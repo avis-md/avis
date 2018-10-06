@@ -1,6 +1,6 @@
 #include "anweb.h"
 
-//#define NO_PYLOG
+#define NO_PYLOG
 
 bool AnScript::Clear() {
 	invars.clear();

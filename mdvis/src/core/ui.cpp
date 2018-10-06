@@ -461,6 +461,20 @@ Vec3 AU(Vec3 vec) {
 	return vec;
 }
 
+float UI::GetLabelW(float s, std::string str, Font* font) {
+	if (!s || !str[0]) return 0;
+	uint si = (uint)round(s);
+	size_t sz = str.size();
+	float totalW = 0;
+	char* cc = &str[0];
+	while(cc) {
+		auto c = Font::utf2unc(cc);
+		if (c < 0x0100) totalW += font->params[(uint)s][0].o2s[c & 0x00ff];
+		else totalW += font2->params[(uint)s][c & 0xff00].o2s[c & 0x00ff];
+	}
+	return totalW;
+}
+
 void UI::Label(float x, float y, float s, std::string st, Vec4 col, float maxw, Font* font) {
 	Label(x, y, s, &st[0], st.size(), col, maxw, font);
 }

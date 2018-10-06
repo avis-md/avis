@@ -26,14 +26,21 @@ void Node_Plot::DrawFooter(float& y) {
 	y += width;
 }
 
+#define RETERR(msg) std::cerr << msg << std::endl; return
+
 void Node_Plot::Execute() {
 #ifndef IS_ANSERVER
 	if (!inputR[0].first) return;
 	auto xid = inputR[1].first ? *(int*)inputR[1].first->conV[inputR[1].second].value : inputVDef[1].i;
 	auto yid = inputR[2].first ? *(int*)inputR[2].first->conV[inputR[2].second].value : inputVDef[2].i;
 	CVar& cv = inputR[0].first->conV[inputR[0].second];
-	if (!cv.value) return;
+	if (!cv.value) {
+		RETERR("Value pointer is empty!");
+	}
 	auto ds = cv.dimVals.size();
+	if (ds > 2) {
+		RETERR("Data of 3+ dimensions cannot be plotted!");
+	}
 	auto sz = *cv.dimVals[0];
 	auto sz2 = (cv.dimVals.size() > 1)? *cv.dimVals[1] : 1;
 	if (sz > 1) {
@@ -70,9 +77,8 @@ void Node_Plot::Execute() {
 			}
 			break;
 		default:
-			Debug::Warning("Plot", "Unexpected data type " + cv.typeName + "!");
 			valXs.clear();
-			break;
+			RETERR("Unexpected data type " + cv.typeName + "!");
 		}
 	}
 	if (ds == 2 && yid == -1) {
@@ -86,9 +92,8 @@ void Node_Plot::Execute() {
 				cs('i', int);
 				cs('d', double);
 			default:
-				Debug::Warning("Plot", "Unexpected data type " + cv.typeName + "!");
 				valXs.clear();
-				return;
+				RETERR("Unexpected data type " + cv.typeName + "!");
 			}
 		}
 #undef cs
@@ -105,9 +110,8 @@ void Node_Plot::Execute() {
 			cs('i', int);
 			cs('d', double);
 		default:
-			Debug::Warning("Plot", "Unexpected data type " + cv.typeName + "!");
 			valXs.clear();
-			return;
+			RETERR("Unexpected data type " + cv.typeName + "!");
 		}
 	}
 #endif

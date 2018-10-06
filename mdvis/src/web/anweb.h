@@ -72,6 +72,7 @@ public:
 
 	static bool drawFull, expanded, executing, apply;
 	static float maxScroll, scrollPos, expandPos;
+	static int execFrame;
 
 	static std::thread* execThread;
 	static AnNode* execNode;
@@ -79,6 +80,7 @@ public:
 	static bool hasPy, hasC, hasFt;
 	static bool hasPy_s, hasC_s, hasFt_s;
 
+	static void Clear();
 	static void Insert(AnScript* scr, Vec2 pos = Vec2(100, 100));
 	static void Insert(AnNode* node, Vec2 pos = Vec2(100, 100));
 	static void Init(), Update(), Draw(), DrawSide(), DrawScene();

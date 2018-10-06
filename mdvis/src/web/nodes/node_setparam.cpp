@@ -10,16 +10,18 @@ Node_SetParam::Node_SetParam() : AnNode(new DmScript(sig)), paramId(0), di(&para
 	script->invars.push_back(std::pair<std::string, std::string>("values", "list(*d)"));
 }
 
+#define RETERR(msg) { std::cerr << msg << std::endl; return; }
+
 void Node_SetParam::Execute() {
     if (!inputR[0].first) return;
 	if (!Particles::particles_ParamSz) {
-		throw((char*)"Input param error\nNo params available!");
+		RETERR("No params available!");
 	}
 	CVar& cv = inputR[0].first->conV[inputR[0].second];
 	auto dm = cv.dimVals.size();
 	auto& prm = Particles::particles_Params[paramId];
 	if (dm > 2) {
-		throw((char*)"Input dimension error\nInput must be 1 or 2 dimensions!");
+		RETERR("Input must be 1 or 2 dimensions!");
 	}
 	auto sz = *cv.dimVals[0];
 	auto tsz = 1;
@@ -28,11 +30,11 @@ void Node_SetParam::Execute() {
 		tsz = sz;
 		sz = *cv.dimVals[1];
 		if (tsz != Particles::anim.frameCount)
-			throw((char*)"Input length error\nInput must be for each frame!");
+			RETERR("Input must be for each frame!");
 		prm->timed = true;
 	}
 	if (sz != Particles::particleSz)
-		throw((char*)"Input length error\nInput must be for each particle!");
+		RETERR("Input must be for each particle!");
 
     auto& tar = prm->data;
 	auto src = *((double**)cv.value);

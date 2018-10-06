@@ -124,7 +124,10 @@ void VisSystem::Init() {
 
 	auto& mi = menuItems[0];
 	mi.resize(5);
-	mi[0].Set(Icons::newfile, _("New"), Particles::Clear);
+	mi[0].Set(Icons::newfile, _("New"), []() {
+		Particles::Clear();
+		AnWeb::Clear();
+	});
 	mi[1].Set(Icons::openfile, _("Open"), []() {
 		auto res = Dialog::OpenFile({ "*" EXT_SVFL });
 		if (!!res.size()) {
@@ -343,6 +346,7 @@ bool VisSystem::Load(const std::string& path) {
 	bool success = false;
 	Debug::Message("System", "Loading: " + path);
 	Particles::Clear();
+	AnWeb::Clear();
 	currentSavePath = path;
 	auto l = path.find_last_of('/');
 	auto s = path.substr(0, l);

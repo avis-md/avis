@@ -86,11 +86,47 @@ void Node_Inputs::DrawHeader(float& off) {
 
 void Node_Inputs::Execute() {
 #ifndef IS_ANSERVER
-	conV[0].value = &Particles::anim.poss[frame];
-	conV[1].value = &Particles::anim.vels[frame];
-
-	
-	conV[4].value = &Particles::particles_Typ;
+	if (!filter) {
+		conV[0].value = &Particles::anim.poss[frame];
+		conV[1].value = &Particles::anim.vels[frame];
+		conV[4].value = &Particles::particles_Typ;
+	}
+	else {
+		vpos.clear();
+		vvel.clear();
+		vtyp.clear();
+		vpos.reserve(Particles::particleSz);
+		vvel.reserve(Particles::particleSz);
+		vtyp.reserve(Particles::particleSz);
+		int off;
+		if (filter & (int)FILTER::VIS > 0) {
+			for (int a = 0; a < Particles::residueListSz; a++) {
+				auto& rli = Particles::residueLists[a];
+				if (rli.visible) {
+					for (int b = 0; b < rli.residueSz; b++) {
+						auto& rl = rli.residues[b];
+						if (rl.visible) {
+							vpos.resize(off + rl.cnt);
+							vvel.resize(off + rl.cnt);
+							vtyp.resize(off + rl.cnt);
+#pragma omp parallel for
+							for (int a = 0; a < rl.cnt; a++) {
+								vpos[off + a] = Particles::particles_Pos[rl.offset + a];
+								vvel[off + a] = Particles::particles_Vel[rl.offset + a];
+								vtyp[off + a] = Particles::particles_Typ[rl.offset + a];
+							}
+						}
+					}
+				}
+			}
+		}
+		poss = &vpos[0][0];
+		vels = &vvel[0][0];
+		typs = &vtyp[0];
+		conV[0].value = &poss;
+		conV[1].value = &vels;
+		conV[4].value = &typs;
+	}
 #endif
 }
 
