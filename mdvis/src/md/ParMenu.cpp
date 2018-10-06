@@ -69,6 +69,7 @@ void ParMenu::Draw() {
 			case 4:
 				//
 				UI::Label(expandPos - 148, 30, 12, "Particle count: " + std::to_string(Particles::particleSz), white());
+				UI::Label(expandPos - 148, 47, 12, "fps: " + std::to_string((int)roundf(1/Time::delta)), white());
 				break;
 			}
 		}

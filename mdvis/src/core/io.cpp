@@ -248,11 +248,13 @@ void IO::RedirectStdio2(std::string path) {
 	stderr_o = _dup(2);
 #ifdef PLATFORM_WIN
 	stdout_n = _fsopen(path.c_str(), "w", _SH_DENYWR);
+	stdout_n = _fsopen(path.c_str(), "w", _SH_DENYWR);
 #else
-	stdout_n = fopen(path.c_str(), "w");
+	stdout_n = fopen((path + "_o").c_str(), "w");
+	stderr_n = fopen((path + "_e").c_str(), "w");
 #endif
 	_dup2(_fileno(stdout_n), 1);
-	_dup2(_fileno(stdout_n), 2);
+	_dup2(_fileno(stderr_n), 2);
 }
 
 void IO::RestoreStdio2() {
@@ -263,6 +265,7 @@ void IO::RestoreStdio2() {
 	_close(stdout_o);
 	_close(stderr_o);
 	fclose(stdout_n);
+	fclose(stderr_n);
 }
 
 void IO::OpenFd(std::string path) {

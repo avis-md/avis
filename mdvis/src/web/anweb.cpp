@@ -9,7 +9,7 @@
 #include "vis/system.h"
 #endif
 
-#define NO_REDIR_LOG
+//#define NO_REDIR_LOG
 
 bool AnWeb::lazyLoad = true;
 
@@ -359,15 +359,13 @@ void AnWeb::DoExecute(bool all) {
 
 	executing = false;
 	apply = true;
-#ifndef NO_REDIR_LOG
-	remove((IO::path + "nodes/__tmpstd").c_str());
-#endif
 }
 
 void AnWeb::_DoExecute() {
 	char* err = 0;
 	static std::string pylog;
 	for (auto n : nodes) {
+		Debug::Message("AnWeb", "Executing " + n->script->name);
 #ifndef NO_REDIR_LOG
 		if (n->script->type == AN_SCRTYPE::PYTHON)
 			PyScript::ClearLog();
@@ -380,10 +378,11 @@ void AnWeb::_DoExecute() {
 		try {
 			n->Execute();
 		}
-		catch (char* e) {
-			err = e;
+		catch (const char* e) {
+			err = const_cast<char*>(e);
 		}
 		catch (...) {
+			err = (char*)"Unknown error thrown!";
 			cxp = std::current_exception();
 		}
 		n->executing = false;
@@ -394,12 +393,10 @@ void AnWeb::_DoExecute() {
 			}
 			catch (std::exception& e) {
 				static std::string serr = e.what();
-				serr += " thrown!\x01";
+				serr += " thrown!";
 				err = &serr[0];
 			}
-			catch (...) {
-				err = (char*)"Unknown error thrown!\x01";
-			}
+			catch (...) {}
 		}
 
 #ifndef NO_REDIR_LOG
@@ -408,10 +405,15 @@ void AnWeb::_DoExecute() {
 		}
 		else {
 			IO::RestoreStdio2();
-			auto f = std::ifstream(IO::path + "nodes/__tmpstd");
+			auto f = std::ifstream(IO::path + "nodes/__tmpstd_o");
 			std::string s;
 			while (std::getline(f, s)) {
 				n->log.push_back(std::pair<byte, std::string>(0, s));
+			}
+			f.close();
+			f.open(IO::path + "nodes/__tmpstd_e");
+			while (std::getline(f, s)) {
+				n->log.push_back(std::pair<byte, std::string>(2, s));
 			}
 		}
 #endif
@@ -429,6 +431,10 @@ void AnWeb::_DoExecute() {
 			n->CatchExp(err);
 			break;
 		}
+#ifndef NO_REDIR_LOG
+		remove((IO::path + "nodes/__tmpstd_o").c_str());
+		remove((IO::path + "nodes/__tmpstd_e").c_str());
+#endif
 	}
 	execNode = nullptr;
 }

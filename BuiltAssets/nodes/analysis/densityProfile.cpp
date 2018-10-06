@@ -28,6 +28,10 @@ int typecnt = 0;
 
 //entry
 void Do () {
+    if (count <= 0) {
+        std::cerr << "count must be positive!" << std::endl;
+        return;
+    }
     double zmin = bbox[axis*2];
     double zmax = bbox[axis*2+1];
     double vol = (bbox[1]-bbox[0])*(bbox[3]-bbox[2])*(bbox[5]-bbox[4]);

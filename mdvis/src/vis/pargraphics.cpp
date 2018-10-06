@@ -815,7 +815,10 @@ void ParGraphics::BlitSky() {
 		glUniform1f(reflProgLocs[8], reflStr);
 		glUniform1f(reflProgLocs[9], reflStrDecay);
 		glUniform1f(reflProgLocs[10], specStr);
-		glUniform3f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b);
+		if (AnWeb::drawFull)
+			glUniform3f(reflProgLocs[11], 0, 0, 0);
+		else
+			glUniform3f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b);
 	}
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, cam->texs.colTex);

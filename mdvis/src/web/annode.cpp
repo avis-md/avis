@@ -910,7 +910,9 @@ void CNode::CatchExp(char* c) {
 	msg.name = script->name;
 	msg.path = script->path;
 	msg.severe = true;
-	
+	msg.msg.resize(1, c);
+	log.push_back(std::pair<byte, std::string>(2, c));
+	ErrorView::execMsgs.push_back(msg);
 }
 
 
