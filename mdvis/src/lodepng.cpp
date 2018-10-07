@@ -5685,7 +5685,8 @@ unsigned lodepng_encode(unsigned char** out, size_t* outsize,
   if(!lodepng_color_mode_equal(&state->info_raw, &info.color))
   {
     unsigned char* converted;
-    size_t size = (w * h * (size_t)lodepng_get_bpp(&info.color) + 7) / 8;
+	//casted to 64-bit to avoid overflow on 32-bit versions
+    size_t size = (size_t)((uint64_t)w * h * (size_t)lodepng_get_bpp(&info.color) / 8 + 1);
 
     converted = (unsigned char*)lodepng_malloc(size);
     if(!converted && size) state->error = 83; /*alloc fail*/

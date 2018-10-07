@@ -102,10 +102,6 @@ public:
 
 	static void Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h);
 
-	//colPallete to gbuffer
-	//static void Recolor();
-
-	//gbuffers to screen
 	static void Reblit();
 
 	static void DrawOverlay();

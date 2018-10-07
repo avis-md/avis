@@ -135,7 +135,7 @@ void Camera::Render(onBlitFunc func) {
 		}
 	}
 
-	float zero[] = { 0,0,0,0 };
+	float zero[4] = {};
 	float one = 1;
 	if (Scene::dirty) {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
@@ -150,6 +150,9 @@ void Camera::Render(onBlitFunc func) {
 		glDisable(GL_BLEND);
 		MVP::Switch(true);
 		MVP::Clear();
+		MVP::Translate(-1 - offset.x * 2, 1 + offset.y * 2, 0);
+		MVP::Scale(scale, scale, 1);
+		MVP::Translate(1, -1, 0);
 		ApplyGL();
 		MVP::Switch(false);
 		MVP::Clear();
@@ -188,16 +191,7 @@ void Camera::Render(onBlitFunc func) {
 
 	Scene::dirty = false;
 }
-/*
-void Camera::_ApplyEmission(GLuint d_fbo, GLuint d_texs[], float w, float h, GLuint targetFbo) {
-	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetFbo);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, d_fbo);
 
-	glReadBuffer(GL_COLOR_ATTACHMENT0 + GBUFFER_EMISSION_AO);
-	glBlitFramebuffer(0, 0, (int)w, (int)h, 0, 0, (int)w, (int)h, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-}
-*/
 GLuint Light::_shadowFbo = 0;
 GLuint Light::_shadowGITexs[] = {0, 0, 0};
 GLuint Light::_shadowMap = 0;
@@ -263,7 +257,7 @@ void Light::DrawShadowMap(GLuint tar) {
 	glDepthFunc(GL_LEQUAL);
 	glDepthMask(true);
 	glDisable(GL_BLEND);
-	float zero[] = { 0,0,0,0 };
+	float zero[4] = {};
 	float one = 1;
 	glClearBufferfv(GL_COLOR, 0, zero);
 	glClearBufferfv(GL_DEPTH, 0, &one);

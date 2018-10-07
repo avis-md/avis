@@ -102,7 +102,7 @@ void ParGraphics::Eff::Apply() {
 		}
 		if (AnWeb::drawFull) cnt += Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1], 1.0f, Display::width, Display::height);
 	}
-
+	
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->target);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->blitFbos[cnt % 2]);
 	
@@ -188,7 +188,7 @@ void ParGraphics::Init() {
 	LC(inEmit); LC(inDepth); LC(inSky); LC(inSkyE);
 	LC(skyStrength); LC(skyStrDecay); LC(specStr); LC(bgCol);
 #undef LC
-
+	
 	reflCProg = Shader::FromF(mv, glsl::reflFragC);
 #define LC(nm) reflCProgLocs[i++] = glGetUniformLocation(reflCProg, #nm)
 	i = 0;
@@ -203,7 +203,7 @@ void ParGraphics::Init() {
 	LC(_MV); LC(_P); LC(camPos);
 	LC(camFwd); LC(orthoSz); LC(screenSize);
 	LC(radTex); LC(radScl); LC(id2col); LC(colList);
-	LC(gradCols); LC(colUseGrad);
+	LC(gradCols); LC(colUseGrad); LC(spriteScl);
 	auto bid = glGetUniformBlockIndex(parProg, "clipping");
 	glUniformBlockBinding(parProg, bid, _clipBindId);
 #undef LC
@@ -216,7 +216,7 @@ void ParGraphics::Init() {
 	LC(id2); LC(radScl); LC(orthoSz);
 	LC(id2col); LC(colList); 
 	LC(gradCols); LC(colUseGrad);
-	LC(usegrad); LC(onecol);
+	LC(usegrad); LC(onecol); LC(spriteScl);
 	bid = glGetUniformBlockIndex(parConProg, "clipping");
 	glUniformBlockBinding(parConProg, bid, _clipBindId);
 #undef LC
@@ -593,6 +593,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		}
 
 		auto ql = ChokoLait::mainCamera->quality;
+		auto spriteScl = ChokoLait::mainCamera->scale;
 
 		float osz = -1;
 		if (ChokoLait::mainCamera->ortographic) {
@@ -627,6 +628,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 				glUniform4fv(parProgLocs[10], 3, &gradCols[0][0]);
 			}
 			glUniform1i(parProgLocs[11], useGradCol);
+			glUniform1f(parProgLocs[12], spriteScl);
 
 			glBindVertexArray(Particles::posVao);
 			for (auto& p : drawLists) {
@@ -686,6 +688,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					glUniform1i(parConProgLocs[13], useGradCol);
 					glUniform1i(parConProgLocs[14], useConGradCol);
 					glUniform4f(parConProgLocs[15], conCol.r, conCol.g, conCol.b, useConCol? 1 : 0);
+					glUniform1f(parConProgLocs[16], spriteScl);
 
 					glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
 				}
@@ -757,7 +760,7 @@ void ParGraphics::Reblit() {
 			else {
 				//Recolor();
 				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[0]);
-				float zero[] = { 0,0,0,0 };
+				float zero[4] = {};
 				glClearBufferfv(GL_COLOR, 0, zero);
 				BlitSky();
 			}

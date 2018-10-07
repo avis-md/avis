@@ -6,10 +6,11 @@ VisRenderer::IMG_TYPE VisRenderer::imgType;
 VisRenderer::VID_TYPE VisRenderer::vidType;
 VisRenderer::STATUS VisRenderer::status;
 
-#define RESO 4096
+#define RESO 2048*8
 
-bool VisRenderer::imgUseAlpha = true, VisRenderer::vidUseAlpha;
+bool VisRenderer::imgUseAlpha = false, VisRenderer::vidUseAlpha;
 uint VisRenderer::imgW = RESO, VisRenderer::imgH = RESO, VisRenderer::vidW = 1024, VisRenderer::vidH = 600;
+uint VisRenderer::imgSlices = 4;
 float VisRenderer::resLerp = -1;
 
 std::string VisRenderer::outputFolder =
@@ -21,6 +22,17 @@ std::string VisRenderer::outputFolder =
 ;
 
 GLuint VisRenderer::res_fbo = 0, VisRenderer::res_img = 0;
+GLuint VisRenderer::tmp_fbo = 0, VisRenderer::tmp_img = 0;
+
+int VisRenderer::_maxTexSz;
+
+void VisRenderer::Init() {
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &_maxTexSz);
+	if (!_maxTexSz) {
+		Debug::Warning("VisRenderer", "Unable to determine max texture size, assuming 2048!");
+		_maxTexSz = 2048;
+	}
+}
 
 void VisRenderer::Draw() {
 	if (status == IMG) {
@@ -70,26 +82,56 @@ void VisRenderer::Draw() {
 
 void VisRenderer::ToImage() {
 	if (status != READY) return;
-	_SetRes();
+	int iw = imgW / imgSlices;
+	int ih = imgH / imgSlices;
+	if ((iw * imgSlices != imgW) || (ih * imgSlices != imgH))
+		Debug::Warning("VisRenderer", "Image cannot be cleanly sliced into " + std::to_string(imgSlices) + "!");
 
 	auto cam = ChokoLait::mainCamera();
-	Scene::dirty = true;
 	auto w = Display::width;
 	auto h = Display::height;
 	auto w2 = Display::actualWidth;
 	auto h2 = Display::actualHeight;
 	auto w3 = Display::frameWidth;
 	auto h3 = Display::frameHeight;
-	Display::width = Display::actualWidth = Display::frameWidth = imgW;
-	Display::height = Display::actualHeight = Display::frameHeight = imgH;
-	cam->target = res_fbo;
+	Display::width = Display::actualWidth = Display::frameWidth = iw;
+	Display::height = Display::actualHeight = Display::frameHeight = ih;
 	ParGraphics::hlIds.clear();
 	if (imgUseAlpha) ParGraphics::bgCol.a = 0;
 
-	cam->Render([]() {
-		auto& cm = ChokoLait::mainCamera->object->transform;
-		ParGraphics::Rerender(cm.position(), cm.forward(), (float)imgW, (float)imgH);
-	});
+	MakeTex(res_fbo, res_img, imgW, imgH);
+	if (imgSlices > 1) {
+		MakeTex(tmp_fbo, tmp_img, iw, ih);
+		cam->target = tmp_fbo;
+	}
+	else {
+		cam->target = res_fbo;
+	}
+	
+	cam->scale = imgSlices;
+	for (int a = 0; a < imgSlices; a++) {
+		for (int b = 0; b < imgSlices; b++) {
+			Scene::dirty = true;
+			cam->offset = Vec2(a, b);
+			cam->Render([]() {
+				auto& cm = ChokoLait::mainCamera->object->transform;
+				ParGraphics::Rerender(cm.position(), cm.forward(), (float)imgW / imgSlices, (float)imgH / imgSlices);
+			});
+			MVP::Switch(false);
+			MVP::Clear();
+			glDepthMask(true);
+			if (imgSlices > 1) {
+				glBindFramebuffer(GL_READ_FRAMEBUFFER, tmp_fbo);
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, res_fbo);
+				glReadBuffer(GL_COLOR_ATTACHMENT0);
+				glBlitFramebuffer(0, 0, iw, ih, iw*a, ih*(imgSlices - b - 1), iw*(a+1)-1, ih*(imgSlices - b)-1, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+				glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			}
+		}
+	}
+	cam->scale = 1;
+	cam->offset = Vec2();
 
 	Display::width = w;
 	Display::height = h;
@@ -104,19 +146,19 @@ void VisRenderer::ToImage() {
 	status = IMG;
 }
 
-void VisRenderer::_SetRes() {
-	if (res_fbo) {
-		glDeleteFramebuffers(1, &res_fbo);
+void VisRenderer::MakeTex(GLuint& fbo, GLuint& tex, int w, int h) {
+	if (fbo) {
+		glDeleteFramebuffers(1, &fbo);
 	}
 	else {
-		glGenTextures(1, &res_img);
+		glGenTextures(1, &tex);
 	}
-	glGenFramebuffers(1, &res_fbo);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, res_fbo);
+	glGenFramebuffers(1, &fbo);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 
-	glBindTexture(GL_TEXTURE_2D, res_img);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgW, imgH, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, res_img, 0);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
 	SetTexParams<>();
 	glBindTexture(GL_TEXTURE_2D, 0);
 	

@@ -21,16 +21,22 @@ public:
 
 	static bool imgUseAlpha, vidUseAlpha;
 	static uint imgW, imgH, vidW, vidH;
+	static uint imgSlices;
 	
 	static float resLerp;
 
 	static std::string outputFolder;
 
-	static GLuint res_fbo, res_img;
+	static GLuint res_fbo, res_img, res_dph;
+	static GLuint tmp_fbo, tmp_img, tmp_dph;
+
+	static int _maxTexSz;
+
+	static void Init();
 
 	static void Draw();
 
 	static void ToImage();
 
-	static void _SetRes();
+	static void MakeTex(GLuint& fbo, GLuint& tex, int w, int h);
 };

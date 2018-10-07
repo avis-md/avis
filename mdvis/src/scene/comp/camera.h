@@ -24,8 +24,9 @@ public:
 	float nearClip;
 	float farClip;
 	GLuint target;
-	//rRenderTexture targetRT; //oh well
-	//std::vector<rCameraEffect> effects;
+
+	float scale;
+	Vec2 offset;
 
 	void Render(onBlitFunc func = nullptr);
 
