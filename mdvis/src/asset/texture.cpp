@@ -1,7 +1,9 @@
 #include "Engine.h"
 
+extern "C" {
 #include "jpeglib.h"
 #include "jerror.h"
+}
 #include "lodepng.h"
 
 std::unordered_map<GLuint, int> Texture::_refcnt;

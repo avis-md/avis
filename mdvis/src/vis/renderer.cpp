@@ -6,11 +6,11 @@ VisRenderer::IMG_TYPE VisRenderer::imgType;
 VisRenderer::VID_TYPE VisRenderer::vidType;
 VisRenderer::STATUS VisRenderer::status;
 
-#define RESO 2048*8
+#define RESO 2048*4
 
 bool VisRenderer::imgUseAlpha = false, VisRenderer::vidUseAlpha;
 uint VisRenderer::imgW = RESO, VisRenderer::imgH = RESO, VisRenderer::vidW = 1024, VisRenderer::vidH = 600;
-uint VisRenderer::imgSlices = 4;
+uint VisRenderer::imgSlices = 4, VisRenderer::multisamples = 4;
 float VisRenderer::resLerp = -1;
 
 std::string VisRenderer::outputFolder =
@@ -111,22 +111,32 @@ void VisRenderer::ToImage() {
 	cam->scale = imgSlices;
 	for (int a = 0; a < imgSlices; a++) {
 		for (int b = 0; b < imgSlices; b++) {
-			Scene::dirty = true;
-			cam->offset = Vec2(a, b);
-			cam->Render([]() {
-				auto& cm = ChokoLait::mainCamera->object->transform;
-				ParGraphics::Rerender(cm.position(), cm.forward(), (float)imgW / imgSlices, (float)imgH / imgSlices);
-			});
-			MVP::Switch(false);
-			MVP::Clear();
-			glDepthMask(true);
-			if (imgSlices > 1) {
-				glBindFramebuffer(GL_READ_FRAMEBUFFER, tmp_fbo);
-				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, res_fbo);
-				glReadBuffer(GL_COLOR_ATTACHMENT0);
-				glBlitFramebuffer(0, 0, iw, ih, iw*a, ih*(imgSlices - b - 1), iw*(a+1)-1, ih*(imgSlices - b)-1, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-				glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			const float ctw = 0.5f / iw;
+			const float cth = 0.5f / ih;
+			const Vec2 smps[] = { Vec2(ctw / 2, cth / 2), Vec2(3 * ctw / 2, cth / 2), Vec2(ctw / 2, 3 * cth / 2), Vec2(3 * ctw / 2, 3 * cth / 2) };
+			for (int c = 0; c < 4; c++) {
+				Scene::dirty = true;
+				cam->offset = Vec2(a, b) + Vec2(smps[c]);
+				cam->Render([]() {
+					auto& cm = ChokoLait::mainCamera->object->transform;
+					ParGraphics::Rerender(cm.position(), cm.forward(), (float)imgW / imgSlices, (float)imgH / imgSlices);
+				});
+				MVP::Switch(false);
+				MVP::Clear();
+				glDepthMask(true);
+				if (imgSlices > 1) {
+					glViewport(0, 0, imgW, imgH);
+					//glBindFramebuffer(GL_READ_FRAMEBUFFER, tmp_fbo);
+					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, res_fbo);
+					//glReadBuffer(GL_COLOR_ATTACHMENT0);
+					//glBlitFramebuffer(0, 0, iw, ih, iw*a, ih*(imgSlices - b - 1), iw*(a + 1), ih*(imgSlices - b), GL_COLOR_BUFFER_BIT, GL_LINEAR);
+					const float dis = 1.0f / imgSlices;
+					if (c > 0) glBlendFunc(GL_ONE, GL_ONE);
+					else glBlendFunc(GL_ONE, GL_ZERO);
+					UI::Quad(a*iw*dis, b*ih*dis, iw*dis, ih*dis, tmp_img, white()*0.25f);
+					//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+				}
 			}
 		}
 	}
@@ -159,7 +169,7 @@ void VisRenderer::MakeTex(GLuint& fbo, GLuint& tex, int w, int h) {
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
-	SetTexParams<>();
+	SetTexParams<>(0, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	
 	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0 };

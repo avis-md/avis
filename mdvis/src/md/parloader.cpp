@@ -560,6 +560,8 @@ void ParLoader::DoOpenAnim() {
 	info.first = droppedFiles[0].c_str();
 	info.parNum = Particles::particleSz;
 	info.maxFrames = maxframes;
+	loadFrames = &info.frames;
+	loadProgress = &info.progress;
 
 	if (impId > -1) importers[impId].funcs[funcId].trjFunc(&info);
 

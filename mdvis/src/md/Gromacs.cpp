@@ -4,7 +4,7 @@
 #include "xdrfile/xdrfile.h"
 #include "xdrfile/xdrfile_trr.h"
 
-uint _find_char_not_of(char* first, char* last, char c) {
+size_t _find_char_not_of(char* first, char* last, char c) {
 	for (char* f = first; first < last; first++) {
 		if (*first != c)
 			return first - f;
@@ -52,7 +52,7 @@ bool Gromacs::Read(ParInfo* info) {
 		auto bf = buf;
 		info->resId[i] = (uint16_t)std::atoi(bf); bf += ns;
 		memcpy(info->resname + i * info->nameSz, bf, 5); bf += 5;
-		uint n0 = _find_char_not_of(bf, bf + 5, ' ');
+		auto n0 = _find_char_not_of(bf, bf + 5, ' ');
 		memcpy(info->name + i * info->nameSz, bf + n0, 5 - n0);
 		info->type[i] = (uint16_t)bf[n0];
 		bf += 5 + ns;
@@ -102,6 +102,11 @@ bool Gromacs::ReadGro2(ParInfo* info, std::ifstream& strm, size_t isz) {
 //fix float
 bool Gromacs::ReadTrj(TrjInfo* info) {
 	int natoms = 0;
+	size_t fsz;
+	{
+		std::ifstream strm(info->first, std::ios::binary | std::ios::ate);
+		fsz = strm.tellg();
+	}
 	auto file = xdrfile_open(info->first, "rb");
 	if (!file) {
 		SETERR("Cannot open file!");
@@ -120,6 +125,7 @@ bool Gromacs::ReadTrj(TrjInfo* info) {
 			delete[](_ps);
 			break;
 		}
+		info->progress = ftell((FILE*)xdrfile_ptr(file)) / (float)fsz;
 		poss.push_back(_ps);
 		info->frames++;
 	} while (info->frames != info->maxFrames);

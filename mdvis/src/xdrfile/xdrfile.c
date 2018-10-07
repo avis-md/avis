@@ -244,6 +244,12 @@ xdrfile_open(const char *path, const char *mode)
 	return xfp;
 }
 
+void *
+xdrfile_ptr(XDRFILE* xfp)
+{
+	return xfp->fp;
+}
+
 int 
 xdrfile_close(XDRFILE *xfp)
 {

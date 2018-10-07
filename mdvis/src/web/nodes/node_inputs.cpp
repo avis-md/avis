@@ -99,7 +99,7 @@ void Node_Inputs::Execute() {
 		vvel.reserve(Particles::particleSz);
 		vtyp.reserve(Particles::particleSz);
 		int off = 0;
-		if (filter & (int)FILTER::VIS > 0) {
+		if ((filter & (int)FILTER::VIS) > 0) {
 			for (int a = 0; a < Particles::residueListSz; a++) {
 				auto& rli = Particles::residueLists[a];
 				if (rli.visible) {

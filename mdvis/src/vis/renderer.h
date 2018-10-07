@@ -21,7 +21,7 @@ public:
 
 	static bool imgUseAlpha, vidUseAlpha;
 	static uint imgW, imgH, vidW, vidH;
-	static uint imgSlices;
+	static uint imgSlices, multisamples;
 	
 	static float resLerp;
 

@@ -126,6 +126,11 @@ extern "C"
 	xdrfile_open    (const char *    path, 
 					 const char *    mode);
 
+	/*
+	 *  Hey I want the FILE* for ftell and stuff
+	 */
+	void *
+	xdrfile_ptr		(XDRFILE *		 xfp);
 
 	/*! \brief Close a previously opened portable binary file, just like fclose()
 	 *

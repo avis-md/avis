@@ -459,6 +459,7 @@ void AnWeb::_DoExecute() {
 		remove((IO::path + "nodes/__tmpstd_o").c_str());
 		remove((IO::path + "nodes/__tmpstd_e").c_str());
 #endif
+		Debug::Message("AnWeb", "Executed " + n->script->name);
 	}
 	execNode = nullptr;
 }

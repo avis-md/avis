@@ -296,6 +296,15 @@ void VisSystem::DrawBar() {
 
 		UI::Label(Display::width - 155.0f, Display::height - 16.0f, 12, std::to_string(Particles::anim.currentFrame + 1) + "/" + std::to_string(Particles::anim.frameCount), white());
 	}
+	else if (Particles::anim.reading && ParLoader::loadFrames) {
+		float w = 172;
+		if (*ParLoader::loadProgress > 0) {
+			UI::Quad(w, Display::height - 15.0f, 150, 12, white(1, 0.05f));
+			UI::Quad(w + 1, Display::height - 14.0f, 148 * *ParLoader::loadProgress, 10, white(1, 0.7f));
+			w += 155;
+		}
+		UI::Label(w, Display::height - 16.0f, 12, "Loading frame " + std::to_string(*ParLoader::loadFrames), white(0.5f));
+	}
 	else
 		UI::Label(172, Display::height - 16.0f, 12, _("No Animation Data"), white(0.5f));
 

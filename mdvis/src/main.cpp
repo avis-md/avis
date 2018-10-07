@@ -68,7 +68,7 @@ void updateFunc() {
 
 	if (!!Particles::particleSz) {
 		Particles::Update();
-		if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime)) {
+		if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime) && !ParLoader::busy) {
 			VisSystem::lastSave = Time::time;
 			VisSystem::Save(IO::path + ".recover");
 			VisSystem::SetMsg("autosaved at t=" + std::to_string((int)Time::time) + "s");
