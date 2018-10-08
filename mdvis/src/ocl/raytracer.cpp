@@ -244,6 +244,12 @@ void RayTracer::SetObjs() {
 		v.y += 1;
 	}
 
+	g_objshapes.push_back(g_objshapes[1]);
+	auto& v = g_objshapes.back().mesh.positions;
+	for (int a = 0, b = g_objshapes.back().mesh.positions.size() / 3; a < b; a++) {
+		v[a * 3] += 1;
+	}
+
 	/*
 	g_objshapes.push_back(TO::shape_t());
 	g_objshapes.back().name = "ball";
@@ -253,11 +259,12 @@ void RayTracer::SetObjs() {
 	memcpy(&msh.positions[0], &tet.verts[0][0], tsz * sizeof(Vec3));
 	msh.normals.resize(tsz*3);
 	memcpy(&msh.normals[0], &tet.norms[0][0], tsz * sizeof(Vec3));
+	msh.texcoords.resize(tsz*2);
 	auto isz = tet.tris.size();
 	msh.indices.resize(isz);
 	memcpy(&msh.indices[0], &tet.tris[0], isz * sizeof(int));
 	msh.material_ids.resize(isz/3, 0);
-	//*/
+	*/
 
 	std::vector<float> verts;
 	std::vector<float> normals;

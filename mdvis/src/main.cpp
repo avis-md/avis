@@ -50,8 +50,6 @@ void rendFunc() {
 		MVP::Clear();
 		MVP::Mul(_p);
 	}
-	if (RayTracer::resTex)
-		RayTracer::Refine();
 	AnWeb::OnSceneUpdate();
 }
 
@@ -100,7 +98,7 @@ void updateFunc() {
 		}
 	}
 	if (RayTracer::resTex) {
-		
+		RayTracer::Refine();
 	}
 
 
@@ -298,7 +296,7 @@ The hash for this program is )" << VisSystem::version_hash
 		INIT(CReader);
 		LINIT(PyReader);
 		INIT(FReader);
-		LINIT(RayTracer);
+		INIT(RayTracer);
 		INIT(Color);
 		INIT(Icons);
 		LINIT(CubeMarcher);
