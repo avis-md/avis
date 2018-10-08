@@ -38,7 +38,7 @@ int ErrorView::Parse_GCC(const std::string& path, const std::string& sig, const 
         if (str[0] == '/') {
 #endif
 			if (str.substr(0, sz) == sig) {
-				if (string_find(str, " initialized and declared 'extern'") > -1 || 
+				if (string_find(str, "initialized and declared ‘extern’") > -1 || 
 					string_find(str, "all code is position independant") > -1 ) continue;
 				msgs.push_back(Message());
 				msg = &msgs.back();

@@ -9,8 +9,8 @@
                 "${workspaceFolder}/../radeonrays/RadeonRays/include",
                 "usr/include/freetype2/",
                 "/usr/local/include/freetype2/",
-                "/usr/include/python2.7/",
-                "/usr/local/include/python2.7"
+                "/usr/include/python3.6/",
+                "/usr/local/include/python3.6/"
             ],
             "defines": [
                 "PLATFORM_OSX",
@@ -39,7 +39,14 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/src"
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/../radeonrays/Calc/inc",
+                "${workspaceFolder}/../radeonrays/CLW",
+                "${workspaceFolder}/../radeonrays/RadeonRays/include",
+                "usr/include/freetype2/",
+                "/usr/local/include/freetype2/",
+                "/usr/include/python3.6/",
+                "/usr/local/include/python3.6/"
             ],
             "defines": [
                 "PLATFORM_LNX",

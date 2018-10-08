@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine.h"
 #include "popups.h"
+#include <functional>
 
 //UI with default style settings
 

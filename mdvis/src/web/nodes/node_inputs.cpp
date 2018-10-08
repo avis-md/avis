@@ -85,10 +85,21 @@ void Node_Inputs::DrawHeader(float& off) {
 }
 
 void Node_Inputs::Execute() {
+	glm::dvec3* pos, *vel;
+	if (!Particles::anim.poss.size()) {
+		pos = Particles::particles_Pos;
+		vel = Particles::particles_Vel;
+	}
+	else {
+		pos = &Particles::anim.poss[frame][0];
+		vel = &Particles::anim.vels[frame][0];
+	}
 #ifndef IS_ANSERVER
 	if (!filter) {
-		conV[0].value = &Particles::anim.poss[frame];
-		conV[1].value = &Particles::anim.vels[frame];
+		conV[0].data.val.arr.p = pos;
+		conV[0].value = &conV[0].data.val.arr.p;
+		conV[1].data.val.arr.p = vel;
+		conV[1].value = &conV[1].data.val.arr.p;
 		conV[4].value = &Particles::particles_Typ;
 	}
 	else {

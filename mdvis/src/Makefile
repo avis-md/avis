@@ -10,6 +10,10 @@ UNAME_S := $(shell uname -s)
 RRAYPRE := ../../radeonrays
 RRAY := -DUSE_OPENCL -DRR_EMBED_KERNELS -I$(RRAYPRE)/Calc/inc -I$(RRAYPRE)/CLW/ -I$(RRAYPRE)/RadeonRays/include
 RRAYL := -L$(RRAYPRE)/build/Calc -L$(RRAYPRE)/build/CLW -L../build
+RRAYBIN :=
+
+BINPRE := /usr/lib/x86_64-linux-gnu
+BINPRE2 := /lib/x86_64-linux-gnu
 
 ifeq ($(UNAME_S),Linux)
 	OSFLAG += -D PLATFORM_LNX
@@ -17,7 +21,8 @@ ifeq ($(UNAME_S),Linux)
 	GLLIB += /usr/lib/x86_64-linux-gnu/libjpeg.a -lssh2 -lOpenCL `pkg-config --static --libs gl glew glfw3 freetype2`
 	#PYLIB += $(shell python3-config --configdir)/libpython3.6m.a -lexpat
 	PYLIB += -L../build -lpython3
-	NUMPY +=  -I/usr/local/lib/python3.6/dist-packages/numpy/core/include
+	NUMPY += -I/usr/local/lib/python3.6/dist-packages/numpy/core/include
+	RRAYBIN += libRadeonRays.so.2.0
 endif
 ifeq ($(UNAME_S),Darwin)
 	OSFLAG += -D PLATFORM_OSX
@@ -26,6 +31,7 @@ ifeq ($(UNAME_S),Darwin)
 	WEAK_LIB += -weak_library
 	PYLIB += $(shell python3-config --configdir)/libpython3.6m.a
 	NUMPY +=  -I/usr/local/lib/python3.6/site-packages/numpy/core/include
+	RRAYBIN += libRadeonRays.dylib
 endif
 LIBS2 += $(RRAYL) -lCalc -lCLW -lRadeonRays
 
@@ -68,12 +74,18 @@ HEADERSX = xdrfile/xdrfile.h xdrfile/xdrfile_trr.h xdrfile/xdrfile_xtc.h
 ../build/mdvis: $(OBJS)
 ifeq ($(UNAME_S),Darwin)
 	cp $(RRAYPRE)/build/bin/libRadeonRays.dylib ../build/libRadeonRays.dylib
-	$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
 endif
 ifeq ($(UNAME_S),Linux)
-	cp $(RRAYPRE)/build/bin/libRadeonRays.so ../build/libRadeonRays.so
-	$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
+	cp $(BINPRE)/libpython3.6m.so.1.0 ../build/libpython3.6m.so.1.0
+	cp $(BINPRE)/libssh2.so.1 ../build/libssh2.so.1
+	cp $(BINPRE)/libOpenCL.so.1 ../build/libOpenCL.so.1
+	cp $(BINPRE)/libGLEW.so.2.0 ../build/libGLEW.so.2.0
+	cp $(BINPRE)/libglfw.so.3 ../build/libglfw.so.3
+	cp $(BINPRE2)/libgcrypt.so.20 ../build/libgcrypt.so.20
+	cp $(RRAYPRE)/build/bin/libRadeonRays.so.2.0 ../build/libRadeonRays.so.2.0
 endif
+	@echo "Linking..."
+	@$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
 ifeq ($(UNAME_S),Darwin)
 	install_name_tool -add_rpath "@executable_path" ../build/mdvis
 	install_name_tool -change $(shell python3-config --exec)/Python /tmpp/Python ../build/mdvis
@@ -83,7 +95,8 @@ endif
 
 obj/%.o: $(HEADERS)
 obj/%.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	@echo "Compiling " $<
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
 obj/xdrfile/%.o: $(HEADERSX)
 obj/xdrfile/%.o: xdrfile/%.c
