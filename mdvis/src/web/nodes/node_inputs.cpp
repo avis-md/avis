@@ -80,6 +80,7 @@ void Node_Inputs::DrawHeader(float& off) {
 	UI::Quad(pos.x, off, width, 17, bgCol);
 	static std::string ss[] = { "Visible", "Clipped", "" };
 	static Popups::DropdownItem di(&filter, &ss[0], true);
+	di.target = &filter;
 	UI2::Dropdown(pos.x + 5, off, width - 10, "Filter", di);
 	off += 17;
 }
@@ -122,8 +123,8 @@ void Node_Inputs::Execute() {
 							vtyp.resize(off + rl.cnt);
 #pragma omp parallel for
 							for (int a = 0; a < rl.cnt; a++) {
-								vpos[off + a] = Particles::particles_Pos[rl.offset + a];
-								vvel[off + a] = Particles::particles_Vel[rl.offset + a];
+								vpos[off + a] = pos[rl.offset + a];
+								vvel[off + a] = vel[rl.offset + a];
 								vtyp[off + a] = Particles::particles_Typ[rl.offset + a];
 							}
 						}
