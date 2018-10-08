@@ -2,9 +2,10 @@
 #ifndef IS_ANSERVER
 #include "md/Particles.h"
 #include "ui/ui_ext.h"
+#include "vis/pargraphics.h"
 #endif
 
-uint Node_Inputs::frame = 0;
+uint Node_Inputs::frame = 0, Node_Inputs::parcount = 0;
 
 Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)), filter(0) {
 	DmScript* scr = (DmScript*)script;
@@ -45,7 +46,7 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)), filter(0) {
 	poss.data.dims.resize(1, 3);
 	poss.type = AN_VARTYPE::LIST;
 #ifndef IS_ANSERVER
-	poss.dimVals[0] = (int*)&Particles::particleSz;
+	poss.dimVals[0] = (int*)&parcount;
 #endif
 	poss.dimVals[1] = &poss.data.dims[0];
 	
@@ -57,7 +58,7 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)), filter(0) {
 	posa.data.dims.resize(1, 3);
 #ifndef IS_ANSERVER
 	posa.dimVals[0] = (int*)&Particles::anim.frameCount;
-	posa.dimVals[1] = (int*)&Particles::particleSz;
+	posa.dimVals[1] = (int*)&parcount;
 #endif
 	posa.dimVals[2] = &posa.data.dims[0];
 	conV[3] = posa;
@@ -65,7 +66,7 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)), filter(0) {
 	auto& post = conV[4];
 	post.dimVals.resize(1);
 #ifndef IS_ANSERVER
-	post.dimVals[0] = (int*)&Particles::particleSz;
+	post.dimVals[0] = (int*)&parcount;
 #endif
 	post.stride = 2;
 
@@ -86,6 +87,11 @@ void Node_Inputs::DrawHeader(float& off) {
 }
 
 void Node_Inputs::Execute() {
+#ifndef IS_ANSERVER
+	bool setpos = outputR[0].size() > 0;
+	bool setvel = outputR[1].size() > 0;
+	bool settyp = outputR[4].size() > 0;
+
 	glm::dvec3* pos, *vel;
 	if (!Particles::anim.poss.size()) {
 		pos = Particles::particles_Pos;
@@ -95,8 +101,8 @@ void Node_Inputs::Execute() {
 		pos = &Particles::anim.poss[frame][0];
 		vel = &Particles::anim.vels[frame][0];
 	}
-#ifndef IS_ANSERVER
 	if (!filter) {
+		parcount = Particles::particleSz;
 		conV[0].data.val.arr.p = pos;
 		conV[0].value = &conV[0].data.val.arr.p;
 		conV[1].data.val.arr.p = vel;
@@ -104,33 +110,54 @@ void Node_Inputs::Execute() {
 		conV[4].value = &Particles::particles_Typ;
 	}
 	else {
-		vpos.clear();
-		vvel.clear();
-		vtyp.clear();
-		vpos.reserve(Particles::particleSz);
-		vvel.reserve(Particles::particleSz);
-		vtyp.reserve(Particles::particleSz);
+		if (setpos) {
+			vpos.clear();
+			vpos.reserve(Particles::particleSz);
+		}
+		if (setpos) {
+			vvel.clear();
+			vvel.reserve(Particles::particleSz);
+		}
+		if (setpos) {
+			vtyp.clear();
+			vtyp.reserve(Particles::particleSz);
+		}
 		int off = 0;
 		if ((filter & (int)FILTER::VIS) > 0) {
-			for (int a = 0; a < Particles::residueListSz; a++) {
-				auto& rli = Particles::residueLists[a];
-				if (rli.visible) {
-					for (int b = 0; b < rli.residueSz; b++) {
-						auto& rl = rli.residues[b];
-						if (rl.visible) {
-							vpos.resize(off + rl.cnt);
-							vvel.resize(off + rl.cnt);
-							vtyp.resize(off + rl.cnt);
-#pragma omp parallel for
-							for (int a = 0; a < rl.cnt; a++) {
-								vpos[off + a] = pos[rl.offset + a];
-								vvel[off + a] = vel[rl.offset + a];
-								vtyp[off + a] = Particles::particles_Typ[rl.offset + a];
-							}
-						}
+			for (auto& dl : ParGraphics::drawLists) {
+				vpos.resize(off + dl.second.first);
+				memcpy(&vpos[off], pos + dl.first, dl.second.first * sizeof(glm::dvec3));
+				if (setvel) {
+					vvel.resize(off + dl.second.first);
+					memcpy(&vvel[off], vel + dl.first, dl.second.first * sizeof(glm::dvec3));
+				}
+				if (settyp) {
+					vtyp.resize(off + dl.second.first);
+					memcpy(&vtyp[off], Particles::particles_Typ + dl.first, dl.second.first * sizeof(short));
+				}
+				off += dl.second.first;
+			}
+			parcount = (uint)vpos.size();
+		}
+		if ((filter & (int)FILTER::CLP) > 0 && ParGraphics::clippingType != ParGraphics::CLIPPING::NONE) {
+			std::vector<glm::dvec3> tpos; std::swap(tpos, vpos); vpos.reserve(parcount);
+			std::vector<glm::dvec3> tvel; if (setvel) { std::swap(tvel, vvel); vvel.reserve(parcount); }
+			std::vector<short> ttyp; if (settyp) { std::swap(ttyp, vtyp); vtyp.reserve(parcount); }
+			for (int a = 0; a < parcount; a++) {
+				auto& pos = tpos[a];
+				bool clipped = false;
+				for (int c = 0; c < 6; c++) {
+					if (glm::dot((Vec3)pos, (Vec3)ParGraphics::clippingPlanes[c]) > ParGraphics::clippingPlanes[c].w) {
+						clipped = true;
+						break;
 					}
 				}
+				if (clipped) continue;
+				vpos.push_back(pos);
+				if (setvel) vvel.push_back(tvel[a]);
+				if (setvel) vtyp.push_back(ttyp[a]);
 			}
+			parcount = (uint)vpos.size();
 		}
 		poss = &vpos[0][0];
 		vels = &vvel[0][0];

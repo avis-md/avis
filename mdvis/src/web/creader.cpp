@@ -153,11 +153,11 @@ bool CReader::Read(CScript* scr) {
 				}
 				cl += " /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
 				const std::string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".so\" \"" + fp2 + nm + ".obj\"";
-				RunCmd::Run("\"" + vcbatPath + "\" && " + cl + " > \"" + fp2 + nm + "_log.txt\" && " + lk + " > \"" + fp2 + nm + "_log.txt\"");
+				RunCmd::Run("\"" + vcbatPath + "\">NUL && " + cl + " > \"" + fp2 + nm + "_log.txt\" && " + lk + " > \"" + fp2 + nm + "_log.txt\"");
 				scr->errorCount = ErrorView::Parse_MSVC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 			}
 			else {
-				std::string cmd = "g++ -std=c++11 -static-libstdc++ -static-libgcc -shared -fPIC " + flags1;
+				std::string cmd = "g++ -std=c++11 -static-libstdc++ -shared -fPIC " + flags1;
 				if (useOMP) {
 					cmd += " -fopenmp";
 					if (useOMP2) cmd += " -lomp";
