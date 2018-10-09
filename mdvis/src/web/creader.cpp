@@ -345,7 +345,7 @@ bool CReader::Read(CScript* scr) {
 					opt.enums.push_back("");
 				}
 				else if (irg) {
-					opt.range = Vec2(TryParse(lns[2], 0.0f), TryParse(lns[3], 1.0f));
+					opt.range = Vec2(TryParse(lns[2], 0.f), TryParse(lns[3], 1.f));
 				}
 			}
 

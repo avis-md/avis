@@ -52,7 +52,7 @@ void plt::plot(float x, float y, float w, float h, float* dx, float** dy, uint c
 		UI::SetVao(cnt, poss);
 
 		glUseProgram(Engine::defProgram);
-		glUniform4f(Engine::defColLoc, cols[j*3], cols[j*3+1], cols[j*3+2], 1.0f);
+		glUniform4f(Engine::defColLoc, cols[j*3], cols[j*3+1], cols[j*3+2], 1.f);
 		glBindVertexArray(UI::_vao);
 		glDrawArrays(GL_LINE_STRIP, 0, cnt);
 		glBindVertexArray(0);
@@ -66,7 +66,7 @@ void plt::plot(float x, float y, float w, float h, float* dx, float** dy, uint c
 		UI::Label(x, y + h + 2, (float)sz, to_string_scientific(x1), col);
 		font->Align(ALIGN_TOPRIGHT);
 		UI::Label(x + w, y + h + 2, (float)sz, to_string_scientific(x2), col);
-		Engine::RotateUI(-90.0f, Vec2(x, y + w));
+		Engine::RotateUI(-90.f, Vec2(x, y + w));
 		font->Align(ALIGN_TOPLEFT);
 		UI::Label(x, y + h - 4 - sz, (float)sz, to_string_scientific(y1), col);
 		font->Align(ALIGN_TOPRIGHT);
@@ -133,8 +133,8 @@ void plt::remap(float x, float y, float w, float h, plt::remapdata& data) {
 		}
 	}
 	if (data.selId > -1 && Input::mouse0) {
-		data.pts[data.selId] = Vec2(Clamp((Input::mousePos.x - x)/w, 0.0f, 1.0f), 
-			1 - Clamp((Input::mousePos.y - y)/h, 0.0f, 1.0f));
+		data.pts[data.selId] = Vec2(Clamp((Input::mousePos.x - x)/w, 0.f, 1.f), 
+			1 - Clamp((Input::mousePos.y - y)/h, 0.f, 1.f));
 		
 		Vec2 me = data.pts[data.selId];
 		std::sort(data.pts.begin(), data.pts.end(), [](Vec2 v1, Vec2 v2) { return v1.x < v2.x; });

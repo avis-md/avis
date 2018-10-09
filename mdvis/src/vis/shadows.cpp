@@ -84,7 +84,7 @@ void Shadows::UpdateBox() {
 	}
 	pos = Vec3();
 		//pos += *(Vec3*)&wps[a];
-	pos /= 8.0f;
+	pos /= 8.f;
 	memset(box, 0, sizeof(float) * 6);
 	for (uint a = 0; a < 8; a++) {
 		Vec4 rs = _p * wps[a];
@@ -98,7 +98,7 @@ void Shadows::UpdateBox() {
 	}
 	*/
 	_p = glm::ortho<float>(-1, 1, -1, 1, 0.01f, 100);//glm::ortho(box[0], box[1], box[2], box[3], box[4] - dst2, box[5]) * _p;
-	_p *= Mat4x4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, -1.0f, 0, 0, 0, 0, 1);
+	_p *= Mat4x4(1.f, 0, 0, 0, 0, 1.f, 0, 0, 0, 0, -1.f, 0, 0, 0, 0, 1);
 	_p *= Mat4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1);
 	float csw = cos(rw*deg2rad);
 	float snw = sin(rw*deg2rad);
@@ -149,7 +149,7 @@ void Shadows::Reblit() {
 	glUniform1f(_progLocs[5], bias / 100);
 	glUniform1f(_progLocs[6], str);
 	glUniform3f(_progLocs[7], cpos.x, cpos.y, cpos.z);
-	glUniform1f(_progLocs[8], _sz / 2048.0f);
+	glUniform1f(_progLocs[8], _sz / 2048.f);
 	glUniformMatrix4fv(_progLocs[9], 1, GL_FALSE, glm::value_ptr(_p));
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

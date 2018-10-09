@@ -43,7 +43,7 @@ bool Gromacs::Read(ParInfo* info) {
 	auto ns = _find_char_not_of(buf, buf + 10, ' ') + 1;
 	strm.seekg(lc);
 	for (uint i = 0; i < sz; i++) {
-		info->progress = i * 1.0f / sz;
+		info->progress = i * 1.f / sz;
 		strm.getline(buf, 100);
 		if (strm.eof()) {
 			SETERR("File data is incomplete!");

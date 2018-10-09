@@ -17,9 +17,9 @@ CubeMarcher::CubeMarcher(Texture3D* tex) : tex(tex) {
 	for (byte a = 0; a < _sz; a++) {
 		for (byte b = 0; b < _sz; b++) {
 			for (byte c = 0; c < _sz; c++) {
-				float a2 = powf(a - (_sz - 1.0f) / 2, 2);
-				float b2 = powf(b - (_sz - 1.0f) / 2, 2);
-				float c2 = powf(c - (_sz - 1.0f) / 2, 2);
+				float a2 = powf(a - (_sz - 1.f) / 2, 2);
+				float b2 = powf(b - (_sz - 1.f) / 2, 2);
+				float c2 = powf(c - (_sz - 1.f) / 2, 2);
 				ff[a * _sz * _sz + b * _sz + c] = (expf(-16 * sqrtf(a2 + b2 + c2) / _sz));
 				cff[a * _sz * _sz + b * _sz + c] = (expf(-16 * sqrtf(a2 + b2 + c2) / _sz));
 			}
@@ -28,9 +28,9 @@ CubeMarcher::CubeMarcher(Texture3D* tex) : tex(tex) {
 	for (byte a = 0; a < _sz; a++) {
 		for (byte b = 0; b < _sz; b++) {
 			for (byte c = 0; c < _sz; c++) {
-				float a2 = powf(a - 3 * (_sz - 1.0f) / 4, 2);
-				float b2 = powf(b - (_sz - 1.0f) / 2, 2);
-				float c2 = powf(c - (_sz - 1.0f) / 2, 2);
+				float a2 = powf(a - 3 * (_sz - 1.f) / 4, 2);
+				float b2 = powf(b - (_sz - 1.f) / 2, 2);
+				float c2 = powf(c - (_sz - 1.f) / 2, 2);
 				ff[a * _sz * _sz + b * _sz + c] += (expf(-32 * sqrtf(a2 + b2 + c2) / _sz));
 				cff[a * _sz * _sz + b * _sz + c] -= (expf(-32 * sqrtf(a2 + b2 + c2) / _sz));
 			}
@@ -39,9 +39,9 @@ CubeMarcher::CubeMarcher(Texture3D* tex) : tex(tex) {
 	for (byte a = 0; a < _sz; a++) {
 		for (byte b = 0; b < _sz; b++) {
 			for (byte c = 0; c < _sz; c++) {
-				float a2 = powf(a - (_sz - 1.0f) / 2, 2);
-				float b2 = powf(b - (_sz - 1.0f) / 2, 2);
-				float c2 = powf(c - 3 * (_sz - 1.0f) / 4, 2);
+				float a2 = powf(a - (_sz - 1.f) / 2, 2);
+				float b2 = powf(b - (_sz - 1.f) / 2, 2);
+				float c2 = powf(c - 3 * (_sz - 1.f) / 4, 2);
 				ff[a * _sz * _sz + b * _sz + c] += (expf(-32 * sqrtf(a2 + b2 + c2) / _sz));
 				cff[a * _sz * _sz + b * _sz + c] -= (expf(-32 * sqrtf(a2 + b2 + c2) / _sz));
 			}
@@ -50,11 +50,11 @@ CubeMarcher::CubeMarcher(Texture3D* tex) : tex(tex) {
 	for (byte a = 0; a < _sz; a++) {
 		for (byte b = 0; b < _sz; b++) {
 			for (byte c = 0; c < _sz; c++) {
-				float a2 = powf(a - 16.0f, 2);
-				float b2 = powf(b - 16.0f, 2);
-				float c2 = powf(c - 8.0f, 2);
+				float a2 = powf(a - 16.f, 2);
+				float b2 = powf(b - 16.f, 2);
+				float c2 = powf(c - 8.f, 2);
 				bb[a * _sz * _sz + b * _sz + c] = (byte)min(ff[a * _sz * _sz + b * _sz + c] * 500, 254.99f);
-				cbb[a * _sz * _sz + b * _sz + c] = (byte)Clamp(cff[a * _sz * _sz + b * _sz + c] * 6400 + 127, 0.0f, 254.99f);
+				cbb[a * _sz * _sz + b * _sz + c] = (byte)Clamp(cff[a * _sz * _sz + b * _sz + c] * 6400 + 127, 0.f, 254.99f);
 			}
 		}
 	}

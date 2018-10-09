@@ -47,10 +47,10 @@ void Node_ShowRange::DrawHeader(float& off) {
     off += 18;
     auto s = std::to_string(rMin);
     s = UI2::EditText(pos.x + 2, off, (uint)width - 4, "min", s);
-    rMin = TryParse(s, 0.0f);
+    rMin = TryParse(s, 0.f);
     s = std::to_string(rMax);
     s = UI2::EditText(pos.x + 2, off + 17, (uint)width - 4, "max", s);
-    rMax = TryParse(s, 0.0f);
+    rMax = TryParse(s, 0.f);
 	off += 35;
 }
 

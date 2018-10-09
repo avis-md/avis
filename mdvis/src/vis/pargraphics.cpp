@@ -15,8 +15,8 @@
 #include "ocl/raytracer.h"
 #include "res/shddata.h"
 
-#define SCL_MIN -7.0f
-#define SCL_MAX 2.0f
+#define SCL_MIN -7.f
+#define SCL_MAX 2.f
 
 
 Texture ParGraphics::bg, ParGraphics::splash, ParGraphics::logo;
@@ -100,7 +100,7 @@ void ParGraphics::Eff::Apply() {
 			std::swap(cam->blitTexs[0], cam->blitTexs[1]);
 			cnt = 0;
 		}
-		if (AnWeb::drawFull) cnt += Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1], 1.0f, Display::width, Display::height);
+		if (AnWeb::drawFull) cnt += Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1], 1.f, Display::width, Display::height);
 	}
 	
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->target);
@@ -269,7 +269,7 @@ void ParGraphics::InitClippingMesh() {
 	for (int a = 0; a < 4; a++) {
 		pts[a] = Vec3(cosf(a*PI/2), sinf(a*PI/2), 0) * 0.05f;
 		pts[a+4] = pts[a];
-		pts[a+8] = pts[a]*3.0f;
+		pts[a+8] = pts[a]*3.f;
 		pts[a+8].z = pts[a+4].z = 0.5f;
 	}
 	pts[13] = Vec3(0, 0, 0.6f);
@@ -422,8 +422,8 @@ void ParGraphics::Update() {
 					}
 				}
 				else if ((VisSystem::mouseMode == VIS_MOUSE_MODE::PAN) || (((VisSystem::mouseMode == VIS_MOUSE_MODE::ROTATE) && (dragMode == 2)))) {
-					rotCenter -= 5.0f * scrX * (Input::mouseDelta.x / Display::width);
-					rotCenter += 5.0f * scrY * (Input::mouseDelta.y / Display::height);
+					rotCenter -= 5.f * scrX * (Input::mouseDelta.x / Display::width);
+					rotCenter += 5.f * scrY * (Input::mouseDelta.y / Display::height);
 				}
 			}
 		}
@@ -573,7 +573,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		float snw = sin(-rotW*deg2rad);
 		Mat4x4 mMatrix = Mat4x4(1, 0, 0, 0, 0, csw, snw, 0, 0, -snw, csw, 0, 0, 0, 0, 1) * Mat4x4(csz, 0, -snz, 0, 0, 1, 0, 0, snz, 0, csz, 0, 0, 0, 0, 1);
 		MVP::Mul(mMatrix);
-		float s = pow(2.0f, rotScale);
+		float s = pow(2.f, rotScale);
 		MVP::Scale(s, s, s);
 		if (rotCenterTrackId < ~0) {
 			rotCenter = Particles::particles_Pos[rotCenterTrackId];
@@ -848,7 +848,7 @@ void ParGraphics::BlitHl() {
 	glBindVertexArray(Camera::emptyVao);
 
 	if (!!selIds.size()) {
-		glUniform3f(selHlProgLocs[3], 0.0f, 1.0f, 0.0f);
+		glUniform3f(selHlProgLocs[3], 0.f, 1.f, 0.f);
 		for (auto& i : selIds) {
 			glUniform1i(selHlProgLocs[1], i);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -856,7 +856,7 @@ void ParGraphics::BlitHl() {
 	}
 	if (!!hlIds.size()) {
 		glUniform1i(selHlProgLocs[1], hlIds[0]);
-		glUniform3f(selHlProgLocs[3], 1.0f, 1.0f, 0.0f);
+		glUniform3f(selHlProgLocs[3], 1.f, 1.f, 0.f);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 
@@ -866,12 +866,12 @@ void ParGraphics::BlitHl() {
 
 void ParGraphics::DrawOverlay() {
 	if (zoomFade > 0) {
-		auto zf = min(zoomFade * 2, 1.0f);
-		UI::Quad(Display::width * 0.5f - 150.0f, Display::height - 100.0f, 300, 20, white(zf * 0.9f, 0.15f));
-		UI::Texture(Display::width * 0.5f - 150.0f, Display::height - 98.0f, 16, 16, Icons::zoomOut, white(zf));
-		UI::Texture(Display::width * 0.5f + 134.0f, Display::height - 98.0f, 16, 16, Icons::zoomIn, white(zf));
-		UI::Quad(Display::width * 0.5f - 130.0f, Display::height - 91.0f, 260, 2, white(zf, 0.8f));
-		UI::Quad(Display::width * 0.5f - 133.0f + 260 * InverseLerp(SCL_MIN, SCL_MAX, rotScale), Display::height - 98.0f, 6, 16, white(zf));
+		auto zf = min(zoomFade * 2, 1.f);
+		UI::Quad(Display::width * 0.5f - 150.f, Display::height - 100.f, 300, 20, white(zf * 0.9f, 0.15f));
+		UI::Texture(Display::width * 0.5f - 150.f, Display::height - 98.f, 16, 16, Icons::zoomOut, white(zf));
+		UI::Texture(Display::width * 0.5f + 134.f, Display::height - 98.f, 16, 16, Icons::zoomIn, white(zf));
+		UI::Quad(Display::width * 0.5f - 130.f, Display::height - 91.f, 260, 2, white(zf, 0.8f));
+		UI::Quad(Display::width * 0.5f - 133.f + 260 * InverseLerp(SCL_MIN, SCL_MAX, rotScale), Display::height - 98.f, 6, 16, white(zf));
 		zoomFade -= Time::delta;
 	}
 }
@@ -994,10 +994,10 @@ void ParGraphics::DrawMenu() {
 	}
 	rotCenter = UI2::EditVec(expandPos - 147, off + 17, 147, _("Center"), rotCenter, !htr);
 
-	rotZs = rotZ = TryParse(UI2::EditText(expandPos - 147, off + 17 * 4, 147, _("Rotation") + " W", std::to_string(rotZ), true, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.0f);
-	rotWs = rotW = TryParse(UI2::EditText(expandPos - 147, off + 17 * 5, 147, _("Rotation") + " Y", std::to_string(rotW), true, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
+	rotZs = rotZ = TryParse(UI2::EditText(expandPos - 147, off + 17 * 4, 147, _("Rotation") + " W", std::to_string(rotZ), true, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.f);
+	rotWs = rotW = TryParse(UI2::EditText(expandPos - 147, off + 17 * 5, 147, _("Rotation") + " Y", std::to_string(rotW), true, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.f);
 
-	rotScale = TryParse(UI2::EditText(expandPos - 147, off + 17 * 6, 147, _("Scale"), std::to_string(rotScale)), 0.0f);
+	rotScale = TryParse(UI2::EditText(expandPos - 147, off + 17 * 6, 147, _("Scale"), std::to_string(rotScale)), 0.f);
 
 	auto cm = ChokoLait::mainCamera.raw();
 	auto ql = cm->quality;
@@ -1023,7 +1023,7 @@ void ParGraphics::DrawMenu() {
 	if (a2) {
 		UI::Quad(expandPos - 149, off - 2, 148, 18, white(0.9f, 0.1f));
 		ql = cm->quality2;
-		ql = UI2::Slider(expandPos - 147, off - 1, 147, _("Quality") + " 2", 0.25f, 1.0f, ql, std::to_string(int(ql * 100)) + "%");
+		ql = UI2::Slider(expandPos - 147, off - 1, 147, _("Quality") + " 2", 0.25f, 1.f, ql, std::to_string(int(ql * 100)) + "%");
 		if (ql != cm->quality2) {
 			cm->quality2 = ql;
 			Scene::dirty = true;
@@ -1054,7 +1054,7 @@ void ParGraphics::DrawMenu() {
 		off += 17 * 3;
 		clipPlane.norm = UI2::EditVec(expandPos - 147, off, 147, _("Normal"), clipPlane.norm, true);
 		off += 17 * 3;
-		clipPlane.size = TryParse(UI2::EditText(expandPos - 147, off, 147, _("Thickness"), std::to_string(clipPlane.size)), 0.0f);
+		clipPlane.size = TryParse(UI2::EditText(expandPos - 147, off, 147, _("Thickness"), std::to_string(clipPlane.size)), 0.f);
 		off += 17;
 		if (c != clipPlane.center || n != clipPlane.norm || s != clipPlane.size) UpdateClipping();
 		break;
@@ -1106,7 +1106,7 @@ void ParGraphics::DrawPopupDM() {
 	}
 	UI::Label(Popups::pos.x + 2, Popups::pos.y + 35, 12, _("Bonds"), white());
 	for (byte i = 0; i < 3; i++) {
-		if (Engine::Button(Popups::pos.x + 42 + 17 * i, Popups::pos.y + 35, 16, 16, bs[i], ((i+1) == b)? yellow() : white(0.8f)) == MOUSE_RELEASE) {
+		if (Engine::Button(Popups::pos.x + 42 + 17 * i, Popups::pos.y + 35, 16, 16, bs[i], (i == b)? yellow() : white(0.8f)) == MOUSE_RELEASE) {
 			if (dt == 255) dt = 0; 
 			dt = (dt & 0x0f) | (i << 4);
 			if (a == 0 && i == 0) dt = 1;

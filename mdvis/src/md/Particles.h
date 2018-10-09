@@ -5,7 +5,7 @@
 const uint PAR_MAX_NAME_LEN = 6;
 
 struct Residue {
-	Residue() : visible(true), expanded(false), drawType(0x22) {}
+	Residue() : visible(true), expanded(false), drawType(0x22), selected(false) {}
 
 	uint maxOff;
 	bool visible, expanded;

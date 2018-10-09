@@ -225,7 +225,7 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4,
 	MOUSE_STATUS b = Button(x, y, w, h, normalVec4, highlightVec4, pressVec4);
 	ALIGNMENT al = labelFont->alignment;
 	labelFont->alignment = labelCenter? ALIGN_MIDCENTER : ALIGN_MIDLEFT;
-	UI::Label(round(x + (labelCenter? w*0.5f : 2)), round(y + 0.4f*h), labelSize, label, labelVec4, -1.0f, labelFont);
+	UI::Label(round(x + (labelCenter? w*0.5f : 2)), round(y + 0.4f*h), labelSize, label, labelVec4, -1.f, labelFont);
 	labelFont->alignment = al;
 	return b;
 }
@@ -255,7 +255,7 @@ float Engine::DrawSliderFill(float x, float y, float w, float h, float min, floa
 	float v = val, vv = (val - min)/(max-min);
 	if (Rect(x, y, w, h).Inside(Input::mouseDownPos)) {
 		if (Input::mouse0 && (UI::_layer == UI::_layerMax)) {
-			vv = Clamp((Input::mousePos.x - (x+1)) / (w-2), 0.0f, 1.0f);
+			vv = Clamp((Input::mousePos.x - (x+1)) / (w-2), 0.f, 1.f);
 			v = vv*(max - min) + min;
 			UI::Quad(x + 1, y + 1, (w - 2)*vv, h - 2, foreground*white(1, 0.4f));
 			return v;
@@ -270,7 +270,7 @@ float Engine::DrawSliderFillY(float x, float y, float w, float h, float min, flo
 	float v = val, vv = (val - min) / (max - min);
 	if (Rect(x, y, w, h).Inside(Input::mouseDownPos)) {
 		if (Input::mouse0 && (UI::_layer == UI::_layerMax)) {
-			vv = Clamp((Input::mousePos.y - (y + 1)) / (h - 2), 0.0f, 1.0f);
+			vv = Clamp((Input::mousePos.y - (y + 1)) / (h - 2), 0.f, 1.f);
 			v = vv*(max - min) + min;
 			UI::Quad(x + 1, y + 1 + (h-2)*(1-vv), w - 2, (h - 2)*vv, foreground*white(1, 0.4f));
 			return v;
@@ -299,7 +299,7 @@ Vec2 Engine::DrawSliderFill2D(float x, float y, float w, float h, Vec2 min, Vec2
 
 void Engine::DrawProgressBar(float x, float y, float w, float h, float progress, Vec4 background, const Texture& foreground, Vec4 tint, int padding, byte clip) {
 	UI::Quad(x, y, w, h, background);
-	progress = Clamp(progress, 0.0f, 100.0f)*0.01f;
+	progress = Clamp(progress, 0.f, 100.f)*0.01f;
 	float tx = (clip == 0) ? 1 : ((clip == 1) ? progress : w*progress / h);
 	UI::Quad(x + padding, y + padding, w*progress - 2 * padding, h - 2 * padding, foreground.pointer, tint, Vec2(0, 1), Vec2(tx, 1), Vec2(0, 0), Vec2(tx, 0));
 }

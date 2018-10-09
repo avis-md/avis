@@ -514,7 +514,7 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 	y -= (1 - (0.5f * (align >> 4))) * s;
 
 	y = Display::height - y;
-	Vec3 ds = Vec3(1.0f / Display::width, 1.0f / Display::height, 0.5f);
+	Vec3 ds = Vec3(1.f / Display::width, 1.f / Display::height, 0.5f);
 	x = round(x);
 	float defx = x;
 	for (uint i = 0; i < usz * 4; i += 4) {

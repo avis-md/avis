@@ -67,7 +67,7 @@ Font::Font(const std::string& path, ALIGNMENT align) : vecSize(0), alignment(ali
 		Debug::Warning("Font", "Failed to load font! " + std::to_string(err));
 		return;
 	}
-	//FT_Set_Char_Size(_face, 0, (FT_F26Dot6)(size * 64.0f), Display::dpi, 0); // set pixel size based on dpi
+	//FT_Set_Char_Size(_face, 0, (FT_F26Dot6)(size * 64.f), Display::dpi, 0); // set pixel size based on dpi
 	FT_Set_Pixel_Sizes(_face, 0, 12); // set pixel size directly
 	FT_Select_Charmap(_face, FT_ENCODING_UNICODE);
 	CreateGlyph(12, 0);
@@ -124,7 +124,7 @@ GLuint Font::CreateGlyph(uint sz, uint mask) {
 				pr.o2s[a] = 0;
 			}
 			else {
-				pr.o2s[a] = (float)(_face->glyph->advance.x >> 6);//_face->glyph->metrics.horiAdvance / sz / 64.0f;
+				pr.o2s[a] = (float)(_face->glyph->advance.x >> 6);//_face->glyph->metrics.horiAdvance / sz / 64.f;
 			}
 			pr.off[a] = Vec2(_face->glyph->bitmap_left, sz - _face->glyph->bitmap_top);
 		}

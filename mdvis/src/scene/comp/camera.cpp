@@ -4,7 +4,7 @@
 Camera* Camera::active;
 
 Camera::Camera() : Component("Camera", COMP_CAM), 
-	ortographic(false), fov(60), orthoSize(10), screenPos(0.0f, 0.0f, 1.0f, 1.0f), 
+	ortographic(false), fov(60), orthoSize(10), screenPos(0.f, 0.f, 1.f, 1.f), 
 	clearType(CAM_CLEAR_COLOR), clearColor(black(1)), _tarRT(-1), 
 	nearClip(0.01f), farClip(500), quality(1), quality2(0.5f), 
 	useGBuffer2(false), applyGBuffer2(false), 
@@ -25,10 +25,10 @@ Camera::Camera(std::ifstream& stream, SceneObject* o, long pos) : Camera() {
 void Camera::ApplyGL() {
 	Quat q = glm::inverse(object->transform.rotation());
 	if (ortographic) {
-		float hw = Display::height * 1.0f / Display::width;
-		MVP::Mul(glm::ortho(-1.0f, 1.0f, -hw, hw, 0.01f, 500.0f));
+		float hw = Display::height * 1.f / Display::width;
+		MVP::Mul(glm::ortho(-1.f, 1.f, -hw, hw, 0.01f, 500.f));
 	} else {
-		MVP::Mul(glm::perspectiveFov(fov * deg2rad, static_cast<float>(Display::width), static_cast<float>(Display::height), 0.01f, 500.0f));
+		MVP::Mul(glm::perspectiveFov(fov * deg2rad, static_cast<float>(Display::width), static_cast<float>(Display::height), 0.01f, 500.f));
 	}
 	MVP::Scale(1, 1, -1);
 	MVP::Mul(QuatFunc::ToMatrix(q));

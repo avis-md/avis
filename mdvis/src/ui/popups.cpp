@@ -55,8 +55,8 @@ void Popups::DrawMenu() {
 
 bool Popups::DoDrawMenu(std::vector<MenuItem>* mn, float x, float y, size_t* act) {
 	auto sz = mn->size();
-	UI::Quad(x - 1, y, 122, 18 * sz + 1.0f, black(0.7f));
-	UI::Quad(x, y, 120, 18.0f * sz, white(1, 0.1f));
+	UI::Quad(x - 1, y, 122, 18 * sz + 1.f, black(0.7f));
+	UI::Quad(x, y, 120, 18.f * sz, white(1, 0.1f));
 	for (size_t a = 0; a < sz; a++) {
 		auto& i = mn->at(a);
 		auto st = Engine::Button(x + 1, y + 18 * a + 1, 118, 16, white(0), white(1, 0.2f), white(1, 0.05f));
@@ -81,8 +81,8 @@ bool Popups::DoDrawMenu(std::vector<MenuItem>* mn, float x, float y, size_t* act
 		if (DoDrawMenu(&mn->at(*act-1).child, x + 119, y + 18 * (*act-1) + 1, act+1))
 			*act = 0;
 	}
-	bool clk = (Input::mouse0State == 1) && !Engine::Button(x - 1, y, 122, 18 * sz + 3.0f);
-	bool hvr = !Rect(x - 30, y - 30, 182, 18 * sz + 63.0f).Inside(Input::mousePos);
+	bool clk = (Input::mouse0State == 1) && !Engine::Button(x - 1, y, 122, 18 * sz + 3.f);
+	bool hvr = !Rect(x - 30, y - 30, 182, 18 * sz + 63.f).Inside(Input::mousePos);
 	return ((clk || hvr) && !*act);
 }
 
@@ -91,7 +91,7 @@ void Popups::DrawDropdown() {
 	uint n = 0;
 	while (!!dt->list[n][0]) n++;
 	if (!dt->flags) {
-		UI::Quad(pos.x - 1, pos.y, pos2.x + 2, 16 * n + 1.0f, black(0.7f));
+		UI::Quad(pos.x - 1, pos.y, pos2.x + 2, 16 * n + 1.f, black(0.7f));
 		for (uint a = 0; a < n; a++) {
 			if (Engine::Button(pos.x, pos.y + 16 * a, pos2.x, 16, white(1, 0.2f), dt->list[a], 12, white()) == MOUSE_RELEASE) {
 				(*dt->target) = a;
@@ -101,7 +101,7 @@ void Popups::DrawDropdown() {
 		}
 	}
 	else {
-		UI::Quad(pos.x - 1, pos.y, pos2.x + 2, 16 * (n+2) + 1.0f, black(0.7f));
+		UI::Quad(pos.x - 1, pos.y, pos2.x + 2, 16 * (n+2) + 1.f, black(0.7f));
 
 		if (Engine::Button(pos.x, pos.y, pos2.x, 16, white(1, 0.2f), "None", 12, white()) == MOUSE_RELEASE) {
 			(*dt->target) = 0;
@@ -122,7 +122,7 @@ void Popups::DrawDropdown() {
 		}
 		n += 2;
 	}
-	if ((Input::mouse0State == 1) && !Engine::Button(pos.x, pos.y, pos2.x, 16.0f*(n+2))) {
+	if ((Input::mouse0State == 1) && !Engine::Button(pos.x, pos.y, pos2.x, 16.f*(n+2))) {
 		Popups::type = POPUP_TYPE::NONE;
 	}
 }

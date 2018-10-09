@@ -7,14 +7,14 @@ void Light::CalcShadowMatrix() {
 	MVP::Clear();
 	if (lightType == LIGHTTYPE_SPOT || lightType == LIGHTTYPE_POINT) {
 		Quat q = glm::inverse(object->transform.rotation());
-		MVP::Mul(glm::perspectiveFov(angle * deg2rad, 1024.0f, 1024.0f, minDist, maxDist));
+		MVP::Mul(glm::perspectiveFov(angle * deg2rad, 1024.f, 1024.f, minDist, maxDist));
 		MVP::Scale(1, 1, -1);
 		MVP::Mul(QuatFunc::ToMatrix(q));
 		Vec3 pos = -object->transform.position();
 		MVP::Translate(pos.x, pos.y, pos.z);
 	}
 	else {
-		float md = Clamp(maxDist / Camera::active->farClip, 0.0f, 1.0f) * 2 - 1;
+		float md = Clamp(maxDist / Camera::active->farClip, 0.f, 1.f) * 2 - 1;
 	 	Vec4 edges[] = {
 			Vec4(-1, -1, -1, 1), Vec4(-1, 1, -1, 1), Vec4(1, -1, -1, 1), Vec4(1, 1, -1, 1), 
 			Vec4(-1, -1, md, 1), Vec4(-1, 1, md, 1), Vec4(1, -1, md, 1), Vec4(1, 1, md, 1) };

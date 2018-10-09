@@ -10,6 +10,7 @@ uniform samplerBuffer posTex;
 uniform usamplerBuffer connTex;
 uniform float radScl;
 uniform float orthoSz;
+uniform float spriteScl;
 
 layout (std140) uniform clipping {
     vec4 clip_planes[6];
@@ -126,8 +127,8 @@ void main(){
 		td1.x = 1;
 		td2.x = -1;	
 	}
-	td1 *= 2 / screenSize;
-	td2 *= 2 / screenSize;
+	td1 *= spriteScl * 2 / screenSize;
+	td2 *= spriteScl * 2 / screenSize;
 	pts[0] = spos1 + td1*r1;
 	pts[1] = spos1 + td2*r1;
 	pts[2] = spos2 - td1*r2;

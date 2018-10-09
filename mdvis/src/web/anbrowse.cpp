@@ -94,30 +94,30 @@ void AnBrowse::Refresh() {
 
 void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 #ifndef IS_ANSERVER
-	UI::Quad(2.0f + 5 * layer, off, 150.0f, 16.0f, white(1, 0.3f));
-	if (Engine::Button(2.0f + 5 * layer, off, 16.0f, 16.0f, f->expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE)
+	UI::Quad(2.f + 5 * layer, off, 150.f, 16.f, white(1, 0.3f));
+	if (Engine::Button(2.f + 5 * layer, off, 16.f, 16.f, f->expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE)
 		f->expanded = !f->expanded;
-	if (!!Engine::Button(2.0f + 5 * layer, off, 150.0f, 16.0f)) {
+	if (!!Engine::Button(2.f + 5 * layer, off, 150.f, 16.f)) {
 		if (Engine::Button(expandPos - 18, off, 16, 16, Icons::browse) == MOUSE_RELEASE) {
 			IO::OpenFd(f->fullName);
 		}
 	}
-	UI::Label(22.0f + 5 * layer, off, 12.0f, f->name, white());
+	UI::Label(22.f + 5 * layer, off, 12.f, f->name, white());
 	off += 17;
 	if (f->expanded) {
 		layer++;
 		for (auto& fd : f->subfolders)
 			DoDraw(&fd, off, layer);
 		for (auto& fs : f->saves) {
-			if (Engine::Button(2.0f + 5 * layer, off, 150.0f, 16.0f, white(1, 0.35f)) == MOUSE_RELEASE) {
+			if (Engine::Button(2.f + 5 * layer, off, 150.f, 16.f, white(1, 0.35f)) == MOUSE_RELEASE) {
 				AnWeb::Load(f->fullName + fs + EXT_ANSV);
 			}
-			UI::Texture(2.0f + 5 * layer, off, 16.0f, 16.0f, Icons::icon_anl);
-			UI::Label(22.0f + 5 * layer, off, 12.0f, fs, white());
+			UI::Texture(2.f + 5 * layer, off, 16.f, 16.f, Icons::icon_anl);
+			UI::Label(22.f + 5 * layer, off, 12.f, fs, white());
 			off += 17;
 		}
 		for (auto& fs : f->scripts) {
-			if (Engine::Button(2.0f + 5 * layer, off, 150.0f, 16.0f, white(1, 0.35f)) == MOUSE_RELEASE) {
+			if (Engine::Button(2.f + 5 * layer, off, 150.f, 16.f, white(1, 0.35f)) == MOUSE_RELEASE) {
 				AnWeb::selScript = fs;
 			}
 			Texture& icon = Icons::lang_ft;
@@ -125,11 +125,11 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 				icon = Icons::lang_c;
 			else if (fs->type == AN_SCRTYPE::PYTHON)
 				icon = Icons::lang_py;
-			UI::Texture(2.0f + 5 * layer, off, 16.0f, 16.0f, icon);
-			UI::Label(22.0f + 5 * layer, off, 12.0f, fs->name, white());
+			UI::Texture(2.f + 5 * layer, off, 16.f, 16.f, icon);
+			UI::Label(22.f + 5 * layer, off, 12.f, fs->name, white());
 			if (!fs->ok) {
 				UI::font->Align(ALIGN_TOPRIGHT);
-				UI::Label(145.0f - 5 * layer, off, 12, std::to_string(fs->errorCount), red());
+				UI::Label(145.f - 5 * layer, off, 12, std::to_string(fs->errorCount), red());
 				UI::font->Align(ALIGN_TOPLEFT);
 			}
 			off += 17;
@@ -140,29 +140,29 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 
 void AnBrowse::Draw() {
 #ifndef IS_ANSERVER
-	UI::Quad(0.0f, 0.0f, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
+	UI::Quad(0.f, 0.f, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
 	if (expanded) {
 		float f = 20;
-		Engine::BeginStencil(0.0f, 0.0f, expandPos, Display::height - 18.0f);
-		UI::Label(5.0f, 3.0f, 12.0f, "Scripts", white());
+		Engine::BeginStencil(0.f, 0.f, expandPos, Display::height - 18.f);
+		UI::Label(5.f, 3.f, 12.f, "Scripts", white());
 
 #define BT(nm) (byte)(AN_NODE_ ## nm)
-#define MSC1(n, nm) UI::Quad(2, f, 150.0f, 16.0f, white(1, 0.3f)); \
-		if (Engine::Button(2, f, 16.0f, 16.0f, mscFdExpanded[n] ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) \
+#define MSC1(n, nm) UI::Quad(2, f, 150.f, 16.f, white(1, 0.3f)); \
+		if (Engine::Button(2, f, 16.f, 16.f, mscFdExpanded[n] ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) \
 			mscFdExpanded[n] = !mscFdExpanded[n]; \
-		UI::Label(22, f, 12.0f, nm, white()); \
+		UI::Label(22, f, 12.f, nm, white()); \
 		f += 17; \
 		if (mscFdExpanded[n])
-#define MSC2() if (Engine::Button(7, f, 150.0f, 16.0f, white(1, 0.35f)) == MOUSE_RELEASE) { \
+#define MSC2() if (Engine::Button(7, f, 150.f, 16.f, white(1, 0.35f)) == MOUSE_RELEASE) { \
 					AnWeb::selScript = (AnScript*)1; \
 					AnWeb::selSpNode = a; \
 				} \
-				UI::Texture(7, f, 16.0f, 16.0f, Icons::lightning);
+				UI::Texture(7, f, 16.f, 16.f, Icons::lightning);
 
 		MSC1(0, "Scene IO") {
 			for (byte a = BT(SCN::NUM0) + 1; a < BT(SCN::NUM); a++) {
 				MSC2()
-				UI::Label(27, f, 12.0f, AN_NODE_SCNS[a - BT(SCN::NUM0) - 1], white());
+				UI::Label(27, f, 12.f, AN_NODE_SCNS[a - BT(SCN::NUM0) - 1], white());
 				f += 17;
 			}
 		}
@@ -170,7 +170,7 @@ void AnBrowse::Draw() {
 		MSC1(1, _("Inputs")) {
 			for (byte a = BT(IN::NUM0) + 1; a < BT(IN::NUM); a++) {
 				MSC2()
-				UI::Label(27, f, 12.0f, AN_NODE_INS[a - BT(IN::NUM0) - 1], white());
+				UI::Label(27, f, 12.f, AN_NODE_INS[a - BT(IN::NUM0) - 1], white());
 				f += 17;
 			}
 		}
@@ -178,7 +178,7 @@ void AnBrowse::Draw() {
 		MSC1(2, _("Modifiers")) {
 			for (byte a = BT(MOD::NUM0) + 1; a < BT(MOD::NUM); a++) {
 				MSC2()
-				UI::Label(27, f, 12.0f, AN_NODE_MODS[a - BT(MOD::NUM0) - 1], white());
+				UI::Label(27, f, 12.f, AN_NODE_MODS[a - BT(MOD::NUM0) - 1], white());
 				f += 17;
 			}
 		}
@@ -186,7 +186,7 @@ void AnBrowse::Draw() {
 		MSC1(3, _("Generators")) {
 			for (byte a = BT(GEN::NUM0) + 1; a < BT(GEN::NUM); a++) {
 				MSC2()
-				UI::Label(27, f, 12.0f, AN_NODE_GENS[a - BT(GEN::NUM0) - 1], white());
+				UI::Label(27, f, 12.f, AN_NODE_GENS[a - BT(GEN::NUM0) - 1], white());
 				f += 17;
 			}
 		}
@@ -194,24 +194,24 @@ void AnBrowse::Draw() {
 		MSC1(4, _("Miscellaneous")) {
 			for (byte a = BT(MISC::NUM0) + 1; a < BT(MISC::NUM); a++) {
 				MSC2()
-				UI::Label(27, f, 12.0f, AN_NODE_MISCS[a - BT(MISC::NUM0) - 1], white());
+				UI::Label(27, f, 12.f, AN_NODE_MISCS[a - BT(MISC::NUM0) - 1], white());
 				f += 17;
 			}
 		}
 
 		DoDraw(&folder, f, 0);
 		Engine::EndStencil();
-		UI::Quad(expandPos, Display::height - 34.0f, 16.0f, 16.0f, white(1, 0.2f));
-		if ((!UI::editingText && Input::KeyUp(Key_S)) || Engine::Button(expandPos, Display::height - 34.0f, 16.0f, 16.0f, Icons::collapse) == MOUSE_RELEASE)
+		UI::Quad(expandPos, Display::height - 34.f, 16.f, 16.f, white(1, 0.2f));
+		if ((!UI::editingText && Input::KeyUp(Key_S)) || Engine::Button(expandPos, Display::height - 34.f, 16.f, 16.f, Icons::collapse) == MOUSE_RELEASE)
 			expanded = false;
-		expandPos = min(expandPos + 1500 * Time::delta, 150.0f);
+		expandPos = min(expandPos + 1500 * Time::delta, 150.f);
 	}
 	else {
-		if ((!UI::editingText && Input::KeyUp(Key_S)) || Engine::Button(expandPos, Display::height - 34.0f, 110.0f, 16.0f, white(1, 0.2f), white(1, 0.2f), white(1, 0.2f)) == MOUSE_RELEASE)
+		if ((!UI::editingText && Input::KeyUp(Key_S)) || Engine::Button(expandPos, Display::height - 34.f, 110.f, 16.f, white(1, 0.2f), white(1, 0.2f), white(1, 0.2f)) == MOUSE_RELEASE)
 			expanded = true;
-		UI::Texture(expandPos, Display::height - 34.0f, 16.0f, 16.0f, Icons::expand);
-		UI::Label(expandPos + 18, Display::height - 33.0f, 12.0f, "Scripts (S)", white());
-		expandPos = max(expandPos - 1500 * Time::delta, 0.0f);
+		UI::Texture(expandPos, Display::height - 34.f, 16.f, 16.f, Icons::expand);
+		UI::Label(expandPos + 18, Display::height - 33.f, 12.f, "Scripts (S)", white());
+		expandPos = max(expandPos - 1500 * Time::delta, 0.f);
 	}
 #endif
 }

@@ -184,7 +184,7 @@ void ChokoLait::Init(int scrW, int scrH) {
 		glFrontFace(GL_CW);
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 		glEnable(GL_PROGRAM_POINT_SIZE);
-		glClearColor(0, 0, 0, 1.0f);
+		glClearColor(0, 0, 0, 1.f);
 
 		glfwSetWindowSize(window, scrW, scrH);
 		ReshapeGL(window, scrW, scrH);
@@ -258,7 +258,7 @@ void ChokoLait::MouseEnterGL(GLFWwindow* window, int e) {
 
 void ChokoLait::MotionGL(GLFWwindow* window, double x, double y) {
 	Input::mousePos = Vec2(x, y);
-	Input::mousePosRelative = Vec2(x*1.0f / Display::width, y*1.0f / Display::height);
+	Input::mousePosRelative = Vec2(x*1.f / Display::width, y*1.f / Display::height);
 }
 
 void ChokoLait::ReshapeGL(GLFWwindow* window, int w, int h) {

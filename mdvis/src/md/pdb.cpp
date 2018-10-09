@@ -69,7 +69,7 @@ bool PDB::Read(ParInfo* info) {
 	info->pos = new double[sz * 3];
 
 	for (uint32_t i = 0; i < sz; i++) {
-		info->progress = i * 1.0f / sz;
+		info->progress = i * 1.f / sz;
 		char* ln = lines[i];
 		char* n1 = NSP(ln + 12, ln + 15);
 		char* n2 = SP(n1, ln + 15);

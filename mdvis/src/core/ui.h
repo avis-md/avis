@@ -18,8 +18,8 @@ public:
 
 
 	//Draws an editable text box. EditText does not work on recursive functions.
-	static std::string EditText(float x, float y, float w, float h, float s, Vec4 bcol, const std::string& str, bool delayed = false, Vec4 fcol = black(), bool* changed = nullptr, std::string str2 = "", Font* fnt = font, Vec4 hcol = Vec4(0, 120.0f / 255, 215.0f / 255, 1), Vec4 acol = white(), bool ser = true);
-	static std::string EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, const std::string& str, char repl, bool delayed = false, Vec4 fcol = black(), bool* changed = nullptr, Font* fnt = font, Vec4 hcol = Vec4(0, 120.0f / 255, 215.0f / 255, 1), Vec4 acol = white(), bool ser = true);
+	static std::string EditText(float x, float y, float w, float h, float s, Vec4 bcol, const std::string& str, bool delayed = false, Vec4 fcol = black(), bool* changed = nullptr, std::string str2 = "", Font* fnt = font, Vec4 hcol = Vec4(0, 120.f / 255, 215.f / 255, 1), Vec4 acol = white(), bool ser = true);
+	static std::string EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, const std::string& str, char repl, bool delayed = false, Vec4 fcol = black(), bool* changed = nullptr, Font* fnt = font, Vec4 hcol = Vec4(0, 120.f / 255, 215.f / 255, 1), Vec4 acol = white(), bool ser = true);
 
 	static bool _isDrawingLoop;
 	static void PreLoop();

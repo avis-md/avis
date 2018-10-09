@@ -255,7 +255,7 @@ void hdr::to_float(unsigned char imagergbe[], int w, int h, float* res) {
 	for (int i = w*h - 1; i >= 0; i--) {
 		unsigned char exponent = imagergbe[i * 4 + 3];
 		if (exponent != 0) {
-			double v = (1.0f / 256.0f) * pow(2, (float)(exponent - 128));
+			double v = (1.f / 256.f) * pow(2, (float)(exponent - 128));
 			res[i * 3 + 0] = (float)((imagergbe[i * 4 + 0] + 0.5f) * v);
 			res[i * 3 + 1] = (float)((imagergbe[i * 4 + 1] + 0.5f) * v);
 			res[i * 3 + 2] = (float)((imagergbe[i * 4 + 2] + 0.5f) * v);

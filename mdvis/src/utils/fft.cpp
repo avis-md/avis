@@ -5,7 +5,7 @@ std::vector<std::complex<float>> FFT::Evaluate(const std::vector<float>& vals, F
 	assert(isGoodLength(sz));
 	std::vector<std::complex<float>> res(sz);
 	for (uint i = 0; i < sz; i++) {
-		res[i] = applyWindow(vals[i], i * 1.0f / (sz - 1));
+		res[i] = applyWindow(vals[i], i * 1.f / (sz - 1));
 	}
 	doFft(&res[0], sz);
 	return res;
@@ -31,7 +31,7 @@ void FFT::doFft(std::complex<float>* v, uint c) {
 		for (uint i = 0; i < hc; i++) {
 			auto e = v[i];
 			auto o = v[i + hc];
-			auto w = exp(std::complex<float>(0, -2.0f*PI * i / c));
+			auto w = exp(std::complex<float>(0, -2.f*PI * i / c));
 			v[i] = e + w * o;
 			v[i + hc] = e - w * o;
 		}

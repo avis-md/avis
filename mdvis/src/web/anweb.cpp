@@ -99,8 +99,8 @@ void AnWeb::Update() {
 void AnWeb::Draw() {
 #ifndef IS_ANSERVER
 	AnNode::width = 220;
-	UI::Quad(AnBrowse::expandPos, 0.0f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.0f, white(0.8f, 0.05f));
-	Engine::BeginStencil(AnBrowse::expandPos, 0.0f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.0f);
+	UI::Quad(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f, white(0.8f, 0.05f));
+	Engine::BeginStencil(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f);
 	byte ms = Input::mouse0State;
 	if (executing) {
 		Input::mouse0 = false;
@@ -160,10 +160,10 @@ void AnWeb::Draw() {
 	}
 	if (Input::mouse0State == MOUSE_UP && selPreClear) selConnNode = nullptr;
 
-	float canScroll = max(maxScroll - (Display::width - AnBrowse::expandPos - AnOps::expandPos), 0.0f);
+	float canScroll = max(maxScroll - (Display::width - AnBrowse::expandPos - AnOps::expandPos), 0.f);
 	//if (Input::KeyHold(Key_RightArrow)) scrollPos += 1000 * Time::delta;
 	//if (Input::KeyHold(Key_LeftArrow)) scrollPos -= 1000 * Time::delta;
-	scrollPos = Clamp(scrollPos - Input::mouseScroll * 1000 * Time::delta, 0.0f, canScroll);
+	scrollPos = Clamp(scrollPos - Input::mouseScroll * 1000 * Time::delta, 0.f, canScroll);
 
 	Input::mouse0State = ms;
 	Input::mouse0 = (Input::mouse0State == 1) || (Input::mouse0State == 2);
@@ -263,12 +263,12 @@ void AnWeb::Draw() {
 		UI::Texture(Input::mousePos.x - 16, Input::mousePos.y - 16, 32, 32, icon, white(0.3f));
 	}
 
-	if (Engine::Button(Display::width - 71.0f, 1.0f, 70.0f, 16.0f, white(1, 0.4f), _("Done"), 12.0f, white(), true) == MOUSE_RELEASE) {
+	if (Engine::Button(Display::width - 71.f, 1.f, 70.f, 16.f, white(1, 0.4f), _("Done"), 12.f, white(), true) == MOUSE_RELEASE) {
 		drawFull = false;
 		AnBrowse::expandPos = AnOps::expandPos = 0;
 	}
 	
-	if (Engine::Button(200, 1, 70.0f, 16.0f, white(1, 0.4f), _("Save"), 12.0f, white(), true) == MOUSE_RELEASE)
+	if (Engine::Button(200, 1, 70.f, 16.f, white(1, 0.4f), _("Save"), 12.f, white(), true) == MOUSE_RELEASE)
 		Save(IO::path + "nodes/rdf.anl");
 
 	bool canexec = (!AnOps::remote || (AnOps::connectStatus == 255));
@@ -285,7 +285,7 @@ void AnWeb::Draw() {
 
 void AnWeb::DrawSide() {
 #ifndef IS_ANSERVER
-	UI::Quad(Display::width - expandPos, 18, 180.0f, Display::height - 36.0f, white(0.9f, 0.15f));
+	UI::Quad(Display::width - expandPos, 18, 180.f, Display::height - 36.f, white(0.9f, 0.15f));
 	if (expanded) {
 		float w = 180;
 		AnNode::width = w - 2;
@@ -317,18 +317,18 @@ void AnWeb::DrawSide() {
 			n->pos = poss;
 			poss.y += n->DrawSide();
 		}
-		UI::Quad(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, white(0.9f, 0.15f));
-		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		UI::Quad(Display::width - expandPos - 16.f, Display::height - 34.f, 16.f, 16.f, white(0.9f, 0.15f));
+		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(Display::width - expandPos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
-		expandPos = Clamp(expandPos + 1500 * Time::delta, 0.0f, 180.0f);
+		expandPos = Clamp(expandPos + 1500 * Time::delta, 0.f, 180.f);
 	}
 	else {
-		UI::Quad(Display::width - expandPos, 0.0f, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
-		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(Display::width - expandPos - 110.0f, Display::height - 34.0f, 110.0f, 16.0f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
+		UI::Quad(Display::width - expandPos, 0.f, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
+		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(Display::width - expandPos - 110.f, Display::height - 34.f, 110.f, 16.f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
-		UI::Texture(Display::width - expandPos - 110.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::expand);
-		UI::Label(Display::width - expandPos - 92.0f, Display::height - 33.0f, 12.0f, _("Analysis") +" (A)", white());
-		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.0f, 180.0f);
+		UI::Texture(Display::width - expandPos - 110.f, Display::height - 34.f, 16.f, 16.f, Icons::expand);
+		UI::Label(Display::width - expandPos - 92.f, Display::height - 33.f, 12.f, _("Analysis") +" (A)", white());
+		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.f, 180.f);
 	}
 #endif
 }

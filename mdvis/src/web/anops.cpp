@@ -17,7 +17,7 @@ std::thread* AnOps::conThread;
 SSH AnOps::ssh;
 
 void AnOps::Draw() {
-	UI::Quad(Display::width - expandPos, 0.0f, 180.0f, Display::height - 18.0f, white(0.9f, 0.15f));
+	UI::Quad(Display::width - expandPos, 0.f, 180.f, Display::height - 18.f, white(0.9f, 0.15f));
 	if (expanded) {
 		float w = 180;
 		UI::Label(Display::width - expandPos + 5, 1, 12, "Options", white());
@@ -55,7 +55,7 @@ void AnOps::Draw() {
 					Disconnect();
 				}
 			}
-			UI::Label(Display::width - expandPos + 2, 138, 12, message, Vec4(0.1f, 1.0f, 0.1f, 1.0f));
+			UI::Label(Display::width - expandPos + 2, 138, 12, message, Vec4(0.1f, 1.f, 0.1f, 1.f));
 
 			UI::Label(Display::width - expandPos + 4, 157, 12, "Working directory", white());
 			path = UI::EditText(Display::width - expandPos + 1, 174, 178, 16, 12, white(1, 0.5f), path, true, white());
@@ -70,7 +70,7 @@ void AnOps::Draw() {
 		}
 
 
-		off = max(off, Display::height - 68.0f - 18.f);
+		off = max(off, Display::height - 68.f - 18.f);
 		UI::Label(Display::width - expandPos + 2, off, 12, "Status", white());
 		UI::Label(Display::width - expandPos + 4, off + 17, 12, "C++", white());
 		UI::Quad(Display::width - expandPos + 164, off + 18, 14, 14, (remote? AnWeb::hasC_s : AnWeb::hasC) ? green() : red());
@@ -79,18 +79,18 @@ void AnOps::Draw() {
 		UI::Label(Display::width - expandPos + 4, off + 51, 12, "Fortran", white());
 		UI::Quad(Display::width - expandPos + 164, off + 51, 14, 14, (remote ? AnWeb::hasFt_s : AnWeb::hasFt) ? green() : red());
 		
-		UI::Quad(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, white(0.9f, 0.15f));
-		if ((!UI::editingText && (Input::KeyUp(Key_O))) || Engine::Button(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		UI::Quad(Display::width - expandPos - 16.f, Display::height - 34.f, 16.f, 16.f, white(0.9f, 0.15f));
+		if ((!UI::editingText && (Input::KeyUp(Key_O))) || Engine::Button(Display::width - expandPos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
-		expandPos = Clamp(expandPos + 1500 * Time::delta, 0.0f, 180.0f);
+		expandPos = Clamp(expandPos + 1500 * Time::delta, 0.f, 180.f);
 	}
 	else {
-		UI::Quad(Display::width - expandPos, 0.0f, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
-		if ((!UI::editingText && (Input::KeyUp(Key_O))) || Engine::Button(Display::width - expandPos - 110.0f, Display::height - 34.0f, 110.0f, 16.0f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
+		UI::Quad(Display::width - expandPos, 0.f, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
+		if ((!UI::editingText && (Input::KeyUp(Key_O))) || Engine::Button(Display::width - expandPos - 110.f, Display::height - 34.f, 110.f, 16.f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
-		UI::Texture(Display::width - expandPos - 110.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::expand);
-		UI::Label(Display::width - expandPos - 92.0f, Display::height - 33.0f, 12.0f, "Options (O)", white());
-		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.0f, 180.0f);
+		UI::Texture(Display::width - expandPos - 110.f, Display::height - 34.f, 16.f, 16.f, Icons::expand);
+		UI::Label(Display::width - expandPos - 92.f, Display::height - 33.f, 12.f, "Options (O)", white());
+		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.f, 180.f);
 	}
 }
 

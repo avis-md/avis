@@ -32,15 +32,15 @@ void HelpMenu::Draw() {
 		UI::Quad(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), black(0.9f));
 		UI::Label(10, 5, 14, "HELP (?)", white());
 		UI::font->Align(ALIGN_TOPRIGHT);
-		UI::Label(Display::width - 5.0f, 5, 10, "version 0.01", white(0.7f));
+		UI::Label(Display::width - 5.f, 5, 10, "version 0.01", white(0.7f));
 		UI::font->Align(ALIGN_TOPLEFT);
 
 		//for (uint a = 0; a < 12; a++) {
 		//	UI::Label(20, 25 + 15 * a, 12, _opn[a], white());
 		//}
 
-		UI::Label(10, Display::height - 16.0f, 12, "This program is under development.", white(0.7f));
+		UI::Label(10, Display::height - 16.f, 12, "This program is under development.", white(0.7f));
 		UI::alpha = 1;
 	}
-	alpha = Clamp(alpha + (show? 1 : -1)*5*Time::delta, 0.0f, 1.0f);
+	alpha = Clamp(alpha + (show? 1 : -1)*5*Time::delta, 0.f, 1.f);
 }

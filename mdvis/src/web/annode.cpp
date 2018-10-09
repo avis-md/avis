@@ -79,7 +79,7 @@ void AnNode::Draw() {
 	for (auto& i : inputR) {
 		if (i.use) cnt++;
 	}
-	UI::Quad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.0f : 0.7f));
+	UI::Quad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.f : 0.7f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 18, pos.y + 1, 12, title, white());
 	DrawToolbar();
@@ -92,7 +92,7 @@ void AnNode::Draw() {
 			float y = pos.y + 16, yy = y;
 			DrawHeader(y);
 			hdrSz = y-yy - setSz;
-			UI::Quad(pos.x, y, width, 4.0f + 17 * cnt, bgCol);
+			UI::Quad(pos.x, y, width, 4.f + 17 * cnt, bgCol);
 			y += 2;
 			for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 				bool hi = inputR[i].first;
@@ -195,7 +195,7 @@ void AnNode::Draw() {
 			auto yo = y;
 			DrawFooter(y);
 			ftrSz = y - yo;
-			if (AnWeb::executing) UI::Quad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));
+			if (AnWeb::executing) UI::Quad(pos.x, pos.y + 16, width, 3.f + 17 * cnt, white(0.5f, 0.25f));
 		}
 	}
 #endif
@@ -204,7 +204,7 @@ void AnNode::Draw() {
 float AnNode::DrawSide() {
 #ifndef IS_ANSERVER
 	auto cnt = (script->invars.size());
-	UI::Quad(pos.x, pos.y, width, 16, white(selected ? 1.0f : 0.7f, 0.35f));
+	UI::Quad(pos.x, pos.y, width, 16, white(selected ? 1.f : 0.7f, 0.35f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 20, pos.y + 1, 12, title, white());
 	if (this->log.size() && Engine::Button(pos.x + width - 17, pos.y, 16, 16, Icons::log, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
@@ -221,7 +221,7 @@ float AnNode::DrawSide() {
 	if (expanded) {
 		DrawHeader(y);
 		if (cnt > 0) {
-			UI::Quad(pos.x, y, width, 2.0f + 17 * cnt, bgCol);
+			UI::Quad(pos.x, y, width, 2.f + 17 * cnt, bgCol);
 			for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 				UI::Label(pos.x + 2, y, 12, script->invars[i].first, white());
 				auto& vr = script->invars[i].second;
@@ -287,7 +287,7 @@ float AnNode::DrawSide() {
 				}
 			}
 		}
-		if (AnWeb::executing) UI::Quad(pos.x, pos.y + 16, width, 3.0f + 17 * cnt, white(0.5f, 0.25f));
+		if (AnWeb::executing) UI::Quad(pos.x, pos.y + 16, width, 3.f + 17 * cnt, white(0.5f, 0.25f));
 
 		DrawFooter(y);
 
@@ -334,7 +334,7 @@ void AnNode::DrawDefVal(int i, float y) {
 
 void AnNode::DrawHeader(float& off) {
 	if (showDesc) {
-		UI::Quad(pos.x, off, width, 17.0f * script->descLines, bgCol);
+		UI::Quad(pos.x, off, width, 17.f * script->descLines, bgCol);
 		UI::alpha = 0.7f;
 		UI2::LabelMul(pos.x + 5, off + 1, 12, script->desc);
 		UI::alpha = 1;
@@ -353,8 +353,8 @@ float AnNode::DrawLog(float off) {
 	if (!sz) return 0;
 	auto sz2 = min<int>(sz, 10);
 	if (logExpanded) {
-		UI::Quad(pos.x, pos.y + off, width, 15.0f * sz2 + 2, black(0.9f));
-		Engine::PushStencil(pos.x + 1, pos.y + off, width - 2, 15.0f * sz2);
+		UI::Quad(pos.x, pos.y + off, width, 15.f * sz2 + 2, black(0.9f));
+		Engine::PushStencil(pos.x + 1, pos.y + off, width - 2, 15.f * sz2);
 		for (int i = 0; i < sz2; i++) {
 			auto& l = log[i + logOffset];
 			Vec4 col = (!l.first) ? white() : ((l.first == 1) ? yellow() : red());
@@ -373,7 +373,7 @@ float AnNode::DrawLog(float off) {
 				logOffset = min<int>(logOffset + 10, sz - 10);
 			}
 		}
-		return 15 * sz2 + 2.0f;
+		return 15 * sz2 + 2.f;
 	}
 	else {
 		UI::Quad(pos.x, pos.y + off, width, 2, black(0.9f));

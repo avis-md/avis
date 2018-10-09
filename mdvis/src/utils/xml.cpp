@@ -117,7 +117,7 @@ XmlNode Xml::FromVec(std::string nm, Vec4 v) {
 	return nd;
 }
 
-#define GT(nm, vl) if (n.name == #nm) vl = TryParse(n.value, 0.0f)
+#define GT(nm, vl) if (n.name == #nm) vl = TryParse(n.value, 0.f)
 void Xml::ToVec(XmlNode* nd, Vec2& v) {
 	for (auto& n : nd->children) {
 		GT(x, v.x);

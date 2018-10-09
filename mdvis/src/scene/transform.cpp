@@ -46,17 +46,17 @@ void Transform::localScale(const Vec3& r) {
 }
 
 void Transform::eulerRotation(const Vec3& r) {
-	_eulerRotation.x = Repeat(r.x, 0.0f, 360.0f);
-	_eulerRotation.y = Repeat(r.y, 0.0f, 360.0f);
-	_eulerRotation.z = Repeat(r.z, 0.0f, 360.0f);
+	_eulerRotation.x = Repeat(r.x, 0.f, 360.f);
+	_eulerRotation.y = Repeat(r.y, 0.f, 360.f);
+	_eulerRotation.z = Repeat(r.z, 0.f, 360.f);
 	_UpdateWQuat();
 	_UpdateLMatrix();
 }
 
 void Transform::localEulerRotation(const Vec3& r) {
-	_localEulerRotation.x = Repeat(r.x, 0.0f, 360.0f);
-	_localEulerRotation.y = Repeat(r.y, 0.0f, 360.0f);
-	_localEulerRotation.z = Repeat(r.z, 0.0f, 360.0f);
+	_localEulerRotation.x = Repeat(r.x, 0.f, 360.f);
+	_localEulerRotation.y = Repeat(r.y, 0.f, 360.f);
+	_localEulerRotation.z = Repeat(r.z, 0.f, 360.f);
 	_UpdateLQuat();
 	_UpdateLMatrix();
 }

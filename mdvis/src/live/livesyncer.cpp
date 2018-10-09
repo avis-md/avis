@@ -78,7 +78,7 @@ void LiveSyncer::Stop() {
 }
 
 void LiveSyncer::DrawSide() {
-	UI::Quad(Display::width - expandPos, 18, 180, Display::height - 36.0f, white(0.9f, 0.15f));
+	UI::Quad(Display::width - expandPos, 18, 180, Display::height - 36.f, white(0.9f, 0.15f));
 	if (expanded) {
 		UI::Label(Display::width - expandPos + 5, 20, 12, "Live Run", white());
 
@@ -104,24 +104,24 @@ void LiveSyncer::DrawSide() {
 			UI::Label(Display::width - expandPos + 2, 17 * 5 + 4, 12, "Select Module", white());
 			uint a = 0;
 			for (auto& r : runners) {
-				if (Engine::Button(Display::width - expandPos + 4, 17 * 6 + 5.0f + 17 * a, 170, 16, white(1, 0.6f), r->name, 12, white()) == MOUSE_RELEASE) {
+				if (Engine::Button(Display::width - expandPos + 4, 17 * 6 + 5.f + 17 * a, 170, 16, white(1, 0.6f), r->name, 12, white()) == MOUSE_RELEASE) {
 					Init(a);
 				}
 				a++;
 			}
 		}
 
-		if ((!UI::editingText && Input::KeyUp(Key_R)) || Engine::Button(Display::width - expandPos - 16.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		if ((!UI::editingText && Input::KeyUp(Key_R)) || Engine::Button(Display::width - expandPos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
-		expandPos = Clamp(expandPos + 1500 * Time::delta, 0.0f, 180.0f);
+		expandPos = Clamp(expandPos + 1500 * Time::delta, 0.f, 180.f);
 	}
 	else {
-		UI::Quad(Display::width - expandPos, 0.0f, expandPos, Display::height - 18.0f, white(0.9f, 0.15f));
-		if ((!UI::editingText && Input::KeyUp(Key_R)) || Engine::Button(Display::width - expandPos - 110.0f, Display::height - 34.0f, 110.0f, 16.0f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
+		UI::Quad(Display::width - expandPos, 0.f, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
+		if ((!UI::editingText && Input::KeyUp(Key_R)) || Engine::Button(Display::width - expandPos - 110.f, Display::height - 34.f, 110.f, 16.f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
-		UI::Texture(Display::width - expandPos - 110.0f, Display::height - 34.0f, 16.0f, 16.0f, Icons::expand);
-		UI::Label(Display::width - expandPos - 92.0f, Display::height - 33.0f, 12.0f, "Analysis (A)", white());
-		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.0f, 180.0f);
+		UI::Texture(Display::width - expandPos - 110.f, Display::height - 34.f, 16.f, 16.f, Icons::expand);
+		UI::Label(Display::width - expandPos - 92.f, Display::height - 33.f, 12.f, "Analysis (A)", white());
+		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.f, 180.f);
 	}
 }
 

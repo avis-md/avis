@@ -409,7 +409,7 @@ void ParLoader::DoOpen() {
 	}
 	else loadName = "Post processing";
 	for (uint i = 0; i < info.num; i++) {
-		info.progress = i * 1.0f / info.num;
+		info.progress = i * 1.f / info.num;
 		auto id1 = info.type[i];//info.name[i * PAR_MAX_NAME_LEN];
 		auto& resId = info.resId[i];
 		uint64_t resNm = *((uint64_t*)(&info.resname[i * PAR_MAX_NAME_LEN])) & 0x000000ffffffffff;
@@ -675,7 +675,7 @@ void ParLoader::DrawOpenDialog() {
 		}
 		Engine::PopStencil();
 	}
-	_impPos = _showImp ? min(_impPos + 800 * Time::delta, 100.0f) : max(_impPos - 800 * Time::delta, 0.0f);
+	_impPos = _showImp ? min(_impPos + 800 * Time::delta, 100.f) : max(_impPos - 800 * Time::delta, 0.f);
 
 	UI::Quad(woff, hoff, 400, 300, white(0.8f, 0.15f));
 	UI::Quad(woff, hoff, 400, 16, white(0.9f, 0.1f));

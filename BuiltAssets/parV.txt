@@ -11,6 +11,7 @@ uniform float orthoSz;
 uniform vec2 screenSize;
 uniform samplerBuffer radTex;
 uniform float radScl;
+uniform float spriteScl;
 
 layout (std140) uniform clipping {
     vec4 clip_planes[6];
@@ -56,10 +57,10 @@ void main(){
 			float ca = dot(normalize(wpos.xyz - camPos), camFwd);
 			float z2 = z * ca;
 			if (z2 < 0.1) gl_PointSize = 0;
-			else gl_PointSize = v2f_scl * v2f_rad * 2 * screenSize.y / z2;
+			else gl_PointSize = spriteScl * v2f_scl * v2f_rad * 2 * screenSize.y / z2;
 		}
 		else {
-			gl_PointSize = screenSize.y * v2f_scl * v2f_rad * 2 / orthoSz;
+			gl_PointSize = spriteScl * screenSize.y * v2f_scl * v2f_rad * 2 / orthoSz;
 		}
 	}
 }

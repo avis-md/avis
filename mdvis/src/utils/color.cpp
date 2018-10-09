@@ -49,10 +49,10 @@ void Color::Rgb2Hsv(byte r, byte g, byte b, float& h, float& s, float& v) {
 				h = (G - B) / (mx - mn);
 			}
 			else if (G == mx) {
-				h = 2.0f + (B - R) / (mx - mn);
+				h = 2.f + (B - R) / (mx - mn);
 			}
 			else {
-				h = 4.0f + (R - G) / (mx - mn);
+				h = 4.f + (R - G) / (mx - mn);
 			}
 			h /= 6;
 			if (h < 0) h += 1;
@@ -87,8 +87,8 @@ void Color::DrawPicker(bool hasA) {
 
 	Vec3 hsv = Rgb2Hsv(cl);
 
-	Popups::pos.x = min(Popups::pos.x, Display::width - 155.0f);
-	Popups::pos.y = min(Popups::pos.y, Display::width - 155.0f);
+	Popups::pos.x = min(Popups::pos.x, Display::width - 155.f);
+	Popups::pos.y = min(Popups::pos.y, Display::width - 155.f);
 
 	UI::Quad(Popups::pos.x, Popups::pos.y, 150, 150, black(0.7f));
 	Color::DrawSV(Popups::pos.x + 5, Popups::pos.y + 5, 120, 120, hsv.r);
@@ -114,15 +114,15 @@ void Color::DrawPicker(bool hasA) {
 
 	hx = UI::EditText(Popups::pos.x + 5, Popups::pos.y + 130, 120, 16, 12, white(1, 0.5f), hx, true, white());
 
-	cl = Vec4(bs[0] / 255.0f, bs[1] / 255.0f, bs[2] / 255.0f, 1);
+	cl = Vec4(bs[0] / 255.f, bs[1] / 255.f, bs[2] / 255.f, 1);
 }
 
 Vec4 Color::HueBaseCol(float hue) {
 	hue *= 6;
 	Vec4 v;
-	v.r = Clamp(abs(hue - 3) - 1.0f, 0.0f, 1.0f);
-	v.g = 1 - Clamp(abs(hue - 2) - 1.0f, 0.0f, 1.0f);
-	v.b = 1 - Clamp(abs(hue - 4) - 1.0f, 0.0f, 1.0f);
+	v.r = Clamp(abs(hue - 3) - 1.f, 0.f, 1.f);
+	v.g = 1 - Clamp(abs(hue - 2) - 1.f, 0.f, 1.f);
+	v.b = 1 - Clamp(abs(hue - 4) - 1.f, 0.f, 1.f);
 	v.a = 1;
 	return v;
 }

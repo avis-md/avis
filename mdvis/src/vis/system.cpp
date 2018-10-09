@@ -119,7 +119,7 @@ void VisSystem::Init() {
 		Color::Hsv2Rgb(a * 0.66f / 255, 1, 1, colb[0], colb[1], colb[2]);
 		Particles::colorPallete[a] =
 			Particles::_colorPallete[a] = 
-				Vec4(colb[0], colb[1], colb[2], 255) / 255.0f;
+				Vec4(colb[0], colb[1], colb[2], 255) / 255.f;
 	}
 
 	auto& mi = menuItems[0];
@@ -223,7 +223,7 @@ void VisSystem::DrawTitle() {
 	bool iso = Popups::type == POPUP_TYPE::MENU && Popups::data >= menuItems && Popups::data < (menuItems + 5) && UI::_layerMax == UI::_layer+1;
 	UI::ignoreLayers = iso; 
 	for (uint i = 0; i < 5; i++) {
-		auto st = Engine::Button(2.0f + 60 * i, 1, 59, 16, white(0), menu[i], 12, white(), true);
+		auto st = Engine::Button(2.f + 60 * i, 1, 59, 16, white(0), menu[i], 12, white(), true);
 		if (st == MOUSE_RELEASE || (!!(st & MOUSE_HOVER_FLAG) && iso)) {
 			Popups::type = POPUP_TYPE::MENU;
 			Popups::pos = Vec2(2 + 60 * i, 17);
@@ -238,12 +238,12 @@ void VisSystem::DrawTitle() {
 	}
 
 	UI::font->Align(ALIGN_TOPRIGHT);
-	UI::Label(Display::width - 5.0f, 3, 10, VERSIONSTRING, white(0.7f));
+	UI::Label(Display::width - 5.f, 3, 10, VERSIONSTRING, white(0.7f));
 	UI::font->Align(ALIGN_TOPLEFT);
 }
 
 void VisSystem::DrawBar() {
-	UI::Quad(0, Display::height - 18.0f, static_cast<float>(Display::width), 18, white(0.9f, 0.1f));
+	UI::Quad(0, Display::height - 18.f, static_cast<float>(Display::width), 18, white(0.9f, 0.1f));
 	if (Particles::anim.frameCount > 1) {
 		if (!LiveSyncer::activeRunner) {
 			if (!UI::editingText) {
@@ -254,39 +254,39 @@ void VisSystem::DrawBar() {
 					if (!!Particles::anim.currentFrame) Particles::SetFrame(Particles::anim.currentFrame - 1);
 				}
 			}
-			if ((!UI::editingText && Input::KeyDown(Key_Space)) || Engine::Button(150, Display::height - 17.0f, 16, 16, Icons::right, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+			if ((!UI::editingText && Input::KeyDown(Key_Space)) || Engine::Button(150, Display::height - 17.f, 16, 16, Icons::right, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
 				ParGraphics::animate = !ParGraphics::animate;
 				ParGraphics::animOff = 0;
 			}
 		}
 
 		auto& fps = ParGraphics::animTarFps;
-		fps = TryParse(UI::EditText(170, Display::height - 17.0f, 50, 16, 12, white(1, 0.4f), std::to_string(fps), true, white(), nullptr, std::to_string(fps) + " fps"), 0);
+		fps = TryParse(UI::EditText(170, Display::height - 17.f, 50, 16, 12, white(1, 0.4f), std::to_string(fps), true, white(), nullptr, std::to_string(fps) + " fps"), 0);
 		fps = Clamp(fps, 0, 1000);
 
 		auto ssz = Particles::anim.frameCount;
 		float al = float(Particles::anim.currentFrame) / (ssz - 1);
-		al = Engine::DrawSliderFill(225, Display::height - 13.0f, Display::width - 385.0f, 9, 0, 1, al, white(1, 0.3f), white(0));
+		al = Engine::DrawSliderFill(225, Display::height - 13.f, Display::width - 385.f, 9, 0, 1, al, white(1, 0.3f), white(0));
 
 		using fs = Particles::AnimData::FRAME_STATUS;
 		fs sold = Particles::anim.status[0];
-		auto pw = float(Display::width - 385.0f) / ssz;
+		auto pw = float(Display::width - 385.f) / ssz;
 		size_t p0 = 0;
 		for (size_t p = 0; p <= ssz; p++) {
 			auto st = (p == ssz)? fs::UNLOADED : Particles::anim.status[p];
 			if (st == fs::READING) st = fs::UNLOADED;
 			if (sold != st || (p == ssz)) {
 				if (sold == fs::LOADED)
-					UI::Quad(225 + pw * p0, Display::height - 13.0f, pw * (p-p0), 9, white(1, 0.5f));
+					UI::Quad(225 + pw * p0, Display::height - 13.f, pw * (p-p0), 9, white(1, 0.5f));
 				else if (sold == fs::BAD)
-					UI::Quad(225 + pw * p0, Display::height - 13.0f, pw * (p - p0), 9, red(1, 0.5f));
+					UI::Quad(225 + pw * p0, Display::height - 13.f, pw * (p - p0), 9, red(1, 0.5f));
 				sold = st;
 				p0 = p;
 			}
 		}
 		
-		UI::Quad(222 + (Display::width - 385.0f) * al, Display::height - 17.0f, 6, 16, white());
-		if ((Engine::Button(225, Display::height - 13.0f, Display::width - 385.0f, 9) & 0x0f) == MOUSE_DOWN)
+		UI::Quad(222 + (Display::width - 385.f) * al, Display::height - 17.f, 6, 16, white());
+		if ((Engine::Button(225, Display::height - 13.f, Display::width - 385.f, 9) & 0x0f) == MOUSE_DOWN)
 			ParGraphics::seek = true;
 		else ParGraphics::seek = ParGraphics::seek && Input::mouse0;
 
@@ -294,23 +294,23 @@ void VisSystem::DrawBar() {
 			Particles::SetFrame((uint)roundf(al * (Particles::anim.frameCount - 1)));
 		}
 
-		UI::Label(Display::width - 155.0f, Display::height - 16.0f, 12, std::to_string(Particles::anim.currentFrame + 1) + "/" + std::to_string(Particles::anim.frameCount), white());
+		UI::Label(Display::width - 155.f, Display::height - 16.f, 12, std::to_string(Particles::anim.currentFrame + 1) + "/" + std::to_string(Particles::anim.frameCount), white());
 	}
 	else if (Particles::anim.reading && ParLoader::loadFrames) {
 		float w = 172;
 		if (*ParLoader::loadProgress > 0) {
-			UI::Quad(w, Display::height - 15.0f, 150, 12, white(1, 0.05f));
-			UI::Quad(w + 1, Display::height - 14.0f, 148 * *ParLoader::loadProgress, 10, white(1, 0.7f));
+			UI::Quad(w, Display::height - 15.f, 150, 12, white(1, 0.05f));
+			UI::Quad(w + 1, Display::height - 14.f, 148 * *ParLoader::loadProgress, 10, white(1, 0.7f));
 			w += 155;
 		}
-		UI::Label(w, Display::height - 16.0f, 12, "Loading frame " + std::to_string(*ParLoader::loadFrames), white(0.5f));
+		UI::Label(w, Display::height - 16.f, 12, "Loading frame " + std::to_string(*ParLoader::loadFrames), white(0.5f));
 	}
 	else
-		UI::Label(172, Display::height - 16.0f, 12, _("No Animation Data"), white(0.5f));
+		UI::Label(172, Display::height - 16.f, 12, _("No Animation Data"), white(0.5f));
 
 	byte sel = (byte)mouseMode;
 	for (byte b = 0; b < 3; b++) {
-		if (Engine::Button(Display::width - 60.0f + 17 * b, Display::height - 17.0f, 16, 16, (&Icons::toolRot)[b], (sel == b) ? Vec4(1, 0.7f, 0.4f, 1) : white(0.7f), white(), white(0.5f)) == MOUSE_RELEASE) {
+		if (Engine::Button(Display::width - 60.f + 17 * b, Display::height - 17.f, 16, 16, (&Icons::toolRot)[b], (sel == b) ? Vec4(1, 0.7f, 0.4f, 1) : white(0.7f), white(), white(0.5f)) == MOUSE_RELEASE) {
 			mouseMode = (VIS_MOUSE_MODE)b;
 		}
 	}

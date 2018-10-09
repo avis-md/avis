@@ -25,5 +25,5 @@ template <typename T> T Lerp(T a, T b, float c) {
 	else return a*(1 - c) + b*c;
 }
 template <typename T> float InverseLerp(T a, T b, T c) {
-	return Clamp((float)((c - a) / (b - a)), 0.0f, 1.0f);
+	return Clamp((float)((c - a) / (b - a)), 0.f, 1.f);
 }

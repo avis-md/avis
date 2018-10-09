@@ -29,10 +29,10 @@ void UI2::LabelMul(float x, float y, float sz, const std::string& s) {
 std::string UI2::EditText(float x, float y, uint w, const std::string& title, const std::string& val, bool enabled, Vec4 col) {
 	UI::Label(x, y, 12, title, white());
 	if (enabled) {
-		return UI::EditText(x + w*sepw, y, w*sepw2 - 1.0f, 16, 12, col, val, true, white());
+		return UI::EditText(x + w*sepw, y, w*sepw2 - 1.f, 16, 12, col, val, true, white());
 	}
 	else {
-		Engine::Button(x + w*sepw, y, w*sepw2 - 1.0f, 16, col, val, 12, white(0.5f));
+		Engine::Button(x + w*sepw, y, w*sepw2 - 1.f, 16, col, val, 12, white(0.5f));
 		return val;
 	}
 }
@@ -40,10 +40,10 @@ std::string UI2::EditText(float x, float y, uint w, const std::string& title, co
 std::string UI2::EditPass(float x, float y, uint w, const std::string& title, const std::string& val, bool enabled, Vec4 col) {
 	UI::Label(x, y, 12, title, white());
 	if (enabled) {
-		return UI::EditTextPass(x + w*sepw, y, w*sepw2 - 1.0f, 16, 12, col, val, '*', true, white());
+		return UI::EditTextPass(x + w*sepw, y, w*sepw2 - 1.f, 16, 12, col, val, '*', true, white());
 	}
 	else {
-		Engine::Button(x + w*sepw, y, w*sepw2 - 1.0f, 16, col, "****", 12, white(0.5f));
+		Engine::Button(x + w*sepw, y, w*sepw2 - 1.f, 16, col, "****", 12, white(0.5f));
 		return val;
 	}
 }
@@ -54,7 +54,7 @@ float UI2::Slider(float x, float y, uint w, const std::string& title, float a, f
 
 float UI2::Slider(float x, float y, uint w, const std::string& title, float a, float b, float t, const std::string& lbl) {
 	UI::Label(x, y, 12, title, white());
-	return Slider(x + w*sepw, y, w*sepw2 - 1.0f, a, b, t);
+	return Slider(x + w*sepw, y, w*sepw2 - 1.f, a, b, t);
 }
 
 float UI2::Slider(float x, float y, uint w, float a, float b, float t) {
@@ -65,7 +65,7 @@ float UI2::Slider(float x, float y, uint w, float a, float b, float t) {
 
 void UI2::Color(float x, float y, uint w, const std::string& title, Vec4& col) {
 	UI::Label(x, y, 12, title, white());
-	if (Engine::Button(x + w*sepw, y, w*sepw2 - 1.0f, 16, col) == MOUSE_RELEASE) {
+	if (Engine::Button(x + w*sepw, y, w*sepw2 - 1.f, 16, col) == MOUSE_RELEASE) {
 		Popups::type = POPUP_TYPE::COLORPICK;
 		Popups::pos = Vec2(x + w*sepw, y + 16);
 		Popups::data = &col;
@@ -75,7 +75,7 @@ void UI2::Color(float x, float y, uint w, const std::string& title, Vec4& col) {
 
 void UI2::File(float x, float y, uint w, const std::string& title, const std::string& fl, filecallback func) {
 	UI::Label(x, y, 12, "File", white());
-	if (Engine::Button(x + w*sepw, y, w*sepw2 - 1.0f, 16, white(1, 0.3f), fl, 12, white(0.5f)) == MOUSE_RELEASE) {
+	if (Engine::Button(x + w*sepw, y, w*sepw2 - 1.f, 16, white(1, 0.3f), fl, 12, white(0.5f)) == MOUSE_RELEASE) {
 		std::vector<std::string> exts = {"*.hdr"};
 		auto res = Dialog::OpenFile(exts);
 		if (!!res.size()) {
@@ -163,10 +163,32 @@ void UI2::Bezier(Vec2 p1, Vec2 t1, Vec2 t2, Vec2 p2, Vec4 col, int reso) {
 	glUseProgram(0);
 }
 
+float UI2::Scroll(float x, float y, float h, float t, float tot, float fill) {
+	static float scrpos = -1;
+
+	bool me = Input::mouse0 && (UI::_layer == UI::_layerMax) && Rect(x, y, 8, h).Inside(Input::mouseDownPos);
+	UI::Quad(x, y, 8, h, black(0.2f));
+	bool clk = Engine::Button(x, y, 8, h) == MOUSE_CLICK;
+	auto scr = Engine::Button(x, y + (h - 2)*t / tot, 8, (h-2)*fill/tot + 2);
+	if (scr > 0 || (me && scrpos >= 0)) {
+		UI::Quad(x, y + (h - 2)*t / tot, 8, (h - 2)*fill / tot + 2, (scr == MOUSE_HOVER_FLAG) ? white() : white(1, 0.5f));
+		if (scr == MOUSE_CLICK) scrpos = Input::mousePos.y - (y + (h - 2)*t / tot);
+		else if (scr == MOUSE_RELEASE) scrpos = -1;
+		else if (me && scrpos >= 0) {
+			t = min((Input::mousePos.y - scrpos - y) / (h - 2) * tot, tot - fill);
+			t = max(t, 0.f);
+		}
+	}
+	else {
+		UI::Quad(x + 1, y + 1 + (h - 2)*t / tot, 6, (h - 2)*fill / tot, white(0.5f));
+	}
+	return t;
+}
+
 Vec3 UI2::EditVec(float x, float y, float w, const std::string& t, Vec3 v, bool ena) {
 	Vec3 res;
-	res.x = TryParse(UI2::EditText(x, y, w, t + " X", std::to_string(v.x), ena, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.0f);
-	res.y = TryParse(UI2::EditText(x, y + 17, w, t + " Y", std::to_string(v.y), ena, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.0f);
-	res.z = TryParse(UI2::EditText(x, y + 34, w, t + " Z", std::to_string(v.z), ena, Vec4(0.4f, 0.4f, 0.6f, 1)), 0.0f);
+	res.x = TryParse(UI2::EditText(x, y, w, t + " X", std::to_string(v.x), ena, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.f);
+	res.y = TryParse(UI2::EditText(x, y + 17, w, t + " Y", std::to_string(v.y), ena, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.f);
+	res.z = TryParse(UI2::EditText(x, y + 34, w, t + " Z", std::to_string(v.z), ena, Vec4(0.4f, 0.4f, 0.6f, 1)), 0.f);
 	return res;
 }

@@ -46,7 +46,7 @@ bool CDV::Read(ParInfo* info) {
 	std::getline(strm, s);
 
 	for (uint i = 0; i < sz; i++) {
-		info->progress = i * 1.0f / sz;
+		info->progress = i * 1.f / sz;
 		strm >> id >> rd;
 		info->resId[i] = id;
 		info->type[id] = *((uint16_t*)"H");

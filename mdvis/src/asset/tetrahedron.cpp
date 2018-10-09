@@ -1,7 +1,7 @@
 #include "tetrahedron.h"
 
 Tetrahedron::Tetrahedron() {
-	const float c = 1 / std::sqrt(2.0f);
+	const float c = 1 / std::sqrt(2.f);
 	verts = { Vec3(1, 0, -c),
 		Vec3(-1, 0, -c),
 		Vec3(0, 1, c),

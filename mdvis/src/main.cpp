@@ -61,6 +61,7 @@ void updateFunc() {
 			Particles::GenTexBufs();
 			ParGraphics::UpdateDrawLists();
 		}
+		ParMenu::CalcH();
 		VisSystem::lastSave = Time::time;
 	}
 
