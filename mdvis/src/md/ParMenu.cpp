@@ -135,6 +135,13 @@ void ParMenu::Draw_List(float off) {
 			for (uint i = 0; i < Particles::residueListSz; i++) {
 				auto& rli = Particles::residueLists[i];
 				if (rli.selected) rli.visible = visibleAll;
+				if (rli.expanded) {
+					for (uint j = 0; j < rli.residueSz; j++) {
+						auto& rl = rli.residues[j];
+						//if (rl.selected)
+							rl.visible = visibleAll;
+					}
+				}
 			}
 			ParGraphics::UpdateDrawLists();
 		}
