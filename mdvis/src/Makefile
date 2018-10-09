@@ -106,7 +106,7 @@ obj/utils/tinyfiledialogs.o: utils/tinyfiledialogs.c
 	$(C) -g -c $< -o $@
 
 obj/vis/system.o: vis/system.cpp
-	echo "\""$(shell git rev-parse --short head)"\"" > ../../githash.h
+	echo "\""$(shell git rev-parse --short HEAD^)"\"" > ../../githash.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 obj/tinyobj.o : tmp/tiny_obj_loader.cpp

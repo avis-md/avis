@@ -24,7 +24,7 @@ int RunCmd::Run(std::string cmd) {
 	CloseHandle(pi.hThread);
 	CloseHandle(pi.hProcess);
 #else
-	ret = system(&cmd[0]);
+	ret = WEXITSTATUS(system(&cmd[0]));
 #endif
 	Debug::Message("Cmd", "cmd exit with code " + std::to_string(ret));
 	return ret;

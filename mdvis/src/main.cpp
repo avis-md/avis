@@ -296,7 +296,7 @@ The hash for this program is )" << VisSystem::version_hash
 		INIT(CReader);
 		LINIT(PyReader);
 		INIT(FReader);
-		INIT(RayTracer);
+		LINIT(RayTracer);
 		INIT(Color);
 		INIT(Icons);
 		LINIT(CubeMarcher);

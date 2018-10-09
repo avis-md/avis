@@ -41,7 +41,7 @@ void CReader::Init() {
 	}
 #else
 	gpp = VisSystem::envs["GPP"];
-	auto res = RunCmd::Run("command -v " + gpp + " &> /dev/null");
+	auto res = RunCmd::Run("command -v " + gpp + "&> /dev/null");
 	if (res == 0)
 		AnWeb::hasC = true;
 	else

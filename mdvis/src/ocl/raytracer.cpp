@@ -26,7 +26,12 @@ RR::IntersectionApi* RayTracer::api;
 return false
 bool RayTracer::Init() {
 	std::vector<CLWPlatform> platforms;
-	CLWPlatform::CreateAllPlatforms(platforms);
+	try {
+		CLWPlatform::CreateAllPlatforms(platforms);
+	}
+	catch (CLWException& e) {
+		Debug::Warning("RayTracer", e.what());
+	}
 
 	if (platforms.size() == 0)
 	{
@@ -36,8 +41,13 @@ bool RayTracer::Init() {
 	for (int i = 0; i < platforms.size(); ++i) {
 		for (int d = 0; d < (int)platforms[i].GetDeviceCount(); ++d) {
 			if (platforms[i].GetDevice(d).GetType() == CL_DEVICE_TYPE_GPU) {
-				context = CLWContext::Create(platforms[i].GetDevice(d));
-				break;
+				try {
+					context = CLWContext::Create(platforms[i].GetDevice(d));
+					break;
+				}
+				catch (CLWException& e) {
+					Debug::Warning("RayTracer", e.what());
+				}
 			}
 		}
 		if (context) break;
