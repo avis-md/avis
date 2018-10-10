@@ -1,4 +1,5 @@
 OSFLAG :=
+CFLAGS2 :=
 LDFLAGS2 :=
 GLLIB :=
 LIBS2 :=
@@ -17,6 +18,7 @@ BINPRE2 := /lib/x86_64-linux-gnu
 
 ifeq ($(UNAME_S),Linux)
 	OSFLAG += -D PLATFORM_LNX
+	CFLAGS2 += -Wno-ignored-attributes
 	LDFLAGS2 += -Wl,-rpath='$$ORIGIN' -static-libstdc++
 	GLLIB += /usr/lib/x86_64-linux-gnu/libjpeg.a -lssh2 -lOpenCL `pkg-config --static --libs gl glew glfw3 freetype2`
 	#PYLIB += $(shell python3-config --configdir)/libpython3.6m.a -lexpat
@@ -37,7 +39,7 @@ LIBS2 += $(RRAYL) -lCalc -lCLW -lRadeonRays
 
 C = gcc
 CXX = g++
-CXXFLAGS = -O0 -g -std=c++11 -fvisibility=hidden -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ $(NUMPY) -I$(shell python3-config --prefix)/include/python3.6m $(RRAY) $(OSFLAG)
+CXXFLAGS = -O0 -g -std=c++11 -fvisibility=hidden -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ $(NUMPY) -I$(shell python3-config --prefix)/include/python3.6m $(RRAY) $(OSFLAG) $(CFLAGS2)
 LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
 LIBS = $(WEAK_LIB) $(PYLIB) -lpthread -lm $(GLLIB) -lz $(LIBS2)
 
@@ -107,7 +109,8 @@ obj/utils/tinyfiledialogs.o: utils/tinyfiledialogs.c
 
 obj/vis/system.o: vis/system.cpp
 	echo "\""$(shell git rev-parse --short HEAD^)"\"" > ../../githash.h
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	@echo "Compiling " $< 	
 
 obj/tinyobj.o : tmp/tiny_obj_loader.cpp
 	$(CXX) -g -c $< -o $@
