@@ -33,21 +33,18 @@ const std::string AN_NODE_INS[] = { "Particle data", "System info" };
 
 enum class AN_NODE_MOD {
 	NUM0 = 0x20,
-	RECOL,
-	RECOLA,
 	PARAM,
 	NUM
 };
-const std::string AN_NODE_MODS[] = { "Recolor", "Recolor All", "Set Param" };
+const std::string AN_NODE_MODS[] = { "Set Param" };
 
 enum class AN_NODE_GEN {
 	NUM0 = 0x40,
 	BOND,
-	VOL,
 	TRJ,
 	NUM
 };
-const std::string AN_NODE_GENS[] = { "Add Bonds", "Add Volume", "Trace Trajectory" };
+const std::string AN_NODE_GENS[] = { "Add Bonds", "Trace Trajectory" };
 
 enum class AN_NODE_MISC {
 	NUM0 = 0x60,
@@ -103,10 +100,8 @@ public:
 #include "nodes/node_inputs.h"
 #include "nodes/node_info.h"
 #include "nodes/node_addbond.h"
-//#include "nodes/node_volume.h"
 #include "nodes/node_camera.h"
 #include "nodes/node_plot.h"
-#include "nodes/node_recolor.h"
 #include "nodes/node_setparam.h"
 #include "nodes/node_showrange.h"
 #include "nodes/node_tracetrj.h"

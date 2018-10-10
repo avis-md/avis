@@ -198,13 +198,9 @@ void AnWeb::Draw() {
 						SW(IN::PARS, Node_Inputs);
 						SW(IN::PINFO, Node_Info);
 
-						SW(MOD::RECOL, Node_Recolor);
-						SW(MOD::RECOLA, Node_Recolor_All);
-
 						SW(MOD::PARAM, Node_SetParam);
 
 						SW(GEN::BOND, Node_AddBond);
-						SW(GEN::VOL, Node_Volume);
 						SW(GEN::TRJ, Node_TraceTrj);
 
 						SW(MISC::PLOT, Node_Plot);
@@ -637,10 +633,7 @@ void AnWeb::Load(const std::string& s) {
 					//ND(Node_AddVolume)
 					ND(Node_TraceTrj)
 					ND(Node_Camera_Out)
-					ND(Node_Recolor)
-					ND(Node_Recolor_All)
 					ND(Node_SetParam)
-					ND(Node_Volume)
 					ND(Node_Plot)
 					ND(Node_ShowRange)
 					Debug::Warning("AnWeb::Load", "Unknown node name: " + nm);
