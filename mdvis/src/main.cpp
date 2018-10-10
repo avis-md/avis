@@ -167,8 +167,8 @@ void paintfunc() {
 			id--;
 			UI::Quad(Input::mousePos.x + 14, Input::mousePos.y + 2, 120, 60, white(0.8f, 0.1f));
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Particle " + std::to_string(id), white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, &Particles::particles_ResName[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, &Particles::particles_Name[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, &Particles::resNames[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, &Particles::names[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, std::to_string(Particles::particles_Pos[id]), white());
 
 		}
@@ -216,7 +216,7 @@ int main(int argc, char **argv) {
 						return 0;
 					}
 					else if ISS(help) {
-						std::cout << "MDVIS\n" << VERSIONSTRING "\n"
+						std::cout << "AVIS\n" << VERSIONSTRING "\n"
 							<< res::helpText << std::endl;
 						return 0;
 					}
@@ -249,7 +249,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			else {
-				fls.push_back(argv[a]);
+				fls.push_back(IO::FullPath(argv[a]));
 			}
 		}
 		std::cout << R"(Thanks for trying out this program! :)

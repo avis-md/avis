@@ -18,7 +18,9 @@ public:
 	static std::string GetText(const std::string& path);
 	static std::vector<byte> GetBytes(const std::string& path);
 
+	static bool IsRelPath(const std::string& path);
 	static std::string ResolveUserPath(const std::string& path);
+	static std::string FullPath(const std::string& path);
 
 	static time_t ModTime(const std::string& path);
 

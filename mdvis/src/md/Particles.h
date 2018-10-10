@@ -32,7 +32,7 @@ class Particles {
 public:
 	struct conninfo {
 		uint cnt, ocnt = 0;
-		Int2* ids;
+		std::vector<Int2> ids;
 		GLuint buf = 0, tbuf = 0;
 		byte drawMode = 1;
 		float scale = 1;
@@ -64,13 +64,14 @@ public:
 
 	static std::string cfgFile, trjFile;
 
-	static char* particles_Name, *particles_ResName; //10 chars per name
 	static glm::dvec3* particles_Pos, *particles_Vel;
-	static short* particles_Typ;
-	static byte* particles_Col;
-	static conninfo particles_Conn;
-	static float* particles_Rad;
-	static Int2* particles_Res;
+
+	static std::vector<char> names, resNames;
+	static std::vector<short> types;
+	static std::vector<byte> colors;
+	static std::vector<float> radii;
+	static std::vector<Int2> ress;
+	static conninfo conns;
 
 	static int particles_ParamSz;
 	static paramdata* particles_Params[10];
@@ -122,7 +123,9 @@ public:
 	static GLuint colorPalleteTex;
 	static bool palleteDirty;
 
-	static void Init(), Clear(), GenTexBufs(), Update(), UpdateBufs(), UpdateColorTex(), UpdateRadBuf();
+	static void Init(), Clear(), GenTexBufs();
+	static void Resize(uint i);
+	static void Update(), UpdateBufs(), UpdateColorTex(), UpdateRadBuf();
 	static void AddParam(), RmParam(int i);
 
 	static void Serialize(XmlNode* nd);

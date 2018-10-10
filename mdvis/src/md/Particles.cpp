@@ -117,13 +117,14 @@ uint Particles::particleSz;
 
 std::string Particles::cfgFile, Particles::trjFile;
 
-char* Particles::particles_Name, *Particles::particles_ResName;
 glm::dvec3* Particles::particles_Pos, *Particles::particles_Vel;
-short* Particles::particles_Typ;
-byte* Particles::particles_Col;
-Particles::conninfo Particles::particles_Conn;
-float* Particles::particles_Rad;
-Int2* Particles::particles_Res;
+
+std::vector<char> Particles::names, Particles::resNames;
+std::vector<short> Particles::types;
+std::vector<byte> Particles::colors;
+std::vector<float> Particles::radii;
+std::vector<Int2> Particles::ress;
+Particles::conninfo Particles::conns;
 
 int Particles::particles_ParamSz = 0;
 Particles::paramdata* Particles::particles_Params[] = {};
@@ -181,13 +182,14 @@ void Particles::Clear() {
 	if (particles_Pos) {
 		residueLists.clear();
 		
-		delete[](particles_Name);
-		delete[](particles_ResName);
-		delete[](particles_Typ);
-		delete[](particles_Col);
-		std::free(particles_Conn.ids);
+		names.clear();
+		resNames.clear();
+		types.clear();
+		colors.clear();
+		radii.clear();
+		conns.ids.clear();
 		particles_Pos = 0;
-		residueListSz = particleSz = Particles::particles_Conn.cnt = 0;
+		residueListSz = particleSz = Particles::conns.cnt = 0;
 
 		anim.Clear();
 
@@ -213,6 +215,15 @@ void Particles::GenTexBufs() {
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, radBuffer);
 
 	glBindTexture(GL_TEXTURE_BUFFER, 0);
+}
+
+void Particles::Resize(uint i) {
+	names.resize(i * PAR_MAX_NAME_LEN);
+	resNames.resize(i * PAR_MAX_NAME_LEN);
+	types.resize(i);
+	colors.resize(i);
+	radii.resize(i);
+	ress.resize(i);
 }
 
 void Particles::Update() {
@@ -241,20 +252,20 @@ void Particles::UpdateBufs() {
 	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(Vec3), &poss[0], GL_DYNAMIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, connBuffer);
-	glBufferData(GL_ARRAY_BUFFER, particles_Conn.cnt * 2 * sizeof(uint), particles_Conn.ids, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, conns.cnt * 2 * sizeof(uint), &conns.ids[0], GL_DYNAMIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, colIdBuffer);
-	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(byte), particles_Col, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(byte), &colors[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, radBuffer);
-	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(float), particles_Rad, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(float), &radii[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void Particles::UpdateRadBuf() {
 	glBindBuffer(GL_ARRAY_BUFFER, radBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(float), particles_Rad);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(float), &radii[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
@@ -264,9 +275,9 @@ void Particles::UpdateConBufs2() {
 		if (!c2.buf) glGenBuffers(1, &c2.buf);
 		glBindBuffer(GL_ARRAY_BUFFER, c2.buf);
 		if (c2.ocnt < c2.cnt)
-			glBufferData(GL_ARRAY_BUFFER, c2.cnt * sizeof(Int2), c2.ids, GL_DYNAMIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, c2.cnt * sizeof(Int2), &c2.ids[0], GL_DYNAMIC_DRAW);
 		else
-			glBufferSubData(GL_ARRAY_BUFFER, 0, c2.cnt * sizeof(Int2), c2.ids);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, c2.cnt * sizeof(Int2), &c2.ids[0]);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		c2.ocnt = c2.cnt;
 		if (!c2.tbuf) {
@@ -313,8 +324,8 @@ void Particles::SetFrame(uint frm) {
 			auto& c2 = anim.conns2[i];
 			if (!c2.size()) continue;
 			auto& c = particles_Conn2[i];
-			c.cnt = c2[frm].count;
-			c.ids = &c2[frm].ids[0];
+			//c.cnt = c2[frm].count;
+			//c.ids = &c2[frm].ids[0];
 		}
 		AnWeb::OnAnimFrame();
 		if (!!anim.conns2.size()) UpdateConBufs2();

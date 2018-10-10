@@ -463,7 +463,7 @@ Vec3 AU(Vec3 vec) {
 
 float UI::GetLabelW(float s, std::string str, Font* font) {
 	if (!s || !str[0]) return 0;
-	uint si = (uint)round(s);
+	uint si = (uint)std::roundf(s);
 	size_t sz = str.size();
 	float totalW = 0;
 	char* cc = &str[0];
@@ -481,7 +481,7 @@ void UI::Label(float x, float y, float s, std::string st, Vec4 col, float maxw, 
 
 void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, float maxw, Font* font) {
 	if (!s || !str[0]) return;
-	uint si = (uint)round(s);
+	uint si = (uint)std::roundf(s);
 	sz = min(sz, (uint)strlen(str));
 	font->SizeVec(sz);
 	byte align = (byte)font->alignment;
@@ -515,7 +515,7 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 
 	y = Display::height - y;
 	Vec3 ds = Vec3(1.f / Display::width, 1.f / Display::height, 0.5f);
-	x = round(x);
+	x = std::roundf(x);
 	float defx = x;
 	for (uint i = 0; i < usz * 4; i += 4) {
 		auto& c = ucs[i / 4];
@@ -532,7 +532,7 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 				font->poss[i + 2] = font->poss[i + 3] = Vec3(-1, -1, 0);
 			font->cs[i] = font->cs[i + 1] = font->cs[i + 2] = font->cs[i + 3] = 0;
 			x = defx;
-			y = round(y - s * 1.3f);
+			y = std::roundf(y - s * 1.3f);
 		}
 		else {
 			font->poss[i] = AU(Vec3(x - 1, y - s - 1, 1) + off)*ds;
@@ -542,7 +542,7 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 			font->cs[i] = font->cs[i + 1] = font->cs[i + 2] = font->cs[i + 3] = c;
 			x += prm.o2s[cc];
 			if (c == ' ' || c == '\t')
-				x = round(x);
+				x = std::roundf(x);
 		}
 	}
 	font->poss[usz * 4] = Vec3(x, 0, 0)*ds;

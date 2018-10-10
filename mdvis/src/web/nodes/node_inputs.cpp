@@ -107,7 +107,7 @@ void Node_Inputs::Execute() {
 		conV[0].value = &conV[0].data.val.arr.p;
 		conV[1].data.val.arr.p = vel;
 		conV[1].value = &conV[1].data.val.arr.p;
-		conV[4].value = &Particles::particles_Typ;
+		conV[4].value = &Particles::types;
 	}
 	else {
 		if (setpos) {
@@ -133,7 +133,7 @@ void Node_Inputs::Execute() {
 				}
 				if (settyp) {
 					vtyp.resize(off + dl.second.first);
-					memcpy(&vtyp[off], Particles::particles_Typ + dl.first, dl.second.first * sizeof(short));
+					memcpy(&vtyp[off], &Particles::types[dl.first], dl.second.first * sizeof(short));
 				}
 				off += dl.second.first;
 			}

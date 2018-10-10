@@ -22,7 +22,7 @@ void UI2::Init() {
 void UI2::LabelMul(float x, float y, float sz, const std::string& s) {
 	auto ss = string_split(s, '\n');
 	for (size_t a = 0; a < ss.size(); a++) {
-		UI::Label(x, round(y + sz * 1.2f * a), sz, ss[a], white());
+		UI::Label(x, std::roundf(y + sz * 1.2f * a), sz, ss[a], white());
 	}
 }
 

@@ -159,11 +159,11 @@ void ParMenu::Draw_List(float off) {
 			ParGraphics::UpdateDrawLists();
 		}
 		if (Engine::Button(110, off, 16, 16, Icons::down) == MOUSE_RELEASE) {
-			Particles::particles_Conn.visible = !Particles::particles_Conn.visible;
+			Particles::conns.visible = !Particles::conns.visible;
 		}
 	}
 	else {
-		Particles::particles_Conn.visible = false;
+		Particles::conns.visible = false;
 	}
 	off += 17;
 	float hmax = Display::height - 18 - off;
@@ -172,8 +172,8 @@ void ParMenu::Draw_List(float off) {
 	if (hbar) {
 		listHOff = UI2::Scroll(expandPos - 8, off, hmax, listHOff, listH*17, hmax);
 	}
-	if (!!selCnt && Particles::particles_Conn.visible) {
-		DrawConnMenu(Particles::particles_Conn, 1, off, 148);
+	if (!!selCnt && Particles::conns.visible) {
+		DrawConnMenu(Particles::conns, 1, off, 148);
 	}
 	Engine::BeginStencil(0, off, expandPos, hmax);
 	if (Rect(0, off, expandPos, Display::height - 18 - off).Inside(Input::mousePos)) {
@@ -297,7 +297,7 @@ void ParMenu::Draw_List(float off) {
 						bool has = itr != sell.end();
 						if (off - mof + 16 > 0) {
 							UI::Quad(expandPos - 138, off, 136.f - bar, 16, has ? Vec4(0.3f, 0.5f, 0.3f, 1) : white(1, 0.4f));
-							UI::Label(expandPos - 136, off, 12, &Particles::particles_Name[(rj.offset + k)*PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
+							UI::Label(expandPos - 136, off, 12, &Particles::names[(rj.offset + k)*PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
 							if (Engine::Button(expandPos - 138, off, 120.f - bar, 16) == MOUSE_RELEASE) {
 								if (!Input::KeyHold(Key_LeftShift)) {
 									if (!(sell.size() == 1 && has)) {
@@ -322,7 +322,7 @@ void ParMenu::Draw_List(float off) {
 									else sell.push_back(rj.offset + k + 1);
 								}
 							}
-							Vec3& col = Particles::colorPallete[Particles::particles_Col[rj.offset + k]];
+							Vec3& col = Particles::colorPallete[Particles::colors[rj.offset + k]];
 							Engine::Button(expandPos - 18.f - bar, off, 16, 16, Icons::circle, Vec4(col, 0.8f), Vec4(col, 1), Vec4(col, 0.5f));
 						}
 						off += 17;
@@ -570,7 +570,7 @@ void ParMenu::DrawSelPopup() {
 						if (rj.expanded) {
 							for (uint k = 0; k < rj.cnt; k++) {
 								UI::Quad(expandPos - 138, off, 136, 16, white(1, 0.4f));
-								UI::Label(expandPos - 136, off, 12, &Particles::particles_Name[(rj.offset + k)*PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
+								UI::Label(expandPos - 136, off, 12, &Particles::names[(rj.offset + k)*PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
 								if (Engine::Button(expandPos - 138, off, 120, 16) == MOUSE_RELEASE) {
 									*(uint*)Popups::data = rj.offset + k;
 									Popups::type = POPUP_TYPE::NONE;

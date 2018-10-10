@@ -225,7 +225,7 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4,
 	MOUSE_STATUS b = Button(x, y, w, h, normalVec4, highlightVec4, pressVec4);
 	ALIGNMENT al = labelFont->alignment;
 	labelFont->alignment = labelCenter? ALIGN_MIDCENTER : ALIGN_MIDLEFT;
-	UI::Label(round(x + (labelCenter? w*0.5f : 2)), round(y + 0.4f*h), labelSize, label, labelVec4, -1.f, labelFont);
+	UI::Label(std::roundf(x + (labelCenter? w*0.5f : 2)), std::roundf(y + 0.4f*h), labelSize, label, labelVec4, -1.f, labelFont);
 	labelFont->alignment = al;
 	return b;
 }

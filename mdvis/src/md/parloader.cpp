@@ -7,7 +7,6 @@
 #include "ui/icons.h"
 #include "ui/popups.h"
 #include "ui/ui_ext.h"
-#include "utils/rawvector.h"
 #include <iomanip>
 
 #define EndsWith(s, s2) s.substr(sz - s2.size()) == s2
@@ -363,22 +362,19 @@ void ParLoader::DoOpen() {
 	*loadProgress2 = 0;
 	loadFrames = nullptr;
 
-	Particles::particles_ResName = info.resname;
-	Particles::particles_Name = info.name;
+	Particles::Resize(info.num);
+	memcpy(&Particles::names[0], info.name, info.num * PAR_MAX_NAME_LEN);
+	memcpy(&Particles::resNames[0], info.resname, info.num * PAR_MAX_NAME_LEN);
 	Particles::particles_Pos = (glm::dvec3*)info.pos;
 	Particles::particles_Vel = (glm::dvec3*)info.vel;
-	Particles::particles_Typ = (short*)info.type;
+	memcpy(&Particles::types[0], info.type, info.num * sizeof(short));
 	memcpy(Particles::boundingBox, info.bounds, 6 * sizeof(double));
-	Particles::particles_Col = new byte[info.num];
-	Particles::particles_Rad = new float[info.num];
-	Particles::particles_Res = new Int2[info.num];
 	if (!VisSystem::currentSavePath.size())
 		ParGraphics::rotCenter = Vec3(info.bounds[0] + info.bounds[1], 
 		info.bounds[2] + info.bounds[3], 
 		info.bounds[4] + info.bounds[5]) * 0.5f;
 
-	auto& conn = Particles::particles_Conn;
-	auto cn = rawvector<Int2, uint>(conn.ids, conn.cnt);
+	auto& conn = Particles::conns;
 
 	uint64_t currResNm = -1;
 	uint16_t currResId = -1;
@@ -396,8 +392,8 @@ void ParLoader::DoOpen() {
 			char buf[100];
 			strm->getline(buf, 100, '\n');
 			strm->read((char*)(&conn.cnt), 4);
-			conn.ids = (Int2*)std::realloc(conn.ids, conn.cnt * sizeof(Int2));
-			strm->read((char*)conn.ids, conn.cnt * sizeof(Int2));
+			conn.ids.resize(conn.cnt);
+			strm->read((char*)&conn.ids[0], conn.cnt * sizeof(Int2));
 			strm->read(buf, 2);
 			if (buf[0] != 'X' || buf[1] != 'X') {
 				useConnCache = false;
@@ -453,7 +449,7 @@ void ParLoader::DoOpen() {
 		auto vec = *((glm::dvec3*)(&info.pos[i * 3]));
 		int cnt = int(lastCnt + tr->cnt);
 		if (useConn && (!useConnCache || !hasConnCache || ovwConnCache)) {
-#pragma omp parallel for
+//#pragma omp parallel for
 			for (int j = 0; j < cnt; j++) {
 				Vec3 dp = Particles::particles_Pos[lastOff + j] - vec;
 
@@ -463,9 +459,10 @@ void ParLoader::DoOpen() {
 					float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
 					if (!bst) bst = VisSystem::_defBondLength;
 					if (dst < bst) {
-#pragma omp critical
+//#pragma omp critical
 						{
-							cn.push(Int2(i, lastOff + j));
+							conn.ids.push_back(Int2(i, lastOff + j));
+							conn.cnt++;
 							tr->cnt_b++;
 						}
 					}
@@ -474,15 +471,15 @@ void ParLoader::DoOpen() {
 		}
 		for (byte b = 0; b < Particles::defColPalleteSz; b++) {
 			if (id1 == Particles::defColPallete[b]) {
-				Particles::particles_Col[i] = b;
+				Particles::colors[i] = b;
 				break;
 			}
 		}
 
 		float rad = VisSystem::radii[id1][1];
 
-		Particles::particles_Rad[i] = rad;
-		Particles::particles_Res[i] = Int2(Particles::residueListSz - 1, trs->residueSz - 1);
+		Particles::radii[i] = rad;
+		Particles::ress[i] = Int2(Particles::residueListSz - 1, trs->residueSz - 1);
 
 		tr->cnt++;
 	}
@@ -493,7 +490,7 @@ void ParLoader::DoOpen() {
 		std::ofstream ostrm(path + ".conn", std::ios::binary);
 		ostrm << __DATE__ << " " << __TIME__ << "\n";
 		_StreamWrite(&conn.cnt, &ostrm, 4);
-		_StreamWrite(conn.ids, &ostrm, conn.cnt * sizeof(Int2));
+		_StreamWrite(&conn.ids[0], &ostrm, conn.cnt * sizeof(Int2));
 		_StreamWrite("XX", &ostrm, 2);
 		for (uint a = 0; a < Particles::residueListSz; a++) {
 			auto& rsl = Particles::residueLists[a];
@@ -503,6 +500,11 @@ void ParLoader::DoOpen() {
 			}
 		}
 	}
+
+	delete[](info.name);
+	delete[](info.resname);
+	delete[](info.type);
+	delete[](info.resId);
 
 	auto& anm = Particles::anim;
 	anm.Clear();

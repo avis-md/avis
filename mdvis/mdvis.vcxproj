@@ -248,6 +248,7 @@
     <ClCompile Include="src\asset\tetrahedron.cpp" />
     <ClCompile Include="src\core\ui3.cpp" />
     <ClCompile Include="src\md\CDV.cpp" />
+    <ClCompile Include="src\md\dlpoly.cpp" />
     <ClCompile Include="src\md\lammps.cpp" />
     <ClCompile Include="src\md\pdb.cpp" />
     <ClCompile Include="src\tmp\tiny_obj_loader.cpp" />
@@ -308,7 +309,6 @@
     <ClCompile Include="src\web\nodes\node_info.cpp" />
     <ClCompile Include="src\web\nodes\node_inputs.cpp" />
     <ClCompile Include="src\web\nodes\node_plot.cpp" />
-    <ClCompile Include="src\web\nodes\node_recolor.cpp" />
     <ClCompile Include="src\web\nodes\node_remap.cpp" />
     <ClCompile Include="src\web\nodes\node_setparam.cpp" />
     <ClCompile Include="src\web\nodes\node_showrange.cpp" />
@@ -424,7 +424,6 @@
     <ClInclude Include="src\web\nodes\node_info.h" />
     <ClInclude Include="src\web\nodes\node_inputs.h" />
     <ClInclude Include="src\web\nodes\node_plot.h" />
-    <ClInclude Include="src\web\nodes\node_recolor.h" />
     <ClInclude Include="src\web\nodes\node_remap.h" />
     <ClInclude Include="src\web\nodes\node_setparam.h" />
     <ClInclude Include="src\web\nodes\node_showrange.h" />

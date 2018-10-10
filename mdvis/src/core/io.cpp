@@ -173,12 +173,24 @@ std::vector<byte> IO::GetBytes(const std::string& path) {
 	return res;
 }
 
+bool IO::IsRelPath(const std::string& path) {
+#ifdef PLATFORM_WIN
+	return (path[1] == ':') && (path[0] >= 'A' && path[0] <= 'Z');
+#else
+	return path[0] == '/';
+#endif
+}
+
 std::string IO::ResolveUserPath(const std::string& path) {
 	if (path[0] == '~') {
 		if (path[1] == '/')
 			return userPath + path.substr(1);
 	}
 	return path;
+}
+
+std::string IO::FullPath(const std::string& path) {
+	return IsRelPath(path) ? userPath + path : path;
 }
 
 time_t IO::ModTime(const std::string& s) {

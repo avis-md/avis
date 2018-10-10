@@ -28,9 +28,9 @@ void Color::Init() {
 void Color::Hsv2Rgb(float h, float s, float v, byte& r, byte& g, byte& b) {
 	Vec4 cb = HueBaseCol(h);
 	Vec4 c(Lerp(Lerp(cb, Vec4(1, 1, 1, 1), 1 - s), Vec4(), 1 - v));
-	r = (byte)round(c.r * 255);
-	g = (byte)round(c.g * 255);
-	b = (byte)round(c.b * 255);
+	r = (byte)std::roundf(c.r * 255);
+	g = (byte)std::roundf(c.g * 255);
+	b = (byte)std::roundf(c.b * 255);
 }
 
 void Color::Rgb2Hsv(byte r, byte g, byte b, float& h, float& s, float& v) {

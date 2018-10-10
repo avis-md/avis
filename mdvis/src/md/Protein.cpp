@@ -39,7 +39,7 @@ C=O
 uint _Has(const std::vector<uint>& c, char _c) {
     uint i = 0;
     for (auto& a : c) {
-        if (Particles::particles_Name[a * PAR_MAX_NAME_LEN] == _c)
+        if (Particles::names[a * PAR_MAX_NAME_LEN] == _c)
             return i;
         i++;
     }
@@ -47,7 +47,7 @@ uint _Has(const std::vector<uint>& c, char _c) {
 }
 
 #define _FOR(conn, c, i) for (auto& i : conn) { \
-    if (Particles::particles_Name[i * PAR_MAX_NAME_LEN] == c)
+    if (Particles::names[i * PAR_MAX_NAME_LEN] == c)
 
 byte _CntOf(const std::vector<uint>& c, char _c) {
     byte i = 0;
@@ -111,7 +111,7 @@ bool Protein::Refresh() {
 				bool hascon = isn;
 				uint ls = ch[4];
                 for (uint k = 0; k < rs.cnt_b; k++) {
-                    auto& cn = Particles::particles_Conn.ids[rs.offset_b + k];
+                    auto& cn = Particles::conns.ids[rs.offset_b + k];
 					if (cn[1] >= (int)rs.offset) {
 						conns[cn[0] - rs.offset].push_back(cn[1]);
 						conns[cn[1] - rs.offset].push_back(cn[0]);
@@ -143,7 +143,7 @@ bool Protein::Refresh() {
 				msg2 += std::string(&rl.name[0]);
 				msg2 += " (" + rs.name + ")\n";
 				for (uint a = 0; a < rs.cnt; a++) {
-                    if (Particles::particles_Name[(a + rs.offset) * PAR_MAX_NAME_LEN] == 'N') {
+                    if (Particles::names[(a + rs.offset) * PAR_MAX_NAME_LEN] == 'N') {
 						mxf = 1;
                         //if (_Has(conns[a], 'H')) {
                             _FOR(conns[a], 'C', b) {

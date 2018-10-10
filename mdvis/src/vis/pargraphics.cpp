@@ -361,7 +361,7 @@ void ParGraphics::FillRad(byte* rads) {
 		default: break;
 		}
 		for (uint a = p.first; a < p.first + p.second.first; a++) {
-			rads[a] = (byte)(min(0.1f * ml * Particles::particles_Rad[a], 0.2f) * 255 / 0.2f);
+			rads[a] = (byte)(min(0.1f * ml * Particles::radii[a], 0.2f) * 255 / 0.2f);
 		}
 	}
 }
@@ -377,7 +377,7 @@ void ParGraphics::Update() {
 			auto af = Particles::anim.currentFrame;
 			auto dt = Time::delta + animOff;
 			auto df = dt * animTarFps;
-			auto dfi = (uint)floor(df);
+			auto dfi = (uint)std::floorf(df);
 			animOff = (df - dfi) / animTarFps;
 			af += dfi;
 			while (af >= Particles::anim.frameCount) af -= Particles::anim.frameCount;
@@ -417,8 +417,8 @@ void ParGraphics::Update() {
 					rotZs = rotZ;
 					if (Input::KeyHold(Key_LeftShift)) {
 						const float dth = 22.5f;
-						rotW = dth * round(rotW / dth);
-						rotZ = dth * round(rotZ / dth);
+						rotW = dth * std::roundf(rotW / dth);
+						rotZ = dth * std::roundf(rotZ / dth);
 					}
 				}
 				else if ((VisSystem::mouseMode == VIS_MOUSE_MODE::PAN) || (((VisSystem::mouseMode == VIS_MOUSE_MODE::ROTATE) && (dragMode == 2)))) {
@@ -573,7 +573,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		float snw = sin(-rotW*deg2rad);
 		Mat4x4 mMatrix = Mat4x4(1, 0, 0, 0, 0, csw, snw, 0, 0, -snw, csw, 0, 0, 0, 0, 1) * Mat4x4(csz, 0, -snz, 0, 0, 1, 0, 0, snz, 0, csz, 0, 0, 0, 0, 1);
 		MVP::Mul(mMatrix);
-		float s = pow(2.f, rotScale);
+		float s = std::powf(2.f, rotScale);
 		MVP::Scale(s, s, s);
 		if (rotCenterTrackId < ~0) {
 			rotCenter = Particles::particles_Pos[rotCenterTrackId];
@@ -639,7 +639,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 				glDrawArrays(GL_POINTS, p.first, p.second.first);
 			}
 
-			auto& con = Particles::particles_Conn;
+			auto& con = Particles::conns;
 			glBindVertexArray(Camera::emptyVao);
 			for (auto& p : drawListsB) {
 				byte& tp = p.second.second;
@@ -687,7 +687,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					}
 					glUniform1i(parConProgLocs[13], useGradCol);
 					glUniform1i(parConProgLocs[14], useConGradCol);
-					glUniform4f(parConProgLocs[15], conCol.r, conCol.g, conCol.b, useConCol? 1 : 0);
+					glUniform4f(parConProgLocs[15], conCol.r, conCol.g, conCol.b, useConCol? 1.f : 0.f);
 					glUniform1f(parConProgLocs[16], spriteScl);
 
 					glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
@@ -735,7 +735,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 					glUniform1i(parConProgLocs[13], 0);
 					glUniform1i(parConProgLocs[14], 0);
-					glUniform4f(parConProgLocs[15], c2.col.r, c2.col.g, c2.col.b, c2.usecol? 1 : 0);
+					glUniform4f(parConProgLocs[15], c2.col.r, c2.col.g, c2.col.b, c2.usecol? 1.f : 0.f);
 					glUniform1f(parConProgLocs[16], spriteScl);
 					glDrawArrays(GL_TRIANGLES, 0, c2.cnt*12);
 
@@ -1036,7 +1036,7 @@ void ParGraphics::DrawMenu() {
 
 	const int ns[] = { 1, 8, 7 };
 	UI::Label(expandPos - 148, off, 12, _("Clipping"), white());
-	UI::Quad(expandPos - 149, off + 17, 148, 17 * ns[(int)clippingType] + 2, white(0.9f, 0.1f));
+	UI::Quad(expandPos - 149, off + 17, 148, 17 * ns[(int)clippingType] + 2.f, white(0.9f, 0.1f));
 	off += 18;
 	static std::string nms[] = { _("None"), _("Slice"), _("Cube"), "" };
 	static Popups::DropdownItem di = Popups::DropdownItem((uint*)&clippingType, nms);

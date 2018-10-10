@@ -87,7 +87,7 @@ void VisSystem::Init() {
 			if (p2.size() != 2) continue;
 			auto i1 = *(ushort*)&(p2[0])[0];
 			auto i2 = *(ushort*)&(p2[1])[0];
-			auto ln = pow(std::stof(p[1]) * 0.001f, 2);
+			auto ln = std::powf(std::stof(p[1]) * 0.001f, 2);
 			_bondLengths.emplace(i1 + (i2 << 16), ln);
 			_bondLengths.emplace(i2 + (i1 << 16), ln);
 		}

@@ -313,7 +313,7 @@ void AnNode::DrawDefVal(int i, float y) {
 	case VarOpt::RANGE: {
 		float res = (float)(isi ? inputVDef[i].i : inputVDef[i].d);
 		res = UI2::Slider(pos.x + width*0.33f, y, width*0.67f - 6, opt.range.x, opt.range.y, res);
-		if (isi) inputVDef[i].i = (int)round(res);
+		if (isi) inputVDef[i].i = (int)std::roundf(res);
 		else inputVDef[i].d = res;
 		break;
 	}
