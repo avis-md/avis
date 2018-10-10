@@ -11,6 +11,7 @@
 #endif
 
 #define NO_REDIR_LOG
+//#define VERBOSE
 
 bool AnWeb::lazyLoad = true;
 
@@ -389,7 +390,9 @@ void AnWeb::_DoExecute() {
 	char* err = 0;
 	static std::string pylog;
 	for (auto n : nodes) {
+#ifdef VERBOSE
 		Debug::Message("AnWeb", "Executing " + n->script->name);
+#endif
 #ifndef NO_REDIR_LOG
 		if (n->script->type == AN_SCRTYPE::PYTHON)
 			PyScript::ClearLog();
@@ -459,7 +462,9 @@ void AnWeb::_DoExecute() {
 		remove((IO::path + "nodes/__tmpstd_o").c_str());
 		remove((IO::path + "nodes/__tmpstd_e").c_str());
 #endif
+#ifdef VERBOSE
 		Debug::Message("AnWeb", "Executed " + n->script->name);
+#endif
 	}
 	execNode = nullptr;
 }

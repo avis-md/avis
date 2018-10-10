@@ -1,22 +1,26 @@
 #include "node_addbond.h"
 #ifndef IS_ANSERVER
+#include "node_inputs.h"
 #include "md/Particles.h"
 #include "md/ParMenu.h"
 #include "ui/icons.h"
 #include "ui/ui_ext.h"
 #endif
 
+#define RETERR(msg) { std::cerr << msg << std::endl; return; }
+
 Node_AddBond::Node_AddBond() : AnNode(new DmScript(sig)) {
 	title = "Extra Bonds";
 	titleCol = Vec3(0.3f, 0.5f, 0.3f);
 	canTile = false;
-	inputR.resize(2);
-	script->invars.push_back(std::pair<std::string, std::string>("pair counts", "list(1i)"));
-	script->invars.push_back(std::pair<std::string, std::string>("bonds", "list(1i)"));
+	inputR.resize(1);
+	script->invars.push_back(std::pair<std::string, std::string>("bonds", "list(2i)"));
 
 	Particles::anim.conns2.resize(1);
 	Particles::particles_Conn2.resize(1);
 	animId = 0;
+	auto& c2 = Particles::anim.conns2[animId];
+	c2.clear();
 }
 
 Node_AddBond::~Node_AddBond() {
@@ -25,20 +29,15 @@ Node_AddBond::~Node_AddBond() {
 }
 
 void Node_AddBond::Execute() {
-	if (!inputR[0].first || !inputR[1].first) return;
-	CVar& cv1 = inputR[0].first->conV[inputR[0].second];
-	CVar& cv2 = inputR[1].first->conV[inputR[1].second];
-	if (*cv1.dimVals[0] != Particles::anim.frameCount) return;
-	auto& c2 = Particles::anim.conns2[animId];
-	c2.clear();
-	c2.resize(Particles::anim.frameCount);
-	uint off = 0;
-	for (uint i = 0; i < Particles::anim.frameCount; i++) {
-		c2[i].count = (*((int**)cv1.value))[i];
-		c2[i].ids.resize(c2[i].count);
-		memcpy(&c2[i].ids[0], *((Int2**)cv2.value) + off, c2[i].count * sizeof(Int2));
-		off += c2[i].count;
-	}
+	if (!inputR[0].first) return;
+	CVar& cv = inputR[0].first->conV[inputR[0].second];
+	if (*cv.dimVals[1] != 2) RETERR("dimension 1 must be of size 2!");
+	auto& c = Particles::anim.conns2[animId];
+	c.resize(Particles::anim.frameCount);
+	auto& c2 = c[Node_Inputs::frame];
+	c2.count = *cv.dimVals[0];
+	c2.ids.resize(c2.count);
+	memcpy(&c2.ids[0], *((Int2**)cv.value), c2.count * sizeof(Int2));
 }
 
 void Node_AddBond::DrawSettings(float& off) {

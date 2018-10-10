@@ -21,7 +21,7 @@ bool DLPoly::Read(ParInfo* info) {
 	if (dm != "timestep") SETERR("timestep tag not found!")
 	strm.ignore(500, '\n');
 
-	float vl;
+	double vl;
 	strm >> vl >> dm >> dm;
 	info->bounds[0] = -vl / 20;
 	info->bounds[1] = vl / 20;
@@ -36,8 +36,8 @@ bool DLPoly::Read(ParInfo* info) {
 	info->name = new char[sz * info->nameSz]{};
 	info->type = new uint16_t[sz];
 	info->resId = new uint16_t[sz];
-	info->pos = new float[sz * 3];
-	info->vel = new float[sz * 3];
+	info->pos = new double[sz * 3];
+	info->vel = new double[sz * 3];
 
 	std::vector<uint32_t> ignores;
 	int li = 0;
@@ -68,8 +68,8 @@ bool DLPoly::Read(ParInfo* info) {
 	ignores.push_back(-1);
 	
 	auto trj = &info->trajectory;
-    std::vector<float*> poss = {};
-    float* _ps;
+    std::vector<double*> poss = {};
+    double* _ps;
     do {
 		int ign = 0;
 		dm = "";
@@ -81,7 +81,7 @@ bool DLPoly::Read(ParInfo* info) {
 		strm.ignore(500, '\n');
 		strm.ignore(500, '\n');
 		
-        _ps = new float[sz * 3];
+        _ps = new double[sz * 3];
         
         for (uint32_t a = 0; a != sz; a++) {
 			trj->progress = a * 1.0f / sz;
@@ -110,11 +110,11 @@ bool DLPoly::Read(ParInfo* info) {
 out:
     if (!!trj->frames) {
         trj->frames++;
-	    trj->poss = new float*[trj->frames];
-        _ps = new float[sz*3];
-        memcpy(_ps, info->pos, sz*3*sizeof(float));
+	    trj->poss = new double*[trj->frames];
+        _ps = new double[sz*3];
+        memcpy(_ps, info->pos, sz*3*sizeof(double));
         trj->poss[0] = _ps;
-	    memcpy(trj->poss + 1, &poss[0], trj->frames * sizeof(float*));
+	    memcpy(trj->poss + 1, &poss[0], trj->frames * sizeof(double*));
     }
 
 	return true;

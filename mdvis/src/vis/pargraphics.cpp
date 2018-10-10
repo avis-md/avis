@@ -733,7 +733,10 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					glUniform1i(parConProgLocs[11], 4);
 					glActiveTexture(GL_TEXTURE4);
 					glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
-					glUniform1i(parConProgLocs[12], 0);
+					glUniform1i(parConProgLocs[13], 0);
+					glUniform1i(parConProgLocs[14], 0);
+					glUniform4f(parConProgLocs[15], c2.col.r, c2.col.g, c2.col.b, c2.usecol? 1 : 0);
+					glUniform1f(parConProgLocs[16], spriteScl);
 					glDrawArrays(GL_TRIANGLES, 0, c2.cnt*12);
 
 				}

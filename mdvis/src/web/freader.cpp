@@ -100,7 +100,7 @@ bool FReader::Read(FScript* scr) {
 								ostrm << s.substr(0, loc - 1) << ", BIND(C) " << s.substr(loc) << "\n";
 							break;
 						case 3:
-							auto sl = string_find(s, "subroutine");
+							auto sl = string_find(to_lowercase(s), "subroutine");
 							if (sl == -1) {
 								_ER("FReader", "Subroutine missing after \"!entry\"!");
 								break;
@@ -258,7 +258,7 @@ bool FReader::Read(FScript* scr) {
 				_ER("FReader", "variable name not found!");
 				return false;
 			}
-			bk->name = ss[atn + 2];
+			bk->name = to_lowercase(ss[atn + 2]);
 			bool isa = false;
 			if (sss > atn + 3) {
 				auto sa = ss[atn + 3];
@@ -283,7 +283,7 @@ bool FReader::Read(FScript* scr) {
 				if (!isa)
 					bk->value = scr->lib->GetSym(nml);
 				else {
-					bk->value = scr->lib->GetSym("__test_MOD_" + nml);
+					bk->value = scr->lib->GetSym("__" + scr->name + "_MOD_" + nml);
 					if (iso) *fk = (emptyFunc)scr->lib->GetSym("exp_get_" + nml);
 					else *fk = (emptyFunc)scr->lib->GetSym("imp_set_" + nml);
 					if (!fk) {

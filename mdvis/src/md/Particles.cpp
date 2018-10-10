@@ -307,15 +307,15 @@ void Particles::SetFrame(uint frm) {
 					p->Update();
 				}
 			}
-			for (int i = anim.conns2.size() - 1; i >= 0; i--) {
-				auto& c2 = anim.conns2[i];
-				if (!c2.size()) continue;
-				auto& c = particles_Conn2[i];
-				c.cnt = c2[frm].count;
-				c.ids = &c2[frm].ids[0];
-			}
 		}
 		else anim.Seek(frm);
+		for (int i = anim.conns2.size() - 1; i >= 0; i--) {
+			auto& c2 = anim.conns2[i];
+			if (!c2.size()) continue;
+			auto& c = particles_Conn2[i];
+			c.cnt = c2[frm].count;
+			c.ids = &c2[frm].ids[0];
+		}
 		AnWeb::OnAnimFrame();
 		if (!!anim.conns2.size()) UpdateConBufs2();
 		Scene::active->dirty = true;

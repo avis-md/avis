@@ -20,7 +20,7 @@
 //#include "md/XYZ.h"
 //#include "md/mdvbin.h"
 #include "md/lammps.h"
-//#include "md/dlpoly.h"
+#include "md/dlpoly.h"
 #include "vis/cubemarcher.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
@@ -361,7 +361,8 @@ The hash for this program is )" << VisSystem::version_hash
 		//NEWIMP(Binary, bin, .bin, MDVBin);
 		NEWIMP("Lammps", lmp, .atom, Lammps::Read)
 		PUSHIMP
-		//NEWIMP(DLPoly, dlp, .000, DLPoly);
+		NEWIMP("DLPoly", dlp, .000, DLPoly::Read);
+		PUSHIMP
 
 		if (fls.size()) {
 			ParLoader::directLoad = _s;

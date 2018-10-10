@@ -7,10 +7,8 @@
                 "${workspaceFolder}/../radeonrays/Calc/inc",
                 "${workspaceFolder}/../radeonrays/CLW",
                 "${workspaceFolder}/../radeonrays/RadeonRays/include",
-                "usr/include/freetype2/",
                 "/usr/local/include/freetype2/",
-                "/usr/include/python3.6/",
-                "/usr/local/include/python3.6/"
+                "/Library/Frameworks/Python.framework/Versions/3.6/include/python3.6m/"
             ],
             "defines": [
                 "PLATFORM_OSX",

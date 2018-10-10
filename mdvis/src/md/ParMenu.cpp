@@ -464,10 +464,13 @@ void ParMenu::DrawConnMenu(Particles::conninfo& cn, float x, float& off, float w
 	UI2::Toggle(x + 2, off, width - 4, "Custom Colors", _usecol);
 	off += 17;
 	if (_usecol) {
-		SV(col);
+		static auto _col = cn.col;
 		UI2::Color(x + 2, off, (uint)width - 4, "Color", cn.col);
 		off += 18;
-		if (_col != cn.col) Scene::dirty = true;
+		if (_col != cn.col) {
+			_col = cn.col;
+			Scene::dirty = true;
+		}
 	}
 	else off++;
 	CP(usecol);
