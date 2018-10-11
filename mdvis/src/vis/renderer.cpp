@@ -1,15 +1,17 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "renderer.h"
 #include "pargraphics.h"
+#include "gif/gif.h"
 
 VisRenderer::IMG_TYPE VisRenderer::imgType;
 VisRenderer::VID_TYPE VisRenderer::vidType;
 VisRenderer::STATUS VisRenderer::status;
 
 #define RESO 2048*4
+#define VRESO 1024
 
-bool VisRenderer::imgUseAlpha = false, VisRenderer::vidUseAlpha;
-uint VisRenderer::imgW = RESO, VisRenderer::imgH = RESO, VisRenderer::vidW = 1024, VisRenderer::vidH = 600;
+bool VisRenderer::imgUseAlpha = false;
+uint VisRenderer::imgW = RESO, VisRenderer::imgH = RESO, VisRenderer::vidW = VRESO, VisRenderer::vidH = VRESO;
 uint VisRenderer::imgSlices = 4, VisRenderer::multisamples = 4;
 float VisRenderer::resLerp = -1;
 
@@ -126,15 +128,11 @@ void VisRenderer::ToImage() {
 				glDepthMask(true);
 				if (imgSlices > 1) {
 					glViewport(0, 0, imgW, imgH);
-					//glBindFramebuffer(GL_READ_FRAMEBUFFER, tmp_fbo);
 					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, res_fbo);
-					//glReadBuffer(GL_COLOR_ATTACHMENT0);
-					//glBlitFramebuffer(0, 0, iw, ih, iw*a, ih*(imgSlices - b - 1), iw*(a + 1), ih*(imgSlices - b), GL_COLOR_BUFFER_BIT, GL_LINEAR);
 					const float dis = 1.f / imgSlices;
 					if (c > 0) glBlendFunc(GL_ONE, GL_ONE);
 					else glBlendFunc(GL_ONE, GL_ZERO);
 					UI::Quad(a*iw*dis, b*ih*dis, iw*dis, ih*dis, tmp_img, white()*0.25f);
-					//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 				}
 			}
@@ -156,13 +154,109 @@ void VisRenderer::ToImage() {
 	status = IMG;
 }
 
+void VisRenderer::ToGif() {
+	if (status != READY) return;
+	
+	static Texture wtx(IO::path + "res/cat2.jpg");
+	UI::Quad(0, 0, Display::width, Display::height, black());
+	UI::Label(10, 10, 15, "Rendering, please wait...", white());
+	UI::Label(10, 30, 15, "Unfortunately, the UI during rendering is not implemented yet.", white());
+	UI::Label(10, 50, 15, "So look at this cat instead.", white());
+	UI::Texture(10, 30, Display::height*0.5f, Display::height*0.5f, wtx, DRAWTEX_FIT);
+	glfwSwapBuffers(ChokoLait::window);
+
+	auto cam = ChokoLait::mainCamera();
+	auto w = Display::width;
+	auto h = Display::height;
+	auto w2 = Display::actualWidth;
+	auto h2 = Display::actualHeight;
+	auto w3 = Display::frameWidth;
+	auto h3 = Display::frameHeight;
+	auto frm = Particles::anim.currentFrame;
+	Display::width = Display::actualWidth = Display::frameWidth = vidW;
+	Display::height = Display::actualHeight = Display::frameHeight = vidH;
+	ParGraphics::hlIds.clear();
+	if (imgUseAlpha) ParGraphics::bgCol.a = 0;
+
+	MakeTex(tmp_fbo, tmp_img, vidW, vidH);
+	MakeTex(res_fbo, res_img, vidW, vidH);
+	cam->target = tmp_fbo;
+	cam->offset = Vec2();
+	cam->scale = 1;
+	const float ctw = 0.25f / vidW;
+	const float cth = 0.25f / vidH;
+	const Vec2 smps[] = { Vec2(-ctw, -cth), Vec2(ctw, -cth), Vec2(-ctw, cth), Vec2(ctw, cth) };
+	
+	auto delay = (uint32_t)std::ceilf(1.0f / ParGraphics::animTarFps);
+
+	GifWriter writer;
+	GifBegin(&writer, (IO::currPath + "movie.gif").c_str(), vidW, vidH, delay);
+	std::vector<byte> res(vidW * vidH * 4);
+
+	for (uint f = 0; f < Particles::anim.frameCount; f++) {
+		Debug::Message("Renderer::ToGif", "Rendering frame " + std::to_string(f));
+		Particles::SetFrame(f);
+		for (int c = 0; c < 4; c++) {
+			Scene::dirty = true;
+			cam->offset = Vec2(smps[c]);
+			cam->Render([]() {
+				auto& cm = ChokoLait::mainCamera->object->transform;
+				ParGraphics::Rerender(cm.position(), cm.forward(), vidW, vidH);
+			});
+			MVP::Switch(false);
+			MVP::Clear();
+			glDepthMask(true);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, res_fbo);
+			if (c > 0) glBlendFunc(GL_ONE, GL_ONE);
+			else glBlendFunc(GL_ONE, GL_ZERO);
+			UI::Quad(0, 0, vidW, vidH, tmp_img, white()*0.25f);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		}
+		
+		/*
+		Display::width = w;
+		Display::height = h;
+		Display::actualWidth = w2;
+		Display::actualHeight = h2;
+		Display::frameWidth = w3;
+		Display::frameHeight = h3;
+		glViewport(0, 0, Display::frameWidth, Display::frameHeight);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glDepthMask(true);
+		UI::Quad(0, 0, 200, 200, res_img);
+		glfwSwapBuffers(ChokoLait::window);
+		*/
+		glfwPollEvents();
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, res_fbo);
+		glReadPixels(0, 0, vidW, vidH, GL_RGBA, GL_UNSIGNED_BYTE, &res[0]);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		glFinish();
+		GifWriteFrame(&writer, &res[0], vidW, vidH, delay);
+	}
+
+	GifEnd(&writer);
+
+	Display::width = w;
+	Display::height = h;
+	Display::actualWidth = w2;
+	Display::actualHeight = h2;
+	Display::frameWidth = w3;
+	Display::frameHeight = h3;
+	Particles::SetFrame(frm);
+	cam->target = 0;
+	ParGraphics::bgCol.a = 1;
+	Scene::dirty = true;
+}
+
 void VisRenderer::MakeTex(GLuint& fbo, GLuint& tex, int w, int h) {
 	if (fbo) {
 		glDeleteFramebuffers(1, &fbo);
+		glDeleteTextures(1, &tex);
 	}
-	else {
-		glGenTextures(1, &tex);
-	}
+	glGenTextures(1, &tex);
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 

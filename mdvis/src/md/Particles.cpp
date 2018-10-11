@@ -243,14 +243,14 @@ void Particles::UpdateBufs() {
 		a.resize(anim.frameCount);
 	}
 
-	std::vector<Vec3> poss(particleSz);
+	std::vector<Vec3> ps(particleSz);
 #pragma omp parallel for
 	for (int a = 0; a < (int)particleSz; a++) {
-		poss[a] = (Vec3)poss[a];
+		ps[a] = (Vec3)poss[a];
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
-	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(Vec3), &poss[0], GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(Vec3), &ps[0], GL_DYNAMIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, connBuffer);
 	glBufferData(GL_ARRAY_BUFFER, conns.cnt * 2 * sizeof(uint), &conns.ids[0], GL_DYNAMIC_DRAW);
@@ -305,13 +305,13 @@ void Particles::SetFrame(uint frm) {
 			anim.Seek(frm);
 			if (anim.status[frm] != AnimData::FRAME_STATUS::LOADED) return;
 			poss = &anim.poss[anim.currentFrame][0];
-			std::vector<Vec3> poss(particleSz);
+			std::vector<Vec3> ps(particleSz);
 	#pragma omp parallel for
 			for (int a = 0; a < (int)particleSz; a++) {
-				poss[a] = (Vec3)poss[a];
+				ps[a] = (Vec3)poss[a];
 			}
 			glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(Vec3), &poss[0]);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(Vec3), &ps[0]);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			for (int a = 0; a < particles_ParamSz; a++) {
 				auto& p = particles_Params[a];

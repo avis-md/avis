@@ -146,7 +146,7 @@ bool Lammps::Read(ParInfo* info) {
         }
         poss.push_back(_ps);
         trj->frames++;
-    } while (trj->frames != trj->maxFrames);
+    } while (trj->frames != 100);//trj->maxFrames);
 out:
     if (!!trj->frames) {
 	    trj->poss = new double*[trj->frames];

@@ -19,6 +19,7 @@ public:
 	}
 
 	static rCamera mainCamera;
+	static GLFWwindow* window;
 
 	static std::vector<dropFileFunc> dropFuncs;
 	static std::vector<emptyCallbackFunc> focusFuncs;
@@ -29,11 +30,8 @@ public:
 
 	static void Update(emptyCallbackFunc func = 0);
 	static void Paint(emptyCallbackFunc rendFunc = 0, emptyCallbackFunc paintFunc = 0);
-
 protected:
 	static int initd;
-
-	static GLFWwindow* window;
 
 	static void _InitVars();
 

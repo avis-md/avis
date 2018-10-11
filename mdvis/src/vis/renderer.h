@@ -19,7 +19,7 @@ public:
 		IMG,
 	} status;
 
-	static bool imgUseAlpha, vidUseAlpha;
+	static bool imgUseAlpha;
 	static uint imgW, imgH, vidW, vidH;
 	static uint imgSlices, multisamples;
 	
@@ -35,6 +35,8 @@ public:
 	static void Init();
 
 	static void Draw();
+
+	static void ToGif();
 
 	static void ToImage();
 
