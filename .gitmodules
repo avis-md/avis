@@ -1,3 +1,6 @@
 [submodule "radeonrays"]
 	path = radeonrays
 	url = https://github.com/chokomancarr/RadeonRays_SDK
+[submodule "mdvis/src/gif"]
+	path = mdvis/src/gif
+	url = https://github.com/ginsweater/gif-h.git
