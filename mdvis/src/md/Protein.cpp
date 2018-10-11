@@ -216,10 +216,10 @@ bool Protein::Refresh() {
 
 void Protein::ApplyChain() {
 	for (uint i = 0; i < cnt * 3; i++) {
-		auto& p1 = Particles::particles_Pos[chain[i * 2]];
+		auto& p1 = Particles::poss[chain[i * 2]];
 		for (uint j = 0; j < cnt * 3; j++) {
 			if (j < (i - 3) || j >(i + 3)) {
-				auto& p2 = Particles::particles_Pos[chain[j * 2]];
+				auto& p2 = Particles::poss[chain[j * 2]];
 				if (glm::length2(p1 - p2) < 33) {
 					chain[i * 2 + 1] = j;
 					break;

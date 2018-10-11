@@ -118,7 +118,7 @@ uint Particles::particleSz;
 
 std::string Particles::cfgFile, Particles::trjFile;
 
-glm::dvec3* Particles::particles_Pos, *Particles::particles_Vel;
+glm::dvec3* Particles::poss, *Particles::vels;
 
 std::vector<char> Particles::names, Particles::resNames;
 std::vector<short> Particles::types;
@@ -180,7 +180,7 @@ void Particles::UpdateColorTex() {
 }
 
 void Particles::Clear() {
-	if (particles_Pos) {
+	if (poss) {
 		residueLists.clear();
 		
 		names.clear();
@@ -189,7 +189,7 @@ void Particles::Clear() {
 		colors.clear();
 		radii.clear();
 		conns.ids.clear();
-		particles_Pos = 0;
+		poss = 0;
 		residueListSz = particleSz = Particles::conns.cnt = 0;
 
 		anim.Clear();
@@ -246,7 +246,7 @@ void Particles::UpdateBufs() {
 	std::vector<Vec3> poss(particleSz);
 #pragma omp parallel for
 	for (int a = 0; a < (int)particleSz; a++) {
-		poss[a] = (Vec3)particles_Pos[a];
+		poss[a] = (Vec3)poss[a];
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
@@ -304,11 +304,11 @@ void Particles::SetFrame(uint frm) {
 		if (anim.currentFrame != -1) {
 			anim.Seek(frm);
 			if (anim.status[frm] != AnimData::FRAME_STATUS::LOADED) return;
-			particles_Pos = &anim.poss[anim.currentFrame][0];
+			poss = &anim.poss[anim.currentFrame][0];
 			std::vector<Vec3> poss(particleSz);
 	#pragma omp parallel for
 			for (int a = 0; a < (int)particleSz; a++) {
-				poss[a] = (Vec3)particles_Pos[a];
+				poss[a] = (Vec3)poss[a];
 			}
 			glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
 			glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(Vec3), &poss[0]);

@@ -1,6 +1,8 @@
 #include "Engine.h"
 
-int Random::seed = 1;
+void Random::Seed(uint i) {
+	srand(i);
+}
 
 float Random::Value() {
 	return ((float)rand()) / ((float)RAND_MAX);

@@ -9,6 +9,8 @@
 #include "ui/ui_ext.h"
 #include "ocl/raytracer.h"
 
+#define HATENA
+
 int ParMenu::activeMenu = 0;
 int ParMenu::activeSubMenu[] = {};
 std::string ParMenu::menuNames[];
@@ -304,13 +306,13 @@ void ParMenu::Draw_List(float off) {
 										sell.resize(1);
 										sell[0] = rj.offset + k + 1;
 										if (Input::dbclick) {
-											ParGraphics::rotCenter = Particles::particles_Pos[rj.offset + k];
+											ParGraphics::rotCenter = Particles::poss[rj.offset + k];
 											Scene::dirty = true;
 										}
 									}
 									else {
 										if (Input::dbclick) {
-											ParGraphics::rotCenter = Particles::particles_Pos[rj.offset + k];
+											ParGraphics::rotCenter = Particles::poss[rj.offset + k];
 											Scene::dirty = true;
 										}
 										else
@@ -340,6 +342,16 @@ loopout:
 void ParMenu::DrawStart() {
 	UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::bg, DRAWTEX_CROP);
 	if (ParLoader::busy) {
+#ifdef HATENA
+		static float lt = 0;
+		static bool ip = Random::Value() > 0.5f;
+		static Texture pic(IO::path + (ip? "res/panda.jpg" : "res/cat.jpg"));
+		if (lt > 2) {
+			UI::Label(Display::width * 0.5f - Display::height * 0.2f, Display::height * 0.15f - 35, 15, "Phew, that's taking a while.", white());
+			UI::Label(Display::width * 0.5f - Display::height * 0.2f, Display::height * 0.15f - 17, 15, (ip? "In the meantime, find the panda." : "In the meantime, look at this cat."), white());
+			UI::Texture(Display::width * 0.5f - Display::height * 0.2f, Display::height * 0.15f, Display::height * 0.4f, Display::height * 0.4f, pic, DRAWTEX_CROP);
+		} else lt += Time::delta;
+#endif
 		UI::Quad(Display::width * 0.5f - 50, Display::height * 0.6f, 100, 6, white(0.8f, 0.2f));
 		UI::Quad(Display::width * 0.5f - 50, Display::height * 0.6f, 100 * *ParLoader::loadProgress, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
 		float oy = 10;
@@ -347,9 +359,9 @@ void ParMenu::DrawStart() {
 			UI::Quad(Display::width * 0.5f - 50, Display::height * 0.6f + 8, 100, 6, white(0.8f, 0.2f));
 			UI::Quad(Display::width * 0.5f - 50, Display::height * 0.6f + 8, 100 * *ParLoader::loadProgress2, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
 			oy += 14;
-			UI::Label(Display::width * 0.5f - 48, Display::height * 0.6f + oy + 16, 12, "Frame " + std::to_string(*ParLoader::loadFrames));
+			UI::Label(Display::width * 0.5f - 48, Display::height * 0.6f + oy + 16, 12, "Frame " + std::to_string(*ParLoader::loadFrames), white());
 		}
-		UI::Label(Display::width * 0.5f - 48, Display::height * 0.6f + oy, 12, ParLoader::loadName);
+		UI::Label(Display::width * 0.5f - 48, Display::height * 0.6f + oy, 12, ParLoader::loadName, white());
 	}
 }
 

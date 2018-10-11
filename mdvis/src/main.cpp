@@ -161,7 +161,7 @@ void paintfunc() {
 					}
 				}
 				else if (Input::dbclick)
-					ParGraphics::rotCenter = Particles::particles_Pos[id - 1];
+					ParGraphics::rotCenter = Particles::poss[id - 1];
 			}
 
 			id--;
@@ -169,7 +169,7 @@ void paintfunc() {
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Particle " + std::to_string(id), white());
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, &Particles::resNames[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, &Particles::names[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, std::to_string(Particles::particles_Pos[id]), white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, std::to_string(Particles::poss[id]), white());
 
 		}
 		else {
@@ -290,6 +290,7 @@ The hash for this program is )" << VisSystem::version_hash
 #endif
 		IO::MakeDirectory(IO::path + "tmp/");
 
+		Random::Seed((uint)milliseconds());
 		INIT(Font);
 		INIT(UI);
 		INIT(UI2);
@@ -316,23 +317,8 @@ The hash for this program is )" << VisSystem::version_hash
 
 		AnBrowse::Scan();
 
-		ParImporter imp = ParImporter();
-		imp.name = "Gromacs";
-		imp.sig = "gro";
+		ParImporter imp = {};
 		ParImporter::Func fnc = {};
-		fnc.type = ParImporter::Func::FUNC_TYPE::CONFIG;
-		fnc.exts.push_back(".gro");
-		fnc.func = Gromacs::Read;
-		imp.funcs.push_back(fnc);
-		fnc = {};
-		fnc.type = ParImporter::Func::FUNC_TYPE::TRAJ;
-		fnc.exts.push_back(".trr");
-		fnc.trjFunc = Gromacs::ReadTrj;
-		imp.funcs.push_back(fnc);
-		ParLoader::importers.push_back(imp);
-
-		ParLoader::exts = std::vector<std::string>({ "*.gro", "*.trr" });
-
 #define NEWIMP(_nm, _sig, _ext, _fnc) \
 		imp.name = _nm; \
 		imp.sig = #_sig; \
@@ -349,19 +335,28 @@ The hash for this program is )" << VisSystem::version_hash
 		fnc.frmFunc = _fnc;\
 		imp.funcs.push_back(fnc);\
 		ParLoader::exts.push_back("*" #_ext);
+#define SETTRJ(_ext, _fnc) \
+		fnc = {}; \
+		fnc.type = ParImporter::Func::FUNC_TYPE::TRAJ;\
+		fnc.exts.push_back(#_ext);\
+		fnc.trjFunc = _fnc;\
+		imp.funcs.push_back(fnc);\
+		ParLoader::exts.push_back("*" #_ext);
 #define PUSHIMP ParLoader::importers.push_back(imp); \
 		imp = {};
 
-		NEWIMP("Protein DataBank", pdb, .pdb, PDB::Read);
-		PUSHIMP
 		//NEWIMP(XYZ coords, xyz, .xyz, XYZ);
+		NEWIMP("Gromacs", gro, .gro, Gromacs::Read)
+		SETTRJ(.trr, Gromacs::ReadTrj)
+		PUSHIMP
+		NEWIMP("Protein DataBank", pdb, .pdb, PDB::Read)
+		PUSHIMP
 		NEWIMP("CDView", cdv, .cdv, CDV::Read)
 		SETFRM(.cdv, CDV::ReadFrame)
 		PUSHIMP
-		//NEWIMP(Binary, bin, .bin, MDVBin);
 		NEWIMP("Lammps", lmp, .atom, Lammps::Read)
 		PUSHIMP
-		NEWIMP("DLPoly", dlp, .000, DLPoly::Read);
+		NEWIMP("DLPoly", dlp, .000, DLPoly::Read)
 		PUSHIMP
 
 		if (fls.size()) {

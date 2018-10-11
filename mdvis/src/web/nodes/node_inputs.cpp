@@ -94,8 +94,8 @@ void Node_Inputs::Execute() {
 
 	glm::dvec3* pos, *vel;
 	if (!Particles::anim.poss.size()) {
-		pos = Particles::particles_Pos;
-		vel = Particles::particles_Vel;
+		pos = Particles::poss;
+		vel = Particles::vels;
 	}
 	else {
 		pos = &Particles::anim.poss[frame][0];

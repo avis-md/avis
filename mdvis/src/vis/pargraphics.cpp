@@ -576,7 +576,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		float s = std::powf(2.f, rotScale);
 		MVP::Scale(s, s, s);
 		if (rotCenterTrackId < ~0) {
-			rotCenter = Particles::particles_Pos[rotCenterTrackId];
+			rotCenter = Particles::poss[rotCenterTrackId];
 		}
 		MVP::Translate(-rotCenter.x, -rotCenter.y, -rotCenter.z);
 		auto _mv = MVP::modelview();

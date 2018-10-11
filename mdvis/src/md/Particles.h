@@ -64,7 +64,7 @@ public:
 
 	static std::string cfgFile, trjFile;
 
-	static glm::dvec3* particles_Pos, *particles_Vel;
+	static glm::dvec3* poss, *vels;
 
 	static std::vector<char> names, resNames;
 	static std::vector<short> types;

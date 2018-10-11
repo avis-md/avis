@@ -64,14 +64,17 @@ HEADERS += core/bbox.h core/debug.h core/display.h core/font.h core/input.h core
 HEADERS += md/Protein.h md/Gromacs.h md/CDV.h md/ParMenu.h md/Particles.h md/mdvbin.h md/parloader.h md/XYZ.h md/pdb.h md/lammps.h md/dlpoly.h md/CDV.h
 HEADERS += web/anbrowse.h web/anconv.h web/annode.h web/anscript.h web/anops.h web/anweb.h web/creader.h web/pyreader.h web/freader.h web/errorview.h
 HEADERS += web/nodes/node_inputs.h web/nodes/node_info.h web/nodes/node_plot.h web/nodes/node_volume.h web/nodes/node_gromacs.h web/nodes/node_addbond.h web/nodes/node_camera.h web/nodes/node_setparam.h web/nodes/node_showrange.h web/nodes/node_tracetrj.h
-HEADERS += scene/object.h scene/scene.h scene/sceneobject.h scene/transform.h scene/comp/camera.h scene/comp/component.h scene/comp/light.h scene/comp/voxelrenderer.h
+HEADERS += scene/object.h scene/scene.h scene/sceneobject.h scene/transform.h scene/comp/camera.h scene/comp/component.h scene/comp/light.h
 HEADERS += ui/popups.h ui/icons.h ui/help.h ui/ui_ext.h ui/localizer.h
 HEADERS += vis/pargraphics.h vis/system.h vis/shadows.h vis/renderer.h vis/cubemarcher.h
 HEADERS += res/resdata.h res/shddata.h
 HEADERS += utils/color.h utils/effects.h utils/fft.h utils/ifaddrs.h utils/net.h utils/plot.h utils/ptrext.h utils/random.h utils/rawvector.h utils/rect.h utils/spline.h utils/stream.h utils/strext.h utils/xml.h utils/dialog.o utils/dylib.h utils/runcmd.h utils/ssh.h utils/tinyfiledialogs.h utils/shader.h utils/glmext.h
 HEADERS += live/livesyncer.h live/lj256.h
-HEADERS += ocl/raytracer.h ocl/oclcode.h
+HEADERS += ocl/raytracer.h ocl/kernel.h
 HEADERSX = xdrfile/xdrfile.h xdrfile/xdrfile_trr.h xdrfile/xdrfile_xtc.h
+
+PCH = precompile.h
+PCH_OUT = precompile.h.gch
 
 ../build/avis: $(OBJS)
 ifeq ($(UNAME_S),Darwin)
@@ -95,28 +98,35 @@ ifeq ($(UNAME_S),Darwin)
 	cd ../build && rm .pyregfin && ./regpython.sh
 endif
 
-obj/%.o: $(HEADERS)
-obj/%.o: %.cpp
-	@echo "Compiling " $<
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+$(PCH_OUT): $(PCH) $(HEADERS)
+	@echo "Creating precompiled header"
+	@$(CXX) $(CXXFLAGS) -x c++-header $< -o $@
+
+obj/%.o: %.cpp $(PCH_OUT)
+	@echo "Compiling" $<
+	@$(CXX) $(CXXFLAGS) -include precompile.h -c $< -o $@
 
 obj/xdrfile/%.o: $(HEADERSX)
 obj/xdrfile/%.o: xdrfile/%.c
-	$(C) -g -c $< -o $@
+	@echo "Compiling" $<
+	@$(C) -g -c $< -o $@
 
 obj/utils/tinyfiledialogs.o: utils/tinyfiledialogs.c
-	$(C) -g -c $< -o $@
+	@echo "Compiling" $<
+	@$(C) -g -c $< -o $@
 
 obj/vis/system.o: vis/system.cpp
 	echo "\""$(shell git rev-parse --short HEAD)"\"" > ../../githash.h
+	@echo "Compiling" $<
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
-	@echo "Compiling " $< 	
 
 obj/tinyobj.o : tmp/tiny_obj_loader.cpp
-	$(CXX) -g -c $< -o $@
+	@echo "Compiling" $<
+	@$(CXX) -g -c $< -o $@
 
 clean:
 	find ./obj -name '*.o' -exec rm {} \;
+	rm -f $(PCH_OUT)
 	rm -f ../build/avis
 clean-all:
 	$(MAKE) clean

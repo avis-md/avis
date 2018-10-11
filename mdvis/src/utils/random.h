@@ -4,6 +4,6 @@
 [av] */
 class Random {
 public:
-	static int seed;
+	static void Seed(uint i);
 	static float Value(), Range(float min, float max);
 };

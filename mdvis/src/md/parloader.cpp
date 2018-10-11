@@ -365,8 +365,8 @@ void ParLoader::DoOpen() {
 	Particles::Resize(info.num);
 	memcpy(&Particles::names[0], info.name, info.num * PAR_MAX_NAME_LEN);
 	memcpy(&Particles::resNames[0], info.resname, info.num * PAR_MAX_NAME_LEN);
-	Particles::particles_Pos = (glm::dvec3*)info.pos;
-	Particles::particles_Vel = (glm::dvec3*)info.vel;
+	Particles::poss = (glm::dvec3*)info.pos;
+	Particles::vels = (glm::dvec3*)info.vel;
 	memcpy(&Particles::types[0], info.type, info.num * sizeof(short));
 	memcpy(Particles::boundingBox, info.bounds, 6 * sizeof(double));
 	if (!VisSystem::currentSavePath.size())
@@ -451,7 +451,7 @@ void ParLoader::DoOpen() {
 		if (useConn && (!useConnCache || !hasConnCache || ovwConnCache)) {
 //#pragma omp parallel for
 			for (int j = 0; j < cnt; j++) {
-				Vec3 dp = Particles::particles_Pos[lastOff + j] - vec;
+				Vec3 dp = Particles::poss[lastOff + j] - vec;
 
 				if (fabsf(dp.x) < 0.25f && fabsf(dp.y) < 0.25f && fabsf(dp.z) < 0.25f) {
 					auto dst = glm::length2(dp);
