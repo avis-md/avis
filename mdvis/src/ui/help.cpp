@@ -4,7 +4,7 @@
 
 const std::string _opn[] = {
 	"Open file via terminal",
-	"	Command line is: mdvis filename [args...]",
+	"	Command line is: avis filename [args...]",
 	"	Args (default values are in brackets)",
 	"		-d[0/(1)]		Show the import dialog.",
 	"		-t[0/(1)]		Load trajectory if available.",

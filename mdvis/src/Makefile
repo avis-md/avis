@@ -73,7 +73,7 @@ HEADERS += live/livesyncer.h live/lj256.h
 HEADERS += ocl/raytracer.h ocl/oclcode.h
 HEADERSX = xdrfile/xdrfile.h xdrfile/xdrfile_trr.h xdrfile/xdrfile_xtc.h
 
-../build/mdvis: $(OBJS)
+../build/avis: $(OBJS)
 ifeq ($(UNAME_S),Darwin)
 	cp $(RRAYPRE)/build/bin/libRadeonRays.dylib ../build/libRadeonRays.dylib
 endif
@@ -89,9 +89,9 @@ endif
 	@echo "Linking..."
 	@$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
 ifeq ($(UNAME_S),Darwin)
-	install_name_tool -add_rpath "@executable_path" ../build/mdvis
-	install_name_tool -change $(shell python3-config --exec)/Python /tmpp/Python ../build/mdvis
-	cp ../build/mdvis ../build/mdvis_clean
+	install_name_tool -add_rpath "@executable_path" ../build/avis
+	install_name_tool -change $(shell python3-config --exec)/Python /tmpp/Python ../build/avis
+	cp ../build/avis ../build/avis_clean
 	cd ../build && rm .pyregfin && ./regpython.sh
 endif
 
@@ -117,7 +117,7 @@ obj/tinyobj.o : tmp/tiny_obj_loader.cpp
 
 clean:
 	find ./obj -name '*.o' -exec rm {} \;
-	rm -f ../build/mdvis
+	rm -f ../build/avis
 clean-all:
 	$(MAKE) clean
 	cd web && $(MAKE) clean

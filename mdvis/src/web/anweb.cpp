@@ -534,7 +534,7 @@ void AnWeb::Save(const std::string& s) {
 #define SVS(nm, vl) n->addchild(#nm, vl)
 #define SV(nm, vl) SVS(nm, std::to_string(vl))
 	XmlNode head = {};
-	head.name = "MDVis_Graph_File";
+	head.name = "AViS_Graph_File";
 	for (auto nd : nodes) {
 		auto n = head.addchild("node");
 		SV(type, (int)nd->script->type);

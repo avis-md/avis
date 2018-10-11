@@ -15,9 +15,9 @@ float VisRenderer::resLerp = -1;
 
 std::string VisRenderer::outputFolder =
 #ifdef PLATFORM_WIN
-"C:/tmp/mdvis/";
+"C:/tmp/avis/";
 #else
-"/var/tmp/mdvis/";
+"/var/tmp/avis/";
 #endif
 ;
 
@@ -66,7 +66,7 @@ void VisRenderer::Draw() {
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, res_fbo);
 			std::vector<byte> res(imgW * imgH * 4);
 			glReadPixels(0, 0, imgW, imgH, GL_RGBA, GL_UNSIGNED_BYTE, &res[0]);
-			Texture::ToPNG(res, imgW, imgH, IO::path + "ss.png");
+			Texture::ToPNG(res, imgW, imgH, IO::currPath + "ss.png");
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 			status = READY;
 			resLerp = -1;

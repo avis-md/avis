@@ -62,9 +62,8 @@ bool Lammps::Read(ParInfo* info) {
     for (int a = 0; a < 6; a++)
         strm >> info->bounds[a];
 
-    do {
-        strm.getline(buf, 100);
-    } while (buf[0] == 0);
+    strm.ignore(100, '\n');
+    strm.getline(buf, 100);
     SEQ(ATOMS);
     auto tt = string_split(std::string(buf + sizeof("ITEM: ATOMS")), ' ');
     auto c = tt.size();
@@ -103,9 +102,10 @@ bool Lammps::Read(ParInfo* info) {
     
     auto trj = &info->trajectory;
     std::vector<double*> poss = {};
+    std::vector<double> bounds = {};
     double* _ps;
     do {
-        for (int a = 0; a < 10; a++) {
+        for (int a = 0; a < 6; a++) {
             do {
                 strm.getline(buf, 100);
                 if (strm.eof()) {
@@ -113,7 +113,15 @@ bool Lammps::Read(ParInfo* info) {
                 }
             } while (buf[0] == 0);
         }
-        
+        SEQ(BOX BOUNDS);
+        bounds.resize((trj->frames+1)*6);
+        for (int a = 0; a < 6; a++)
+            strm >> bounds[trj->frames*6 + a];
+
+        strm.ignore(100, '\n');
+        strm.getline(buf, 100);
+        SEQ(ATOMS);
+            
         trj->progress = ((float)strm.tellg()) / maxspos;
         _ps = new double[info->num * 3];
         
@@ -138,15 +146,15 @@ bool Lammps::Read(ParInfo* info) {
         }
         poss.push_back(_ps);
         trj->frames++;
-    } while (trj->frames + 1 != trj->maxFrames);
+    } while (trj->frames != trj->maxFrames);
 out:
     if (!!trj->frames) {
-        trj->frames++;
 	    trj->poss = new double*[trj->frames];
-        _ps = new double[info->num*3];
-        memcpy(_ps, info->pos, info->num*3*sizeof(double));
-        trj->poss[0] = _ps;
-	    memcpy(trj->poss + 1, &poss[0], trj->frames * sizeof(uintptr_t));
+	    memcpy(trj->poss, &poss[0], trj->frames * sizeof(uintptr_t));
+        trj->bounds = new double[trj->frames][6];
+        for (uint16_t a = 0; a < trj->frames; a++) {
+            memcpy(trj->bounds[a], &bounds[a*6], 6*sizeof(double));
+        }
     }
 
 	return true;

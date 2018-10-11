@@ -526,6 +526,13 @@ void ParLoader::DoOpen() {
 		}
 		delete[](trj.poss);
 		if (trj.vels) delete[](trj.vels);
+		if (trj.bounds) {
+			anm.bboxs.resize(6*trj.frames);
+			for (uint16_t i = 0; i < trj.frames; i++) {
+				memcpy(&anm.bboxs[i*6], trj.bounds[i], 6*sizeof(double));
+			}
+			delete[](trj.bounds);
+		}
 		anm.reading = false;
 
 		anm.maxFramesInMem = 10000000;

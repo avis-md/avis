@@ -32,6 +32,7 @@ struct TrjInfo {
 	uint16_t frames;
 	double** poss;
 	double** vels;
+	double (*bounds)[6];
 	char error[100];
 };
 

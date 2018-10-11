@@ -100,6 +100,7 @@ public:
 		std::vector<std::vector<glm::dvec3>> poss, vels;
 		std::vector<Particles::conndata> conns;
 		std::vector<std::vector<Particles::conndata>> conns2;
+		std::vector<double> bboxs;
 		
 		int impId, funcId;
 

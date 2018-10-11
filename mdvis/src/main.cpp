@@ -39,7 +39,7 @@ void rendFunc() {
 	auto& cm = ChokoLait::mainCamera->object->transform;
 	ParGraphics::Rerender(cm.position(), cm.forward(), static_cast<float>(Display::width), static_cast<float>(Display::height));
 #define bb(i) static_cast<float>(Particles::boundingBox[i])
-	//UI3::Cube(bb(0), bb(1), bb(2), bb(3), bb(4), bb(5), black());
+	UI3::Cube(bb(0), bb(1), bb(2), bb(3), bb(4), bb(5), black());
 	if (!!Particles::particleSz && Shadows::show) {
 		Shadows::UpdateBox();
 		Mat4x4 _p = MVP::projection();
@@ -216,7 +216,7 @@ int main(int argc, char **argv) {
 						return 0;
 					}
 					else if ISS(help) {
-						std::cout << "AVIS\n" << VERSIONSTRING "\n"
+						std::cout << "AViS\n" << VERSIONSTRING "\n"
 							<< res::helpText << std::endl;
 						return 0;
 					}
@@ -249,10 +249,10 @@ int main(int argc, char **argv) {
 				}
 			}
 			else {
-				fls.push_back(IO::FullPath(argv[a]));
+				fls.push_back(argv[a]);
 			}
 		}
-		std::cout << R"(Thanks for trying out this program! :)
+		std::cout << "AViS " APPVERSION "\n" R"(Thanks for trying out this program! :)
 You can view a copy of all logs in Log.txt.
 Raw compile output for each script is in __[]cache__/name_log.txt.
 The hash for this program is )" << VisSystem::version_hash
@@ -365,6 +365,7 @@ The hash for this program is )" << VisSystem::version_hash
 		PUSHIMP
 
 		if (fls.size()) {
+			for (auto& f : fls) f = IO::FullPath(f);
 			ParLoader::directLoad = _s;
 			ParLoader::OnOpenFile(fls);
 		}

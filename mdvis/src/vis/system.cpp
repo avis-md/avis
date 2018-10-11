@@ -336,7 +336,7 @@ void VisSystem::Save(const std::string& path) {
 	Debug::Message("System", "Saving...");
 	currentSavePath = path;
 	IO::MakeDirectory(path + "_data/");
-	XmlNode head("MDVis_State_File");
+	XmlNode head("AViS_State_File");
 	head.params.emplace("hash", version_hash);
 	head.children.reserve(10);
 	Particles::Serialize(head.addchild());

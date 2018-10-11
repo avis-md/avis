@@ -107,7 +107,7 @@ void SSH::Disconnect() {
 }
 
 void SSH::GetUserPath() {
-	std::string tpf = "/tmp/mdvis_userpath.txt";
+	std::string tpf = "/tmp/avis_userpath.txt";
 	Write("cd && pwd > " + tpf);
 	auto res = GetFile(tpf);
 	userPath = std::string(&res[0], res.size());

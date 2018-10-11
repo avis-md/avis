@@ -20,6 +20,7 @@ void Particles::AnimData::Clear() {
 	vels.clear();
 	conns.clear();
 	conns2.clear();
+	bboxs.clear();
 	paths.clear();
 }
 
@@ -318,6 +319,7 @@ void Particles::SetFrame(uint frm) {
 					p->Update();
 				}
 			}
+			if (!!anim.bboxs.size()) memcpy(boundingBox, &anim.bboxs[6*frm], 6*sizeof(double));
 		}
 		else anim.Seek(frm);
 		for (int i = anim.conns2.size() - 1; i >= 0; i--) {

@@ -138,7 +138,7 @@ void ChokoLait::_InitVars() {
 #ifdef USE_DEBUG_CONTEXT
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 #endif
-	window = glfwCreateWindow(10, 10, "MDVis Application", NULL, NULL);
+	window = glfwCreateWindow(10, 10, "AViS " APPVERSION, NULL, NULL);
 	Display::window = window;
 	if (!window) {
 		Debug::Error("System", "Fatal: Cannot create glfw window!");

@@ -21,7 +21,7 @@ void FReader::Init() {
 	if (AnWeb::hasC)
 		AnWeb::hasFt = true;
 	else
-		Debug::Warning("CReader", "GFortran compiler depends on C++ compiler!");
+		Debug::Warning("CReader", "Fortran compiler depends on C++ compiler!");
 #endif
 }
 
@@ -142,7 +142,7 @@ bool FReader::Read(FScript* scr) {
 			#ifdef PLATFORM_WIN
 				"-static-libstdc++ -static-libgcc -Wl,--export-all-symbols "
 			#else
-				//"-lc++ "
+				"-D/tmp/ "
 			#endif
 			"-fPIC \"" + IO::path + "res/noterminate.o\" -o \""
 				+ fp2 + nm + ".so\" \"" + fp + "_temp__.f90\" -lgfortran 2> \"" + fp2 + nm + "_log.txt\"";

@@ -18,7 +18,7 @@
 #endif
 #endif
 
-std::string IO::path, IO::userPath;
+std::string IO::path, IO::userPath, IO::currPath;
 
 std::thread IO::readstdiothread;
 bool IO::readingStdio;
@@ -175,9 +175,9 @@ std::vector<byte> IO::GetBytes(const std::string& path) {
 
 bool IO::IsRelPath(const std::string& path) {
 #ifdef PLATFORM_WIN
-	return (path[1] == ':') && (path[0] >= 'A' && path[0] <= 'Z');
+	return (path[1] != ':') || path[0] < 'A' || path[0] > 'Z';
 #else
-	return path[0] == '/';
+	return path[0] != '/';
 #endif
 }
 
@@ -190,7 +190,8 @@ std::string IO::ResolveUserPath(const std::string& path) {
 }
 
 std::string IO::FullPath(const std::string& path) {
-	return IsRelPath(path) ? userPath + path : path;
+	auto p = ResolveUserPath(path);
+	return IsRelPath(p) ? currPath + p : p;
 }
 
 time_t IO::ModTime(const std::string& s) {
@@ -334,9 +335,16 @@ void IO::InitPath() {
 #ifdef PLATFORM_WIN
 	userPath = "~";
 #else
-	RunCmd::Run("cd&&pwd > /tmp/mdvis_userpath.txt");
-	std::ifstream strm("/tmp/mdvis_userpath.txt");
+	RunCmd::Run("pwd>/tmp/avis_currpath.txt&&cd&&pwd>/tmp/avis_userpath.txt");
+	std::ifstream strm("/tmp/avis_currpath.txt");
+	std::getline(strm, currPath);
+	strm.close();
+	strm.open("/tmp/avis_userpath.txt");
 	std::getline(strm, userPath);
+	if (currPath.back() != '/') currPath += "/";
+	if (userPath.back() != '/') userPath += "/";
+	Debug::Message("IO", "Working path is \"" + currPath + "\"");
+	Debug::Message("IO", "User path is \"" + userPath + "\"");
 #endif
 }
 
