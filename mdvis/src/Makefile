@@ -115,7 +115,7 @@ obj/utils/tinyfiledialogs.o: utils/tinyfiledialogs.c
 	@echo "Compiling" $<
 	@$(C) -g -c $< -o $@
 
-obj/vis/system.o: vis/system.cpp
+obj/vis/system.o: vis/system.cpp $(PCH_OUT)
 	echo "\""$(shell git rev-parse --short HEAD)"\"" > ../../githash.h
 	@echo "Compiling" $<
 	@$(CXX) $(CXXFLAGS) -c $< -o $@

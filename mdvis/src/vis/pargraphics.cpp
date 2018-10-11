@@ -377,7 +377,7 @@ void ParGraphics::Update() {
 			auto af = Particles::anim.currentFrame;
 			auto dt = Time::delta + animOff;
 			auto df = dt * animTarFps;
-			auto dfi = (uint)std::floorf(df);
+			auto dfi = (uint)std::floor(df);
 			animOff = (df - dfi) / animTarFps;
 			af += dfi;
 			while (af >= Particles::anim.frameCount) af -= Particles::anim.frameCount;
@@ -439,7 +439,7 @@ void ParGraphics::Update() {
 			}
 			if (Input::mouseScroll != 0 && VisSystem::InMainWin(Input::mousePos)) {
 				if (Input::KeyHold(Key_LeftShift)) {
-					rotCenter -= 0.1f * scrZ * Input::mouseScroll / powf(2, rotScale);
+					rotCenter -= 0.1f * scrZ * Input::mouseScroll / std::pow(2.f, rotScale);
 				}
 				else {
 					rotScale += 0.05f * Input::mouseScroll;
@@ -573,7 +573,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		float snw = sin(-rotW*deg2rad);
 		Mat4x4 mMatrix = Mat4x4(1, 0, 0, 0, 0, csw, snw, 0, 0, -snw, csw, 0, 0, 0, 0, 1) * Mat4x4(csz, 0, -snz, 0, 0, 1, 0, 0, snz, 0, csz, 0, 0, 0, 0, 1);
 		MVP::Mul(mMatrix);
-		float s = std::powf(2.f, rotScale);
+		float s = std::pow(2.f, rotScale);
 		MVP::Scale(s, s, s);
 		if (rotCenterTrackId < ~0) {
 			rotCenter = Particles::poss[rotCenterTrackId];

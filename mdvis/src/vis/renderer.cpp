@@ -187,7 +187,7 @@ void VisRenderer::ToGif() {
 	const float cth = 0.25f / vidH;
 	const Vec2 smps[] = { Vec2(-ctw, -cth), Vec2(ctw, -cth), Vec2(-ctw, cth), Vec2(ctw, cth) };
 	
-	auto delay = (uint32_t)std::ceilf(1.0f / ParGraphics::animTarFps);
+	auto delay = (uint32_t)std::ceil(1.0f / ParGraphics::animTarFps);
 
 	GifWriter writer;
 	GifBegin(&writer, (IO::currPath + "movie.gif").c_str(), vidW, vidH, delay);
