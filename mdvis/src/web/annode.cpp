@@ -872,7 +872,7 @@ void CNode::WriteFrame(int f) {
 			ca.val.i = *(int*)scr->_outvars[a].value;
 			break;
 		case AN_VARTYPE::DOUBLE:
-			ca.val.i = *(double*)scr->_outvars[a].value;
+			ca.val.d = *(double*)scr->_outvars[a].value;
 			break;
 		case AN_VARTYPE::LIST: {
 			int n = 1;

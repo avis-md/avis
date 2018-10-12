@@ -9,4 +9,5 @@ public:
 	void Execute() override;
 
 	void OnSceneUpdate() override;
+	void OnAnimFrame() override;
 };

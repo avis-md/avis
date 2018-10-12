@@ -26,6 +26,7 @@
 #include "vis/system.h"
 #include "vis/shadows.h"
 #include "vis/renderer.h"
+#include "vis/selection.h"
 #include "utils/effects.h"
 #include "utils/ssh.h"
 #include "live/livesyncer.h"
@@ -67,7 +68,7 @@ void updateFunc() {
 
 	if (!!Particles::particleSz) {
 		Particles::Update();
-		if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime) && !ParLoader::busy) {
+		if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime) && !ParLoader::busy && (VisRenderer::status != VisRenderer::STATUS::BUSY)) {
 			VisSystem::lastSave = Time::time;
 			VisSystem::Save(IO::path + ".recover");
 			VisSystem::SetMsg("autosaved at t=" + std::to_string((int)Time::time) + "s");
@@ -146,22 +147,28 @@ void paintfunc() {
 
 		auto id = ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y);
 		if (!!id) {
-			//std::cout << id << std::to_string(Input::mousePos) << std::endl;
 			ParGraphics::hlIds.push_back(id);
-			if (Input::mouse0State == 1) {
-				if (Input::KeyHold(Key_LeftControl)) {
-					if (Input::KeyHold(Key_LeftShift)) {
-						auto f = std::find(ParGraphics::selIds.begin(), ParGraphics::selIds.end(), id);
-						if (f == ParGraphics::selIds.end()) ParGraphics::selIds.push_back(id);
-						else ParGraphics::selIds.erase(f);
-					}
-					else {
-						ParGraphics::selIds.resize(1);
-						ParGraphics::selIds[0] = id;
-					}
-				}
-				else if (Input::dbclick)
+			if ((Input::mouse0State == MOUSE_UP) && (Input::mouseDownPos == Input::mousePos)) {
+				if (Input::dbclick) {
 					ParGraphics::rotCenter = Particles::poss[id - 1];
+					Scene::dirty = true;
+				}
+				if (Input::KeyHold(Key_LeftShift)) {
+					auto f = std::find(Selection::atoms.begin(), Selection::atoms.end(), id-1);
+					if (f == Selection::atoms.end()) Selection::atoms.push_back(id-1);
+					else if (!Input::dbclick) Selection::atoms.erase(f);
+					else goto nore;
+					Selection::Recalc();
+					nore:;
+				}
+				else {
+					Selection::atoms.resize(1);
+					Selection::atoms[0] = id-1;
+					Selection::Recalc();
+				}
+				//auto& rl = Particles::ress[id-1];
+				//Particles::residueLists[rl.x].expanded = true;
+				//Particles::residueLists[rl.x].residues[rl.y].expanded = true;
 			}
 
 			id--;
@@ -173,8 +180,8 @@ void paintfunc() {
 
 		}
 		else {
-			if ((Input::mouse0State == 1) && Input::KeyHold(Key_LeftControl)) {
-				ParGraphics::selIds.clear();
+			if ((Input::mouse0State == MOUSE_UP) && (Input::mouseDownPos == Input::mousePos)) {
+				Selection::Clear();
 			}
 		}
 	}

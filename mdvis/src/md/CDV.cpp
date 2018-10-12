@@ -25,8 +25,16 @@ bool CDV::Read(ParInfo* info) {
 	auto& sz = info->num = 0;
 
 	std::string s;
+
+	auto pos = strm.tellg();
+	std::getline(strm, s);
+	auto uid = SplitString(s, ' ', true).size() == 6;
+	strm.seekg(pos);
+
 	while (std::getline(strm, s)) {
-		pi = (uint32_t)std::stoi(s.substr(0, s.find(' ')));
+		auto ps = s.find_first_of(' ');
+		if (uid) ps = s.find_first_of(' ', ps + 1);
+		pi = (uint32_t)std::stoi(s.substr(0, ps));
 		sz = std::max(sz, pi + 1);
 	}
 
@@ -47,8 +55,9 @@ bool CDV::Read(ParInfo* info) {
 
 	for (uint i = 0; i < sz; i++) {
 		info->progress = i * 1.f / sz;
+		if (uid) strm >> rd;
 		strm >> id >> rd;
-		info->resId[i] = id;
+		info->resId[i] = rd;
 		info->type[id] = *((uint16_t*)"H");
 			strm >> vl;
 			info->pos[id * 3] = vl / 10;
@@ -70,10 +79,16 @@ bool CDV::ReadFrame(FrmInfo* info) {
 	std::getline(strm, s);
 	std::getline(strm, s);
 
+	auto pos = strm.tellg();
+	std::getline(strm, s);
+	auto uid = SplitString(s, ' ', true).size() == 6;
+	strm.seekg(pos);
+
 	uint16_t id;
 	std::string rd;
 	double vl;
 	for (uint32_t i = 0; i < info->parNum; i++) {
+		if (uid) strm >> rd;
 		strm >> id >> rd;
 		if (id >= info->parNum) {
 			SETERR("Index exceeds particle count!");
@@ -87,4 +102,16 @@ bool CDV::ReadFrame(FrmInfo* info) {
 		info->pos[id * 3 + 2] = vl / 10;
 	}
 	return true;
+}
+
+std::vector<std::string> CDV::SplitString(std::string s, char c, bool rm) {
+	std::vector<std::string> o = std::vector<std::string>();
+	size_t pos = -1;
+	do {
+		s = s.substr(pos + 1);
+		pos = s.find_first_of(c);
+		if (!rm || pos > 0)
+			o.push_back(s.substr(0, pos));
+	} while (pos != std::string::npos);
+	return o;
 }

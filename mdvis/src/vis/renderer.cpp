@@ -5,7 +5,7 @@
 
 VisRenderer::IMG_TYPE VisRenderer::imgType;
 VisRenderer::VID_TYPE VisRenderer::vidType;
-VisRenderer::STATUS VisRenderer::status;
+VisRenderer::STATUS VisRenderer::status = STATUS::READY;
 
 #define RESO 2048*4
 #define VRESO 1024
@@ -13,6 +13,7 @@ VisRenderer::STATUS VisRenderer::status;
 bool VisRenderer::imgUseAlpha = false;
 uint VisRenderer::imgW = RESO, VisRenderer::imgH = RESO, VisRenderer::vidW = VRESO, VisRenderer::vidH = VRESO;
 uint VisRenderer::imgSlices = 4, VisRenderer::multisamples = 4;
+uint VisRenderer::vidSkip = 1;
 float VisRenderer::resLerp = -1;
 
 std::string VisRenderer::outputFolder =
@@ -37,7 +38,7 @@ void VisRenderer::Init() {
 }
 
 void VisRenderer::Draw() {
-	if (status == IMG) {
+	if (status == STATUS::IMG) {
 		UI::IncLayer();
 		UI::Quad(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), black(0.9f*resLerp));
 		resLerp = (resLerp >= 0)? min(resLerp + 4 * Time::delta, 1.f) : 0;
@@ -70,12 +71,12 @@ void VisRenderer::Draw() {
 			glReadPixels(0, 0, imgW, imgH, GL_RGBA, GL_UNSIGNED_BYTE, &res[0]);
 			Texture::ToPNG(res, imgW, imgH, IO::currPath + "ss.png");
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-			status = READY;
+			status = STATUS::READY;
 			resLerp = -1;
 			Scene::dirty = true;
 		}
 		if (Input::KeyDown(Key_Escape)) {
-			status = READY;
+			status = STATUS::READY;
 			resLerp =-1;
 			Scene::dirty = true;
 		}
@@ -83,7 +84,10 @@ void VisRenderer::Draw() {
 }
 
 void VisRenderer::ToImage() {
-	if (status != READY) return;
+	if (status != STATUS::READY) return;
+	status = STATUS::BUSY;
+
+	Debug::Message("Renderer::ToImage", "Rendering image");
 	int iw = imgW / imgSlices;
 	int ih = imgH / imgSlices;
 	if ((iw * imgSlices != imgW) || (ih * imgSlices != imgH))
@@ -151,11 +155,15 @@ void VisRenderer::ToImage() {
 	ParGraphics::bgCol.a = 1;
 	Scene::dirty = true;
 
-	status = IMG;
+	status = STATUS::IMG;
 }
 
 void VisRenderer::ToGif() {
-	if (status != READY) return;
+	if (status != STATUS::READY) return;
+	status = STATUS::BUSY;
+	Debug::Message("Renderer::ToGif", "Starting");
+	//
+	vidSkip = max(Particles::anim.frameCount/50, 1U);
 	
 	static Texture wtx(IO::path + "res/cat2.jpg");
 	UI::Quad(0, 0, Display::width, Display::height, black());
@@ -193,7 +201,7 @@ void VisRenderer::ToGif() {
 	GifBegin(&writer, (IO::currPath + "movie.gif").c_str(), vidW, vidH, delay);
 	std::vector<byte> res(vidW * vidH * 4);
 
-	for (uint f = 0; f < Particles::anim.frameCount; f++) {
+	for (uint f = 0; f < Particles::anim.frameCount; f += vidSkip) {
 		Debug::Message("Renderer::ToGif", "Rendering frame " + std::to_string(f));
 		Particles::SetFrame(f);
 		for (int c = 0; c < 4; c++) {
@@ -238,6 +246,7 @@ void VisRenderer::ToGif() {
 	}
 
 	GifEnd(&writer);
+	Debug::Message("Renderer::ToGif", "Finished");
 
 	Display::width = w;
 	Display::height = h;
@@ -249,6 +258,7 @@ void VisRenderer::ToGif() {
 	cam->target = 0;
 	ParGraphics::bgCol.a = 1;
 	Scene::dirty = true;
+	status = STATUS::READY;
 }
 
 void VisRenderer::MakeTex(GLuint& fbo, GLuint& tex, int w, int h) {

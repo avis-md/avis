@@ -3,6 +3,7 @@
 #include "md/Protein.h"
 #include "md/parloader.h"
 #include "vis/system.h"
+#include "vis/selection.h"
 #include "res/resdata.h"
 #include "ui/icons.h"
 #include "ui/popups.h"
@@ -42,7 +43,7 @@ PROGDEF(ParGraphics::parConLineProg);
 PROGDEF(ParGraphics::selHlProg);
 PROGDEF(ParGraphics::colProg);
 
-std::vector<uint> ParGraphics::hlIds, ParGraphics::selIds;
+std::vector<uint> ParGraphics::hlIds;
 std::vector<std::pair<uint, std::pair<uint, byte>>> ParGraphics::drawLists, ParGraphics::drawListsB;
 
 uint ParGraphics::usePBR = 1;
@@ -785,7 +786,7 @@ void ParGraphics::Reblit() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	if (Shadows::show)
 		Shadows::Reblit();
-	if (!!hlIds.size() || !!selIds.size())
+	if (!!hlIds.size() || !!Selection::atoms.size())
 		BlitHl();
 }
 
@@ -850,10 +851,10 @@ void ParGraphics::BlitHl() {
 	glBindTexture(GL_TEXTURE_2D, ChokoLait::mainCamera->texs.idTex);
 	glBindVertexArray(Camera::emptyVao);
 
-	if (!!selIds.size()) {
+	if (!!Selection::atoms.size()) {
 		glUniform3f(selHlProgLocs[3], 0.f, 1.f, 0.f);
-		for (auto& i : selIds) {
-			glUniform1i(selHlProgLocs[1], i);
+		for (auto& i : Selection::atoms) {
+			glUniform1i(selHlProgLocs[1], i+1);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
 	}

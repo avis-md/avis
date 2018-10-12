@@ -326,8 +326,8 @@ void Particles::SetFrame(uint frm) {
 			auto& c2 = anim.conns2[i];
 			if (!c2.size()) continue;
 			auto& c = particles_Conn2[i];
-			//c.cnt = c2[frm].count;
-			//c.ids = &c2[frm].ids[0];
+			c.cnt = c2[frm].count;
+			c.ids = c2[frm].ids;
 		}
 		AnWeb::OnAnimFrame();
 		if (!!anim.conns2.size()) UpdateConBufs2();

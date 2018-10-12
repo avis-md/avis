@@ -359,6 +359,7 @@ void ParLoader::DoOpen() {
 
 	if (isSrv) remove(path.c_str());
 
+	loadProgress = 0;
 	*loadProgress2 = 0;
 	loadFrames = nullptr;
 
