@@ -337,23 +337,22 @@ void AnWeb::DrawScene() {
 }
 
 void AnWeb::Execute(bool all) {
-	if (!Particles::particleSz) return;
-	if (!executing) {
-		if (execThread) {
-			if (execThread->joinable()) execThread->join();
-			delete(execThread);
-		}
-		executing = true;
-		execFrame = all? 1 : 0;
-#ifndef IS_ANSERVER
-		if (AnOps::remote) {
-			Save(activeFile);
-			execThread = new std::thread(DoExecute_Srv);
-		}
-		else
-#endif
-			execThread = new std::thread(DoExecute, all);
+	if (!Particles::particleSz || executing) return;
+	ParGraphics::animate = false;
+	if (execThread) {
+		if (execThread->joinable()) execThread->join();
+		delete(execThread);
 	}
+	executing = true;
+	execFrame = all? 1 : 0;
+#ifndef IS_ANSERVER
+	if (AnOps::remote) {
+		Save(activeFile);
+		execThread = new std::thread(DoExecute_Srv);
+	}
+	else
+#endif
+		execThread = new std::thread(DoExecute, all);
 }
 
 void AnWeb::DoExecute(bool all) {

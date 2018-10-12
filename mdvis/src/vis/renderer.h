@@ -13,7 +13,7 @@ public:
 		PNG_SEQ
 	} vidType;
 
-	static enum STATUS {
+	static enum class STATUS {
 		READY,
 		BUSY,
 		IMG,
@@ -22,6 +22,7 @@ public:
 	static bool imgUseAlpha;
 	static uint imgW, imgH, vidW, vidH;
 	static uint imgSlices, multisamples;
+	static uint vidSkip;
 	
 	static float resLerp;
 
