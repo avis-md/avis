@@ -28,7 +28,7 @@ public:
 	PROGDEF_H(selHlProg, 5);
 	PROGDEF_H(colProg, 10);
 
-	static std::vector<uint> hlIds, selIds;
+	static std::vector<uint> hlIds;
 	static std::vector<std::pair<uint, std::pair<uint, byte>>> drawLists, drawListsB;
 
 	static uint usePBR;

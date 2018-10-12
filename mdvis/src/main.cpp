@@ -26,6 +26,7 @@
 #include "vis/system.h"
 #include "vis/shadows.h"
 #include "vis/renderer.h"
+#include "vis/selection.h"
 #include "utils/effects.h"
 #include "utils/ssh.h"
 #include "live/livesyncer.h"
@@ -151,13 +152,14 @@ void paintfunc() {
 			if (Input::mouse0State == 1) {
 				if (Input::KeyHold(Key_LeftControl)) {
 					if (Input::KeyHold(Key_LeftShift)) {
-						auto f = std::find(ParGraphics::selIds.begin(), ParGraphics::selIds.end(), id);
-						if (f == ParGraphics::selIds.end()) ParGraphics::selIds.push_back(id);
-						else ParGraphics::selIds.erase(f);
+						auto f = std::find(Selection::atoms.begin(), Selection::atoms.end(), id-1);
+						if (f == Selection::atoms.end()) Selection::atoms.push_back(id-1);
+						else Selection::atoms.erase(f);
+						Selection::Recalc();
 					}
 					else {
-						ParGraphics::selIds.resize(1);
-						ParGraphics::selIds[0] = id;
+						Selection::atoms.resize(1, id-1);
+						Selection::Recalc();
 					}
 				}
 				else if (Input::dbclick)
@@ -174,7 +176,7 @@ void paintfunc() {
 		}
 		else {
 			if ((Input::mouse0State == 1) && Input::KeyHold(Key_LeftControl)) {
-				ParGraphics::selIds.clear();
+				Selection::Clear();
 			}
 		}
 	}
