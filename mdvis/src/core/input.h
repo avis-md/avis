@@ -31,6 +31,4 @@ private:
 	static Vec2 mousePosOld;
 	static std::string _inputString;
 	static float _mouseScroll;
-	//Input(Input const &); //deliberately not defined
-	//Input& operator= (Input const &);
 };

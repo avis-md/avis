@@ -45,18 +45,9 @@ bool Input::KeyUp(InputKey k) {
 }
 
 void Input::UpdateMouseNKeyboard(bool* src) {
-	//#ifdef PLATFORM_WIN
 	memcpy(keyStatusOld, keyStatusNew, 325);
 	if (src) std::swap_ranges(src, src + 325, keyStatusNew);
 	else {
-		/*
-		for (byte a = 1; a < 112; a++) {
-		keyStatusNew[a] = ((GetAsyncKeyState(a) >> 8) == -128);
-		}
-		for (byte a = Key_Plus; a <= Key_Dot; a++) {
-		keyStatusNew[a] = ((GetAsyncKeyState(a) >> 8) == -128);
-		}
-		*/
 		for (uint i = 32; i < 97; i++) {
 			keyStatusNew[i - 32] = !!glfwGetKey(Display::window, i);
 		}
@@ -64,32 +55,7 @@ void Input::UpdateMouseNKeyboard(bool* src) {
 			keyStatusNew[i - 32] = !!glfwGetKey(Display::window, i);
 		}
 	}
-	//#endif
-	/*
-	bool shift = KeyHold(Key_LeftShift);
-	byte b;
-	for (b = Key_0; b <= Key_9; b++) {
-	if (KeyDown((InputKey)b)) {
-	inputString += char(b);
-	}
-	}
-	for (b = Key_NumPad0; b <= Key_NumPad9; b++) {
-	if (KeyDown((InputKey)b)) {
-	inputString += char(b-48);
-	}
-	}
-	for (b = Key_A; b <= Key_Z; b++) {
-	if (KeyDown((InputKey)b)) {
-	inputString += shift ? char(b) : char(b + 32);
-	}
-	}
-	for (b = Key_Plus; b <= Key_Dot; b++) {
-	if (KeyDown((InputKey)b)) {
-	inputString += char(b-0x90);
-	}
-	}
-	if (KeyDown(Key_Space)) inputString += " ";
-	*/
+	
 	if (mouse0)
 		mouse0State = min<byte>(mouse0State + 1U, MOUSE_HOLD);
 	else
@@ -106,7 +72,7 @@ void Input::UpdateMouseNKeyboard(bool* src) {
 	if (mouse0State == MOUSE_DOWN) {
 		mouseDownPos = mousePos;
 		auto mt = Time::millis;
-		dbclick = (mt - mouseT < 300);
+		dbclick = (mt - mouseT < 300) && !dbclick;
 		mouseT = mt;
 	}
 	else if (!mouse0State)

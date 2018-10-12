@@ -3,10 +3,12 @@
 #include "md/ParMenu.h"
 #include "ui/icons.h"
 #include "ui/localizer.h"
+#include "vis/pargraphics.h"
 
 bool Selection::dirty = false;
 size_t Selection::count;
 std::vector<uint> Selection::atoms;
+std::vector<Vec2> Selection::spos;
 std::vector<double> Selection::lengths, Selection::angles, Selection::torsions;
 
 bool Selection::expL = true, Selection::expA = true, Selection::expT = true;
@@ -25,7 +27,7 @@ void Selection::Recalc() {
 }
 
 void Selection::Calc1() {
-    if (!dirty || _dirty) return;
+    if (!dirty || _dirty || !count) return;
     if (count > 1) {
         auto& p = Particles::poss[atoms[0]];
         auto& q = Particles::poss[atoms[1]];
@@ -43,6 +45,21 @@ void Selection::Calc1() {
     }
     dirty = false;
     _dirty = 0xff;
+}
+
+void Selection::CalcSpos() {
+    if (!count) return;
+    spos.resize(count);
+    static Mat4x4 _mat;
+    if (_mat != ParGraphics::lastMVP || dirty) {
+        _mat = ParGraphics::lastMVP;
+#pragma omp parallel
+        for (int a = 0; a < (int)count; a++) {
+            Vec4 v = _mat * Vec4(Particles::poss[atoms[a]], 1);
+            v /= v.w;
+            spos[a] = Vec2(Display::width * (v.x + 1)/2, Display::height * (-v.y + 1)/2);
+        }
+    }
 }
 
 void Selection::CalcLen() {
@@ -97,9 +114,16 @@ void Selection::DrawMenu() {
     const float ep = ParMenu::expandPos;
     count = atoms.size();
     UI::Label(ep - 148, off, 12, "Information", white());
+    CalcSpos();
     Calc1();
     off += 30;
     if (count > 1) {
+        UI::font->Align(ALIGN_MIDCENTER);
+        for (size_t a = 0; a < count; a++) {
+            auto& p = spos[a];
+            UI::Label(p.x, p.y, 20, std::to_string(a));
+        }
+        UI::font->Align(ALIGN_TOPLEFT);
         if (count > 2) {
             if (Engine::Button(ep - 148, off, 16, 16, expL ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) {
                 expL = !expL;
@@ -140,8 +164,8 @@ void Selection::DrawMenu() {
                     off += 17;
                     if (expA) {
                         CalcTor();
-                        for (size_t a = 0; a < count-2; a++) {
-                            UI::Label(ep - 146, off, 12, std::to_string(a) + "~" + std::to_string(a+3) + ": " + std::to_string(angles[a]) + " rad", white());
+                        for (size_t a = 0; a < count-3; a++) {
+                            UI::Label(ep - 146, off, 12, std::to_string(a) + "~" + std::to_string(a+3) + ": " + std::to_string(torsions[a]) + " rad", white());
                             off += 17;
                         }
                     }
