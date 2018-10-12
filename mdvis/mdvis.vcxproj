@@ -292,6 +292,7 @@
     <ClCompile Include="src\utils\ssh.cpp" />
     <ClCompile Include="src\utils\tinyfiledialogs.c" />
     <ClCompile Include="src\vis\cubemarcher.cpp" />
+    <ClCompile Include="src\vis\options.cpp" />
     <ClCompile Include="src\vis\renderer.cpp" />
     <ClCompile Include="src\vis\shadows.cpp" />
     <ClCompile Include="src\web\anbrowse.cpp" />
@@ -357,6 +358,7 @@
     <ClInclude Include="src\libjpeg\jpeglib.h" />
     <ClInclude Include="src\libjpeg\jversion.h" />
     <ClInclude Include="src\tmp\tiny_obj_loader.h" />
+    <ClInclude Include="src\vis\options.h" />
     <ClInclude Include="src\utils\glmext.h" />
     <ClInclude Include="src\utils\shader.h" />
     <ClInclude Include="src\hdr.h" />

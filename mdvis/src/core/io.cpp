@@ -319,6 +319,7 @@ void IO::InitPath() {
 	GetModuleFileName(NULL, cpath, 200);
 	path = cpath;
 	path = path.substr(0, path.find_last_of('\\') + 1);
+	auto p = path;
 	std::replace(path.begin(), path.end(), '\\', '/');
 #elif defined(PLATFORM_LNX)
 	readlink("/proc/self/exe", cpath, 200);
@@ -333,7 +334,10 @@ void IO::InitPath() {
 	if (path.back() != '/') path += "/";
 
 #ifdef PLATFORM_WIN
-	userPath = "~";
+	RunCmd::Run("cd>\"" + p + "\\currpath.txt\"");
+	std::ifstream strm(path + "currpath.txt");
+	std::getline(strm, currPath);
+	std::replace(currPath.begin(), currPath.end(), '\\', '/');
 #else
 	RunCmd::Run("pwd>/tmp/avis_currpath.txt&&cd&&pwd>/tmp/avis_userpath.txt");
 	std::ifstream strm("/tmp/avis_currpath.txt");
@@ -341,11 +345,11 @@ void IO::InitPath() {
 	strm.close();
 	strm.open("/tmp/avis_userpath.txt");
 	std::getline(strm, userPath);
+#endif
 	if (currPath.back() != '/') currPath += "/";
 	if (userPath.back() != '/') userPath += "/";
 	Debug::Message("IO", "Working path is \"" + currPath + "\"");
 	Debug::Message("IO", "User path is \"" + userPath + "\"");
-#endif
 }
 
 std::wstring IO::_tow(const std::string& s) {

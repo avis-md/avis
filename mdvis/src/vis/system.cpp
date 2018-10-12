@@ -144,6 +144,15 @@ void VisSystem::Init() {
 	});
 	mi[4].Set(Icons::openfile, _("Import Recent"), 0);
 
+	auto& mi0 = menuItems[1];
+	mi0.resize(2);
+	mi0[0].Set(0, _("Config folder"), []() {
+		IO::OpenFd(IO::path + "config");
+	});
+	mi0[1].Set(0, _("Nodes folder"), []() {
+		IO::OpenFd(IO::path + "nodes");
+	});
+
 	auto& mi1 = menuItems[2];
 	mi1.resize(3);
 	mi1[0].Set(0, "Help I'm", 0);
