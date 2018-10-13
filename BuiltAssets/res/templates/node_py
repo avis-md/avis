@@ -1,0 +1,11 @@
+import numpy as np
+
+//in list(2d)
+positions = None
+
+//out list(1d)
+xcoords = None
+
+//entry
+def Execute:
+    xcoords = positions[:,0]

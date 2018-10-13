@@ -10,9 +10,11 @@ Usage
     The order of arguments is not important.
 Switches
     --help      : Print this text and exit
+    --nologo    : Do not print the startup text
     --debug     : Show all log messages in the console
-Opening file(s)
-    avis myFile.xyz [-s]
-    -s          : load with default settings without showing the loader dialog
+    --version   : Print the version of the program
+Options
+    -v          : alias of --version
+    -s          : Load with default settings without showing the loader dialog
 )";
 }

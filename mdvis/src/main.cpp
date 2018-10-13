@@ -207,7 +207,7 @@ int main(int argc, char **argv) {
 #endif
 		Time::startMillis = milliseconds();
 		std::vector<std::string> fls;
-		bool _s = false, _x = false;
+		bool _s = false, _x = false, nologo = false;
 		std::string _xs = "";
 		for (auto a = 1; a < argc; a++) {
 			if (argv[a][0] == '-') {
@@ -232,8 +232,11 @@ int main(int argc, char **argv) {
 						std::cout << IO::path << std::endl;
 						return 0;
 					}
+					else if ISS(nologo) {
+						nologo = true;
+					}
 					else {
-						std::cout << "Unknown switch " << argv[a] - 2 << ". Type --help for usage guide.";
+						std::cout << "Unknown switch " << argv[a] - 2 << ". Type --help for usage guide." << std::endl;
 						return -1;
 					}
 				}
@@ -258,16 +261,17 @@ int main(int argc, char **argv) {
 				fls.push_back(argv[a]);
 			}
 		}
-		std::cout << "AViS " APPVERSION "\n" R"(Thanks for trying out this program! :)
+		if (!nologo) {
+			std::cout << "AViS " APPVERSION "\n" R"(Thanks for trying out this program! :)
 You can view a copy of all logs in Log.txt.
 Raw compile output for each script is in __[]cache__/name_log.txt.
 The hash for this program is )" << VisSystem::version_hash
-		<< "\n(I may need this hash to fix bugs)"
-		<< "\n----------------------------------------------" << std::endl;
+			<< "\n(I may need this hash to fix bugs)"
+			<< "\n----------------------------------------------" << std::endl;
+		}
 		if (!__debug) {
 			Debug::suppress = 1;
-			//
-			std::cout << "Starting in silent mode. You can enable all logs using the --debug switch." << std::endl;
+			if (!nologo) std::cout << "Starting in silent mode. You can enable all logs using the --debug switch." << std::endl;
 		}
 		ChokoLait::Init(800, 800);
 
