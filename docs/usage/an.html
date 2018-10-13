@@ -1,0 +1,202 @@
+<!doctype html><html><head><meta charset='utf-8'>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/2.4.1/github-markdown.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.11.0/styles/default.min.css">
+<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0-rc.1/dist/katex.min.css" integrity="sha384-D+9gmBxUQogRLqvARvNLmA9hS2x//eK1FhVb9PiU86gmcrBrJAQT8okdJ4LMp2uv" crossorigin="anonymous">
+<link rel="stylesheet" href="https://gitcdn.xyz/repo/goessner/mdmath/master/css/texmath.css">
+<link rel="stylesheet" href="https://gitcdn.xyz/repo/goessner/mdmath/master/css/vscode-texmath.css">
+<title>AViS Reference</title>
+</head><body class="markdown-body">
+<h1 data-line="0" class="code-line" id="a-name-aanalysis"><a name=""></a>Analysis</h1>
+<h2 data-line="2" class="code-line" id="a-namenods-ain-built-nodes"><a name="nods"></a>In-built nodes</h2>
+<ul>
+<li data-line="4" class="code-line">Scene I/O
+<ul>
+<li data-line="5" class="code-line"><a href="#scm">Camera (Set)</a></li>
+</ul>
+</li>
+<li data-line="6" class="code-line">Inputs
+<ul>
+<li data-line="7" class="code-line"><a href="#ipd">Particle data</a></li>
+<li data-line="8" class="code-line"><a href="#isi">System info</a></li>
+</ul>
+</li>
+<li data-line="9" class="code-line">Modifiers
+<ul>
+<li data-line="10" class="code-line"><a href="#msp">Set Param</a></li>
+</ul>
+</li>
+<li data-line="11" class="code-line">Generators
+<ul>
+<li data-line="12" class="code-line"><a href="#gab">Add Bonds</a></li>
+<li data-line="13" class="code-line"><a href="#gtt">Trace Trajectory</a></li>
+</ul>
+</li>
+<li data-line="14" class="code-line">Miscallenous
+<ul>
+<li data-line="15" class="code-line"><a href="#mpg">Plot graph</a></li>
+<li data-line="16" class="code-line"><a href="#msr">Show Range</a></li>
+</ul>
+</li>
+</ul>
+<h2 data-line="18" class="code-line" id="a-namescrp-ascripting-guide"><a name="scrp"></a>Scripting guide</h2>
+<ul>
+<li data-line="20" class="code-line"><a href="#sgn">General</a></li>
+<li data-line="21" class="code-line"><a href="#cpp">C++</a></li>
+<li data-line="22" class="code-line"><a href="#py">Python</a></li>
+<li data-line="23" class="code-line"><a href="#f90">Fortran</a></li>
+</ul>
+<h1 data-line="26" class="code-line" id="details">Details</h1>
+<h2 data-line="28" class="code-line" id="in-built-nodes">In-built nodes</h2>
+<h2 data-line="31" class="code-line" id="scripting-guide">Scripting guide</h2>
+<h3 data-line="33" class="code-line" id="a-namesgn-ageneral"><a name="sgn"></a>General</h3>
+<p data-line="35" class="code-line"><em>This section describes common properties amongst languages. Please refer to the actual languages for examples.</em></p>
+<p data-line="37" class="code-line">AViS Accepts these basic data types. They can be either appear single or as an array.</p>
+<ul>
+<li data-line="39" class="code-line">short</li>
+<li data-line="40" class="code-line">int</li>
+<li data-line="41" class="code-line">double</li>
+</ul>
+<p data-line="43" class="code-line">These few things are parsed by the pre-compiler. They are all optional except when marked with *.</p>
+<ul>
+<li data-line="45" class="code-line">Description
+<ul>
+<li data-line="46" class="code-line">Beginning lines of the script, if any, will be parsed as the description of the node.</li>
+</ul>
+</li>
+<li data-line="47" class="code-line">Input variables
+<ul>
+<li data-line="48" class="code-line">Global variables that are commented as <code>in</code> will be parsed as the inputs for the node.</li>
+</ul>
+</li>
+<li data-line="49" class="code-line">Output variables
+<ul>
+<li data-line="50" class="code-line">Global variables that are commented as <code>out</code>, well, you get the idea.</li>
+</ul>
+</li>
+<li data-line="51" class="code-line">Progress variable
+<ul>
+<li data-line="52" class="code-line">A variable with type <code>double</code> marked as <code>progress</code> will allow the node to display its progress (duh) on the UI.</li>
+</ul>
+</li>
+<li data-line="53" class="code-line">Entry point*
+<ul>
+<li data-line="54" class="code-line">The function to be called when the node is executed. It must be a function marked as <code>entry</code> with no arguments and no return value.</li>
+</ul>
+</li>
+</ul>
+<p data-line="56" class="code-line">&quot;Marks&quot; are the single API format for an AViS script. Each mark must immediately precede its target, with no extra spaces or newlines in between.</p>
+<pre class="hljs"><code><div>*mark*
+variable or function as *mark*
+</div></code></pre>
+<h3 data-line="62" class="code-line" id="a-namecpp-ac"><a name="cpp"></a>C++</h3>
+<p data-line="64" class="code-line">The general format of a parse-able script is as follows.</p>
+<ul>
+<li data-line="66" class="code-line">Description</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-number">1.</span> <span class="hljs-comment">///This must come at the top of the script.</span>
+<span class="hljs-number">2.</span> <span class="hljs-comment">///No new-lines must occur before or between these lines.</span>
+<span class="hljs-number">3.</span> <span class="hljs-comment">///This is another line.</span>
+</div></code></pre>
+<ul>
+<li data-line="73" class="code-line">Input variables</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-comment">//in</span>
+<span class="hljs-keyword">int</span> numberOfFrames = <span class="hljs-number">0</span>;
+</div></code></pre>
+<ul>
+<li data-line="79" class="code-line">Output variables</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-comment">//out</span>
+<span class="hljs-keyword">int</span> numberOfRedAtoms = <span class="hljs-number">0</span>;
+</div></code></pre>
+<ul>
+<li data-line="85" class="code-line">Progress variable</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-comment">//progress</span>
+<span class="hljs-keyword">double</span> progressOfTheCode = <span class="hljs-number">0</span>;
+</div></code></pre>
+<ul>
+<li data-line="91" class="code-line">Entry point</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-comment">//entry</span>
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">DoSomething</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-comment">//do something fancy!</span>
+}
+</div></code></pre>
+<h4 data-line="99" class="code-line" id="arrays">Arrays</h4>
+<p data-line="101" class="code-line">C-like code uses raw-pointers as dynamic arrays, so you need to know the length of each dimension. They can be specified beside the <code>in</code> or <code>out</code> comment. Length variables can be either: an input or output variable; a variable declared as <code>var</code>; or a constant. All length variables must be of type <code>int</code>.</p>
+<p data-line="103" class="code-line">Example:</p>
+<pre class="hljs"><code><div><span class="hljs-comment">//in cnt</span>
+<span class="hljs-keyword">short</span>* takeAnArrayOfSizeCnt = <span class="hljs-number">0</span>;
+<span class="hljs-comment">//out cnt 3</span>
+<span class="hljs-keyword">double</span>* andReturnAnArrayOfSizeCntX3 = <span class="hljs-number">0</span>;
+
+<span class="hljs-comment">//in</span>
+<span class="hljs-keyword">int</span> numberOfBirds = <span class="hljs-number">0</span>;
+<span class="hljs-comment">//out numberOfBirds numberOfLegs</span>
+<span class="hljs-keyword">int</span>* numberOfToes = <span class="hljs-number">0</span>;
+<span class="hljs-comment">//var</span>
+<span class="hljs-keyword">int</span> numberOfLegs = <span class="hljs-number">2</span>;
+</div></code></pre>
+<p data-line="118" class="code-line">For multi-dimensional arrays, the items are arranged row-major. That is, the right-est index advances the fastest.</p>
+<p data-line="120" class="code-line">Example:</p>
+<pre class="hljs"><code><div><span class="hljs-comment">//in a b c</span>
+<span class="hljs-keyword">int</span>* myArray = <span class="hljs-number">0</span>;
+
+<span class="hljs-comment">//The element at location [x][y][z] can be accessed as below.</span>
+<span class="hljs-comment">//It is your responsibility not to overflow the indices!</span>
+<span class="hljs-keyword">int</span> xyz = myArray[x*b*c + y*c + z];
+</div></code></pre>
+<p data-line="130" class="code-line"><strong>As this is C++, please use <code>new</code> and not <code>malloc</code> for arrays!</strong></p>
+<p data-line="132" class="code-line">Example:</p>
+<pre class="hljs"><code><div><span class="hljs-comment">//out 100</span>
+<span class="hljs-keyword">double</span>* myArray = <span class="hljs-number">0</span>;
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Alloc</span><span class="hljs-params">()</span> </span>{
+    myArray = <span class="hljs-keyword">new</span> <span class="hljs-keyword">double</span>[<span class="hljs-number">100</span>]{}; <span class="hljs-comment">//good</span>
+    <span class="hljs-comment">//myArray = (double*)calloc(100*sizeof(double)); //never ever ever do this!</span>
+}
+</div></code></pre>
+<h3 data-line="142" class="code-line" id="a-namepy-apython"><a name="py"></a>Python</h3>
+<h3 data-line="145" class="code-line" id="a-namef90-afortran"><a name="f90"></a>Fortran</h3>
+<p data-line="147" class="code-line">A fortran script should contain a primary module with the same name as the first module.</p>
+<p data-line="149" class="code-line">The general format of a parse-able script is as follows.</p>
+<ul>
+<li data-line="151" class="code-line">Description</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-number">1.</span> <span class="hljs-comment">! This must come at the top of the script.</span>
+<span class="hljs-number">2.</span> <span class="hljs-comment">! No new-lines must occur before or between these lines.</span>
+<span class="hljs-number">3.</span> <span class="hljs-comment">! A space must exist between the ! and the text.</span>
+</div></code></pre>
+<ul>
+<li data-line="158" class="code-line">Input variables</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-comment">!in </span>
+<span class="hljs-keyword">INTEGER</span> :: MYINT
+</div></code></pre>
+<ul>
+<li data-line="164" class="code-line">Output variables</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-comment">!out</span>
+<span class="hljs-keyword">REAL</span>*<span class="hljs-number">8</span> :: DOUBLEVAR
+</div></code></pre>
+<ul>
+<li data-line="170" class="code-line">Progress variable</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-comment">!progress</span>
+<span class="hljs-keyword">REAL</span>*<span class="hljs-number">8</span> :: PROGRESSMEOW
+</div></code></pre>
+<ul>
+<li data-line="176" class="code-line">Entry point</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-comment">!entry</span>
+<span class="hljs-function"><span class="hljs-keyword">SUBROUTINE</span></span> HELLO()
+    <span class="hljs-comment">!say hello!</span>
+<span class="hljs-keyword">end</span> <span class="hljs-function"><span class="hljs-keyword">subroutine</span></span> HELLO
+</div></code></pre>
+<h4 data-line="184" class="code-line" id="arrays">Arrays</h4>
+<p data-line="186" class="code-line">To allow for interoperability with other languages, arrays must be declared as <code>ALLOCATABLE TARGET</code>s.</p>
+<p data-line="188" class="code-line">Example:</p>
+<pre class="hljs"><code><div><span class="hljs-keyword">REAL</span>*<span class="hljs-number">8</span>, <span class="hljs-keyword">ALLOCATABLE</span>, <span class="hljs-keyword">TARGET</span> :: SOMEARRAY (:,:)
+</div></code></pre>
+
+</body></html>
