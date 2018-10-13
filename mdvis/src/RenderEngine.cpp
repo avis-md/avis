@@ -172,7 +172,7 @@ void Camera::Render(onBlitFunc func) {
 	//DumpBuffers();
 	//return;
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, texs.fbo);
+	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, texs.fbo);
 
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);

@@ -3,7 +3,7 @@
 
 class Shadows {
 public:
-	static Camera* cam;
+	static pCamera cam;
 
 	static bool show;
 	static byte quality;

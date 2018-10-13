@@ -136,7 +136,7 @@ void Node_Volume::DrawScene() {
 	glUniformMatrix4fv(shadLocs[0], 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
 	glUniformMatrix4fv(shadLocs[1], 1, GL_FALSE, glm::value_ptr(MVP::projection()));
 	glUniform3f(shadLocs[2], sx, sy, sz);
-	auto& cam = ChokoLait::mainCamera->object->transform.position();
+	auto& cam = ChokoLait::mainCameraObj->transform.position();
 	glUniform3f(shadLocs[3], cam.x, cam.y, cam.z);
 	glUniform3f(shadLocs[5], cutC.x, cutC.y, cutC.z);
 	glUniform3f(shadLocs[6], cutD.x, cutD.y, cutD.z);

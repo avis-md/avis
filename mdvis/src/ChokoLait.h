@@ -18,7 +18,8 @@ public:
 		}
 	}
 
-	static rCamera mainCamera;
+	static pSceneObject mainCameraObj;
+	static pCamera mainCamera;
 	static GLFWwindow* window;
 
 	static std::vector<dropFileFunc> dropFuncs;

@@ -31,9 +31,11 @@ public:
 	Transform& RotateAround(Vec3 a, float f);
 
 	friend class SceneObject;
-	friend class Armature;
 private:
 	Transform() {}
+	Transform(const Transform& rhs) = delete;
+	Transform& operator= (const Transform& other) = delete;
+
 	void Init(pSceneObject& sc, Vec3 pos, Quat rot, Vec3 scl);
 	void Init(pSceneObject& sc, byte* data);
 
@@ -48,7 +50,4 @@ private:
 	void _UpdateWEuler(), _UpdateLEuler();
 	void _UpdateLMatrix();
 	void _UpdateWMatrix(const Mat4x4& mat);
-
-	//never call Transform constructor directly.
-	Transform(const Transform& rhs);
 };

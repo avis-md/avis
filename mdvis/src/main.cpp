@@ -18,7 +18,6 @@
 #include "md/pdb.h"
 #include "md/CDV.h"
 //#include "md/XYZ.h"
-//#include "md/mdvbin.h"
 #include "md/lammps.h"
 #include "md/dlpoly.h"
 #include "vis/cubemarcher.h"
@@ -37,7 +36,7 @@ bool __debug = false;
 float autoSaveTime = 10;
 
 void rendFunc() {
-	auto& cm = ChokoLait::mainCamera->object->transform;
+	auto& cm = ChokoLait::mainCameraObj->transform;
 	ParGraphics::Rerender(cm.position(), cm.forward(), static_cast<float>(Display::width), static_cast<float>(Display::height));
 #define bb(i) static_cast<float>(Particles::boundingBox[i])
 	UI3::Cube(bb(0), bb(1), bb(2), bb(3), bb(4), bb(5), black());
@@ -376,7 +375,7 @@ The hash for this program is )" << VisSystem::version_hash
 
 		auto lastMillis = Time::millis;
 
-		ChokoLait::mainCamera->object->transform.localPosition(Vec3(0, 0, -1));
+		ChokoLait::mainCameraObj->transform.localPosition(Vec3(0, 0, -1));
 		ChokoLait::mainCamera->quality = 1;
 		ChokoLait::mainCamera->quality2 = 1;
 

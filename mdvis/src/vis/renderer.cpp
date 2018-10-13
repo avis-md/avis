@@ -93,7 +93,7 @@ void VisRenderer::ToImage() {
 	if ((iw * imgSlices != imgW) || (ih * imgSlices != imgH))
 		Debug::Warning("VisRenderer", "Image cannot be cleanly sliced into " + std::to_string(imgSlices) + "!");
 
-	auto cam = ChokoLait::mainCamera();
+	auto& cam = ChokoLait::mainCamera;
 	auto w = Display::width;
 	auto h = Display::height;
 	auto w2 = Display::actualWidth;
@@ -124,8 +124,8 @@ void VisRenderer::ToImage() {
 				Scene::dirty = true;
 				cam->offset = Vec2(a, b) + Vec2(smps[c]);
 				cam->Render([]() {
-					auto& cm = ChokoLait::mainCamera->object->transform;
-					ParGraphics::Rerender(cm.position(), cm.forward(), (float)imgW / imgSlices, (float)imgH / imgSlices);
+					auto& cam = ChokoLait::mainCameraObj->transform;
+					ParGraphics::Rerender(cam.position(), cam.forward(), (float)imgW / imgSlices, (float)imgH / imgSlices);
 				});
 				MVP::Switch(false);
 				MVP::Clear();
@@ -173,7 +173,7 @@ void VisRenderer::ToGif() {
 	UI::Texture(10, 30, Display::height*0.5f, Display::height*0.5f, wtx, DRAWTEX_FIT);
 	glfwSwapBuffers(ChokoLait::window);
 
-	auto cam = ChokoLait::mainCamera();
+	auto& cam = ChokoLait::mainCamera;
 	auto w = Display::width;
 	auto h = Display::height;
 	auto w2 = Display::actualWidth;
@@ -208,8 +208,8 @@ void VisRenderer::ToGif() {
 			Scene::dirty = true;
 			cam->offset = Vec2(smps[c]);
 			cam->Render([]() {
-				auto& cm = ChokoLait::mainCamera->object->transform;
-				ParGraphics::Rerender(cm.position(), cm.forward(), vidW, vidH);
+				auto& cam = ChokoLait::mainCameraObj->transform;
+				ParGraphics::Rerender(cam.position(), cam.forward(), vidW, vidH);
 			});
 			MVP::Switch(false);
 			MVP::Clear();

@@ -5,7 +5,7 @@
 #include "ui/ui_ext.h"
 #include "res/shddata.h"
 
-Camera* Shadows::cam;
+pCamera Shadows::cam;
 
 bool Shadows::show = false;
 byte Shadows::quality = 2;
@@ -25,7 +25,7 @@ GLuint Shadows::_fbo, Shadows::_dtex;
 PROGDEF(Shadows::_prog);
 
 void Shadows::Init() {
-	cam = ChokoLait::mainCamera().get();
+	cam = ChokoLait::mainCamera;
 
 	_prog = Shader::FromVF(glsl::minVert, IO::GetText(IO::path + "shadows.txt"));
 

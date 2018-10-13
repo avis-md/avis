@@ -89,7 +89,7 @@ int ParGraphics::Eff::ssaoSamples;
 float ParGraphics::Eff::glowThres, ParGraphics::Eff::glowRad, ParGraphics::Eff::glowStr;
 
 void ParGraphics::Eff::Apply() {
-	auto cam = ChokoLait::mainCamera().get();
+	auto& cam = ChokoLait::mainCamera;
 	byte cnt = 0;
 	if (tfboDirty) {
 		//cnt += Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1], _rad*20, Display::width, Display::height);
@@ -401,7 +401,7 @@ void ParGraphics::Update() {
 				if (Input::KeyHold(Key_LeftShift)) dragMode = 2;
 				else dragMode = 0;
 			}
-			else if (Input::mouse0State == MOUSE_HOLD && !dragging && VisSystem::InMainWin(Input::mouseDownPos)) {
+			else if ((Input::mouse0State == MOUSE_HOLD) && !dragging && (Input::mousePos != Input::mouseDownPos) && VisSystem::InMainWin(Input::mouseDownPos)) {
 				dragging = true;
 				if (!ChokoLait::mainCamera->applyGBuffer2) Scene::dirty = true;
 				ChokoLait::mainCamera->applyGBuffer2 = true;
@@ -567,194 +567,193 @@ void ParGraphics::UpdateClipping() {
 }
 
 void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
-	if (!!Particles::particleSz) {
-		float csz = cos(-rotZ*deg2rad);
-		float snz = sin(-rotZ*deg2rad);
-		float csw = cos(-rotW*deg2rad);
-		float snw = sin(-rotW*deg2rad);
-		Mat4x4 mMatrix = Mat4x4(1, 0, 0, 0, 0, csw, snw, 0, 0, -snw, csw, 0, 0, 0, 0, 1) * Mat4x4(csz, 0, -snz, 0, 0, 1, 0, 0, snz, 0, csz, 0, 0, 0, 0, 1);
-		MVP::Mul(mMatrix);
-		float s = std::pow(2.f, rotScale);
-		MVP::Scale(s, s, s);
-		if (rotCenterTrackId < ~0) {
-			rotCenter = Particles::poss[rotCenterTrackId];
+	if (!Particles::particleSz) return;
+	float csz = cos(-rotZ*deg2rad);
+	float snz = sin(-rotZ*deg2rad);
+	float csw = cos(-rotW*deg2rad);
+	float snw = sin(-rotW*deg2rad);
+	Mat4x4 mMatrix = Mat4x4(1, 0, 0, 0, 0, csw, snw, 0, 0, -snw, csw, 0, 0, 0, 0, 1) * Mat4x4(csz, 0, -snz, 0, 0, 1, 0, 0, snz, 0, csz, 0, 0, 0, 0, 1);
+	MVP::Mul(mMatrix);
+	float s = std::pow(2.f, rotScale);
+	MVP::Scale(s, s, s);
+	if (rotCenterTrackId < ~0) {
+		rotCenter = Particles::poss[rotCenterTrackId];
+	}
+	MVP::Translate(-rotCenter.x, -rotCenter.y, -rotCenter.z);
+	auto _mv = MVP::modelview();
+	auto _p = MVP::projection();
+
+	UpdateClipping();
+
+	if (!Shadows::isPass) {
+		lastMVP = _p * _mv;
+		auto imvp = glm::inverse(lastMVP);
+		scrX = Vec3(imvp * Vec4(1, 0, 0, 0));
+		scrY = Vec3(imvp * Vec4(0, 1, 0, 0));
+		scrZ = glm::normalize(glm::cross(scrY, scrX));
+	}
+
+	auto ql = ChokoLait::mainCamera->quality;
+	auto spriteScl = ChokoLait::mainCamera->scale;
+
+	float osz = -1;
+	if (ChokoLait::mainCamera->ortographic) {
+		Vec4 p1 = _p * Vec4(-1, 1, -1, 1);
+		p1 /= p1.w;
+		Vec4 p2 = _p * Vec4(1, 1, -1, 1);
+		p2 /= p2.w;
+		osz = glm::length(p2 - p1)/2;
+	}
+
+	if (!RayTracer::resTex) {
+		glUseProgram(parProg);
+		glUniformMatrix4fv(parProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+		glUniformMatrix4fv(parProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+		glUniform3f(parProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
+		glUniform3f(parProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
+		glUniform1f(parProgLocs[4], osz);
+		glUniform2f(parProgLocs[5], _w * ql, _h * ql);
+		glUniform1i(parProgLocs[6], 1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
+		glUniform1i(parProgLocs[8], 2);
+		glActiveTexture(GL_TEXTURE2);
+		if (!useGradCol) {
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
+			glUniform1i(parProgLocs[9], 3);
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 		}
-		MVP::Translate(-rotCenter.x, -rotCenter.y, -rotCenter.z);
-		auto _mv = MVP::modelview();
-		auto _p = MVP::projection();
+		else {
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[gradColParam]->texBuf);
+			glUniform4fv(parProgLocs[10], 3, &gradCols[0][0]);
+		}
+		glUniform1i(parProgLocs[11], useGradCol);
+		glUniform1f(parProgLocs[12], spriteScl);
 
-		UpdateClipping();
-
-		if (!Shadows::isPass) {
-			lastMVP = _p * _mv;
-			auto imvp = glm::inverse(lastMVP);
-			scrX = Vec3(imvp * Vec4(1, 0, 0, 0));
-			scrY = Vec3(imvp * Vec4(0, 1, 0, 0));
-			scrZ = glm::normalize(glm::cross(scrY, scrX));
+		glBindVertexArray(Particles::posVao);
+		for (auto& p : drawLists) {
+			if (p.second.second == 1) glUniform1f(parProgLocs[7], -1);
+			else if (p.second.second == 0x0f) glUniform1f(parProgLocs[7], 0);
+			else if (p.second.second == 2) glUniform1f(parProgLocs[7], 0.2f);
+			else glUniform1f(parProgLocs[7], 1);
+			glDrawArrays(GL_POINTS, p.first, p.second.first);
 		}
 
-		auto ql = ChokoLait::mainCamera->quality;
-		auto spriteScl = ChokoLait::mainCamera->scale;
-
-		float osz = -1;
-		if (ChokoLait::mainCamera->ortographic) {
-			Vec4 p1 = _p * Vec4(-1, 1, -1, 1);
-			p1 /= p1.w;
-			Vec4 p2 = _p * Vec4(1, 1, -1, 1);
-			p2 /= p2.w;
-			osz = glm::length(p2 - p1)/2;
-		}
-
-		if (!RayTracer::resTex) {
-			glUseProgram(parProg);
-			glUniformMatrix4fv(parProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
-			glUniformMatrix4fv(parProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
-			glUniform3f(parProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
-			glUniform3f(parProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-			glUniform1f(parProgLocs[4], osz);
-			glUniform2f(parProgLocs[5], _w * ql, _h * ql);
-			glUniform1i(parProgLocs[6], 1);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
-			glUniform1i(parProgLocs[8], 2);
-			glActiveTexture(GL_TEXTURE2);
-			if (!useGradCol) {
-				glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
-				glUniform1i(parProgLocs[9], 3);
-				glActiveTexture(GL_TEXTURE3);
-				glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
+		auto& con = Particles::conns;
+		glBindVertexArray(Camera::emptyVao);
+		for (auto& p : drawListsB) {
+			byte& tp = p.second.second;
+			if (tp == 1) {
+				glUseProgram(parConLineProg);
+				glUniformMatrix4fv(parConLineProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+				glUniformMatrix4fv(parConLineProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+				glUniform1i(parConLineProgLocs[2], 1);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+				glUniform1i(parConLineProgLocs[3], 2);
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
+				glUniform2f(parConLineProgLocs[4], con.line_sc / Display::width, con.line_sc / Display::height);
+				glUniform1ui(parConLineProgLocs[5], 1);
+				glDrawArrays(GL_TRIANGLES, p.first * 6, p.second.first * 6);
 			}
 			else {
-				glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[gradColParam]->texBuf);
-				glUniform4fv(parProgLocs[10], 3, &gradCols[0][0]);
-			}
-			glUniform1i(parProgLocs[11], useGradCol);
-			glUniform1f(parProgLocs[12], spriteScl);
-
-			glBindVertexArray(Particles::posVao);
-			for (auto& p : drawLists) {
-				if (p.second.second == 1) glUniform1f(parProgLocs[7], -1);
-				else if (p.second.second == 0x0f) glUniform1f(parProgLocs[7], 0);
-				else if (p.second.second == 2) glUniform1f(parProgLocs[7], 0.2f);
-				else glUniform1f(parProgLocs[7], 1);
-				glDrawArrays(GL_POINTS, p.first, p.second.first);
-			}
-
-			auto& con = Particles::conns;
-			glBindVertexArray(Camera::emptyVao);
-			for (auto& p : drawListsB) {
-				byte& tp = p.second.second;
-				if (tp == 1) {
-					glUseProgram(parConLineProg);
-					glUniformMatrix4fv(parConLineProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
-					glUniformMatrix4fv(parConLineProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
-					glUniform1i(parConLineProgLocs[2], 1);
-					glActiveTexture(GL_TEXTURE1);
-					glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
-					glUniform1i(parConLineProgLocs[3], 2);
-					glActiveTexture(GL_TEXTURE2);
-					glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
-					glUniform2f(parConLineProgLocs[4], con.line_sc / Display::width, con.line_sc / Display::height);
-					glUniform1ui(parConLineProgLocs[5], 1);
-					glDrawArrays(GL_TRIANGLES, p.first * 6, p.second.first * 6);
-				}
-				else {
-					glUseProgram(parConProg);
-					glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
-					glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
-					glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
-					glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-					glUniform2f(parConProgLocs[4], _w * ql, _h * ql);
-					glUniform1i(parConProgLocs[5], 1);
-					glActiveTexture(GL_TEXTURE1);
-					glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
-					glUniform1i(parConProgLocs[6], 2);
-					glActiveTexture(GL_TEXTURE2);
-					glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
-					glUniform1ui(parConProgLocs[7], 1);
-					glUniform1f(parConProgLocs[8], con.scale);
-					glUniform1f(parConProgLocs[9], osz);
-					glUniform1i(parConProgLocs[10], 3);
-					glActiveTexture(GL_TEXTURE3);
-					if (!useGradCol) {
-						glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
-						glUniform1i(parConProgLocs[11], 4);
-						glActiveTexture(GL_TEXTURE4);
-						glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
-					}
-					else {
-						glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[gradColParam]->texBuf);
-						glUniform4fv(parConProgLocs[12], 3, &gradCols[0][0]);
-					}
-					glUniform1i(parConProgLocs[13], useGradCol);
-					glUniform1i(parConProgLocs[14], useConGradCol);
-					glUniform4f(parConProgLocs[15], conCol.r, conCol.g, conCol.b, useConCol? 1.f : 0.f);
-					glUniform1f(parConProgLocs[16], spriteScl);
-
-					glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
-				}
-			}
-			uint id2 = 4;
-			for (auto& c2 : Particles::particles_Conn2) {
-				id2++;
-				if (!c2.cnt || !c2.visible) continue;
-				if (!c2.drawMode) {
-					glUseProgram(parConLineProg);
-					glUniformMatrix4fv(parConLineProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
-					glUniformMatrix4fv(parConLineProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
-					glUniform1i(parConLineProgLocs[2], 1);
-					glActiveTexture(GL_TEXTURE1);
-					glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
-					glUniform1i(parConLineProgLocs[3], 2);
-					glActiveTexture(GL_TEXTURE2);
-					glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
-					glUniform2f(parConLineProgLocs[4], c2.line_sc / Display::width, c2.line_sc / Display::height);
-					glUniform1ui(parConLineProgLocs[5], id2);
-					glDrawArrays(GL_TRIANGLES, 0, c2.cnt * 6);
-				}
-				else {
-					glUseProgram(parConProg);
-					glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
-					glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
-					glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
-					glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
-					glUniform2f(parConProgLocs[4], _w * ql, _h * ql);
-					glUniform1i(parConProgLocs[5], 1);
-					glActiveTexture(GL_TEXTURE1);
-					glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
-					glUniform1i(parConProgLocs[6], 2);
-					glActiveTexture(GL_TEXTURE2);
-					glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
-					glUniform1ui(parConProgLocs[7], id2);
-					glUniform1f(parConProgLocs[8], c2.scale);
-					glUniform1f(parConProgLocs[9], osz);
-					glUniform1i(parConProgLocs[10], 3);
-					glActiveTexture(GL_TEXTURE3);
+				glUseProgram(parConProg);
+				glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+				glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+				glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
+				glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
+				glUniform2f(parConProgLocs[4], _w * ql, _h * ql);
+				glUniform1i(parConProgLocs[5], 1);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+				glUniform1i(parConProgLocs[6], 2);
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
+				glUniform1ui(parConProgLocs[7], 1);
+				glUniform1f(parConProgLocs[8], con.scale);
+				glUniform1f(parConProgLocs[9], osz);
+				glUniform1i(parConProgLocs[10], 3);
+				glActiveTexture(GL_TEXTURE3);
+				if (!useGradCol) {
 					glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
 					glUniform1i(parConProgLocs[11], 4);
 					glActiveTexture(GL_TEXTURE4);
 					glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
-					glUniform1i(parConProgLocs[13], 0);
-					glUniform1i(parConProgLocs[14], 0);
-					glUniform4f(parConProgLocs[15], c2.col.r, c2.col.g, c2.col.b, c2.usecol? 1.f : 0.f);
-					glUniform1f(parConProgLocs[16], spriteScl);
-					glDrawArrays(GL_TRIANGLES, 0, c2.cnt*12);
-
 				}
+				else {
+					glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[gradColParam]->texBuf);
+					glUniform4fv(parConProgLocs[12], 3, &gradCols[0][0]);
+				}
+				glUniform1i(parConProgLocs[13], useGradCol);
+				glUniform1i(parConProgLocs[14], useConGradCol);
+				glUniform4f(parConProgLocs[15], conCol.r, conCol.g, conCol.b, useConCol? 1.f : 0.f);
+				glUniform1f(parConProgLocs[16], spriteScl);
+
+				glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
 			}
-
-			glBindVertexArray(0);
-			glUseProgram(0);
-
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			Protein::Draw();
-			AnWeb::DrawScene();
 		}
+		uint id2 = 4;
+		for (auto& c2 : Particles::particles_Conn2) {
+			id2++;
+			if (!c2.cnt || !c2.visible) continue;
+			if (!c2.drawMode) {
+				glUseProgram(parConLineProg);
+				glUniformMatrix4fv(parConLineProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+				glUniformMatrix4fv(parConLineProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+				glUniform1i(parConLineProgLocs[2], 1);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+				glUniform1i(parConLineProgLocs[3], 2);
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
+				glUniform2f(parConLineProgLocs[4], c2.line_sc / Display::width, c2.line_sc / Display::height);
+				glUniform1ui(parConLineProgLocs[5], id2);
+				glDrawArrays(GL_TRIANGLES, 0, c2.cnt * 6);
+			}
+			else {
+				glUseProgram(parConProg);
+				glUniformMatrix4fv(parConProgLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+				glUniformMatrix4fv(parConProgLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+				glUniform3f(parConProgLocs[2], _cpos.x, _cpos.y, _cpos.z);
+				glUniform3f(parConProgLocs[3], _cfwd.x, _cfwd.y, _cfwd.z);
+				glUniform2f(parConProgLocs[4], _w * ql, _h * ql);
+				glUniform1i(parConProgLocs[5], 1);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+				glUniform1i(parConProgLocs[6], 2);
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
+				glUniform1ui(parConProgLocs[7], id2);
+				glUniform1f(parConProgLocs[8], c2.scale);
+				glUniform1f(parConProgLocs[9], osz);
+				glUniform1i(parConProgLocs[10], 3);
+				glActiveTexture(GL_TEXTURE3);
+				glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
+				glUniform1i(parConProgLocs[11], 4);
+				glActiveTexture(GL_TEXTURE4);
+				glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
+				glUniform1i(parConProgLocs[13], 0);
+				glUniform1i(parConProgLocs[14], 0);
+				glUniform4f(parConProgLocs[15], c2.col.r, c2.col.g, c2.col.b, c2.usecol? 1.f : 0.f);
+				glUniform1f(parConProgLocs[16], spriteScl);
+				glDrawArrays(GL_TRIANGLES, 0, c2.cnt*12);
+
+			}
+		}
+
+		glBindVertexArray(0);
+		glUseProgram(0);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		Protein::Draw();
+		AnWeb::DrawScene();
 	}
 }
 
 void ParGraphics::Reblit() {
-	auto cam = ChokoLait::mainCamera().get();
+	auto& cam = ChokoLait::mainCamera;
 	if (!AnWeb::drawFull || Scene::dirty) tfboDirty = true;
 	if (tfboDirty) {
 		if (!!Particles::particleSz) {
@@ -792,7 +791,7 @@ void ParGraphics::Reblit() {
 
 void ParGraphics::BlitSky() {
 	auto _p = MVP::projection();
-	auto cam = ChokoLait::mainCamera().get();
+	auto& cam = ChokoLait::mainCamera;
 
 	if (!usePBR) {
 		glUseProgram(reflCProg);
@@ -1003,22 +1002,22 @@ void ParGraphics::DrawMenu() {
 
 	rotScale = TryParse(UI2::EditText(expandPos - 147, off + 17 * 6, 147, _("Scale"), std::to_string(rotScale)), 0.f);
 
-	auto cm = ChokoLait::mainCamera.raw();
-	auto ql = cm->quality;
+	auto& cam = ChokoLait::mainCamera;
+	auto ql = cam->quality;
 	ql = UI2::Slider(expandPos - 147, off + 17 * 7, 147, _("Quality"), 0.25f, 1.5f, ql, std::to_string(int(ql * 100)) + "%");
 	if (Engine::Button(expandPos - 91, off + 17 * 7, 16, 16, Icons::refresh) == MOUSE_RELEASE)
 		ql = 1;
 
-	if (ql != cm->quality) {
-		cm->quality = ql;
+	if (ql != cam->quality) {
+		cam->quality = ql;
 		Scene::dirty = true;
 	}
-	bool a2 = cm->useGBuffer2;
+	bool a2 = cam->useGBuffer2;
 	UI::Label(expandPos - 147, off + 17 * 8, 12, _("Use Dynamic Quality"), white());
 	a2 = Engine::Toggle(expandPos - 19, off + 17 * 8, 16, Icons::checkbox, a2, white(), ORIENT_HORIZONTAL);
-	if (a2 != cm->useGBuffer2) {
-		cm->useGBuffer2 = a2;
-		if (a2) cm->GenGBuffer2();
+	if (a2 != cam->useGBuffer2) {
+		cam->useGBuffer2 = a2;
+		if (a2) cam->GenGBuffer2();
 		Scene::dirty = true;
 	}
 
@@ -1026,10 +1025,10 @@ void ParGraphics::DrawMenu() {
 
 	if (a2) {
 		UI::Quad(expandPos - 149, off - 2, 148, 18, white(0.9f, 0.1f));
-		ql = cm->quality2;
+		ql = cam->quality2;
 		ql = UI2::Slider(expandPos - 147, off - 1, 147, _("Quality") + " 2", 0.25f, 1.f, ql, std::to_string(int(ql * 100)) + "%");
-		if (ql != cm->quality2) {
-			cm->quality2 = ql;
+		if (ql != cam->quality2) {
+			cam->quality2 = ql;
 			Scene::dirty = true;
 		}
 		off += 17;
@@ -1138,10 +1137,10 @@ void ParGraphics::Serialize(XmlNode* nd) {
 	SV(target, rotCenterTrackId);
 	n->children.push_back(Xml::FromVec("center", rotCenter));
 	SV(rotw, rotW); SV(rotz, rotZ); SV(scale, rotScale);
-	auto cm = ChokoLait::mainCamera.raw();
-	SV(quality, cm->quality);
-	SVS(usequality2, cm->useGBuffer2? "1" : "0");
-	SV(quality2, cm->quality2);
+	auto& cam = ChokoLait::mainCamera;
+	SV(quality, cam->quality);
+	SVS(usequality2, cam->useGBuffer2? "1" : "0");
+	SV(quality2, cam->quality2);
 	SerializeCol(nd->addchild("Colors"));
 	Eff::Serialize(nd->addchild("Effects"));
 	Shadows::Serialize(nd->addchild("Shadows"));
@@ -1183,15 +1182,15 @@ void ParGraphics::Deserialize(XmlNode* nd) {
 							else GTV(bgcol, bgCol);
 						}
 						else SW(Camera) {
-							auto cm = ChokoLait::mainCamera.raw();
+							auto& cam = ChokoLait::mainCamera;
 							GT(target, rotCenterTrackId);
 							else GTV(center, rotCenter);
 							else GT(rotw, rotW);
 							else GT(rotz, rotZ);
 							else GT(scale, rotScale);
-							else GT(quality, cm->quality);
-							else if (n4.name == "usequality2") cm->useGBuffer2 = (n4.value == "1");
-							else GT(quality2, cm->quality2);
+							else GT(quality, cam->quality);
+							else if (n4.name == "usequality2") cam->useGBuffer2 = (n4.value == "1");
+							else GT(quality2, cam->quality2);
 						}
 					}
 				}

@@ -45,29 +45,6 @@ void Camera::InitShaders() {
 		Debug::Error("Cam Shader Compiler", "v! " + err);
 		abort();
 	}
-	/*
-	GenShaderFromPath(vertex_shader, "blurPassFrag.txt", &d_blurProgram);
-	GenShaderFromPath(vertex_shader, "blurPassFrag_Skybox.txt", &d_blurSBProgram);
-	GenShaderFromPath(vertex_shader, "lightPassFrag_Sky.txt", &d_skyProgram);
-	GenShaderFromPath(vertex_shader, "lightPassFrag_Point.txt", &d_pLightProgram);
-	GenShaderFromPath(vertex_shader, "lightPassFrag_Spot.txt", &d_sLightProgram);
-	GenShaderFromPath(vertex_shader, "lightPassFrag_Spot_ContShad.txt", &d_sLightCSProgram);
-	GenShaderFromPath(vertex_shader, "lightPassFrag_Spot_GI_RSM.txt", &d_sLightRSMProgram);
-	GenShaderFromPath(vertex_shader, "lightPassFrag_Spot_GI_FluxPrep.txt", &d_sLightRSMFluxProgram);
-	GenShaderFromPath(vertex_shader, "lightPassFrag_ProbeMask.txt", &d_probeMaskProgram);
-	GenShaderFromPath(vertex_shader, "lightPassFrag_ReflQuad.txt", &d_reflQuadProgram);
-	glDeleteShader(vertex_shader);
-
-	d_skyProgramLocs[0] = glGetUniformLocation(d_skyProgram, "_IP");
-	d_skyProgramLocs[1] = glGetUniformLocation(d_skyProgram, "inColor");
-	d_skyProgramLocs[2] = glGetUniformLocation(d_skyProgram, "inNormal");
-	d_skyProgramLocs[3] = glGetUniformLocation(d_skyProgram, "inSpec");
-	d_skyProgramLocs[4] = glGetUniformLocation(d_skyProgram, "inDepth");
-	d_skyProgramLocs[5] = glGetUniformLocation(d_skyProgram, "inSky");
-	d_skyProgramLocs[6] = glGetUniformLocation(d_skyProgram, "skyStrength");
-	d_skyProgramLocs[7] = glGetUniformLocation(d_skyProgram, "screenSize");
-	d_skyProgramLocs[8] = glGetUniformLocation(d_skyProgram, "skyStrengthB");
-	*/
 	glGenVertexArrays(1, &emptyVao);
 	
 	glGenBuffers(1, &rectIdBuf);

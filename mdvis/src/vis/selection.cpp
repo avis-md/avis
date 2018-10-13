@@ -158,11 +158,11 @@ void Selection::DrawMenu() {
                 
                 if (count > 4) {
                     if (Engine::Button(ep - 148, off, 16, 16, expL ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) {
-                        expA = !expA;
+                        expT = !expT;
                     }
                     UI::Label(ep - 130, off, 12, "Torsion", white());
                     off += 17;
-                    if (expA) {
+                    if (expT) {
                         CalcTor();
                         for (size_t a = 0; a < count-3; a++) {
                             UI::Label(ep - 146, off, 12, std::to_string(a) + "~" + std::to_string(a+3) + ": " + std::to_string(torsions[a]) + " rad", white());
