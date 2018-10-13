@@ -1,11 +1,12 @@
 import numpy as np
 
-//in list(2d)
+#in list(2d)
 positions = None
 
-//out list(1d)
+#out list(1d)
 xcoords = None
 
-//entry
-def Execute:
+#entry list(1d)
+def Execute():
+    global positions, xcoords
     xcoords = positions[:,0]

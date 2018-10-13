@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 //in count 3
 double* positions = 0;
