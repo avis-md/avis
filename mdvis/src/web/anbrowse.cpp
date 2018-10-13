@@ -10,6 +10,9 @@ bool AnBrowse::expanded = true;
 bool AnBrowse::mscFdExpanded[] = {};
 float AnBrowse::expandPos = 0;
 
+AnBrowse::Folder* AnBrowse::doAddFd = nullptr;
+std::string AnBrowse::tmplC, AnBrowse::tmplP, AnBrowse::tmplF;
+
 void AnBrowse::DoScan(Folder* fo, const std::string& path, const std::string& incPath) {
 	Debug::Message("AnBrowse", " Scanning folder: /" + incPath);
 	fo->fullName = path;
@@ -59,6 +62,12 @@ void AnBrowse::DoScan(Folder* fo, const std::string& path, const std::string& in
 	}
 }
 
+void AnBrowse::Init() {
+	tmplC = IO::GetText(IO::path + "res/templates/node_cpp");
+	tmplP = IO::GetText(IO::path + "res/templates/node_py");
+	tmplF = IO::GetText(IO::path + "res/templates/node_f90");
+}
+
 void AnBrowse::Scan() {
 	Debug::Message("AnBrowse", "Scanning nodes folder...");
 	folder = Folder(_("Custom"));
@@ -94,10 +103,35 @@ void AnBrowse::Refresh() {
 
 void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 #ifndef IS_ANSERVER
-	UI::Quad(2.f + 5 * layer, off, 150.f, 16.f, white(1, 0.3f));
-	if (Engine::Button(2.f + 5 * layer, off, 16.f, 16.f, f->expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE)
+	UI::Quad(2.f + 5 * layer, off, 150, 16, white(1, 0.3f));
+	if (Engine::Button(2.f + 5 * layer, off, 16, 16, f->expanded ? Icons::expand : Icons::collapse) == MOUSE_RELEASE)
 		f->expanded = !f->expanded;
-	if (!!Engine::Button(2.f + 5 * layer, off, 150.f, 16.f)) {
+	if (!!Engine::Button(2.f + 5 * layer, off, 150.f, 16.f) || (doAddFd == f)) {
+		if (Engine::Button(expandPos - 35, off + 1, 14, 14, Icons::expand) == MOUSE_RELEASE) {
+			doAddFd = f;
+			static std::vector<Popups::MenuItem> vm;
+			vm.resize(4);
+			vm[0].Set(0, "Folder", []() {
+				IO::MakeDirectory(AnBrowse::doAddFd->fullName + "/newFolder");
+				
+			});
+			vm[1].Set(0, "C++ Script", []() {
+				std::ofstream strm(AnBrowse::doAddFd->fullName + "/newModule.cpp");
+				strm << AnBrowse::tmplC;
+			});
+			vm[2].Set(0, "Python Script", []() {
+				std::ofstream strm(AnBrowse::doAddFd->fullName + "/newModule.py");
+				strm << AnBrowse::tmplP;
+			});
+			vm[3].Set(0, "Fortran Script", []() {
+				std::ofstream strm(AnBrowse::doAddFd->fullName + "/newModule.f90");
+				strm << AnBrowse::tmplF;
+			});
+
+			Popups::pos = Vec2(expandPos - 35, off + 17);
+			Popups::data = &vm;
+			Popups::type = POPUP_TYPE::MENU;
+		}
 		if (Engine::Button(expandPos - 18, off, 16, 16, Icons::browse) == MOUSE_RELEASE) {
 			IO::OpenFd(f->fullName);
 		}
@@ -140,6 +174,7 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 
 void AnBrowse::Draw() {
 #ifndef IS_ANSERVER
+	if (Popups::type == POPUP_TYPE::NONE) doAddFd = nullptr;
 	UI::Quad(0.f, 0.f, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
 	if (expanded) {
 		float f = 20;

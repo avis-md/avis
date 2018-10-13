@@ -294,6 +294,7 @@
     <ClCompile Include="src\vis\cubemarcher.cpp" />
     <ClCompile Include="src\vis\options.cpp" />
     <ClCompile Include="src\vis\renderer.cpp" />
+    <ClCompile Include="src\vis\selection.cpp" />
     <ClCompile Include="src\vis\shadows.cpp" />
     <ClCompile Include="src\web\anbrowse.cpp" />
     <ClCompile Include="src\web\anconv.cpp" />
@@ -410,6 +411,7 @@
     <ClInclude Include="src\utils\tinyfiledialogs.h" />
     <ClInclude Include="src\vis\cubemarcher.h" />
     <ClInclude Include="src\vis\renderer.h" />
+    <ClInclude Include="src\vis\selection.h" />
     <ClInclude Include="src\vis\shadows.h" />
     <ClInclude Include="src\web\anbrowse.h" />
     <ClInclude Include="src\web\anconv.h" />

@@ -244,7 +244,7 @@ float AnNode::DrawSide() {
 						tmp = nullptr; opt = this; opi = i;
 						ss.resize(2);
 						ss[1] = "Parameter";
-						for (int a = 0; a < id; a++)
+						for (uint a = 0; a < id; a++)
 							ss.push_back(AnWeb::nodes[a]->title);
 						ss.push_back("");
 						di.list = &ss[0];
@@ -349,7 +349,7 @@ void AnNode::DrawHeader(float& off) {
 float AnNode::DrawLog(float off) {
 	auto sz = this->log.size();
 	if (!sz) return 0;
-	auto sz2 = min<int>(sz, 10);
+	auto sz2 = min((int)sz, 10);
 	if (logExpanded) {
 		UI::Quad(pos.x, pos.y + off, width, 15.f * sz2 + 2, black(0.9f));
 		Engine::PushStencil(pos.x + 1, pos.y + off, width - 2, 15.f * sz2);
@@ -365,10 +365,10 @@ float AnNode::DrawLog(float off) {
 			float w = 10 * mw / sz;
 			UI::Quad(pos.x + width - 3, pos.y + off + 1 + of, 2, w, white(0.3f));
 			if (Engine::Button(pos.x + width - 17, pos.y + off + 150 - 33, 16, 16, Icons::up, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
-				logOffset = max<int>(logOffset - 10, 0);
+				logOffset = max(logOffset - 10, 0);
 			}
 			if (Engine::Button(pos.x + width - 17, pos.y + off + 150 - 16, 16, 16, Icons::down, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
-				logOffset = min<int>(logOffset + 10, sz - 10);
+				logOffset = min(logOffset + 10, (int)sz - 10);
 			}
 		}
 		return 15 * sz2 + 2.f;
@@ -536,12 +536,12 @@ void AnNode::SaveConn() {
 
 void AnNode::ClearConn() {
 	for (size_t i = 0; i < inputR.size(); i++) {
-		Disconnect(i, false);
+		Disconnect((uint)i, false);
 	}
 	inputR.clear();
 	inputR.resize(script->invars.size());
 	for (size_t i = 0; i < outputR.size(); i++) {
-		Disconnect(i, true);
+		Disconnect((uint)i, true);
 	}
 	outputR.clear();
 	outputR.resize(script->outvars.size(), std::vector<nodecon>());
@@ -558,7 +558,7 @@ void AnNode::Reconn() {
 						for (size_t b = 0, sz2 = ra->outputR.size(); b < sz2; b++) {
 							if (ra->script->outvars[b].first == cn.tarnm) {
 								if (ra->script->outvars[b].second == cn.tartp) {
-									ra->ConnectTo(b, this, a);
+									ra->ConnectTo((uint)b, this, (uint)a);
 									goto got;
 								}
 							}
@@ -722,7 +722,7 @@ void PyNode::Execute() {
 		{
 			auto& ar = outputVC[i].val.arr;
 			int n;
-			ar.p = AnConv::FromPy(mv.value, conV[i].dimVals.size(), &conV[i].dimVals[0], n);
+			ar.p = AnConv::FromPy(mv.value, (int)conV[i].dimVals.size(), &conV[i].dimVals[0], n);
 			n *= scr->_outvars[i].stride;
 			ar.data.resize(n);
 			memcpy(&ar.data[0], ar.p, n);

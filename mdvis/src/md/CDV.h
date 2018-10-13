@@ -1,5 +1,6 @@
 #pragma once
 #include "importer_info.h"
+#include <vector>
 
 //CDView molecular data file parser
 class CDV {

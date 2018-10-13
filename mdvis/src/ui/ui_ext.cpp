@@ -48,22 +48,22 @@ std::string UI2::EditPass(float x, float y, uint w, const std::string& title, co
 	}
 }
 
-float UI2::Slider(float x, float y, uint w, const std::string& title, float a, float b, float t) {
+float UI2::Slider(float x, float y, float w, const std::string& title, float a, float b, float t) {
 	return Slider(x, y, w, title, a, b, t, std::to_string(t));
 }
 
-float UI2::Slider(float x, float y, uint w, const std::string& title, float a, float b, float t, const std::string& lbl) {
+float UI2::Slider(float x, float y, float w, const std::string& title, float a, float b, float t, const std::string& lbl) {
 	UI::Label(x, y, 12, title, white());
 	return Slider(x + w*sepw, y, w*sepw2 - 1.f, a, b, t);
 }
 
-float UI2::Slider(float x, float y, uint w, float a, float b, float t) {
+float UI2::Slider(float x, float y, float w, float a, float b, float t) {
 	t = Engine::DrawSliderFill(x, y, w, 16, a, b, t, white(1, 0.5f), white());
 	UI::Label(x + 2, y, 12, std::to_string(t), white(1, 0.2f));
 	return t;
 }
 
-void UI2::Color(float x, float y, uint w, const std::string& title, Vec4& col) {
+void UI2::Color(float x, float y, float w, const std::string& title, Vec4& col) {
 	UI::Label(x, y, 12, title, white());
 	if (Engine::Button(x + w*sepw, y, w*sepw2 - 1.f, 16, col) == MOUSE_RELEASE) {
 		Popups::type = POPUP_TYPE::COLORPICK;
@@ -73,7 +73,7 @@ void UI2::Color(float x, float y, uint w, const std::string& title, Vec4& col) {
 	UI::Texture(x + w - 18, y, 16, 16, Icons::colorwheel);
 }
 
-void UI2::File(float x, float y, uint w, const std::string& title, const std::string& fl, filecallback func) {
+void UI2::File(float x, float y, float w, const std::string& title, const std::string& fl, filecallback func) {
 	UI::Label(x, y, 12, "File", white());
 	if (Engine::Button(x + w*sepw, y, w*sepw2 - 1.f, 16, white(1, 0.3f), fl, 12, white(0.5f)) == MOUSE_RELEASE) {
 		std::vector<std::string> exts = {"*.hdr"};

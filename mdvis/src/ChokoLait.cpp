@@ -3,7 +3,7 @@
 //#define USE_DEBUG_CONTEXT
 //#define SIMULATE_FRAMESCALE 2
 
-void APIENTRY glDebugOutput(GLenum source,
+void glDebugOutput(GLenum source,
 	GLenum type,
 	GLuint id,
 	GLenum severity,
@@ -248,7 +248,7 @@ void ChokoLait::FocusGL(GLFWwindow* window, int focus) {
 
 
 #ifdef USE_DEBUG_CONTEXT
-void APIENTRY glDebugOutput(GLenum source,
+void glDebugOutput(GLenum source,
 	GLenum type,
 	GLuint id,
 	GLenum severity,

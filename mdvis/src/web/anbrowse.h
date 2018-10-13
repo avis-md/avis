@@ -18,6 +18,11 @@ public:
 	static float expandPos;
 	static bool mscFdExpanded[10];
 
+	static Folder* doAddFd;
+	static std::string tmplC, tmplP, tmplF;
+
+	static void Init();
+
 	static void Scan(), DoScan(Folder* f, const std::string& path, const std::string& incPath);
 	static void Refresh(), DoRefresh(Folder* f);
 

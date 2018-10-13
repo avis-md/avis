@@ -111,7 +111,7 @@ void AnWeb::Draw() {
 	Vec2 poss(AnBrowse::expandPos + 10 - scrollPos, 100);
 	float maxoff = 220, offy = -5;
 	maxScroll = 10;
-	int ns = nodes.size(), i = 0, iter = -1;
+	int ns = (int)nodes.size(), i = 0, iter = -1;
 	bool iterTile = false, iterTileTop = false;
 	for (auto n : nodes) {
 		if (!n->canTile) {
@@ -218,7 +218,7 @@ void AnWeb::Draw() {
 				else pn->canTile = false;
 				nodes.insert(nodes.begin() + iter + 1, pn);
 				for (size_t a = 0; a < nodes.size(); a++)
-					nodes[a]->id = a;
+					nodes[a]->id = (uint)a;
 			}
 			selScript = nullptr;
 		}
