@@ -116,16 +116,42 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 				
 			});
 			vm[1].Set(0, "C++ Script", []() {
-				std::ofstream strm(AnBrowse::doAddFd->fullName + "/newModule.cpp");
+				std::string path = AnBrowse::doAddFd->fullName + "/";
+				std::string nm = "newModule";
+				int i = 2;
+				while (IO::HasFile(path + nm + EXT_CS) || 
+					(CScript::allScrs.find(nm) != CScript::allScrs.end())) {
+					nm = "newModule" + std::to_string(i++);
+				}
+				std::ofstream strm(path + nm + EXT_CS);
 				strm << AnBrowse::tmplC;
 			});
 			vm[2].Set(0, "Python Script", []() {
-				std::ofstream strm(AnBrowse::doAddFd->fullName + "/newModule.py");
+				std::string path = AnBrowse::doAddFd->fullName + "/";
+				std::string nm = "newModule";
+				int i = 2;
+				while (IO::HasFile(path + nm + EXT_PS) || 
+					(PyScript::allScrs.find(nm) != PyScript::allScrs.end())) {
+					nm = "newModule" + std::to_string(i++);
+				}
+				std::ofstream strm(path + nm + EXT_PS);
 				strm << AnBrowse::tmplP;
 			});
 			vm[3].Set(0, "Fortran Script", []() {
-				std::ofstream strm(AnBrowse::doAddFd->fullName + "/newModule.f90");
-				strm << AnBrowse::tmplF;
+				std::string path = AnBrowse::doAddFd->fullName + "/";
+				std::string nm = "newModule";
+				int i = 2;
+				while (IO::HasFile(path + nm + EXT_FS) ||
+					(FScript::allScrs.find(nm) != FScript::allScrs.end())) {
+					nm = "newModule" + std::to_string(i++);
+				}
+				std::ofstream strm(path + nm + EXT_FS);
+				std::string scr = AnBrowse::tmplF;
+				size_t pos;
+				while ((pos = string_find(scr, "%NAME%")) != -1) {
+					scr = scr.substr(0, pos) + to_uppercase(nm) + scr.substr(pos + 6);
+				} 
+				strm << scr;
 			});
 
 			Popups::pos = Vec2(expandPos - 35, off + 17);

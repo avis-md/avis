@@ -123,7 +123,7 @@ void VisSystem::Init() {
 	}
 
 	auto& mi = menuItems[0];
-	mi.resize(5);
+	mi.resize(6);
 	mi[0].Set(Icons::newfile, _("New"), []() {
 		Particles::Clear();
 		AnWeb::Clear();
@@ -143,6 +143,11 @@ void VisSystem::Init() {
 		ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
 	});
 	mi[4].Set(Icons::openfile, _("Import Recent"), 0);
+	mi[5].Set(Icons::openfile, _("Import Remote"), []() {
+		ParLoader::isSrv = true;
+		const char* e = "";
+		ParLoader::OnDropFile(1, &e);
+	});
 
 	auto& mi0 = menuItems[1];
 	mi0.resize(2);

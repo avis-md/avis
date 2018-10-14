@@ -323,6 +323,7 @@ The hash for this program is )" << VisSystem::version_hash
 		INIT(AnNode);
 		INIT(Effects, 0xffff);
 		INIT(SSH);
+		INIT(AnBrowse);
 		ParMenu::LoadRecents();
 
 		AnBrowse::Scan();

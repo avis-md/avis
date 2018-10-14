@@ -44,22 +44,22 @@ bool PDB::Read(ParInfo* info) {
 	}
 
 	std::vector<char*> lines, helices, sheets;
-	char* cc = new char[150];
+	char* cc = new char[150]{};
 	while (strm.getline(cc, 150)) {
-		if ((ATM(cc) || HTM(cc)) && (cc[13] != ' ')) {
+		if ((ATM(cc) || HTM(cc))) {
 			lines.push_back(cc);
-			cc = new char[150];
+			cc = new char[150]{};
 		}
 		else if (HLX(cc)) {
 			helices.push_back(cc);
-			cc = new char[150];
+			cc = new char[150]{};
 		}
 		else if (SHT(cc)) {
 			sheets.push_back(cc);
-			cc = new char[150];
+			cc = new char[150]{};
 		}
+		else memset(cc, 0, 150);
 	}
-	delete[](cc);
 
 	auto& sz = info->num = lines.size();
 	info->resname = new char[sz * info->nameSz]{};
@@ -82,21 +82,24 @@ bool PDB::Read(ParInfo* info) {
 		if (*(ln + 76) == ' ') info->type[i] = (uint16_t)(*(ln + 77));
 		else info->type[i] = *((uint16_t*)(ln + 76));
 		info->type[i] &= 0x00ff;
+		delete[](ln);
 	}
 
 	info->secStructNum = (uint16_t)(helices.size() + sheets.size());
 	auto sc = info->secStructs = new ParInfo::ProSec[info->secStructNum];
-	for (auto& h : helices) {
+	for (auto h : helices) {
 		sc->type = ParInfo::ProSec::HELIX;
 		sc->resSt = (uint16_t)atoi(NSP(h + 21, h + 24));
 		sc->resEd = (uint16_t)atoi(NSP(h + 33, h + 36));
 		sc++;
+		delete[](h);
 	}
-	for (auto& s : sheets) {
+	for (auto s : sheets) {
 		sc->type = ParInfo::ProSec::SHEET;
 		sc->resSt = (uint16_t)atoi(NSP(s + 21, s + 24));
 		sc->resEd = (uint16_t)atoi(NSP(s + 33, s + 36));
 		sc++;
+		delete[](s);
 	}
 
 	auto& bnd = info->bounds;

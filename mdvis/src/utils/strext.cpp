@@ -42,15 +42,20 @@ int string_find(const std::string& s, const std::string& s2, int start) {
 	return -1;
 }
 
-std::string to_lowercase(const std::string& s) {
-	std::string ss;
-	ss.reserve(s.size());
-	for (auto c : s) {
-		if (c >= 'A' && c <= 'Z')
-			ss += (c - 'A' + 'a');
-		else ss += c;
+std::string to_uppercase(std::string s) {
+	for (auto& c : s) {
+		if (c >= 'a' && c <= 'z')
+			c += 'A' - 'a';
 	}
-	return ss;
+	return s;
+}
+
+std::string to_lowercase(std::string s) {
+	for (auto& c : s) {
+		if (c >= 'A' && c <= 'Z')
+			c += 'a' - 'A';
+	}
+	return s;
 }
 
 std::string rm_spaces(const std::string& s) {

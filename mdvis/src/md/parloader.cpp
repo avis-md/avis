@@ -9,7 +9,7 @@
 #include "ui/ui_ext.h"
 #include <iomanip>
 
-#define EndsWith(s, s2) s.substr(sz - s2.size()) == s2
+#define EndsWith(s, s2) sz > s2.size() && s.substr(sz - s2.size()) == s2
 
 int ParLoader::impId, ParLoader::funcId;
 ParImporter* ParLoader::customImp;
@@ -41,12 +41,8 @@ float ParLoader::_impPos = 0, ParLoader::_impScr = 0;
 void ParLoader::Init() {
 	ChokoLait::dropFuncs.push_back(OnDropFile);
 
-	//
-	srvuser = "chokopan";
-	srvhost = "gpu01";
-	srvport = 22;
-	srvkey = "~/.ssh/id_rsa.pub";
-	srvpass = "";
+	std::ifstream strm(IO::path + ".srvinfo");
+	if (strm) strm >> srvusepass >> srvuser >> srvhost >> srvport >> srvkey;
 }
 
 #if defined(PLATFORM_WIN)
@@ -208,6 +204,7 @@ void ParLoader::Scan() {
 }
 
 void ParLoader::SrvConnect() {
+	SaveSrvInfo();
 	SSHConfig config;
 	config.user = srvuser;
 	config.ip = srvhost;
@@ -228,6 +225,15 @@ void ParLoader::SrvDisconnect() {
 		srv.Disconnect();
 		Debug::Message("ParLoader", "Disconnected from host");
 	}
+}
+
+void ParLoader::SaveSrvInfo() {
+	std::ofstream strm(IO::path + ".srvinfo");
+	strm << srvusepass << "\n"
+	<< srvuser << "\n"
+	<< srvhost << "\n"
+	<< srvport << "\n"
+	<< srvkey;
 }
 
 #define ISNUM(c) (c >= '0' && c <= '9')
@@ -450,22 +456,17 @@ void ParLoader::DoOpen() {
 		auto vec = *((glm::dvec3*)(&info.pos[i * 3]));
 		int cnt = int(lastCnt + tr->cnt);
 		if (useConn && (!useConnCache || !hasConnCache || ovwConnCache)) {
-//#pragma omp parallel for
 			for (int j = 0; j < cnt; j++) {
 				Vec3 dp = Particles::poss[lastOff + j] - vec;
-
 				if (fabsf(dp.x) < 0.25f && fabsf(dp.y) < 0.25f && fabsf(dp.z) < 0.25f) {
 					auto dst = glm::length2(dp);
-					uint32_t id2 = info.type[lastOff + j];//Particles::particles_Name[(lastOff + j) * PAR_MAX_NAME_LEN];
+					uint32_t id2 = info.type[lastOff + j];
 					float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
 					if (!bst) bst = VisSystem::_defBondLength;
 					if (dst < bst) {
-//#pragma omp critical
-						{
-							conn.ids.push_back(Int2(i, lastOff + j));
-							conn.cnt++;
-							tr->cnt_b++;
-						}
+						conn.ids.push_back(Int2(i, lastOff + j));
+						conn.cnt++;
+						tr->cnt_b++;
 					}
 				}
 			}
@@ -689,7 +690,7 @@ void ParLoader::DrawOpenDialog() {
 
 	UI::Quad(woff, hoff, 400, 300, white(0.8f, 0.15f));
 	UI::Quad(woff, hoff, 400, 16, white(0.9f, 0.1f));
-	UI::Label(woff + 2, hoff, 12, loadAsTrj ? "Load Trajectory" : "Load Configuration", white());
+	UI::Label(woff + 2, hoff, 12, loadAsTrj ? "Import Trajectory" : "Import Configuration", white());
 	hoff += 17;
 	
 	static bool hsf = true;

@@ -65,7 +65,9 @@
         "iostream": "cpp",
         "__mutex_base": "cpp",
         "mutex": "cpp",
-        "cstring": "cpp"
+        "cstring": "cpp",
+        "iomanip": "cpp"
     },
-    "python.linting.pylintEnabled": false
+    "python.linting.pylintEnabled": false,
+    "python.pythonPath": "/usr/local/bin/python3"
 }

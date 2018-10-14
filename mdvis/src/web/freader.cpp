@@ -38,7 +38,7 @@ bool FReader::Read(FScript* scr) {
 	if (!IO::HasDirectory(fp2)) IO::MakeDirectory(fp2);
 
 	if (AnWeb::hasFt) {
-		auto mt = scr->chgtime = IO::ModTime(fp + ".f90");
+		auto mt = scr->chgtime = IO::ModTime(fp + EXT_FS);
 		if (mt < 0) return false;
 		auto ot = IO::ModTime(fp2 + nm + ".so");
 
@@ -60,8 +60,8 @@ bool FReader::Read(FScript* scr) {
 			remove(&lp[0]);
 
 			{
-				std::ifstream strm(fp + ".f90");
-				std::ofstream ostrm(fp + "_temp__.f90");
+				std::ifstream strm(fp + EXT_FS);
+				std::ofstream ostrm(fp + "_temp__" EXT_FS);
 				std::vector<typestring> arr_i;
 				std::vector<std::string> arr_o;
 				std::string s;
@@ -145,14 +145,14 @@ bool FReader::Read(FScript* scr) {
 				"-D/tmp/ "
 			#endif
 			"-fPIC \"" + IO::path + "res/noterminate.o\" -o \""
-				+ fp2 + nm + ".so\" \"" + fp + "_temp__.f90\" -lgfortran 2> \"" + fp2 + nm + "_log.txt\"";
+				+ fp2 + nm + ".so\" \"" + fp + "_temp__" EXT_FS "\" -lgfortran 2> \"" + fp2 + nm + "_log.txt\"";
 			RunCmd::Run(SETPATH cmd);
-			scr->errorCount = ErrorView::Parse_GFortran(fp2 + nm + "_log.txt", fp + "_temp__.f90", nm + ".f90", scr->compileLog);
+			scr->errorCount = ErrorView::Parse_GFortran(fp2 + nm + "_log.txt", fp + "_temp__" EXT_FS, nm + EXT_FS, scr->compileLog);
 			for (auto& m : scr->compileLog) {
-				m.path = fp + ".f90";
+				m.path = fp + EXT_FS;
 			}
 
-			remove((fp + "_temp__.f90").c_str());
+			remove((fp + "_temp__" EXT_FS).c_str());
 		}
 
 #endif
@@ -216,7 +216,7 @@ bool FReader::Read(FScript* scr) {
 	}
 
 
-	std::ifstream strm(fp + ".f90");
+	std::ifstream strm(fp + EXT_FS);
 	std::string ln;
 	bool fst = true;
 	while (!strm.eof()) {
@@ -283,7 +283,7 @@ bool FReader::Read(FScript* scr) {
 				if (!isa)
 					bk->value = scr->lib->GetSym(nml);
 				else {
-					bk->value = scr->lib->GetSym("__" + scr->name + "_MOD_" + nml);
+					bk->value = scr->lib->GetSym("__" + to_lowercase(scr->name) + "_MOD_" + nml);
 					if (iso) *fk = (emptyFunc)scr->lib->GetSym("exp_get_" + nml);
 					else *fk = (emptyFunc)scr->lib->GetSym("imp_set_" + nml);
 					if (!fk) {

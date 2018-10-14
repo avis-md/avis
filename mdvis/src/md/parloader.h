@@ -64,6 +64,7 @@ public:
 	static float _impPos, _impScr;
 
 	static void SrvConnect(), SrvDisconnect();
+	static void SaveSrvInfo();
 
 	static void ScanFrames(const std::string& first);
 
