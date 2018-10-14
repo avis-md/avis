@@ -43,6 +43,13 @@ void ParLoader::Init() {
 
 	std::ifstream strm(IO::path + ".srvinfo");
 	if (strm) strm >> srvusepass >> srvuser >> srvhost >> srvport >> srvkey;
+	else {
+		srvusepass = false;
+		srvuser = "username";
+		srvhost = "host";
+		srvport = 22;
+		srvkey = "~/.ssh/id_rsa.pub";
+	}
 }
 
 #if defined(PLATFORM_WIN)
@@ -581,8 +588,8 @@ void ParLoader::DoOpenAnim() {
 		fault = true;
 	}
 
-	Engine::stateLockId = 1;
-	Engine::stateLock.lock();
+	Engine::AcquireLock(1);
+
 	anm.AllocFrames(info.frames);
 	for (uint16_t i = 0; i < info.frames; i++) {
 		anm.poss[i].resize(info.parNum);
@@ -604,8 +611,7 @@ void ParLoader::DoOpenAnim() {
 	busy = false;
 	fault = false;
 	
-	Engine::stateLock.unlock();
-	Engine::stateLockId = 0;
+	Engine::ReleaseLock();
 }
 
 void ParLoader::OpenFrame(uint f, const std::string& path) {

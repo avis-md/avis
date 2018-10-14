@@ -2,13 +2,15 @@
 #include "md/Protein.h"
 #include "md/parloader.h"
 #include "ocl/raytracer.h"
-#include "utils/dialog.h"
-#include "ui/localizer.h"
 #include "ui/icons.h"
+#include "ui/localizer.h"
 #include "ui/popups.h"
 #include "ui/ui_ext.h"
+#include "utils/dialog.h"
+#include "utils/effects.h"
 #include "vis/pargraphics.h"
 #include "vis/selection.h"
+#include "web/anweb.h"
 
 #define HATENA
 
@@ -339,7 +341,26 @@ loopout:
 }
 
 void ParMenu::DrawStart() {
-	UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::bg, DRAWTEX_CROP);
+	if (AnWeb::drawFull) {
+		auto& cam = ChokoLait::mainCamera;
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[0]);
+		UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::bg, DRAWTEX_CROP);
+		
+		Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1], 1.f, Display::width, Display::height);
+		
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->blitFbos[0]);
+
+		glReadBuffer(GL_COLOR_ATTACHMENT0);
+		glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::frameWidth, Display::frameHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	}
+	else
+		UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::bg, DRAWTEX_CROP);
+
+
 	if (ParLoader::busy) {
 #ifdef HATENA
 		static float lt = 0;

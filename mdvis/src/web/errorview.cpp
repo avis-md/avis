@@ -106,32 +106,39 @@ int ErrorView::Parse_MSVC(const std::string& path, const std::string& sig, const
 }
 
 void ErrorView::Draw() {
-	if (Engine::Button(3, Display::height - 17.f, 35, 16, white(0), white(0.2f), black(0.2f)) == MOUSE_RELEASE) {
-		if (show && !showExec) show = false;
-		else {
-			show = true;
-			showExec = false;
-		}
-		descId = -1;
+	if (AnBrowse::busy) {
+		Engine::RotateUI(Time::time * 180, Vec2(13, Display::height - 9));
+		UI::Texture(5, Display::height - 17.f, 16, 16, Icons::refresh);
+		Engine::ResetUIMatrix();
 	}
-	UI::Texture(5, Display::height - 17.f, 16, 16, Icons::compile);
-	auto csz = compileMsgs.size();
-	UI::Label(22, Display::height - 17.f, 12, std::to_string(csz), (!csz) ? white(0.8f) : red());
-	if (Engine::Button(40, Display::height - 17.f, 35, 16, white(0), white(0.2f), black(0.2f)) == MOUSE_RELEASE) {
-		if (show && showExec) show = false;
-		else {
-			show = true;
-			showExec = true;
+	else {
+		if (Engine::Button(3, Display::height - 17.f, 35, 16, white(0), white(0.2f), black(0.2f)) == MOUSE_RELEASE) {
+			if (show && !showExec) show = false;
+			else {
+				show = true;
+				showExec = false;
+			}
+			descId = -1;
 		}
-		descId = -1;
+		UI::Texture(5, Display::height - 17.f, 16, 16, Icons::compile);
+		auto csz = compileMsgs.size();
+		UI::Label(22, Display::height - 17.f, 12, std::to_string(csz), (!csz) ? white(0.8f) : red());
+		if (Engine::Button(40, Display::height - 17.f, 35, 16, white(0), white(0.2f), black(0.2f)) == MOUSE_RELEASE) {
+			if (show && showExec) show = false;
+			else {
+				show = true;
+				showExec = true;
+			}
+			descId = -1;
+		}
+		UI::Texture(42, Display::height - 17.f, 16, 16, Icons::exec);
+		auto msz = execMsgs.size();
+		UI::Label(58, Display::height - 17.f, 12, std::to_string(msz), (!msz) ? white(0.8f) : red());
 	}
-	UI::Texture(42, Display::height - 17.f, 16, 16, Icons::exec);
-	auto msz = execMsgs.size();
-	UI::Label(58, Display::height - 17.f, 12, std::to_string(msz), (!msz) ? white(0.8f) : red());
 
 	if (show) {
 		float y = Display::height - 18.f - windowSize;
-		UI::Quad(0, y, static_cast<float>(Display::width), (float)windowSize, white(0.95f, 0.1f));
+		UI::Quad(0, y, static_cast<float>(Display::width), static_cast<float>(windowSize), white(0.95f, 0.1f));
 		y++;
 		if (Engine::Button(2, y, 80, 16, white(0), white(0.2f), black(0.2f), "Compile Log", 12, UI::font, showExec ? white(0.8f) : VisSystem::accentColor) == MOUSE_RELEASE) {
 			showExec = false;

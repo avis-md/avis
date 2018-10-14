@@ -4,6 +4,9 @@
 
 class AnBrowse {
 public:
+	static bool busy;
+	static std::string busyMsg;
+
 	static struct Folder {
 		Folder(std::string nm) : name(nm) {}
 

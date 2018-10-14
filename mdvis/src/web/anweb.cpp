@@ -356,6 +356,8 @@ void AnWeb::Execute(bool all) {
 }
 
 void AnWeb::DoExecute(bool all) {
+	Engine::stateLock2.lock();
+
 	for (auto n : nodes) {
 		n->log.clear();
 	}
@@ -379,6 +381,8 @@ void AnWeb::DoExecute(bool all) {
 
 	executing = false;
 	apply = true;
+
+	Engine::stateLock2.unlock();
 }
 
 void AnWeb::_DoExecute() {

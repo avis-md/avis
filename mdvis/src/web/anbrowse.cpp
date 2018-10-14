@@ -5,6 +5,8 @@
 #include "utils/runcmd.h"
 #endif
 
+bool AnBrowse::busy = false;
+std::string AnBrowse::busyMsg;
 AnBrowse::Folder AnBrowse::folder = AnBrowse::Folder("");
 bool AnBrowse::expanded = true;
 bool AnBrowse::mscFdExpanded[] = {};
@@ -36,7 +38,7 @@ void AnBrowse::DoScan(Folder* fo, const std::string& path, const std::string& in
 				fo->scripts.push_back(scr);\
 				scr->name = f;\
 				scr->path = incPath + scr->name;\
-				scr->ok = hd##Reader::Read(scr);\
+				scr->ok = false;\
 				hd##Script::allScrs.emplace(f, scr);\
 			}\
 		}\
@@ -95,10 +97,15 @@ void AnBrowse::DoRefresh(Folder* fd) {
 	for (auto& f : fd->subfolders) {
 		DoRefresh(&f);
 	}
+	if (fd == &folder) busy = false;
 }
 
 void AnBrowse::Refresh() {
-	DoRefresh(&folder);
+	while (busy) {}
+	Debug::Message("AnBrowse", "Refreshing");
+	busy = true;
+	//DoRefresh(&folder);
+	std::thread(DoRefresh, &folder).detach();
 }
 
 void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
@@ -119,18 +126,25 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 				std::string path = AnBrowse::doAddFd->fullName + "/";
 				std::string nm = "newModule";
 				int i = 2;
-				while (IO::HasFile(path + nm + EXT_CS) || 
+				while (IO::HasFile(path + nm + EXT_CS) ||
 					(CScript::allScrs.find(nm) != CScript::allScrs.end())) {
 					nm = "newModule" + std::to_string(i++);
 				}
 				std::ofstream strm(path + nm + EXT_CS);
 				strm << AnBrowse::tmplC;
+				strm.close();
+				auto scr = new CScript();
+				AnBrowse::doAddFd->scripts.push_back(scr);
+				scr->name = nm;
+				scr->path = AnBrowse::doAddFd->fullName.substr(IO::path.size() + 6) + nm;
+				scr->ok = CReader::Read(scr);
+				CScript::allScrs.emplace(nm, scr);
 			});
 			vm[2].Set(0, "Python Script", []() {
 				std::string path = AnBrowse::doAddFd->fullName + "/";
 				std::string nm = "newModule";
 				int i = 2;
-				while (IO::HasFile(path + nm + EXT_PS) || 
+				while (IO::HasFile(path + nm + EXT_PS) ||
 					(PyScript::allScrs.find(nm) != PyScript::allScrs.end())) {
 					nm = "newModule" + std::to_string(i++);
 				}

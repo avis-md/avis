@@ -193,6 +193,8 @@ bool CReader::Read(CScript* scr) {
 	
 #endif
 
+		Engine::AcquireLock(5);
+#define FAIL0 Engine::ReleaseLock(); return false
 		scr->libpath = fp2 + nm + ".so";
 		scr->lib = new DyLib(scr->libpath);
 		if (!scr->lib->is_open()) {
@@ -203,7 +205,7 @@ bool CReader::Read(CScript* scr) {
 				"";//dlerror();
 #endif
 			_ER("CReader", "Failed to load script into memory! " + err);
-			return false;
+			FAIL0;
 		}
 		{
 			std::ifstream ets(fp2 + nm + ".entry");
@@ -219,7 +221,7 @@ bool CReader::Read(CScript* scr) {
 				"";//dlerror();
 #endif
 			_ER("CReader", "Failed to load function \"" + funcNm + "\" into memory! " + err);
-			return false;
+			FAIL0;
 		}
 
 #ifdef PLATFORM_WIN
@@ -227,18 +229,19 @@ bool CReader::Read(CScript* scr) {
 			auto fhlc = (emptyFunc*)scr->lib->GetSym("__noterm_cFunc");
 			if (!fhlc) {
 				_ER("CReader", "Failed to register function pointer! Please tell the monkey!");
-				return false;
+				FAIL0;
 			}
 			*fhlc = scr->funcLoc;
 
 			scr->wFuncLoc = (wrapFunc)scr->lib->GetSym("_Z5ExecCv");
 			if (!scr->funcLoc) {
 				_ER("CReader", "Failed to register entry function! Please tell the monkey!");
-				return false;
+				FAIL0;
 			}
 		}
 #endif
 	}
+	else Engine::AcquireLock(5);
 
 	std::ifstream strm(fp + EXT_CS);
 	std::string ln;
@@ -280,39 +283,39 @@ bool CReader::Read(CScript* scr) {
 			}
 			if (ira && lnsz == 1) {
 				_ER("CReader", "Plain " + ios + " must be of non-pointer type!");
-				return false;
+				goto FAIL;
 			}
 			else if (ien && (bk->typeName != "int" || ira)) {
 				_ER("CReader", "" + ios + " enum must be of int type!");
-				return false;
+				goto FAIL;
 			}
 			else if (ien && lnsz < 3) {
 				_ER("CReader", "" + ios + " enum has no options!");
-				return false;
+				goto FAIL;
 			}
 			else if (irg && lnsz != 4) {
 				_ER("CReader", "" + ios + " range must have 2 parameters!");
-				return false;
+				goto FAIL;
 			}
 			if (!ira) {
 				if (lnsz > 1 && !ien && !irg) {
 					_ER("CReader", "" + ios + " with specified size must be of pointer type!");
-					return false;
+					goto FAIL;
 				}
 				else if (ien && iso) {
 					_ER("CReader", "" + ios + " cannot be an enum!");
-					return false;
+					goto FAIL;
 				}
 				else if (irg && iso) {
 					_ER("CReader", "" + ios + " cannot be ranged!");
-					return false;
+					goto FAIL;
 				}
 			}
 			if (!ira && !ParseType(bk->typeName, bk)) {
 				std::string add = "";
 				if (bk->typeName == "float") add = " Did you mean \"double\"?";
 				_ER("CReader", "arg type \"" + bk->typeName + "\" not recognized!" + add);
-				return false;
+				goto FAIL;
 			}
 			
 			std::string::iterator eps;
@@ -328,7 +331,7 @@ bool CReader::Read(CScript* scr) {
 				bk->stride = AnScript::StrideOf(bk->typeName[0]);
 				if (!bk->stride) {
 					_ER("CReader", "unsupported type \"" + bk->typeName + "\" for list!");
-					return false;
+					goto FAIL;
 				}
 				bk->typeName = "list(" + std::to_string(lnsz-1) + bk->typeName[0] + ")";
 			}
@@ -352,7 +355,7 @@ bool CReader::Read(CScript* scr) {
 			if (AnWeb::hasC) {
 				if (!(bk->value = scr->lib->GetSym(bk->name))) {
 					_ER("CReader", "cannot find \"" + bk->name + "\" from memory!");
-					return false;
+					goto FAIL;
 				}
 				if (ira) {
 					auto sz = bk->dimVals.size();
@@ -367,7 +370,7 @@ bool CReader::Read(CScript* scr) {
 						}
 						else if (!(bk->dimVals[a] = (int*)scr->lib->GetSym(bk->dimNames[a]))) {
 							_ER("CReader", "cannot find \"" + bk->dimNames[a] + "\" from memory!");
-							return false;
+							goto FAIL;
 						}
 					}
 				}
@@ -379,13 +382,18 @@ bool CReader::Read(CScript* scr) {
 		Debug::Warning("CReader", "Script has no output parameters!");
 	}
 
+	Engine::ReleaseLock();
 	return true;
+FAIL:
+	Engine::ReleaseLock();
+	return false;
 }
 
 void CReader::Refresh(CScript* scr) {
 	auto mt = IO::ModTime(IO::path + "nodes/" + scr->path + EXT_CS);
-	if (mt > scr->chgtime) {
-		Debug::Message("CReader", "Reloading " + scr->path + EXT_CS);
+	if (mt > scr->chgtime || !scr->ok) {
+		AnBrowse::busyMsg = "Reloading " + scr->path + EXT_CS;
+		Debug::Message("CReader", AnBrowse::busyMsg);
 		scr->Clear();
 		scr->ok = Read(scr);
 	}

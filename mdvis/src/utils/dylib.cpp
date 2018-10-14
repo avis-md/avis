@@ -20,6 +20,7 @@ DyLib::~DyLib() {
 }
 
 bool DyLib::ForceUnload(DyLib* lib, std::string path) {
+	if (!lib) return true;
 #ifdef PLATFORM_WIN
 	return FreeLibrary((HMODULE)lib->lib);
 #else

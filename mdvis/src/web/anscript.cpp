@@ -72,7 +72,7 @@ bool PyScript::Clear() {
 	_invars.clear();
 	_outvars.clear();
 	if (AnWeb::hasPy) {
-		Py_DECREF(pArgl);
+		if (pArgl) Py_DECREF(pArgl);
 		for (auto& i : _invars) {
 			if (i.value) Py_DECREF(i.value);
 		}

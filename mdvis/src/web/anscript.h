@@ -100,7 +100,7 @@ public:
 
 class PyScript : public AnScript {
 public:
-	PyScript() : AnScript(AN_SCRTYPE::PYTHON), pModule(nullptr) {}
+	PyScript() : AnScript(AN_SCRTYPE::PYTHON), pModule(nullptr), pArgl(nullptr) {}
 
 	std::vector<PyVar> _invars, _outvars;
 	
@@ -142,7 +142,7 @@ typedef char* (*wrapFunc)();
 
 class CScript : public AnScript {
 public:
-	CScript() : AnScript(AN_SCRTYPE::C) {}
+	CScript() : AnScript(AN_SCRTYPE::C), lib(nullptr) {}
 
 	std::vector<CVar> _invars, _outvars;
 
@@ -163,7 +163,7 @@ public:
 
 class FScript : public AnScript {
 public:
-	FScript() : AnScript(AN_SCRTYPE::FORTRAN) {}
+	FScript() : AnScript(AN_SCRTYPE::FORTRAN), lib(nullptr) {}
 
 	std::vector<CVar> _invars, _outvars;
 	std::vector<emptyFunc> _inarr_pre, _outarr_post;

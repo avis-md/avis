@@ -71,19 +71,24 @@ void PyReader::Init() {
 }
 
 bool PyReader::Read(PyScript* scr) {
+	Engine::AcquireLock(6);
+	//Py_BEGIN_ALLOW_THREADS
+
 	PyScript::ClearLog();
 	std::string& path = scr->path;
 	std::string mdn = path;
 	std::replace(mdn.begin(), mdn.end(), '/', '.');
 	std::string spath = IO::path + "nodes/" + path + EXT_PS;
 	scr->chgtime = IO::ModTime(spath);
+	std::ifstream strm(spath);
+	std::string ln;
 	if (AnWeb::hasPy) {
 		auto mdl = scr->pModule ? PyImport_ReloadModule(scr->pModule) : PyImport_ImportModule(mdn.c_str());
 		//Py_DECREF(pName);
 		if (!mdl) {
 			Debug::Warning("PyReader", "Failed to read python file " + path + EXT_PS "!");
 			PyErr_Print();
-			return false;
+			goto FAIL;
 		}
 		scr->pModule = mdl;
 		scr->pFunc = PyObject_GetAttrString(scr->pModule, "Execute");
@@ -91,13 +96,11 @@ bool PyReader::Read(PyScript* scr) {
 			Debug::Warning("PyReader", "Failed to find \"Execute\" function in " + path + EXT_PS "!");
 			Py_XDECREF(scr->pFunc);
 			Py_DECREF(scr->pModule);
-			return false;
+			goto FAIL;
 		}
 		Py_INCREF(scr->pFunc);
 	}
 	//extract io variables
-	std::ifstream strm(spath);
-	std::string ln;
 	while (!strm.eof()) {
 		std::getline(strm, ln);
 		while (ln[0] == '#' && ln[1] == '#' && ln[2] == ' ') {
@@ -116,7 +119,7 @@ bool PyReader::Read(PyScript* scr) {
 				bk.typeName = ss[i + 1];
 				if (!ParseType(bk.typeName, &bk)) {
 					Debug::Warning("PyReader::ParseType", "input arg type \"" + bk.typeName + "\" not recognized!");
-					return false;
+					goto FAIL;
 				}
 				scr->invaropts.push_back(VarOpt());
 				auto& opt = scr->invaropts.back();
@@ -126,12 +129,12 @@ bool PyReader::Read(PyScript* scr) {
 			auto c1 = ln.find_first_of('('), c2 = ln.find_first_of(')');
 			if (c1 == std::string::npos || c2 == std::string::npos || c2 <= c1) {
 				Debug::Warning("PyReader::ParseType", "braces for input function not found!");
-				return false;
+				goto FAIL;
 			}
 			ss = string_split(ln.substr(c1 + 1, c2 - c1 - 1), ',');
 			if (ss.size() != sz) {
 				Debug::Warning("PyReader::ParseType", "input function args count not consistent!");
-				return false;
+				goto FAIL;
 			}
 			scr->pArgl = (AnWeb::hasPy) ? PyTuple_New(sz) : nullptr;
 			scr->pArgs.resize(sz, 0);
@@ -152,7 +155,7 @@ bool PyReader::Read(PyScript* scr) {
 			bk.typeName = ln.substr(5);
 			if (!ParseType(bk.typeName, &bk)) {
 				Debug::Warning("PyReader::ParseType", "output arg type \"" + bk.typeName + "\" not recognized!");
-				return false;
+				goto FAIL;
 			}
 			std::getline(strm, ln);
 			bk.name = ln.substr(0, ln.find_first_of(' '));
@@ -169,13 +172,20 @@ bool PyReader::Read(PyScript* scr) {
 		Debug::Warning("PyReader", "Script has no output parameters!");
 	}
 
+	//PyEval_RestoreThread(_save);
+	Engine::ReleaseLock();
 	return true;
+FAIL:
+	//PyEval_RestoreThread(_save);
+	Engine::ReleaseLock();
+	return false;
 }
 
 void PyReader::Refresh(PyScript* scr) {
 	auto mt = IO::ModTime(IO::path + "nodes/" + scr->path + EXT_PS);
-	if (mt > scr->chgtime) {
-		Debug::Message("CReader", "Reloading " + scr->path + EXT_PS);
+	if (mt > scr->chgtime || !scr->ok) {
+		AnBrowse::busyMsg = "Reloading " + scr->path + EXT_PS;
+		Debug::Message("PyReader", AnBrowse::busyMsg);
 		scr->Clear();
 		scr->ok = Read(scr);
 	}

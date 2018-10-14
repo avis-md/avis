@@ -144,7 +144,7 @@ bool FReader::Read(FScript* scr) {
 			#else
 				"-D/tmp/ "
 			#endif
-			"-fPIC \"" + IO::path + "res/noterminate.o\" -o \""
+			"-fPIC \"" + IO::path + "res/noterminate.o\" -J \"" + fp2 + "\" -o \""
 				+ fp2 + nm + ".so\" \"" + fp + "_temp__" EXT_FS "\" -lgfortran 2> \"" + fp2 + nm + "_log.txt\"";
 			RunCmd::Run(SETPATH cmd);
 			scr->errorCount = ErrorView::Parse_GFortran(fp2 + nm + "_log.txt", fp + "_temp__" EXT_FS, nm + EXT_FS, scr->compileLog);
@@ -156,11 +156,14 @@ bool FReader::Read(FScript* scr) {
 		}
 
 #endif
+
+		Engine::AcquireLock(7);
+#define FAIL0 Engine::ReleaseLock(); return false
 		scr->libpath = fp2 + nm + ".so";
 		scr->lib = new DyLib(scr->libpath);
 		if (!scr->lib->is_open()) {
 			_ER("FReader", "Failed to load script into memory!");
-			return false;
+			FAIL0;
 		}
 		{
 			std::ifstream ets(fp2 + nm + ".entry");
@@ -175,12 +178,12 @@ bool FReader::Read(FScript* scr) {
 				"";//dlerror();
 #endif
 			_ER("FReader", "Failed to load function \"" + funcNm + "\" into memory! " + err);
-			return false;
+			FAIL0;
 		}
 		auto fhlc = (emptyFunc*)scr->lib->GetSym("__noterm_ftFunc");
 		if (!fhlc) {
 			_ER("FReader", "Failed to register function pointer! Please tell the monkey!");
-			return false;
+			FAIL0;
 		}
 		*fhlc = acf;
 
@@ -189,32 +192,32 @@ bool FReader::Read(FScript* scr) {
 		scr->funcLoc = (wrapFunc)scr->lib->GetSym("_Z5ExecFv");
 		if (!scr->funcLoc) {
 			_ER2("entry function");
-			return false;
+			FAIL0;
 		}
 
 		scr->arr_in_shapeloc = (int32_t**)scr->lib->GetSym("imp_arr_shp");
 		if (!scr->arr_in_shapeloc) {
 			_ER2("input array shape pointer");
-			return false;
+			FAIL0;
 		}
 		scr->arr_in_dataloc = (void**)scr->lib->GetSym("imp_arr_ptr");
 		if (!scr->arr_in_dataloc) {
 			_ER2("input array data pointer");
-			return false;
+			FAIL0;
 		}
 
 		scr->arr_out_shapeloc = (int32_t**)scr->lib->GetSym("__mod_exp_MOD_exp_arr_shp");
 		if (!scr->arr_out_shapeloc) {
 			_ER2("output array shape pointer");
-			return false;
+			FAIL0;
 		}
 		scr->arr_out_dataloc = (void**)scr->lib->GetSym("exp_arr_ptr");
 		if (!scr->arr_out_dataloc) {
 			_ER2("output array data pointer");
-			return false;
+			FAIL0;
 		}
 	}
-
+	else Engine::AcquireLock(7);
 
 	std::ifstream strm(fp + EXT_FS);
 	std::string ln;
@@ -251,12 +254,12 @@ bool FReader::Read(FScript* scr) {
 			bk->typeName = ss[0];
 			if (!ParseType(bk->typeName, bk)) {
 				_ER("FReader", "arg type \"" + bk->typeName + "\" not recognized!");
-				return false;
+				goto FAIL;
 			}
 			bk->stride = AnScript::StrideOf(bk->typeName[0]);
 			if (sss < atn + 2) {
 				_ER("FReader", "variable name not found!");
-				return false;
+				goto FAIL;
 			}
 			bk->name = to_lowercase(ss[atn + 2]);
 			bool isa = false;
@@ -288,24 +291,29 @@ bool FReader::Read(FScript* scr) {
 					else *fk = (emptyFunc)scr->lib->GetSym("imp_set_" + nml);
 					if (!fk) {
 						_ER2("array convert function")
-						return false;
+						goto FAIL;
 					}
 				}
 				if (!bk->value) {
 					Debug::Warning("FReader", "cannot find \"" + bk->name + "\" from memory!");
-					return false;
+					goto FAIL;
 				}
 			}
 		}
 	}
 
+	Engine::ReleaseLock();
 	return true;
+FAIL:
+	Engine::ReleaseLock();
+	return false;
 }
 
 void FReader::Refresh(FScript* scr) {
 	auto mt = IO::ModTime(IO::path + "nodes/" + scr->path + EXT_FS);
-	if (mt > scr->chgtime) {
-		Debug::Message("FReader", "Reloading " + scr->path + EXT_FS);
+	if (mt > scr->chgtime || !scr->ok) {
+		AnBrowse::busyMsg = "Reloading " + scr->path + EXT_FS;
+		Debug::Message("FReader", AnBrowse::busyMsg);
 		scr->Clear();
 		scr->ok = Read(scr);
 	}

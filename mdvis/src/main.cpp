@@ -327,6 +327,7 @@ The hash for this program is )" << VisSystem::version_hash
 		ParMenu::LoadRecents();
 
 		AnBrowse::Scan();
+		//AnBrowse::Refresh();
 
 		ParImporter imp = {};
 		ParImporter::Func fnc = {};

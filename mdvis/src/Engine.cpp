@@ -45,7 +45,7 @@ Rect* Engine::stencilRect = nullptr;
 
 GLuint Engine::quadBuffer;
 
-std::mutex Engine::stateLock;
+std::mutex Engine::stateLock, Engine::stateLock2;
 int Engine::stateLockId;
 
 void Engine::Init() {
@@ -388,4 +388,16 @@ void Engine::DrawLinesW(Vec3* pts, int num, Vec4 col, float width) {
 	glDrawArrays(GL_TRIANGLES, 0, 6 * (num-1));
 	glBindVertexArray(0);
 	glUseProgram(0);
+}
+
+void Engine::AcquireLock(int i) {
+	stateLock2.lock();
+	stateLockId = i;
+	stateLock.lock();
+	stateLock.unlock();
+}
+
+void Engine::ReleaseLock() {
+	stateLockId = 0;
+	stateLock2.unlock();
 }
