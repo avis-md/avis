@@ -67,7 +67,9 @@ void updateFunc() {
 
 	if (!!Particles::particleSz) {
 		Particles::Update();
-		if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime) && !ParLoader::busy && (VisRenderer::status != VisRenderer::STATUS::BUSY)) {
+		if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime)
+			&& !ParLoader::busy && ChokoLait::foreground
+			&& (VisRenderer::status != VisRenderer::STATUS::BUSY)) {
 			VisSystem::lastSave = Time::time;
 			VisSystem::Save(IO::path + ".recover");
 			VisSystem::SetMsg("autosaved at t=" + std::to_string((int)Time::time) + "s");

@@ -93,9 +93,9 @@ bool CReader::Read(CScript* scr) {
 			remove((fp2 + nm + ".so").c_str());
 
 #ifdef PLATFORM_WIN
-			const std::string dlx = " __declspec(dllexport)";
+			#define EXTERN "extern \"C\" __declspec(dllexport)"
 #else
-			const std::string dlx = "";
+			#define EXTERN "extern \"C\" __attribute__((visibility(\"default\"))) "
 #endif
 			{
 				std::ifstream strm(fp + EXT_CS);
@@ -109,10 +109,10 @@ bool CReader::Read(CScript* scr) {
 						if (ss[0] == "//in"
 							|| ss[0] == "//out"
 							|| ss[0] == "//var") {
-							ostrm << "extern \"C\" " + dlx << '\n';
+							ostrm << EXTERN << '\n';
 						}
 						else if (ss[0] == "//entry") {
-							ostrm << "extern \"C\" " + dlx << '\n';
+							ostrm << EXTERN << '\n';
 							std::getline(strm, s);
 							ostrm << s << '\n';
 							s = rm_spaces(s);
@@ -167,9 +167,9 @@ bool CReader::Read(CScript* scr) {
 				scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
 			}
 #else
-			std::string cmd = gpp + " -std=c++11 -shared -fPIC "
+			std::string cmd = gpp + " -std=c++11 -shared -fPIC -fvisibility=hidden "
 #ifdef PLATFORM_LNX
-				" -fno-gnu-unique "
+				"-fno-gnu-unique "
 #endif
 				+ flags1;
 			if (useOMP) {

@@ -101,7 +101,7 @@ void AnBrowse::DoRefresh(Folder* fd) {
 }
 
 void AnBrowse::Refresh() {
-	while (busy) {}
+	if (busy) return; //careful: this will not handle well if script is changed while compiling
 	Debug::Message("AnBrowse", "Refreshing");
 	busy = true;
 	//DoRefresh(&folder);

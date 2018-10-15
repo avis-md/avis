@@ -21,6 +21,7 @@ public:
 	static pSceneObject mainCameraObj;
 	static pCamera mainCamera;
 	static GLFWwindow* window;
+	static bool foreground;
 
 	static std::vector<dropFileFunc> dropFuncs;
 	static std::vector<emptyCallbackFunc> focusFuncs;

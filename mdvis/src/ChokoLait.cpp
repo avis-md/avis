@@ -11,10 +11,11 @@ void glDebugOutput(GLenum source,
 	const GLchar *message,
 	void *userParam);
 
-GLFWwindow* ChokoLait::window = nullptr;
 int ChokoLait::initd = 0;
 pSceneObject ChokoLait::mainCameraObj;
 pCamera ChokoLait::mainCamera;
+GLFWwindow* ChokoLait::window = nullptr;
+bool ChokoLait::foreground;
 std::vector<dropFileFunc> ChokoLait::dropFuncs;
 std::vector<emptyCallbackFunc> ChokoLait::focusFuncs;
 
@@ -239,7 +240,8 @@ void ChokoLait::DropGL(GLFWwindow* window, int w, const char** c) {
 }
 
 void ChokoLait::FocusGL(GLFWwindow* window, int focus) {
-	if (!!focus) {
+	foreground = !!focus;
+	if (foreground) {
 		for (auto& a : focusFuncs) {
 			a();
 		}

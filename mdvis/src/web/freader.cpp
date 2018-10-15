@@ -142,7 +142,7 @@ bool FReader::Read(FScript* scr) {
 			#ifdef PLATFORM_WIN
 				"-static-libstdc++ -static-libgcc -Wl,--export-all-symbols "
 			#else
-				"-D/tmp/ "
+				"-D/tmp/ -fvisibility=hidden "
 			#endif
 			"-fPIC \"" + IO::path + "res/noterminate.o\" -J \"" + fp2 + "\" -o \""
 				+ fp2 + nm + ".so\" \"" + fp + "_temp__" EXT_FS "\" -lgfortran 2> \"" + fp2 + nm + "_log.txt\"";

@@ -268,11 +268,11 @@ void AnWeb::Draw() {
 	if (Engine::Button(200, 1, 70.f, 16.f, white(1, 0.4f), _("Save"), 12.f, white(), true) == MOUSE_RELEASE)
 		Save(IO::path + "nodes/rdf.anl");
 
-	bool canexec = (!AnOps::remote || (AnOps::connectStatus == 255));
-	if (Engine::Button(275, 1, 70, 16, white(1, (!canexec || executing) ? 0.2f : 0.4f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
+	bool canexec = (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
+	if (Engine::Button(275, 1, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
 		if (canexec) AnWeb::Execute(false);
 	}
-	if (Engine::Button(350, 1, 107, 16, white(1, (!canexec || executing) ? 0.2f : 0.4f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
+	if (Engine::Button(350, 1, 107, 16, white(1, canexec ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
 		if (canexec) AnWeb::Execute(true);
 	}
 	UI::Texture(275, 1, 16, 16, Icons::play);
@@ -291,13 +291,13 @@ void AnWeb::DrawSide() {
 		if (Engine::Button(Display::width - expandPos + 109, 20, 70, 16, white(1, 0.4f), _("Edit"), 12, white(), true) == MOUSE_RELEASE)
 			drawFull = true;
 
-		bool ce = executing || ParLoader::busy;
-		if (Engine::Button(Display::width - expandPos + 1, 38, 70, 16, white(1, ce ? 0.2f : 0.4f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
-			AnWeb::Execute(false);
+		bool canexec = (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
+		if (Engine::Button(Display::width - expandPos + 1, 38, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
+			if (canexec) AnWeb::Execute(false);
 		}
 		if (!execFrame) {
-			if (Engine::Button(Display::width - expandPos + 72, 38, 107, 16, white(1, ce ? 0.2f : 0.4f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
-				AnWeb::Execute(true);
+			if (Engine::Button(Display::width - expandPos + 72, 38, 107, 16, white(1, canexec ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
+				if (canexec) AnWeb::Execute(true);
 			}
 		}
 		else {
