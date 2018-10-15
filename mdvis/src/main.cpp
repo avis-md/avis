@@ -57,10 +57,10 @@ void updateFunc() {
 	if (ParLoader::parDirty) {
 		ParLoader::parDirty = false;
 		Particles::UpdateBufs();
-		if (Protein::Refresh()) {
+		//if (Protein::Refresh()) {
 			Particles::GenTexBufs();
 			ParGraphics::UpdateDrawLists();
-		}
+		//}
 		ParMenu::CalcH();
 		VisSystem::lastSave = Time::time;
 	}

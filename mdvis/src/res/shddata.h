@@ -25,3 +25,4 @@
 #include "_shd/voxelVert.h"
 #include "_shd/bezierVert.h"
 #include "_shd/ssaoFrag.h"
+#include "_shd/ssaoFrag2.h"

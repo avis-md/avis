@@ -70,6 +70,7 @@ public:
 	static bool drawFull, expanded, executing, apply;
 	static float maxScroll, scrollPos, expandPos;
 	static int execFrame;
+	static float drawLerp;
 
 	static std::thread* execThread;
 	static AnNode* execNode;

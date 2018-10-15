@@ -620,7 +620,6 @@ void ParLoader::OpenFrame(uint f, const std::string& path) {
 
 void ParLoader::OpenFrameNow(uint f, std::string path) {
 	while (busy){}
-	//std::cout << f << " " << path << " --- ";
 	std::flush(std::cout);
 	using FS = Particles::AnimData::FRAME_STATUS;
 	busy = true;
@@ -654,7 +653,6 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 
 	anm.reading = false;
 	if (isSrv) remove(path.c_str());
-	//std::cout << "done" << std::endl;
 	busy = false;
 }
 

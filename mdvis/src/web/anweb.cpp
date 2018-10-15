@@ -29,6 +29,7 @@ bool AnWeb::executing = false;
 bool AnWeb::apply = false;
 float AnWeb::maxScroll, AnWeb::scrollPos = 0, AnWeb::expandPos = 0;
 int AnWeb::execFrame;
+float AnWeb::drawLerp;
 
 std::thread* AnWeb::execThread = nullptr;
 AnNode* AnWeb::execNode = nullptr;
@@ -100,7 +101,7 @@ void AnWeb::Update() {
 void AnWeb::Draw() {
 #ifndef IS_ANSERVER
 	AnNode::width = 220;
-	UI::Quad(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f, white(0.8f, 0.05f));
+	UI::Quad(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f, white(0.8f * drawLerp, 0.05f));
 	Engine::BeginStencil(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f);
 	byte ms = Input::mouse0State;
 	if (executing) {
@@ -277,6 +278,7 @@ void AnWeb::Draw() {
 	}
 	UI::Texture(275, 1, 16, 16, Icons::play);
 	UI::Texture(350, 1, 16, 16, Icons::playall);
+	if (drawLerp < 1) drawLerp = min(drawLerp + 10 * Time::delta, 1.f);
 #endif
 }
 
@@ -327,6 +329,7 @@ void AnWeb::DrawSide() {
 		UI::Label(Display::width - expandPos - 92.f, Display::height - 33.f, 12.f, _("Analysis") +" (A)", white());
 		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.f, 180.f);
 	}
+	drawLerp = 0;
 #endif
 }
 
@@ -364,14 +367,26 @@ void AnWeb::DoExecute(bool all) {
 	ErrorView::execMsgs.clear();
 	
 	if (all) {
+		auto f = Particles::anim.currentFrame;
 		ApplyFrameCount(Particles::anim.frameCount);
 		for (uint a = 0; a < Particles::anim.frameCount; a++) {
 			execFrame = a+1;
+			Particles::anim.Seek(a);
+			auto st = Particles::anim.status[a];
+			if (st != Particles::AnimData::FRAME_STATUS::LOADED){
+				Debug::Warning("AnWeb::Execute", "failed to seek to frame " + std::to_string(a) + "! " + std::to_string((int)st));
+				executing = false;
+				Engine::stateLock2.unlock();
+				Particles::anim.Seek(f);
+				execFrame = 0;
+				return;
+			}
 			Node_Inputs::frame = a;
 			_DoExecute();
 			AnWeb::WriteFrame(a);
 		}
 		execFrame = 0;
+		Particles::anim.Seek(f);
 	}
 	else {
 		RemoveFrames();

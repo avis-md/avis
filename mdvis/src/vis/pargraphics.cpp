@@ -101,7 +101,7 @@ void ParGraphics::Eff::Apply() {
 			std::swap(cam->blitTexs[0], cam->blitTexs[1]);
 			cnt = 0;
 		}
-		if (AnWeb::drawFull) cnt += Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1], 1.f, Display::width, Display::height);
+		if (AnWeb::drawFull) cnt += Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1], AnWeb::drawLerp, Display::width, Display::height);
 	}
 	
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->target);

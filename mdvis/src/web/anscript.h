@@ -69,7 +69,7 @@ public:
 
 	std::string desc = "";
 	int descLines = 0;
-	bool ok = false;
+	bool ok = false, busy = false;
 
 	static int StrideOf(char c);
 

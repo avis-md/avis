@@ -79,6 +79,7 @@ void AnBrowse::Scan() {
 
 void AnBrowse::DoRefresh(Folder* fd) {
 	for (auto s : fd->scripts) {
+		s->busy = true;
 		switch (s->type) {
 		case AN_SCRTYPE::C:
 			CReader::Refresh((CScript*)s);
@@ -93,6 +94,7 @@ void AnBrowse::DoRefresh(Folder* fd) {
 			OHNO("AnBrowse::DoRefresh", "Invalid script type " + std::to_string((int)s->type));
 			break;
 		}
+		s->busy = false;
 	}
 	for (auto& f : fd->subfolders) {
 		DoRefresh(&f);
@@ -202,9 +204,16 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 			UI::Texture(2.f + 5 * layer, off, 16.f, 16.f, icon);
 			UI::Label(22.f + 5 * layer, off, 12.f, fs->name, white());
 			if (!fs->ok) {
-				UI::font->Align(ALIGN_TOPRIGHT);
-				UI::Label(145.f - 5 * layer, off, 12, std::to_string(fs->errorCount), red());
-				UI::font->Align(ALIGN_TOPLEFT);
+				if (fs->busy) {
+					Engine::RotateUI(Time::time * 180, Vec2(137, off + 8));
+					UI::Texture(129, off, 16, 16, Icons::refresh);
+					Engine::ResetUIMatrix();
+				}
+				else {
+					UI::font->Align(ALIGN_TOPRIGHT);
+					UI::Label(145, off, 12, std::to_string(fs->errorCount), red());
+					UI::font->Align(ALIGN_TOPLEFT);
+				}
 			}
 			off += 17;
 		}

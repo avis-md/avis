@@ -346,7 +346,7 @@ void ParMenu::DrawStart() {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[0]);
 		UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::bg, DRAWTEX_CROP);
 		
-		Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1], 1.f, Display::width, Display::height);
+		Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1], AnWeb::drawLerp, Display::width, Display::height);
 		
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->blitFbos[0]);

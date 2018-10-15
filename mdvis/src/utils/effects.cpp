@@ -118,11 +118,11 @@ void Effects::_InitSSAO(const std::string& vs) {
 	gu(7, _P);
 	gu(8, _IP);
 	
-	prog = ssaoProg2 = Shader::FromVF(vs, IO::GetText(IO::path + "ssaoFrag2.txt"));
+	prog = ssaoProg2 = Shader::FromVF(vs, glsl::ssaoFrag2);
 	locs = ssaoProg2Locs;
 	gu(0, tex1);
 	gu(1, tex2);
-	gu(2, depth);
+	gu(2, dtex);
 	gu(3, val);
 	gu(4, screenSize);
 

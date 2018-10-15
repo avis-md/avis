@@ -12,7 +12,7 @@ void _InitGBuffer(Camera::TexGroup& tg, float w = Display::width, float h = Disp
 
 	// color
 	glBindTexture(GL_TEXTURE_2D, tg.colTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int)w, (int)h, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, (int)w, (int)h, 0, GL_RGBA, GL_FLOAT, NULL);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GBUFFER_COLOR, GL_TEXTURE_2D, tg.colTex, 0);
 	SetTexParams<>(0, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST);
 	//id
