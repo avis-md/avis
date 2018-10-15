@@ -214,8 +214,8 @@ void ParGraphics::Init() {
 	i = 0;
 	LC(_MV); LC(_P); LC(camPos); LC(camFwd);
 	LC(screenSize); LC(posTex); LC(connTex);
-	LC(id2); LC(radScl); LC(orthoSz);
-	LC(id2col); LC(colList); 
+	LC(radTex); LC(id2); LC(radScl); 
+	LC(orthoSz); LC(id2col); LC(colList);
 	LC(gradCols); LC(colUseGrad);
 	LC(usegrad); LC(onecol); LC(spriteScl);
 	bid = glGetUniformBlockIndex(parConProg, "clipping");
@@ -671,25 +671,28 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 				glUniform1i(parConProgLocs[6], 2);
 				glActiveTexture(GL_TEXTURE2);
 				glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
-				glUniform1ui(parConProgLocs[7], 1);
-				glUniform1f(parConProgLocs[8], con.scale);
-				glUniform1f(parConProgLocs[9], osz);
-				glUniform1i(parConProgLocs[10], 3);
+				glUniform1i(parConProgLocs[7], 3);
 				glActiveTexture(GL_TEXTURE3);
+				glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
+				glUniform1ui(parConProgLocs[8], 1);
+				glUniform1f(parConProgLocs[9], con.scale);
+				glUniform1f(parConProgLocs[10], osz);
+				glUniform1i(parConProgLocs[11], 4);
+				glActiveTexture(GL_TEXTURE4);
 				if (!useGradCol) {
 					glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
-					glUniform1i(parConProgLocs[11], 4);
-					glActiveTexture(GL_TEXTURE4);
+					glUniform1i(parConProgLocs[12], 5);
+					glActiveTexture(GL_TEXTURE5);
 					glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 				}
 				else {
 					glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[gradColParam]->texBuf);
-					glUniform4fv(parConProgLocs[12], 3, &gradCols[0][0]);
+					glUniform4fv(parConProgLocs[13], 3, &gradCols[0][0]);
 				}
-				glUniform1i(parConProgLocs[13], useGradCol);
-				glUniform1i(parConProgLocs[14], useConGradCol);
-				glUniform4f(parConProgLocs[15], conCol.r, conCol.g, conCol.b, useConCol? 1.f : 0.f);
-				glUniform1f(parConProgLocs[16], spriteScl);
+				glUniform1i(parConProgLocs[14], useGradCol);
+				glUniform1i(parConProgLocs[15], useConGradCol);
+				glUniform4f(parConProgLocs[16], conCol.r, conCol.g, conCol.b, useConCol? 1.f : 0.f);
+				glUniform1f(parConProgLocs[17], spriteScl);
 
 				glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
 			}

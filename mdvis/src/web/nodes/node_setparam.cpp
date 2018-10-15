@@ -1,6 +1,7 @@
 #include "node_setparam.h"
 #include "md/Particles.h"
 #include "ui/ui_ext.h"
+#include "web/anweb.h"
 
 Node_SetParam::Node_SetParam() : AnNode(new DmScript(sig)), paramId(0), di(&paramId, Particles::particles_ParamNms) {
 	title = "Set Parameter";
@@ -19,29 +20,44 @@ void Node_SetParam::Execute() {
 	}
 	CVar& cv = inputR[0].first->conV[inputR[0].second];
 	auto dm = cv.dimVals.size();
+	auto src = *((double**)cv.value);
 	auto& prm = Particles::particles_Params[paramId];
 	if (dm > 2) {
-		RETERR("Input must be 1 or 2 dimensions!");
+		RETERR("Input must be 1- or 2-dimensional!");
+	}
+	else if (AnWeb::execFrame > 0 && dm > 1) {
+		RETERR("Input must be 1-dimensional for Run All!");
 	}
 	auto sz = *cv.dimVals[0];
 	auto tsz = 1;
-	prm->timed = false;
-	if (dm == 2) {
-		tsz = sz;
-		sz = *cv.dimVals[1];
-		if (tsz != Particles::anim.frameCount)
-			RETERR("Input must be for each frame!");
-		prm->timed = true;
-	}
-	if (sz != Particles::particleSz)
-		RETERR("Input must be for each particle!");
-
-    auto& tar = prm->data;
-	auto src = *((double**)cv.value);
-	tar.resize(tsz*sz);
+	prm->timed = AnWeb::execFrame > 0;
+	if (prm->timed) {
+		if (sz != Particles::particleSz)
+			RETERR("Input must be for each particle!");
+		auto& tar = prm->data;
+		tar.resize(Particles::anim.frameCount*sz);
 #pragma omp parallel for
-	for (int a = 0; a < sz*tsz; a++) {
-		tar[a] = (float)src[a];
+		for (int a = 0; a < sz; a++) {
+			tar[a + Particles::particleSz*(AnWeb::execFrame-1)] = (float)src[a];
+		}
+	}
+	else {
+		if (dm == 2) {
+			tsz = sz;
+			sz = *cv.dimVals[1];
+			if (tsz != Particles::anim.frameCount)
+				RETERR("Input must be for each frame!");
+			prm->timed = true;
+		}
+
+		if (sz != Particles::particleSz)
+			RETERR("Input must be for each particle!");
+		auto& tar = prm->data;
+		tar.resize(tsz*sz);
+#pragma omp parallel for
+		for (int a = 0; a < sz*tsz; a++) {
+			tar[a] = (float)src[a];
+		}
 	}
 	prm->dirty = true;
 }

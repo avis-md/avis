@@ -273,8 +273,9 @@ void AnWeb::Draw() {
 	if (Engine::Button(275, 1, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
 		if (canexec) AnWeb::Execute(false);
 	}
-	if (Engine::Button(350, 1, 107, 16, white(1, canexec ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
-		if (canexec) AnWeb::Execute(true);
+	bool canexec2 = (canexec && Particles::anim.frameCount > 1);
+	if (Engine::Button(350, 1, 107, 16, white(1, canexec2 ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
+		if (canexec2) AnWeb::Execute(true);
 	}
 	UI::Texture(275, 1, 16, 16, Icons::play);
 	UI::Texture(350, 1, 16, 16, Icons::playall);
@@ -297,9 +298,10 @@ void AnWeb::DrawSide() {
 		if (Engine::Button(Display::width - expandPos + 1, 38, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
 			if (canexec) AnWeb::Execute(false);
 		}
+		bool canexec2 = (canexec && Particles::anim.frameCount > 1);
 		if (!execFrame) {
-			if (Engine::Button(Display::width - expandPos + 72, 38, 107, 16, white(1, canexec ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
-				if (canexec) AnWeb::Execute(true);
+			if (Engine::Button(Display::width - expandPos + 72, 38, 107, 16, white(1, canexec2 ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
+				if (canexec2) AnWeb::Execute(true);
 			}
 		}
 		else {

@@ -58,20 +58,24 @@ public:
 		void Update();
 	};
 
-	static std::vector<ResidueList> residueLists;
 	static uint residueListSz;
-	static uint particleSz;
+	static uint particleSz, _particleSz;
 
 	static std::string cfgFile, trjFile;
 
 	static glm::dvec3* poss, *vels;
 
+	static std::vector<ResidueList> residueLists;
+
 	static std::vector<char> names, resNames;
 	static std::vector<short> types;
 	static std::vector<byte> colors;
 	static std::vector<float> radii;
+	static std::vector<bool> visii;
 	static std::vector<Int2> ress;
 	static conninfo conns;
+
+	static bool visDirty;
 
 	static int particles_ParamSz;
 	static paramdata* particles_Params[10];
@@ -126,7 +130,7 @@ public:
 
 	static void Init(), Clear(), GenTexBufs();
 	static void Resize(uint i);
-	static void Update(), UpdateBufs(), UpdateColorTex(), UpdateRadBuf();
+	static void Update(), UpdateBufs(), UpdateColorTex(), UpdateRadBuf(int i = -1);
 	static void AddParam(), RmParam(int i);
 
 	static void Serialize(XmlNode* nd);

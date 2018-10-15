@@ -8,6 +8,7 @@ uniform vec2 screenSize;
 
 uniform samplerBuffer posTex;
 uniform usamplerBuffer connTex;
+uniform samplerBuffer radTex;
 uniform float radScl;
 uniform float orthoSz;
 uniform float spriteScl;
@@ -50,6 +51,10 @@ void main(){
 	vec3 pos1 = texelFetch(posTex, int(id1)).rgb;
 	vec3 pos2 = texelFetch(posTex, int(id2)).rgb;
 	if (len2(pos2 - pos1) > maxDst2) {
+		gl_Position = vec4(-1, -1, -1, 1);
+		return;
+	}
+	if (texelFetch(radTex, int(id1)).r < 0 || texelFetch(radTex, int(id2)).r < 0) {
 		gl_Position = vec4(-1, -1, -1, 1);
 		return;
 	}

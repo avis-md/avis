@@ -113,10 +113,14 @@ void Selection::DrawMenu() {
     float off = 20;
     const float ep = ParMenu::expandPos;
     count = atoms.size();
-    UI::Label(ep - 148, off, 12, "Information", white());
     CalcSpos();
     Calc1();
-    off += 30;
+    UI::Label(ep - 148, off, 12, "Information", white());
+    off += 17;
+    UI::Label(ep - 148, off, 12, "Total: " + std::to_string(Particles::particleSz), white());
+    off += 17;
+    UI::Label(ep - 148, off, 12, "Selected: " + std::to_string(count), white());
+    off += 20;
     if (count > 1) {
         UI::font->Align(ALIGN_MIDCENTER);
         for (size_t a = 0; a < count; a++) {

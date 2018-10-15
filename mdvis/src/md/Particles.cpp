@@ -2,6 +2,7 @@
 #include "parloader.h"
 #include "web/anweb.h"
 #include "md/Protein.h"
+#include "utils/glext.h"
 
 uint Particles::AnimData::maxFramesInMem = 20;
 
@@ -81,17 +82,12 @@ void Particles::AnimData::Update() {
 
 void Particles::AnimData::UpdateMemRange() {
 	frameMemPos = (uint)std::max((int)currentFrame - (int)maxFramesInMem/2, 0);
-	//auto mx = frameMemPos + maxFramesInMem;
-	//mx = std::min(mx, frameCount);
-	//frameMemPos = (uint)std::max((int)mx - (int)maxFramesInMem, 0);
 }
 
 
 Particles::paramdata::paramdata() {
 	glGenBuffers(1, &buf);
-	glBindBuffer(GL_ARRAY_BUFFER, buf);
-	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(float), 0, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	SetGLBuf<float>(buf, nullptr, particleSz);
 	glGenTextures(1, &texBuf);
 	glBindTexture(GL_TEXTURE_BUFFER, texBuf);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, buf);
@@ -112,20 +108,24 @@ void Particles::paramdata::Update() {
 	dirty = false;
 }
 
-std::vector<ResidueList> Particles::residueLists;
 uint Particles::residueListSz;
-uint Particles::particleSz;
+uint Particles::particleSz, Particles::_particleSz;
 
 std::string Particles::cfgFile, Particles::trjFile;
 
 glm::dvec3* Particles::poss, *Particles::vels;
 
+std::vector<ResidueList> Particles::residueLists;
+
 std::vector<char> Particles::names, Particles::resNames;
 std::vector<short> Particles::types;
 std::vector<byte> Particles::colors;
 std::vector<float> Particles::radii;
+std::vector<bool> Particles::visii;
 std::vector<Int2> Particles::ress;
 Particles::conninfo Particles::conns;
+
+bool Particles::visDirty = false;
 
 int Particles::particles_ParamSz = 0;
 Particles::paramdata* Particles::particles_Params[] = {};
@@ -172,13 +172,6 @@ void Particles::Init() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Particles::UpdateColorTex() {
-	glBindTexture(GL_TEXTURE_2D, colorPalleteTex);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 16, 16, GL_RGB, GL_FLOAT, colorPallete);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	Scene::dirty = true;
-}
-
 void Particles::Clear() {
 	if (poss) {
 		residueLists.clear();
@@ -188,6 +181,7 @@ void Particles::Clear() {
 		types.clear();
 		colors.clear();
 		radii.clear();
+		visii.clear();
 		conns.ids.clear();
 		poss = 0;
 		residueListSz = particleSz = Particles::conns.cnt = 0;
@@ -224,10 +218,15 @@ void Particles::Resize(uint i) {
 	types.resize(i);
 	colors.resize(i);
 	radii.resize(i);
+	visii.clear(); visii.resize(i, true);
 	ress.resize(i);
 }
 
 void Particles::Update() {
+	if (visDirty) {
+		visDirty = false;
+		Particles::UpdateRadBuf();
+	}
 	for (int a = 0; a < particles_ParamSz; a++) {
 		auto& p = particles_Params[a];
 		if (p->dirty) {
@@ -249,37 +248,53 @@ void Particles::UpdateBufs() {
 		ps[a] = (Vec3)poss[a];
 	}
 
-	glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
-	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(Vec3), &ps[0], GL_DYNAMIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, connBuffer);
-	glBufferData(GL_ARRAY_BUFFER, conns.cnt * 2 * sizeof(uint), &conns.ids[0], GL_DYNAMIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, colIdBuffer);
-	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(byte), &colors[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, radBuffer);
-	glBufferData(GL_ARRAY_BUFFER, particleSz * sizeof(float), &radii[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	if (_particleSz != particleSz) {
+		_particleSz = particleSz;
+		SetGLBuf(posBuffer, &ps[0], particleSz, GL_DYNAMIC_DRAW);
+		SetGLBuf(connBuffer, &conns.ids[0], particleSz);
+		SetGLBuf(colIdBuffer, &colors[0], particleSz);
+		SetGLBuf(radBuffer, &radii[0], particleSz);
+	}
+	else {
+		SetGLSubBuf(posBuffer, &ps[0], particleSz);
+		SetGLSubBuf(connBuffer, &conns.ids[0], particleSz);
+		SetGLSubBuf(colIdBuffer, &colors[0], particleSz);
+		UpdateRadBuf();
+	}
 }
 
-void Particles::UpdateRadBuf() {
-	glBindBuffer(GL_ARRAY_BUFFER, radBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(float), &radii[0]);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+void Particles::UpdateColorTex() {
+	glBindTexture(GL_TEXTURE_2D, colorPalleteTex);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 16, 16, GL_RGB, GL_FLOAT, colorPallete);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	Scene::dirty = true;
+}
+
+void Particles::UpdateRadBuf(int i) {
+	if (i == -1) {
+		std::vector<float> res(particleSz);
+#pragma omp parallel for
+		for (int a = 0; a < particleSz; a++) {
+			res[a] = visii[a] ? radii[a] : -1;
+		}
+		SetGLSubBuf(radBuffer, &res[0], particleSz);
+	}
+	else {
+		glBindBuffer(GL_ARRAY_BUFFER, radBuffer);
+		float vl = visii[i] ? radii[i] : -1;
+		glBufferSubData(GL_ARRAY_BUFFER, i * sizeof(float), sizeof(float), &vl);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
 }
 
 void Particles::UpdateConBufs2() {
 	for (auto& c2 : particles_Conn2) {
 		if (!c2.cnt) continue;
 		if (!c2.buf) glGenBuffers(1, &c2.buf);
-		glBindBuffer(GL_ARRAY_BUFFER, c2.buf);
 		if (c2.ocnt < c2.cnt)
-			glBufferData(GL_ARRAY_BUFFER, c2.cnt * sizeof(Int2), &c2.ids[0], GL_DYNAMIC_DRAW);
+			SetGLBuf(c2.buf, &c2.ids[0], c2.cnt, GL_DYNAMIC_DRAW);
 		else
-			glBufferSubData(GL_ARRAY_BUFFER, 0, c2.cnt * sizeof(Int2), &c2.ids[0]);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+			SetGLSubBuf(c2.buf, &c2.ids[0], c2.cnt);
 		c2.ocnt = c2.cnt;
 		if (!c2.tbuf) {
 			glGenTextures(1, &c2.tbuf);
@@ -310,9 +325,7 @@ void Particles::SetFrame(uint frm) {
 			for (int a = 0; a < (int)particleSz; a++) {
 				ps[a] = (Vec3)poss[a];
 			}
-			glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(Vec3), &ps[0]);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			SetGLSubBuf(posBuffer, &ps[0], particleSz);
 			for (int a = 0; a < particles_ParamSz; a++) {
 				auto& p = particles_Params[a];
 				if (p->timed) {

@@ -8,7 +8,7 @@ Node_ShowRange::Node_ShowRange() : AnNode(new DmScript(sig)) {
 	titleCol = Vec3(0.3f, 0.5f, 0.3f);
     canTile = false;
 	inputR.resize(1);
-	script->invars.push_back(std::pair<std::string, std::string>("values", "list(1f)"));
+	script->invars.push_back(std::pair<std::string, std::string>("values", "list(1d)"));
 }
 
 void Node_ShowRange::Execute() {
@@ -17,26 +17,17 @@ void Node_ShowRange::Execute() {
 	auto& sz = *cv.dimVals[0];
 	if (sz != Particles::particleSz) return;
 
-    float* vals = *((float**)cv.value);
+    double* vals = *((double**)cv.value);
 
-    //
-    for (auto& r : Particles::residueLists) {
-        r.visible = r.visibleAll = true;
-        int a = -1;
-        for (auto& rr : r.residues) {
-            auto& v = vals[rr.offset];
-            if (v > rMin && v < rMax) {
-                rr.visible = !invert;
-            }
-            else rr.visible = invert;
-            if (a == -1) {
-                r.visible = rr.visible;
-                a = rr.visible? 1 : 0;
-            }
-            else if (!a == rr.visible) r.visibleAll = false;
-        }
+#pragma omp parallel for
+    for (int a = 0; a < Particles::particleSz; a++) {
+        auto& v = vals[a];
+        if (v > rMin && v < rMax)
+            Particles::visii[a] = !invert;
+        else
+            Particles::visii[a] = invert;
     }
-    ParGraphics::UpdateDrawLists();
+    Particles::visDirty = true;
 }
 
 void Node_ShowRange::DrawHeader(float& off) {
