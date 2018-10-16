@@ -1,6 +1,6 @@
 #include "node_camera.h"
 #include "vis/pargraphics.h"
-#include "md/Particles.h"
+#include "md/particles.h"
 
 Node_Camera_Out::Node_Camera_Out() : AnNode(new DmScript(sig)) {
     title = "Camera (Set)";

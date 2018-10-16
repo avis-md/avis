@@ -1,5 +1,5 @@
 #include "node_tracetrj.h"
-#include "md/Particles.h"
+#include "md/particles.h"
 
 Node_TraceTrj::Node_TraceTrj() : AnNode(new DmScript(sig)) {
 	title = "Trace Trajectory";

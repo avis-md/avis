@@ -1,4 +1,4 @@
-#include "ParMenu.h"
+#include "parmenu.h"
 #include "md/Protein.h"
 #include "md/parloader.h"
 #include "ocl/raytracer.h"
@@ -10,6 +10,7 @@
 #include "utils/effects.h"
 #include "vis/pargraphics.h"
 #include "vis/selection.h"
+#include "vis/renderer.h"
 #include "web/anweb.h"
 
 #define HATENA
@@ -82,7 +83,7 @@ void ParMenu::Draw() {
 				ParGraphics::DrawMenu();
 				break;
 			case 3:
-				RayTracer::DrawMenu();
+				VisRenderer::DrawMenu();
 				break;
 			case 4:
 				Selection::DrawMenu();

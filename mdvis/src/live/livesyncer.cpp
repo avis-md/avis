@@ -1,5 +1,5 @@
 #include "livesyncer.h"
-#include "md/Particles.h"
+#include "md/particles.h"
 #include "vis/pargraphics.h"
 #include "utils/rawvector.h"
 #include "lj256.h"

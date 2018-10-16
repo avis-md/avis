@@ -1,5 +1,5 @@
 #include "Protein.h"
-#include "md/ParMenu.h"
+#include "md/parmenu.h"
 #include "md/parloader.h"
 #include "utils/rawvector.h"
 #include "utils/spline.h"

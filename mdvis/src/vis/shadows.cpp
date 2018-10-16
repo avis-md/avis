@@ -1,6 +1,6 @@
 #include "shadows.h"
 #include "pargraphics.h"
-#include "md/ParMenu.h"
+#include "md/parmenu.h"
 #include "ui/icons.h"
 #include "ui/ui_ext.h"
 #include "res/shddata.h"

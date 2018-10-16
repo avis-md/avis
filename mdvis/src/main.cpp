@@ -11,7 +11,7 @@
 #include "ui/popups.h"
 #include "ui/help.h"
 #include "web/anweb.h"
-#include "md/ParMenu.h"
+#include "md/parmenu.h"
 #include "md/Protein.h"
 #include "md/parloader.h"
 #include "md/Gromacs.h"

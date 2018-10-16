@@ -1,6 +1,6 @@
 #include "selection.h"
-#include "md/Particles.h"
-#include "md/ParMenu.h"
+#include "md/particles.h"
+#include "md/parmenu.h"
 #include "ui/icons.h"
 #include "ui/localizer.h"
 #include "vis/pargraphics.h"

@@ -2,7 +2,7 @@
 #include "Gromacs.h"
 #include "Protein.h"
 #include "vis/pargraphics.h"
-#include "md/ParMenu.h"
+#include "md/parmenu.h"
 #include "web/anweb.h"
 #include "ui/icons.h"
 #include "ui/popups.h"

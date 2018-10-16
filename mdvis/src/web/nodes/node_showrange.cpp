@@ -1,5 +1,5 @@
 #include "node_showrange.h"
-#include "md/Particles.h"
+#include "md/particles.h"
 #include "vis/pargraphics.h"
 #include "ui/ui_ext.h"
 

@@ -4,7 +4,7 @@
 #include "errorview.h"
 #include "ui/localizer.h"
 #include "ui/icons.h"
-#include "md/Particles.h"
+#include "md/particles.h"
 #include "md/parloader.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"

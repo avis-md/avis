@@ -1,6 +1,6 @@
 #include "../anweb.h"
 #ifndef IS_ANSERVER
-#include "md/Particles.h"
+#include "md/particles.h"
 #include "ui/ui_ext.h"
 #include "vis/pargraphics.h"
 #endif

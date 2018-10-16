@@ -1,5 +1,5 @@
 #include "Engine.h"
-#include "Particles.h"
+#include "particles.h"
 
 const byte AMINO_ACID_LEN = 20;
 const std::string AMINO_ACIDS =

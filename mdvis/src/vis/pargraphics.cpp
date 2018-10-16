@@ -1,5 +1,5 @@
 #include "pargraphics.h"
-#include "md/ParMenu.h"
+#include "md/parmenu.h"
 #include "md/Protein.h"
 #include "md/parloader.h"
 #include "vis/system.h"
@@ -55,6 +55,8 @@ uint ParGraphics::rotCenterTrackId = -1;
 float ParGraphics::rotW = 0, ParGraphics::rotZ = 0;
 float ParGraphics::rotWs = 0, ParGraphics::rotZs = 0;
 float ParGraphics::rotScale = 0;
+
+bool ParGraphics::autoRot = true;
 
 Mesh* ParGraphics::arrowMesh;
 
@@ -122,11 +124,11 @@ float ParGraphics::Eff::DrawMenu(float off) {
 	UI::Quad(expandPos - 148, off - 1, 147, 17 * 5 + 2, white(0.9f, 0.1f));
 	UI::Label(expandPos - 146, off, 12, _("Ambient Occlusion"), white());
 	useSSAO = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, useSSAO, white(), ORIENT_HORIZONTAL);
-	ssaoSamples = (int)UI2::Slider(expandPos - 147, off + 17, 147, _("Samples"), 5, 100, (float)ssaoSamples, std::to_string(ssaoSamples));
+	ssaoSamples = (int)UI2::Slider(expandPos - 147, off + 17, 146, _("Samples"), 5, 100, (float)ssaoSamples, std::to_string(ssaoSamples));
 	ssaoSamples = Clamp(ssaoSamples, 10, 100);
-	ssaoRad = UI2::Slider(expandPos - 147, off + 17 * 2, 147, _("Radius"), 0.001f, 0.05f, ssaoRad);
-	ssaoStr = UI2::Slider(expandPos - 147, off + 17 * 3, 147, _("Strength"), 0, 3, ssaoStr);
-	ssaoBlur = UI2::Slider(expandPos - 147, off + 17 * 4, 147, _("Blur"), 0, 40, ssaoBlur);
+	ssaoRad = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Radius"), 0.001f, 0.05f, ssaoRad);
+	ssaoStr = UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Strength"), 0, 3, ssaoStr);
+	ssaoBlur = UI2::Slider(expandPos - 147, off + 17 * 4, 146, _("Blur"), 0, 40, ssaoBlur);
 	return off + 17 * 5 + 1;
 }
 
@@ -149,7 +151,7 @@ void ParGraphics::Eff::Deserialize(XmlNode* nd) {
 			for (auto& n : n1.children) {
 				if (n.name == "enabled") useSSAO = (n.value == "1");
 				else GT(samples, ssaoSamples);
-				else GT(radies, ssaoRad);
+				else GT(radius, ssaoRad);
 				else GT(strength, ssaoStr);
 				else GT(blur, ssaoBlur);
 			}
@@ -396,6 +398,10 @@ void ParGraphics::Update() {
 		float rw0 = rotW;
 		Vec3 center0 = rotCenter;
 
+		if (autoRot) {
+			rotZ = Repeat<float>(rotZ + 30*Time::delta, 0, 360);
+		}
+
 		if (Input::mouse0) {
 			if (Input::mouse0State == MOUSE_DOWN) {
 				if (Input::KeyHold(Key_LeftShift)) dragMode = 2;
@@ -407,6 +413,7 @@ void ParGraphics::Update() {
 				ChokoLait::mainCamera->applyGBuffer2 = true;
 			}
 			else if (dragging) {
+				autoRot = false;
 				if ((VisSystem::mouseMode == VIS_MOUSE_MODE::ROTATE) && (dragMode != 2)) {
 					rotW = rotWs;
 					rotZ = rotZs;
@@ -901,7 +908,7 @@ void ParGraphics::DrawColMenu() {
 	off += 17;
 	UI::alpha = (Particles::particles_ParamSz > 0)? 1 : 0.5f;
 	auto ug = useGradCol;
-	UI2::Toggle(exps - 148, off, 147, _("Gradient Fill"), useGradCol);
+	UI2::Toggle(exps - 148, off, 146, _("Gradient Fill"), useGradCol);
 	if (Particles::particles_ParamSz == 0) useGradCol = false;
 	if (ug != useGradCol) Scene::dirty = true;
 	UI::alpha = 1;
@@ -920,8 +927,8 @@ void ParGraphics::DrawColMenu() {
 		off += 17 * 5 + 2;
 	}
 	else {
-		UI::Quad(exps - 148, off, 147, Display::height*0.5f - off, white(0.9f, 0.1f));
-		Engine::PushStencil(exps - 148, off + 1, 147, Display::height*0.5f - off - 2);
+		UI::Quad(exps - 148, off, 146, Display::height*0.5f - off, white(0.9f, 0.1f));
+		Engine::PushStencil(exps - 148, off + 1, 146, Display::height*0.5f - off - 2);
 		off++;
 		UI2::sepw = 0.33f;
 		for (int x = 0; x < 256; x++) {
@@ -939,7 +946,7 @@ void ParGraphics::DrawColMenu() {
 		Engine::PopStencil();
 	}
 	bool uc = useConCol;
-	UI2::Toggle(exps - 148, off, 147, "Custom Bond Colors", useConCol);
+	UI2::Toggle(exps - 148, off, 146, "Custom Bond Colors", useConCol);
 	if (useConCol) {
 		static auto cc = conCol;
 		UI2::Color(exps - 147, off + 17, 146, "Bond Color", conCol);
@@ -951,7 +958,7 @@ void ParGraphics::DrawColMenu() {
 	}
 	else {
 		auto ucg = useConGradCol;
-		UI2::Toggle(exps - 148, off + 17, 147, "Blend Colors", useConGradCol);
+		UI2::Toggle(exps - 148, off + 17, 146, "Blend Colors", useConGradCol);
 		if (ucg != useConGradCol) Scene::dirty = true;
 		off += 35;
 	}
@@ -966,7 +973,7 @@ void ParGraphics::DrawMenu() {
 
 	auto& expandPos = ParMenu::expandPos;
 
-	UI2::Dropdown(expandPos - 148, 20, 147, _("Shading"), _usePBRItems);
+	UI2::Dropdown(expandPos - 148, 20, 146, _("Shading"), _usePBRItems);
 
 	float off = 37;
 
@@ -978,10 +985,10 @@ void ParGraphics::DrawMenu() {
 		off += 17;
 	}
 	UI::Quad(expandPos - 149, off + 16, 148, 17 * 4 + 2, white(0.9f, 0.1f));
-	reflStr = UI2::Slider(expandPos - 147, off + 17, 147, _("Strength"), 0, 5, reflStr);
-	reflStrDecay = UI2::Slider(expandPos - 147, off + 17 * 2, 147, _("Falloff"), 0, 50, reflStrDecay);
-	specStr = UI2::Slider(expandPos - 147, off + 17 * 3, 147, _("Specular"), 0, 1, specStr);
-	UI2::Color(expandPos - 147, off + 17 * 4, 147, _("Background"), bgCol);
+	reflStr = UI2::Slider(expandPos - 147, off + 17, 146, _("Strength"), 0, 5, reflStr);
+	reflStrDecay = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Falloff"), 0, 50, reflStrDecay);
+	specStr = UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Specular"), 0, 1, specStr);
+	UI2::Color(expandPos - 147, off + 17 * 4, 146, _("Background"), bgCol);
 
 	off += 17 * 5 + 2;
 
@@ -998,16 +1005,16 @@ void ParGraphics::DrawMenu() {
 	if (Engine::Button(expandPos - 18, off, 16, 16, white(1, 0.5f)) == MOUSE_RELEASE) {
 		
 	}
-	rotCenter = UI2::EditVec(expandPos - 147, off + 17, 147, _("Center"), rotCenter, !htr);
+	rotCenter = UI2::EditVec(expandPos - 147, off + 17, 146, _("Center"), rotCenter, !htr);
 
-	rotZs = rotZ = TryParse(UI2::EditText(expandPos - 147, off + 17 * 4, 147, _("Rotation") + " W", std::to_string(rotZ), true, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.f);
-	rotWs = rotW = TryParse(UI2::EditText(expandPos - 147, off + 17 * 5, 147, _("Rotation") + " Y", std::to_string(rotW), true, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.f);
+	rotZs = rotZ = TryParse(UI2::EditText(expandPos - 147, off + 17 * 4, 146, _("Rotation") + " W", std::to_string(rotZ), true, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.f);
+	rotWs = rotW = TryParse(UI2::EditText(expandPos - 147, off + 17 * 5, 146, _("Rotation") + " Y", std::to_string(rotW), true, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.f);
 
-	rotScale = TryParse(UI2::EditText(expandPos - 147, off + 17 * 6, 147, _("Scale"), std::to_string(rotScale)), 0.f);
+	rotScale = TryParse(UI2::EditText(expandPos - 147, off + 17 * 6, 146, _("Scale"), std::to_string(rotScale)), 0.f);
 
 	auto& cam = ChokoLait::mainCamera;
 	auto ql = cam->quality;
-	ql = UI2::Slider(expandPos - 147, off + 17 * 7, 147, _("Quality"), 0.25f, 1.5f, ql, std::to_string(int(ql * 100)) + "%");
+	ql = UI2::Slider(expandPos - 147, off + 17 * 7, 146, _("Quality"), 0.25f, 1.5f, ql, std::to_string(int(ql * 100)) + "%");
 	if (Engine::Button(expandPos - 91, off + 17 * 7, 16, 16, Icons::refresh) == MOUSE_RELEASE)
 		ql = 1;
 
@@ -1029,7 +1036,7 @@ void ParGraphics::DrawMenu() {
 	if (a2) {
 		UI::Quad(expandPos - 149, off - 2, 148, 18, white(0.9f, 0.1f));
 		ql = cam->quality2;
-		ql = UI2::Slider(expandPos - 147, off - 1, 147, _("Quality") + " 2", 0.25f, 1.f, ql, std::to_string(int(ql * 100)) + "%");
+		ql = UI2::Slider(expandPos - 147, off - 1, 146, _("Quality") + " 2", 0.25f, 1.f, ql, std::to_string(int(ql * 100)) + "%");
 		if (ql != cam->quality2) {
 			cam->quality2 = ql;
 			Scene::dirty = true;
@@ -1056,11 +1063,11 @@ void ParGraphics::DrawMenu() {
 		auto c = clipPlane.center;
 		auto n = clipPlane.norm;
 		auto s = clipPlane.size;
-		clipPlane.center = UI2::EditVec(expandPos - 147, off, 147, _("Center"), clipPlane.center, true);
+		clipPlane.center = UI2::EditVec(expandPos - 147, off, 146, _("Center"), clipPlane.center, true);
 		off += 17 * 3;
-		clipPlane.norm = UI2::EditVec(expandPos - 147, off, 147, _("Normal"), clipPlane.norm, true);
+		clipPlane.norm = UI2::EditVec(expandPos - 147, off, 146, _("Normal"), clipPlane.norm, true);
 		off += 17 * 3;
-		clipPlane.size = TryParse(UI2::EditText(expandPos - 147, off, 147, _("Thickness"), std::to_string(clipPlane.size)), 0.f);
+		clipPlane.size = TryParse(UI2::EditText(expandPos - 147, off, 146, _("Thickness"), std::to_string(clipPlane.size)), 0.f);
 		off += 17;
 		if (c != clipPlane.center || n != clipPlane.norm || s != clipPlane.size) UpdateClipping();
 		break;
@@ -1069,9 +1076,9 @@ void ParGraphics::DrawMenu() {
 	{
 		auto c = clipCube.center;
 		auto s = clipCube.size;
-		clipCube.center = UI2::EditVec(expandPos - 147, off, 147, _("Center"), clipCube.center, true);
+		clipCube.center = UI2::EditVec(expandPos - 147, off, 146, _("Center"), clipCube.center, true);
 		off += 17 * 3;
-		clipCube.size = UI2::EditVec(expandPos - 147, off, 147, _("Size"), clipCube.size, true);
+		clipCube.size = UI2::EditVec(expandPos - 147, off, 146, _("Size"), clipCube.size, true);
 		off += 17 * 3;
 		if (c != clipCube.center || s != clipCube.size) UpdateClipping();
 		break;

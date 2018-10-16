@@ -1,5 +1,5 @@
 #include "system.h"
-#include "md/ParMenu.h"
+#include "md/parmenu.h"
 #include "md/parloader.h"
 #include "vis/pargraphics.h"
 #include "vis/renderer.h"
@@ -160,9 +160,9 @@ void VisSystem::Init() {
 
 	auto& mi1 = menuItems[2];
 	mi1.resize(3);
-	mi1[0].Set(0, "Help I'm", 0);
-	mi1[1].Set(0, "Trapped in", 0);
-	mi1[2].Set(0, "Line " + std::to_string(__LINE__), 0);
+	mi1[0].Set(0, "Autorotate", []() {
+		ParGraphics::autoRot = true;
+	});
 
 	auto& mi2 = menuItems[3];
 	mi2.resize(5);
@@ -174,7 +174,10 @@ void VisSystem::Init() {
 		VisRenderer::ToGif();
 	});
 	mi2[3].Set(0, "Movie (Raytraced)", 0);
-	mi2[4].Set(0, "Options", 0);
+	mi2[4].Set(0, "Options", []() {
+		ParMenu::expanded = true;
+		ParMenu::activeMenu = 3;
+	});
 
 	auto& mi3 = menuItems[4];
 	mi3.resize(2);

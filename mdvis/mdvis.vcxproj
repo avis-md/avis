@@ -387,8 +387,8 @@
     <ClInclude Include="src\md\Gromacs.h" />
     <ClInclude Include="src\makegen.h" />
     <ClInclude Include="src\md\parloader.h" />
-    <ClInclude Include="src\md\ParMenu.h" />
-    <ClInclude Include="src\md\Particles.h" />
+    <ClInclude Include="src\md\parmenu.h" />
+    <ClInclude Include="src\md\particles.h" />
     <ClInclude Include="src\md\pdb.h" />
     <ClInclude Include="src\md\Protein.h" />
     <ClInclude Include="src\md\XYZ.h" />

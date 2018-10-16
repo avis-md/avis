@@ -1,6 +1,6 @@
 #include "node_info.h"
 #include "node_inputs.h"
-#include "md/Particles.h"
+#include "md/particles.h"
 
 Node_Info::Node_Info() :AnNode(new DmScript(sig)) {
 	title = "System Info";

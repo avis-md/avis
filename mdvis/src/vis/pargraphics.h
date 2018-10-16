@@ -1,6 +1,6 @@
 #pragma once
 #include "ChokoLait.h"
-#include "md/Particles.h"
+#include "md/particles.h"
 #include "vis/system.h"
 
 class ParGraphics {
@@ -40,6 +40,8 @@ public:
 	static float rotW, rotZ;
 	static float rotWs, rotZs;
 	static float rotScale;
+
+	static bool autoRot;
 
 	static Mesh* arrowMesh;
 

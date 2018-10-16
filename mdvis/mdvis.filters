@@ -482,10 +482,10 @@
     <ClInclude Include="src\py\pybrowse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\md\ParMenu.h">
+    <ClInclude Include="src\md\parmenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\md\Particles.h">
+    <ClInclude Include="src\md\particles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\md\Gromacs.h">

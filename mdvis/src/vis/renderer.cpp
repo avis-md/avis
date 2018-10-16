@@ -2,6 +2,9 @@
 #include "renderer.h"
 #include "pargraphics.h"
 #include "gif/gif.h"
+#include "md/parmenu.h"
+#include "ui/ui_ext.h"
+#include "ui/localizer.h"
 
 VisRenderer::IMG_TYPE VisRenderer::imgType;
 VisRenderer::VID_TYPE VisRenderer::vidType;
@@ -12,8 +15,9 @@ VisRenderer::STATUS VisRenderer::status = STATUS::READY;
 
 bool VisRenderer::imgUseAlpha = false;
 uint VisRenderer::imgW = RESO, VisRenderer::imgH = RESO, VisRenderer::vidW = VRESO, VisRenderer::vidH = VRESO;
-uint VisRenderer::imgSlices = 4, VisRenderer::multisamples = 4;
-uint VisRenderer::vidSkip = 1;
+uint VisRenderer::imgSlices = 4;
+uint VisRenderer::imgMsaa = 4, VisRenderer::vidMsaa = 4;
+uint VisRenderer::vidMaxFrames = 1000;
 float VisRenderer::resLerp = -1;
 
 std::string VisRenderer::outputFolder =
@@ -83,6 +87,50 @@ void VisRenderer::Draw() {
 	}
 }
 
+void VisRenderer::DrawMenu() {
+	auto& ep = ParMenu::expandPos;
+	float off = 20;
+
+	UI::Label(ep - 148, off, 12, _("Image (GLSL)"), white());
+	off += 17;
+	UI::Quad(ep - 149, off - 1, 148, 17 * 5 + 3, white(0.9f, 0.1f));
+	if (Engine::Button(ep - 147, off, 145, 16, Vec4(0.2f, 0.4f, 0.2f, 1), _("Render"), 12, white(), true) == MOUSE_RELEASE) {
+		ToImage();
+	}
+	off += 18;
+	imgW = TryParse(UI2::EditText(ep - 147, off, 146, _("Width"), std::to_string(imgW)), 1024U);
+	off += 17;
+	imgH = TryParse(UI2::EditText(ep - 147, off, 146, _("Height"), std::to_string(imgH)), 1024U);
+	off += 17;
+	imgSlices = TryParse(UI2::EditText(ep - 147, off, 146, _("Slices"), std::to_string(imgSlices)), 1024U);
+	off += 17;
+	bool ms = !!imgMsaa;
+	UI2::Toggle(ep - 147, off, 145, _("MSAA"), ms);
+	imgMsaa = ms? 4 : 0;
+	off += 20;
+
+	UI::Label(ep - 148, off, 12, _("Movie (GLSL)"), white());
+	off += 17;
+	UI::Quad(ep - 149, off - 1, 148, 17 * 6 + 3, white(0.9f, 0.1f));
+	if (Engine::Button(ep - 147, off, 145, 16, Vec4(0.2f, 0.4f, 0.2f, 1), _("Render"), 12, white(), true) == MOUSE_RELEASE) {
+		ToGif();
+	}
+	off += 18;
+	static std::string fmts[] = { "Gif", "" };
+	static Popups::DropdownItem di((uint*)&vidType, fmts);
+	UI2::Dropdown(ep - 147, off, 146, _("Format"), di);
+	off += 17;
+	vidW = TryParse(UI2::EditText(ep - 147, off, 146, _("Width"), std::to_string(vidW)), 1024U);
+	off += 17;
+	vidH = TryParse(UI2::EditText(ep - 147, off, 146, _("Height"), std::to_string(vidH)), 1024U);
+	off += 17;
+	ms = !!vidMsaa;
+	UI2::Toggle(ep - 147, off, 145, _("MSAA"), ms);
+	vidMsaa = ms? 4 : 0;
+	off += 17;
+	vidMaxFrames = TryParse(UI2::EditText(ep - 147, off, 146, _("Max Frames"), std::to_string(vidMaxFrames)), 1000U);
+}
+
 void VisRenderer::ToImage() {
 	if (status != STATUS::READY) return;
 	status = STATUS::BUSY;
@@ -106,7 +154,7 @@ void VisRenderer::ToImage() {
 	if (imgUseAlpha) ParGraphics::bgCol.a = 0;
 
 	MakeTex(res_fbo, res_img, imgW, imgH);
-	if (imgSlices > 1) {
+	if (imgSlices > 1 || imgMsaa > 0) {
 		MakeTex(tmp_fbo, tmp_img, iw, ih);
 		cam->target = tmp_fbo;
 	}
@@ -117,26 +165,45 @@ void VisRenderer::ToImage() {
 	cam->scale = imgSlices;
 	for (int a = 0; a < imgSlices; a++) {
 		for (int b = 0; b < imgSlices; b++) {
-			const float ctw = 0.5f / iw;
-			const float cth = 0.5f / ih;
-			const Vec2 smps[] = { Vec2(ctw / 2, cth / 2), Vec2(3 * ctw / 2, cth / 2), Vec2(ctw / 2, 3 * cth / 2), Vec2(3 * ctw / 2, 3 * cth / 2) };
-			for (int c = 0; c < 4; c++) {
-				Scene::dirty = true;
-				cam->offset = Vec2(a, b) + Vec2(smps[c]);
-				cam->Render([]() {
-					auto& cam = ChokoLait::mainCameraObj->transform;
-					ParGraphics::Rerender(cam.position(), cam.forward(), (float)imgW / imgSlices, (float)imgH / imgSlices);
-				});
-				MVP::Switch(false);
-				MVP::Clear();
-				glDepthMask(true);
-				if (imgSlices > 1) {
+			if (imgMsaa > 0) {
+				const float ctw = 0.5f / iw;
+				const float cth = 0.5f / ih;
+				const Vec2 smps[] = { Vec2(ctw / 2, cth / 2), Vec2(3 * ctw / 2, cth / 2), Vec2(ctw / 2, 3 * cth / 2), Vec2(3 * ctw / 2, 3 * cth / 2) };
+				for (int c = 0; c < 4; c++) {
+					Scene::dirty = true;
+					cam->offset = Vec2(a, b) + Vec2(smps[c]);
+					cam->Render([]() {
+						auto& cam = ChokoLait::mainCameraObj->transform;
+						ParGraphics::Rerender(cam.position(), cam.forward(), (float)imgW / imgSlices, (float)imgH / imgSlices);
+					});
+					MVP::Switch(false);
+					MVP::Clear();
+					glDepthMask(true);
 					glViewport(0, 0, imgW, imgH);
 					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, res_fbo);
 					const float dis = 1.f / imgSlices;
 					if (c > 0) glBlendFunc(GL_ONE, GL_ONE);
 					else glBlendFunc(GL_ONE, GL_ZERO);
 					UI::Quad(a*iw*dis, b*ih*dis, iw*dis, ih*dis, tmp_img, white()*0.25f);
+					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+				}
+			}
+			else {
+				Scene::dirty = true;
+				cam->offset = Vec2(a, b);
+				cam->Render([]() {
+					auto& cam = ChokoLait::mainCameraObj->transform;
+					ParGraphics::Rerender(cam.position(), cam.forward(), (float)imgW / imgSlices, (float)imgH / imgSlices);
+				});
+				if (imgSlices > 1) {
+					MVP::Switch(false);
+					MVP::Clear();
+					glDepthMask(true);
+					glViewport(0, 0, imgW, imgH);
+					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, res_fbo);
+					const float dis = 1.f / imgSlices;
+					glBlendFunc(GL_ONE, GL_ZERO);
+					UI::Quad(a*iw*dis, b*ih*dis, iw*dis, ih*dis, tmp_img, white());
 					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 				}
 			}
@@ -162,8 +229,8 @@ void VisRenderer::ToGif() {
 	if (status != STATUS::READY) return;
 	status = STATUS::BUSY;
 	Debug::Message("Renderer::ToGif", "Starting");
-	//
-	vidSkip = max(Particles::anim.frameCount/50, 1U);
+	
+	auto vidSkip = max(Particles::anim.frameCount/vidMaxFrames, 1U);
 	
 	static Texture wtx(IO::path + "res/cat2.jpg");
 	UI::Quad(0, 0, Display::width, Display::height, black());
@@ -187,8 +254,13 @@ void VisRenderer::ToGif() {
 	if (imgUseAlpha) ParGraphics::bgCol.a = 0;
 
 	MakeTex(tmp_fbo, tmp_img, vidW, vidH);
-	MakeTex(res_fbo, res_img, vidW, vidH);
-	cam->target = tmp_fbo;
+	if (vidMsaa > 0) {
+		MakeTex(res_fbo, res_img, vidW, vidH);
+		cam->target = tmp_fbo;
+	}
+	else {
+		cam->target = res_fbo;
+	}
 	cam->offset = Vec2();
 	cam->scale = 1;
 	const float ctw = 0.25f / vidW;
@@ -204,38 +276,32 @@ void VisRenderer::ToGif() {
 	for (uint f = 0; f < Particles::anim.frameCount; f += vidSkip) {
 		Debug::Message("Renderer::ToGif", "Rendering frame " + std::to_string(f));
 		Particles::SetFrame(f);
-		for (int c = 0; c < 4; c++) {
+		if (vidMsaa > 0) {
+			for (int c = 0; c < 4; c++) {
+				Scene::dirty = true;
+				cam->offset = Vec2(smps[c]);
+				cam->Render([]() {
+					auto& cam = ChokoLait::mainCameraObj->transform;
+					ParGraphics::Rerender(cam.position(), cam.forward(), vidW, vidH);
+				});
+				MVP::Switch(false);
+				MVP::Clear();
+				glDepthMask(true);
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, res_fbo);
+				if (c > 0) glBlendFunc(GL_ONE, GL_ONE);
+				else glBlendFunc(GL_ONE, GL_ZERO);
+				UI::Quad(0, 0, vidW, vidH, tmp_img, white()*0.25f);
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			}
+		}
+		else {
 			Scene::dirty = true;
-			cam->offset = Vec2(smps[c]);
 			cam->Render([]() {
 				auto& cam = ChokoLait::mainCameraObj->transform;
 				ParGraphics::Rerender(cam.position(), cam.forward(), vidW, vidH);
 			});
-			MVP::Switch(false);
-			MVP::Clear();
-			glDepthMask(true);
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, res_fbo);
-			if (c > 0) glBlendFunc(GL_ONE, GL_ONE);
-			else glBlendFunc(GL_ONE, GL_ZERO);
-			UI::Quad(0, 0, vidW, vidH, tmp_img, white()*0.25f);
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		}
 		
-		/*
-		Display::width = w;
-		Display::height = h;
-		Display::actualWidth = w2;
-		Display::actualHeight = h2;
-		Display::frameWidth = w3;
-		Display::frameHeight = h3;
-		glViewport(0, 0, Display::frameWidth, Display::frameHeight);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glDepthMask(true);
-		UI::Quad(0, 0, 200, 200, res_img);
-		glfwSwapBuffers(ChokoLait::window);
-		*/
 		glfwPollEvents();
 
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, res_fbo);

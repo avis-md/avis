@@ -1,5 +1,5 @@
 #include "node_setparam.h"
-#include "md/Particles.h"
+#include "md/particles.h"
 #include "ui/ui_ext.h"
 #include "web/anweb.h"
 

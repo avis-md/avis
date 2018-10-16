@@ -21,8 +21,9 @@ public:
 
 	static bool imgUseAlpha;
 	static uint imgW, imgH, vidW, vidH;
-	static uint imgSlices, multisamples;
-	static uint vidSkip;
+	static uint imgSlices;
+	static uint imgMsaa, vidMsaa;
+	static uint vidMaxFrames;
 	
 	static float resLerp;
 
@@ -35,7 +36,7 @@ public:
 
 	static void Init();
 
-	static void Draw();
+	static void Draw(), DrawMenu();
 
 	static void ToGif();
 

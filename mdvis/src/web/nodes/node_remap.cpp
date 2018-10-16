@@ -1,5 +1,5 @@
 #include "node_remap.h"
-#include "md/Particles.h"
+#include "md/particles.h"
 #include "ui/ui_ext.h"
 
 Node_Remap::Node_Remap() : AnNode(new DmScript(sig)) {

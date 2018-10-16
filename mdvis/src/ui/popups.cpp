@@ -1,6 +1,6 @@
 #include "popups.h"
 #include "vis/pargraphics.h"
-#include "md/ParMenu.h"
+#include "md/parmenu.h"
 #include "ui/icons.h"
 
 POPUP_TYPE Popups::type = POPUP_TYPE::NONE;
