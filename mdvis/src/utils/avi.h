@@ -1,8 +1,15 @@
 #pragma once
 #include "Engine.h"
+extern "C" {
+#include "libgwavi.h"
+}
 
 class AVI {
 public:
+	AVI(const std::string& path, uint w, uint h, uint fps = 30);
+	void AddFrame(GLuint tex);
+	void End();
 
-	static void Encode(const std::string& path, byte** frames, uint frameC, int w, int h, byte chn);
+private:
+	struct gwavi_t* gwavi;
 };

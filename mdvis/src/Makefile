@@ -8,10 +8,15 @@ WEAK_LIB :=
 NUMPY :=
 USR := /usr
 UNAME_S := $(shell uname -s)
+
 RRAYPRE := ../../radeonrays
 RRAY := -DUSE_OPENCL -DRR_EMBED_KERNELS -I$(RRAYPRE)/Calc/inc -I$(RRAYPRE)/CLW/ -I$(RRAYPRE)/RadeonRays/include
-RRAYL := -L$(RRAYPRE)/build/Calc -L$(RRAYPRE)/build/CLW -L../build
+RRAYL := -L$(RRAYPRE)/build/Calc -L$(RRAYPRE)/build/CLW -L../build -lCalc -lCLW -lRadeonRays
 RRAYBIN :=
+
+AVIPRE := ../../libgwavi
+AVI := -I$(AVIPRE)/inc/
+AVIL := -L$(AVIPRE)/lib -lgwavi
 
 BINPRE := /usr/lib/x86_64-linux-gnu
 BINPRE2 := /lib/x86_64-linux-gnu
@@ -35,11 +40,11 @@ ifeq ($(UNAME_S),Darwin)
 	NUMPY +=  -I/usr/local/lib/python3.6/site-packages/numpy/core/include
 	RRAYBIN += libRadeonRays.dylib
 endif
-LIBS2 += $(RRAYL) -lCalc -lCLW -lRadeonRays
+LIBS2 += $(RRAYL) $(AVIL)
 
 C = gcc
 CXX = g++
-CXXFLAGS = -O0 -g -std=c++11 -fvisibility=hidden -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ $(NUMPY) -I$(shell python3-config --prefix)/include/python3.6m $(RRAY) $(OSFLAG) $(CFLAGS2)
+CXXFLAGS = -O0 -g -std=c++11 -fvisibility=hidden -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ $(NUMPY) -I$(shell python3-config --prefix)/include/python3.6m $(RRAY) $(AVI) $(OSFLAG) $(CFLAGS2)
 LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
 LIBS = $(WEAK_LIB) $(PYLIB) -lpthread -lm $(GLLIB) -lz $(LIBS2)
 
