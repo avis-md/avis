@@ -11,12 +11,12 @@ UNAME_S := $(shell uname -s)
 
 RRAYPRE := ../../radeonrays
 RRAY := -DUSE_OPENCL -DRR_EMBED_KERNELS -I$(RRAYPRE)/Calc/inc -I$(RRAYPRE)/CLW/ -I$(RRAYPRE)/RadeonRays/include
-RRAYL := -L$(RRAYPRE)/build/Calc -L$(RRAYPRE)/build/CLW -L../build -lCalc -lCLW -lRadeonRays
+RRAYL := -L$(RRAYPRE)/build/Calc -L$(RRAYPRE)/build/CLW -lCalc -lCLW -lRadeonRays
 RRAYBIN :=
 
 AVIPRE := ../../libgwavi
 AVI := -I$(AVIPRE)/inc/
-AVIL := -L$(AVIPRE)/lib -lgwavi
+AVIL := $(AVIPRE)/obj/libgwavi.a
 
 BINPRE := /usr/lib/x86_64-linux-gnu
 BINPRE2 := /lib/x86_64-linux-gnu
@@ -40,7 +40,7 @@ ifeq ($(UNAME_S),Darwin)
 	NUMPY +=  -I/usr/local/lib/python3.6/site-packages/numpy/core/include
 	RRAYBIN += libRadeonRays.dylib
 endif
-LIBS2 += $(RRAYL) $(AVIL)
+LIBS2 += -L../build $(RRAYL) $(AVIL)
 
 C = gcc
 CXX = g++
@@ -55,7 +55,7 @@ OBJS += obj/md/Protein.o obj/md/Gromacs.o obj/md/parmenu.o obj/md/particles.o ob
 OBJS += obj/web/anbrowse.o obj/web/anconv.o obj/web/annode.o obj/web/anops.o obj/web/anscript.o obj/web/anweb.o obj/web/creader.o obj/web/pyreader.o obj/web/freader.o obj/web/errorview.o
 OBJS += obj/web/nodes/node_inputs.o obj/web/nodes/node_info.o obj/web/nodes/node_plot.o obj/web/nodes/node_volume.o obj/web/nodes/node_gromacs.o obj/web/nodes/node_addbond.o obj/web/nodes/node_camera.o obj/web/nodes/node_setparam.o obj/web/nodes/node_showrange.o obj/web/nodes/node_tracetrj.o
 OBJS += obj/scene/object.o obj/scene/scene.o obj/scene/sceneobject.o obj/scene/transform.o obj/scene/comp/camera.o obj/scene/comp/component.o
-OBJS += obj/utils/ssh.o obj/utils/color.o obj/utils/effects.o obj/utils/fft.o obj/utils/net.o obj/utils/plot.o obj/utils/random.o obj/utils/rect.o obj/utils/spline.o obj/utils/stream.o obj/utils/strext.o obj/utils/xml.o obj/utils/dialog.o obj/utils/dylib.o obj/utils/runcmd.o obj/utils/tinyfiledialogs.o obj/utils/shader.o obj/utils/glmext.o
+OBJS += obj/utils/avi.o obj/utils/ssh.o obj/utils/color.o obj/utils/effects.o obj/utils/fft.o obj/utils/net.o obj/utils/plot.o obj/utils/random.o obj/utils/rect.o obj/utils/spline.o obj/utils/stream.o obj/utils/strext.o obj/utils/xml.o obj/utils/dialog.o obj/utils/dylib.o obj/utils/runcmd.o obj/utils/tinyfiledialogs.o obj/utils/shader.o obj/utils/glmext.o
 OBJS += obj/ui/popups.o obj/ui/icons.o obj/ui/help.o obj/ui/ui_ext.o obj/ui/localizer.o
 OBJS += obj/vis/pargraphics.o obj/vis/system.o obj/vis/shadows.o obj/vis/renderer.o obj/vis/cubemarcher.o obj/vis/selection.o
 OBJS += obj/live/livesyncer.o live/lj256.o
@@ -73,7 +73,7 @@ HEADERS += scene/object.h scene/scene.h scene/sceneobject.h scene/transform.h sc
 HEADERS += ui/popups.h ui/icons.h ui/help.h ui/ui_ext.h ui/localizer.h
 HEADERS += vis/pargraphics.h vis/system.h vis/shadows.h vis/renderer.h vis/cubemarcher.h vis/selection.h
 HEADERS += res/resdata.h res/shddata.h
-HEADERS += utils/color.h utils/effects.h utils/fft.h utils/ifaddrs.h utils/net.h utils/plot.h utils/ptrext.h utils/random.h utils/rawvector.h utils/rect.h utils/spline.h utils/stream.h utils/strext.h utils/xml.h utils/dialog.h utils/dylib.h utils/runcmd.h utils/ssh.h utils/tinyfiledialogs.h utils/shader.h utils/glmext.h
+HEADERS += utils/avi.h utils/color.h utils/effects.h utils/fft.h utils/ifaddrs.h utils/net.h utils/plot.h utils/ptrext.h utils/random.h utils/rawvector.h utils/rect.h utils/spline.h utils/stream.h utils/strext.h utils/xml.h utils/dialog.h utils/dylib.h utils/runcmd.h utils/ssh.h utils/tinyfiledialogs.h utils/shader.h utils/glmext.h
 HEADERS += live/livesyncer.h live/lj256.h
 HEADERS += ocl/raytracer.h ocl/kernel.h
 HEADERSX = xdrfile/xdrfile.h xdrfile/xdrfile_trr.h xdrfile/xdrfile_xtc.h
@@ -94,8 +94,9 @@ ifeq ($(UNAME_S),Linux)
 	cp $(BINPRE2)/libgcrypt.so.20 ../build/libgcrypt.so.20
 	cp $(RRAYPRE)/build/bin/libRadeonRays.so.2.0 ../build/libRadeonRays.so.2.0
 endif
+	ar rvs $(AVIPRE)/obj/libgwavi.a $(AVIPRE)/obj/*.o
 	@echo "Linking..."
-	@$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
+	$(CXX) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
 ifeq ($(UNAME_S),Darwin)
 	install_name_tool -add_rpath "@executable_path" ../build/avis
 	install_name_tool -change $(shell python3-config --exec)/Python /tmpp/Python ../build/avis

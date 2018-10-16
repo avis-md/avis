@@ -735,19 +735,22 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 				glUniform1i(parConProgLocs[6], 2);
 				glActiveTexture(GL_TEXTURE2);
 				glBindTexture(GL_TEXTURE_BUFFER, c2.tbuf);
-				glUniform1ui(parConProgLocs[7], id2);
-				glUniform1f(parConProgLocs[8], c2.scale);
-				glUniform1f(parConProgLocs[9], osz);
-				glUniform1i(parConProgLocs[10], 3);
+				glUniform1i(parConProgLocs[7], 3);
 				glActiveTexture(GL_TEXTURE3);
-				glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
+				glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
+				glUniform1ui(parConProgLocs[8], id2);
+				glUniform1f(parConProgLocs[9], c2.scale);
+				glUniform1f(parConProgLocs[10], osz);
 				glUniform1i(parConProgLocs[11], 4);
 				glActiveTexture(GL_TEXTURE4);
+				glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
+				glUniform1i(parConProgLocs[12], 5);
+				glActiveTexture(GL_TEXTURE5);
 				glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
-				glUniform1i(parConProgLocs[13], 0);
 				glUniform1i(parConProgLocs[14], 0);
-				glUniform4f(parConProgLocs[15], c2.col.r, c2.col.g, c2.col.b, c2.usecol? 1.f : 0.f);
-				glUniform1f(parConProgLocs[16], spriteScl);
+				glUniform1i(parConProgLocs[15], 0);
+				glUniform4f(parConProgLocs[16], c2.col.r, c2.col.g, c2.col.b, c2.usecol? 1.f : 0.f);
+				glUniform1f(parConProgLocs[17], spriteScl);
 				glDrawArrays(GL_TRIANGLES, 0, c2.cnt*12);
 
 			}

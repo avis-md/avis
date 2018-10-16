@@ -7,6 +7,7 @@
                 "${workspaceFolder}/../radeonrays/Calc/inc",
                 "${workspaceFolder}/../radeonrays/CLW",
                 "${workspaceFolder}/../radeonrays/RadeonRays/include",
+                "${workspaceFolder}/../libgwavi/inc",
                 "/usr/local/include/freetype2",
                 "/Library/Frameworks/Python.framework/Versions/3.6/include/python3.6m"
             ],

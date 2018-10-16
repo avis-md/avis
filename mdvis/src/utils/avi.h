@@ -1,7 +1,7 @@
 #pragma once
 #include "Engine.h"
 extern "C" {
-#include "libgwavi.h"
+#include "gwavi.h"
 }
 
 class AVI {
@@ -12,4 +12,5 @@ public:
 
 private:
 	struct gwavi_t* gwavi;
+	uint _w, _h;
 };

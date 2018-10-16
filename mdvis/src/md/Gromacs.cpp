@@ -42,6 +42,7 @@ bool Gromacs::Read(ParInfo* info) {
 	strm.getline(buf, 100);
 	auto ns = _find_char_not_of(buf, buf + 10, ' ') + 1;
 	strm.seekg(lc);
+	int of = 8;
 	for (uint i = 0; i < sz; i++) {
 		info->progress = i * 1.f / sz;
 		strm.getline(buf, 100);
@@ -55,21 +56,58 @@ bool Gromacs::Read(ParInfo* info) {
 		auto n0 = _find_char_not_of(bf, bf + 5, ' ');
 		memcpy(info->name + i * info->nameSz, bf + n0, 5 - n0);
 		info->type[i] = (uint16_t)bf[n0];
-		bf += 5 + ns;
-		info->pos[i * 3] = std::atof(bf); bf += 8;
-		info->pos[i * 3 + 1] = std::atof(bf); bf += 8;
-		info->pos[i * 3 + 2] = std::atof(bf);
-		if (!!buf[50]) {
-			bf += 8;
-			info->vel[i * 3] = std::atof(bf); bf += 8;
-			info->vel[i * 3 + 1] = std::atof(bf); bf += 8;
+		bf += 5 + ns + (of-8);
+		while (*bf == ' ') {
+			bf++;
+			of++;
+		}
+		info->pos[i * 3] = std::atof(bf); bf += of;
+		info->pos[i * 3 + 1] = std::atof(bf); bf += of;
+		info->pos[i * 3 + 2] = std::atof(bf); bf += of;
+		if (!!bf) {
+			info->vel[i * 3] = std::atof(bf); bf += of;
+			info->vel[i * 3 + 1] = std::atof(bf); bf += of;
 			info->vel[i * 3 + 2] = std::atof(bf);
 		}
 	}
 
 	strm >> info->bounds[1] >> info->bounds[3] >> info->bounds[5];
 	strm.ignore(10, '\n');
-	ReadGro2(info, strm, ns);
+	if (!strm.eof())
+		ReadGro2(info, strm, ns);
+	return true;
+}
+
+bool Gromacs::ReadFrm(FrmInfo* info) {
+	char buf[100]{};
+	std::ifstream strm(info->path);
+	if (!strm.is_open()) {
+		SETERR("Cannot open file!");
+		return false;
+	}
+	strm.getline(buf, 100);
+	strm.getline(buf, 100);
+	int of = 8;
+	for (uint32_t i = 0; i < info->parNum; i++) {
+		strm.getline(buf, 100);
+		if (strm.eof()) {
+			SETERR("File data is incomplete!");
+			return false;
+		}
+		auto bf = buf + 23;
+		info->pos[i * 3] = std::atof(bf); bf += of;
+		while (*bf == ' ') {
+			bf++;
+			of++;
+		}
+		info->pos[i * 3 + 1] = std::atof(bf); bf += of;
+		info->pos[i * 3 + 2] = std::atof(bf); bf += of;
+		if (!!bf) {
+			info->vel[i * 3] = std::atof(bf); bf += of;
+			info->vel[i * 3 + 1] = std::atof(bf); bf += of;
+			info->vel[i * 3 + 2] = std::atof(bf);
+		}
+	}
 	return true;
 }
 

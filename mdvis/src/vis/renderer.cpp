@@ -2,6 +2,7 @@
 #include "renderer.h"
 #include "pargraphics.h"
 #include "gif/gif.h"
+#include "utils/avi.h"
 #include "md/parmenu.h"
 #include "ui/ui_ext.h"
 #include "ui/localizer.h"
@@ -269,8 +270,9 @@ void VisRenderer::ToGif() {
 	
 	auto delay = (uint32_t)std::ceil(1.0f / ParGraphics::animTarFps);
 
-	GifWriter writer;
-	GifBegin(&writer, (IO::currPath + "movie.gif").c_str(), vidW, vidH, delay);
+	//GifWriter writer;
+	//GifBegin(&writer, (IO::currPath + "movie.gif").c_str(), vidW, vidH, delay);
+	AVI avifile(IO::currPath + "movie.avi", vidW, vidH, 30);
 	std::vector<byte> res(vidW * vidH * 4);
 
 	for (uint f = 0; f < Particles::anim.frameCount; f += vidSkip) {
@@ -304,14 +306,16 @@ void VisRenderer::ToGif() {
 		
 		glfwPollEvents();
 
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, res_fbo);
-		glReadPixels(0, 0, vidW, vidH, GL_RGBA, GL_UNSIGNED_BYTE, &res[0]);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-		glFinish();
-		GifWriteFrame(&writer, &res[0], vidW, vidH, delay);
+		//glBindFramebuffer(GL_READ_FRAMEBUFFER, res_fbo);
+		//glReadPixels(0, 0, vidW, vidH, GL_RGBA, GL_UNSIGNED_BYTE, &res[0]);
+		//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		//glFinish();
+		//GifWriteFrame(&writer, &res[0], vidW, vidH, delay);
+		avifile.AddFrame(res_img);
 	}
 
-	GifEnd(&writer);
+	//GifEnd(&writer);
+	avifile.End();
 	Debug::Message("Renderer::ToGif", "Finished");
 
 	Display::width = w;
