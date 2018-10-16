@@ -296,8 +296,13 @@ void RayTracer::SetObjs() {
 			colors.push_back(mat.diffuse[2]);
 		}
 
-		verts.resize(mesh.indices.size() * 3, 0.f);
-		normals.resize(mesh.indices.size() * 3, 0.f);
+        if (mesh.positions.size() / 3 < mesh.indices.size())
+        {
+            int count = mesh.indices.size() * 3 - mesh.positions.size();
+            auto sz = verts.size();
+            verts.resize(sz + count, 0.f);
+            normals.resize(sz + count, 0.f);
+        }
 
 		indents.push_back(indent);
 		indent += mesh.indices.size();
