@@ -27,10 +27,21 @@ void _printstack() {
 	void* buf[50];
 	uint c = Debug::StackTrace(50, buf);
 #ifndef PLATFORM_WIN
+	remove((IO::path + "trace.txt").c_str());
 	auto bs = backtrace_symbols(buf, c);
 	for (uint a = 0; a < c; a++) {
-		Debug::Error("System", bs[a]);
+		std::string str(bs[a]);
+		Debug::Error("System", str);
+		int pos = string_find(str, "avis");
+		if (pos > -1) {
+			str = str.substr(string_find(str, "(+") + 2);
+			str = str.substr(0, str.find_first_of(")"));
+			auto cmd = ("addr2line -a " + str + " -e " + IO::path + "avis >> " + IO::path + "trace.txt");
+			system(cmd.c_str());
+		}
 	}
+	std::cout << "Addr2Line below:" << std::endl;
+	system(("cat " + IO::path + "trace.txt").c_str());
 #endif
 }
 

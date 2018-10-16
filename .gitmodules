@@ -4,3 +4,6 @@
 [submodule "mdvis/src/gif"]
 	path = mdvis/src/gif
 	url = https://github.com/ginsweater/gif-h.git
+[submodule "libgwavi"]
+	path = libgwavi
+	url = https://github.com/Rolinh/libgwavi.git
