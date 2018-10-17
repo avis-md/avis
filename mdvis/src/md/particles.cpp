@@ -29,6 +29,7 @@ void Particles::AnimData::Seek(uint f) {
 	currentFrame = f;
 	if (frameCount <= 1) return;
 	if (status[f] != FRAME_STATUS::LOADED) {
+		while (status[f] == FRAME_STATUS::READING){}
 		if (status[f] == FRAME_STATUS::UNLOADED) {
 			ParLoader::OpenFrameNow(f, paths[f]);
 		}

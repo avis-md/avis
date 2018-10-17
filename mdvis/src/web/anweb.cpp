@@ -206,6 +206,8 @@ void AnWeb::Draw() {
 
 						SW(MISC::PLOT, Node_Plot);
 						SW(MISC::SRNG, Node_ShowRange);
+						SW(MISC::ADJL, Node_AdjList);
+						SW(MISC::ADJLI, Node_AdjListI);
 					default:
 						Debug::Error("AnWeb::Draw", "Unhandled node type: " + std::to_string((int)selSpNode));
 						return;
@@ -279,7 +281,10 @@ void AnWeb::Draw() {
 	}
 	UI::Texture(275, 1, 16, 16, Icons::play);
 	UI::Texture(350, 1, 16, 16, Icons::playall);
-	if (drawLerp < 1) drawLerp = min(drawLerp + 10 * Time::delta, 1.f);
+	if (drawLerp < 1) {
+		drawLerp = min(drawLerp + 10 * Time::delta, 1.f);
+		Scene::dirty = true;
+	}
 #endif
 }
 
@@ -291,8 +296,10 @@ void AnWeb::DrawSide() {
 		AnNode::width = w - 2;
 		UI::Label(Display::width - expandPos + 5, 20, 12, _("Analysis"), white());
 
-		if (Engine::Button(Display::width - expandPos + 109, 20, 70, 16, white(1, 0.4f), _("Edit"), 12, white(), true) == MOUSE_RELEASE)
+		if (Engine::Button(Display::width - expandPos + 109, 20, 70, 16, white(1, 0.4f), _("Edit"), 12, white(), true) == MOUSE_RELEASE){
 			drawFull = true;
+			Scene::dirty = true;
+		}
 
 		bool canexec = (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
 		if (Engine::Button(Display::width - expandPos + 1, 38, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
@@ -656,6 +663,8 @@ void AnWeb::Load(const std::string& s) {
 					ND(Node_SetParam)
 					ND(Node_Plot)
 					ND(Node_ShowRange)
+					ND(Node_AdjList)
+					ND(Node_AdjListI)
 					Debug::Warning("AnWeb::Load", "Unknown node name: " + nm);
 		#undef ND
 					break;

@@ -50,9 +50,11 @@ enum class AN_NODE_MISC {
 	NUM0 = 0x60,
 	PLOT,
 	SRNG,
+	ADJL,
+	ADJLI,
 	NUM
 };
-const std::string AN_NODE_MISCS[] = { "Plot graph", "Show Range" };
+const std::string AN_NODE_MISCS[] = { "Plot graph", "Show Range", "To Adjacency List", "To Paired List" };
 
 class AnWeb {
 public:
@@ -109,3 +111,4 @@ public:
 #include "nodes/node_volume.h"
 #include "nodes/node_remap.h"
 #include "nodes/node_gromacs.h"
+#include "nodes/misc/node_adjlist.h"

@@ -620,6 +620,7 @@ void ParLoader::OpenFrame(uint f, const std::string& path) {
 
 void ParLoader::OpenFrameNow(uint f, std::string path) {
 	while (busy){}
+	Debug::Message("ParLoader", "Load frame " + std::to_string(f));
 	std::flush(std::cout);
 	using FS = Particles::AnimData::FRAME_STATUS;
 	busy = true;
@@ -793,14 +794,14 @@ void ParLoader::DrawOpenDialog() {
 			}
 		}
 	}
-		auto l = Engine::Toggle(woff + 5, hoff + 17 * 4, 16, Icons::checkbox, loadAsTrj, white(), ORIENT_HORIZONTAL);
-		if (l != loadAsTrj) {
-			loadAsTrj = l;
-			FindImpId(true);
-		}
-		UI::Label(woff + 34, hoff + 17 * 4, 12, "As Trajectory", white(), 326);
-		additive = Engine::Toggle(woff + 201, hoff + 17 * 4, 16, Icons::checkbox, additive, white(), ORIENT_HORIZONTAL);
-		UI::Label(woff + 230, hoff + 17 * 4, 12, "Additive", white(), 326);
+	auto l = Engine::Toggle(woff + 5, hoff + 17 * 4, 16, Icons::checkbox, loadAsTrj, white(), ORIENT_HORIZONTAL);
+	if (l != loadAsTrj) {
+		loadAsTrj = l;
+		FindImpId(true);
+	}
+	UI::Label(woff + 34, hoff + 17 * 4, 12, "As Trajectory", white(), 326);
+	additive = Engine::Toggle(woff + 201, hoff + 17 * 4, 16, Icons::checkbox, additive, white(), ORIENT_HORIZONTAL);
+	UI::Label(woff + 230, hoff + 17 * 4, 12, "Additive", white(), 326);
 
 	UI::Label(woff + 2, hoff + 17 * 5, 12, "Options", white(), 326);
 	useConn = Engine::Toggle(woff + 5, hoff + 17 * 6, 16, Icons::checkbox, useConn, white(), ORIENT_HORIZONTAL);
@@ -816,6 +817,7 @@ void ParLoader::DrawOpenDialog() {
 			}
 		}
 	}
+	maxframes = TryParse(UI2::EditText(woff + 2, hoff + 17 * 8, 200, "Max Frames", std::to_string(maxframes)), 1000);
 	/*
 	std::string line = "";
 	if (loadAsTrj) line += "-trj ";

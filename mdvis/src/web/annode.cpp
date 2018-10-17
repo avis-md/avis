@@ -17,6 +17,8 @@ const std::string Node_TraceTrj::sig = ".trrj";
 const std::string Node_Volume::sig = ".vol";
 const std::string Node_Remap::sig = ".remap";
 const std::string Node_Gromacs::sig = ".gro";
+const std::string Node_AdjList::sig = ".adjl";
+const std::string Node_AdjListI::sig = ".adjli";
 
 Vec4 AnNode::bgCol = white(0.7f, 0.25f);
 

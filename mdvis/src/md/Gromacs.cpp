@@ -56,9 +56,8 @@ bool Gromacs::Read(ParInfo* info) {
 		auto n0 = _find_char_not_of(bf, bf + 5, ' ');
 		memcpy(info->name + i * info->nameSz, bf + n0, 5 - n0);
 		info->type[i] = (uint16_t)bf[n0];
-		bf += 5 + ns + (of-8);
-		while (*bf == ' ') {
-			bf++;
+		bf += 5 + ns;
+		while (*(bf+of) != ' ') {
 			of++;
 		}
 		info->pos[i * 3] = std::atof(bf); bf += of;
@@ -94,12 +93,11 @@ bool Gromacs::ReadFrm(FrmInfo* info) {
 			SETERR("File data is incomplete!");
 			return false;
 		}
-		auto bf = buf + 23;
-		info->pos[i * 3] = std::atof(bf); bf += of;
-		while (*bf == ' ') {
-			bf++;
+		auto bf = buf + 20;
+		while (*(bf+of) != ' ') {
 			of++;
 		}
+		info->pos[i * 3] = std::atof(bf); bf += of;
 		info->pos[i * 3 + 1] = std::atof(bf); bf += of;
 		info->pos[i * 3 + 2] = std::atof(bf); bf += of;
 		if (!!bf) {

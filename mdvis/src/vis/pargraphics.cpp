@@ -56,7 +56,7 @@ float ParGraphics::rotW = 0, ParGraphics::rotZ = 0;
 float ParGraphics::rotWs = 0, ParGraphics::rotZs = 0;
 float ParGraphics::rotScale = 0;
 
-bool ParGraphics::autoRot = true;
+bool ParGraphics::autoRot = false;
 
 Mesh* ParGraphics::arrowMesh;
 
