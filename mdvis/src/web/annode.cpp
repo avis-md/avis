@@ -13,6 +13,7 @@ const std::string Node_Camera_Out::sig = ".camo";
 const std::string Node_Plot::sig = ".plot";
 const std::string Node_SetParam::sig = ".param";
 const std::string Node_ShowRange::sig = ".srng";
+const std::string Node_SetRadScl::sig = ".rscl";
 const std::string Node_TraceTrj::sig = ".trrj";
 const std::string Node_Volume::sig = ".vol";
 const std::string Node_Remap::sig = ".remap";

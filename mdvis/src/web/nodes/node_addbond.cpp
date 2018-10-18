@@ -29,6 +29,15 @@ Node_AddBond::~Node_AddBond() {
 }
 
 void Node_AddBond::Execute() {
+	//
+	if (!Particles::anim.conns2.size()) {
+		Particles::anim.conns2.resize(1);
+		Particles::particles_Conn2.resize(1);
+		animId = 0;
+		auto& c2 = Particles::anim.conns2[animId];
+		c2.clear();
+	}
+
 	if (!inputR[0].first) return;
 	CVar& cv = inputR[0].first->conV[inputR[0].second];
 	if (*cv.dimVals[1] != 2) RETERR("dimension 1 must be of size 2!");

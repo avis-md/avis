@@ -68,7 +68,7 @@ void updateFunc() {
 	if (!!Particles::particleSz) {
 		Particles::Update();
 		if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime)
-			&& !ParLoader::busy && ChokoLait::foreground
+			&& !ParLoader::busy && !AnWeb::executing && ChokoLait::foreground
 			&& (VisRenderer::status != VisRenderer::STATUS::BUSY)) {
 			VisSystem::lastSave = Time::time;
 			VisSystem::Save(IO::path + ".recover");

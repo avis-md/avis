@@ -1,18 +1,13 @@
 #pragma once
 #include "../annode.h"
 
-class Node_ShowRange : public AnNode {
+class Node_SetRadScl : public AnNode {
 public:
 	static const std::string sig;
-	Node_ShowRange();
-    
-    bool invert;
-
-    float rMin = 0, rMax = 1;
+	Node_SetRadScl();
     
 	void Execute() override;
 	void OnAnimFrame() override { Execute(); }
-    void DrawHeader(float& off) override;
 	void SaveOut(const std::string& path) override {}
 	void LoadOut(const std::string& path) override;
 };

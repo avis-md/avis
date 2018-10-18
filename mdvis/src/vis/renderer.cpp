@@ -278,6 +278,7 @@ void VisRenderer::ToGif() {
 	for (uint f = 0; f < Particles::anim.frameCount; f += vidSkip) {
 		Debug::Message("Renderer::ToGif", "Rendering frame " + std::to_string(f));
 		Particles::SetFrame(f);
+		Particles::Update();
 		if (vidMsaa > 0) {
 			for (int c = 0; c < 4; c++) {
 				Scene::dirty = true;

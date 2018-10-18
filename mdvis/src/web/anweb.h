@@ -34,9 +34,10 @@ const std::string AN_NODE_INS[] = { "Particle data", "System info" };
 enum class AN_NODE_MOD {
 	NUM0 = 0x20,
 	PARAM,
+	RSCL,
 	NUM
 };
-const std::string AN_NODE_MODS[] = { "Set Param" };
+const std::string AN_NODE_MODS[] = { "Set Param", "Set Radii Scale" };
 
 enum class AN_NODE_GEN {
 	NUM0 = 0x40,
@@ -107,6 +108,7 @@ public:
 #include "nodes/node_plot.h"
 #include "nodes/node_setparam.h"
 #include "nodes/node_showrange.h"
+#include "nodes/node_setradscl.h"
 #include "nodes/node_tracetrj.h"
 #include "nodes/node_volume.h"
 #include "nodes/node_remap.h"
