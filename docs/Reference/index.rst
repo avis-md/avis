@@ -4,5 +4,5 @@ Usage Reference
 .. toctree::
    :maxdepth: 3
    
-   Analysis/index
-   IO/index
+   fileio/index
+   anl/index

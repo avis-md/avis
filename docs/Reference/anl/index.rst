@@ -4,5 +4,5 @@ Analysis
 .. toctree::
    :maxdepth: 2
    
-   Nodes/index
+   nodes/index
    scripting

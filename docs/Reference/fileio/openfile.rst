@@ -29,7 +29,7 @@ The format of the configuration and trajectory files need not be the same; but t
 Incremental loading
 ~~~~~~~~~~~~~~~~~~~
 
-For trajectories that come in separate files, AViS can load each file progressively, thus saving time and data usage.
+For trajectories that come in separate files, AViS can load each file incrementally, thus saving time and data usage.
 The total number of frames to load into memory can be set in the ``Preferences``.
 
 .. Note::
@@ -38,7 +38,7 @@ The total number of frames to load into memory can be set in the ``Preferences``
 
 .. Important::
 
-    To allow for progressive loading, every filename must have matching formats with an incrementing number at the end.
+    To allow for incremental loading, every filename must have matching formats with an incrementing number at the end.
     The number of figures of the number must be constant. The number may increment by more than 1 every frame, but the rate must be constant.
 
     Example::
