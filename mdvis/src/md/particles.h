@@ -71,6 +71,7 @@ public:
 	static std::vector<short> types;
 	static std::vector<byte> colors;
 	static std::vector<float> radii;
+	static std::vector<float> radiiscl;
 	static std::vector<bool> visii;
 	static std::vector<Int2> ress;
 	static conninfo conns;

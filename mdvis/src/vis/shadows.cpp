@@ -174,10 +174,10 @@ float Shadows::DrawMenu(float off) {
 	UI::Quad(expandPos - 148, off - 1, 147, 17 * 5 + 2, white(0.9f, 0.1f));
 	UI::Label(expandPos - 147, off, 12, "Shadows", white());
 	show = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, show, white(), ORIENT_HORIZONTAL);
-	str = UI2::Slider(expandPos - 147, off + 17, 147, "Strength", 0, 1, str);
-	bias = UI2::Slider(expandPos - 147, off + 17 * 2, 147, "Bias", 0, 1, bias);
-	rw = UI2::Slider(expandPos - 147, off + 17 * 3, 147, "Angle W", 0, 360, rw);
-	rz = UI2::Slider(expandPos - 147, off + 17 * 4, 147, "Angle Y", -90, 90, rz);
+	str = UI2::Slider(expandPos - 147, off + 17, 146, "Strength", 0, 1, str);
+	bias = UI2::Slider(expandPos - 147, off + 17 * 2, 146, "Bias", 0, 1, bias);
+	rw = UI2::Slider(expandPos - 147, off + 17 * 3, 146, "Angle W", 0, 360, rw);
+	rz = UI2::Slider(expandPos - 147, off + 17 * 4, 146, "Angle Y", -90, 90, rz);
 #define DF(x) (_ ## x != x)
 	if (DF(show) || DF(str) || DF(bias) || DF(rw) || DF(rz)) {
 		Scene::dirty = true;

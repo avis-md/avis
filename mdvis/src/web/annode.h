@@ -44,6 +44,8 @@ public:
 		uint second;
 		bool use;
 		nodecon(AnNode* f = 0, uint s = 0, bool use = true) : first(f), second(s), use(true) {}
+		CVar& getconv() { return first->conV[second]; }
+		void*& getval() { return getconv().value; }
 	};
 	std::vector<nodecon> inputR;
 	std::vector<std::vector<nodecon>> outputR;

@@ -29,6 +29,7 @@ void Particles::AnimData::Seek(uint f) {
 	currentFrame = f;
 	if (frameCount <= 1) return;
 	if (status[f] != FRAME_STATUS::LOADED) {
+		while (status[f] == FRAME_STATUS::READING){}
 		if (status[f] == FRAME_STATUS::UNLOADED) {
 			ParLoader::OpenFrameNow(f, paths[f]);
 		}
@@ -121,6 +122,7 @@ std::vector<char> Particles::names, Particles::resNames;
 std::vector<short> Particles::types;
 std::vector<byte> Particles::colors;
 std::vector<float> Particles::radii;
+std::vector<float> Particles::radiiscl;
 std::vector<bool> Particles::visii;
 std::vector<Int2> Particles::ress;
 Particles::conninfo Particles::conns;
@@ -181,6 +183,7 @@ void Particles::Clear() {
 		types.clear();
 		colors.clear();
 		radii.clear();
+		radiiscl.clear();
 		visii.clear();
 		conns.ids.clear();
 		poss = 0;
@@ -218,6 +221,7 @@ void Particles::Resize(uint i) {
 	types.resize(i);
 	colors.resize(i);
 	radii.resize(i);
+	radiiscl.resize(i, 1);
 	visii.clear(); visii.resize(i, true);
 	ress.resize(i);
 }
@@ -275,13 +279,13 @@ void Particles::UpdateRadBuf(int i) {
 		std::vector<float> res(particleSz);
 #pragma omp parallel for
 		for (int a = 0; a < particleSz; a++) {
-			res[a] = visii[a] ? radii[a] : -1;
+			res[a] = visii[a] ? radii[a]*radiiscl[a] : -1;
 		}
 		SetGLSubBuf(radBuffer, &res[0], particleSz);
 	}
 	else {
 		glBindBuffer(GL_ARRAY_BUFFER, radBuffer);
-		float vl = visii[i] ? radii[i] : -1;
+		float vl = visii[i] ? radii[i]*radiiscl[i] : -1;
 		glBufferSubData(GL_ARRAY_BUFFER, i * sizeof(float), sizeof(float), &vl);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}

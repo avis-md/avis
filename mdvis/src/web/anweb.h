@@ -34,9 +34,10 @@ const std::string AN_NODE_INS[] = { "Particle data", "System info" };
 enum class AN_NODE_MOD {
 	NUM0 = 0x20,
 	PARAM,
+	RSCL,
 	NUM
 };
-const std::string AN_NODE_MODS[] = { "Set Param" };
+const std::string AN_NODE_MODS[] = { "Set Param", "Set Radii Scale" };
 
 enum class AN_NODE_GEN {
 	NUM0 = 0x40,
@@ -50,9 +51,11 @@ enum class AN_NODE_MISC {
 	NUM0 = 0x60,
 	PLOT,
 	SRNG,
+	ADJL,
+	ADJLI,
 	NUM
 };
-const std::string AN_NODE_MISCS[] = { "Plot graph", "Show Range" };
+const std::string AN_NODE_MISCS[] = { "Plot graph", "Show Range", "To Adjacency List", "To Paired List" };
 
 class AnWeb {
 public:
@@ -105,7 +108,9 @@ public:
 #include "nodes/node_plot.h"
 #include "nodes/node_setparam.h"
 #include "nodes/node_showrange.h"
+#include "nodes/node_setradscl.h"
 #include "nodes/node_tracetrj.h"
 #include "nodes/node_volume.h"
 #include "nodes/node_remap.h"
 #include "nodes/node_gromacs.h"
+#include "nodes/misc/node_adjlist.h"
