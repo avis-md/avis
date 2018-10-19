@@ -39,6 +39,8 @@ list                    list(2i)           parcount, size       the converted ad
 Remarks
 ~~~~~~~
 
+.. image:: img/graph.png
+
 A paired list is pairs of indices indicating "bonds".
 For example, the connection above can be represented with the paired list below.
 
@@ -55,12 +57,12 @@ For example, the same connection can be represented with the adjacency list belo
 
 ::
 
-   0   1  3 -1 -1
-   1   2  3 -1 -1
-   2   1  3 -1 -1
-   3   0  1  2 -1
+   0   1  3 -1
+   1   0  2  3
+   2   1  3 -1
+   3   0  1  2
 
-In this case, the ``size`` of the list is 4, meaning each index can be connected to a maximum of 4 other indices.
+In this case, the ``size`` of the list is 3, meaning each index can be connected to a maximum of 3 other indices.
 An error will be output if the ``size`` is not big enough to accomodate the whole connection.
 
 .. Tip::
