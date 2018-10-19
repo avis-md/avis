@@ -2,6 +2,7 @@
 #include "md/Protein.h"
 #include "md/parloader.h"
 #include "ocl/raytracer.h"
+#include "ui/help.h"
 #include "ui/icons.h"
 #include "ui/localizer.h"
 #include "ui/popups.h"
@@ -123,6 +124,7 @@ void ParMenu::Draw() {
 }
 
 void ParMenu::Draw_List(float off) {
+	HelpMenu::Link(expandPos - 16, off, "");
 	if (Engine::Button(2, off, 16, 16, Icons::select, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
 		SelAll();
 	}
@@ -403,7 +405,7 @@ void ParMenu::DrawSplash() {
 	if (ms & MOUSE_HOVER_FLAG) {
 		sub = "Displays the user manual in the browser";
 		if (ms == MOUSE_RELEASE) {
-			IO::OpenEx(IO::path + "docs/index.html");
+			IO::OpenEx(IO::path + "../../docs/_build/html/index.html");
 		}
 	}
 	ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63 + 56, 140, 54, white(0.3f), _("Report A Problem"), 12, white(), true);

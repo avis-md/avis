@@ -2,6 +2,7 @@
 #include "ui/localizer.h"
 #ifndef IS_ANSERVER
 #include "ui/icons.h"
+#include "ui/help.h"
 #include "utils/runcmd.h"
 #endif
 
@@ -224,11 +225,12 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 void AnBrowse::Draw() {
 #ifndef IS_ANSERVER
 	if (Popups::type == POPUP_TYPE::NONE) doAddFd = nullptr;
-	UI::Quad(0.f, 0.f, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
+	UI::Quad(0, 0, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
 	if (expanded) {
 		float f = 20;
-		Engine::BeginStencil(0.f, 0.f, expandPos, Display::height - 18.f);
-		UI::Label(5.f, 3.f, 12.f, "Scripts", white());
+		Engine::BeginStencil(0, 0, expandPos, Display::height - 18.f);
+		UI::Label(5, 3, 12.f, "Scripts", white());
+		HelpMenu::Link(expandPos - 16, 3, "Analysis/index.html");
 
 #define BT(nm) (byte)(AN_NODE_ ## nm)
 #define MSC1(n, nm) UI::Quad(2, f, 150.f, 16.f, white(1, 0.3f)); \

@@ -5,3 +5,4 @@ Usage Reference
    :maxdepth: 3
    
    Analysis/index
+   IO/index

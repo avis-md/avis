@@ -8,4 +8,5 @@ public:
 	static float alpha;
 
 	static void Draw();
+	static void Link(float x, float y, const std::string& path);
 };

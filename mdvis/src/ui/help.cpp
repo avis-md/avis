@@ -1,6 +1,7 @@
 #include "help.h"
 #include "vis/pargraphics.h"
 #include "utils/tinyfiledialogs.h"
+#include "ui/icons.h"
 
 const std::string _opn[] = {
 	"Open file via terminal",
@@ -43,4 +44,10 @@ void HelpMenu::Draw() {
 		UI::alpha = 1;
 	}
 	alpha = Clamp(alpha + (show? 1 : -1)*5*Time::delta, 0.f, 1.f);
+}
+
+void HelpMenu::Link(float x, float y, const std::string& path) {
+	if (Engine::Button(x + 1, y + 1, 14, 14, Icons::circle) == MOUSE_RELEASE) {
+		IO::OpenEx(IO::path + "../../docs/_build/html/Reference/" + path);
+	}
 }

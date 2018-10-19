@@ -1,10 +1,7 @@
-In-built Nodes
+File I/O
 ================================
 
 .. toctree::
    :maxdepth: 2
    
-   ninput
-   nio
-   nmod
-   nmisc
+   openfile

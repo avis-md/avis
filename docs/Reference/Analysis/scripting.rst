@@ -1,7 +1,7 @@
 Scripting Reference
 ===================
 
-This section describes the requirement for extending the Analysis framework.
+This section describes the requirements for extending the Analysis framework.
 
 General
 -------
@@ -98,7 +98,10 @@ The general format of a parse-able script is as follows.
 Arrays
 ~~~~~~
 
-C-like code uses raw-pointers as dynamic arrays, so you need to know the length of each dimension. They can be specified beside the ``in`` or ``out`` comment. Length variables can be either: an input or output variable; a variable declared as ``var``; or a constant. All length variables must be of type ``int``.
+C-like code uses raw-pointers as dynamic arrays, so you need to know the length of each dimension.
+They can be specified beside the ``in`` or ``out`` comment.
+Length variables can be either: an input or output variable, a variable declared as ``var``, or a constant.
+All length variables must be of type ``int``.
 
 Example::
 
@@ -139,7 +142,7 @@ Example::
 
 .. Tip::
 
-      If you want to use other libraries that require linking, you can set additional linker flags in ``Preferences``
+      If you want to use other libraries that require additional compiler/linker flags, you can set them in ``Preferences``
 
 Python
 -------
@@ -149,7 +152,8 @@ Fortran
 
 .. highlight:: fortran
 
-.. Note:
+.. Note::
+
    A fortran script should contain a primary module with the same name as the first module.
 
 The general format of a parse-able script is as follows.
