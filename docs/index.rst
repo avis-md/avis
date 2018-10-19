@@ -2,10 +2,10 @@ AViS Documentation
 ================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    
    install
-
+   Reference/index
 
 
 Indices and tables

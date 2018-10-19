@@ -1,4 +1,4 @@
-Installing
+Installation
 ===========
 
 This section goes through the steps to install on 3 different OSes.
@@ -13,7 +13,7 @@ This section goes through the steps to install on 3 different OSes.
 Windows
 ----------
 
-Open up a command prompt with SSH (you should have it installed, yes?) and type the following:
+Open up a command prompt with SSH (you should have it installed, no?) and type the following:
 
 * cd [install path]
 * scp [any tekka gpu]:/nfs/home/share/avis/win/avis.zip avis.zip
