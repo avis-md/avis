@@ -78,7 +78,7 @@ To Paired List
 Description
 ~~~~~~~~~~~
 
-Converts data from a paired list to an adjacency list. See `remarks` for the description of paired lists and adjacency lists.
+Converts data from an adjacency list to a paired list. See `remarks` above for the definition of paired lists and adjacency lists.
 
 Input sockets
 ~~~~~~~~~~~~~
@@ -97,8 +97,3 @@ Name                    Type               Shape                Description
 ==================      ===============    ===============      ============
 list                    list(2i)           variable, 2          the converted linked list
 ==================      ===============    ===============      ============
-
-Remarks
-~~~~~~~
-
-See the Remarks section above for the definition of paired lists and adjacency lists.

@@ -1,10 +1,11 @@
 Installation
-===========
+============
 
 This section goes through the steps to install on 3 different OSes.
 
 .. Note::
-      This section is temporary; the contents will change once the project becomes public.
+      The contents for this section will change once the project becomes public.
+      For now, the app will only be available to Yasuoka Lab members.
 
 1. Windows
 2. MacOS
