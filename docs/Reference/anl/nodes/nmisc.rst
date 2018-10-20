@@ -40,6 +40,7 @@ Remarks
 ~~~~~~~
 
 .. image:: img/graph.png
+    :width: 30%
 
 A paired list is pairs of indices indicating "bonds".
 For example, the connection above can be represented with the paired list below.

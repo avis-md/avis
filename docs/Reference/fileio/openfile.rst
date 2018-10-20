@@ -8,6 +8,8 @@ Importing Configurations
 Configuration files contain the atom types, residue groups, as well as initial positions and other information.
 
 .. image:: img/icfg.png
+    :width: 50%
+    :align: center
 
 .. Note::
 
@@ -18,6 +20,8 @@ Importing Trajectories
 ----------------------
 
 .. image:: img/itrj.png
+    :width: 50%
+    :align: center
 
 Trajectory files contain the coordinates (and velocities) for a certain number of frames.
 The format of the configuration and trajectory files need not be the same; but the atom count must match.
@@ -55,6 +59,8 @@ AViS can handle remote files the same way as local files.
 You are required to connect to the remote server via SSH.
 
 .. image:: img/irmt.png
+    :width: 50%
+    :align: center
 
 Remote files are downloaded to a temporary folder, and erased as soon as the file is read into memory.
 You can significantly reduce the disk usage by lowering the maximum number of frames loaded into memory; however,

@@ -141,7 +141,11 @@ Cube                    Only atoms in the bounding volume is shown
 
 * Effects
 
+Additional effects to apply to the scene
+
 .. image:: img/geff.png
+
+List of effects available:
 
    * Ambient Occlusion
 
@@ -165,6 +169,8 @@ Render Tab
 
 Produces a high resolution screenshot of the view.
 
+.. image:: img/rimg.png
+
 =====================   ==============
 Option                  Details
 =====================   ==============
@@ -176,7 +182,9 @@ MSAA                    Averages the final image over 4 samples. Slower but more
 
 * To Video (GLSL)
 
-Produces a high resolution video of the animation playback.
+Produces a high resolution screenshot video of the animation playback.
+
+.. image:: img/rmov.png
 
 =====================   ==============
 Option                  Details
