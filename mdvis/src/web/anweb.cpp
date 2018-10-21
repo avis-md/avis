@@ -53,6 +53,14 @@ void AnWeb::Clear() {
 	nodes.clear();
 }
 
+void AnWeb::Clear0() {
+	for (int a = 1; a < nodes.size(); a++) {
+		delete(nodes[a]);
+	}
+	nodes.resize(1);
+	nodes.push_back(new Node_Info());
+}
+
 void AnWeb::Insert(AnScript* scr, Vec2 pos) {
 	AnNode* nd;
 	if (scr->type == AN_SCRTYPE::PYTHON)

@@ -126,7 +126,7 @@ void VisSystem::Init() {
 	mi.resize(6);
 	mi[0].Set(Icons::newfile, _("New"), []() {
 		Particles::Clear();
-		AnWeb::Clear();
+		AnWeb::Clear0();
 	});
 	mi[1].Set(Icons::openfile, _("Open"), []() {
 		auto res = Dialog::OpenFile({ "*" EXT_SVFL });
