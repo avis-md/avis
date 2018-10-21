@@ -5,7 +5,7 @@
 
 Node_SetParam::Node_SetParam() : AnNode(new DmScript(sig)), paramId(0), di(&paramId, Particles::particles_ParamNms) {
 	title = "Set Parameter";
-	titleCol = Vec3(0.3f, 0.5f, 0.3f);
+	titleCol = NODE_COL_IO;
     canTile = false;
 	inputR.resize(1);
 	script->invars.push_back(std::pair<std::string, std::string>("values", "list(*d)"));

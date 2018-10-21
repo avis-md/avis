@@ -4,7 +4,7 @@
 
 Node_Info::Node_Info() :AnNode(new DmScript(sig)) {
 	title = "System Info";
-	titleCol = Vec3(0.3f, 0.3f, 0.5f);
+	titleCol = NODE_COL_IO;
 	canTile = true;
 	
 	const std::string vars[] = {

@@ -1,6 +1,53 @@
 #pragma once
 #include "anscript.h"
 
+const Vec3 NODE_COL_USR = Vec3(0.35f);
+const Vec3 NODE_COL_NRM = Vec3(0.5f, 0.4f, 0.3f);
+const Vec3 NODE_COL_IO = Vec3(0.3f, 0.3f, 0.5f);
+const Vec3 NODE_COL_MOD = Vec3(0.3f, 0.5f, 0.3f);
+const Vec3 NODE_COL_SPC = Vec3(0.5f, 0.3f, 0.3f);
+
+enum class AN_NODE_SCN : byte {
+	NUM0 = 0x80,
+	OCAM,
+	NUM	
+};
+const std::string AN_NODE_SCNS[] = { "Camera (Set)" };
+
+enum class AN_NODE_IN : byte {
+	NUM0 = 0,
+	PARS,
+	PINFO,
+	NUM
+};
+const std::string AN_NODE_INS[] = { "Particle data", "System info" };
+
+enum class AN_NODE_MOD {
+	NUM0 = 0x20,
+	PARAM,
+	RSCL,
+	NUM
+};
+const std::string AN_NODE_MODS[] = { "Set Param", "Set Radii Scale" };
+
+enum class AN_NODE_GEN {
+	NUM0 = 0x40,
+	BOND,
+	TRJ,
+	NUM
+};
+const std::string AN_NODE_GENS[] = { "Add Bonds", "Trace Trajectory" };
+
+enum class AN_NODE_MISC {
+	NUM0 = 0x60,
+	PLOT,
+	SRNG,
+	ADJL,
+	ADJLI,
+	NUM
+};
+const std::string AN_NODE_MISCS[] = { "Plot graph", "Show Range", "To Adjacency List", "To Paired List" };
+
 enum class ANNODE_OP {
 	NONE,
 	LEFT,
@@ -25,7 +72,7 @@ public:
 	uint id;
 	static float width;
 	std::string title;
-	Vec3 titleCol = Vec3(0.35f);
+	Vec3 titleCol = NODE_COL_USR;
 	static Vec4 bgCol;
 
 	bool expanded = true;

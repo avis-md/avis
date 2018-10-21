@@ -3,7 +3,7 @@
 
 Node_TraceTrj::Node_TraceTrj() : AnNode(new DmScript(sig)) {
 	title = "Trace Trajectory";
-	titleCol = Vec3(0.3f, 0.5f, 0.3f);
+	titleCol = NODE_COL_MOD;
     canTile = false;
 	inputR.resize(1);
 	script->invars.push_back(std::pair<std::string, std::string>("values", "list(2f)"));

@@ -16,47 +16,6 @@ constexpr int EXT_FS_SZ = strlen_c(EXT_FS);
 #define EXT_ANSV ".anl"
 constexpr int EXT_ANSV_SZ = strlen_c(EXT_ANSV);
 
-enum class AN_NODE_SCN : byte {
-	NUM0 = 0x80,
-	OCAM,
-	NUM	
-};
-const std::string AN_NODE_SCNS[] = { "Camera (Set)" };
-
-enum class AN_NODE_IN : byte {
-	NUM0 = 0,
-	PARS,
-	PINFO,
-	NUM
-};
-const std::string AN_NODE_INS[] = { "Particle data", "System info" };
-
-enum class AN_NODE_MOD {
-	NUM0 = 0x20,
-	PARAM,
-	RSCL,
-	NUM
-};
-const std::string AN_NODE_MODS[] = { "Set Param", "Set Radii Scale" };
-
-enum class AN_NODE_GEN {
-	NUM0 = 0x40,
-	BOND,
-	TRJ,
-	NUM
-};
-const std::string AN_NODE_GENS[] = { "Add Bonds", "Trace Trajectory" };
-
-enum class AN_NODE_MISC {
-	NUM0 = 0x60,
-	PLOT,
-	SRNG,
-	ADJL,
-	ADJLI,
-	NUM
-};
-const std::string AN_NODE_MISCS[] = { "Plot graph", "Show Range", "To Adjacency List", "To Paired List" };
-
 class AnWeb {
 public:
 	static bool lazyLoad;

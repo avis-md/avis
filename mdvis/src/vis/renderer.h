@@ -38,9 +38,8 @@ public:
 
 	static void Draw(), DrawMenu();
 
-	static void ToGif();
-
 	static void ToImage();
+	static void ToVid();
 
 	static void MakeTex(GLuint& fbo, GLuint& tex, int w, int h);
 };

@@ -62,7 +62,7 @@ void Node_AdjList::Execute() {
 Node_AdjListI::Node_AdjListI() : AnNode(new DmScript(sig)) {
 	auto scr = (DmScript*)script;
 	title = "To Paired List";
-	titleCol = Vec3(0.3f, 0.5f, 0.3f);
+	titleCol = NODE_COL_NRM;
 	inputR.resize(1);
 	scr->invaropts.resize(1);
 	scr->invars.push_back(std::pair<std::string, std::string>("adjlist", "list(2i)"));

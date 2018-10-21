@@ -47,7 +47,8 @@ void Node_Volume::Init() {
 }
 
 Node_Volume::Node_Volume() : AnNode(new DmScript(sig)) {
-	//width = 200;
+	title = "Volume view";
+	titleCol = NODE_COL_MOD;
 	canTile = true;
 	inputR.resize(1);
 	script->invars.push_back(std::pair<std::string, std::string>("array", "list(3)"));

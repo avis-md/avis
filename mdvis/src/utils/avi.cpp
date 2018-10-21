@@ -33,8 +33,8 @@ void AVI::AddFrame(GLuint tex) {
 	jpeg_start_compress(&cinfo, TRUE);
 	row_stride = _w * 3;
 	while (cinfo.next_scanline < cinfo.image_height) {
-	row_pointer[0] = &buf[cinfo.next_scanline * row_stride];
-	jpeg_write_scanlines(&cinfo, row_pointer, 1);
+		row_pointer[0] = &buf[(_h-1-cinfo.next_scanline) * row_stride];
+		jpeg_write_scanlines(&cinfo, row_pointer, 1);
 	}
 
 	jpeg_finish_compress(&cinfo);

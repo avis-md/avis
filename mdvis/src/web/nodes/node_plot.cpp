@@ -7,6 +7,7 @@
 
 Node_Plot::Node_Plot() : AnNode(new DmScript(sig)) {
 	title = "Plot Data";
+	titleCol = NODE_COL_SPC;
 	canTile = true;
 	inputR.resize(3, nodecon(0, 0, false));
 	inputVDef.resize(3);

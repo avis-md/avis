@@ -4,7 +4,7 @@
 
 Node_Camera_Out::Node_Camera_Out() : AnNode(new DmScript(sig)) {
     title = "Camera (Set)";
-    titleCol = Vec3(0.3f, 0.5f, 0.3f);
+    titleCol = NODE_COL_IO;
     canTile = false;
     inputR.resize(6);
     auto& vrs = script->invars;

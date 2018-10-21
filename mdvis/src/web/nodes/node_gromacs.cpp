@@ -7,7 +7,7 @@
 Node_Gromacs::Node_Gromacs() : Node_Inputs() {
 	script->name = ".ingro";
 	title = "Gromacs File";
-	titleCol = Vec3(0.225f, 0.5f, 0.25f);
+	titleCol = NODE_COL_IO;
 
 	outputR.resize(4);
 	script->outvars.resize(4);

@@ -11,7 +11,7 @@
 
 Node_AddBond::Node_AddBond() : AnNode(new DmScript(sig)) {
 	title = "Extra Bonds";
-	titleCol = Vec3(0.3f, 0.5f, 0.3f);
+	titleCol = NODE_COL_MOD;
 	canTile = false;
 	inputR.resize(1);
 	script->invars.push_back(std::pair<std::string, std::string>("bonds", "list(2i)"));

@@ -171,7 +171,7 @@ void VisSystem::Init() {
 	});
 	mi2[1].Set(0, "Image (Raytraced)", 0);
 	mi2[2].Set(0, "Movie (GLSL)", []() {
-		VisRenderer::ToGif();
+		VisRenderer::ToVid();
 	});
 	mi2[3].Set(0, "Movie (Raytraced)", 0);
 	mi2[4].Set(0, "Options", []() {

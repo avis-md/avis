@@ -20,7 +20,7 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)), filter(0) {
 	script->descLines = 8;
 	
 	title = "Particle Data";
-	titleCol = Vec3(0.3f, 0.3f, 0.5f);
+	titleCol = NODE_COL_IO;
 	canTile = true;
 	
 	const std::string vars[] = {

@@ -114,10 +114,10 @@ void VisRenderer::DrawMenu() {
 	off += 17;
 	UI::Quad(ep - 149, off - 1, 148, 17 * 6 + 3, white(0.9f, 0.1f));
 	if (Engine::Button(ep - 147, off, 145, 16, Vec4(0.2f, 0.4f, 0.2f, 1), _("Render"), 12, white(), true) == MOUSE_RELEASE) {
-		ToGif();
+		ToVid();
 	}
 	off += 18;
-	static std::string fmts[] = { "Gif", "" };
+	static std::string fmts[] = { "AVI", "GIF", "PNG Sequence", "" };
 	static Popups::DropdownItem di((uint*)&vidType, fmts);
 	UI2::Dropdown(ep - 147, off, 146, _("Format"), di);
 	off += 17;
@@ -226,10 +226,10 @@ void VisRenderer::ToImage() {
 	status = STATUS::IMG;
 }
 
-void VisRenderer::ToGif() {
+void VisRenderer::ToVid() {
 	if (status != STATUS::READY) return;
 	status = STATUS::BUSY;
-	Debug::Message("Renderer::ToGif", "Starting");
+	Debug::Message("Renderer::ToVid", "Starting");
 	
 	auto vidSkip = max(Particles::anim.frameCount/vidMaxFrames, 1U);
 	
@@ -270,13 +270,23 @@ void VisRenderer::ToGif() {
 	
 	auto delay = (uint32_t)std::ceil(1.0f / ParGraphics::animTarFps);
 
-	//GifWriter writer;
-	//GifBegin(&writer, (IO::currPath + "movie.gif").c_str(), vidW, vidH, delay);
-	AVI avifile(IO::currPath + "movie.avi", vidW, vidH, 30);
+	AVI avifile;
+	GifWriter giffile;
+	switch (vidType) {
+	case VID_TYPE::AVI:
+		avifile = AVI(IO::currPath + "movie.avi", vidW, vidH, 30);
+		break;
+	case VID_TYPE::GIF:
+		GifBegin(&giffile, (IO::currPath + "movie.gif").c_str(), vidW, vidH, delay);
+		break;
+	default:
+		break;
+	}
 	std::vector<byte> res(vidW * vidH * 4);
 
+	int _f = 0;
 	for (uint f = 0; f < Particles::anim.frameCount; f += vidSkip) {
-		Debug::Message("Renderer::ToGif", "Rendering frame " + std::to_string(f));
+		Debug::Message("Renderer::ToVid", "Rendering frame " + std::to_string(f));
 		Particles::SetFrame(f);
 		Particles::Update();
 		if (vidMsaa > 0) {
@@ -307,17 +317,41 @@ void VisRenderer::ToGif() {
 		
 		glfwPollEvents();
 
-		//glBindFramebuffer(GL_READ_FRAMEBUFFER, res_fbo);
-		//glReadPixels(0, 0, vidW, vidH, GL_RGBA, GL_UNSIGNED_BYTE, &res[0]);
-		//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-		//glFinish();
-		//GifWriteFrame(&writer, &res[0], vidW, vidH, delay);
-		avifile.AddFrame(res_img);
+		switch (vidType) {
+		case VID_TYPE::AVI:
+			avifile.AddFrame(res_img);
+			break;
+		case VID_TYPE::GIF:
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, res_fbo);
+			glReadPixels(0, 0, vidW, vidH, GL_RGBA, GL_UNSIGNED_BYTE, &res[0]);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+			glFinish();
+			GifWriteFrame(&giffile, &res[0], vidW, vidH, delay);
+			break;
+		default:
+			std::vector<byte> vres;
+			vres.resize(vidW*vidH*4);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, res_fbo);
+			glReadPixels(0, 0, vidW, vidH, GL_RGBA, GL_UNSIGNED_BYTE, &vres[0]);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+			glFinish();
+			Texture::ToPNG(vres, vidW, vidH, IO::currPath + "movie" + std::to_string(_f) + ".png");
+			_f++;
+			break;
+		}
 	}
 
-	//GifEnd(&writer);
-	avifile.End();
-	Debug::Message("Renderer::ToGif", "Finished");
+	switch (vidType) {
+	case VID_TYPE::AVI:
+		avifile.End();
+		break;
+	case VID_TYPE::GIF:
+		GifEnd(&giffile);
+		break;
+	default:
+		break;
+	}
+	Debug::Message("Renderer::ToVid", "Finished");
 
 	Display::width = w;
 	Display::height = h;

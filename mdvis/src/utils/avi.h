@@ -6,6 +6,7 @@ extern "C" {
 
 class AVI {
 public:
+	AVI() {}
 	AVI(const std::string& path, uint w, uint h, uint fps = 30);
 	void AddFrame(GLuint tex);
 	void End();
