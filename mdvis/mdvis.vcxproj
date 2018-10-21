@@ -156,10 +156,10 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include;C:\Intel\OpenCL\sdk\include;C:\Anaconda64\include;C:\Anaconda64\Lib\site-packages\numpy\core\include;../radeonrays/RadeonRays/include/;../radeonrays/CLW/;./src;./src/libjpeg/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include;C:\Intel\OpenCL\sdk\include;C:\Anaconda64\include;C:\Anaconda64\Lib\site-packages\numpy\core\include;../radeonrays/RadeonRays/include/;../radeonrays/CLW/;./src;./src/libjpeg/;../libgwavi/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>_MBCS;PLATFORM_WIN;GLEW_STATIC;USE_OPENCL;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;PLATFORM_WIN;GLEW_STATIC;USE_OPENCL;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OpenMPSupport>true</OpenMPSupport>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>SyncCThrow</ExceptionHandling>
@@ -244,6 +244,9 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\libgwavi\src\avi-utils.c" />
+    <ClCompile Include="..\libgwavi\src\fileio.c" />
+    <ClCompile Include="..\libgwavi\src\gwavi.c" />
     <ClCompile Include="src\asset\mesh.cpp" />
     <ClCompile Include="src\asset\tetrahedron.cpp" />
     <ClCompile Include="src\core\ui3.cpp" />
@@ -305,6 +308,7 @@
     <ClCompile Include="src\web\creader.cpp" />
     <ClCompile Include="src\web\errorview.cpp" />
     <ClCompile Include="src\web\freader.cpp" />
+    <ClCompile Include="src\web\nodes\misc\node_adjlist.cpp" />
     <ClCompile Include="src\web\nodes\node_addbond.cpp" />
     <ClCompile Include="src\web\nodes\node_camera.cpp" />
     <ClCompile Include="src\web\nodes\node_gromacs.cpp" />
@@ -313,6 +317,7 @@
     <ClCompile Include="src\web\nodes\node_plot.cpp" />
     <ClCompile Include="src\web\nodes\node_remap.cpp" />
     <ClCompile Include="src\web\nodes\node_setparam.cpp" />
+    <ClCompile Include="src\web\nodes\node_setradscl.cpp" />
     <ClCompile Include="src\web\nodes\node_showrange.cpp" />
     <ClCompile Include="src\web\nodes\node_tracetrj.cpp" />
     <ClCompile Include="src\web\nodes\node_volume.cpp" />
@@ -344,6 +349,9 @@
     <ClCompile Include="src\vis\system.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\libgwavi\src\avi-utils.h" />
+    <ClInclude Include="..\libgwavi\src\fileio.h" />
+    <ClInclude Include="..\libgwavi\src\gwavi_private.h" />
     <ClInclude Include="src\asset\mesh.h" />
     <ClInclude Include="src\asset\tetrahedron.h" />
     <ClInclude Include="src\core\ui3.h" />
@@ -359,6 +367,7 @@
     <ClInclude Include="src\libjpeg\jpeglib.h" />
     <ClInclude Include="src\libjpeg\jversion.h" />
     <ClInclude Include="src\tmp\tiny_obj_loader.h" />
+    <ClInclude Include="src\unistd.h" />
     <ClInclude Include="src\vis\options.h" />
     <ClInclude Include="src\utils\glmext.h" />
     <ClInclude Include="src\utils\shader.h" />
@@ -422,6 +431,7 @@
     <ClInclude Include="src\web\creader.h" />
     <ClInclude Include="src\web\errorview.h" />
     <ClInclude Include="src\web\freader.h" />
+    <ClInclude Include="src\web\nodes\misc\node_adjlist.h" />
     <ClInclude Include="src\web\nodes\node_addbond.h" />
     <ClInclude Include="src\web\nodes\node_camera.h" />
     <ClInclude Include="src\web\nodes\node_gromacs.h" />
@@ -430,6 +440,7 @@
     <ClInclude Include="src\web\nodes\node_plot.h" />
     <ClInclude Include="src\web\nodes\node_remap.h" />
     <ClInclude Include="src\web\nodes\node_setparam.h" />
+    <ClInclude Include="src\web\nodes\node_setradscl.h" />
     <ClInclude Include="src\web\nodes\node_showrange.h" />
     <ClInclude Include="src\web\nodes\node_tracetrj.h" />
     <ClInclude Include="src\web\nodes\node_volume.h" />

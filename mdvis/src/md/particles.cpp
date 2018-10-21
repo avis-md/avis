@@ -255,16 +255,16 @@ void Particles::UpdateBufs() {
 	if (_particleSz != particleSz) {
 		_particleSz = particleSz;
 		SetGLBuf(posBuffer, &ps[0], particleSz, GL_DYNAMIC_DRAW);
-		SetGLBuf(connBuffer, &conns.ids[0], particleSz);
 		SetGLBuf(colIdBuffer, &colors[0], particleSz);
 		SetGLBuf(radBuffer, &radii[0], particleSz);
 	}
 	else {
 		SetGLSubBuf(posBuffer, &ps[0], particleSz);
-		SetGLSubBuf(connBuffer, &conns.ids[0], particleSz);
 		SetGLSubBuf(colIdBuffer, &colors[0], particleSz);
+		SetGLSubBuf(radBuffer, &radii[0], particleSz);
 		UpdateRadBuf();
 	}
+	SetGLBuf(connBuffer, &conns.ids[0], conns.cnt);
 }
 
 void Particles::UpdateColorTex() {

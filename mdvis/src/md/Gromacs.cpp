@@ -135,7 +135,6 @@ bool Gromacs::ReadGro2(ParInfo* info, std::ifstream& strm, size_t isz) {
 	return true;
 }
 
-//fix float
 bool Gromacs::ReadTrj(TrjInfo* info) {
 	int natoms = 0;
 	size_t fsz;
@@ -143,6 +142,12 @@ bool Gromacs::ReadTrj(TrjInfo* info) {
 		std::ifstream strm(info->first, std::ios::binary | std::ios::ate);
 		fsz = strm.tellg();
 	}
+	read_trr_natoms(info->first, &natoms);
+	if (natoms != info->parNum) {
+		SETERR("Atom count is different!");
+		return false;
+	}
+
 	auto file = xdrfile_open(info->first, "rb");
 	if (!file) {
 		SETERR("Cannot open file!");
