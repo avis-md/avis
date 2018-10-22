@@ -121,6 +121,8 @@ public:
 	static void SetFrame(uint frm);
 
 	static double boundingBox[6];
+	static glm::dvec3 bboxCenter;
+	static bool boxPeriodic;
 
 	static Vec3 colorPallete[256];
 	static ushort defColPallete[256];
@@ -131,8 +133,11 @@ public:
 
 	static void Init(), Clear(), GenTexBufs();
 	static void Resize(uint i);
-	static void Update(), UpdateBufs(), UpdateColorTex(), UpdateRadBuf(int i = -1);
+	static void Update(), UpdateBBox(), UpdateBufs(), UpdateColorTex(), UpdateRadBuf(int i = -1);
 	static void AddParam(), RmParam(int i);
+
+	static void Rebound(glm::dvec3 center);
+	static void BoundParticles();
 
 	static void Serialize(XmlNode* nd);
 	static void SerializeVis(XmlNode* nd);

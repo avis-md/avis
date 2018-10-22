@@ -57,6 +57,7 @@ void updateFunc() {
 	if (ParLoader::parDirty) {
 		ParLoader::parDirty = false;
 		Particles::UpdateBufs();
+		Particles::UpdateBBox();
 		//if (Protein::Refresh()) {
 			Particles::GenTexBufs();
 			ParGraphics::UpdateDrawLists();

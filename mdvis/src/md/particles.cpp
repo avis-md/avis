@@ -36,6 +36,7 @@ void Particles::AnimData::Seek(uint f) {
 		if (status[f] == FRAME_STATUS::BAD) return;
 	}
 	UpdateMemRange();
+	UpdateBBox();
 }
 
 void Particles::AnimData::Update() {
@@ -138,6 +139,8 @@ std::vector<Particles::conninfo> Particles::particles_Conn2;
 Particles::AnimData Particles::anim = {};
 
 double Particles::boundingBox[] = {};
+glm::dvec3 Particles::bboxCenter;
+bool Particles::boxPeriodic = false;
 
 Vec3 Particles::colorPallete[] = {};
 ushort Particles::defColPallete[] = {};
@@ -238,6 +241,12 @@ void Particles::Update() {
 		}
 	}
 	anim.Update();
+}
+
+void Particles::UpdateBBox() {
+	bboxCenter = glm::dvec3((boundingBox[1] + boundingBox[0]) / 2,
+		(boundingBox[3] + boundingBox[2]) / 2,
+		(boundingBox[5] + boundingBox[4]) / 2);
 }
 
 void Particles::UpdateBufs() {
@@ -366,6 +375,34 @@ void Particles::RmParam(int i) {
 	}
 	particles_ParamSz--;
 	particles_ParamNms[particles_ParamSz] = "";
+}
+
+void Particles::Rebound(glm::dvec3 center) {
+	auto co = center - bboxCenter;
+	boundingBox[0] += co.x;
+	boundingBox[1] += co.x;
+	boundingBox[2] += co.y;
+	boundingBox[3] += co.y;
+	boundingBox[4] += co.z;
+	boundingBox[5] += co.z;
+	bboxCenter = center;
+	if (boxPeriodic)
+		BoundParticles();
+}
+
+void Particles::BoundParticles() {
+	glm::dvec3 sz (boundingBox[1] - boundingBox[0],
+		boundingBox[3] - boundingBox[2],
+		boundingBox[5] - boundingBox[4]);
+	#pragma omp parallel for
+	for (int a = 0; a < particleSz; a++) {
+		glm::dvec3 dp = poss[a] - bboxCenter;
+		dp /= sz;
+		dp = glm::round(dp);
+		dp *= sz;
+		poss[a] -= dp;
+	}
+	UpdateBufs(); //do we assume this is the main thread?
 }
 
 void Particles::Serialize(XmlNode* nd) {
