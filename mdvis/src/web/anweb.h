@@ -60,6 +60,7 @@ public:
 };
 
 #include "anbrowse.h"
+#include "nodes/in/node_vector.h"
 #include "nodes/node_inputs.h"
 #include "nodes/node_info.h"
 #include "nodes/node_addbond.h"
@@ -68,6 +69,7 @@ public:
 #include "nodes/node_setparam.h"
 #include "nodes/node_showrange.h"
 #include "nodes/node_setradscl.h"
+#include "nodes/set/node_setbboxcenter.h"
 #include "nodes/node_tracetrj.h"
 #include "nodes/node_volume.h"
 #include "nodes/node_remap.h"

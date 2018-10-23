@@ -1,4 +1,5 @@
 #include "CDV.h"
+#include <iostream>
 #include <algorithm>
 #include <fstream>
 #include <string>
@@ -28,7 +29,10 @@ bool CDV::Read(ParInfo* info) {
 
 	auto pos = strm.tellg();
 	std::getline(strm, s);
-	auto uid = SplitString(s, ' ', true).size() == 6;
+	while (s.back() == ' ') s.pop_back();
+	auto ssz = SplitString(s, ' ', true).size();
+	auto uid = (ssz == 6) || (ssz == 9);
+	auto hvl = ssz > 7;
 	strm.seekg(pos);
 
 	while (std::getline(strm, s)) {
@@ -45,7 +49,8 @@ bool CDV::Read(ParInfo* info) {
 	info->pos = new double[sz * 3];
 	info->vel = new double[sz * 3];
 
-	uint16_t id, rd;
+	size_t id;
+	uint16_t rd;
 	double vl;
 
 	strm.clear();
@@ -57,14 +62,24 @@ bool CDV::Read(ParInfo* info) {
 		info->progress = i * 1.f / sz;
 		if (uid) strm >> rd;
 		strm >> id >> rd;
-		info->resId[i] = rd;
+		info->resId[id] = rd;
+		info->resname[id*info->nameSz] = '-';
 		info->type[id] = *((uint16_t*)"H");
+		info->name[id*info->nameSz] = 'A' + rd;
+		strm >> vl;
+		info->pos[id * 3] = vl / 10;
+		strm >> vl;
+		info->pos[id * 3 + 1] = vl / 10;
+		strm >> vl;
+		info->pos[id * 3 + 2] = vl / 10;
+		if (hvl) {
 			strm >> vl;
-			info->pos[id * 3] = vl / 10;
+			info->vel[id * 3] = vl / 10;
 			strm >> vl;
-			info->pos[id * 3 + 1] = vl / 10;
+			info->vel[id * 3 + 1] = vl / 10;
 			strm >> vl;
-			info->pos[id * 3 + 2] = vl / 10;
+			info->vel[id * 3 + 2] = vl / 10;
+		}
 	}
 
 	auto& bnd = info->bounds;
@@ -94,10 +109,13 @@ bool CDV::ReadFrame(FrmInfo* info) {
 
 	auto pos = strm.tellg();
 	std::getline(strm, s);
-	auto uid = SplitString(s, ' ', true).size() == 6;
+	while (s.back() == ' ') s.pop_back();
+	auto ssz = SplitString(s, ' ', true).size();
+	auto uid = (ssz == 6) || (ssz == 9);
+	auto hvl = ssz > 7;
 	strm.seekg(pos);
 
-	uint16_t id;
+	size_t id;
 	std::string rd;
 	double vl;
 	for (uint32_t i = 0; i < info->parNum; i++) {
@@ -113,6 +131,14 @@ bool CDV::ReadFrame(FrmInfo* info) {
 		info->pos[id * 3 + 1] = vl / 10;
 		strm >> vl;
 		info->pos[id * 3 + 2] = vl / 10;
+		if (hvl) {
+			strm >> vl;
+			info->vel[id * 3] = vl / 10;
+			strm >> vl;
+			info->vel[id * 3 + 1] = vl / 10;
+			strm >> vl;
+			info->vel[id * 3 + 2] = vl / 10;
+		}
 	}
 	return true;
 }

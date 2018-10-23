@@ -8,12 +8,14 @@
 
 const std::string Node_Inputs::sig = ".in";
 const std::string Node_Info::sig = ".info";
+const std::string Node_Vector::sig = ".vec";
 const std::string Node_AddBond::sig = ".abnd";
 const std::string Node_Camera_Out::sig = ".camo";
 const std::string Node_Plot::sig = ".plot";
 const std::string Node_SetParam::sig = ".param";
 const std::string Node_ShowRange::sig = ".srng";
 const std::string Node_SetRadScl::sig = ".rscl";
+const std::string Node_SetBBoxCenter::sig = ".sbxc";
 const std::string Node_TraceTrj::sig = ".trrj";
 const std::string Node_Volume::sig = ".vol";
 const std::string Node_Remap::sig = ".remap";

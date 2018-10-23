@@ -246,16 +246,17 @@ void ParLoader::SaveSrvInfo() {
 #define ISNUM(c) (c >= '0' && c <= '9')
 void ParLoader::ScanFrames(const std::string& first) {
 	if (Particles::anim.frameCount > 1) return;
+	if (maxframes == 0 || maxframes == 1) return;
 	auto ps = first.find_last_of('/');
 	auto nm = first.substr(ps + 1);
-	int n1 = 0, n2 = 0;
+	int n1 = -1, n2 = 0;
 	for (uint a = 0; a < nm.size() - 1; a++) {
 		if (nm[a + 1] == '.' && ISNUM(nm[a])) {
 			n1 = a;
 			break;
 		}
 	}
-	if (!n1) return;
+	if (n1 == -1) return;
 	for (int a = n1 - 1; a >= 0; a--) {
 		if (!ISNUM(nm[a])) {
 			n2 = a;
@@ -281,6 +282,19 @@ void ParLoader::ScanFrames(const std::string& first) {
 		}
 		i++;
 	}
+	Debug::Warning("ParLoader", "Cannot find frame loader for extension \"" + nm2 + "\"! Trying to use configuration loader...");
+	{
+		int id2 = 0;
+		for (auto& pr : importers[impId].funcs) {
+			if (pr.type == ParImporter::Func::FUNC_TYPE::FRAME){
+				Particles::anim.impId = impId;
+				Particles::anim.funcId = id2;
+				goto found;
+			}
+			id2++;
+		}
+	}
+	Debug::Warning("ParLoader", "Configuration loader does not have a frame loader!");
 	return;
 	found:
 
@@ -304,6 +318,7 @@ void ParLoader::ScanFrames(const std::string& first) {
 		//Particles::anim.status[f] = Particles::AnimData::FRAME_STATUS::UNLOADED;
 		Particles::anim.paths[f] = nms[f];
 	}
+
 }
 
 void ParLoader::DoOpen() {
@@ -338,6 +353,7 @@ void ParLoader::DoOpen() {
 
 	try {
 		if (impId > -1) {
+			Debug::Message("ParLoader", "Running importer \"" + importers[impId].name + "\"");
 			if (!importers[impId].funcs[funcId].func(&info)) {
 				if (!info.error[0]) {
 					Debug::Warning("ParLoader", "Unspecified importer error!");
@@ -557,6 +573,20 @@ void ParLoader::DoOpen() {
 	frameskip = FindNextOff(droppedFiles[0]);
 	ScanFrames(droppedFiles[0]);
 
+	if (Particles::anim.poss.size()) {
+		Particles::anim.poss[0].resize(info.num);
+		memcpy(&Particles::anim.poss[0][0], Particles::poss, info.num * sizeof(glm::dvec3));
+		delete[](Particles::poss);
+		Particles::poss = &Particles::anim.poss[0][0];
+		if (info.vel) {
+			Particles::anim.vels[0].resize(info.num);
+			memcpy(&Particles::anim.vels[0][0], Particles::vels, info.num * sizeof(glm::dvec3));
+			delete[](Particles::vels);
+			Particles::vels = &Particles::anim.vels[0][0];
+		}
+		Particles::anim.status[0] = Particles::AnimData::FRAME_STATUS::LOADED;
+	}
+
 	parDirty = true;
 	busy = false;
 	fault = false;
@@ -573,15 +603,28 @@ void ParLoader::DoOpenAnim() {
 	auto& anm = Particles::anim;
 	anm.reading = true;
 	anm.Clear();
+	
+	std::replace(droppedFiles[0].begin(), droppedFiles[0].end(), '\\', '/');
+	std::string nm = droppedFiles[0].substr(droppedFiles[0].find_last_of('/') + 1);
+	auto path = droppedFiles[0];
 
 	TrjInfo info = {};
-	info.first = droppedFiles[0].c_str();
 	info.parNum = Particles::particleSz;
 	info.maxFrames = maxframes;
 	loadFrames = &info.frames;
 	loadProgress = &info.progress;
 
-	if (impId > -1) importers[impId].funcs[funcId].trjFunc(&info);
+	if (isSrv) {
+		*loadProgress = 0.001f;
+		loadName = "Downloading";
+		path = IO::path + "tmp/" + nm;
+		srv.GetFile(droppedFiles[0], path);
+	}
+
+	info.first = path.c_str();
+
+	Debug::Message("ParLoader", "Running importer \"" + importers[impId].name + "\"");
+	importers[impId].funcs[funcId].trjFunc(&info);
 
 	if (!info.frames) {
 		busy = false;
@@ -649,6 +692,7 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 	pos.resize(Particles::particleSz);
 	vel.resize(Particles::particleSz);
 	FrmInfo info(path.c_str(), Particles::particleSz, &pos[0][0], &vel[0][0]);
+	Debug::Message("ParLoader", "Running importer \"" + importers[anm.impId].name + "\"");
 	fault = !importers[anm.impId].funcs[anm.funcId].frmFunc(&info);
 	anm.status[f] = fault? FS::BAD : FS::LOADED;
 

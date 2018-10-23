@@ -7,6 +7,8 @@
 #include <netdb.h>
 #endif
 
+#define SFTP_BUF_SZ 65535
+
 void SSH::Init() {
 	int res = libssh2_init(0);
 	if (!!res) {
@@ -208,17 +210,20 @@ std::vector<char> SSH::GetFile(std::string from) {
 	auto hnd = libssh2_sftp_open(sftpChannel, &from[0], LIBSSH2_FXF_READ, 0);
 	std::vector<char> res;
 	auto sz = 0;
+	auto tm = milliseconds();
+	std::array<char, SFTP_BUF_SZ> mem;
 	if (hnd) {
-		char mem[4096];
 		for (;;) {
-			auto wc = libssh2_sftp_read(hnd, mem, 4096);
+			auto wc = libssh2_sftp_read(hnd, &mem[0], SFTP_BUF_SZ);
 			if (wc <= 0) break;
 			res.resize(sz + wc);
-			memcpy(&res[sz], mem, wc);
+			memcpy(&res[sz], &mem[0], wc);
 			sz += wc;
 		}
 		libssh2_sftp_close(hnd);
 	}
+	tm = milliseconds() - tm;
+	Debug::Message("SSH", "Got " + std::to_string(sz) + " in " + std::to_string(tm * 0.001f) + " (" + std::to_string((sz * 1000) / tm) + "B/s)");
 	return res;
 }
 

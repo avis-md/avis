@@ -206,9 +206,11 @@ void AnWeb::Draw() {
 
 						SW(IN::PARS, Node_Inputs);
 						SW(IN::PINFO, Node_Info);
+						SW(IN::VEC, Node_Vector);
 
 						SW(MOD::PARAM, Node_SetParam);
 						SW(MOD::RSCL, Node_SetRadScl);
+						SW(MOD::SBXC, Node_SetBBoxCenter);
 
 						SW(GEN::BOND, Node_AddBond);
 						SW(GEN::TRJ, Node_TraceTrj);
@@ -665,12 +667,14 @@ void AnWeb::Load(const std::string& s) {
 		#define ND(scr) if (nm == scr::sig) n = new scr(); else
 					ND(Node_Inputs)
 					ND(Node_Info)
+					ND(Node_Vector)
 					ND(Node_AddBond)
 					//ND(Node_AddVolume)
 					ND(Node_TraceTrj)
 					ND(Node_Camera_Out)
 					ND(Node_SetParam)
 					ND(Node_SetRadScl)
+					ND(Node_SetBBoxCenter)
 					ND(Node_Plot)
 					ND(Node_ShowRange)
 					ND(Node_AdjList)

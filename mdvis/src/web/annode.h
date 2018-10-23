@@ -18,17 +18,19 @@ enum class AN_NODE_IN : byte {
 	NUM0 = 0,
 	PARS,
 	PINFO,
+	VEC,
 	NUM
 };
-const std::string AN_NODE_INS[] = { "Particle data", "System info" };
+const std::string AN_NODE_INS[] = { "Particle data", "System info", "Vector" };
 
 enum class AN_NODE_MOD {
 	NUM0 = 0x20,
 	PARAM,
 	RSCL,
+	SBXC,
 	NUM
 };
-const std::string AN_NODE_MODS[] = { "Set Param", "Set Radii Scale" };
+const std::string AN_NODE_MODS[] = { "Set Param", "Set Radii Scale", "Set BBox Center" };
 
 enum class AN_NODE_GEN {
 	NUM0 = 0x40,
