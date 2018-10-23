@@ -76,7 +76,7 @@ public:
 	static std::vector<Int2> ress;
 	static conninfo conns;
 
-	static bool visDirty;
+	static bool bufDirty, visDirty, palleteDirty;
 
 	static int particles_ParamSz;
 	static paramdata* particles_Params[10];
@@ -129,7 +129,6 @@ public:
 	static Vec4 _colorPallete[256];
 	static byte defColPalleteSz;
 	static GLuint colorPalleteTex;
-	static bool palleteDirty;
 
 	static void Init(), Clear(), GenTexBufs();
 	static void Resize(uint i);

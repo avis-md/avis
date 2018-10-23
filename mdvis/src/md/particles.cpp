@@ -128,7 +128,7 @@ std::vector<bool> Particles::visii;
 std::vector<Int2> Particles::ress;
 Particles::conninfo Particles::conns;
 
-bool Particles::visDirty = false;
+bool Particles::bufDirty = false, Particles::visDirty = false, Particles::palleteDirty = false;
 
 int Particles::particles_ParamSz = 0;
 Particles::paramdata* Particles::particles_Params[] = {};
@@ -147,7 +147,6 @@ ushort Particles::defColPallete[] = {};
 Vec4 Particles::_colorPallete[] = {};
 byte Particles::defColPalleteSz = 0;
 GLuint Particles::colorPalleteTex;
-bool Particles::palleteDirty = false;
 
 GLuint Particles::posVao;
 GLuint Particles::posBuffer;
@@ -230,9 +229,13 @@ void Particles::Resize(uint i) {
 }
 
 void Particles::Update() {
+	if (bufDirty) {
+		bufDirty = false;
+		UpdateBufs();
+	}
 	if (visDirty) {
 		visDirty = false;
-		Particles::UpdateRadBuf();
+		UpdateRadBuf();
 	}
 	for (int a = 0; a < particles_ParamSz; a++) {
 		auto& p = particles_Params[a];
@@ -386,11 +389,12 @@ void Particles::Rebound(glm::dvec3 center) {
 	boundingBox[4] += co.z;
 	boundingBox[5] += co.z;
 	bboxCenter = center;
-	if (boxPeriodic)
-		BoundParticles();
+	BoundParticles();
+	Scene::dirty = true;
 }
 
 void Particles::BoundParticles() {
+	if (!boxPeriodic) return;
 	glm::dvec3 sz (boundingBox[1] - boundingBox[0],
 		boundingBox[3] - boundingBox[2],
 		boundingBox[5] - boundingBox[4]);
@@ -402,7 +406,8 @@ void Particles::BoundParticles() {
 		dp *= sz;
 		poss[a] -= dp;
 	}
-	UpdateBufs(); //do we assume this is the main thread?
+	bufDirty = true;
+	Scene::dirty = true;
 }
 
 void Particles::Serialize(XmlNode* nd) {

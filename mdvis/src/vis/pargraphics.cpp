@@ -895,7 +895,7 @@ void ParGraphics::DrawOverlay() {
 void ParGraphics::DrawColMenu() {
 	auto& exps = ParMenu::expandPos;
 	float off = 20;
-	UI::Label(exps - 148, off, 12, "Parameters", white());
+	UI::Label(exps - 148, off, 12, "Attributes", white());
 	UI::Quad(exps - 149, off + 17, 149, 17 * 4 + 2, white(0.9f, 0.1f));
 	off += 18;
 	for (int a = 0; a < Particles::particles_ParamSz; a++) {
@@ -919,7 +919,7 @@ void ParGraphics::DrawColMenu() {
 	if (useGradCol) {
 		gradColParam = min(gradColParam, (uint)(Particles::particles_ParamSz-1));
 		static Popups::DropdownItem di = Popups::DropdownItem(&gradColParam, Particles::particles_ParamNms);
-		UI2::Dropdown(exps - 147, off, 146, "Param", di);
+		UI2::Dropdown(exps - 147, off, 146, "Attribute", di);
 		off += 20;
 		Color::DrawH2(exps - 115, off + 8, 16, 17*5 - 16, gradCols);
 		static const std::string ii[] = { "0.0", "0.5", "1.0" };
@@ -961,11 +961,25 @@ void ParGraphics::DrawColMenu() {
 	}
 	else {
 		auto ucg = useConGradCol;
-		UI2::Toggle(exps - 148, off + 17, 146, "Blend Colors", useConGradCol);
+		UI2::Toggle(exps - 148, off + 17, 146, "Blend Bond Colors", useConGradCol);
 		if (ucg != useConGradCol) Scene::dirty = true;
 		off += 35;
 	}
 	if (uc != useConCol) Scene::dirty = true;
+	off++;
+	UI::Label(exps - 148, off, 12, "Bounding Box", white());
+	off += 18;
+	auto _bc = Particles::bboxCenter;
+	_bc = UI2::EditVec(exps - 147, off, 146, "Center", _bc, true);
+	if (_bc != Particles::bboxCenter) {
+		Particles::Rebound(_bc);
+	}
+	off += 17*3;
+	auto _bp = Particles::boxPeriodic;
+	UI2::Toggle(exps - 147, off, 146, "Periodic", Particles::boxPeriodic);
+	if (_bp != Particles::boxPeriodic) {
+		Particles::BoundParticles();
+	}
 }
 
 void ParGraphics::DrawMenu() {
