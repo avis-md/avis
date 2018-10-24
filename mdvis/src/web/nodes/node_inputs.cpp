@@ -36,7 +36,7 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)), filter(0) {
 	script->outvars.resize(sz);
 	conV.resize(sz);
 
-	for (int a = 0; a < sz; a++) {
+	for (int a = 0; a < sz; ++a)  {
 		script->outvars[a] = std::pair<std::string, std::string>(vars[a * 2], vars[a * 2 + 1]);
 		conV[a].typeName = vars[a * 2 + 1];
 	}
@@ -70,7 +70,7 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)), filter(0) {
 #endif
 	post.stride = 2;
 
-	for (int a = 0; a < sz; a++) {
+	for (int a = 0; a < sz; ++a)  {
 		conV[a].typeName = scr->outvars[a].second;
 	}
 }
@@ -143,10 +143,10 @@ void Node_Inputs::Execute() {
 			std::vector<glm::dvec3> tpos; std::swap(tpos, vpos); vpos.reserve(parcount);
 			std::vector<glm::dvec3> tvel; if (setvel) { std::swap(tvel, vvel); vvel.reserve(parcount); }
 			std::vector<short> ttyp; if (settyp) { std::swap(ttyp, vtyp); vtyp.reserve(parcount); }
-			for (int a = 0; a < parcount; a++) {
+			for (int a = 0; a < parcount; ++a)  {
 				auto& pos = tpos[a];
 				bool clipped = false;
-				for (int c = 0; c < 6; c++) {
+				for (int c = 0; c < 6; ++c)  {
 					if (glm::dot((Vec3)pos, (Vec3)ParGraphics::clippingPlanes[c]) > ParGraphics::clippingPlanes[c].w) {
 						clipped = true;
 						break;

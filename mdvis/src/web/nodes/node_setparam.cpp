@@ -37,7 +37,7 @@ void Node_SetParam::Execute() {
 		auto& tar = prm->data;
 		tar.resize(Particles::anim.frameCount*sz);
 #pragma omp parallel for
-		for (int a = 0; a < sz; a++) {
+		for (int a = 0; a < sz; ++a)  {
 			tar[a + Particles::particleSz*(AnWeb::execFrame-1)] = (float)src[a];
 		}
 	}
@@ -55,7 +55,7 @@ void Node_SetParam::Execute() {
 		auto& tar = prm->data;
 		tar.resize(tsz*sz);
 #pragma omp parallel for
-		for (int a = 0; a < sz*tsz; a++) {
+		for (int a = 0; a < sz*tsz; ++a)  {
 			tar[a] = (float)src[a];
 		}
 	}

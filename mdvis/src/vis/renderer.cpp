@@ -11,7 +11,7 @@ VisRenderer::IMG_TYPE VisRenderer::imgType;
 VisRenderer::VID_TYPE VisRenderer::vidType;
 VisRenderer::STATUS VisRenderer::status = STATUS::READY;
 
-#define RESO 2048*4
+#define RESO 2048
 #define VRESO 1024
 
 bool VisRenderer::imgUseAlpha = false;
@@ -164,13 +164,13 @@ void VisRenderer::ToImage() {
 	}
 	
 	cam->scale = imgSlices;
-	for (int a = 0; a < imgSlices; a++) {
-		for (int b = 0; b < imgSlices; b++) {
+	for (int a = 0; a < imgSlices; ++a)  {
+		for (int b = 0; b < imgSlices; ++b)  {
 			if (imgMsaa > 0) {
 				const float ctw = 0.5f / iw;
 				const float cth = 0.5f / ih;
 				const Vec2 smps[] = { Vec2(ctw / 2, cth / 2), Vec2(3 * ctw / 2, cth / 2), Vec2(ctw / 2, 3 * cth / 2), Vec2(3 * ctw / 2, 3 * cth / 2) };
-				for (int c = 0; c < 4; c++) {
+				for (int c = 0; c < 4; ++c)  {
 					Scene::dirty = true;
 					cam->offset = Vec2(a, b) + Vec2(smps[c]);
 					cam->Render([]() {
@@ -290,7 +290,7 @@ void VisRenderer::ToVid() {
 		Particles::SetFrame(f);
 		Particles::Update();
 		if (vidMsaa > 0) {
-			for (int c = 0; c < 4; c++) {
+			for (int c = 0; c < 4; ++c)  {
 				Scene::dirty = true;
 				cam->offset = Vec2(smps[c]);
 				cam->Render([]() {

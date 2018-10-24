@@ -36,7 +36,7 @@ void HelpMenu::Draw() {
 		UI::Label(Display::width - 5.f, 5, 10, "version 0.01", white(0.7f));
 		UI::font->Align(ALIGN_TOPLEFT);
 
-		//for (uint a = 0; a < 12; a++) {
+		//for (uint a = 0; a < 12; ++a)  {
 		//	UI::Label(20, 25 + 15 * a, 12, _opn[a], white());
 		//}
 

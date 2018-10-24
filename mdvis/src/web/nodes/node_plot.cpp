@@ -52,29 +52,29 @@ void Node_Plot::Execute() {
 	valXs.resize(sz);
 	valYs.resize(sz2);
 	_valYs.resize(sz2);
-	for (int a = 0; a < sz2; a++) {
+	for (int a = 0; a < sz2; ++a)  {
 		valYs[a].resize(sz);
 		_valYs[a] = &valYs[a][0];
 	}
 	if (ds == 1 || xid == -1) {
-		for (int i = 0; i < sz; i++) {
+		for (int i = 0; i < sz; ++i)  {
 			valXs[i] = (float)i;
 		}
 	}
 	else {
 		switch (cv.typeName[6]) {
 		case 's':
-			for (int i = 0; i < sz; i++) {
+			for (int i = 0; i < sz; ++i)  {
 				valXs[i] = (float)(*(short**)cv.value)[i * 2 + xid];
 			}
 			break;
 		case 'i':
-			for (int i = 0; i < sz; i++) {
+			for (int i = 0; i < sz; ++i)  {
 				valXs[i] = (float)(*(int**)cv.value)[i * 2 + xid];
 			}
 			break;
 		case 'd':
-			for (int i = 0; i < sz; i++) {
+			for (int i = 0; i < sz; ++i)  {
 				valXs[i] = (float)(*(double**)cv.value)[i * 2 + xid];
 			}
 			break;
@@ -85,10 +85,10 @@ void Node_Plot::Execute() {
 	}
 	if (ds == 2 && yid == -1) {
 #define cs(_c, _t) case _c:\
-			for (int i = 0; i < sz; i++) {\
+			for (int i = 0; i < sz; ++i)  {\
 				valYs[j][i] = (float)(*(_t**)cv.value)[i*sz2 + j];\
 			} break
-		for (int j = 0; j < sz2; j++) {
+		for (int j = 0; j < sz2; ++j)  {
 			switch (cv.typeName[6]) {
 				cs('s', short);
 				cs('i', int);
@@ -102,7 +102,7 @@ void Node_Plot::Execute() {
 	}
 	else {
 #define cs(_c, _t) case _c:\
-			for (int i = 0; i < sz; i++) {\
+			for (int i = 0; i < sz; ++i)  {\
 				valYs[0][i] = (float)(*(_t**)cv.value)[i*sz2 + j];\
 			} break
 		_valYs.resize(1);

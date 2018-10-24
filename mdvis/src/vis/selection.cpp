@@ -54,7 +54,7 @@ void Selection::CalcSpos() {
     if (_mat != ParGraphics::lastMVP || dirty) {
         _mat = ParGraphics::lastMVP;
 #pragma omp parallel
-        for (int a = 0; a < (int)count; a++) {
+        for (int a = 0; a < (int)count; ++a)  {
             Vec4 v = _mat * Vec4(Particles::poss[atoms[a]], 1);
             v /= v.w;
             spos[a] = Vec2(Display::width * (v.x + 1)/2, Display::height * (-v.y + 1)/2);
@@ -67,7 +67,7 @@ void Selection::CalcLen() {
     if (count > 1) {
         lengths.resize(count-1);
 #pragma omp parallel for
-        for (int a = 0; a < (int)count-1; a++) {
+        for (int a = 0; a < (int)count-1; ++a)  {
             auto& p = Particles::poss[atoms[a]];
             auto& q = Particles::poss[atoms[a+1]];
             lengths[a] = glm::length(q - p);
@@ -81,7 +81,7 @@ void Selection::CalcAng() {
     if (count > 2) {
         angles.resize(count-2);
 #pragma omp parallel for
-        for (int a = 0; a < (int)count-2; a++) {
+        for (int a = 0; a < (int)count-2; ++a)  {
             auto& p = Particles::poss[atoms[a]];
             auto& q = Particles::poss[atoms[a+1]];
             auto& r = Particles::poss[atoms[a+2]];
@@ -96,7 +96,7 @@ void Selection::CalcTor() {
     if (count > 3) {
         torsions.resize(count-3);
 #pragma omp parallel for
-        for (int a = 0; a < (int)count-3; a++) {
+        for (int a = 0; a < (int)count-3; ++a)  {
             auto& p = Particles::poss[atoms[a]];
             auto& q = Particles::poss[atoms[a+1]];
             auto& r = Particles::poss[atoms[a+2]];
@@ -123,7 +123,7 @@ void Selection::DrawMenu() {
     off += 20;
     if (count > 1) {
         UI::font->Align(ALIGN_MIDCENTER);
-        for (size_t a = 0; a < count; a++) {
+        for (size_t a = 0; a < count; ++a)  {
             auto& p = spos[a];
             UI::Label(p.x, p.y, 20, std::to_string(a));
         }
@@ -136,7 +136,7 @@ void Selection::DrawMenu() {
             off += 17;
             if (expL) {
                 CalcLen();
-                for (size_t a = 0; a < count-1; a++) {
+                for (size_t a = 0; a < count-1; ++a)  {
                     UI::Label(ep - 146, off, 12, std::to_string(a) + "~" + std::to_string(a+1) + ": " + std::to_string(lengths[a]) + " nm", white());
                     off += 17;
                 }
@@ -152,7 +152,7 @@ void Selection::DrawMenu() {
                 off += 17;
                 if (expA) {
                     CalcAng();
-                    for (size_t a = 0; a < count-2; a++) {
+                    for (size_t a = 0; a < count-2; ++a)  {
                         UI::Label(ep - 146, off, 12, std::to_string(a) + "~" + std::to_string(a+2) + ": " + std::to_string(angles[a]) + " rad", white());
                         off += 17;
                     }
@@ -168,7 +168,7 @@ void Selection::DrawMenu() {
                     off += 17;
                     if (expT) {
                         CalcTor();
-                        for (size_t a = 0; a < count-3; a++) {
+                        for (size_t a = 0; a < count-3; ++a)  {
                             UI::Label(ep - 146, off, 12, std::to_string(a) + "~" + std::to_string(a+3) + ": " + std::to_string(torsions[a]) + " rad", white());
                             off += 17;
                         }

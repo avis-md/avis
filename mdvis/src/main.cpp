@@ -212,7 +212,7 @@ int main(int argc, char **argv) {
 		std::vector<std::string> fls;
 		bool _s = false, _x = false, nologo = false;
 		std::string _xs = "";
-		for (auto a = 1; a < argc; a++) {
+		for (auto a = 1; a < argc; ++a)  {
 			if (argv[a][0] == '-') {
 				if (argv[a][1] == '-') {
 					argv[a] += 2;

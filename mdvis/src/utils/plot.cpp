@@ -36,16 +36,16 @@ void plt::plot(float x, float y, float w, float h, float* dx, float** dy, uint c
 
 	Vec3* poss = new Vec3[cnt];
 	float x1 = *dx, x2 = *dx, y1 = **dy, y2 = **dy;
-	for (uint j = 0; j < cnt2; j++) {
-		for (uint i = 0; i < cnt; i++) {
+	for (uint j = 0; j < cnt2; ++j)  {
+		for (uint i = 0; i < cnt; ++i)  {
 			if (x1 > dx[i]) x1 = dx[i];
 			if (x2 < dx[i]) x2 = dx[i];
 			if (y1 > dy[j][i]) y1 = dy[j][i];
 			if (y2 < dy[j][i]) y2 = dy[j][i];
 		}
 	}
-	for (uint j = 0; j < cnt2; j++) {
-		for (uint i = 0; i < cnt; i++) {
+	for (uint j = 0; j < cnt2; ++j)  {
+		for (uint i = 0; i < cnt; ++i)  {
 			poss[i].x = ((x + ((dx[i] - x1) / (x2 - x1)) * w) / Display::width) * 2 - 1;
 			poss[i].y = 1 - ((y + (1 - (dy[j][i] - y1) / (y2 - y1)) * h) / Display::height) * 2;
 		}
@@ -78,7 +78,7 @@ void plt::plot(float x, float y, float w, float h, float* dx, float** dy, uint c
 
 void plt::remap(float x, float y, float w, float h, plt::remapdata& data) {
 	auto ps = data.pts.size();
-	for (int a = 0; a < 3; a++) {
+	for (int a = 0; a < 3; ++a)  {
 		if (Engine::Button(x + w - 21 * (2-a) - 20, y, 20, 16, white(1, 0.4f)) == MOUSE_RELEASE) {
 			data.type = a;
 		}
@@ -100,7 +100,7 @@ void plt::remap(float x, float y, float w, float h, plt::remapdata& data) {
 				x1 = x + data.pts[1].x * w;
 				Engine::DrawLine(Vec2(x, y0), Vec2(x1, y0), white(), 1);
 				Engine::DrawLine(Vec2(x1, y0), Vec2(x1, y + (1-data.pts[1].y) * h), white(), 1);
-				for (size_t a = 1; a < ps - 1; a++) {
+				for (size_t a = 1; a < ps - 1; ++a)  {
 					y0 = y + (1-data.pts[a].y) * h;
 					x1 = x + data.pts[a+1].x * w;
 					Engine::DrawLine(Vec2(x + data.pts[a].x * w, y0), Vec2(x1, y0), white(), 1);
@@ -111,7 +111,7 @@ void plt::remap(float x, float y, float w, float h, plt::remapdata& data) {
 				break;
 			case 1:
 				Engine::DrawLine(Vec2(x, y0), Vec2(x + data.pts[0].x * w, y0), white(), 1);
-				for (size_t a = 0; a < ps - 1; a++) {
+				for (size_t a = 0; a < ps - 1; ++a)  {
 					y0 = y + (1-data.pts[a].y) * h;
 					Engine::DrawLine(Vec2(x + data.pts[a].x * w, y + (1-data.pts[a].y) * h), 
 						Vec2(x + data.pts[a+1].x * w, y + (1-data.pts[a+1].y) * h), white(), 1);
@@ -126,7 +126,7 @@ void plt::remap(float x, float y, float w, float h, plt::remapdata& data) {
 	else Engine::DrawLine(Vec2(x, y + h), Vec2(x + w, y), white(), 1);
 	
 	if (Input::mouse0State == 1) data.selId = -1;
-	for (size_t i = 0; i < ps; i++) {
+	for (size_t i = 0; i < ps; ++i)  {
 		auto& pt = data.pts[i];
 		if (Engine::Button(x + w*pt.x - 4, y + h*(1-pt.y) - 4, 8, 8, Icons::circle, (i == data.selId)? yellow() : white()) == MOUSE_PRESS) {
 			data.selId = i;

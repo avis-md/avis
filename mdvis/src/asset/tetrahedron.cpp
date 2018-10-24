@@ -23,10 +23,10 @@ void Tetrahedron::Subdivide() {
 	tris.resize(tsz * 4);
 
 	std::unordered_map<int64_t, int> map;
-	for (size_t a = 0; a < tsz/3; a++) {
+	for (size_t a = 0; a < tsz/3; ++a)  {
 		int* vs = &triso[a*3];
 		int vn[3];
-		for (int b = 0; b < 3; b++) {
+		for (int b = 0; b < 3; ++b)  {
 			auto vs0 = vs[b];
 			auto vs1 = vs[(b==2)? 0 : b+1];
 			int in = map[mrg(vs0, vs1)];
@@ -51,7 +51,7 @@ void Tetrahedron::Subdivide() {
 void Tetrahedron::ToSphere(float rad) {
 	auto vsz = verts.size();
 	norms.resize(vsz);
-	for (size_t a = 0; a < vsz; a++) {
+	for (size_t a = 0; a < vsz; ++a)  {
 		norms[a] = glm::normalize(verts[a]);
 		verts[a] = norms[a] * rad;
 	}

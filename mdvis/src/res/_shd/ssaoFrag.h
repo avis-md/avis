@@ -31,7 +31,7 @@ void main () {
 	wPos *= ceil(1-z) / wPos.w; //world position
 
 	float str = 0;
-	for (int i = 0; i < samples; i++) {
+	for (int i = 0; i < samples; ++i)  {
 		vec3 dw = texture(noiseTex, vec2(i / 16, mod(i, 16)) / 16.0).xyz;
 		dw = (dw*2.0) - vec3(1,1,1);
 		vec3 wpos2 = wPos.xyz + (nrm*dw.x + tan*dw.y + bitan*dw.z)*radius;

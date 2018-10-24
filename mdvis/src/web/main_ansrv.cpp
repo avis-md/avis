@@ -5,7 +5,7 @@ int compileType = -1;
 bool forceCompile = false;
 
 int main(int argc, char** argv) {
-    for (int a = 0; a < argc; a++) {
+    for (int a = 0; a < argc; ++a)  {
         if (!strcmp(argv[a], "-f")) {
             forceCompile = true;
         }

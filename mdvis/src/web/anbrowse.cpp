@@ -246,7 +246,7 @@ void AnBrowse::Draw() {
 				UI::Texture(7, f, 16.f, 16.f, Icons::lightning);
 
 		MSC1(0, "Scene IO") {
-			for (byte a = BT(SCN::NUM0) + 1; a < BT(SCN::NUM); a++) {
+			for (byte a = BT(SCN::NUM0) + 1; a < BT(SCN::NUM); ++a)  {
 				MSC2()
 				UI::Label(27, f, 12.f, AN_NODE_SCNS[a - BT(SCN::NUM0) - 1], white());
 				f += 17;
@@ -254,7 +254,7 @@ void AnBrowse::Draw() {
 		}
 
 		MSC1(1, _("Inputs")) {
-			for (byte a = BT(IN::NUM0) + 1; a < BT(IN::NUM); a++) {
+			for (byte a = BT(IN::NUM0) + 1; a < BT(IN::NUM); ++a)  {
 				MSC2()
 				UI::Label(27, f, 12.f, AN_NODE_INS[a - BT(IN::NUM0) - 1], white());
 				f += 17;
@@ -262,7 +262,7 @@ void AnBrowse::Draw() {
 		}
 
 		MSC1(2, _("Modifiers")) {
-			for (byte a = BT(MOD::NUM0) + 1; a < BT(MOD::NUM); a++) {
+			for (byte a = BT(MOD::NUM0) + 1; a < BT(MOD::NUM); ++a)  {
 				MSC2()
 				UI::Label(27, f, 12.f, AN_NODE_MODS[a - BT(MOD::NUM0) - 1], white());
 				f += 17;
@@ -270,7 +270,7 @@ void AnBrowse::Draw() {
 		}
 
 		MSC1(3, _("Generators")) {
-			for (byte a = BT(GEN::NUM0) + 1; a < BT(GEN::NUM); a++) {
+			for (byte a = BT(GEN::NUM0) + 1; a < BT(GEN::NUM); ++a)  {
 				MSC2()
 				UI::Label(27, f, 12.f, AN_NODE_GENS[a - BT(GEN::NUM0) - 1], white());
 				f += 17;
@@ -278,7 +278,7 @@ void AnBrowse::Draw() {
 		}
 
 		MSC1(4, _("Miscellaneous")) {
-			for (byte a = BT(MISC::NUM0) + 1; a < BT(MISC::NUM); a++) {
+			for (byte a = BT(MISC::NUM0) + 1; a < BT(MISC::NUM); ++a)  {
 				MSC2()
 				UI::Label(27, f, 12.f, AN_NODE_MISCS[a - BT(MISC::NUM0) - 1], white());
 				f += 17;

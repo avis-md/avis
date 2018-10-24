@@ -18,7 +18,7 @@ void Node_SetRadScl::Execute() {
     double* vals = *((double**)cv.value);
 
 #pragma omp parallel for
-    for (int a = 0; a < Particles::particleSz; a++) {
+    for (int a = 0; a < Particles::particleSz; ++a)  {
         Particles::radiiscl[a] = (float)vals[a];
     }
     Particles::visDirty = true;

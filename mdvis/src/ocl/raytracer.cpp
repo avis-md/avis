@@ -130,7 +130,7 @@ void RayTracer::Refine() {
 	// Shading
 	RR::Event* e = nullptr;
 
-	for (int a = 0; a < maxRefl-1; a++) {
+	for (int a = 0; a < maxRefl-1; ++a)  {
 		ShadeKernel(out_buff, isect_buffer_cl, col_buff, ray_buffer_cl, 1 + samples, a==0);
 		delete(ray_buffer);
 		ray_buffer = CreateFromOpenClBuffer(api, ray_buffer_cl);
@@ -256,7 +256,7 @@ void RayTracer::SetObjs() {
 
 	g_objshapes.push_back(g_objshapes[1]);
 	auto& v = g_objshapes.back().mesh.positions;
-	for (int a = 0, b = g_objshapes.back().mesh.positions.size() / 3; a < b; a++) {
+	for (int a = 0, b = g_objshapes.back().mesh.positions.size() / 3; a < b; ++a)  {
 		v[a * 3] += 1;
 	}
 

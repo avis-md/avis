@@ -216,7 +216,7 @@ float AnNode::DrawSide() {
 	if (executing) {
 		UI::Quad(pos.x, pos.y + 16, width, 2, white(0.7f, 0.25f));
 		if (script->progress)
-			UI::Quad(pos.x, pos.y + 16, 2 + (width - 2) * *((float*)script->progress), 2, red());
+			UI::Quad(pos.x, pos.y + 16, 2 + (width - 2) * (float)(*script->progress), 2, red());
 		else
 			UI::Quad(pos.x, pos.y + 16, width * 0.1f, 2, red());
 	}
@@ -358,7 +358,7 @@ float AnNode::DrawLog(float off) {
 	if (logExpanded) {
 		UI::Quad(pos.x, pos.y + off, width, 15.f * sz2 + 2, black(0.9f));
 		Engine::PushStencil(pos.x + 1, pos.y + off, width - 2, 15.f * sz2);
-		for (int i = 0; i < sz2; i++) {
+		for (int i = 0; i < sz2; ++i)  {
 			auto& l = log[i + logOffset];
 			Vec4 col = (!l.first) ? white() : ((l.first == 1) ? yellow() : red());
 			UI::Label(pos.x + 4, pos.y + off + 1 + 15 * i, 12, l.second, col);
@@ -418,7 +418,7 @@ void AnNode::ApplyFrameCount(int f) {
 
 bool AnNode::ReadFrame(int f) {
 	if (!conVAll.size()) return true;
- 	for (int a = 0; a < conV.size(); a++) {
+ 	for (int a = 0; a < conV.size(); ++a)  {
 		auto& c = conV[a];
 		if (conVAll[a].size() <= f) return false;
 		auto& ca = conVAll[a][f];
@@ -430,7 +430,7 @@ bool AnNode::ReadFrame(int f) {
 			c.value = &ca.val.d;
 			break;
 		case AN_VARTYPE::LIST:
-			for (int b = 0; b < c.dimVals.size(); b++) {
+			for (int b = 0; b < c.dimVals.size(); ++b)  {
 				c.dimVals[b] = &ca.dims[b];
 			}
 			c.value = &ca.val.arr.p;
@@ -456,9 +456,9 @@ void AnNode::Load(std::ifstream& strm) {
 	int ic, cc, ct;
 	strm >> ic >> cc >> ct;
 	std::string vn, tp;
-	for (auto i = 0; i < ic; i++) {
+	for (auto i = 0; i < ic; ++i)  {
 		strm >> vn >> tp;
-		for (uint b = 0; b < script->invars.size(); b++) {
+		for (uint b = 0; b < script->invars.size(); ++b)  {
 			std::string nn = script->invars[b].first;
 			if (nn == vn) {
 				auto t = ((CScript*)script)->_invars[b].type;
@@ -469,19 +469,19 @@ void AnNode::Load(std::ifstream& strm) {
 			}
 		}
 	}
-	for (auto i = 0; i < cc; i++) {
+	for (auto i = 0; i < cc; ++i)  {
 		strm >> ic;
 		if (ic < 0) continue;
 		strm >> vn >> tp;
 		AnNode* n2 = AnWeb::nodes[ic];
 		uint i1 = -1, i2 = -1;
-		for (uint b = 0; b < n2->script->outvars.size(); b++) {
+		for (uint b = 0; b < n2->script->outvars.size(); ++b)  {
 			if (n2->script->outvars[b].first == vn) {
 				i2 = b;
 				break;
 			}
 		}
-		for (uint b = 0; b < script->invars.size(); b++) {
+		for (uint b = 0; b < script->invars.size(); ++b)  {
 			if (script->invars[b].first == tp) {
 				i1 = b;
 				break;
@@ -526,7 +526,7 @@ void AnNode::LoadOut(const std::string& path) {
 void AnNode::SaveConn() {
 	auto sz = inputR.size();
 	_connInfo.resize(sz);
-	for (size_t a = 0; a < sz; a++) {
+	for (size_t a = 0; a < sz; ++a)  {
 		ConnInfo& cn = _connInfo[a];
 		cn.mynm = script->invars[a].first;
 		cn.mytp = script->invars[a].second;
@@ -540,12 +540,12 @@ void AnNode::SaveConn() {
 }
 
 void AnNode::ClearConn() {
-	for (size_t i = 0; i < inputR.size(); i++) {
+	for (size_t i = 0; i < inputR.size(); ++i)  {
 		Disconnect((uint)i, false);
 	}
 	inputR.clear();
 	inputR.resize(script->invars.size());
-	for (size_t i = 0; i < outputR.size(); i++) {
+	for (size_t i = 0; i < outputR.size(); ++i)  {
 		Disconnect((uint)i, true);
 	}
 	outputR.clear();
@@ -555,12 +555,12 @@ void AnNode::ClearConn() {
 
 void AnNode::Reconn() {
 	for (auto& cn : _connInfo) {
-		for (size_t a = 0, sz = inputR.size(); a < sz; a++) {
+		for (size_t a = 0, sz = inputR.size(); a < sz; ++a)  {
 			if (script->invars[a].first == cn.mynm) {
 				if (script->invars[a].second == cn.mytp) {
 					if (cn.cond) {
 						auto& ra = cn.tar;
-						for (size_t b = 0, sz2 = ra->outputR.size(); b < sz2; b++) {
+						for (size_t b = 0, sz2 = ra->outputR.size(); b < sz2; ++b)  {
 							if (ra->script->outvars[b].first == cn.tarnm) {
 								if (ra->script->outvars[b].second == cn.tartp) {
 									ra->ConnectTo((uint)b, this, (uint)a);
@@ -589,7 +589,7 @@ bool AnNode::CanConn(std::string lhs, std::string rhs) {
 	if (rhs[0] == '*' && lhs.substr(0, 4) != "list") return true;
 	auto s = lhs.size();
 	if (s != rhs.size()) return false;
-	for (size_t a = 0; a < s; a++) {
+	for (size_t a = 0; a < s; ++a)  {
 		if (lhs[a] != rhs[a] && rhs[a] != '*') return false;
 	}
 	return true;
@@ -650,12 +650,12 @@ PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 	outputV.resize(scr->outvars.size());
 	outputVC.resize(scr->outvars.size());
 	inputVDef.resize(scr->invars.size());
-	for (uint i = 0; i < scr->invars.size(); i++) {
+	for (uint i = 0; i < scr->invars.size(); ++i)  {
 		inputV[i] = scr->_invars[i];
 		if (scr->_invars[i].type == AN_VARTYPE::DOUBLE) inputVDef[i].d = 0;
 		else inputVDef[i].i = 0;
 	}
-	for (uint i = 0; i < scr->outvars.size(); i++) {
+	for (uint i = 0; i < scr->outvars.size(); ++i)  {
 		auto& ovi = outputV[i] = scr->_outvars[i];
 		conV[i].type = ovi.type;
 		conV[i].typeName = ovi.typeName;
@@ -669,7 +669,7 @@ PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 
 void PyNode::Execute() {
 	auto scr = (PyScript*)script;
-	for (uint i = 0; i < script->invars.size(); i++) {
+	for (uint i = 0; i < script->invars.size(); ++i)  {
 		auto& mv = scr->_invars[i];
 		if (HasConnI(i)) {
 			auto& cv = inputR[i].first->conV[inputR[i].second];
@@ -712,7 +712,7 @@ void PyNode::Execute() {
 		}
 	}
 	script->Exec();
-	for (uint i = 0; i < script->outvars.size(); i++) {
+	for (uint i = 0; i < script->outvars.size(); ++i)  {
 		auto& mv = outputV[i];
 		mv.value = scr->pRets[i];
 		Py_INCREF(mv.value);
@@ -742,7 +742,7 @@ void PyNode::Execute() {
 }
 
 void PyNode::WriteFrame(int f) {
-	for (int a = 0; a < conV.size(); a++) {
+	for (int a = 0; a < conV.size(); ++a)  {
 		conVAll[a][f] = outputVC[a];
 		conVAll[a][f].val.arr.p = &conVAll[a][f].val.arr.data[0];
 	}
@@ -751,7 +751,7 @@ void PyNode::WriteFrame(int f) {
 void PyNode::RemoveFrames() {
 	AnNode::RemoveFrames();
 	auto scr = (PyScript*)script;
-	for (uint i = 0; i < scr->outvars.size(); i++) {
+	for (uint i = 0; i < scr->outvars.size(); ++i)  {
 		switch (scr->_outvars[i].type) {
 		case AN_VARTYPE::INT:
 			conV[i].value = &outputVC[i].val.i;
@@ -794,7 +794,7 @@ void PyNode::CatchExp(char* c) {
 	msg.severe = true;
 	msg.msg.resize(n - i - 1);
 	msg.msg[0] = ss[n-1];
-	for (size_t a = i + 1; a < n - 1; a++) {
+	for (size_t a = i + 1; a < n - 1; ++a)  {
 		msg.msg[a - i] = ss[a];
 	}
 	auto loc = string_find(ss[n - 3], ", line ");
@@ -809,12 +809,12 @@ CNode::CNode(CScript* scr) : AnNode(scr) {
 	inputV.resize(scr->invars.size());
 	outputV.resize(scr->outvars.size());
 	inputVDef.resize(scr->invars.size());
-	for (uint i = 0; i < scr->invars.size(); i++) {
+	for (uint i = 0; i < scr->invars.size(); ++i)  {
 		inputV[i] = scr->_invars[i].value;
 		if (scr->_invars[i].type == AN_VARTYPE::DOUBLE) inputVDef[i].d = 0;
 		else inputVDef[i].i = 0;
 	}
-	for (uint i = 0; i < scr->outvars.size(); i++) {
+	for (uint i = 0; i < scr->outvars.size(); ++i)  {
 		outputV[i] = scr->_outvars[i].value;
 		conV[i] = scr->_outvars[i];
 	}
@@ -822,7 +822,7 @@ CNode::CNode(CScript* scr) : AnNode(scr) {
 
 void CNode::Execute() {
 	auto scr = (CScript*)script;
-	for (uint i = 0; i < scr->invars.size(); i++) {
+	for (uint i = 0; i < scr->invars.size(); ++i)  {
 		auto& mv = scr->_invars[i];
 		if (HasConnI(i)) {
 			auto& cv = inputR[i].first->conV[inputR[i].second];
@@ -836,7 +836,7 @@ void CNode::Execute() {
 			case AN_VARTYPE::LIST:
 				scr->Set(i, *(uintptr_t*)cv.value);
 				
-				for (uint j = 0; j < mv.dimVals.size(); j++) {
+				for (uint j = 0; j < mv.dimVals.size(); ++j)  {
 					auto loc = mv.dimVals[j];
 					if (loc)
 						*loc = *cv.dimVals[j];
@@ -869,7 +869,7 @@ void CNode::Execute() {
 
 void CNode::WriteFrame(int f) {
 	auto scr = (CScript*)script;
-	for (int a = 0; a < conV.size(); a++) {
+	for (int a = 0; a < conV.size(); ++a)  {
 		auto& c = conV[a];
 		auto& ca = conVAll[a][f];
 		switch (c.type) {
@@ -883,7 +883,7 @@ void CNode::WriteFrame(int f) {
 			int n = 1;
 			auto ds = conV[a].dimVals.size();
 			ca.dims.resize(ds);
-			for (size_t d = 0; d < ds; d++) {
+			for (size_t d = 0; d < ds; ++d) {
 				n *= ca.dims[d] = *conV[a].dimVals[d];
 			}
 			n *= scr->_outvars[a].stride;
@@ -899,7 +899,7 @@ void CNode::WriteFrame(int f) {
 void CNode::RemoveFrames() {
 	AnNode::RemoveFrames();
 	auto scr = (CScript*)script;
-	for (uint i = 0; i < scr->outvars.size(); i++) {
+	for (uint i = 0; i < scr->outvars.size(); ++i)  {
 		conV[i] = scr->_outvars[i];
 	}
 }
@@ -925,12 +925,12 @@ FNode::FNode(FScript* scr) : AnNode(scr) {
 	inputV.resize(scr->invars.size());
 	outputV.resize(scr->outvars.size());
 	inputVDef.resize(scr->invars.size());
-	for (uint i = 0; i < scr->invars.size(); i++) {
+	for (uint i = 0; i < scr->invars.size(); ++i)  {
 		inputV[i] = scr->_invars[i].value;
 		if (scr->_invars[i].type == AN_VARTYPE::DOUBLE) inputVDef[i].d = 0;
 		else inputVDef[i].i = 0;
 	}
-	for (uint i = 0; i < scr->outvars.size(); i++) {
+	for (uint i = 0; i < scr->outvars.size(); ++i)  {
 		outputV[i] = scr->_outvars[i].value;
 		conV[i] = scr->_outvars[i];
 	}
@@ -938,7 +938,7 @@ FNode::FNode(FScript* scr) : AnNode(scr) {
 
 void FNode::Execute() {
 	auto scr = (FScript*)script;
-	for (uint i = 0; i < scr->invars.size(); i++) {
+	for (uint i = 0; i < scr->invars.size(); ++i)  {
 		scr->pre = i;
 		auto& mv = scr->_invars[i];
 		if (HasConnI(i)) {
@@ -987,7 +987,7 @@ void FNode::Execute() {
 	
 	scr->Exec();
 
-	for (uint i = 0; i < scr->outvars.size(); i++) {
+	for (uint i = 0; i < scr->outvars.size(); ++i)  {
 		scr->post = i;
 		if (scr->_outvars[i].type == AN_VARTYPE::LIST) {
 			scr->_outarr_post[i]();
@@ -995,7 +995,7 @@ void FNode::Execute() {
 			size_t dn = cv.dimVals.size();
 			cv.data.dims.resize(dn);
 			int sz = 1;
-			for (size_t a = 0; a < dn; a++) {
+			for (size_t a = 0; a < dn; ++a)  {
 				cv.data.dims[a] = (*scr->arr_out_shapeloc)[a];
 				cv.dimVals[a] = &cv.data.dims[a];
 				sz *= cv.data.dims[a];
@@ -1016,7 +1016,7 @@ void FNode::WriteFrame(int f) {
 void FNode::RemoveFrames() {
 	AnNode::RemoveFrames();
 	auto scr = (FScript*)script;
-	for (uint i = 0; i < scr->outvars.size(); i++) {
+	for (uint i = 0; i < scr->outvars.size(); ++i)  {
 		conV[i] = scr->_outvars[i];
 	}
 }

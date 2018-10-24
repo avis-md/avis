@@ -15,9 +15,9 @@ bool LJ256::Init(SyncInfo* info) {
 	info->bounds[1] = info->bounds[3] = info->bounds[5] = 4;
 	info->pos = new float[info->num * 3];
 	info->vel = new float[info->num * 3]{};
-	for (uint a = 0; a < 4; a++) {
-		for (uint b = 0; b < 4; b++) {
-			for (uint c = 0; c < 4; c++) {
+	for (uint a = 0; a < 4; ++a)  {
+		for (uint b = 0; b < 4; ++b)  {
+			for (uint c = 0; c < 4; ++c)  {
 				uint off = a * 64 + b * 16 + c * 4;
 				float* p = info->pos + off * 3;
 				p[0] = p[9] = a + 0.25f;
@@ -39,7 +39,7 @@ bool LJ256::Init(SyncInfo* info) {
 	vls = new float[info->num * 3];
 	float tx = 0, ty = 0, tz = 0;
 	float T = 2;
-	for (uint a = 0; a < info->num; a++) {
+	for (uint a = 0; a < info->num; ++a)  {
 		vls[a * 3] = Random::Range(-T, T);
 		vls[a * 3 + 1] = Random::Range(-T, T);
 		vls[a * 3 + 2] = Random::Range(-T, T);
@@ -50,7 +50,7 @@ bool LJ256::Init(SyncInfo* info) {
 	tx /= info->num;
 	ty /= info->num;
 	tz /= info->num;
-	for (uint a = 0; a < info->num; a++) {
+	for (uint a = 0; a < info->num; ++a)  {
 		vls[a * 3] -= tx;
 		vls[a * 3 + 1] -= ty;
 		vls[a * 3 + 2] -= tz;
@@ -92,7 +92,7 @@ void WL(float* p) {
 }
 
 bool LJ256::Loop(SyncInfo* info) {
-	for (uint a = 0; a < info->num; a++) {
+	for (uint a = 0; a < info->num; ++a)  {
 		float* p = pss + a * 3;
 		float* v = vls + a * 3;
 		float* f = ff + a * 3;
@@ -102,10 +102,10 @@ bool LJ256::Loop(SyncInfo* info) {
 		WL(p);
 	}
 	float ff2[256 * 3]{};
-	for (uint a = 0; a < info->num; a++) {
+	for (uint a = 0; a < info->num; ++a)  {
 		float* p = pss + a * 3;
 		float* f = ff2 + a * 3;
-		for (uint b = 0; b < info->num; b++) {
+		for (uint b = 0; b < info->num; ++b)  {
 			if (b == a) continue;
 			float* p2 = pss + b * 3;
 			float dp[3];
@@ -118,7 +118,7 @@ bool LJ256::Loop(SyncInfo* info) {
 			f[2] += dp[2] * fm;
 		}
 	}
-	for (uint a = 0; a < info->num; a++) {
+	for (uint a = 0; a < info->num; ++a)  {
 		float* v = vls + a * 3;
 		float* f = ff + a * 3;
 		float* f2 = ff2 + a * 3;

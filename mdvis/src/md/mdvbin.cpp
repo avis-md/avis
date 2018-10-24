@@ -18,7 +18,7 @@ bool MDVBin::Read(ParInfo* info) {
 	info->pos = new float[sz * 3];
 	info->vel = new float[sz * 3];
 
-	for (uint i = 0; i < sz; i++) {
+	for (uint i = 0; i < sz; ++i)  {
 		info->progress = i * 1.0f / sz;
 		RD(info->type[i]);
 		RD(info->pos[i * 3]);
@@ -44,7 +44,7 @@ bool MDVBin::ReadTrj(TrjInfo* info) {
 	auto ps = nmf.find_last_of('/');
 	auto nm = nmf.substr(ps + 1);
 	int n1, n2 = 0;
-	for (uint a = 0; a < nm.size() - 1; a++) {
+	for (uint a = 0; a < nm.size() - 1; ++a)  {
 		if (nm[a + 1] == '.' && ISNUM(nm[a])) {
 			n1 = a;
 			break;
@@ -95,7 +95,7 @@ bool MDVBin::ReadTrj(TrjInfo* info) {
 		auto ps = poss.back();
 		auto vs = vels.back();
 
-		for (uint i = 0; i < info->parNum; i++) {
+		for (uint i = 0; i < info->parNum; ++i)  {
 			RD(dm);
 			RD(ps[i * 3]);
 			RD(ps[i * 3 + 1]);

@@ -137,7 +137,7 @@ std::vector<string> IO::GetRegistryKeys(HKEY key) {
 
 	if (RegQueryInfoKey(key, achClass, &cchClassName, NULL, &size, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == ERROR_SUCCESS) {
 		DWORD cbName = 255;
-		for (uint i = 0; i < size; i++) {
+		for (uint i = 0; i < size; ++i)  {
 			if (RegEnumKeyEx(key, i, achKey, &cbName, NULL, NULL, NULL, NULL) == ERROR_SUCCESS) {
 				res.push_back(achKey);
 			}

@@ -68,7 +68,7 @@ void Camera::InitGBuffer(uint w, uint h) {
 	glGenTextures(NUM_EXTRA_TEXS, blitTexs);
 
 	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
-	for (byte i = 0; i < NUM_EXTRA_TEXS; i++) {
+	for (byte i = 0; i < NUM_EXTRA_TEXS; ++i)  {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, blitFbos[i]);
 		glBindTexture(GL_TEXTURE_2D, blitTexs[i]);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, (int)Display::width, (int)Display::height, 0, GL_RGBA, GL_FLOAT, NULL);
@@ -216,7 +216,7 @@ void Light::InitShadow() {
 	//glGenTextures(3, _shadowGITexs);
 	glGenTextures(1, &_shadowMap);
 
-	for (uint i = 0; i < 3; i++) {
+	for (uint i = 0; i < 3; ++i)  {
 		glBindTexture(GL_TEXTURE_2D, _shadowGITexs[i]);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, _shadowGITexs[i], 0);

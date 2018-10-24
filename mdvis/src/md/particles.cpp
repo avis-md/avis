@@ -44,7 +44,7 @@ void Particles::AnimData::Update() {
 	if (maxFramesInMem > 1000000) return;
 
 	if (maxFramesInMem < frameCount) {
-		for (uint a = 0; a < frameMemPos; a++) {
+		for (uint a = 0; a < frameMemPos; ++a)  {
 			if (a + frameCount - frameMemPos < maxFramesInMem) continue;
 			if (status[a] == FRAME_STATUS::LOADED) {
 				std::vector<glm::dvec3>().swap(poss[a]);
@@ -52,7 +52,7 @@ void Particles::AnimData::Update() {
 				status[a] = FRAME_STATUS::UNLOADED;
 			}
 		}
-		for (uint a = frameMemPos + maxFramesInMem; a < frameCount; a++) {
+		for (uint a = frameMemPos + maxFramesInMem; a < frameCount; ++a)  {
 			if (status[a] == FRAME_STATUS::LOADED) {
 				std::vector<glm::dvec3>().swap(poss[a]);
 				std::vector<glm::dvec3>().swap(vels[a]);
@@ -61,7 +61,7 @@ void Particles::AnimData::Update() {
 		}
 	}
 
-	for (uint ff = currentFrame; ff < frameMemPos + maxFramesInMem; ff++) {
+	for (uint ff = currentFrame; ff < frameMemPos + maxFramesInMem; ++ff) {
 		auto f = Repeat(ff, 0U, frameCount);
 		auto& st = status[f];
 		if (st == FRAME_STATUS::READING || st == FRAME_STATUS::BAD) return;
@@ -237,7 +237,7 @@ void Particles::Update() {
 		visDirty = false;
 		UpdateRadBuf();
 	}
-	for (int a = 0; a < particles_ParamSz; a++) {
+	for (int a = 0; a < particles_ParamSz; ++a)  {
 		auto& p = particles_Params[a];
 		if (p->dirty) {
 			p->Update();
@@ -260,7 +260,7 @@ void Particles::UpdateBufs() {
 
 	std::vector<Vec3> ps(particleSz);
 #pragma omp parallel for
-	for (int a = 0; a < (int)particleSz; a++) {
+	for (int a = 0; a < (int)particleSz; ++a)  {
 		ps[a] = (Vec3)poss[a];
 	}
 
@@ -290,7 +290,7 @@ void Particles::UpdateRadBuf(int i) {
 	if (i == -1) {
 		std::vector<float> res(particleSz);
 #pragma omp parallel for
-		for (int a = 0; a < particleSz; a++) {
+		for (int a = 0; a < particleSz; ++a)  {
 			res[a] = visii[a] ? radii[a]*radiiscl[a] : -1;
 		}
 		SetGLSubBuf(radBuffer, &res[0], particleSz);
@@ -338,11 +338,11 @@ void Particles::SetFrame(uint frm) {
 			poss = &anim.poss[anim.currentFrame][0];
 			std::vector<Vec3> ps(particleSz);
 	#pragma omp parallel for
-			for (int a = 0; a < (int)particleSz; a++) {
+			for (int a = 0; a < (int)particleSz; ++a)  {
 				ps[a] = (Vec3)poss[a];
 			}
 			SetGLSubBuf(posBuffer, &ps[0], particleSz);
-			for (int a = 0; a < particles_ParamSz; a++) {
+			for (int a = 0; a < particles_ParamSz; ++a)  {
 				auto& p = particles_Params[a];
 				if (p->timed) {
 					p->Update();
@@ -372,7 +372,7 @@ void Particles::AddParam() {
 
 void Particles::RmParam(int i) {
 	delete(particles_Params[i]);
-	for (int a = i+1; a < particles_ParamSz; a++) {
+	for (int a = i+1; a < particles_ParamSz; ++a)  {
 		particles_Params[a-1] = particles_Params[a];
 		particles_ParamNms[a-1] = particles_ParamNms[a];
 	}
@@ -399,7 +399,7 @@ void Particles::BoundParticles() {
 		boundingBox[3] - boundingBox[2],
 		boundingBox[5] - boundingBox[4]);
 	#pragma omp parallel for
-	for (int a = 0; a < particleSz; a++) {
+	for (int a = 0; a < particleSz; ++a)  {
 		glm::dvec3 dp = poss[a] - bboxCenter;
 		dp /= sz;
 		dp = glm::round(dp);

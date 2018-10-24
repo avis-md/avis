@@ -209,7 +209,7 @@ std::vector<char> SSH::GetFile(std::string from) {
 	from = ResolveUserPath(from);
 	auto hnd = libssh2_sftp_open(sftpChannel, &from[0], LIBSSH2_FXF_READ, 0);
 	std::vector<char> res;
-	auto sz = 0;
+	size_t sz = 0;
 	auto tm = milliseconds();
 	std::array<char, SFTP_BUF_SZ> mem;
 	if (hnd) {

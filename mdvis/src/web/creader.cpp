@@ -75,7 +75,7 @@ bool CReader::Read(CScript* scr) {
 		if (mt < 0) return false;
 		auto ot = IO::ModTime(fp2 + nm + ".so");
 
-		std::string funcNm;
+		std::string funcNm, progrsNm;
 
 		bool fail = false;
 #define _ER(a, b)\
@@ -123,6 +123,23 @@ bool CReader::Read(CScript* scr) {
 								funcNm = s.substr(4, bo - 4);
 								std::ofstream ets(fp2 + nm + ".entry");
 								ets << funcNm;
+							}
+							else {
+								_ER("CReader", "//entry must precede a void function with no arguments!");
+								fail = true;
+								break;
+							}
+						}
+						else if (ss[0] == "//progress") {
+							ostrm << EXTERN << '\n';
+							std::getline(strm, s);
+							ostrm << s << '\n';
+							s = rm_spaces(s);
+							int eq = s.find('=');
+							if (s.substr(0, 6) == "double" && eq > -1) {
+								progrsNm = s.substr(6, eq - 6);
+								std::ofstream ets(fp2 + nm + ".progress");
+								ets << progrsNm;
 							}
 							else {
 								_ER("CReader", "//entry must precede a void function with no arguments!");
@@ -211,6 +228,10 @@ bool CReader::Read(CScript* scr) {
 			std::ifstream ets(fp2 + nm + ".entry");
 			ets >> funcNm;
 		}
+		{
+			std::ifstream prs(fp2 + nm + ".progress");
+			prs >> progrsNm;
+		}
 
 		scr->funcLoc = (emptyFunc)scr->lib->GetSym(funcNm);
 		if (!scr->funcLoc) {
@@ -222,6 +243,13 @@ bool CReader::Read(CScript* scr) {
 #endif
 			_ER("CReader", "Failed to load function \"" + funcNm + "\" into memory! " + err);
 			FAIL0;
+		}
+
+		if (progrsNm.size() > 0) {
+			scr->progress = (double*)scr->lib->GetSym(progrsNm);
+			if (!scr->progress) {
+				Debug::Warning("CReader", "Failed to load progress \"" + progrsNm + "\" into memory! Ignoring...");
+			}
 		}
 
 #ifdef PLATFORM_WIN
@@ -360,7 +388,7 @@ bool CReader::Read(CScript* scr) {
 				if (ira) {
 					auto sz = bk->dimVals.size();
 					bk->data.dims.resize(sz);
-					for (size_t a = 0; a < sz; a++) {
+					for (size_t a = 0; a < sz; ++a)  {
 						int es = TryParse(bk->dimNames[a], 0);
 						if (es > 0) {
 							if (iso) { //temp fix for mac access error

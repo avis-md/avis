@@ -14,7 +14,7 @@ bool XYZ::Read(ParInfo* info) {
 
 	string tp;
 	strm >> tp;
-	for (uint a = 0; a < sz; a++) {
+	for (uint a = 0; a < sz; ++a)  {
 		info->progress = a * 1.0f / sz;
 		strm >> tp;
 		info->type[a] = *((uint16_t*)(&tp[0]));

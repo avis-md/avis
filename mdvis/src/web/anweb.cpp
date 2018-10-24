@@ -40,7 +40,7 @@ bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
 void AnWeb::Init() {
 	Insert(new Node_Inputs());
 	Insert(new Node_Info());
-	for (int a = 0; a < 10; a++) {
+	for (int a = 0; a < 10; ++a)  {
 		AnBrowse::mscFdExpanded[a] = true;
 	}
 	ChokoLait::focusFuncs.push_back(CheckChanges);
@@ -54,7 +54,7 @@ void AnWeb::Clear() {
 }
 
 void AnWeb::Clear0() {
-	for (int a = 1; a < nodes.size(); a++) {
+	for (int a = 1; a < nodes.size(); ++a)  {
 		delete(nodes[a]);
 	}
 	nodes.resize(1);
@@ -237,7 +237,7 @@ void AnWeb::Draw() {
 			selScript = nullptr;
 		}
 		else {
-			for (auto nn = nodes.begin() + 1; nn != nodes.end(); nn++) {
+			for (auto nn = nodes.begin() + 1; nn != nodes.end(); nn++)  {
 				auto& n = *nn;
 				if (n->op == ANNODE_OP::REMOVE) {
 					if ((nn + 1) != nodes.end()) {
@@ -389,7 +389,7 @@ void AnWeb::DoExecute(bool all) {
 	if (all) {
 		auto f = Particles::anim.currentFrame;
 		ApplyFrameCount(Particles::anim.frameCount);
-		for (uint a = 0; a < Particles::anim.frameCount; a++) {
+		for (uint a = 0; a < Particles::anim.frameCount; ++a)  {
 			execFrame = a+1;
 			Particles::anim.Seek(a);
 			auto st = Particles::anim.status[a];
@@ -580,7 +580,7 @@ void AnWeb::Save(const std::string& s) {
 		SV(tile, nd->canTile);
 		nd->SaveConn();
 		auto nc = n->addchild("conns");
-		for (size_t a = 0; a < nd->_connInfo.size(); a++) {
+		for (size_t a = 0; a < nd->_connInfo.size(); ++a)  {
 			auto& c = nd->_connInfo[a];
 			auto n = nc->addchild("item");
 			SVS(name, c.mynm);

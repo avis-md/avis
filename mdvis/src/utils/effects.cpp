@@ -127,7 +127,7 @@ void Effects::_InitSSAO(const std::string& vs) {
 	gu(4, screenSize);
 
 	Vec3 noise[256];
-	for (uint i = 0; i < 256; i++) {
+	for (uint i = 0; i < 256; ++i)  {
 		noise[i] = (Vec3(Random::Range(0.5f, 1.f), Random::Value(), Random::Value()));
 	}
 	glGenTextures(1, &noiseTex);

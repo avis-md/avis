@@ -269,7 +269,7 @@ void ParGraphics::Init() {
 
 void ParGraphics::InitClippingMesh() {
 	Vec3 pts[14];
-	for (int a = 0; a < 4; a++) {
+	for (int a = 0; a < 4; ++a)  {
 		pts[a] = Vec3(cosf(a*PI/2), sinf(a*PI/2), 0) * 0.05f;
 		pts[a+4] = pts[a];
 		pts[a+8] = pts[a]*3.f;
@@ -289,11 +289,11 @@ void ParGraphics::UpdateDrawLists() {
 	drawListsB.clear();
 	int di = -1, di2 = -1;
 	byte dt;
-	for (uint i = 0; i < Particles::residueListSz; i++) {
+	for (uint i = 0; i < Particles::residueListSz; ++i)  {
 		auto& r = Particles::residueLists[i];
 
 		if (r.drawType == 255 || !r.visibleAll) {
-			for (uint j = 0; j < r.residueSz; j++) {
+			for (uint j = 0; j < r.residueSz; ++j)  {
 				auto rr = r.residues[j];
 				if ((di == -1) && rr.visible) {
 					di = rr.offset;
@@ -353,7 +353,7 @@ void ParGraphics::FillRad(byte* rads) {
 		float ml = 1;
 		switch (p.second.second) {
 		case 1:
-			for (uint a = p.first; a < p.first + p.second.first; a++) {
+			for (uint a = p.first; a < p.first + p.second.first; ++a)  {
 				rads[a] = 255;
 			}
 			continue;
@@ -363,7 +363,7 @@ void ParGraphics::FillRad(byte* rads) {
 			ml = 0.2f; break;
 		default: break;
 		}
-		for (uint a = p.first; a < p.first + p.second.first; a++) {
+		for (uint a = p.first; a < p.first + p.second.first; ++a)  {
 			rads[a] = (byte)(min(0.1f * ml * Particles::radii[a], 0.2f) * 255 / 0.2f);
 		}
 	}
@@ -506,7 +506,7 @@ void ParGraphics::UpdateClipping() {
 	auto mv = MVP::modelview();
 	switch (clippingType) {
 	case CLIPPING::NONE:
-		for (int a = 0; a < 6; a++) {
+		for (int a = 0; a < 6; ++a)  {
 			clippingPlanes[a] = Vec4();
 		}
 		break;
@@ -525,12 +525,12 @@ void ParGraphics::UpdateClipping() {
 		dirs[1] = glm::normalize(mv * dirs[1]);
 		clippingPlanes[0] = dirs[0];
 		clippingPlanes[1] = dirs[1];
-		for (int a = 0; a < 2; a++) {
+		for (int a = 0; a < 2; ++a)  {
 			cents[a] = mv * cents[a];
 			cents[a] /= cents[a].w;
 			clippingPlanes[a].w = glm::dot((Vec3)cents[a], (Vec3)clippingPlanes[a]);
 		}
-		for (int a = 2; a < 6; a++) {
+		for (int a = 2; a < 6; ++a)  {
 			clippingPlanes[a] = Vec4();
 		}
 		break;
@@ -548,7 +548,7 @@ void ParGraphics::UpdateClipping() {
 		cents[3] = cs + dirs[1] * clipCube.size.y * 0.5f;
 		cents[4] = cs - dirs[2] * clipCube.size.z * 0.5f;
 		cents[5] = cs + dirs[2] * clipCube.size.z * 0.5f;
-		for (int a = 0; a < 3; a++) {
+		for (int a = 0; a < 3; ++a)  {
 			dirs[a] = glm::normalize(mv * dirs[a]);
 		}
 		clippingPlanes[0] = -dirs[0];
@@ -557,7 +557,7 @@ void ParGraphics::UpdateClipping() {
 		clippingPlanes[3] = dirs[1];
 		clippingPlanes[4] = -dirs[2];
 		clippingPlanes[5] = dirs[2];
-		for (int a = 0; a < 6; a++) {
+		for (int a = 0; a < 6; ++a)  {
 			cents[a] = mv * cents[a];
 			cents[a] /= cents[a].w;
 			clippingPlanes[a].w = glm::dot((Vec3)cents[a], (Vec3)clippingPlanes[a]);
@@ -898,7 +898,7 @@ void ParGraphics::DrawColMenu() {
 	UI::Label(exps - 148, off, 12, "Attributes", white());
 	UI::Quad(exps - 149, off + 17, 149, 17 * 4 + 2, white(0.9f, 0.1f));
 	off += 18;
-	for (int a = 0; a < Particles::particles_ParamSz; a++) {
+	for (int a = 0; a < Particles::particles_ParamSz; ++a)  {
 		UI::Label(exps - 147, off + a*17, 12, std::to_string(a+1), white());
 		Particles::particles_ParamNms[a] = UI::EditText(exps - 130, off + a*17, 110, 16, 12, white(1, 0.4f), Particles::particles_ParamNms[a], true, white());
 	}
@@ -923,7 +923,7 @@ void ParGraphics::DrawColMenu() {
 		off += 20;
 		Color::DrawH2(exps - 115, off + 8, 16, 17*5 - 16, gradCols);
 		static const std::string ii[] = { "0.0", "0.5", "1.0" };
-		for (int a = 0; a < 3; a++) {
+		for (int a = 0; a < 3; ++a)  {
 			UI2::Color(exps - 140, off + 34 * (2 - a), 138, ii[a], gradCols[a]);
 			UI::Texture(exps - 95, off + 34 * a, 16, 16, Icons::left, white(1, 0.4f));
 		}
@@ -934,7 +934,7 @@ void ParGraphics::DrawColMenu() {
 		Engine::PushStencil(exps - 148, off + 1, 146, Display::height*0.5f - off - 2);
 		off++;
 		UI2::sepw = 0.33f;
-		for (int x = 0; x < 256; x++) {
+		for (int x = 0; x < 256; ++x)  {
 			std::string nm = (x < Particles::defColPalleteSz) ? std::string((char*)&Particles::defColPallete[x], 2) : std::to_string(x);
 			Vec3& col = Particles::colorPallete[x];
 			Vec4& colt = Particles::_colorPallete[x];
@@ -1126,7 +1126,7 @@ void ParGraphics::DrawPopupDM() {
 	static const Texture bs[] = { Icons::dm_none, Icons::dm_line, Icons::dm_stick };
 
 	UI::Label(Popups::pos.x + 2, Popups::pos.y + 18, 12, _("Atoms"), white());
-	for (byte i = 0; i < 4; i++) {
+	for (byte i = 0; i < 4; ++i)  {
 		if (Engine::Button(Popups::pos.x + 42 + 17 * i, Popups::pos.y + 18, 16, 16, as[i], (i == a)? yellow() : white(0.8f)) == MOUSE_RELEASE) {
 			if (dt == 255) dt = 0;
 			dt = (dt & 0xf0) | i;
@@ -1135,7 +1135,7 @@ void ParGraphics::DrawPopupDM() {
 		}
 	}
 	UI::Label(Popups::pos.x + 2, Popups::pos.y + 35, 12, _("Bonds"), white());
-	for (byte i = 0; i < 3; i++) {
+	for (byte i = 0; i < 3; ++i)  {
 		if (Engine::Button(Popups::pos.x + 42 + 17 * i, Popups::pos.y + 35, 16, 16, bs[i], (i == b)? yellow() : white(0.8f)) == MOUSE_RELEASE) {
 			if (dt == 255) dt = 0; 
 			dt = (dt & 0x0f) | (i << 4);
@@ -1174,14 +1174,14 @@ void ParGraphics::Serialize(XmlNode* nd) {
 }
 void ParGraphics::SerializeCol(XmlNode* n) {
 	auto pm = n->addchild("Params");
-	for (int a = 0; a < Particles::particles_ParamSz; a++) {
+	for (int a = 0; a < Particles::particles_ParamSz; ++a)  {
 		pm->addchild("item")
 			->addchild("name", Particles::particles_ParamNms[a]);
 	}
 	SV(usegrad, (int)useGradCol);
 	/*
 	auto gr = pm->addchild("grad");
-	for (int a = 0; a < 3; a++) {
+	for (int a = 0; a < 3; ++a)  {
 		gr->children.push_back(Xml::FromVec(std::to_string(a), gradCols[a]));
 	}
 	*/

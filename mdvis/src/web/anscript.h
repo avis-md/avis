@@ -62,7 +62,7 @@ public:
 	AN_SCRTYPE type;
 	std::vector<std::pair<std::string, std::string>> invars, outvars;
 	std::vector<VarOpt> invaropts;
-	void* progress = 0;
+	double* progress = 0;
 
 	std::vector<ErrorView::Message> compileLog;
 	int errorCount = 0;

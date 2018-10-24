@@ -24,7 +24,7 @@ bool DyLib::ForceUnload(DyLib* lib, std::string path) {
 #ifdef PLATFORM_WIN
 	return FreeLibrary((HMODULE)lib->lib);
 #else
-	for (int tries = 0; tries < 10; tries++) {
+	for (int tries = 0; tries < 10; ++tries) {
 		dlclose(lib->lib);
 		sleep(10);
 		if (!dlopen(path.c_str(), RTLD_LAZY | RTLD_NOLOAD))

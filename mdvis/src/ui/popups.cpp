@@ -57,7 +57,7 @@ bool Popups::DoDrawMenu(std::vector<MenuItem>* mn, float x, float y, size_t* act
 	auto sz = mn->size();
 	UI::Quad(x - 1, y, 122, 18 * sz + 1.f, black(0.7f));
 	UI::Quad(x, y, 120, 18.f * sz, white(1, 0.1f));
-	for (size_t a = 0; a < sz; a++) {
+	for (size_t a = 0; a < sz; ++a)  {
 		auto& i = mn->at(a);
 		auto st = Engine::Button(x + 1, y + 18 * a + 1, 118, 16, white(0), white(1, 0.2f), white(1, 0.05f));
 		if (i.icon != GLuint(-1)) {
@@ -92,7 +92,7 @@ void Popups::DrawDropdown() {
 	while (!!dt->list[n][0]) n++;
 	if (!dt->flags) {
 		UI::Quad(pos.x - 1, pos.y, pos2.x + 2, 16 * n + 1.f, black(0.7f));
-		for (uint a = 0; a < n; a++) {
+		for (uint a = 0; a < n; ++a)  {
 			if (Engine::Button(pos.x, pos.y + 16 * a, pos2.x, 16, white(1, 0.2f), dt->list[a], 12, white()) == MOUSE_RELEASE) {
 				(*dt->target) = a;
 				Popups::type = POPUP_TYPE::NONE;
@@ -106,7 +106,7 @@ void Popups::DrawDropdown() {
 		if (Engine::Button(pos.x, pos.y, pos2.x, 16, white(1, 0.2f), "None", 12, white()) == MOUSE_RELEASE) {
 			(*dt->target) = 0;
 		}
-		for (uint a = 0; a < n; a++) {
+		for (uint a = 0; a < n; ++a)  {
 			if (Engine::Button(pos.x, pos.y + 16 * (a+1), pos2.x, 16, white(1, 0.2f), dt->list[a], 12, white()) == MOUSE_RELEASE) {
 				(*dt->target) ^= 1<<a;
 			}

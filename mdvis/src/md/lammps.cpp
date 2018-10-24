@@ -68,9 +68,9 @@ bool Lammps::Read(ParInfo* info) {
     auto tt = string_split(std::string(buf + sizeof("ITEM: ATOMS")), ' ');
     auto c = tt.size();
     std::vector<ATTR> attrs(c);
-    for (size_t t = 0; t < c; t++) {
+    for (size_t t = 0; t < c; ++t) {
         auto ts = tt[t];
-        for (int a = 0; a < (int)ATTR::CNT; a++) {
+        for (int a = 0; a < (int)ATTR::CNT; ++a)  {
             if (ts == ATTRS[a]) {
                 attrs[t] = (ATTR)a;
                 goto fnd1;
@@ -79,7 +79,7 @@ bool Lammps::Read(ParInfo* info) {
         attrs[t] = ATTR::SKIP;
         fnd1:;
     }
-    for (uint32_t a = 0; a < info->num; a++) {
+    for (uint32_t a = 0; a < info->num; ++a)  {
         uint32_t x = a;
         for (auto t : attrs) {
             float tmp;
@@ -105,7 +105,7 @@ bool Lammps::Read(ParInfo* info) {
     std::vector<double> bounds = {};
     double* _ps;
     do {
-        for (int a = 0; a < 6; a++) {
+        for (int a = 0; a < 6; ++a)  {
             do {
                 strm.getline(buf, 100);
                 if (strm.eof()) {
@@ -125,7 +125,7 @@ bool Lammps::Read(ParInfo* info) {
         trj->progress = ((float)strm.tellg()) / maxspos;
         _ps = new double[info->num * 3];
         
-        for (uint32_t a = 0; a < info->num; a++) {
+        for (uint32_t a = 0; a < info->num; ++a)  {
             uint32_t x = a;
             for (auto t : attrs) {
                 double tmp;
@@ -152,7 +152,7 @@ out:
 	    trj->poss = new double*[trj->frames];
 	    memcpy(trj->poss, &poss[0], trj->frames * sizeof(uintptr_t));
         trj->bounds = new double[trj->frames][6];
-        for (uint16_t a = 0; a < trj->frames; a++) {
+        for (uint16_t a = 0; a < trj->frames; ++a)  {
             memcpy(trj->bounds[a], &bounds[a*6], 6*sizeof(double));
         }
     }

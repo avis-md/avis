@@ -192,7 +192,7 @@ bool Texture::LoadJPEG(std::string fileN, uint &x, uint &y, byte& channels, byte
 
 void Texture::InvertPNG(std::vector<byte>& data, uint x, uint y) {
 #pragma omp parallel for
-	for (int a = 0; a < y / 2; a++) {
+	for (int a = 0; a < y / 2; ++a)  {
 		std::vector<byte> tmp(x * 4);
 		memcpy(&tmp[0], &data[a*x * 4], x * 4);
 		memcpy(&data[a*x * 4], &data[(y - a - 1)*x * 4], x * 4);

@@ -35,18 +35,18 @@ void Node_AdjList::Execute() {
 	if (!ccnt || !count) return;
 	conns.clear();
 	conns.resize(count*listsize, -1);
-	for (int a = 0; a < ccnt; a++) {
+	for (int a = 0; a < ccnt; ++a)  {
 		int i0 = data[a*2];
 		int i1 = data[a*2+1];
 		int* p0 = &conns[i0*listsize];
 		int* p1 = &conns[i1*listsize];
-		for (int c = 0; c < listsize; c++) {
+		for (int c = 0; c < listsize; ++c)  {
 			if (*p0 == -1) break;
 			p0++;
 		}
 		if (*p0 != -1)
 			RETERR("List size is too short for index " << i0 << "!");
-		for (int c = 0; c < listsize; c++) {
+		for (int c = 0; c < listsize; ++c)  {
 			if (*p1 == -1) break;
 			p1++;
 		}
@@ -91,8 +91,8 @@ void Node_AdjListI::Execute() {
 	if (!cnt || !lsz) return;
 	conns.clear();
 	conns.reserve(cnt*lsz/2);
-	for (int a = 0; a < cnt; a++) {
-		for (int b = 0; b < lsz; b++){
+	for (int a = 0; a < cnt; ++a)  {
+		for (int b = 0; b < lsz; ++b){
 			auto c = data[a*lsz+b];
 			if (c == -1) break;
 			if (c > a) {

@@ -20,7 +20,7 @@ void main()
 	eye = normalize(eye);
 	
 	outColor = vec4(0, 0, 0, 1);
-	for (int i = 0; i < 100; i++) {
+	for (int i = 0; i < 100; ++i)  {
 		vec3 uvw = v2f_uvw + eye * i / 100.0;
 		if (uvw.x < 0 || uvw.x > 1 || uvw.y < 0 || uvw.y > 1 || uvw.y < 0 || uvw.y > 1)
 			return;

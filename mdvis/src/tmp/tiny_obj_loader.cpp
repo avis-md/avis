@@ -208,7 +208,7 @@ void InitMaterial(material_t& material) {
   material.diffuse_texname = "";
   material.specular_texname = "";
   material.normal_texname = "";
-  for (int i = 0; i < 3; i ++) {
+  for (int i = 0; i < 3; ++i ) {
     material.ambient[i] = 0.f;
     material.diffuse[i] = 0.f;
     material.specular[i] = 0.f;
@@ -243,7 +243,7 @@ exportFaceGroupToShape(
   offset = shape.mesh.indices.size();
 
   // Flatten vertices and indices
-  for (size_t i = 0; i < faceGroup.size(); i++) {
+  for (size_t i = 0; i < faceGroup.size(); ++i)  {
     const std::vector<vertex_index>& face = faceGroup[i];
 
     vertex_index i0 = face[0];
@@ -253,7 +253,7 @@ exportFaceGroupToShape(
     size_t npolys = face.size();
 
     // Polygon -> triangle fan conversion
-    for (size_t k = 2; k < npolys; k++) {
+    for (size_t k = 2; k < npolys; ++k) {
       i1 = i2;
       i2 = face[k];
 
