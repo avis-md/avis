@@ -19,10 +19,19 @@ public:
 	static Vec4 gradCols[3];
 	static bool useConCol, useConGradCol;
 	static Vec4 conCol;
+
+	enum class ORIENT : byte {
+		NONE,
+		STRETCH,
+		VECTOR
+	};
+	static ORIENT orientType;
+	static float orientStr;
+	static uint orientParam[3];
 	
 	PROGDEF_H(reflProg, 15);
 	PROGDEF_H(reflCProg, 10);
-	PROGDEF_H(parProg, 15);
+	PROGDEF_H(parProg, 20);
 	PROGDEF_H(parConProg, 20);
 	PROGDEF_H(parConLineProg, 10);
 	PROGDEF_H(selHlProg, 5);

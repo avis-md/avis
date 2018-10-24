@@ -35,6 +35,10 @@ Vec4 ParGraphics::gradCols[] = { blue(), green(), red() };
 bool ParGraphics::useConCol, ParGraphics::useConGradCol;
 Vec4 ParGraphics::conCol = white();
 
+ParGraphics::ORIENT ParGraphics::orientType = ParGraphics::ORIENT::NONE;
+float ParGraphics::orientStr;
+uint ParGraphics::orientParam[] = {};
+
 PROGDEF(ParGraphics::reflProg);
 PROGDEF(ParGraphics::reflCProg);
 PROGDEF(ParGraphics::parProg);
@@ -200,13 +204,14 @@ void ParGraphics::Init() {
 	LC(skyStrDecay); LC(specStr); LC(bgCol);
 #undef LC
 	
-	parProg = Shader::FromVF(IO::GetText(IO::path + "parV.txt"), IO::GetText(IO::path + "parF.txt"));
+	parProg = Shader::FromVF(IO::GetText(IO::path + "parV.txt"), IO::GetText(IO::path + "parF.glsl"));
 #define LC(nm) parProgLocs[i++] = glGetUniformLocation(parProg, #nm)
 	i = 0;
 	LC(_MV); LC(_P); LC(camPos);
 	LC(camFwd); LC(orthoSz); LC(screenSize);
 	LC(radTex); LC(radScl); LC(id2col); LC(colList);
 	LC(gradCols); LC(colUseGrad); LC(spriteScl);
+	LC(oriented); LC(orienScl); LC(orienX); LC(orienY); LC(orienZ);
 	auto bid = glGetUniformBlockIndex(parProg, "clipping");
 	glUniformBlockBinding(parProg, bid, _clipBindId);
 #undef LC
@@ -637,6 +642,18 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		}
 		glUniform1i(parProgLocs[11], useGradCol);
 		glUniform1f(parProgLocs[12], spriteScl);
+		glUniform1i(parProgLocs[13], (orientType == ORIENT::STRETCH && orientStr > 0.0001f)? 1 : 0);
+		glUniform1f(parProgLocs[14], std::powf(2, orientStr));
+		glUniform1i(parProgLocs[15], 4);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[orientParam[0]]->texBuf);
+		glUniform1i(parProgLocs[16], 5);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[orientParam[1]]->texBuf);
+		glUniform1i(parProgLocs[17], 6);
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[orientParam[2]]->texBuf);
+		
 
 		glBindVertexArray(Particles::posVao);
 		for (auto& p : drawLists) {
@@ -919,7 +936,12 @@ void ParGraphics::DrawColMenu() {
 	if (useGradCol) {
 		gradColParam = min(gradColParam, (uint)(Particles::particles_ParamSz-1));
 		static Popups::DropdownItem di = Popups::DropdownItem(&gradColParam, Particles::particles_ParamNms);
+		static auto _gradColParam = gradColParam;
 		UI2::Dropdown(exps - 147, off, 146, "Attribute", di);
+		if (_gradColParam != gradColParam) {
+			_gradColParam = gradColParam;
+			Scene::dirty = true;
+		}
 		off += 20;
 		Color::DrawH2(exps - 115, off + 8, 16, 17*5 - 16, gradCols);
 		static const std::string ii[] = { "0.0", "0.5", "1.0" };
@@ -979,6 +1001,37 @@ void ParGraphics::DrawColMenu() {
 	UI2::Toggle(exps - 147, off, 146, "Periodic", Particles::boxPeriodic);
 	if (_bp != Particles::boxPeriodic) {
 		Particles::BoundParticles();
+	}
+	off += 19;
+
+	static std::string ornms[] = { "None", "Stretch", "" };
+	static Popups::DropdownItem ordi = Popups::DropdownItem((uint*)&orientType, ornms);
+	static auto _ort = orientType;
+	UI2::Dropdown(exps - 148, off, 147, "Orient", ordi);
+	if (Particles::particles_ParamSz == 0) orientType = ORIENT::NONE;
+	if (_ort != orientType) {
+		_ort = orientType;
+		Scene::dirty = true;
+	}
+	off += 17;
+	if (orientType != ORIENT::NONE) {
+		static Popups::DropdownItem odx = Popups::DropdownItem(&orientParam[0], Particles::particles_ParamNms);
+		static Popups::DropdownItem ody = Popups::DropdownItem(&orientParam[1], Particles::particles_ParamNms);
+		static Popups::DropdownItem odz = Popups::DropdownItem(&orientParam[2], Particles::particles_ParamNms);
+		static uint _opx = 100, _opy = 100, _opz = 100;
+		UI2::Dropdown(exps - 147, off, 146, "X", odx); off += 17;
+		UI2::Dropdown(exps - 147, off, 146, "Y", ody); off += 17;
+		UI2::Dropdown(exps - 147, off, 146, "Z", odz); off += 17;
+		if (_opx != orientParam[0] || _opy != orientParam[1] || _opz != orientParam[2]) {
+			_opx = orientParam[0]; _opy = orientParam[1]; _opz = orientParam[2];
+			Scene::dirty = true;
+		}
+	}
+	auto _ors = orientStr;
+	orientStr = UI2::Slider(exps - 147, off, 146, "Strength", 0, 2, orientStr);
+	if (_ors != orientStr) {
+		_ors = orientStr;
+		Scene::dirty = true;
 	}
 }
 
