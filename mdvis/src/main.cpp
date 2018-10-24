@@ -14,6 +14,7 @@
 #include "md/parmenu.h"
 #include "md/Protein.h"
 #include "md/parloader.h"
+#include "md/GenericSSV.h"
 #include "md/Gromacs.h"
 #include "md/pdb.h"
 #include "md/CDV.h"
@@ -63,10 +64,20 @@ void updateFunc() {
 			ParGraphics::UpdateDrawLists();
 		//}
 		ParMenu::CalcH();
+		if (ParLoader::impId == 0) {
+			for (auto& a : GenericSSV::attrs) {
+				Particles::AddParam();
+				Particles::particles_ParamNms[Particles::particles_ParamSz-1] = a.first;
+				auto& p = Particles::particles_Params[Particles::particles_ParamSz-1];
+				p->Get(0).swap(a.second);
+				p->dirty = true;
+			}
+			GenericSSV::attrs.clear();
+		}
 		VisSystem::lastSave = Time::time;
 	}
 
-	if (!!Particles::particleSz) {
+	if (!!Particles::particleSz && !ParLoader::busy) {
 		Particles::Update();
 		if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime)
 			&& !ParLoader::busy && !AnWeb::executing && ChokoLait::foreground
@@ -78,11 +89,11 @@ void updateFunc() {
 	}
 
 	ParGraphics::Update();
-	LiveSyncer::Update();
+	//LiveSyncer::Update();
 
 	AnWeb::Update();
 
-	if (!!Particles::particleSz && !UI::editingText && !AnWeb::drawFull) {
+	if (!!Particles::particleSz && !ParLoader::busy && !UI::editingText && !AnWeb::drawFull) {
 		if (Input::KeyDown(Key_F)) {
 			auto& o = ChokoLait::mainCamera->ortographic;
 			o = !o;
@@ -360,7 +371,9 @@ The hash for this program is )" << VisSystem::version_hash
 #define PUSHIMP ParLoader::importers.push_back(imp); \
 		imp = {};
 
-		//NEWIMP(XYZ coords, xyz, .xyz, XYZ);
+		NEWIMP("Generic SSV", ssv, .ssv, GenericSSV::Read)
+		SETFRM(.ssv, GenericSSV::ReadFrm)
+		PUSHIMP
 		NEWIMP("Gromacs", gro, .gro, Gromacs::Read)
 		SETFRM(.gro, Gromacs::ReadFrm)
 		SETTRJ(.trr, Gromacs::ReadTrj)

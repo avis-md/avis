@@ -252,7 +252,7 @@ unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int
 
 void hdr::to_float(unsigned char imagergbe[], int w, int h, float* res) {
 #pragma omp parallel for
-	for (int i = w*h - 1; i >= 0; i--) {
+	for (int i = w*h - 1; i >= 0; --i) {
 		unsigned char exponent = imagergbe[i * 4 + 3];
 		if (exponent != 0) {
 			double v = (1.f / 256.f) * std::pow(2, (float)(exponent - 128));

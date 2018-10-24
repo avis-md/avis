@@ -33,7 +33,7 @@ void Scene::Unload() {
 }
 
 void Scene::CleanDeadObjects() {
-	for (int a = active->objectCount - 1; a >= 0; a--) {
+	for (int a = active->objectCount - 1; a >= 0; --a) {
 		if (active->objects[a]->dead) {
 			active->objects.erase(active->objects.begin() + a);
 			active->objectCount--;

@@ -33,12 +33,12 @@ void Node_SetParam::Execute() {
 	prm->timed = AnWeb::execFrame > 0;
 	if (prm->timed) {
 		if (sz != Particles::particleSz)
-			RETERR("Input must be for each particle!");
-		auto& tar = prm->data;
-		tar.resize(Particles::anim.frameCount*sz);
+			RETERR("Dim 1 of 1 must be atom count!");
+		auto& tar = prm->Get(AnWeb::execFrame);
+		tar.resize(sz);
 #pragma omp parallel for
 		for (int a = 0; a < sz; ++a)  {
-			tar[a + Particles::particleSz*(AnWeb::execFrame-1)] = (float)src[a];
+			tar[a] = (float)src[a];
 		}
 	}
 	else {
@@ -46,16 +46,16 @@ void Node_SetParam::Execute() {
 			tsz = sz;
 			sz = *cv.dimVals[1];
 			if (tsz != Particles::anim.frameCount)
-				RETERR("Input must be for each frame!");
+				RETERR("Dim 1 of 2 must be frame count!");
 			prm->timed = true;
 		}
 
 		if (sz != Particles::particleSz)
-			RETERR("Input must be for each particle!");
-		auto& tar = prm->data;
-		tar.resize(tsz*sz);
+			RETERR("Dim 2 of 2 must be atom count!");
+		auto& tar = prm->Get(0);
+		tar.resize(sz);
 #pragma omp parallel for
-		for (int a = 0; a < sz*tsz; ++a)  {
+		for (int a = 0; a < sz; ++a)  {
 			tar[a] = (float)src[a];
 		}
 	}

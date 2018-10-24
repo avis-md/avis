@@ -98,9 +98,9 @@ pComponent SceneObject::GetComponent(COMPONENT_TYPE type) {
 }
 
 void SceneObject::RemoveComponent(pComponent c) {
-	for (int a = _components.size() - 1; a >= 0; a--) {
+	for (int a = _components.size() - 1; a >= 0; --a) {
 		if (_components[a] == c) {
-			for (int aa = _components.size() - 1; aa >= 0; aa--) {
+			for (int aa = _components.size() - 1; aa >= 0; --aa) {
 				for (COMPONENT_TYPE t : _components[aa]->dependancies) {
 					if (t == c->componentType) {
 						Debug::Warning("SceneObject", "Cannot delete " + c->name + " because other components depend on it!");

@@ -1,7 +1,7 @@
 #include "xml.h"
 
 void RemoveNewLine(std::string& s) {
-	for (int a = s.size() - 1; a > 0; a--) {
+	for (int a = s.size() - 1; a > 0; --a) {
 		if (s[a] == '\t' || s[a] == '\r' || s[a] == '\n') {
 			s.replace(a, 1, " ");
 		}

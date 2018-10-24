@@ -52,10 +52,15 @@ public:
 
 		bool dirty = false;
 		bool timed = false;
-		std::vector<float> data;
 		GLuint buf, texBuf;
 		
+		std::vector<float>& Get(uint frm);
+		void ApplyParCnt(), ApplyFrmCnt();
 		void Update();
+		void Clear();
+	private:
+		std::vector<float> data;
+		std::vector<std::vector<float>> dataAll;
 	};
 
 	static uint residueListSz;
@@ -96,7 +101,7 @@ public:
 
 		AnimData () {}
 
-		bool reading = false, dynamicBonds;
+		bool reading = false, dirty = false, dynamicBonds;
 		static uint maxFramesInMem;
 		uint frameMemPos;
 		uint frameCount = 0, currentFrame = 0;

@@ -4,6 +4,52 @@
 #include "md/Protein.h"
 #include "utils/glext.h"
 
+Particles::paramdata::paramdata() {
+	glGenBuffers(1, &buf);
+	SetGLBuf<float>(buf, nullptr, particleSz);
+	glGenTextures(1, &texBuf);
+	glBindTexture(GL_TEXTURE_BUFFER, texBuf);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, buf);
+	glBindTexture(GL_TEXTURE_BUFFER, 0);
+	ApplyParCnt();
+	ApplyFrmCnt();
+}
+
+Particles::paramdata::~paramdata() {
+	glDeleteBuffers(1, &buf);
+	glDeleteTextures(1, &texBuf);
+}
+
+std::vector<float>& Particles::paramdata::Get(uint frm) {
+	if (!frm || !timed) return data;
+	else return dataAll[frm-1];
+}
+
+void Particles::paramdata::ApplyParCnt() {
+	SetGLBuf<float>(buf, nullptr, particleSz);
+}
+
+void Particles::paramdata::ApplyFrmCnt() {
+	if (Particles::anim.frameCount < 2) return;
+	dataAll.resize(Particles::anim.frameCount-1);
+}
+
+void Particles::paramdata::Update() {
+	auto& dt = Get(anim.currentFrame);
+	if (!dt.size()) return;
+	glBindBuffer(GL_ARRAY_BUFFER, buf);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(float), &dt[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	dirty = false;
+}
+
+void Particles::paramdata::Clear() {
+	timed = false;
+	std::vector<float>().swap(data);
+	std::vector<std::vector<float>>().swap(dataAll);
+}
+
+
 uint Particles::AnimData::maxFramesInMem = 20;
 
 void Particles::AnimData::AllocFrames(uint frames) {
@@ -41,43 +87,51 @@ void Particles::AnimData::Seek(uint f) {
 
 void Particles::AnimData::Update() {
 	if (frameCount <= 1) return;
-	if (maxFramesInMem > 1000000) return;
 
-	if (maxFramesInMem < frameCount) {
-		for (uint a = 0; a < frameMemPos; ++a)  {
-			if (a + frameCount - frameMemPos < maxFramesInMem) continue;
-			if (status[a] == FRAME_STATUS::LOADED) {
-				std::vector<glm::dvec3>().swap(poss[a]);
-				std::vector<glm::dvec3>().swap(vels[a]);
-				status[a] = FRAME_STATUS::UNLOADED;
-			}
-		}
-		for (uint a = frameMemPos + maxFramesInMem; a < frameCount; ++a)  {
-			if (status[a] == FRAME_STATUS::LOADED) {
-				std::vector<glm::dvec3>().swap(poss[a]);
-				std::vector<glm::dvec3>().swap(vels[a]);
-				status[a] = FRAME_STATUS::UNLOADED;
-			}
+	if (dirty) {
+		dirty = false;
+		for (int a = 0; a < particles_ParamSz; ++a) {
+			particles_Params[a]->ApplyFrmCnt();
 		}
 	}
 
-	for (uint ff = currentFrame; ff < frameMemPos + maxFramesInMem; ++ff) {
-		auto f = Repeat(ff, 0U, frameCount);
-		auto& st = status[f];
-		if (st == FRAME_STATUS::READING || st == FRAME_STATUS::BAD) return;
-		if (st == FRAME_STATUS::UNLOADED) {
-			st = FRAME_STATUS::READING;
-			ParLoader::OpenFrame(f, paths[f]);
-			return;
+	if (maxFramesInMem < 1000000) {
+		if (maxFramesInMem < frameCount) {
+			for (uint a = 0; a < frameMemPos; ++a)  {
+				if (a + frameCount - frameMemPos < maxFramesInMem) continue;
+				if (status[a] == FRAME_STATUS::LOADED) {
+					std::vector<glm::dvec3>().swap(poss[a]);
+					std::vector<glm::dvec3>().swap(vels[a]);
+					status[a] = FRAME_STATUS::UNLOADED;
+				}
+			}
+			for (uint a = frameMemPos + maxFramesInMem; a < frameCount; ++a)  {
+				if (status[a] == FRAME_STATUS::LOADED) {
+					std::vector<glm::dvec3>().swap(poss[a]);
+					std::vector<glm::dvec3>().swap(vels[a]);
+					status[a] = FRAME_STATUS::UNLOADED;
+				}
+			}
 		}
-	}
-	for (int f = currentFrame - 1; f >= (int)frameMemPos; f--) {
-		auto& st = status[f];
-		if (st == FRAME_STATUS::READING || st == FRAME_STATUS::BAD) return;
-		if (st == FRAME_STATUS::UNLOADED) {
-			st = FRAME_STATUS::READING;
-			ParLoader::OpenFrame(f, paths[f]);
-			return;
+
+		for (uint ff = currentFrame; ff < frameMemPos + maxFramesInMem; ++ff) {
+			auto f = Repeat(ff, 0U, frameCount);
+			auto& st = status[f];
+			if (st == FRAME_STATUS::READING || st == FRAME_STATUS::BAD) return;
+			if (st == FRAME_STATUS::UNLOADED) {
+				st = FRAME_STATUS::READING;
+				ParLoader::OpenFrame(f, paths[f]);
+				return;
+			}
+		}
+		for (int f = currentFrame - 1; f >= (int)frameMemPos; --f) {
+			auto& st = status[f];
+			if (st == FRAME_STATUS::READING || st == FRAME_STATUS::BAD) return;
+			if (st == FRAME_STATUS::UNLOADED) {
+				st = FRAME_STATUS::READING;
+				ParLoader::OpenFrame(f, paths[f]);
+				return;
+			}
 		}
 	}
 }
@@ -86,29 +140,6 @@ void Particles::AnimData::UpdateMemRange() {
 	frameMemPos = (uint)std::max((int)currentFrame - (int)maxFramesInMem/2, 0);
 }
 
-
-Particles::paramdata::paramdata() {
-	glGenBuffers(1, &buf);
-	SetGLBuf<float>(buf, nullptr, particleSz);
-	glGenTextures(1, &texBuf);
-	glBindTexture(GL_TEXTURE_BUFFER, texBuf);
-	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, buf);
-	glBindTexture(GL_TEXTURE_BUFFER, 0);
-}
-
-Particles::paramdata::~paramdata() {
-	glDeleteBuffers(1, &buf);
-	glDeleteTextures(1, &texBuf);
-}
-
-void Particles::paramdata::Update() {
-	if (!data.size()) return;
-	float* d = timed? &data[particleSz*anim.currentFrame] : &data[0];
-	glBindBuffer(GL_ARRAY_BUFFER, buf);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(float), d);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	dirty = false;
-}
 
 uint Particles::residueListSz;
 uint Particles::particleSz, Particles::_particleSz;
@@ -188,11 +219,13 @@ void Particles::Clear() {
 		radiiscl.clear();
 		visii.clear();
 		conns.ids.clear();
-		poss = 0;
-		residueListSz = particleSz = Particles::conns.cnt = 0;
-
+		poss = vels = nullptr;
+		for (int a = 0; a < particles_ParamSz; ++a) {
+			delete(particles_Params[a]);
+		}
+		residueListSz = particleSz = Particles::conns.cnt = particles_ParamSz = 0;
+		
 		anim.Clear();
-
 		Protein::Clear();
 	}
 }
@@ -218,6 +251,7 @@ void Particles::GenTexBufs() {
 }
 
 void Particles::Resize(uint i) {
+	particleSz = i;
 	names.resize(i * PAR_MAX_NAME_LEN);
 	resNames.resize(i * PAR_MAX_NAME_LEN);
 	types.resize(i);
@@ -226,6 +260,10 @@ void Particles::Resize(uint i) {
 	radiiscl.resize(i, 1);
 	visii.clear(); visii.resize(i, true);
 	ress.resize(i);
+
+	for (int a = 0; a < particles_ParamSz; ++a) {
+		particles_Params[a]->ApplyParCnt();
+	}
 }
 
 void Particles::Update() {
@@ -237,13 +275,13 @@ void Particles::Update() {
 		visDirty = false;
 		UpdateRadBuf();
 	}
+	anim.Update();
 	for (int a = 0; a < particles_ParamSz; ++a)  {
 		auto& p = particles_Params[a];
 		if (p->dirty) {
 			p->Update();
 		}
 	}
-	anim.Update();
 }
 
 void Particles::UpdateBBox() {
@@ -351,7 +389,7 @@ void Particles::SetFrame(uint frm) {
 			if (!!anim.bboxs.size()) memcpy(boundingBox, &anim.bboxs[6*frm], 6*sizeof(double));
 		}
 		else anim.Seek(frm);
-		for (int i = anim.conns2.size() - 1; i >= 0; i--) {
+		for (int i = anim.conns2.size() - 1; i >= 0; --i) {
 			auto& c2 = anim.conns2[i];
 			if (!c2.size()) continue;
 			auto& c = particles_Conn2[i];

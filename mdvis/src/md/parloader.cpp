@@ -257,7 +257,7 @@ void ParLoader::ScanFrames(const std::string& first) {
 		}
 	}
 	if (n1 == -1) return;
-	for (int a = n1 - 1; a >= 0; a--) {
+	for (int a = n1 - 1; a >= 0; --a) {
 		if (!ISNUM(nm[a])) {
 			n2 = a;
 			break;
@@ -585,6 +585,7 @@ void ParLoader::DoOpen() {
 			Particles::vels = &Particles::anim.vels[0][0];
 		}
 		Particles::anim.status[0] = Particles::AnimData::FRAME_STATUS::LOADED;
+		Particles::anim.dirty = true;
 	}
 
 	parDirty = true;
@@ -594,8 +595,6 @@ void ParLoader::DoOpen() {
 	//temp
 	if (!isSrv)
 		anm.maxFramesInMem = anm.frameCount;
-
-	Particles::particleSz = info.num;
 }
 
 void ParLoader::DoOpenAnim() {
@@ -651,6 +650,7 @@ void ParLoader::DoOpenAnim() {
 
 	Particles::trjFile = droppedFiles[0];
 	anm.reading = false;
+	anm.dirty = true;
 	busy = false;
 	fault = false;
 	
@@ -896,7 +896,7 @@ void ParLoader::DrawOpenDialog() {
 bool ParLoader::OnDropFile(int i, const char** c) {
 	if (AnWeb::drawFull) return false;
 	std::vector<std::string> fs(i);
-	for (i--; i >= 0; i--) {
+	for (i--; i >= 0; --i) {
 		fs[i] = std::string(c[i]);
 	}
 	OnOpenFile(fs);
