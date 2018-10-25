@@ -405,7 +405,7 @@ void ParMenu::DrawSplash() {
 	if (ms & MOUSE_HOVER_FLAG) {
 		sub = "Displays the user manual in the browser";
 		if (ms == MOUSE_RELEASE) {
-			IO::OpenEx(IO::path + "../../docs/_build/html/index.html");
+			IO::OpenEx(IO::path + "docs/index.html");
 		}
 	}
 	ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63 + 56, 140, 54, white(0.3f), _("Report A Problem"), 12, white(), true);

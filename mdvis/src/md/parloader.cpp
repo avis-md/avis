@@ -876,7 +876,7 @@ void ParLoader::DrawOpenDialog() {
 		ff = "";
 	}
 	bool cn = hsf && (!isSrv || srv.ok);
-	if ((Engine::Button(woff + 350, hoff, 49, 16, white(0.4f), "Load", 12, white(cn? 1 : 0.2f), true) == MOUSE_RELEASE) && cn) {
+	if (impId > -1 && (Engine::Button(woff + 350, hoff, 49, 16, white(0.4f), "Load", 12, white(cn? 1 : 0.2f), true) == MOUSE_RELEASE) && cn) {
 		if (loadAsTrj) {
 			std::thread td(DoOpenAnim);
 			td.detach();
