@@ -61,6 +61,7 @@ typedef GLFWwindow NativeWindow;
 #include <memory>
 #include <thread>
 #include <cmath>
+#include <condition_variable>
 #include "glm/glm.hpp"
 #include "glm/gtx/quaternion.hpp"
 #include "glm/gtx/transform.hpp"

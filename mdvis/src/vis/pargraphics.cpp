@@ -645,7 +645,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		bool useorien = (orientType == ORIENT::STRETCH && orientStr > 0.0001f);
 		glUniform1i(parProgLocs[13], useorien ? 1 : 0);
 		if (useorien) {
-			glUniform1f(parProgLocs[14], std::powf(2, orientStr));
+			glUniform1f(parProgLocs[14], std::pow(2, orientStr));
 			glUniform1i(parProgLocs[15], 4);
 			glActiveTexture(GL_TEXTURE4);
 			glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[orientParam[0]]->texBuf);
