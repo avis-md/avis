@@ -14,6 +14,7 @@ uniform float skyStrength;
 uniform float skyStrDecay;
 uniform float specStr;
 uniform vec3 bgCol;
+uniform vec3 fogCol;
 
 out vec4 fragCol;
 
@@ -54,7 +55,8 @@ void main () {
         vec3 refl = reflect(fwd, nCol.xyz);
         vec3 skycol2 = skyColAt(inSky, refl.xyz).rgb;
         float fres = pow(1-dot(-fwd, nCol.xyz), 5);
-        fragCol.rgb = mix(skycol * dCol.rgb, skycol2, (1 - ((1-fres) * (1-specStr)))) * skyStrength * (1 - skyStrDecay * zLinear);
+        fragCol.rgb = mix(skycol * dCol.rgb, skycol2, (1 - ((1-fres) * (1-specStr)))) * skyStrength;
+        fragCol.rgb = mix(fragCol.rgb, fogCol, clamp(skyStrDecay * zLinear, 0, 1));
     }
     fragCol.a = 1;
 }

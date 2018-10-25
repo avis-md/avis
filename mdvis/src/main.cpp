@@ -39,8 +39,6 @@ float autoSaveTime = 10;
 void rendFunc() {
 	auto& cm = ChokoLait::mainCameraObj->transform;
 	ParGraphics::Rerender(cm.position(), cm.forward(), static_cast<float>(Display::width), static_cast<float>(Display::height));
-#define bb(i) static_cast<float>(Particles::boundingBox[i])
-	UI3::Cube(bb(0), bb(1), bb(2), bb(3), bb(4), bb(5), black());
 	if (!!Particles::particleSz && Shadows::show) {
 		Shadows::UpdateBox();
 		Mat4x4 _p = MVP::projection();

@@ -3,11 +3,14 @@
 #define SETERR(msg) memcpy(info->error, msg, sizeof(msg))
 
 std::vector<GenericSSV::AttrTyp> GenericSSV::attrs;
+std::vector<GenericSSV::TYPES> GenericSSV::_tps;
+std::string GenericSSV::_s;
 
 bool GenericSSV::Read(ParInfo* info) {
 	std::ifstream strm(PATH(info->path));
 	std::string p;
 	std::getline(strm, p);
+	_s = p;
 	std::vector<TYPES> ts;
 	attrs.clear();
 	ParseTypes(p, ts);
@@ -15,6 +18,7 @@ bool GenericSSV::Read(ParInfo* info) {
 		SETERR("No types specified!");
 		return false;
 	}
+	_tps = ts;
 
 	strm >> info->num;
 	auto& sz = info->num;
@@ -77,7 +81,38 @@ bool GenericSSV::Read(ParInfo* info) {
 }
 
 bool GenericSSV::ReadFrm(FrmInfo* info) {
-	return false;
+	std::ifstream strm(PATH(info->path));
+	std::string p;
+	std::getline(strm, p);
+	if (p != _s) {
+		SETERR("Header contents are different!");
+		return false;
+	}
+	uint32_t psz;
+	strm >> psz;
+	if (psz != info->parNum) {
+		SETERR("Atom count is different!");
+		return false;
+	}
+	
+	for (int a = 0; a < psz; ++a) {
+		int attri = 0;
+		for (auto& t : _tps) {
+			strm >> p;
+			switch (t) {
+			case TYPES::POSX: info->pos[a*3] = std::stod(p); break;
+			case TYPES::POSY: info->pos[a*3 + 1] = std::stod(p); break;
+			case TYPES::POSZ: info->pos[a*3 + 2] = std::stod(p); break;
+			case TYPES::VELX: info->vel[a*3] = std::stod(p); break;
+			case TYPES::VELY: info->vel[a*3 + 1] = std::stod(p); break;
+			case TYPES::VELZ: info->vel[a*3 + 2] = std::stod(p); break;
+			default: break;
+			}
+		}
+		strm.ignore(1000, '\n');
+	}
+
+	return true;
 }
 
 void GenericSSV::ParseTypes(const std::string& line, std::vector<GenericSSV::TYPES>& ts) {

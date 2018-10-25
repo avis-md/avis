@@ -8,7 +8,10 @@ public:
 	static Texture bg, splash, logo;
 	static GLuint refl, reflE;
 	static float reflStr, reflStrDecay, specStr;
-	static Vec4 bgCol;
+	static bool fogUseBgCol;
+	static Vec4 bgCol, fogCol;
+
+	static bool showbbox;
 	
 	static int reflId, _reflId;
 	static std::vector<std::string> reflNms;

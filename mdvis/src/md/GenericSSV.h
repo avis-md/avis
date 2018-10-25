@@ -17,5 +17,8 @@ public:
 	static std::vector<AttrTyp> attrs;
 
 private:
+	static std::vector<TYPES> _tps;
+	static std::string _s;
+
 	static void ParseTypes(const std::string& line, std::vector<TYPES>& ts);
 };

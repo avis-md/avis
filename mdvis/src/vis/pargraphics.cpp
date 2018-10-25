@@ -23,7 +23,10 @@
 Texture ParGraphics::bg, ParGraphics::splash, ParGraphics::logo;
 GLuint ParGraphics::refl, ParGraphics::reflE;
 float ParGraphics::reflStr = 2, ParGraphics::reflStrDecay = 2, ParGraphics::specStr = 0.2f;
-Vec4 ParGraphics::bgCol = Vec4(1, 1, 1, 1);
+bool ParGraphics::fogUseBgCol = true;
+Vec4 ParGraphics::bgCol = Vec4(1, 1, 1, 1), ParGraphics::fogCol = Vec4(0, 0, 0, 1);
+
+bool ParGraphics::showbbox = true;
 
 int ParGraphics::reflId = 0, ParGraphics::_reflId = -1;
 std::vector<std::string> ParGraphics::reflNms;
@@ -193,7 +196,8 @@ void ParGraphics::Init() {
 	uint i = 0;
 	LC(_IP); LC(screenSize); LC(inColor); LC(inNormal);
 	LC(inEmit); LC(inDepth); LC(inSky); LC(inSkyE);
-	LC(skyStrength); LC(skyStrDecay); LC(specStr); LC(bgCol);
+	LC(skyStrength); LC(skyStrDecay); LC(specStr);
+	LC(bgCol); LC(fogCol);
 #undef LC
 	
 	reflCProg = Shader::FromF(mv, glsl::reflFragC);
@@ -782,6 +786,11 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		Protein::Draw();
 		AnWeb::DrawScene();
 	}
+
+	if (showbbox) {
+#define bb(i) static_cast<float>(Particles::boundingBox[i])
+		UI3::Cube(bb(0), bb(1), bb(2), bb(3), bb(4), bb(5), black());
+	}
 }
 
 void ParGraphics::Reblit() {
@@ -853,10 +862,19 @@ void ParGraphics::BlitSky() {
 		glUniform1f(reflProgLocs[8], reflStr);
 		glUniform1f(reflProgLocs[9], reflStrDecay);
 		glUniform1f(reflProgLocs[10], specStr);
-		if (AnWeb::drawFull)
+		if (AnWeb::drawFull) {
 			glUniform3f(reflProgLocs[11], 0, 0, 0);
-		else
+			glUniform3f(reflProgLocs[12], 0, 0, 0);
+		}
+		else {
 			glUniform3f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b);
+			if (fogUseBgCol) {
+				glUniform3f(reflProgLocs[12], bgCol.r, bgCol.g, bgCol.b);
+			}
+			else {
+				glUniform3f(reflProgLocs[12], fogCol.r, fogCol.g, fogCol.b);
+			}
+		}
 	}
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, cam->texs.colTex);
@@ -993,6 +1011,12 @@ void ParGraphics::DrawColMenu() {
 	off++;
 	UI::Label(exps - 148, off, 12, "Bounding Box", white());
 	off += 18;
+	bool _shbb = showbbox;
+	UI2::Toggle(exps - 147, off, 146, "Draw", showbbox);
+	if (_shbb != showbbox) {
+		Scene::dirty = true;
+	}
+	off += 17;
 	auto _bc = Particles::bboxCenter;
 	_bc = UI2::EditVec(exps - 147, off, 146, "Center", _bc, true);
 	if (_bc != Particles::bboxCenter) {
@@ -1056,13 +1080,16 @@ void ParGraphics::DrawMenu() {
 		UI2::Dropdown(expandPos - 147, off + 17, 146, _("Sky"), reflItms);
 		off += 17;
 	}
-	UI::Quad(expandPos - 149, off + 16, 148, 17 * 4 + 2, white(0.9f, 0.1f));
-	reflStr = UI2::Slider(expandPos - 147, off + 17, 146, _("Strength"), 0, 5, reflStr);
-	reflStrDecay = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Falloff"), 0, 50, reflStrDecay);
-	specStr = UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Specular"), 0, 1, specStr);
-	UI2::Color(expandPos - 147, off + 17 * 4, 146, _("Background"), bgCol);
+	off += 17;
+	UI::Quad(expandPos - 149, off - 1, 148, 17 * (fogUseBgCol? 5 : 6) + 2, white(0.9f, 0.1f));
+	reflStr = UI2::Slider(expandPos - 147, off, 146, _("Strength"), 0, 5, reflStr); off += 17;
+	reflStrDecay = UI2::Slider(expandPos - 147, off, 146, _("Falloff"), 0, 200, reflStrDecay); off += 17;
+	UI2::Toggle(expandPos - 147, off, 146, _("Inherit Color"), fogUseBgCol); off += 17;
+	if (!fogUseBgCol) { UI2::Color(expandPos - 147, off, 146, _("Color"), fogCol); off += 17; }
+	specStr = UI2::Slider(expandPos - 147, off, 146, _("Specular"), 0, 1, specStr); off += 17;
+	UI2::Color(expandPos - 147, off, 146, _("Background"), bgCol);
 
-	off += 17 * 5 + 2;
+	off += 18;
 
 	UI::Label(expandPos - 148, off, 12, _("Camera"), white());
 	UI::Quad(expandPos - 149, off + 17, 148, 17 * 9 + 2, white(0.9f, 0.1f));
