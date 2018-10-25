@@ -642,18 +642,20 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		}
 		glUniform1i(parProgLocs[11], useGradCol);
 		glUniform1f(parProgLocs[12], spriteScl);
-		glUniform1i(parProgLocs[13], (orientType == ORIENT::STRETCH && orientStr > 0.0001f)? 1 : 0);
-		glUniform1f(parProgLocs[14], std::powf(2, orientStr));
-		glUniform1i(parProgLocs[15], 4);
-		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[orientParam[0]]->texBuf);
-		glUniform1i(parProgLocs[16], 5);
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[orientParam[1]]->texBuf);
-		glUniform1i(parProgLocs[17], 6);
-		glActiveTexture(GL_TEXTURE6);
-		glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[orientParam[2]]->texBuf);
-		
+		bool useorien = (orientType == ORIENT::STRETCH && orientStr > 0.0001f);
+		glUniform1i(parProgLocs[13], useorien ? 1 : 0);
+		if (useorien) {
+			glUniform1f(parProgLocs[14], std::powf(2, orientStr));
+			glUniform1i(parProgLocs[15], 4);
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[orientParam[0]]->texBuf);
+			glUniform1i(parProgLocs[16], 5);
+			glActiveTexture(GL_TEXTURE5);
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[orientParam[1]]->texBuf);
+			glUniform1i(parProgLocs[17], 6);
+			glActiveTexture(GL_TEXTURE6);
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[orientParam[2]]->texBuf);
+		}
 
 		glBindVertexArray(Particles::posVao);
 		for (auto& p : drawLists) {
@@ -1005,12 +1007,12 @@ void ParGraphics::DrawColMenu() {
 	off += 19;
 
 	static std::string ornms[] = { "None", "Stretch", "" };
-	static Popups::DropdownItem ordi = Popups::DropdownItem((uint*)&orientType, ornms);
-	static auto _ort = orientType;
+	static auto _ort = (uint)orientType;
+	static Popups::DropdownItem ordi = Popups::DropdownItem(&_ort, ornms);
 	UI2::Dropdown(exps - 148, off, 147, "Orient", ordi);
 	if (Particles::particles_ParamSz == 0) orientType = ORIENT::NONE;
-	if (_ort != orientType) {
-		_ort = orientType;
+	if (_ort != (uint)orientType) {
+		orientType = (ORIENT)_ort;
 		Scene::dirty = true;
 	}
 	off += 17;

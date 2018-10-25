@@ -339,8 +339,11 @@ public:
 
 	static std::mutex stateLock, stateLock2;
 	static int stateLockId;
+	static std::mutex stateLockCV_m;
+	static std::condition_variable stateLockCV;
 	static void AcquireLock(int i);
 	static void ReleaseLock();
+	static void WaitForLockValue();
 };
 
 #include "SceneObjects.h"

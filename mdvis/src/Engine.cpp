@@ -46,7 +46,9 @@ Rect* Engine::stencilRect = nullptr;
 GLuint Engine::quadBuffer;
 
 std::mutex Engine::stateLock, Engine::stateLock2;
-int Engine::stateLockId;
+int Engine::stateLockId = 0;
+std::mutex Engine::stateLockCV_m;
+std::condition_variable Engine::stateLockCV;
 
 void Engine::Init() {
 	Engine::_mainThreadId = std::this_thread::get_id();
@@ -391,13 +393,27 @@ void Engine::DrawLinesW(Vec3* pts, int num, Vec4 col, float width) {
 }
 
 void Engine::AcquireLock(int i) {
-	stateLock2.lock();
-	stateLockId = i;
+	WaitForLockValue();
+	//stateLock2.lock();
+	{
+		std::lock_guard<std::mutex> lock(stateLockCV_m);
+		stateLockId = i;
+	}
 	stateLock.lock();
 	stateLock.unlock();
+	stateLockCV.notify_all();
 }
 
 void Engine::ReleaseLock() {
-	stateLockId = 0;
-	stateLock2.unlock();
+	{
+		std::lock_guard<std::mutex> lock(stateLockCV_m);
+		stateLockId = 0;
+	}
+	//stateLock2.unlock();
+	stateLockCV.notify_all();
+}
+
+void Engine::WaitForLockValue() {
+	std::unique_lock<std::mutex> lock(stateLockCV_m);
+	stateLockCV.wait(lock, [] {return !stateLockId; });
 }
