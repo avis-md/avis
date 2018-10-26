@@ -1,8 +1,10 @@
 #include "Engine.h"
 
 extern "C" {
+#define INT32 J_INT32
 #include "jpeglib.h"
 #include "jerror.h"
+#undef INT32
 }
 #include "lodepng.h"
 

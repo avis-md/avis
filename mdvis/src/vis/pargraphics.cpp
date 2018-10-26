@@ -940,7 +940,7 @@ void ParGraphics::DrawColMenu() {
 		UI::Label(exps - 147, off, 12, std::to_string(a+1), white());
 		Particles::attrNms[a] = UI::EditText(exps - 130, off, 110, 16, 12, white(1, 0.4f), Particles::attrNms[a], true, white());
 		if (!Particles::attrs[a]->readonly) {
-			if (Engine::Button(exps - 109, off, 16, 16, Icons::cross, red()) == MOUSE_RELEASE) {
+			if (Engine::Button(exps - 19, off, 16, 16, Icons::cross, red()) == MOUSE_RELEASE) {
 				Particles::RmParam(a);
 				break;
 			}

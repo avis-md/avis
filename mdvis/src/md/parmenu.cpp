@@ -32,7 +32,7 @@ std::vector<std::string> ParMenu::recentFiles, ParMenu::recentFilesN;
 
 void ParMenu::Init() {
 	menuNames[0] = _("Particles");
-	menuNames[1] = _("Colors");
+	menuNames[1] = _("Attributes");
 	menuNames[2] = _("Graphics");
 	menuNames[3] = _("Render");
 	menuNames[4] = _("Information");

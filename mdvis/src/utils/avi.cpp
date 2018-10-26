@@ -1,7 +1,9 @@
 #include "avi.h"
 extern "C" {
+#define INT32 J_INT32
 #include "jpeglib.h"
 #include "jerror.h"
+#undef INT32
 }
 
 AVI::AVI(const std::string& path, uint w, uint h, uint fps) : _w(w), _h(h) {
