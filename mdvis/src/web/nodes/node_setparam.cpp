@@ -3,8 +3,8 @@
 #include "ui/ui_ext.h"
 #include "web/anweb.h"
 
-Node_SetParam::Node_SetParam() : AnNode(new DmScript(sig)), paramId(0), di(&paramId, Particles::particles_ParamNms) {
-	title = "Set Parameter";
+Node_SetParam::Node_SetParam() : AnNode(new DmScript(sig)), paramId(0), di(&paramId, &Particles::attrNms[0]) {
+	title = "Set Attribute";
 	titleCol = NODE_COL_IO;
     canTile = false;
 	inputR.resize(1);
@@ -15,13 +15,13 @@ Node_SetParam::Node_SetParam() : AnNode(new DmScript(sig)), paramId(0), di(&para
 
 void Node_SetParam::Execute() {
     if (!inputR[0].first) return;
-	if (!Particles::particles_ParamSz) {
-		RETERR("No params available!");
+	if (!Particles::attrs.size()) {
+		RETERR("No attribute available!");
 	}
 	CVar& cv = inputR[0].first->conV[inputR[0].second];
 	auto dm = cv.dimVals.size();
 	auto src = *((double**)cv.value);
-	auto& prm = Particles::particles_Params[paramId];
+	auto& prm = Particles::attrs[paramId];
 	if (dm > 2) {
 		RETERR("Input must be 1- or 2-dimensional!");
 	}
@@ -65,7 +65,7 @@ void Node_SetParam::Execute() {
 void Node_SetParam::DrawHeader(float& off) {
 	AnNode::DrawHeader(off);
 	UI::Quad(pos.x, off, width, 18, bgCol);
-	UI2::Dropdown(pos.x + 2, off, width - 4, "Parameter", di);
+	UI2::Dropdown(pos.x + 2, off, width - 4, "Attribute", di);
 	off += 18;
 }
 

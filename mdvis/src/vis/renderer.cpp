@@ -14,7 +14,7 @@ VisRenderer::STATUS VisRenderer::status = STATUS::READY;
 #define RESO 2048
 #define VRESO 1024
 
-bool VisRenderer::imgUseAlpha = false;
+bool VisRenderer::imgUseAlpha = true;
 uint VisRenderer::imgW = RESO, VisRenderer::imgH = RESO, VisRenderer::vidW = VRESO, VisRenderer::vidH = VRESO;
 uint VisRenderer::imgSlices = 4;
 uint VisRenderer::imgMsaa = 4, VisRenderer::vidMsaa = 4;

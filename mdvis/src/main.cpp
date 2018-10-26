@@ -65,8 +65,9 @@ void updateFunc() {
 		if (ParLoader::impId == 0) {
 			for (auto& a : GenericSSV::attrs) {
 				Particles::AddParam();
-				Particles::particles_ParamNms[Particles::particles_ParamSz-1] = a.first;
-				auto& p = Particles::particles_Params[Particles::particles_ParamSz-1];
+				Particles::attrNms[Particles::attrs.size()-1] = a.first;
+				auto& p = Particles::attrs.back();
+				p->readonly = true;
 				p->Get(0).swap(a.second);
 				p->dirty = true;
 			}
@@ -398,7 +399,8 @@ The hash for this program is )" << VisSystem::version_hash
 
 		ChokoLait::mainCameraObj->transform.localPosition(Vec3(0, 0, -1));
 		ChokoLait::mainCamera->quality = 1;
-		ChokoLait::mainCamera->quality2 = 1;
+		ChokoLait::mainCamera->useGBuffer2 = true;
+		ChokoLait::mainCamera->quality2 = 0.25f;
 
 		glfwShowWindow(Display::window);
 

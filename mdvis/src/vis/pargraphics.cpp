@@ -61,7 +61,7 @@ Vec3 ParGraphics::rotCenter = Vec3();
 uint ParGraphics::rotCenterTrackId = -1;
 float ParGraphics::rotW = 0, ParGraphics::rotZ = 0;
 float ParGraphics::rotWs = 0, ParGraphics::rotZs = 0;
-float ParGraphics::rotScale = 0;
+float ParGraphics::rotScale = SCL_MIN + 1;
 
 bool ParGraphics::autoRot = false;
 
@@ -641,7 +641,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 			glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 		}
 		else {
-			glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[gradColParam]->texBuf);
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::attrs[gradColParam]->texBuf);
 			glUniform4fv(parProgLocs[10], 3, &gradCols[0][0]);
 		}
 		glUniform1i(parProgLocs[11], useGradCol);
@@ -652,13 +652,13 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 			glUniform1f(parProgLocs[14], std::pow(2, orientStr));
 			glUniform1i(parProgLocs[15], 4);
 			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[orientParam[0]]->texBuf);
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::attrs[orientParam[0]]->texBuf);
 			glUniform1i(parProgLocs[16], 5);
 			glActiveTexture(GL_TEXTURE5);
-			glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[orientParam[1]]->texBuf);
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::attrs[orientParam[1]]->texBuf);
 			glUniform1i(parProgLocs[17], 6);
 			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[orientParam[2]]->texBuf);
+			glBindTexture(GL_TEXTURE_BUFFER, Particles::attrs[orientParam[2]]->texBuf);
 		}
 
 		glBindVertexArray(Particles::posVao);
@@ -716,7 +716,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 					glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 				}
 				else {
-					glBindTexture(GL_TEXTURE_BUFFER, Particles::particles_Params[gradColParam]->texBuf);
+					glBindTexture(GL_TEXTURE_BUFFER, Particles::attrs[gradColParam]->texBuf);
 					glUniform4fv(parConProgLocs[13], 3, &gradCols[0][0]);
 				}
 				glUniform1i(parConProgLocs[14], useGradCol);
@@ -796,6 +796,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 void ParGraphics::Reblit() {
 	auto& cam = ChokoLait::mainCamera;
 	if (!AnWeb::drawFull || Scene::dirty) tfboDirty = true;
+	//tfboDirty = Scene::dirty;
 	if (tfboDirty) {
 		if (!!Particles::particleSz) {
 			if (RayTracer::resTex) {
@@ -809,16 +810,16 @@ void ParGraphics::Reblit() {
 				BlitSky();
 			}
 		}
-	}
-	//*
-	//glBlendFunc(GL_ONE, GL_ZERO);
-	glDisable(GL_BLEND);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	
-	Eff::Apply();
+		//*
+		//glBlendFunc(GL_ONE, GL_ZERO);
+		glDisable(GL_BLEND);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		
+		Eff::Apply();
 
-	if (tfboDirty && AnWeb::drawFull)
+		//if (tfboDirty && AnWeb::drawFull)
 		tfboDirty = false;
+	}
 	
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glEnable(GL_BLEND);
@@ -863,11 +864,11 @@ void ParGraphics::BlitSky() {
 		glUniform1f(reflProgLocs[9], reflStrDecay);
 		glUniform1f(reflProgLocs[10], specStr);
 		if (AnWeb::drawFull) {
-			glUniform3f(reflProgLocs[11], 0, 0, 0);
+			glUniform4f(reflProgLocs[11], 0, 0, 0, 1);
 			glUniform3f(reflProgLocs[12], 0, 0, 0);
 		}
 		else {
-			glUniform3f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b);
+			glUniform4f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
 			if (fogUseBgCol) {
 				glUniform3f(reflProgLocs[12], bgCol.r, bgCol.g, bgCol.b);
 			}
@@ -933,29 +934,36 @@ void ParGraphics::DrawColMenu() {
 	auto& exps = ParMenu::expandPos;
 	float off = 20;
 	UI::Label(exps - 148, off, 12, "Attributes", white());
-	UI::Quad(exps - 149, off + 17, 149, 17 * 4 + 2, white(0.9f, 0.1f));
 	off += 18;
-	for (int a = 0; a < Particles::particles_ParamSz; ++a)  {
-		UI::Label(exps - 147, off + a*17, 12, std::to_string(a+1), white());
-		Particles::particles_ParamNms[a] = UI::EditText(exps - 130, off + a*17, 110, 16, 12, white(1, 0.4f), Particles::particles_ParamNms[a], true, white());
+	UI::Quad(exps - 149, off - 1, 149, 17 * (Particles::attrs.size() + 1) + 2, white(0.9f, 0.1f));
+	for (int a = 0; a < Particles::attrs.size(); ++a)  {
+		UI::Label(exps - 147, off, 12, std::to_string(a+1), white());
+		Particles::attrNms[a] = UI::EditText(exps - 130, off, 110, 16, 12, white(1, 0.4f), Particles::attrNms[a], true, white());
+		if (!Particles::attrs[a]->readonly) {
+			if (Engine::Button(exps - 109, off, 16, 16, Icons::cross, red()) == MOUSE_RELEASE) {
+				Particles::RmParam(a);
+				break;
+			}
+		}
+		off += 17;
 	}
-	if (Engine::Button(exps - 130, off + Particles::particles_ParamSz*17, 110, 16, white(1, 0.4f), "+", 12, white(), true) == MOUSE_RELEASE) {
+	if (Engine::Button(exps - 130, off, 110, 16, white(1, 0.4f), "+", 12, white(), true) == MOUSE_RELEASE) {
 		Particles::AddParam();
 	}
-	off += 4 * 17 + 3;
+	off += 19;
 
 	UI::Label(exps - 148, off, 12, "Coloring", white());
 	off += 17;
-	UI::alpha = (Particles::particles_ParamSz > 0)? 1 : 0.5f;
+	UI::alpha = (Particles::attrs.size() > 0)? 1 : 0.5f;
 	auto ug = useGradCol;
 	UI2::Toggle(exps - 148, off, 146, _("Gradient Fill"), useGradCol);
-	if (Particles::particles_ParamSz == 0) useGradCol = false;
+	if (Particles::attrs.size() == 0) useGradCol = false;
 	if (ug != useGradCol) Scene::dirty = true;
 	UI::alpha = 1;
 	off += 17;
 	if (useGradCol) {
-		gradColParam = min(gradColParam, (uint)(Particles::particles_ParamSz-1));
-		static Popups::DropdownItem di = Popups::DropdownItem(&gradColParam, Particles::particles_ParamNms);
+		gradColParam = min(gradColParam, (uint)(Particles::attrs.size()-1));
+		static Popups::DropdownItem di = Popups::DropdownItem(&gradColParam, &Particles::attrNms[0]);
 		static auto _gradColParam = gradColParam;
 		UI2::Dropdown(exps - 147, off, 146, "Attribute", di);
 		if (_gradColParam != gradColParam) {
@@ -1034,16 +1042,17 @@ void ParGraphics::DrawColMenu() {
 	static auto _ort = (uint)orientType;
 	static Popups::DropdownItem ordi = Popups::DropdownItem(&_ort, ornms);
 	UI2::Dropdown(exps - 148, off, 147, "Orient", ordi);
-	if (Particles::particles_ParamSz == 0) orientType = ORIENT::NONE;
+	if (Particles::attrs.size() == 0) orientType = ORIENT::NONE;
 	if (_ort != (uint)orientType) {
 		orientType = (ORIENT)_ort;
 		Scene::dirty = true;
 	}
 	off += 17;
 	if (orientType != ORIENT::NONE) {
-		static Popups::DropdownItem odx = Popups::DropdownItem(&orientParam[0], Particles::particles_ParamNms);
-		static Popups::DropdownItem ody = Popups::DropdownItem(&orientParam[1], Particles::particles_ParamNms);
-		static Popups::DropdownItem odz = Popups::DropdownItem(&orientParam[2], Particles::particles_ParamNms);
+		static Popups::DropdownItem odx = Popups::DropdownItem(&orientParam[0], nullptr);
+		static Popups::DropdownItem ody = Popups::DropdownItem(&orientParam[1], nullptr);
+		static Popups::DropdownItem odz = Popups::DropdownItem(&orientParam[2], nullptr);
+		odx.list = ody.list = odz.list = &Particles::attrNms[0];
 		static uint _opx = 100, _opy = 100, _opz = 100;
 		UI2::Dropdown(exps - 147, off, 146, "X", odx); off += 17;
 		UI2::Dropdown(exps - 147, off, 146, "Y", ody); off += 17;
@@ -1256,9 +1265,10 @@ void ParGraphics::Serialize(XmlNode* nd) {
 }
 void ParGraphics::SerializeCol(XmlNode* n) {
 	auto pm = n->addchild("Params");
-	for (int a = 0; a < Particles::particles_ParamSz; ++a)  {
+	for (int a = 0; a < Particles::attrs.size(); ++a)  {
+		if (Particles::attrs[a]->readonly) continue;
 		pm->addchild("item")
-			->addchild("name", Particles::particles_ParamNms[a]);
+			->addchild("name", Particles::attrNms[a]);
 	}
 	SV(usegrad, (int)useGradCol);
 	/*
@@ -1324,12 +1334,12 @@ void ParGraphics::DeserializeCol(XmlNode* nd) {
 #define GTV(nm, vl) if (n.name == #nm) Xml::ToVec(&n, vl)
 	for (auto& n : nd->children) {
 		if (n.name == "Params") {
-			auto& ps = Particles::particles_ParamSz;
+			auto ps = Particles::attrs.size();
 			for (auto& n2 : n.children) {
 				if (n2.name == "item") {
 					for (auto& n : n2.children) {
 						Particles::AddParam();
-						GTS(name, Particles::particles_ParamNms[ps-1]);
+						GTS(name, Particles::attrNms[ps-1]);
 					}
 				}
 			}

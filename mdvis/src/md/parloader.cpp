@@ -694,7 +694,15 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 	FrmInfo info(path.c_str(), Particles::particleSz, &pos[0][0], &vel[0][0]);
 	Debug::Message("ParLoader", "Running importer \"" + importers[anm.impId].name + "\"");
 	fault = !importers[anm.impId].funcs[anm.funcId].frmFunc(&info);
-	anm.status[f] = fault? FS::BAD : FS::LOADED;
+	if (fault) {
+		ErrorView::Message msg;
+		msg.name = "System";
+		msg.severe = true;
+		msg.msg.resize(1, "failed to load frame " + std::to_string(f) + ": " + std::string(info.error));
+		ErrorView::execMsgs.push_back(msg);
+		anm.status[f] = FS::BAD;
+	}
+	else anm.status[f] = FS::LOADED;
 
 	anm.reading = false;
 	if (isSrv) remove(path.c_str());

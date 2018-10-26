@@ -52,6 +52,7 @@ public:
 
 		bool dirty = false;
 		bool timed = false;
+		bool readonly = false;
 		GLuint buf, texBuf;
 		
 		std::vector<float>& Get(uint frm);
@@ -83,9 +84,8 @@ public:
 
 	static bool bufDirty, visDirty, palleteDirty;
 
-	static int particles_ParamSz;
-	static paramdata* particles_Params[10];
-	static std::string particles_ParamNms[11];
+	static std::vector<paramdata*> attrs;
+	static std::vector<std::string> attrNms;
 
 	static std::vector<conninfo> particles_Conn2;
 

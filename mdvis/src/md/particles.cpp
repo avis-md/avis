@@ -90,8 +90,8 @@ void Particles::AnimData::Update() {
 
 	if (dirty) {
 		dirty = false;
-		for (int a = 0; a < particles_ParamSz; ++a) {
-			particles_Params[a]->ApplyFrmCnt();
+		for (auto& a : attrs) {
+			a->ApplyFrmCnt();
 		}
 	}
 
@@ -161,9 +161,8 @@ Particles::conninfo Particles::conns;
 
 bool Particles::bufDirty = false, Particles::visDirty = false, Particles::palleteDirty = false;
 
-int Particles::particles_ParamSz = 0;
-Particles::paramdata* Particles::particles_Params[] = {};
-std::string Particles::particles_ParamNms[] = {};
+std::vector<Particles::paramdata*> Particles::attrs;
+std::vector<std::string> Particles::attrNms;
 
 std::vector<Particles::conninfo> Particles::particles_Conn2;
 
@@ -205,6 +204,9 @@ void Particles::Init() {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 16, 16, 0, GL_RGB, GL_FLOAT, colorPallete);
 	SetTexParams<>(0, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	attrNms.reserve(50); //reallocation will break something, temporary for now
+	attrNms.push_back("");
 }
 
 void Particles::Clear() {
@@ -220,10 +222,13 @@ void Particles::Clear() {
 		visii.clear();
 		conns.ids.clear();
 		poss = vels = nullptr;
-		for (int a = 0; a < particles_ParamSz; ++a) {
-			delete(particles_Params[a]);
+		for (auto& a : attrs) {
+			delete(a);
 		}
-		residueListSz = particleSz = Particles::conns.cnt = particles_ParamSz = 0;
+		attrs.clear();
+		attrNms.clear();
+		attrNms.push_back("");
+		residueListSz = particleSz = Particles::conns.cnt = 0;
 		
 		anim.Clear();
 		Protein::Clear();
@@ -261,8 +266,8 @@ void Particles::Resize(uint i) {
 	visii.clear(); visii.resize(i, true);
 	ress.resize(i);
 
-	for (int a = 0; a < particles_ParamSz; ++a) {
-		particles_Params[a]->ApplyParCnt();
+	for (auto& a : attrs) {
+		a->ApplyParCnt();
 	}
 }
 
@@ -276,10 +281,9 @@ void Particles::Update() {
 		UpdateRadBuf();
 	}
 	anim.Update();
-	for (int a = 0; a < particles_ParamSz; ++a)  {
-		auto& p = particles_Params[a];
-		if (p->dirty) {
-			p->Update();
+	for (auto& a : attrs) {
+		if (a->dirty) {
+			a->Update();
 		}
 	}
 }
@@ -380,10 +384,9 @@ void Particles::SetFrame(uint frm) {
 				ps[a] = (Vec3)poss[a];
 			}
 			SetGLSubBuf(posBuffer, &ps[0], particleSz);
-			for (int a = 0; a < particles_ParamSz; ++a)  {
-				auto& p = particles_Params[a];
-				if (p->timed) {
-					p->Update();
+			for (auto& a : attrs) {
+				if (a->timed) {
+					a->Update();
 				}
 			}
 			if (!!anim.bboxs.size()) memcpy(boundingBox, &anim.bboxs[6*frm], 6*sizeof(double));
@@ -403,19 +406,19 @@ void Particles::SetFrame(uint frm) {
 }
 
 void Particles::AddParam() {
-	particles_Params[particles_ParamSz] = new paramdata();
-	particles_ParamNms[particles_ParamSz] = "Unnamed " + std::to_string(particles_ParamSz+1);
-	particles_ParamSz++;
+	if (attrs.size() > 48) {
+		Debug::Error("Particles::AddParam", "Limit of attribute count reached!");
+		return;
+	}
+	attrs.push_back(new paramdata());
+	attrNms.push_back("");
+	attrNms.rbegin()[1] = "Unnamed " + std::to_string(attrs.size());
 }
 
 void Particles::RmParam(int i) {
-	delete(particles_Params[i]);
-	for (int a = i+1; a < particles_ParamSz; ++a)  {
-		particles_Params[a-1] = particles_Params[a];
-		particles_ParamNms[a-1] = particles_ParamNms[a];
-	}
-	particles_ParamSz--;
-	particles_ParamNms[particles_ParamSz] = "";
+	delete(attrs[i]);
+	attrs.erase(attrs.begin() + i);
+	attrNms.erase(attrNms.begin() + i);
 }
 
 void Particles::Rebound(glm::dvec3 center) {
