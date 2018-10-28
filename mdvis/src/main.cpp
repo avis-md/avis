@@ -35,6 +35,8 @@
 
 bool __debug = false;
 float autoSaveTime = 10;
+std::vector<std::string> main_openfiles;
+bool option_silent = false, nologo = false;
 
 void rendFunc() {
 	auto& cm = ChokoLait::mainCameraObj->transform;
@@ -74,6 +76,11 @@ void updateFunc() {
 			GenericSSV::attrs.clear();
 		}
 		VisSystem::lastSave = Time::time;
+
+		if (!!main_openfiles.size()) {
+			ParLoader::directLoad = option_silent;
+			ParLoader::OnOpenFile(main_openfiles);
+		}
 	}
 
 	if (!!Particles::particleSz && !ParLoader::busy) {
@@ -219,9 +226,6 @@ int main(int argc, char **argv) {
 	try {
 #endif
 		Time::startMillis = milliseconds();
-		std::vector<std::string> fls;
-		bool _s = false, _x = false, nologo = false;
-		std::string _xs = "";
 		for (auto a = 1; a < argc; ++a)  {
 			if (argv[a][0] == '-') {
 				if (argv[a][1] == '-') {
@@ -256,7 +260,7 @@ int main(int argc, char **argv) {
 				else {
 					argv[a] ++;
 					if ISS(s)
-						_s = true;
+						option_silent = true;
 					else if ISS(v) {
 						std::cout << VERSIONSTRING << std::endl
 							<< "hash: " << VisSystem::version_hash << std::endl;
@@ -271,7 +275,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			else {
-				fls.push_back(argv[a]);
+				main_openfiles.push_back(argv[a]);
 			}
 		}
 		if (!nologo) {
@@ -387,10 +391,11 @@ The hash for this program is )" << VisSystem::version_hash
 		NEWIMP("DLPoly", dlp, .000, DLPoly::Read)
 		PUSHIMP
 
-		if (fls.size()) {
-			for (auto& f : fls) f = IO::FullPath(f);
-			ParLoader::directLoad = _s;
-			ParLoader::OnOpenFile(fls);
+		if (main_openfiles.size()) {
+			for (auto& f : main_openfiles) f = IO::FullPath(f);
+			ParLoader::directLoad = option_silent;
+			ParLoader::OnOpenFile(main_openfiles);
+			main_openfiles.erase(main_openfiles.begin());
 		}
 
 		Display::Resize(1024, 600, false);

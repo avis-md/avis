@@ -106,6 +106,9 @@ bool GenericSSV::ReadFrm(FrmInfo* info) {
 			case TYPES::VELX: info->vel[a*3] = std::stod(p); break;
 			case TYPES::VELY: info->vel[a*3 + 1] = std::stod(p); break;
 			case TYPES::VELZ: info->vel[a*3 + 2] = std::stod(p); break;
+			case TYPES::ATTR:
+				
+				break;
 			default: break;
 			}
 		}

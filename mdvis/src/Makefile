@@ -49,7 +49,7 @@ LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
 LIBS = $(WEAK_LIB) $(PYLIB) -lpthread -lm $(GLLIB) -lz $(LIBS2)
 
 HEADERS = hdr.h lodepng.h AssetObjects.h ChokoLait.h Engine.h SceneObjects.h
-HEADERS += asset/mesh.h asset/tetrahedron.h asset/rendertexture.h asset/texture.h asset/texture3d.h
+HEADERS += asset/mesh.h asset/tetrahedron.h asset/texture.h asset/texture3d.h
 HEADERS += core/bbox.h core/debug.h core/display.h core/font.h core/input.h core/io.h core/math.h core/mvp.h core/time.h core/ui.h core/ui3.h
 HEADERS += md/Protein.h md/GenericSSV.h md/Gromacs.h md/CDV.h md/parmenu.h md/particles.h md/parloader.h md/XYZ.h md/pdb.h md/lammps.h md/dlpoly.h md/CDV.h
 HEADERS += web/anbrowse.h web/anconv.h web/annode.h web/anscript.h web/anops.h web/anweb.h web/creader.h web/pyreader.h web/freader.h web/errorview.h
@@ -64,7 +64,7 @@ HEADERS += res/resdata.h res/shddata.h ocl/kernel.h
 HEADERSX = xdrfile/xdrfile.h xdrfile/xdrfile_trr.h xdrfile/xdrfile_xtc.h
 
 OBJS = obj/hdr.o obj/lodepng.o obj/ChokoLait.o obj/Engine.o obj/main.o obj/RenderEngine.o
-OBJS += obj/asset/mesh.o obj/asset/tetrahedron.o obj/asset/rendertexture.o obj/asset/texture.o obj/asset/texture3d.o
+OBJS += obj/asset/mesh.o obj/asset/tetrahedron.o obj/asset/texture.o obj/asset/texture3d.o
 OBJS += obj/core/bbox.o obj/core/debug.o obj/core/display.o obj/core/font.o obj/core/input.o obj/core/io.o obj/core/mvp.o obj/core/time.o obj/core/ui.o obj/core/ui3.o
 OBJS += obj/md/Protein.o obj/md/GenericSSV.o obj/md/Gromacs.o obj/md/parmenu.o obj/md/particles.o obj/md/parloader.o obj/md/pdb.o obj/md/lammps.o obj/md/CDV.o obj/md/dlpoly.o #obj/md/XYZ.o
 OBJS += obj/web/anbrowse.o obj/web/anconv.o obj/web/annode.o obj/web/anops.o obj/web/anscript.o obj/web/anweb.o obj/web/creader.o obj/web/pyreader.o obj/web/freader.o obj/web/errorview.o
