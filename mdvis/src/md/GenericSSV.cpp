@@ -3,6 +3,7 @@
 #define SETERR(msg) memcpy(info->error, msg, sizeof(msg))
 
 std::vector<GenericSSV::AttrTyp> GenericSSV::attrs;
+std::vector<std::vector<float>> GenericSSV::_attrs;
 std::vector<GenericSSV::TYPES> GenericSSV::_tps;
 std::string GenericSSV::_s;
 
@@ -13,6 +14,7 @@ bool GenericSSV::Read(ParInfo* info) {
 	_s = p;
 	std::vector<TYPES> ts;
 	attrs.clear();
+	_attrs.clear();
 	ParseTypes(p, ts);
 	if (!ts.size()) {
 		SETERR("No types specified!");
@@ -106,9 +108,12 @@ bool GenericSSV::ReadFrm(FrmInfo* info) {
 			case TYPES::VELX: info->vel[a*3] = std::stod(p); break;
 			case TYPES::VELY: info->vel[a*3 + 1] = std::stod(p); break;
 			case TYPES::VELZ: info->vel[a*3 + 2] = std::stod(p); break;
-			case TYPES::ATTR:
-				
-				break;
+			case TYPES::ATTR: {
+					auto& at = _attrs[attri++];
+					at.resize(info->parNum);
+					at[a] = std::stod(p);
+					break;
+				}
 			default: break;
 			}
 		}
@@ -141,6 +146,7 @@ void GenericSSV::ParseTypes(const std::string& line, std::vector<GenericSSV::TYP
 			ts.push_back(TYPES::ATTR);
 			attrs.push_back(AttrTyp());
 			attrs.back().first = a.substr(5);
+			_attrs.push_back(std::vector<float>());
 		}
 		else {
 			ts.push_back(TYPES::NONE);

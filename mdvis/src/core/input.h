@@ -7,18 +7,18 @@ class Input {
 public:
 	static Vec2 mousePos, mousePosRelative, mouseDelta, mouseDownPos;
 	static bool mouse0, mouse1, mouse2;
+	static bool _mouse0, _mouse1, _mouse2;
 	static long long mouseT;
 	static bool dbclick;
 	static float mouseScroll;
 	static byte mouse0State, mouse1State, mouse2State;
+	static byte _mouse0State;
 	static std::string inputString;
 	static void UpdateMouseNKeyboard(bool* src = nullptr);
 
-	static bool KeyDown(InputKey key), KeyHold(InputKey key), KeyUp(InputKey key);
+	static float scrollScl;
 
-	Vec2 _mousePos, _mousePosRelative, _mouseDelta, _mouseDownPos;
-	bool _mouse0, _mouse1, _mouse2;
-	bool _keyStatuses[325];
+	static bool KeyDown(InputKey key), KeyHold(InputKey key), KeyUp(InputKey key);
 
 	static void PreLoop();
 

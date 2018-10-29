@@ -15,6 +15,7 @@ public:
 
 	typedef std::pair<std::string, std::vector<float>> AttrTyp;
 	static std::vector<AttrTyp> attrs;
+	static std::vector<std::vector<float>> _attrs;
 
 private:
 	static std::vector<TYPES> _tps;

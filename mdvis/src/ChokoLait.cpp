@@ -206,19 +206,19 @@ void ChokoLait::Paint(emptyCallbackFunc rendFunc, emptyCallbackFunc paintFunc) {
 void ChokoLait::MouseGL(GLFWwindow* window, int button, int state, int mods) {
 	switch (button) {
 	case GLFW_MOUSE_BUTTON_LEFT:
-		Input::mouse0 = (state == GLFW_PRESS);
+		Input::_mouse0 = (state == GLFW_PRESS);
 		break;
 	case GLFW_MOUSE_BUTTON_MIDDLE:
-		Input::mouse1 = (state == GLFW_PRESS);
+		Input::_mouse1 = (state == GLFW_PRESS);
 		break;
 	case GLFW_MOUSE_BUTTON_RIGHT:
-		Input::mouse2 = (state == GLFW_PRESS);
+		Input::_mouse2 = (state == GLFW_PRESS);
 		break;
 	}
 }
 
 void ChokoLait::MouseScrGL(GLFWwindow* window, double xoff, double yoff) {
-	Input::_mouseScroll = (float)yoff;
+	Input::_mouseScroll = (float)yoff * Input::scrollScl;
 }
 
 void ChokoLait::MouseEnterGL(GLFWwindow* window, int e) {

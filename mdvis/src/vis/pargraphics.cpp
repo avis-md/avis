@@ -398,6 +398,22 @@ void ParGraphics::Update() {
 		Scene::dirty = true;
 	}
 	if (!!Particles::particleSz && !UI::editingText && !UI::_layerMax) {
+
+		if (zoomFade > 0) {
+			static bool scrtr = false;
+			if (!Input::mouse0) scrtr = false;
+			if (Rect(Display::width * 0.5f - 150.f, Display::height - 100.f, 300, 20).Inside(Input::mousePos) || scrtr) {
+				zoomFade = 1;
+				auto _rs = rotScale;
+				rotScale = Engine::DrawSliderFill(Display::width * 0.5f - 130.f, Display::height - 98.f, 260, 16, SCL_MIN, SCL_MAX, rotScale, Vec4(), Vec4());
+				Input::mouse0 = false; Input::mouse0State = MOUSE_NONE;
+				if (_rs != rotScale) {
+					Scene::dirty = true;
+					scrtr = true;
+				}
+			}
+		}
+
 		rotW = Clamp<float>(rotW, -90, 90);
 		rotZ = Repeat<float>(rotZ, 0, 360);
 		rotScale = Clamp(rotScale, SCL_MIN, SCL_MAX);

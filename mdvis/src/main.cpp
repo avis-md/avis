@@ -18,7 +18,6 @@
 #include "md/Gromacs.h"
 #include "md/pdb.h"
 #include "md/CDV.h"
-//#include "md/XYZ.h"
 #include "md/lammps.h"
 #include "md/dlpoly.h"
 #include "vis/cubemarcher.h"
@@ -191,11 +190,13 @@ void paintfunc() {
 			}
 
 			id--;
-			UI::Quad(Input::mousePos.x + 14, Input::mousePos.y + 2, 120, 60, white(0.8f, 0.1f));
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Particle " + std::to_string(id), white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, &Particles::resNames[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, &Particles::names[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, std::to_string(Particles::poss[id]), white());
+			UI::Quad(Input::mousePos.x + 14, Input::mousePos.y + 2, 120, 90, white(0.8f, 0.1f));
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Atom ID: " + std::to_string(id), white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, "Residue: " + std::string(&Particles::resNames[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN), white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, "Atom: " + std::string(&Particles::names[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN), white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, "X: " + std::to_string(Particles::poss[id].x), white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 62, 12, "Y: " + std::to_string(Particles::poss[id].y), white());
+			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 77, 12, "Z: " + std::to_string(Particles::poss[id].z), white());
 
 		}
 		else {
@@ -405,7 +406,7 @@ The hash for this program is )" << VisSystem::version_hash
 		ChokoLait::mainCameraObj->transform.localPosition(Vec3(0, 0, -1));
 		ChokoLait::mainCamera->quality = 1;
 		ChokoLait::mainCamera->useGBuffer2 = true;
-		ChokoLait::mainCamera->quality2 = 0.25f;
+		ChokoLait::mainCamera->quality2 = 0.5f;
 
 		glfwShowWindow(Display::window);
 

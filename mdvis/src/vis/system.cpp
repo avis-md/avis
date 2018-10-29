@@ -215,11 +215,13 @@ void VisSystem::InitEnv() {
 			}
 		}
 	}
+
+	Input::scrollScl = TryParse(prefs["VIS_SCROLL_SPEED"], 1.f);
 }
 
 bool VisSystem::InMainWin(const Vec2& pos) {
 	if (AnWeb::drawFull) return false;
-	else return (pos.x > ParMenu::expandPos + 16) && (pos.x < Display::width - ((!Particles::particleSz || LiveSyncer::activeRunner)? LiveSyncer::expandPos : AnWeb::expandPos)) && (pos.y < Display::height - 18);
+	else return (pos.x > ParMenu::expandPos + 16) && (pos.x < Display::width - ((!Particles::particleSz || LiveSyncer::activeRunner)? LiveSyncer::expandPos : AnWeb::expandPos)) && (pos.y > 18) && (pos.y < Display::height - 18);
 }
 
 void VisSystem::UpdateTitle() {

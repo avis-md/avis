@@ -2,7 +2,8 @@
 #include "Gromacs.h"
 #include "Protein.h"
 #include "vis/pargraphics.h"
-#include "md/parmenu.h"
+#include "parmenu.h"
+#include "GenericSSV.h"
 #include "web/anweb.h"
 #include "ui/icons.h"
 #include "ui/popups.h"
@@ -703,6 +704,16 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 		anm.status[f] = FS::BAD;
 	}
 	else anm.status[f] = FS::LOADED;
+
+	if (!ParLoader::impId) {
+		for (int a = 0, s = GenericSSV::_attrs.size(); a < s; a++) {
+			auto& tr = GenericSSV::_attrs[a];
+			if (!!tr.size()) {
+				Particles::attrs[a]->Get(f) = tr;
+				tr.clear();
+			}
+		}
+	}
 
 	anm.reading = false;
 	if (isSrv) remove(path.c_str());

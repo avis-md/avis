@@ -1,7 +1,8 @@
 #include "particles.h"
 #include "parloader.h"
+#include "GenericSSV.h"
+#include "Protein.h"
 #include "web/anweb.h"
-#include "md/Protein.h"
 #include "utils/glext.h"
 
 Particles::paramdata::paramdata() {
@@ -80,6 +81,9 @@ void Particles::AnimData::Seek(uint f) {
 			ParLoader::OpenFrameNow(f, paths[f]);
 		}
 		if (status[f] == FRAME_STATUS::BAD) return;
+	}
+	for (auto& a : attrs) {
+		a->Update();
 	}
 	UpdateMemRange();
 	UpdateBBox();
