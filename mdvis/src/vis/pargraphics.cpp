@@ -996,24 +996,45 @@ void ParGraphics::DrawColMenu() {
 		off += 17 * 5 + 2;
 	}
 	else {
-		UI::Quad(exps - 148, off, 146, Display::height*0.5f - off, white(0.9f, 0.1f));
-		Engine::PushStencil(exps - 148, off + 1, 146, Display::height*0.5f - off - 2);
+		auto ca = Particles::colorPallete.size();
+		UI::Quad(exps - 148, off, 146, ca * 17 + 2, white(0.9f, 0.1f));
 		off++;
 		UI2::sepw = 0.33f;
-		for (int x = 0; x < 256; ++x)  {
-			std::string nm = (x < Particles::defColPalleteSz) ? std::string((char*)&Particles::defColPallete[x], 2) : std::to_string(x);
-			Vec3& col = Particles::colorPallete[x];
-			Vec4& colt = Particles::_colorPallete[x];
-			UI2::Color(exps - 145, off + 17*x, 143, nm, colt);
+		for (int c = 0; c < ca; ++c)  {
+			auto& pl = Particles::colorPallete[c];
+			std::string nm = (pl.first >= *(ushort*)"A")? std::string((char*)&pl.first, 2) : std::to_string(pl.first);
+			Vec3& col = pl.second;
+			Vec4& colt = Particles::_colorPallete[c];
+			UI2::Color(exps - 145, off, 143, nm, colt);
 			if (col != Vec3(colt)) {
 				col = colt;
 				Particles::UpdateColorTex();
 			}
+			off += 17;
 		}
+		off += 3;
+
+		UI::Label(exps - 147, off, 12, "Overrides", white());
+		off += 18;
+		UI::Quad(exps - 148, off - 1, 147, 36 * Particles::colorOverrides.size() + 19, white(0.9f, 0.1f));
+		for (int a = 0; a < Particles::colorOverrides.size(); ++a)  {
+			auto& co = Particles::colorOverrides[a];
+			UI::Quad(exps - 147, off, 145, 35, white(0.9f, 0.05f));
+			co.di.target = &co.resFlags;
+			UI2::Dropdown(exps - 146, off + 1, 65, co.di);
+			co.type = UI::EditText(exps - 80, off + 1, 60, 16, 12, white(0.2f), co.type, true, white());
+			UI2::Color(exps - 146, off + 18, 144, "Color", Particles::_colorPallete[co.colId]);
+			co.Update();
+			off += 36;
+		}
+		if (Engine::Button(exps - 130, off, 110, 16, white(1, 0.4f), "+", 12, white(), true) == MOUSE_RELEASE) {
+			Particles::colorOverrides.push_back(Particles::SpecificColor());
+		}
+		off += 19;
+
 		UI2::sepw = 0.5f;
-		off = Display::height*0.5f;
-		Engine::PopStencil();
 	}
+
 	bool uc = useConCol;
 	UI2::Toggle(exps - 148, off, 146, "Custom Bond Colors", useConCol);
 	if (useConCol) {

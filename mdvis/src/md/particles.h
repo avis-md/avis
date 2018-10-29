@@ -72,6 +72,7 @@ public:
 	static glm::dvec3* poss, *vels;
 
 	static std::vector<ResidueList> residueLists;
+	static std::vector<std::string> reslist;
 
 	static std::vector<char> names, resNames;
 	static std::vector<short> types;
@@ -129,10 +130,32 @@ public:
 	static glm::dvec3 bboxCenter;
 	static bool boxPeriodic;
 
-	static Vec3 colorPallete[256];
-	static ushort defColPallete[256];
+	struct DefColor {
+		ushort type;
+		Vec3 col;
+		int id = -1;
+	};
+	struct SpecificColor {
+		std::string type;
+		uint resFlags = 0;
+		uint colId;
+		std::vector<uint> mask;
+		Popups::DropdownItem di;
+
+		SpecificColor();
+		void Update();
+		void UpdateMask();
+		void Revert();
+	private:
+		std::string _type;
+		uint _resFlags = 0;
+		Vec4 _col;
+		static byte nextId;
+	};
+	static std::vector<DefColor> defColors;
+	static std::vector<std::pair<ushort, Vec3>> colorPallete;
 	static Vec4 _colorPallete[256];
-	static byte defColPalleteSz;
+	static std::vector<SpecificColor> colorOverrides;
 	static GLuint colorPalleteTex;
 
 	static void Init(), Clear(), GenTexBufs();

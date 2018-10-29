@@ -145,6 +145,61 @@ void Particles::AnimData::UpdateMemRange() {
 }
 
 
+byte Particles::SpecificColor::nextId = 255;
+
+Particles::SpecificColor::SpecificColor() {
+	colId = nextId--;
+	_colorPallete[colId] = white();
+	di = Popups::DropdownItem(&resFlags, reslist.data());
+	di.flags = true;
+}
+
+void Particles::SpecificColor::Update() {
+	if (_type != type || _resFlags != resFlags) {
+		Revert();
+		_type = type;
+		_resFlags = resFlags;
+		if (!type.size() || !resFlags) return;
+		UpdateMask();
+		UpdateColorTex();
+	}
+	else if (_col != _colorPallete[colId]) {
+		_col = _colorPallete[colId];
+		if (!type.size() || !resFlags) return;
+		UpdateColorTex();
+	}
+}
+
+void Particles::SpecificColor::UpdateMask() {
+	type.resize(min<size_t>(type.size(), PAR_MAX_NAME_LEN));
+	auto rls = reslist.size();
+	for (auto& rli : residueLists) {
+		for (int a = 0; a < rls; a++) {
+			if (!!(resFlags & (1 << a))) {
+				if (rli.name == reslist[a]) goto use;
+			}
+		}
+		continue;
+	use:
+		uint first = rli.residues[0].offset;
+		uint last = rli.residues.back().offset + rli.residues.back().cnt;
+		for (uint a = first; a < last; a++) {
+			auto nm = &names[a*PAR_MAX_NAME_LEN];
+			if (!std::string(nm, PAR_MAX_NAME_LEN).compare(0, type.size(), type)) {
+				mask.push_back(a);
+				colors[a] = colId;
+			}
+		}
+	}
+	SetGLSubBuf(colIdBuffer, &colors[0], particleSz);
+}
+
+void Particles::SpecificColor::Revert() {
+
+	mask.clear();
+}
+
+
 uint Particles::residueListSz;
 uint Particles::particleSz, Particles::_particleSz;
 
@@ -153,6 +208,7 @@ std::string Particles::cfgFile, Particles::trjFile;
 glm::dvec3* Particles::poss, *Particles::vels;
 
 std::vector<ResidueList> Particles::residueLists;
+std::vector<std::string> Particles::reslist;
 
 std::vector<char> Particles::names, Particles::resNames;
 std::vector<short> Particles::types;
@@ -176,10 +232,10 @@ double Particles::boundingBox[] = {};
 glm::dvec3 Particles::bboxCenter;
 bool Particles::boxPeriodic = false;
 
-Vec3 Particles::colorPallete[] = {};
-ushort Particles::defColPallete[] = {};
-Vec4 Particles::_colorPallete[] = {};
-byte Particles::defColPalleteSz = 0;
+std::vector<Particles::DefColor> Particles::defColors;
+std::vector<std::pair<ushort, Vec3>> Particles::colorPallete;
+Vec4 Particles::_colorPallete[256];
+std::vector<Particles::SpecificColor> Particles::colorOverrides;
 GLuint Particles::colorPalleteTex;
 
 GLuint Particles::posVao;
@@ -205,7 +261,7 @@ void Particles::Init() {
 
 	glGenTextures(1, &colorPalleteTex);
 	glBindTexture(GL_TEXTURE_2D, colorPalleteTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 16, 16, 0, GL_RGB, GL_FLOAT, colorPallete);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 16, 16, 0, GL_RGB, GL_FLOAT, 0);
 	SetTexParams<>(0, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -327,7 +383,7 @@ void Particles::UpdateBufs() {
 
 void Particles::UpdateColorTex() {
 	glBindTexture(GL_TEXTURE_2D, colorPalleteTex);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 16, 16, GL_RGB, GL_FLOAT, colorPallete);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 16, 16, GL_RGBA, GL_FLOAT, _colorPallete);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	Scene::dirty = true;
 }

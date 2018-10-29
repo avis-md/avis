@@ -56,6 +56,7 @@ void rendFunc() {
 void updateFunc() {
 	if (ParLoader::parDirty) {
 		ParLoader::parDirty = false;
+		Particles::UpdateColorTex();
 		Particles::UpdateBufs();
 		Particles::UpdateBBox();
 		//if (Protein::Refresh()) {

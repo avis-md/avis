@@ -97,29 +97,22 @@ void VisSystem::Init() {
 	_type2Col.clear();
 	if (strm.is_open()) {
 		std::string s;
-		Vec4 col;
+		Vec3 col;
 		while (!strm.eof()) {
 			std::getline(strm, s);
 			auto p = string_split(s, ' ', true);
 			if (p.size() != 4) continue;
-			auto i = *(ushort*)&(p[0][0]);
+			auto i = *(ushort*)(&p[0][0]);
 			col.x = std::stof(p[1]);
 			col.y = std::stof(p[2]);
 			col.z = std::stof(p[3]);
-			col.a = 1;
 			_type2Col.emplace(i, col);
-			Particles::colorPallete[Particles::defColPalleteSz] = 
-				Particles::_colorPallete[Particles::defColPalleteSz] = col;
-			Particles::defColPallete[Particles::defColPalleteSz++] = i;
+			Particles::defColors.push_back(Particles::DefColor());
+			auto& dc = Particles::defColors.back();
+			dc.type = i;
+			dc.col = col;
 		}
 		strm.close();
-	}
-	for (int a = Particles::defColPalleteSz; a < 256; ++a)  {
-		byte colb[3];
-		Color::Hsv2Rgb(a * 0.66f / 255, 1, 1, colb[0], colb[1], colb[2]);
-		Particles::colorPallete[a] =
-			Particles::_colorPallete[a] = 
-				Vec4(colb[0], colb[1], colb[2], 255) / 255.f;
 	}
 
 	auto& mi = menuItems[0];

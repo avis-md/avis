@@ -328,7 +328,7 @@ void ParMenu::Draw_List(float off) {
 									else sell.push_back(rj.offset + k + 1);
 								}
 							}
-							Vec3& col = Particles::colorPallete[Particles::colors[rj.offset + k]];
+							Vec3& col = Particles::colorPallete[Particles::colors[rj.offset + k]].second;
 							Engine::Button(expandPos - 18.f - bar, off, 16, 16, Icons::circle, Vec4(col, 0.8f), Vec4(col, 1), Vec4(col, 0.5f));
 						}
 						off += 17;
