@@ -278,39 +278,39 @@ void VisSystem::DrawBar() {
 						if (!!Particles::anim.currentFrame) Particles::SetFrame(Particles::anim.currentFrame - 1);
 					}
 				}
-				if ((!UI::editingText && Input::KeyDown(Key_Space)) || Engine::Button(150, Display::height - 17.f, 16, 16, Icons::right, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+				if ((!UI::editingText && Input::KeyDown(Key_Space)) || Engine::Button(100, Display::height - 17.f, 16, 16, Icons::right, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
 					ParGraphics::animate = !ParGraphics::animate;
 					ParGraphics::animOff = 0;
 				}
 			}
 
 			auto& fps = ParGraphics::animTarFps;
-			fps = TryParse(UI::EditText(170, Display::height - 17.f, 50, 16, 12, white(1, 0.4f), std::to_string(fps), true, white(), nullptr, std::to_string(fps) + " fps"), 0);
+			fps = TryParse(UI::EditText(120, Display::height - 17.f, 50, 16, 12, white(1, 0.4f), std::to_string(fps), true, white(), nullptr, std::to_string(fps) + " fps"), 0);
 			fps = Clamp(fps, 0, 1000);
 
 			auto ssz = Particles::anim.frameCount;
 			float al = float(Particles::anim.currentFrame) / (ssz - 1);
-			al = Engine::DrawSliderFill(225, Display::height - 13.f, Display::width - 385.f, 9, 0, 1, al, white(1, 0.3f), white(0));
+			al = Engine::DrawSliderFill(175, Display::height - 13.f, Display::width - 310.f, 9, 0, 1, al, white(1, 0.3f), white(0));
 
 			using fs = Particles::AnimData::FRAME_STATUS;
 			fs sold = Particles::anim.status[0];
-			auto pw = float(Display::width - 385.f) / ssz;
+			auto pw = float(Display::width - 310.f) / ssz;
 			size_t p0 = 0;
 			for (size_t p = 0; p <= ssz; ++p) {
 				auto st = (p == ssz)? fs::UNLOADED : Particles::anim.status[p];
 				if (st == fs::READING) st = fs::UNLOADED;
 				if (sold != st || (p == ssz)) {
 					if (sold == fs::LOADED)
-						UI::Quad(225 + pw * p0, Display::height - 13.f, pw * (p-p0), 9, white(1, 0.5f));
+						UI::Quad(175 + pw * p0, Display::height - 13.f, pw * (p-p0), 9, white(1, 0.5f));
 					else if (sold == fs::BAD)
-						UI::Quad(225 + pw * p0, Display::height - 13.f, pw * (p - p0), 9, red(1, 0.5f));
+						UI::Quad(175 + pw * p0, Display::height - 13.f, pw * (p - p0), 9, red(1, 0.5f));
 					sold = st;
 					p0 = p;
 				}
 			}
 			
-			UI::Quad(222 + (Display::width - 385.f) * al, Display::height - 17.f, 6, 16, white());
-			if ((Engine::Button(225, Display::height - 13.f, Display::width - 385.f, 9) & 0x0f) == MOUSE_DOWN)
+			UI::Quad(172 + (Display::width - 310.f) * al, Display::height - 17.f, 6, 16, white());
+			if ((Engine::Button(175, Display::height - 13.f, Display::width - 310.f, 9) & 0x0f) == MOUSE_DOWN)
 				ParGraphics::seek = true;
 			else ParGraphics::seek = ParGraphics::seek && Input::mouse0;
 
@@ -318,7 +318,7 @@ void VisSystem::DrawBar() {
 				Particles::SetFrame((uint)roundf(al * (Particles::anim.frameCount - 1)));
 			}
 
-			UI::Label(Display::width - 155.f, Display::height - 16.f, 12, std::to_string(Particles::anim.currentFrame + 1) + "/" + std::to_string(Particles::anim.frameCount), white());
+			UI::Label(Display::width - 130.f, Display::height - 16.f, 12, std::to_string(Particles::anim.currentFrame + 1) + "/" + std::to_string(Particles::anim.frameCount), white());
 		}
 	}
 	else if (Particles::anim.reading && ParLoader::loadFrames) {

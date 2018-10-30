@@ -96,7 +96,7 @@ ifeq ($(UNAME_S),Linux)
 endif
 	ar rvs obj/libgwavi.a $(AVIPRE)/obj/*.o
 	@echo "Linking..."
-	$(CXX) -o $@ $(OBJS) $(OBJSX) $(LDFLAGS) $(LIBS)
+	@$(CXX) -o $@ $(OBJS) $(OBJSX) $(LDFLAGS) $(LIBS)
 ifeq ($(UNAME_S),Darwin)
 	install_name_tool -add_rpath "@executable_path" ../build/avis
 	install_name_tool -change $(shell python3-config --exec)/Python /tmpp/Python ../build/avis
@@ -128,7 +128,7 @@ obj/vis/system.o: vis/system.cpp $(PCH_OUT)
 
 obj/tinyobj.o : tmp/tiny_obj_loader.cpp
 	@echo "Compiling" $<
-	@$(CXX) -g -c $< -o $@
+	@$(CXX) $(CXXFLAGS) -g -c $< -o $@
 
 clean:
 	find ./obj -name '*.o' -exec rm {} \;

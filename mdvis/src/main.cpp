@@ -35,7 +35,9 @@
 bool __debug = false;
 float autoSaveTime = 10;
 std::vector<std::string> main_openfiles;
+std::vector<std::string> main_openimpsigs;
 bool option_silent = false, nologo = false;
+bool option_min = false;
 
 void rendFunc() {
 	auto& cm = ChokoLait::mainCameraObj->transform;
@@ -233,6 +235,7 @@ int main(int argc, char **argv) {
 				if (argv[a][1] == '-') {
 					argv[a] += 2;
 #define ISS(str) (!strcmp(argv[a], #str))
+#define ISC(c) (argv[a][0] == c)
 					if ISS(debug)
 						__debug = true;
 					else if ISS(version) {
@@ -261,13 +264,24 @@ int main(int argc, char **argv) {
 				}
 				else {
 					argv[a] ++;
-					if ISS(s)
+					if ISC('s')
 						option_silent = true;
-					else if ISS(v) {
+					else if ISC('v') {
 						std::cout << VERSIONSTRING << std::endl
 							<< "hash: " << VisSystem::version_hash << std::endl;
 						if (argc == 2)
 							return 0;
+					}
+					else if ISC('f') {
+						ParLoader::maxframes = TryParse(argv[a] + 1, -1);
+					}
+					else if (ISC('m')) {
+						option_min = true;
+						ParMenu::expanded = false;
+						AnWeb::expanded = false;
+					}
+					else if (ISC('i')) {
+						main_openimpsigs.push_back(argv[a]+1);
 					}
 					else {
 						std::cout << "Unknown option " << argv[a] - 1 << ". Type --help for usage guide." << std::endl;
@@ -400,7 +414,8 @@ The hash for this program is )" << VisSystem::version_hash
 			main_openfiles.erase(main_openfiles.begin());
 		}
 
-		Display::Resize(1024, 600, false);
+		if (option_min) Display::Resize(500, 500, false);
+		else Display::Resize(1024, 600, false);
 
 		auto lastMillis = Time::millis;
 
