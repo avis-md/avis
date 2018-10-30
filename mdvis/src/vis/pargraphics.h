@@ -36,7 +36,7 @@ public:
 	PROGDEF_H(reflCProg, 10);
 	PROGDEF_H(parProg, 20);
 	PROGDEF_H(parConProg, 20);
-	PROGDEF_H(parConLineProg, 10);
+	PROGDEF_H(parConLineProg, 20);
 	PROGDEF_H(selHlProg, 5);
 	PROGDEF_H(colProg, 10);
 

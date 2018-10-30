@@ -242,7 +242,10 @@ void ParGraphics::Init() {
 #define LC(nm) parConLineProgLocs[i++] = glGetUniformLocation(parConLineProg, #nm)
 	i = 0;
 	LC(_MV); LC(_P); LC(posTex);
-	LC(connTex), LC(rad); LC(id2);
+	LC(connTex), LC(rad); LC(id2); LC(radScl); 
+	LC(orthoSz); LC(id2col); LC(colList);
+	LC(gradCols); LC(colUseGrad);
+	LC(usegrad); LC(onecol); 
 #undef LC
 
 	selHlProg = Shader::FromF(mv, IO::GetText(IO::path + "selectorFrag.txt"));
@@ -711,6 +714,24 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 				glBindTexture(GL_TEXTURE_BUFFER, Particles::connTexBuffer);
 				glUniform2f(parConLineProgLocs[4], con.line_sc / Display::width, con.line_sc / Display::height);
 				glUniform1ui(parConLineProgLocs[5], 1);
+				glUniform1f(parConLineProgLocs[6], con.scale);
+				glUniform1f(parConLineProgLocs[7], osz);
+				glUniform1i(parConLineProgLocs[8], 3);
+				glActiveTexture(GL_TEXTURE3);
+				if (!useGradCol) {
+					glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
+					glUniform1i(parConLineProgLocs[9], 4);
+					glActiveTexture(GL_TEXTURE4);
+					glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
+				}
+				else {
+					glBindTexture(GL_TEXTURE_BUFFER, Particles::attrs[gradColParam]->texBuf);
+					glUniform4fv(parConLineProgLocs[10], 3, &gradCols[0][0]);
+				}
+				glUniform1i(parConLineProgLocs[11], useGradCol);
+				glUniform1i(parConLineProgLocs[12], useConGradCol);
+				glUniform4f(parConLineProgLocs[13], conCol.r, conCol.g, conCol.b, useConCol? 1.f : 0.f);
+				glUniform1f(parConLineProgLocs[14], spriteScl);
 				glDrawArrays(GL_TRIANGLES, p.first * 6, p.second.first * 6);
 			}
 			else {

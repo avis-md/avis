@@ -20,6 +20,10 @@ uniform bool isOrtho;
 
 out vec4 fragCol;
 
+float length2(vec3 v) {
+    return v.x*v.x + v.y*v.y + v.z*v.z;
+}
+
 vec4 skyColAt(sampler2D sky, vec3 dir) {
     vec2 refla = normalize(-vec2(dir.x, dir.z));
     float cx = acos(refla.x)/(3.14159 * 2);
@@ -50,10 +54,10 @@ void main () {
 	
     if (z >= 1) {
         fragCol = bgCol;
+        return;
     }
-    else if (length(nCol.xyz) == 0) {
+    else if (length2(nCol.xyz) == 0) {
         fragCol.rgb = dCol.rgb;
-        fragCol.a = 1;
     }
     else {
         vec3 skycol = skyColAt(inSkyE, nCol.xyz).rgb;
@@ -61,13 +65,13 @@ void main () {
         vec3 skycol2 = skyColAt(inSky, refl.xyz).rgb;
         float fres = pow(1-dot(-fwd, nCol.xyz), 5);
         fragCol.rgb = mix(skycol * dCol.rgb, skycol2 * mix(vec3(1, 1, 1), dCol.rgb, specStr), (1 - ((1-fres) * (1-specStr)))) * skyStrength;
-        if (fogCol.a > 0) {
-            fragCol.rgb = mix(fragCol.rgb, fogCol.rgb, clamp(skyStrDecay * (zLinear - skyStrDecayOff), 0, 1));
-            fragCol.a = 1;
-        }
-        else
-            fragCol.a = clamp(1 - skyStrDecay * (zLinear - skyStrDecayOff), 0, 1);
     }
+    if (fogCol.a > 0) {
+        fragCol.rgb = mix(fragCol.rgb, fogCol.rgb, clamp(skyStrDecay * (zLinear - skyStrDecayOff), 0, 1));
+        fragCol.a = 1;
+    }
+    else
+        fragCol.a = clamp(1 - skyStrDecay * (zLinear - skyStrDecayOff), 0, 1);
 }
 )";
 }

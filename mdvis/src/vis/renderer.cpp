@@ -6,6 +6,7 @@
 #include "md/parmenu.h"
 #include "ui/ui_ext.h"
 #include "ui/localizer.h"
+#include "utils/tinyfiledialogs.h"
 
 VisRenderer::IMG_TYPE VisRenderer::imgType;
 VisRenderer::VID_TYPE VisRenderer::vidType;
@@ -71,18 +72,22 @@ void VisRenderer::Draw() {
 			glEnable(GL_BLEND);
 		}
 		if (Engine::Button(Display::width - dw - 120, dh - 20, 120, 16, white(1, 0.4f), "Save", 12, white(), true) == MOUSE_RELEASE) {
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, res_fbo);
-			std::vector<byte> res(imgW * imgH * 4);
-			glReadPixels(0, 0, imgW, imgH, GL_RGBA, GL_UNSIGNED_BYTE, &res[0]);
-			Texture::ToPNG(res, imgW, imgH, IO::currPath + "ss.png");
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-			status = STATUS::READY;
-			resLerp = -1;
-			Scene::dirty = true;
+			const char* fmt[] = { "*.png" };
+			auto path = tinyfd_saveFileDialog("Save Image", nullptr, 0, fmt, "image file");
+			if (path) {
+				glBindFramebuffer(GL_READ_FRAMEBUFFER, res_fbo);
+				std::vector<byte> res(imgW * imgH * 4);
+				glReadPixels(0, 0, imgW, imgH, GL_RGBA, GL_UNSIGNED_BYTE, &res[0]);
+				Texture::ToPNG(res, imgW, imgH, std::string(path) + ".png");
+				glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+				status = STATUS::READY;
+				resLerp = -1;
+				Scene::dirty = true;
+			}
 		}
 		if (Input::KeyDown(Key_Escape)) {
 			status = STATUS::READY;
-			resLerp =-1;
+			resLerp = -1;
 			Scene::dirty = true;
 		}
 	}
@@ -280,6 +285,7 @@ void VisRenderer::ToVid() {
 		GifBegin(&giffile, (IO::currPath + "movie.gif").c_str(), vidW, vidH, delay);
 		break;
 	default:
+		IO::MakeDirectory(IO::currPath + "renderSequence/");
 		break;
 	}
 	std::vector<byte> res(vidW * vidH * 4);
@@ -335,7 +341,7 @@ void VisRenderer::ToVid() {
 			glReadPixels(0, 0, vidW, vidH, GL_RGBA, GL_UNSIGNED_BYTE, &vres[0]);
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 			glFinish();
-			Texture::ToPNG(vres, vidW, vidH, IO::currPath + "movie" + std::to_string(_f) + ".png");
+			Texture::ToPNG(vres, vidW, vidH, IO::currPath + "renderSequence/frame" + std::to_string(_f) + ".png");
 			_f++;
 			break;
 		}
