@@ -490,6 +490,7 @@ void Particles::Rebound(glm::dvec3 center) {
 	boundingBox[4] += co.z;
 	boundingBox[5] += co.z;
 	bboxCenter = center;
+	if (!!anim.bboxs.size()) memcpy(&anim.bboxs[6*anim.currentFrame], boundingBox, 6*sizeof(double));
 	BoundParticles();
 	Scene::dirty = true;
 }

@@ -15,6 +15,7 @@ uniform vec4 gradCols[3];
 uniform int colUseGrad;
 uniform int usegrad;
 uniform vec4 onecol;
+uniform float tubesize;
 
 layout (location=0) out vec4 outColor;
 layout (location=1) out uvec4 outId;
@@ -65,7 +66,7 @@ void main()
     vec3 td = normalize(v2f_wpos2 - v2f_wpos1);
     float lm = length(v2f_wpos2 - v2f_wpos1);
     float L = length(v2f_wpos2 - v2f_wpos1);
-    float r = 0.008 * v2f_scl * 1.5f;
+    float r = tubesize * 2 * v2f_scl;
     //*
     vec4 ndc = vec4(
         (gl_FragCoord.x / screenSize.x - 0.5) * 2.0,
@@ -130,6 +131,7 @@ void main()
         gl_FragDepth = ndc2.z * 0.5 + 0.5;
         
         float et = sqrt(lc2)/lm;
+
         SetColor(v2f_id1, v2f_id2, mix(round(et), et, usegrad));
         outId = uvec4(id, id2, 0, 0);
         outNormal.xyz = normalize(pf - cf);

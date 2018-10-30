@@ -12,9 +12,11 @@ uniform sampler2D inSky;
 uniform sampler2D inSkyE;
 uniform float skyStrength;
 uniform float skyStrDecay;
+uniform float skyStrDecayOff;
 uniform float specStr;
 uniform vec4 bgCol;
-uniform vec3 fogCol;
+uniform vec4 fogCol;
+uniform bool isOrtho;
 
 out vec4 fragCol;
 
@@ -35,7 +37,9 @@ void main () {
     float nClip = 0.01;
     float fClip = 500.0;
 
-    float zLinear = (2 * nClip) / (fClip + nClip - z * (fClip - nClip));
+    float zLinear;
+    if (isOrtho) zLinear = z;// * fClip;
+    else zLinear = (2 * nClip) / (fClip + nClip - z * (fClip - nClip));
 
     vec4 dc = vec4(uv.x*2-1, uv.y*2-1, z*2-1, 1);
     vec4 wPos = _IP*dc;
@@ -57,8 +61,12 @@ void main () {
         vec3 skycol2 = skyColAt(inSky, refl.xyz).rgb;
         float fres = pow(1-dot(-fwd, nCol.xyz), 5);
         fragCol.rgb = mix(skycol * dCol.rgb, skycol2 * mix(vec3(1, 1, 1), dCol.rgb, specStr), (1 - ((1-fres) * (1-specStr)))) * skyStrength;
-        fragCol.rgb = mix(fragCol.rgb, fogCol, clamp(skyStrDecay * zLinear, 0, 1));
-        fragCol.a = 1;
+        if (fogCol.a > 0) {
+            fragCol.rgb = mix(fragCol.rgb, fogCol.rgb, clamp(skyStrDecay * (zLinear - skyStrDecayOff), 0, 1));
+            fragCol.a = 1;
+        }
+        else
+            fragCol.a = clamp(1 - skyStrDecay * (zLinear - skyStrDecayOff), 0, 1);
     }
 }
 )";

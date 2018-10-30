@@ -7,7 +7,7 @@ class ParGraphics {
 public:
 	static Texture bg, splash, logo;
 	static GLuint refl, reflE;
-	static float reflStr, reflStrDecay, specStr;
+	static float reflStr, reflStrDecay, reflStrDecayOff, specStr;
 	static bool fogUseBgCol;
 	static Vec4 bgCol, fogCol;
 

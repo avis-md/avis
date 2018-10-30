@@ -4,6 +4,7 @@
 #include "md/parloader.h"
 #include "vis/system.h"
 #include "vis/selection.h"
+#include "vis/renderer.h"
 #include "res/resdata.h"
 #include "ui/icons.h"
 #include "ui/popups.h"
@@ -19,10 +20,12 @@
 #define SCL_MIN -7.f
 #define SCL_MAX 2.f
 
+#define TUBESIZE 0.01
+
 
 Texture ParGraphics::bg, ParGraphics::splash, ParGraphics::logo;
 GLuint ParGraphics::refl, ParGraphics::reflE;
-float ParGraphics::reflStr = 2, ParGraphics::reflStrDecay = 2, ParGraphics::specStr = 0.2f;
+float ParGraphics::reflStr = 2, ParGraphics::reflStrDecay = 2, ParGraphics::reflStrDecayOff = 0, ParGraphics::specStr = 0.2f;
 bool ParGraphics::fogUseBgCol = true;
 Vec4 ParGraphics::bgCol = Vec4(1, 1, 1, 1), ParGraphics::fogCol = Vec4(0, 0, 0, 1);
 
@@ -196,8 +199,8 @@ void ParGraphics::Init() {
 	uint i = 0;
 	LC(_IP); LC(screenSize); LC(inColor); LC(inNormal);
 	LC(inEmit); LC(inDepth); LC(inSky); LC(inSkyE);
-	LC(skyStrength); LC(skyStrDecay); LC(specStr);
-	LC(bgCol); LC(fogCol);
+	LC(skyStrength); LC(skyStrDecay); LC(skyStrDecayOff); 
+	LC(specStr); LC(bgCol); LC(fogCol); LC(isOrtho);
 #undef LC
 	
 	reflCProg = Shader::FromF(mv, glsl::reflFragC);
@@ -208,7 +211,7 @@ void ParGraphics::Init() {
 	LC(skyStrDecay); LC(specStr); LC(bgCol);
 #undef LC
 	
-	parProg = Shader::FromVF(IO::GetText(IO::path + "parV.txt"), IO::GetText(IO::path + "parF.glsl"));
+	parProg = Shader::FromVF(IO::GetText(IO::path + "parV.glsl"), IO::GetText(IO::path + "parF.glsl"));
 #define LC(nm) parProgLocs[i++] = glGetUniformLocation(parProg, #nm)
 	i = 0;
 	LC(_MV); LC(_P); LC(camPos);
@@ -216,11 +219,12 @@ void ParGraphics::Init() {
 	LC(radTex); LC(radScl); LC(id2col); LC(colList);
 	LC(gradCols); LC(colUseGrad); LC(spriteScl);
 	LC(oriented); LC(orienScl); LC(orienX); LC(orienY); LC(orienZ);
+	LC(tubesize);
 	auto bid = glGetUniformBlockIndex(parProg, "clipping");
 	glUniformBlockBinding(parProg, bid, _clipBindId);
 #undef LC
 
-	parConProg = Shader::FromVF(IO::GetText(IO::path + "parConV.txt"), IO::GetText(IO::path + "parConF.txt"));
+	parConProg = Shader::FromVF(IO::GetText(IO::path + "parConV.glsl"), IO::GetText(IO::path + "parConF.glsl"));
 #define LC(nm) parConProgLocs[i++] = glGetUniformLocation(parConProg, #nm)
 	i = 0;
 	LC(_MV); LC(_P); LC(camPos); LC(camFwd);
@@ -229,6 +233,7 @@ void ParGraphics::Init() {
 	LC(orthoSz); LC(id2col); LC(colList);
 	LC(gradCols); LC(colUseGrad);
 	LC(usegrad); LC(onecol); LC(spriteScl);
+	LC(tubesize);
 	bid = glGetUniformBlockIndex(parConProg, "clipping");
 	glUniformBlockBinding(parConProg, bid, _clipBindId);
 #undef LC
@@ -635,6 +640,9 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		Vec4 p2 = _p * Vec4(1, 1, -1, 1);
 		p2 /= p2.w;
 		osz = glm::length(p2 - p1)/2;
+		if (VisRenderer::status == VisRenderer::STATUS::BUSY) {
+			osz /= VisRenderer::imgSlices;
+		}
 	}
 
 	if (!RayTracer::resTex) {
@@ -676,6 +684,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 			glActiveTexture(GL_TEXTURE6);
 			glBindTexture(GL_TEXTURE_BUFFER, Particles::attrs[orientParam[2]]->texBuf);
 		}
+		glUniform1f(parProgLocs[18], TUBESIZE);
 
 		glBindVertexArray(Particles::posVao);
 		for (auto& p : drawLists) {
@@ -739,6 +748,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 				glUniform1i(parConProgLocs[15], useConGradCol);
 				glUniform4f(parConProgLocs[16], conCol.r, conCol.g, conCol.b, useConCol? 1.f : 0.f);
 				glUniform1f(parConProgLocs[17], spriteScl);
+				glUniform1f(parConProgLocs[18], TUBESIZE);
 
 				glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
 			}
@@ -790,6 +800,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 				glUniform1i(parConProgLocs[15], 0);
 				glUniform4f(parConProgLocs[16], c2.col.r, c2.col.g, c2.col.b, c2.usecol? 1.f : 0.f);
 				glUniform1f(parConProgLocs[17], spriteScl);
+				glUniform1f(parConProgLocs[18], TUBESIZE);
 				glDrawArrays(GL_TRIANGLES, 0, c2.cnt*12);
 
 			}
@@ -878,20 +889,22 @@ void ParGraphics::BlitSky() {
 		glBindTexture(GL_TEXTURE_2D, reflE);
 		glUniform1f(reflProgLocs[8], reflStr);
 		glUniform1f(reflProgLocs[9], reflStrDecay);
-		glUniform1f(reflProgLocs[10], specStr);
+		glUniform1f(reflProgLocs[10], reflStrDecayOff);
+		glUniform1f(reflProgLocs[11], specStr);
 		if (AnWeb::drawFull) {
-			glUniform4f(reflProgLocs[11], 0, 0, 0, 1);
-			glUniform3f(reflProgLocs[12], 0, 0, 0);
+			glUniform4f(reflProgLocs[12], 0, 0, 0, 1);
+			glUniform3f(reflProgLocs[13], 0, 0, 0);
 		}
 		else {
-			glUniform4f(reflProgLocs[11], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
+			glUniform4f(reflProgLocs[12], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
 			if (fogUseBgCol) {
-				glUniform3f(reflProgLocs[12], bgCol.r, bgCol.g, bgCol.b);
+				glUniform4f(reflProgLocs[13], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
 			}
 			else {
-				glUniform3f(reflProgLocs[12], fogCol.r, fogCol.g, fogCol.b);
+				glUniform4f(reflProgLocs[13], fogCol.r, fogCol.g, fogCol.b, 1);
 			}
 		}
+		glUniform1i(reflProgLocs[14], cam->ortographic? 1 : 0);
 	}
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, cam->texs.colTex);
@@ -1127,9 +1140,10 @@ void ParGraphics::DrawMenu() {
 		off += 17;
 	}
 	off += 17;
-	UI::Quad(expandPos - 149, off - 1, 148, 17 * (fogUseBgCol? 5 : 6) + 2, white(0.9f, 0.1f));
+	UI::Quad(expandPos - 149, off - 1, 148, 17 * (fogUseBgCol? 5 : 6) + 3, white(0.9f, 0.1f));
 	reflStr = UI2::Slider(expandPos - 147, off, 146, _("Strength"), 0, 5, reflStr); off += 17;
-	reflStrDecay = UI2::Slider(expandPos - 147, off, 146, _("Falloff"), 0, 200, reflStrDecay); off += 17;
+	reflStrDecay = UI2::Slider(expandPos - 147, off, 146, _("Falloff"), 0, 500, reflStrDecay); off += 17;
+	reflStrDecayOff = UI2::Slider(expandPos - 147, off, 146, _(" Offset"), 0, 0.005, reflStrDecayOff); off += 17;
 	UI2::Toggle(expandPos - 147, off, 146, _("Inherit Color"), fogUseBgCol); off += 17;
 	if (!fogUseBgCol) { UI2::Color(expandPos - 147, off, 146, _("Color"), fogCol); off += 17; }
 	specStr = UI2::Slider(expandPos - 147, off, 146, _("Specular"), 0, 1, specStr); off += 17;
