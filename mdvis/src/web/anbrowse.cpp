@@ -290,14 +290,14 @@ void AnBrowse::Draw() {
 		UI::Quad(expandPos, Display::height - 34.f, 16.f, 16.f, white(1, 0.2f));
 		if ((!UI::editingText && Input::KeyUp(Key_S)) || Engine::Button(expandPos, Display::height - 34.f, 16.f, 16.f, Icons::collapse) == MOUSE_RELEASE)
 			expanded = false;
-		expandPos = min(expandPos + 1500 * Time::delta, 150.f);
+		expandPos = std::min(expandPos + 1500 * Time::delta, 150.f);
 	}
 	else {
 		if ((!UI::editingText && Input::KeyUp(Key_S)) || Engine::Button(expandPos, Display::height - 34.f, 110.f, 16.f, white(1, 0.2f), white(1, 0.2f), white(1, 0.2f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(expandPos, Display::height - 34.f, 16.f, 16.f, Icons::expand);
 		UI::Label(expandPos + 18, Display::height - 33.f, 12.f, "Scripts (S)", white());
-		expandPos = max(expandPos - 1500 * Time::delta, 0.f);
+		expandPos = std::max(expandPos - 1500 * Time::delta, 0.f);
 	}
 #endif
 }

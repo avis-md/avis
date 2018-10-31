@@ -250,8 +250,8 @@ std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol,
 				_editTextCursorPos2 += ssz;
 			}
 			else {
-				_editTextString = _editTextString.substr(0, min(_editTextCursorPos, _editTextCursorPos2)) + Input::inputString + _editTextString.substr(max(_editTextCursorPos, _editTextCursorPos2));
-				_editTextCursorPos = min(_editTextCursorPos, _editTextCursorPos2) + ssz;
+				_editTextString = _editTextString.substr(0, std::min(_editTextCursorPos, _editTextCursorPos2)) + Input::inputString + _editTextString.substr(std::max(_editTextCursorPos, _editTextCursorPos2));
+				_editTextCursorPos = std::min(_editTextCursorPos, _editTextCursorPos2) + ssz;
 				_editTextCursorPos2 = _editTextCursorPos;
 			}
 			if (!delayed && changed) *changed = true;
@@ -266,8 +266,8 @@ std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol,
 				}
 			}
 			else {
-				_editTextString = _editTextString.substr(0, min(_editTextCursorPos, _editTextCursorPos2)) + _editTextString.substr(max(_editTextCursorPos, _editTextCursorPos2));
-				_editTextCursorPos = min(_editTextCursorPos, _editTextCursorPos2);
+				_editTextString = _editTextString.substr(0, std::min(_editTextCursorPos, _editTextCursorPos2)) + _editTextString.substr(std::max(_editTextCursorPos, _editTextCursorPos2));
+				_editTextCursorPos = std::min(_editTextCursorPos, _editTextCursorPos2);
 				_editTextCursorPos2 = _editTextCursorPos;
 			}
 			if (!delayed && changed) *changed = true;
@@ -303,7 +303,7 @@ std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol,
 		else xp2 = font->poss[_editTextCursorPos2 * 4].x*Display::width;
 		if (_editTextCursorPos != _editTextCursorPos2) {
 			UI::Quad(xp, y + 2, xp2 - xp, h - 4, hcol);
-			UI::Label(min(xp, xp2), y + 0.4f*h, s, _editTextString.substr(min(_editTextCursorPos, _editTextCursorPos2), abs((int)_editTextCursorPos - (int)_editTextCursorPos2)), acol);
+			UI::Label(std::min(xp, xp2), y + 0.4f*h, s, _editTextString.substr(std::min(_editTextCursorPos, _editTextCursorPos2), abs((int)_editTextCursorPos - (int)_editTextCursorPos2)), acol);
 		}
 		_editTextBlinkTime += Time::delta;
 		if (fmod(_editTextBlinkTime, 1) < 0.5f) Engine::DrawLine(Vec2(xp, y + 2), Vec2(xp, y + h - 2), (_editTextCursorPos == _editTextCursorPos2) ? black() : white(), 1);
@@ -365,8 +365,8 @@ std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 b
 				_editTextCursorPos2 += ssz;
 			}
 			else {
-				_editTextString = _editTextString.substr(0, min(_editTextCursorPos, _editTextCursorPos2)) + Input::inputString + _editTextString.substr(max(_editTextCursorPos, _editTextCursorPos2));
-				_editTextCursorPos = min(_editTextCursorPos, _editTextCursorPos2) + ssz;
+				_editTextString = _editTextString.substr(0, std::min(_editTextCursorPos, _editTextCursorPos2)) + Input::inputString + _editTextString.substr(std::max(_editTextCursorPos, _editTextCursorPos2));
+				_editTextCursorPos = std::min(_editTextCursorPos, _editTextCursorPos2) + ssz;
 				_editTextCursorPos2 = _editTextCursorPos;
 			}
 			if (!delayed && changed) *changed = true;
@@ -381,8 +381,8 @@ std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 b
 				}
 			}
 			else {
-				_editTextString = _editTextString.substr(0, min(_editTextCursorPos, _editTextCursorPos2)) + _editTextString.substr(max(_editTextCursorPos, _editTextCursorPos2));
-				_editTextCursorPos = min(_editTextCursorPos, _editTextCursorPos2);
+				_editTextString = _editTextString.substr(0, std::min(_editTextCursorPos, _editTextCursorPos2)) + _editTextString.substr(std::max(_editTextCursorPos, _editTextCursorPos2));
+				_editTextCursorPos = std::min(_editTextCursorPos, _editTextCursorPos2);
 				_editTextCursorPos2 = _editTextCursorPos;
 			}
 			if (!delayed && changed) *changed = true;
@@ -420,7 +420,7 @@ std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 b
 		if (_editTextCursorPos != _editTextCursorPos2) {
 			UI::Quad(xp, y + 2, xp2 - xp, h - 4, hcol);
 			pstr.resize(_editTextString.size(), repl);
-			UI::Label(min(xp, xp2), y + 0.4f*h, s, pstr.substr(min(_editTextCursorPos, _editTextCursorPos2), abs((int)_editTextCursorPos - (int)_editTextCursorPos2)), acol);
+			UI::Label(std::min(xp, xp2), y + 0.4f*h, s, pstr.substr(std::min(_editTextCursorPos, _editTextCursorPos2), abs((int)_editTextCursorPos - (int)_editTextCursorPos2)), acol);
 		}
 		_editTextBlinkTime += Time::delta;
 		if (fmod(_editTextBlinkTime, 1) < 0.5f) Engine::DrawLine(Vec2(xp, y + 2), Vec2(xp, y + h - 2), (_editTextCursorPos == _editTextCursorPos2) ? black() : white(), 1);
@@ -482,7 +482,7 @@ void UI::Label(float x, float y, float s, std::string st, Vec4 col, float maxw, 
 void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, float maxw, Font* font) {
 	if (!s || !str[0]) return;
 	uint si = (uint)std::roundf(s);
-	sz = min(sz, (uint)strlen(str));
+	sz = std::min(sz, (uint)strlen(str));
 	font->SizeVec(sz);
 	byte align = (byte)font->alignment;
 	float totalW = 0;

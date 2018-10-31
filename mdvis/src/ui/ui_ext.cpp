@@ -175,8 +175,8 @@ float UI2::Scroll(float x, float y, float h, float t, float tot, float fill) {
 		if (scr == MOUSE_CLICK) scrpos = Input::mousePos.y - (y + (h - 2)*t / tot);
 		else if (scr == MOUSE_RELEASE) scrpos = -1;
 		else if (me && scrpos >= 0) {
-			t = min((Input::mousePos.y - scrpos - y) / (h - 2) * tot, tot - fill);
-			t = max(t, 0.f);
+			t = std::min((Input::mousePos.y - scrpos - y) / (h - 2) * tot, tot - fill);
+			t = std::max(t, 0.f);
 		}
 	}
 	else {

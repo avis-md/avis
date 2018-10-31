@@ -58,7 +58,6 @@ void Engine::Init() {
 	Input::RegisterCallbacks();
 	MVP::Reset();
 	Camera::InitShaders();
-
 	uint d[] = {0, 2, 1, 2, 3, 1};
 
 	glGenBuffers(1, &quadBuffer);
@@ -288,7 +287,7 @@ Vec2 Engine::DrawSliderFill2D(float x, float y, float w, float h, Vec2 min, Vec2
 	Vec2 v = val, vv = (val - min) / (max - min);
 	if (Rect(x, y, w, h).Inside(Input::mouseDownPos)) {
 		if (Input::mouse0 && (UI::_layer == UI::_layerMax)) {
-			vv = Clamp<Vec2>((Input::mousePos - Vec2(x + 1, y + 1)) / Vec2(w - 2, h - 2), Vec2(0, 0), Vec2(1, 1));
+			vv = Clamp((Input::mousePos - Vec2(x + 1, y + 1)) / Vec2(w - 2, h - 2), Vec2(0, 0), Vec2(1, 1));
 			vv.y = 1 - vv.y;
 			v = vv*(max - min) + min;
 			UI::Quad(x + 1, y + 1 + (h - 2)*(1 - vv.y), (w - 2)*vv.x, (h - 2)*vv.y, foreground*white(1, 0.4f));

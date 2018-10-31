@@ -381,7 +381,7 @@ void ParGraphics::FillRad(byte* rads) {
 		default: break;
 		}
 		for (uint a = p.first; a < p.first + p.second.first; ++a)  {
-			rads[a] = (byte)(min(0.1f * ml * Particles::radii[a], 0.2f) * 255 / 0.2f);
+			rads[a] = (byte)(std::min(0.1f * ml * Particles::radii[a], 0.2f) * 255 / 0.2f);
 		}
 	}
 }
@@ -970,7 +970,7 @@ void ParGraphics::BlitHl() {
 
 void ParGraphics::DrawOverlay() {
 	if (zoomFade > 0) {
-		auto zf = min(zoomFade * 2, 1.f);
+		auto zf = std::min(zoomFade * 2, 1.f);
 		UI::Quad(Display::width * 0.5f - 150.f, Display::height - 100.f, 300, 20, white(zf * 0.9f, 0.15f));
 		UI::Texture(Display::width * 0.5f - 150.f, Display::height - 98.f, 16, 16, Icons::zoomOut, white(zf));
 		UI::Texture(Display::width * 0.5f + 134.f, Display::height - 98.f, 16, 16, Icons::zoomIn, white(zf));
@@ -1012,7 +1012,7 @@ void ParGraphics::DrawColMenu() {
 	UI::alpha = 1;
 	off += 17;
 	if (useGradCol) {
-		gradColParam = min(gradColParam, (uint)(Particles::attrs.size()-1));
+		gradColParam = std::min(gradColParam, (uint)(Particles::attrs.size()-1));
 		static Popups::DropdownItem di = Popups::DropdownItem(&gradColParam, &Particles::attrNms[0]);
 		static auto _gradColParam = gradColParam;
 		UI2::Dropdown(exps - 147, off, 146, "Attribute", di);

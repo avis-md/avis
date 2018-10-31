@@ -65,15 +65,15 @@ void Input::UpdateMouseNKeyboard(bool* src) {
 
 	LD(mouse0State);
 	if (mouse0)
-		mouse0State = min<byte>(mouse0State + 1U, MOUSE_HOLD);
+		mouse0State = std::min<byte>(mouse0State + 1U, MOUSE_HOLD);
 	else
 		mouse0State = ((mouse0State == MOUSE_UP) | (mouse0State == 0)) ? 0 : MOUSE_UP;
 	if (mouse1)
-		mouse1State = min<byte>(mouse1State + 1U, MOUSE_HOLD);
+		mouse1State = std::min<byte>(mouse1State + 1U, MOUSE_HOLD);
 	else
 		mouse1State = ((mouse1State == MOUSE_UP) | (mouse1State == 0)) ? 0 : MOUSE_UP;
 	if (mouse2)
-		mouse2State = min<byte>(mouse2State + 1U, MOUSE_HOLD);
+		mouse2State = std::min<byte>(mouse2State + 1U, MOUSE_HOLD);
 	else
 		mouse2State = ((mouse2State == MOUSE_UP) | (mouse2State == 0)) ? 0 : MOUSE_UP;
 		

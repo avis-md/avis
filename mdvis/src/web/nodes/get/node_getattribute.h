@@ -2,12 +2,12 @@
 #include "web/annode.h"
 #include "ui/popups.h"
 
-class Node_GetParam : public AnNode {
+class Node_GetAttribute : public AnNode {
 public:
 	static const std::string sig;
-	Node_GetParam();
+	Node_GetAttribute();
 
-    uint paramId;
+    uint attrId;
     Popups::DropdownItem di;
     
 	void Execute() override;

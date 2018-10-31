@@ -38,8 +38,8 @@ void Color::Rgb2Hsv(byte r, byte g, byte b, float& h, float& s, float& v) {
 	float G = g * 0.0039216f;
 	float B = b * 0.0039216f;
 
-	float mn = min(min(R, G), B);
-	float mx = max(max(R, G), B);
+	float mn = std::min(std::min(R, G), B);
+	float mx = std::max(std::max(R, G), B);
 
 	v = mx;
 	if (mx > 0) {
@@ -87,8 +87,8 @@ void Color::DrawPicker(bool hasA) {
 
 	Vec3 hsv = Rgb2Hsv(cl);
 
-	Popups::pos.x = min(Popups::pos.x, Display::width - 155.f);
-	Popups::pos.y = min(Popups::pos.y, Display::width - 155.f);
+	Popups::pos.x = std::min(Popups::pos.x, Display::width - 155.f);
+	Popups::pos.y = std::min(Popups::pos.y, Display::width - 155.f);
 
 	UI::Quad(Popups::pos.x, Popups::pos.y, 150, 150, black(0.7f));
 	Color::DrawSV(Popups::pos.x + 5, Popups::pos.y + 5, 120, 120, hsv.r);

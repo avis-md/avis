@@ -1,13 +1,13 @@
 #pragma once
-#include "../annode.h"
+#include "web/annode.h"
 #include "ui/popups.h"
 
-class Node_SetParam : public AnNode {
+class Node_SetAttribute : public AnNode {
 public:
 	static const std::string sig;
-	Node_SetParam();
+	Node_SetAttribute();
 
-    uint paramId;
+    uint attrId;
     Popups::DropdownItem di;
     
 	void Execute() override;

@@ -143,7 +143,7 @@ void AnWeb::Draw() {
 		}
 		n->pos = poss;
 		auto o = n->DrawConn();
-		//maxoff = max(maxoff, o.x);
+		//maxoff = std::max(maxoff, o.x);
 		offy = o.y;
 		if (selScript) {
 			if (Engine::Button(poss.x, poss.y + offy + 3, maxoff, 30, white(0.3f, 0.05f)) == MOUSE_RELEASE) {
@@ -170,7 +170,7 @@ void AnWeb::Draw() {
 	}
 	if (Input::mouse0State == MOUSE_UP && selPreClear) selConnNode = nullptr;
 
-	float canScroll = max(maxScroll - (Display::width - AnBrowse::expandPos - AnOps::expandPos), 0.f);
+	float canScroll = std::max(maxScroll - (Display::width - AnBrowse::expandPos - AnOps::expandPos), 0.f);
 	//if (Input::KeyHold(Key_RightArrow)) scrollPos += 1000 * Time::delta;
 	//if (Input::KeyHold(Key_LeftArrow)) scrollPos -= 1000 * Time::delta;
 	scrollPos = Clamp(scrollPos - Input::mouseScroll * 1000 * Time::delta, 0.f, canScroll);
@@ -208,8 +208,8 @@ void AnWeb::Draw() {
 						SW(IN::PINFO, Node_Info);
 						SW(IN::VEC, Node_Vector);
 
-						SW(MOD::GATTR, Node_GetParam);
-						SW(MOD::SATTR, Node_SetParam);
+						SW(MOD::GATTR, Node_GetAttribute);
+						SW(MOD::SATTR, Node_SetAttribute);
 						SW(MOD::RSCL, Node_SetRadScl);
 						SW(MOD::SBXC, Node_SetBBoxCenter);
 
@@ -294,7 +294,7 @@ void AnWeb::Draw() {
 	UI::Texture(275, 1, 16, 16, Icons::play);
 	UI::Texture(350, 1, 16, 16, Icons::playall);
 	if (drawLerp < 1) {
-		drawLerp = min(drawLerp + 10 * Time::delta, 1.f);
+		drawLerp = std::min(drawLerp + 10 * Time::delta, 1.f);
 		Scene::dirty = true;
 	}
 #endif
@@ -673,8 +673,8 @@ void AnWeb::Load(const std::string& s) {
 					//ND(Node_AddVolume)
 					ND(Node_TraceTrj)
 					ND(Node_Camera_Out)
-					ND(Node_GetParam)
-					ND(Node_SetParam)
+					ND(Node_GetAttribute)
+					ND(Node_SetAttribute)
 					ND(Node_SetRadScl)
 					ND(Node_SetBBoxCenter)
 					ND(Node_Plot)

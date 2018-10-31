@@ -12,8 +12,8 @@ const std::string Node_Vector::sig = ".vec";
 const std::string Node_AddBond::sig = ".abnd";
 const std::string Node_Camera_Out::sig = ".camo";
 const std::string Node_Plot::sig = ".plot";
-const std::string Node_GetParam::sig = ".gattr";
-const std::string Node_SetParam::sig = ".sattr";
+const std::string Node_GetAttribute::sig = ".gattr";
+const std::string Node_SetAttribute::sig = ".sattr";
 const std::string Node_ShowRange::sig = ".srng";
 const std::string Node_SetRadScl::sig = ".rscl";
 const std::string Node_SetBBoxCenter::sig = ".sbxc";
@@ -355,7 +355,7 @@ void AnNode::DrawHeader(float& off) {
 float AnNode::DrawLog(float off) {
 	auto sz = this->log.size();
 	if (!sz) return 0;
-	auto sz2 = min((int)sz, 10);
+	auto sz2 = std::min((int)sz, 10);
 	if (logExpanded) {
 		UI::Quad(pos.x, pos.y + off, width, 15.f * sz2 + 2, black(0.9f));
 		Engine::PushStencil(pos.x + 1, pos.y + off, width - 2, 15.f * sz2);
@@ -371,10 +371,10 @@ float AnNode::DrawLog(float off) {
 			float w = 10 * mw / sz;
 			UI::Quad(pos.x + width - 3, pos.y + off + 1 + of, 2, w, white(0.3f));
 			if (Engine::Button(pos.x + width - 17, pos.y + off + 150 - 33, 16, 16, Icons::up, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
-				logOffset = max(logOffset - 10, 0);
+				logOffset = std::max(logOffset - 10, 0);
 			}
 			if (Engine::Button(pos.x + width - 17, pos.y + off + 150 - 16, 16, 16, Icons::down, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
-				logOffset = min(logOffset + 10, (int)sz - 10);
+				logOffset = std::min(logOffset + 10, (int)sz - 10);
 			}
 		}
 		return 15 * sz2 + 2.f;

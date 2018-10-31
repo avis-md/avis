@@ -778,7 +778,7 @@ void ParLoader::DrawOpenDialog() {
 		}
 		Engine::PopStencil();
 	}
-	_impPos = _showImp ? min(_impPos + 800 * Time::delta, 100.f) : max(_impPos - 800 * Time::delta, 0.f);
+	_impPos = _showImp ? std::min(_impPos + 800 * Time::delta, 100.f) : std::max(_impPos - 800 * Time::delta, 0.f);
 
 	UI::Quad(woff, hoff, 400, 300, white(0.8f, 0.15f));
 	UI::Quad(woff, hoff, 400, 16, white(0.9f, 0.1f));

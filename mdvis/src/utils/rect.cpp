@@ -5,9 +5,9 @@ bool Rect::Inside(const Vec2& v) {
 }
 
 Rect Rect::Intersection(const Rect& r2) {
-	float ox = max(x, r2.x);
-	float oy = max(y, r2.y);
-	float p2x = min(x + w, r2.x + r2.w);
-	float p2y = min(y + h, r2.y + r2.h);
+	float ox = std::max(x, r2.x);
+	float oy = std::max(y, r2.y);
+	float p2x = std::min(x + w, r2.x + r2.w);
+	float p2y = std::min(y + h, r2.y + r2.h);
 	return Rect(ox, oy, p2x - ox, p2y - oy);
 }

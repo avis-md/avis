@@ -1,9 +1,9 @@
-#include "node_getparam.h"
+#include "node_getattribute.h"
 #include "md/particles.h"
 #include "ui/ui_ext.h"
 #include "web/anweb.h"
 
-Node_GetParam::Node_GetParam() : AnNode(new DmScript(sig)), paramId(0), di(&paramId, &Particles::attrNms[0]) {
+Node_GetAttribute::Node_GetAttribute() : AnNode(new DmScript(sig)), attrId(0), di(&attrId, &Particles::attrNms[0]) {
 	title = "Get Attribute";
 	titleCol = NODE_COL_IO;
 	outputR.resize(1);
@@ -18,15 +18,15 @@ Node_GetParam::Node_GetParam() : AnNode(new DmScript(sig)), paramId(0), di(&para
 
 #define RETERR(msg) { std::cerr << msg << std::endl; return; }
 
-void Node_GetParam::Execute() {
+void Node_GetAttribute::Execute() {
 	if (!Particles::attrs.size())
 		RETERR("No attribute available!");
 	auto& cv = conV[0];
 	cv.dimVals[0] = (int*)&Particles::particleSz;
-	cv.data.val.arr.p = Particles::attrs[paramId]->Get(AnWeb::execFrame).data();
+	cv.data.val.arr.p = Particles::attrs[attrId]->Get(AnWeb::execFrame).data();
 }
 
-void Node_GetParam::DrawHeader(float& off) {
+void Node_GetAttribute::DrawHeader(float& off) {
 	AnNode::DrawHeader(off);
 	UI::Quad(pos.x, off, width, 18, bgCol);
 	UI2::Dropdown(pos.x + 2, off, width - 4, "Attribute", di);

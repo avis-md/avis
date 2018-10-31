@@ -35,7 +35,7 @@ bool Shader::LoadShader(GLenum shaderType, std::string source, GLuint& shader, s
 		glDeleteShader(shader);
 		return false;
 	}
-	//std::std::cout << "shader compiled" << std::endl;
+	//std::cout << "shader compiled" << std::endl;
 	return true;
 }
 

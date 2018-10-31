@@ -182,7 +182,7 @@ void CVar::Read(std::ifstream& strm) {
 				_Strm2Val(strm, data.dims[a]);
 				totalSz *= data.dims[a];
 			}
-			data.val.arr.data.resize(max(totalSz * stride, 1));
+			data.val.arr.data.resize(std::max(totalSz * stride, 1));
 			data.val.arr.p = &data.val.arr.data[0];
 			value = &data.val.arr.p;
 			if (!!totalSz) {

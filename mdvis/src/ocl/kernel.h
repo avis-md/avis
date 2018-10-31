@@ -83,7 +83,7 @@ static float3 RandVec(uint* r) {
 static float3 RandHemi(uint* r) {
     float r1 = sqrt(Randf(r));
     float r2 = Randf(r) * 2 * 3.14159f;
-    return (float3)(r1 * cos(r2), r1 * sin(r2), sqrt(max(1 - r1, 0.f)));
+    return (float3)(r1 * cos(r2), r1 * sin(r2), sqrt(std::max(1 - r1, 0.f)));
 }
 
 static void GetTans(float3 n, float3* t1, float3* t2) {
@@ -245,9 +245,9 @@ __kernel void Shading(//scene
             }
             else
                 col.xyz *= bgc * (1 - acos(ray[k].d.y)/3.14159f);
-            accum[k * 3] += max(col.x, 0.f);
-            accum[k * 3 + 1] += max(col.y, 0.f);
-            accum[k * 3 + 2] += max(col.z, 0.f);
+            accum[k * 3] += std::max(col.x, 0.f);
+            accum[k * 3 + 1] += std::max(col.y, 0.f);
+            accum[k * 3 + 2] += std::max(col.z, 0.f);
             ray[k].o = 0;
 		}
         */

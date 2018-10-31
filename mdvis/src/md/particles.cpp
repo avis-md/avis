@@ -172,7 +172,7 @@ void Particles::SpecificColor::Update() {
 }
 
 void Particles::SpecificColor::UpdateMask() {
-	type.resize(min<size_t>(type.size(), PAR_MAX_NAME_LEN));
+	type.resize(std::min<size_t>(type.size(), PAR_MAX_NAME_LEN));
 	auto rls = reslist.size();
 	for (auto& rli : residueLists) {
 		for (int a = 0; a < rls; a++) {

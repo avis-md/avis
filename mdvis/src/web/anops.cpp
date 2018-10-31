@@ -70,7 +70,7 @@ void AnOps::Draw() {
 		}
 
 
-		off = max(off, Display::height - 68.f - 18.f);
+		off = std::max(off, Display::height - 68.f - 18.f);
 		UI::Label(Display::width - expandPos + 2, off, 12, "Status", white());
 		UI::Label(Display::width - expandPos + 4, off + 17, 12, "C++", white());
 		UI::Quad(Display::width - expandPos + 164, off + 18, 14, 14, (remote? AnWeb::hasC_s : AnWeb::hasC) ? green() : red());

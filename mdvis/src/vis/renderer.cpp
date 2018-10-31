@@ -1,4 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
 #include "renderer.h"
 #include "pargraphics.h"
 #include "gif/gif.h"
@@ -47,7 +46,7 @@ void VisRenderer::Draw() {
 	if (status == STATUS::IMG) {
 		UI::IncLayer();
 		UI::Quad(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), black(0.9f*resLerp));
-		resLerp = (resLerp >= 0)? min(resLerp + 4 * Time::delta, 1.f) : 0;
+		resLerp = (resLerp >= 0)? std::min(resLerp + 4 * Time::delta, 1.f) : 0;
 		float dw = Display::width * 0.1f;
 		float dh = Display::height * 0.1f;
 		float whi = ((float)imgW) / imgH;
@@ -236,7 +235,7 @@ void VisRenderer::ToVid() {
 	status = STATUS::BUSY;
 	Debug::Message("Renderer::ToVid", "Starting");
 	
-	auto vidSkip = max(Particles::anim.frameCount/vidMaxFrames, 1U);
+	auto vidSkip = std::max(Particles::anim.frameCount/vidMaxFrames, 1U);
 	
 	static Texture wtx(IO::path + "res/cat2.jpg");
 	UI::Quad(0, 0, Display::width, Display::height, black());

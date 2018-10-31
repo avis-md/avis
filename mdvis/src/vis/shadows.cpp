@@ -89,12 +89,12 @@ void Shadows::UpdateBox() {
 	for (uint a = 0; a < 8; ++a)  {
 		Vec4 rs = _p * wps[a];
 		rs /= rs.w;
-		box[0] = min(box[0], rs.x);
-		box[1] = max(box[1], rs.x);
-		box[2] = min(box[2], rs.y);
-		box[3] = max(box[3], rs.y);
-		box[4] = min(box[4], rs.z);
-		box[5] = max(box[5], rs.z);
+		box[0] = std::min(box[0], rs.x);
+		box[1] = std::max(box[1], rs.x);
+		box[2] = std::min(box[2], rs.y);
+		box[3] = std::max(box[3], rs.y);
+		box[4] = std::min(box[4], rs.z);
+		box[5] = std::max(box[5], rs.z);
 	}
 	*/
 	_p = glm::ortho<float>(-1, 1, -1, 1, 0.01f, 100);//glm::ortho(box[0], box[1], box[2], box[3], box[4] - dst2, box[5]) * _p;
