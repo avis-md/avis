@@ -3,7 +3,7 @@
 #define SETERR(msg) memcpy(info->error, msg, sizeof(msg))
 
 std::vector<GenericSSV::AttrTyp> GenericSSV::attrs;
-std::vector<std::vector<float>> GenericSSV::_attrs;
+std::vector<std::vector<double>> GenericSSV::_attrs;
 std::vector<GenericSSV::TYPES> GenericSSV::_tps;
 std::string GenericSSV::_s;
 
@@ -60,7 +60,7 @@ bool GenericSSV::Read(ParInfo* info) {
 			case TYPES::VELX: info->vel[a*3] = std::stod(p); break;
 			case TYPES::VELY: info->vel[a*3 + 1] = std::stod(p); break;
 			case TYPES::VELZ: info->vel[a*3 + 2] = std::stod(p); break;
-			case TYPES::ATTR: attrs[attri++].second[a] = std::stof(p); break;
+			case TYPES::ATTR: attrs[attri++].second[a] = std::stod(p); break;
 			default: break;
 			}
 		}
@@ -146,7 +146,7 @@ void GenericSSV::ParseTypes(const std::string& line, std::vector<GenericSSV::TYP
 			ts.push_back(TYPES::ATTR);
 			attrs.push_back(AttrTyp());
 			attrs.back().first = a.substr(5);
-			_attrs.push_back(std::vector<float>());
+			_attrs.push_back(std::vector<double>());
 		}
 		else {
 			ts.push_back(TYPES::NONE);

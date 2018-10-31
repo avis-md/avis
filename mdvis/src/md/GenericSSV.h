@@ -13,9 +13,9 @@ public:
 	static bool Read(ParInfo* info);
 	static bool ReadFrm(FrmInfo* info);
 
-	typedef std::pair<std::string, std::vector<float>> AttrTyp;
+	typedef std::pair<std::string, std::vector<double>> AttrTyp;
 	static std::vector<AttrTyp> attrs;
-	static std::vector<std::vector<float>> _attrs;
+	static std::vector<std::vector<double>> _attrs;
 
 private:
 	static std::vector<TYPES> _tps;

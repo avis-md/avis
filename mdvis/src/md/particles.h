@@ -55,13 +55,13 @@ public:
 		bool readonly = false;
 		GLuint buf, texBuf;
 		
-		std::vector<float>& Get(uint frm);
+		std::vector<double>& Get(uint frm);
 		void ApplyParCnt(), ApplyFrmCnt();
 		void Update();
 		void Clear();
 	private:
-		std::vector<float> data;
-		std::vector<std::vector<float>> dataAll;
+		std::vector<double> data;
+		std::vector<std::vector<double>> dataAll;
 	};
 
 	static uint residueListSz;

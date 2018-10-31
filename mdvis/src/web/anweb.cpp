@@ -208,7 +208,8 @@ void AnWeb::Draw() {
 						SW(IN::PINFO, Node_Info);
 						SW(IN::VEC, Node_Vector);
 
-						SW(MOD::PARAM, Node_SetParam);
+						SW(MOD::GATTR, Node_GetParam);
+						SW(MOD::SATTR, Node_SetParam);
 						SW(MOD::RSCL, Node_SetRadScl);
 						SW(MOD::SBXC, Node_SetBBoxCenter);
 
@@ -672,6 +673,7 @@ void AnWeb::Load(const std::string& s) {
 					//ND(Node_AddVolume)
 					ND(Node_TraceTrj)
 					ND(Node_Camera_Out)
+					ND(Node_GetParam)
 					ND(Node_SetParam)
 					ND(Node_SetRadScl)
 					ND(Node_SetBBoxCenter)

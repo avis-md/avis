@@ -1107,6 +1107,17 @@ void ParGraphics::DrawColMenu() {
 	if (_bp != Particles::boxPeriodic) {
 		Particles::BoundParticles();
 	}
+	if (Particles::anim.frameCount > 1) {
+		off += 17;
+		if (Engine::Button(exps - 147, off, 100, 16, white(0.2f), "Apply All", 12, white(), true) == MOUSE_RELEASE) {
+			auto frm = Particles::anim.currentFrame;
+			for (uint a = 0; a < Particles::anim.frameCount; ++a) {
+				Particles::SetFrame(a);
+				Particles::Rebound(_bc);
+			}
+			Particles::SetFrame(frm);
+		}
+	}
 	off += 19;
 
 	static std::string ornms[] = { "None", "Stretch", "" };

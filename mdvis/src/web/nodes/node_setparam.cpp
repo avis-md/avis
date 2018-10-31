@@ -8,7 +8,7 @@ Node_SetParam::Node_SetParam() : AnNode(new DmScript(sig)), paramId(0), di(&para
 	titleCol = NODE_COL_IO;
     canTile = false;
 	inputR.resize(1);
-	script->invars.push_back(std::pair<std::string, std::string>("values", "list(*d)"));
+	script->invars.push_back(std::pair<std::string, std::string>("values", "list(1*)"));
 }
 
 #define RETERR(msg) { std::cerr << msg << std::endl; return; }
@@ -19,45 +19,32 @@ void Node_SetParam::Execute() {
 		RETERR("No attribute available!");
 	}
 	CVar& cv = inputR[0].first->conV[inputR[0].second];
-	auto dm = cv.dimVals.size();
-	auto src = *((double**)cv.value);
-	auto& prm = Particles::attrs[paramId];
-	if (dm > 2) {
-		RETERR("Input must be 1- or 2-dimensional!");
-	}
-	else if (AnWeb::execFrame > 0 && dm > 1) {
-		RETERR("Input must be 1-dimensional for Run All!");
-	}
 	auto sz = *cv.dimVals[0];
-	auto tsz = 1;
-	prm->timed = AnWeb::execFrame > 0;
-	if (prm->timed) {
-		if (sz != Particles::particleSz)
-			RETERR("Dim 1 of 1 must be atom count!");
-		auto& tar = prm->Get(AnWeb::execFrame);
-		tar.resize(sz);
-#pragma omp parallel for
-		for (int a = 0; a < sz; ++a)  {
-			tar[a] = (float)src[a];
+	if (sz != Particles::particleSz)
+		RETERR("Attribute must be for each atom!");
+	auto src = *((void**)cv.value);
+	auto prm = Particles::attrs[paramId];
+	prm->timed = (AnWeb::execFrame > 0);
+	auto& tar = prm->Get(prm->timed? AnWeb::execFrame-1 : 0);
+	tar.resize(sz);
+	switch (cv.typeName[6]) {
+	case 's':
+		for (int i = 0; i < sz; ++i)  {
+			tar[i] = ((short*)src)[i];
 		}
-	}
-	else {
-		if (dm == 2) {
-			tsz = sz;
-			sz = *cv.dimVals[1];
-			if (tsz != Particles::anim.frameCount)
-				RETERR("Dim 1 of 2 must be frame count!");
-			prm->timed = true;
+		break;	
+	case 'i':
+		for (int i = 0; i < sz; ++i)  {
+			tar[i] = ((int*)src)[i];
 		}
-
-		if (sz != Particles::particleSz)
-			RETERR("Dim 2 of 2 must be atom count!");
-		auto& tar = prm->Get(0);
-		tar.resize(sz);
-#pragma omp parallel for
-		for (int a = 0; a < sz; ++a)  {
-			tar[a] = (float)src[a];
+		break;
+	case 'd':
+		for (int i = 0; i < sz; ++i)  {
+			tar[i] = ((double*)src)[i];
 		}
+		break;
+	default:
+		RETERR("Unexpected data type " + cv.typeName + "!");
 	}
 	prm->dirty = true;
 }

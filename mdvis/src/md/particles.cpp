@@ -21,7 +21,7 @@ Particles::paramdata::~paramdata() {
 	glDeleteTextures(1, &texBuf);
 }
 
-std::vector<float>& Particles::paramdata::Get(uint frm) {
+std::vector<double>& Particles::paramdata::Get(uint frm) {
 	if (!frm || !timed) return data;
 	else return dataAll[frm-1];
 }
@@ -37,17 +37,16 @@ void Particles::paramdata::ApplyFrmCnt() {
 
 void Particles::paramdata::Update() {
 	auto& dt = Get(anim.currentFrame);
-	if (!dt.size()) return;
-	glBindBuffer(GL_ARRAY_BUFFER, buf);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, particleSz * sizeof(float), &dt[0]);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	auto sz = (int)dt.size();
+	if (!sz) return;
+	SetGLSubBuf<>(buf, dt.data(), particleSz);
 	dirty = false;
 }
 
 void Particles::paramdata::Clear() {
 	timed = false;
-	std::vector<float>().swap(data);
-	std::vector<std::vector<float>>().swap(dataAll);
+	std::vector<double>().swap(data);
+	std::vector<std::vector<double>>().swap(dataAll);
 }
 
 
@@ -82,8 +81,10 @@ void Particles::AnimData::Seek(uint f) {
 		}
 		if (status[f] == FRAME_STATUS::BAD) return;
 	}
-	for (auto& a : attrs) {
-		a->Update();
+	if (std::this_thread::get_id() == Engine::_mainThreadId) {
+		for (auto& a : attrs) {
+			a->Update();
+		}
 	}
 	UpdateMemRange();
 	UpdateBBox();

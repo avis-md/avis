@@ -25,12 +25,13 @@ const std::string AN_NODE_INS[] = { "Particle data", "System info", "Vector" };
 
 enum class AN_NODE_MOD {
 	NUM0 = 0x20,
-	PARAM,
+	GATTR,
+	SATTR,
 	RSCL,
 	SBXC,
 	NUM
 };
-const std::string AN_NODE_MODS[] = { "Set Param", "Set Radii Scale", "Set BBox Center" };
+const std::string AN_NODE_MODS[] = { "Get Param", "Set Param", "Set Radii Scale", "Set BBox Center" };
 
 enum class AN_NODE_GEN {
 	NUM0 = 0x40,
