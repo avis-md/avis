@@ -49,6 +49,55 @@ void Particles::paramdata::Clear() {
 	std::vector<std::vector<double>>().swap(dataAll);
 }
 
+void Particles::paramdata::Export(const std::string& path) {
+	std::ofstream strm(path);
+	strm << Particles::particleSz << " " << (timed? Particles::anim.frameCount : 1) << "\n";
+	if (timed) {
+		for (auto& d : dataAll) {
+			for (auto& d2 : d) {
+				strm << d2 << " ";
+			}
+		}
+	}
+	else {
+		for (auto& d : data) {
+			strm << d << " ";
+		}
+	}
+}
+
+void Particles::paramdata::Import(const std::string& path) {
+	std::ifstream strm(path);
+	uint psz;
+	strm >> psz;
+	if (psz != Particles::particleSz) {
+		Debug::Warning("Attr::Import", "not atom count!");
+		return;
+	}
+	strm >> psz;
+	if (psz != 1 && psz != Particles::anim.frameCount) {
+		Debug::Warning("Attr::Import", "not frame count!");
+		return;
+	}
+
+	timed = (psz > 1);
+	if (timed) {
+		for (auto& d : dataAll) {
+			d.resize(Particles::particleSz);
+			for (auto& d2 : d) {
+				strm >> d2;
+			}
+		}
+	}
+	else {
+		data.resize(Particles::particleSz);
+		for (auto& d : data) {
+			strm >> d;
+		}
+	}
+	dirty = true;
+}
+
 
 uint Particles::AnimData::maxFramesInMem = 20;
 

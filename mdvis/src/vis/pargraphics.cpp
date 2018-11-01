@@ -16,6 +16,8 @@
 #include "hdr.h"
 #include "ocl/raytracer.h"
 #include "res/shddata.h"
+#include "utils/dialog.h"
+#include "utils/tinyfiledialogs.h"
 
 #define SCL_MIN -7.f
 #define SCL_MAX 2.f
@@ -993,6 +995,17 @@ void ParGraphics::DrawColMenu() {
 			if (Engine::Button(exps - 19, off, 16, 16, Icons::cross, red()) == MOUSE_RELEASE) {
 				Particles::RmParam(a);
 				break;
+			}
+			if (Engine::Button(exps + 30, off, 16, 16, Icons::down) == MOUSE_RELEASE) {
+				auto path = tinyfd_saveFileDialog("Save Attribute Data", nullptr, 0, 0, "");
+				if (path) {
+					Particles::attrs[a]->Export(std::string(path) + ".attr");
+				}
+			}
+			if (Engine::Button(exps + 47, off, 16, 16, Icons::up) == MOUSE_RELEASE) {
+				auto p = Dialog::OpenFile(std::vector<std::string>(1, ".attr"));
+				if (!!p.size())
+					Particles::attrs[a]->Import(p[0]);
 			}
 		}
 		off += 17;

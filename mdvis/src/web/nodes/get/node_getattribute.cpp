@@ -23,7 +23,7 @@ void Node_GetAttribute::Execute() {
 		RETERR("No attribute available!");
 	auto& cv = conV[0];
 	cv.dimVals[0] = (int*)&Particles::particleSz;
-	cv.data.val.arr.p = Particles::attrs[attrId]->Get(AnWeb::execFrame).data();
+	cv.data.val.arr.p = Particles::attrs[attrId]->Get((!AnWeb::execFrame)? Particles::anim.currentFrame : AnWeb::execFrame-1).data();
 }
 
 void Node_GetAttribute::DrawHeader(float& off) {

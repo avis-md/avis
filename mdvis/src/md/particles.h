@@ -59,6 +59,8 @@ public:
 		void ApplyParCnt(), ApplyFrmCnt();
 		void Update();
 		void Clear();
+		void Export(const std::string& path);
+		void Import(const std::string& path);
 	private:
 		std::vector<double> data;
 		std::vector<std::vector<double>> dataAll;
