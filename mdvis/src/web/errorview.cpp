@@ -48,15 +48,24 @@ int ErrorView::Parse_GCC(const std::string& path, const std::string& sig, const 
 				if (msg->linenum > -1) {
 					int j = str.find_first_of(':', i + 2);
 					msg->charnum = TryParse(str.substr(i + 1, j - i - 1), -1);
-					str = str.substr(j + 2);
-					if (str.substr(0, 5) == "error") {
-						msg->severe = true;
-						msg->msg.resize(1, str.substr(7));
-						n++;
+					if (str.size() > j + 7) {
+						str = str.substr(j + 2);
+						if (str.substr(0, 5) == "error") {
+							msg->severe = true;
+							msg->msg.resize(1, str.substr(7));
+							n++;
+						}
+						else if (str.substr(0, 7) == "warning") {
+							msg->msg.resize(1, str.substr(9));
+						}
+						else {
+							msg = nullptr;
+							msgs.pop_back();
+						}
 					}
 					else {
-						msg->msg.resize(1, str.substr(9));
-						
+						msg = nullptr;
+						msgs.pop_back();
 					}
 				}
 				else {

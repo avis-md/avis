@@ -3,10 +3,9 @@
 #include "ui/ui_ext.h"
 #include "web/anweb.h"
 
-Node_SetAttribute::Node_SetAttribute() : AnNode(new DmScript(sig)), attrId(0), di(&attrId, &Particles::attrNms[0]) {
+Node_SetAttribute::Node_SetAttribute() : AnNode(new DmScript(sig)), attrId(0), di(&attrId, &Particles::attrNms[0]), timed(true) {
 	title = "Set Attribute";
 	titleCol = NODE_COL_IO;
-    canTile = false;
 	inputR.resize(1);
 	script->invars.push_back(std::pair<std::string, std::string>("values", "list(1*)"));
 }
@@ -24,7 +23,7 @@ void Node_SetAttribute::Execute() {
 		RETERR("Attribute must be for each atom!");
 	auto src = *((void**)cv.value);
 	auto prm = Particles::attrs[attrId];
-	prm->timed = (AnWeb::execFrame > 0);
+	prm->timed = (AnWeb::execFrame > 0 && timed);
 	auto& tar = prm->Get(prm->timed? AnWeb::execFrame-1 : 0);
 	tar.resize(sz);
 	switch (cv.typeName[6]) {
@@ -32,7 +31,7 @@ void Node_SetAttribute::Execute() {
 		for (int i = 0; i < sz; ++i)  {
 			tar[i] = ((short*)src)[i];
 		}
-		break;	
+		break;
 	case 'i':
 		for (int i = 0; i < sz; ++i)  {
 			tar[i] = ((int*)src)[i];
@@ -51,8 +50,10 @@ void Node_SetAttribute::Execute() {
 
 void Node_SetAttribute::DrawHeader(float& off) {
 	AnNode::DrawHeader(off);
-	UI::Quad(pos.x, off, width, 18, bgCol);
+	UI::Quad(pos.x, off, width, 35, bgCol);
 	UI2::Dropdown(pos.x + 2, off, width - 4, "Attribute", di);
+	off += 17;
+	UI2::Toggle(pos.x + 2, off, width - 4, "Animated", timed);
 	off += 18;
 }
 

@@ -91,6 +91,7 @@ void Node_Inputs::Execute() {
 	bool setpos = outputR[0].size() > 0;
 	bool setvel = outputR[1].size() > 0;
 	bool settyp = outputR[4].size() > 0;
+	setpos |= (setvel || settyp) && ((filter & (int)FILTER::CLP) > 0);
 
 	glm::dvec3* pos, *vel;
 	if (!Particles::anim.poss.size()) {
@@ -114,17 +115,25 @@ void Node_Inputs::Execute() {
 			vpos.clear();
 			vpos.reserve(Particles::particleSz);
 		}
-		if (setpos) {
+		if (setvel) {
 			vvel.clear();
 			vvel.reserve(Particles::particleSz);
 		}
-		if (setpos) {
+		if (settyp) {
 			vtyp.clear();
 			vtyp.reserve(Particles::particleSz);
 		}
 		int off = 0;
 		if ((filter & (int)FILTER::VIS) > 0) {
 			for (auto& dl : ParGraphics::drawLists) {
+				for (int a = 0; a < dl.second.first; a++) {
+					int i = a + dl.first;
+					if (Particles::visii[i]) {
+						if (setpos) vpos.push_back(Particles::poss[i]);
+						if (setvel) vvel.push_back(Particles::vels[i]);
+						if (settyp) vtyp.push_back(Particles::types[i]);
+					}
+				}
 				vpos.resize(off + dl.second.first);
 				memcpy(&vpos[off], pos + dl.first, dl.second.first * sizeof(glm::dvec3));
 				if (setvel) {

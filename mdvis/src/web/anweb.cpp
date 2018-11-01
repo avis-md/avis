@@ -11,7 +11,7 @@
 #endif
 
 #define NO_REDIR_LOG
-//#define VERBOSE
+#define VERBOSE
 
 bool AnWeb::lazyLoad = true;
 
@@ -30,6 +30,7 @@ bool AnWeb::apply = false;
 float AnWeb::maxScroll, AnWeb::scrollPos = 0, AnWeb::expandPos = 0;
 int AnWeb::execFrame;
 float AnWeb::drawLerp;
+bool AnWeb::invertRun = false;
 
 std::thread* AnWeb::execThread = nullptr;
 AnNode* AnWeb::execNode = nullptr;
@@ -302,52 +303,56 @@ void AnWeb::Draw() {
 
 void AnWeb::DrawSide() {
 #ifndef IS_ANSERVER
-	UI::Quad(Display::width - expandPos, 18, 180.f, Display::height - 36.f, white(0.9f, 0.15f));
+	const float expos = Display::width - expandPos;
+	UI::Quad(expos, 18, 180.f, Display::height - 36.f, white(0.9f, 0.15f));
 	if (expanded) {
 		float w = 180;
 		AnNode::width = w - 2;
-		UI::Label(Display::width - expandPos + 5, 20, 12, _("Analysis"), white());
+		UI::Label(expos + 5, 20, 12, _("Analysis"), white());
 
-		if (Engine::Button(Display::width - expandPos + 109, 20, 70, 16, white(1, 0.4f), _("Edit"), 12, white(), true) == MOUSE_RELEASE){
+		if (Engine::Button(expos + 109, 20, 70, 16, white(1, 0.4f), _("Edit"), 12, white(), true) == MOUSE_RELEASE){
 			drawFull = true;
 			Scene::dirty = true;
 		}
 
 		bool canexec = (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
-		if (Engine::Button(Display::width - expandPos + 1, 38, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
+		if (Engine::Button(expos + 1, 38, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
 			if (canexec) AnWeb::Execute(false);
 		}
+		UI::Texture(expos + 1, 38, 16, 16, Icons::play);
 		bool canexec2 = (canexec && Particles::anim.frameCount > 1);
 		if (!execFrame) {
-			if (Engine::Button(Display::width - expandPos + 72, 38, 107, 16, white(1, canexec2 ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
+			if (Engine::Button(expos + 72, 38, 107, 16, white(1, canexec2 ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
 				if (canexec2) AnWeb::Execute(true);
 			}
 		}
 		else {
-			UI::Quad(Display::width - expandPos + 72, 38, 107, 16, white(1, 0.2f));
+			UI::Quad(expos + 72, 38, 107, 16, white(1, 0.2f));
 			UI::font->Align(ALIGN_TOPCENTER);
-			UI::Label(Display::width - expandPos + 72 + 54, 39, 12, std::to_string(execFrame), white(0.8f));
+			UI::Label(expos + 72 + 54, 39, 12, std::to_string(execFrame), white(0.8f));
 			UI::font->Align(ALIGN_TOPLEFT);
 		}
-		UI::Texture(Display::width - expandPos + 1, 38, 16, 16, Icons::play);
-		UI::Texture(Display::width - expandPos + 72, 38, 16, 16, Icons::playall);
+		if (invertRun)
+			UI::Texture(expos + 178, 38, -16, 16, Icons::playall);
+		else
+			UI::Texture(expos + 72, 38, 16, 16, Icons::playall);
 
-		Vec2 poss(Display::width - expandPos + 1, 17 * 3 + 4);
+		Vec2 poss(expos + 1, 17 * 3 + 4);
 		for (auto n : nodes) {
 			n->pos = poss;
 			poss.y += n->DrawSide();
 		}
-		UI::Quad(Display::width - expandPos - 16.f, Display::height - 34.f, 16.f, 16.f, white(0.9f, 0.15f));
-		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(Display::width - expandPos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		UI::Quad(expos - 16.f, Display::height - 34.f, 16.f, 16.f, white(0.9f, 0.15f));
+		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(expos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = Clamp(expandPos + 1500 * Time::delta, 0.f, 180.f);
 	}
 	else {
-		UI::Quad(Display::width - expandPos, 0.f, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
-		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(Display::width - expandPos - 110.f, Display::height - 34.f, 110.f, 16.f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
+		UI::Quad(expos, 0.f, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
+		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(expos - 110.f, Display::height - 34.f, 110.f, 16.f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
-		UI::Texture(Display::width - expandPos - 110.f, Display::height - 34.f, 16.f, 16.f, Icons::expand);
-		UI::Label(Display::width - expandPos - 92.f, Display::height - 33.f, 12.f, _("Analysis") +" (A)", white());
+		UI::Texture(expos - 110.f, Display::height - 34.f, 16.f, 16.f, Icons::expand);
+		UI::Label(expos - 92.f, Display::height - 33.f, 12.f, _("Analysis") +" (A)", white());
 		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.f, 180.f);
 	}
 	drawLerp = 0;
@@ -387,10 +392,15 @@ void AnWeb::DoExecute(bool all) {
 	}
 	ErrorView::execMsgs.clear();
 	
+	RemoveFrames();
 	if (all) {
 		auto f = Particles::anim.currentFrame;
 		ApplyFrameCount(Particles::anim.frameCount);
-		for (uint a = 0; a < Particles::anim.frameCount; ++a)  {
+		for (uint _a = 0; _a < Particles::anim.frameCount; ++_a)  {
+			uint a = invertRun? Particles::anim.frameCount - _a - 1U : _a;
+#ifdef VERBOSE
+			Debug::Message("AnWeb", "Frame " + std::to_string(a));
+#endif
 			execFrame = a+1;
 			Particles::anim.Seek(a);
 			auto st = Particles::anim.status[a];
@@ -410,7 +420,6 @@ void AnWeb::DoExecute(bool all) {
 		Particles::anim.Seek(f);
 	}
 	else {
-		RemoveFrames();
 		Node_Inputs::frame = Particles::anim.currentFrame;
 		_DoExecute();
 	}
@@ -501,7 +510,6 @@ void AnWeb::_DoExecute() {
 		Debug::Message("AnWeb", "Executed " + n->script->name);
 #endif
 	}
-	execNode = nullptr;
 }
 
 void AnWeb::OnExecLog(std::string s, bool e) {

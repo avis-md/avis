@@ -1,4 +1,5 @@
 #include "anops.h"
+#include "ui/ui_ext.h"
 #include "ui/icons.h"
 #include "libssh2_sftp.h"
 
@@ -7,9 +8,9 @@ byte AnOps::connectStatus;
 float AnOps::expandPos;
 
 bool AnOps::remote = false;
-std::string AnOps::user = "chokopan", AnOps::ip = "192.168.0.180", AnOps::pw;
+std::string AnOps::user = "username", AnOps::ip = "host", AnOps::pw;
 ushort AnOps::port = 22;
-std::string AnOps::path = "/Users/chokopan/mdvis";
+std::string AnOps::path = "path";
 std::string AnOps::message = "disconnected";
 
 std::thread* AnOps::conThread;
@@ -17,80 +18,37 @@ std::thread* AnOps::conThread;
 SSH AnOps::ssh;
 
 void AnOps::Draw() {
-	UI::Quad(Display::width - expandPos, 0.f, 180.f, Display::height - 18.f, white(0.9f, 0.15f));
+	const float expos = Display::width - expandPos;
+	const float w = 180;
+	UI::Quad(expos, 0.f, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
 	if (expanded) {
-		float w = 180;
-		UI::Label(Display::width - expandPos + 5, 1, 12, "Options", white());
+		UI::Label(expos + 1, 1, 12, "Options", white());
 		
-		UI::Label(Display::width - expandPos + 2, 18, 12, "Host", white());
-		if (Engine::Button(Display::width - expandPos + 1, 35, expandPos*0.5f - 1, 16, remote ? white(1, 0.2f) : white(1, 0.1f), "Local", 12, white(), true) == MOUSE_RELEASE) {
-			if (connectStatus == 255)
-				Disconnect();
-			remote = false;
-		}
-		if (Engine::Button(Display::width - expandPos*0.5f, 35, expandPos*0.5f - 1, 16, remote ? white(1, 0.1f) : white(1, 0.2f), "Remote", 12, white(), true) == MOUSE_RELEASE) {
-			remote = true;
-		}
-
-		float off = 53;
-
-		if (remote) {
-			UI::Label(Display::width - expandPos + 4, 52, 12, "Domain", white());
-			ip = UI::EditText(Display::width - expandPos + 80, 52, 99, 16, 12, white(1, 0.5f), ip, true, white());
-			UI::Label(Display::width - expandPos + 4, 69, 12, "Port", white());
-			port = TryParse(UI::EditText(Display::width - expandPos + 80, 69, 99, 16, 12, white(1, 0.5f), std::to_string(port), true, white()), 22);
-			UI::Label(Display::width - expandPos + 4, 86, 12, "Username", white());
-			user = UI::EditText(Display::width - expandPos + 80, 86, 99, 16, 12, white(1, 0.5f), user, true, white());
-			UI::Label(Display::width - expandPos + 4, 103, 12, "Password", white());
-			pw = UI::EditTextPass(Display::width - expandPos + 80, 103, 99, 16, 12, white(1, 0.5f), pw, '*', true, white());
-			
-			if (!connectStatus) {
-				if (Engine::Button(Display::width - expandPos + 100, 120, 79, 16, white(1, 0.2f), "Connect", 12, white(), true) == MOUSE_RELEASE) {
-					connectStatus = 1;
-					conThread = new std::thread(Connect);
-				}
-			}
-			else if (connectStatus == 255) {
-				if (Engine::Button(Display::width - expandPos + 100, 120, 79, 16, white(1, 0.2f), "Disconnect", 12, white(), true) == MOUSE_RELEASE) {
-					Disconnect();
-				}
-			}
-			UI::Label(Display::width - expandPos + 2, 138, 12, message, Vec4(0.1f, 1.f, 0.1f, 1.f));
-
-			UI::Label(Display::width - expandPos + 4, 157, 12, "Working directory", white());
-			path = UI::EditText(Display::width - expandPos + 1, 174, 178, 16, 12, white(1, 0.5f), path, true, white());
-
-			off = 177;
-		}
-
-		if (conThread && (!connectStatus || (connectStatus == 255))) {
-			conThread->join();
-			delete(conThread);
-			conThread = 0;
-		}
-
+		float off = 20;
+		
+		UI2::Toggle(expos + 2, off, w - 4, "Invert Run All", AnWeb::invertRun);
 
 		off = std::max(off, Display::height - 68.f - 18.f);
-		UI::Label(Display::width - expandPos + 2, off, 12, "Status", white());
-		UI::Label(Display::width - expandPos + 4, off + 17, 12, "C++", white());
-		UI::Quad(Display::width - expandPos + 164, off + 18, 14, 14, (remote? AnWeb::hasC_s : AnWeb::hasC) ? green() : red());
-		UI::Label(Display::width - expandPos + 4, off + 34, 12, "Python", white());
-		UI::Quad(Display::width - expandPos + 164, off + 34, 14, 14, (remote ? AnWeb::hasPy_s : AnWeb::hasPy) ? green() : red());
-		UI::Label(Display::width - expandPos + 4, off + 51, 12, "Fortran", white());
-		UI::Quad(Display::width - expandPos + 164, off + 51, 14, 14, (remote ? AnWeb::hasFt_s : AnWeb::hasFt) ? green() : red());
+		UI::Label(expos + 2, off, 12, "Status", white());
+		UI::Label(expos + 4, off + 17, 12, "C++", white());
+		UI::Quad(expos + 164, off + 18, 14, 14, (remote? AnWeb::hasC_s : AnWeb::hasC) ? green() : red());
+		UI::Label(expos + 4, off + 34, 12, "Python", white());
+		UI::Quad(expos + 164, off + 34, 14, 14, (remote ? AnWeb::hasPy_s : AnWeb::hasPy) ? green() : red());
+		UI::Label(expos + 4, off + 51, 12, "Fortran", white());
+		UI::Quad(expos + 164, off + 51, 14, 14, (remote ? AnWeb::hasFt_s : AnWeb::hasFt) ? green() : red());
 		
-		UI::Quad(Display::width - expandPos - 16.f, Display::height - 34.f, 16.f, 16.f, white(0.9f, 0.15f));
-		if ((!UI::editingText && (Input::KeyUp(Key_O))) || Engine::Button(Display::width - expandPos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		UI::Quad(expos - 16.f, Display::height - 34.f, 16.f, 16.f, white(0.9f, 0.15f));
+		if ((!UI::editingText && (Input::KeyUp(Key_O))) || Engine::Button(expos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
-		expandPos = Clamp(expandPos + 1500 * Time::delta, 0.f, 180.f);
+		expandPos = std::min(expandPos + 1500 * Time::delta, w);
 	}
 	else {
-		UI::Quad(Display::width - expandPos, 0.f, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
-		if ((!UI::editingText && (Input::KeyUp(Key_O))) || Engine::Button(Display::width - expandPos - 110.f, Display::height - 34.f, 110.f, 16.f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
+		UI::Quad(expos, 0.f, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
+		if ((!UI::editingText && (Input::KeyUp(Key_O))) || Engine::Button(expos - 110.f, Display::height - 34.f, 110.f, 16.f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
-		UI::Texture(Display::width - expandPos - 110.f, Display::height - 34.f, 16.f, 16.f, Icons::expand);
-		UI::Label(Display::width - expandPos - 92.f, Display::height - 33.f, 12.f, "Options (O)", white());
-		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.f, 180.f);
+		UI::Texture(expos - 110.f, Display::height - 34.f, 16.f, 16.f, Icons::expand);
+		UI::Label(expos - 92.f, Display::height - 33.f, 12.f, "Options (O)", white());
+		expandPos = std::max(expandPos - 1500 * Time::delta, 2.f);
 	}
 }
 

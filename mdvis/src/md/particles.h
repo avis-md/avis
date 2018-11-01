@@ -116,6 +116,7 @@ public:
 		int impId, funcId;
 
 		void AllocFrames(uint frames);
+		void FillBBox();
 		void Clear();
 		void Seek(uint f);
 		void Update();
@@ -164,7 +165,9 @@ public:
 	static void AddParam(), RmParam(int i);
 
 	static void Rebound(glm::dvec3 center);
+	static void ReboundF(glm::dvec3 center, int f);
 	static void BoundParticles();
+	static void BoundParticlesF(int f);
 
 	static void Serialize(XmlNode* nd);
 	static void SerializeVis(XmlNode* nd);

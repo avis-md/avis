@@ -195,7 +195,26 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 		}
 		for (auto& fs : f->scripts) {
 			if (Engine::Button(2.f + 5 * layer, off, 150.f, 16.f, white(1, 0.35f)) == MOUSE_RELEASE) {
-				AnWeb::selScript = fs;
+				if (Input::dbclick) {
+					AnWeb::selScript = nullptr;
+					AnNode* pn;
+					switch (fs->type) {
+					case AN_SCRTYPE::PYTHON:
+						pn = new PyNode(dynamic_cast<PyScript*>(fs));
+						break;
+					case AN_SCRTYPE::C:
+						pn = new CNode(dynamic_cast<CScript*>(fs));
+						break;
+					case AN_SCRTYPE::FORTRAN:
+						pn = new FNode(dynamic_cast<FScript*>(fs));
+						break;
+					}
+					pn->canTile = true;
+					AnWeb::nodes.push_back(pn);
+				}
+				else {
+					AnWeb::selScript = fs;
+				}
 			}
 			Texture& icon = Icons::lang_ft;
 			if (fs->type == AN_SCRTYPE::C)

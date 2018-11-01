@@ -9,6 +9,7 @@ public:
 
     uint attrId;
     Popups::DropdownItem di;
+	bool timed;
     
 	void Execute() override;
     void DrawHeader(float& off) override;

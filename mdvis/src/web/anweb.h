@@ -33,6 +33,7 @@ public:
 	static float maxScroll, scrollPos, expandPos;
 	static int execFrame;
 	static float drawLerp;
+	static bool invertRun;
 
 	static std::thread* execThread;
 	static AnNode* execNode;

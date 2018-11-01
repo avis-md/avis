@@ -60,6 +60,13 @@ void Particles::AnimData::AllocFrames(uint frames) {
 	paths.resize(frames);
 }
 
+void Particles::AnimData::FillBBox() {
+	bboxs.resize(frameCount * 6);
+	for (int a = 0; a < frameCount; a++) {
+		memcpy(&bboxs[a*6], boundingBox, 6*sizeof(double));
+	}
+}
+
 void Particles::AnimData::Clear() {
 	frameCount = currentFrame = 0;
 	status.clear();
@@ -87,7 +94,6 @@ void Particles::AnimData::Seek(uint f) {
 		}
 	}
 	UpdateMemRange();
-	UpdateBBox();
 }
 
 void Particles::AnimData::Update() {
@@ -439,18 +445,16 @@ void Particles::SetFrame(uint frm) {
 			anim.Seek(frm);
 			if (anim.status[frm] != AnimData::FRAME_STATUS::LOADED) return;
 			poss = &anim.poss[anim.currentFrame][0];
-			std::vector<Vec3> ps(particleSz);
-	#pragma omp parallel for
-			for (int a = 0; a < (int)particleSz; ++a)  {
-				ps[a] = (Vec3)poss[a];
-			}
-			SetGLSubBuf(posBuffer, &ps[0], particleSz);
+			SetGLSubBuf(posBuffer, (double*)&poss[0], particleSz * 3);
 			for (auto& a : attrs) {
 				if (a->timed) {
 					a->Update();
 				}
 			}
-			if (!!anim.bboxs.size()) memcpy(boundingBox, &anim.bboxs[6*frm], 6*sizeof(double));
+			if (!!anim.bboxs.size()) {
+				memcpy(boundingBox, &anim.bboxs[6*frm], 6*sizeof(double));
+				UpdateBBox();
+			}
 		}
 		else anim.Seek(frm);
 		for (int i = anim.conns2.size() - 1; i >= 0; --i) {
@@ -496,6 +500,23 @@ void Particles::Rebound(glm::dvec3 center) {
 	Scene::dirty = true;
 }
 
+void Particles::ReboundF(glm::dvec3 center, int f) {
+	if (!Particles::anim.bboxs.size()) {
+		Particles::anim.FillBBox();
+	}
+	auto bx = &Particles::anim.bboxs[f*6];
+	auto co = center - glm::dvec3((bx[1] + bx[0]),
+		(bx[3] + bx[2]),
+		(bx[5] + bx[4])) * 0.5;
+	bx[0] += co.x;
+	bx[1] += co.x;
+	bx[2] += co.y;
+	bx[3] += co.y;
+	bx[4] += co.z;
+	bx[5] += co.z;
+	BoundParticlesF(f);
+}
+
 void Particles::BoundParticles() {
 	if (!boxPeriodic) return;
 	glm::dvec3 sz (boundingBox[1] - boundingBox[0],
@@ -511,6 +532,23 @@ void Particles::BoundParticles() {
 	}
 	bufDirty = true;
 	Scene::dirty = true;
+}
+
+void Particles::BoundParticlesF(int f) {
+	if (!boxPeriodic) return;
+	auto bx = &Particles::anim.bboxs[f*6];
+	glm::dvec3 sz (bx[1] - bx[0],
+		bx[3] - bx[2],
+		bx[5] - bx[4]);
+	glm::dvec3 isz = glm::dvec3(1, 1, 1) / sz;
+	auto& ps = anim.poss[f];
+	#pragma omp parallel for
+	for (int a = 0; a < particleSz; ++a)  {
+		glm::dvec3 dp = ps[a] - bboxCenter;
+		dp *= isz;
+		dp = sz * glm::round(dp);
+		ps[a] -= dp;
+	}
 }
 
 void Particles::Serialize(XmlNode* nd) {
