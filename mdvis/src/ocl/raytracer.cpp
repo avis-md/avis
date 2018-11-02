@@ -150,6 +150,8 @@ void RayTracer::Refine() {
 	clEnqueueUnmapMemObject(queue, (cl_mem)out_buff, pixels, 0, NULL, NULL);
 
 	delete(isect_buffer);
+
+	std::cout << samples << std::endl;
 }
 
 void RayTracer::Render() {
@@ -239,7 +241,7 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 
 void RayTracer::SetObjs() {
 	Tetrahedron tet = Tetrahedron();
-	for (int a = 0; a < 5; a++)
+	for (int a = 0; a < 4; a++)
 		tet.Subdivide();
 	tet.ToSphere(0.2f);
 

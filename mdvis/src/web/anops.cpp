@@ -26,7 +26,8 @@ void AnOps::Draw() {
 		
 		float off = 20;
 		
-		UI2::Toggle(expos + 2, off, w - 4, "Invert Run All", AnWeb::invertRun);
+		UI2::Toggle(expos + 2, off, w - 4, "Invert Run All", AnWeb::invertRun); off += 17;
+		UI2::Toggle(expos + 2, off, w - 4, "Run On Seek", AnWeb::runOnFrame);
 
 		off = std::max(off, Display::height - 68.f - 18.f);
 		UI::Label(expos + 2, off, 12, "Status", white());

@@ -38,9 +38,7 @@ void Node_SetAttribute::Execute() {
 		}
 		break;
 	case 'd':
-		for (int i = 0; i < sz; ++i)  {
-			tar[i] = ((double*)src)[i];
-		}
+		memcpy(tar.data(), src, sz * sizeof(double));
 		break;
 	default:
 		RETERR("Unexpected data type " + cv.typeName + "!");

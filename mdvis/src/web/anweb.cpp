@@ -28,9 +28,9 @@ bool AnWeb::drawFull = false, AnWeb::expanded = true;
 bool AnWeb::executing = false;
 bool AnWeb::apply = false;
 float AnWeb::maxScroll, AnWeb::scrollPos = 0, AnWeb::expandPos = 0;
-int AnWeb::execFrame;
+int AnWeb::execFrame, AnWeb::execdFrame;
 float AnWeb::drawLerp;
-bool AnWeb::invertRun = false;
+bool AnWeb::invertRun = false, AnWeb::runOnFrame = false;
 
 std::thread* AnWeb::execThread = nullptr;
 AnNode* AnWeb::execNode = nullptr;
@@ -827,8 +827,15 @@ void AnWeb::OnSceneUpdate() {
 }
 
 void AnWeb::OnAnimFrame() {
-	ReadFrame(Particles::anim.currentFrame);
-	for (auto n : nodes) {
-		n->OnAnimFrame();
+	if (runOnFrame && (execdFrame != (int)Particles::anim.currentFrame)) {
+		DoExecute(false);
+		Scene::dirty = true;
+		execdFrame = (int)Particles::anim.currentFrame;
+	}
+	else {
+		ReadFrame(Particles::anim.currentFrame);
+		for (auto n : nodes) {
+			n->OnAnimFrame();
+		}
 	}
 }

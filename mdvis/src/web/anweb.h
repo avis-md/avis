@@ -31,9 +31,9 @@ public:
 
 	static bool drawFull, expanded, executing, apply;
 	static float maxScroll, scrollPos, expandPos;
-	static int execFrame;
+	static int execFrame, execdFrame;
 	static float drawLerp;
-	static bool invertRun;
+	static bool invertRun, runOnFrame;
 
 	static std::thread* execThread;
 	static AnNode* execNode;
