@@ -4,6 +4,7 @@
 //#define MAKE_LOCL
 #define NOCATCH
 #define DELAYLOAD
+//#define AUTOSAVE
 
 #include "ui/ui_ext.h"
 #include "ui/localizer.h"
@@ -87,6 +88,7 @@ void updateFunc() {
 
 	if (!!Particles::particleSz && !ParLoader::busy) {
 		Particles::Update();
+#ifdef AUTOSAVE
 		if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime)
 			&& !ParLoader::busy && !AnWeb::executing && ChokoLait::foreground
 			&& (VisRenderer::status != VisRenderer::STATUS::BUSY)) {
@@ -94,6 +96,7 @@ void updateFunc() {
 			VisSystem::Save(IO::path + ".recover");
 			VisSystem::SetMsg("autosaved at t=" + std::to_string((int)Time::time) + "s");
 		}
+#endif
 	}
 
 	ParGraphics::Update();

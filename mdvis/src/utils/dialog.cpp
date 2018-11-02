@@ -7,7 +7,7 @@ std::vector<std::string> Dialog::OpenFile(std::vector<std::string> pattern, bool
 	for (size_t a = 0; a < ps; ++a)  {
 		pts[a] = pattern[a].c_str();
 	}
-	auto cres = tinyfd_openFileDialog("Open File", NULL, ps, &pts[0], NULL, mul);
+	auto cres = tinyfd_openFileDialog("Open", nullptr, ps, &pts[0], nullptr, mul);
 	if (cres) {
 		auto s = std::string(cres);
 #ifdef PLATFORM_WIN
@@ -16,4 +16,10 @@ std::vector<std::string> Dialog::OpenFile(std::vector<std::string> pattern, bool
 		return string_split(s, '|', true);
 	}
 	return std::vector<std::string>();
+}
+
+std::string Dialog::SaveFile(std::string ext) {
+	const char* exts[] = { ext.c_str() };
+	auto res = tinyfd_saveFileDialog("Save", nullptr, 1, exts, nullptr);
+	return res? std::string(res) + ext : "";
 }

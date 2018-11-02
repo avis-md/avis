@@ -116,7 +116,7 @@ void VisSystem::Init() {
 	}
 
 	auto& mi = menuItems[0];
-	mi.resize(6);
+	mi.resize(7);
 	mi[0].Set(Icons::newfile, _("New"), []() {
 		Particles::Clear();
 		AnWeb::Clear0();
@@ -132,11 +132,15 @@ void VisSystem::Init() {
 	mic.resize(2);
 	mic[0].Set(0, "boo", 0);
 	mic[1].Set(0, "foo", 0);
-	mi[3].Set(Icons::openfile, _("Import"), []() {
+	mi[3].Set(0, _("Save"), []() {
+		auto path = Dialog::SaveFile(EXT_SVFL);
+		if (!!path.size()) VisSystem::Save(path.substr(0, path.size() - strlen_c(EXT_SVFL)));
+	});
+	mi[4].Set(Icons::openfile, _("Import"), []() {
 		ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
 	});
-	mi[4].Set(Icons::openfile, _("Import Recent"), 0);
-	mi[5].Set(Icons::openfile, _("Import Remote"), []() {
+	mi[5].Set(Icons::openfile, _("Import Recent"), 0);
+	mi[6].Set(Icons::openfile, _("Import Remote"), []() {
 		ParLoader::isSrv = true;
 		const char* e = "";
 		ParLoader::OnDropFile(1, &e);
@@ -218,7 +222,7 @@ bool VisSystem::InMainWin(const Vec2& pos) {
 }
 
 void VisSystem::UpdateTitle() {
-	auto& c = menuItems[0][4].child;
+	auto& c = menuItems[0][5].child;
 	auto s = ParMenu::recentFiles.size();
 	c.resize(s);
 	for (size_t i = 0; i < s; ++i)  {

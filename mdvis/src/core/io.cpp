@@ -132,6 +132,11 @@ std::string IO::ReadFile(const std::string& path) {
 	return buffer.str();
 }
 
+void IO::WriteFile(const std::string& path, const std::string& data) {
+	std::ofstream strm(path);
+	strm.write(data.data(), data.size());
+}
+
 void IO::HideInput(bool hide) {
 #ifdef PLATFORM_WIN
     HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE); 

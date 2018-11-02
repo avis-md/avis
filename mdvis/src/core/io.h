@@ -14,6 +14,7 @@ public:
 	static void RmDirectory(std::string path);
 	static bool HasFile(std::string path);
 	static std::string ReadFile(const std::string& path);
+	static void WriteFile(const std::string& path, const std::string& data);
 	static void HideInput(bool hide);
 	static std::string GetText(const std::string& path);
 	static std::vector<byte> GetBytes(const std::string& path);

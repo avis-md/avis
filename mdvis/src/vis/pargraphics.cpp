@@ -661,13 +661,13 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		glUniform1i(parProgLocs[6], 1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
+		glUniform1i(parProgLocs[9], 3);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 		glUniform1i(parProgLocs[8], 2);
 		glActiveTexture(GL_TEXTURE2);
 		if (!useGradCol) {
 			glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
-			glUniform1i(parProgLocs[9], 3);
-			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 		}
 		else {
 			glBindTexture(GL_TEXTURE_BUFFER, Particles::attrs[gradColParam]->texBuf);
@@ -996,24 +996,30 @@ void ParGraphics::DrawColMenu() {
 				Particles::RmParam(a);
 				break;
 			}
-			if (Engine::Button(exps + 30, off, 16, 16, Icons::down) == MOUSE_RELEASE) {
-				auto path = tinyfd_saveFileDialog("Save Attribute Data", nullptr, 0, 0, "");
-				if (path) {
-					Particles::attrs[a]->Export(std::string(path) + ".attr");
-				}
-			}
-			if (Engine::Button(exps + 47, off, 16, 16, Icons::up) == MOUSE_RELEASE) {
-				auto p = Dialog::OpenFile(std::vector<std::string>(1, ".attr"));
-				if (!!p.size())
-					Particles::attrs[a]->Import(p[0]);
-			}
 		}
 		off += 17;
 	}
 	if (Engine::Button(exps - 130, off, 110, 16, white(1, 0.4f), "+", 12, white(), true) == MOUSE_RELEASE) {
 		Particles::AddParam();
 	}
-	off += 19;
+	off += 18;
+	if (Particles::attrs.size() > 0 && !Particles::attrs.back()->readonly) {
+		if (Engine::Button(exps - 148, off, 74, 16, white(1, 0.4f), "Save", 12, white(), true) == MOUSE_RELEASE) {
+			auto path = Dialog::SaveFile(".attr");
+			if (!!path.size()) {
+				Particles::SaveAttrs(path);
+			}
+		}
+		if (Engine::Button(exps - 148, off, 74, 16, white(1, 0.4f), "Save", 12, white(), true) == MOUSE_RELEASE) {
+			auto pp = Dialog::OpenFile(std::vector<std::string>(1, ".attr"));
+			if (!!pp.size()) {
+				auto& path = pp[0];
+				
+			}
+		}
+	}
+
+	off += 18;
 
 	UI::Label(exps - 148, off, 12, "Coloring", white());
 	off += 17;
@@ -1359,13 +1365,10 @@ void ParGraphics::Serialize(XmlNode* nd) {
 	Eff::Serialize(nd->addchild("Effects"));
 	Shadows::Serialize(nd->addchild("Shadows"));
 }
+
 void ParGraphics::SerializeCol(XmlNode* n) {
-	auto pm = n->addchild("Params");
-	for (int a = 0; a < Particles::attrs.size(); ++a)  {
-		if (Particles::attrs[a]->readonly) continue;
-		pm->addchild("item")
-			->addchild("name", Particles::attrNms[a]);
-	}
+	Particles::SaveAttrs(VisSystem::currentSavePath + "_data/attrs.attr");
+	SVS(attrs, "attrs.attr");
 	SV(usegrad, (int)useGradCol);
 	/*
 	auto gr = pm->addchild("grad");
@@ -1429,16 +1432,8 @@ void ParGraphics::DeserializeCol(XmlNode* nd) {
 #define GTB(nm, vl) if (n.name == #nm) vl = (n.value == "1")
 #define GTV(nm, vl) if (n.name == #nm) Xml::ToVec(&n, vl)
 	for (auto& n : nd->children) {
-		if (n.name == "Params") {
-			auto ps = Particles::attrs.size();
-			for (auto& n2 : n.children) {
-				if (n2.name == "item") {
-					for (auto& n : n2.children) {
-						Particles::AddParam();
-						GTS(name, Particles::attrNms[ps-1]);
-					}
-				}
-			}
+		if (n.name == "attrs") {
+			Particles::LoadAttrs(VisSystem::currentSavePath2 + n.value);
 		}
 		else GTB(usegrad, useGradCol);
 		else GTB(useconcol, useConCol);

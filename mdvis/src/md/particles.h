@@ -59,8 +59,8 @@ public:
 		void ApplyParCnt(), ApplyFrmCnt();
 		void Update();
 		void Clear();
-		void Export(const std::string& path);
-		void Import(const std::string& path);
+		std::string Export();
+		void Import(const std::string& data);
 	private:
 		std::vector<double> data;
 		std::vector<std::vector<double>> dataAll;
@@ -92,6 +92,8 @@ public:
 
 	static std::vector<conninfo> particles_Conn2;
 
+	static void SaveAttrs(const std::string& path);
+	static void LoadAttrs(const std::string& path);
 	static void UpdateConBufs2();
 
 	struct AnimData {

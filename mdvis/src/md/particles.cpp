@@ -27,6 +27,7 @@ std::vector<double>& Particles::paramdata::Get(uint frm) {
 }
 
 void Particles::paramdata::ApplyParCnt() {
+	if (!particleSz) return;
 	SetGLBuf<float>(buf, nullptr, particleSz);
 }
 
@@ -49,11 +50,22 @@ void Particles::paramdata::Clear() {
 	std::vector<std::vector<double>>().swap(dataAll);
 }
 
-void Particles::paramdata::Export(const std::string& path) {
-	std::ofstream strm(path);
+std::string Particles::paramdata::Export() {
+	std::ostringstream strm;
+	if ((!timed && !data.size())) {
+		return "0";
+	}
 	strm << Particles::particleSz << " " << (timed? Particles::anim.frameCount : 1) << "\n";
 	if (timed) {
 		for (auto& d : dataAll) {
+			strm << d.size() << " ";
+			for (auto& d2 : d) {
+				strm << d2 << " ";
+			}
+		}
+		for (int a = 0; a < Particles::anim.frameCount; a++) {
+			auto& d = Get(a);
+			strm << d.size() << " ";
 			for (auto& d2 : d) {
 				strm << d2 << " ";
 			}
@@ -64,13 +76,15 @@ void Particles::paramdata::Export(const std::string& path) {
 			strm << d << " ";
 		}
 	}
+	return strm.str();
 }
 
-void Particles::paramdata::Import(const std::string& path) {
-	std::ifstream strm(path);
-	uint psz;
+void Particles::paramdata::Import(const std::string& buf) {
+	std::istringstream strm(buf);
+	int psz;
 	strm >> psz;
-	if (psz != Particles::particleSz) {
+	if (!psz) return;
+	else if (psz != Particles::particleSz) {
 		Debug::Warning("Attr::Import", "not atom count!");
 		return;
 	}
@@ -82,7 +96,11 @@ void Particles::paramdata::Import(const std::string& path) {
 
 	timed = (psz > 1);
 	if (timed) {
-		for (auto& d : dataAll) {
+		int n;
+		for (int f = 0; f < psz; ++f) {
+			strm >> n;
+			if (!n) continue;
+			auto& d = Get(f);
 			d.resize(Particles::particleSz);
 			for (auto& d2 : d) {
 				strm >> d2;
@@ -377,9 +395,9 @@ void Particles::Resize(uint i) {
 	resNames.resize(i * PAR_MAX_NAME_LEN);
 	types.resize(i);
 	colors.resize(i);
-	radii.resize(i);
+	radii.resize(i, 1);
 	radiiscl.resize(i, 1);
-	visii.clear(); visii.resize(i, true);
+	visii.resize(i, true);
 	ress.resize(i);
 
 	for (auto& a : attrs) {
@@ -461,6 +479,38 @@ void Particles::UpdateRadBuf(int i) {
 	}
 }
 
+void Particles::SaveAttrs(const std::string& path) {
+	std::string s;
+	for (int a = 0; a < attrs.size(); ++a) {
+		if (!attrs[a]->readonly) {
+			s += attrNms[a] + "#";
+			s += attrs[a]->Export();
+			s += "\n#";
+		}
+	}
+	IO::WriteFile(path, s);
+}
+
+void Particles::LoadAttrs(const std::string& path) {
+	auto data = IO::GetText(path);
+	auto ss = string_split(data, '#', true);
+	auto ssz = ss.size();
+	if (!ssz) return;
+	int asz = attrs.size();
+	for (; asz > 0; --asz) {
+		if (!attrs[asz-1]->readonly) {
+			RmParam(asz-1);
+		}
+		else break;
+	}
+	for (int a = 0; a < ssz/2; ++a) {
+		AddParam();
+		attrNms[asz++] = ss[a*2];
+		auto& at = attrs.back();
+		at->Import(ss[a*2+1]);
+	}
+}
+
 void Particles::UpdateConBufs2() {
 	for (auto& c2 : particles_Conn2) {
 		if (!c2.cnt) continue;
@@ -521,7 +571,7 @@ void Particles::SetFrame(uint frm) {
 
 void Particles::AddParam() {
 	if (attrs.size() > 48) {
-		Debug::Error("Particles::AddParam", "Limit of attribute count reached!");
+		Debug::Error("Particles::AddParam", "Attribute count limit reached!");
 		return;
 	}
 	attrs.push_back(new paramdata());
