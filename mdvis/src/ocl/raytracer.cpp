@@ -238,43 +238,38 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 #include "asset/tetrahedron.h"
 
 void RayTracer::SetObjs() {
-	auto res = TO::LoadObj(g_objshapes, g_objmaterials, (IO::path + "res/sharo.objm").c_str(), (IO::path + "res/").c_str());
-	if (res != "")
-	{
-		throw std::runtime_error(res);
-	}
-	
 	Tetrahedron tet = Tetrahedron();
 	for (int a = 0; a < 5; a++)
 		tet.Subdivide();
 	tet.ToSphere(0.2f);
 
 	for (auto& v : tet.verts) {
-		v.x += 0.5f;
 		v.y += 1;
 	}
 
-	g_objshapes.push_back(g_objshapes[1]);
-	auto& v = g_objshapes.back().mesh.positions;
-	for (int a = 0, b = g_objshapes.back().mesh.positions.size() / 3; a < b; ++a)  {
-		v[a * 3] += 1;
-	}
-
-	/*
 	g_objshapes.push_back(TO::shape_t());
-	g_objshapes.back().name = "ball";
-	auto& msh = g_objshapes.back().mesh;
-	auto tsz = tet.verts.size();
-	msh.positions.resize(tsz*3);
-	memcpy(&msh.positions[0], &tet.verts[0][0], tsz * sizeof(Vec3));
-	msh.normals.resize(tsz*3);
-	memcpy(&msh.normals[0], &tet.norms[0][0], tsz * sizeof(Vec3));
-	msh.texcoords.resize(tsz*2);
-	auto isz = tet.tris.size();
-	msh.indices.resize(isz);
-	memcpy(&msh.indices[0], &tet.tris[0], isz * sizeof(int));
-	msh.material_ids.resize(isz/3, 0);
-	*/
+	auto& m = g_objshapes.back().mesh;
+	auto& v = m.positions;
+	v.resize(tet.verts.size() * 3);
+	memcpy(&v[0], &tet.verts[0], tet.verts.size() * sizeof(Vec3));
+	m.indices = tet.tris;
+	m.material_ids.resize(tet.tris.size(), 0);
+	m.normals.resize(tet.norms.size() * 3);
+	memcpy(&m.normals[0], &tet.norms[0], tet.norms.size() * sizeof(Vec3));
+	g_objmaterials.push_back(TO::material_t());
+
+	for (int a = 0; a < 500; a++) {
+		g_objshapes.push_back(g_objshapes[0]);
+		auto& p = g_objshapes.back().mesh.positions;
+		float rx = (Random::Value() - 0.5f) * 2;
+		float ry = (Random::Value() - 0.5f) * 2;
+		float rz = (Random::Value() - 0.5f) * 2;
+		for (int v = 0; v < p.size()/3; v++) {
+			p[v * 3] += rx;
+			p[v * 3 + 1] += ry;
+			p[v * 3 + 2] += rz;
+		}
+	}
 
 	std::vector<float> verts;
 	std::vector<float> normals;

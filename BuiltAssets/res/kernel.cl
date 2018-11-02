@@ -1,7 +1,7 @@
 #define EPSILON 0.00001f
-#define ACCUM
 
-typedef struct _Ray {
+typedef struct _Ray
+{
     /// xyz - origin, w - max range
     float4 o;
     /// xyz - direction, w - time
@@ -12,7 +12,8 @@ typedef struct _Ray {
     float2 padding;
 } Ray;
 
-typedef struct _Camera {
+typedef struct _Camera
+    {
         // Camera coordinate frame
         float3 forward;
         float3 up;
@@ -22,20 +23,8 @@ typedef struct _Camera {
         float2 zcap;
     } Camera;
 
-typedef struct _Mat4x4 {
-    float4 a, b, c, d;
-} Mat4x4;
-
-float4 MatVec(Mat4x4 mat, float4 vec) {
-    return (float4)(
-        mat.a.x*vec.x + mat.b.x*vec.y + mat.c.x*vec.z + mat.d.x*vec.w,
-        mat.a.y*vec.x + mat.b.y*vec.y + mat.c.y*vec.z + mat.d.y*vec.w,
-        mat.a.z*vec.x + mat.b.z*vec.y + mat.c.z*vec.z + mat.d.z*vec.w,
-        mat.a.w*vec.x + mat.b.w*vec.y + mat.c.w*vec.z + mat.d.w*vec.w
-    );
-}
-
-typedef struct _Intersection {
+typedef struct _Intersection
+{
     // id of a shape
     int shapeid;
     // Primitive index
@@ -51,7 +40,8 @@ typedef struct _Intersection {
 float4 ConvertFromBarycentric(__global const float* vec, 
                             __global const int* ind, 
                             int prim_id, 
-                            __global const float4* uvwt) {
+                            __global const float4* uvwt)
+{
     float4 a = (float4)(vec[ind[prim_id * 3] * 3],
                         vec[ind[prim_id * 3] * 3 + 1],
                         vec[ind[prim_id * 3] * 3 + 2], 0.f);
@@ -108,7 +98,7 @@ static void Beckmann(float3* nrm, float rough, uint* rnd) {
 }
 
 static float3 SkyAt(float3 dir, __global float* bg) {
-    const int bgw = 1024;
+    const int bgw = 2048;
     const int bgh = bgw/2;
     
 	float2 rf = -(float2)(dir.x, dir.z);
@@ -161,7 +151,7 @@ __kernel void Shading(//scene
                 __global float* colors,
                 __global int* indents,
                 __global Intersection* isect,
-                int isprim,
+                float weight,
                 int width,
                 int height,
                 __global unsigned char* out, //actual color
@@ -186,11 +176,8 @@ __kernel void Shading(//scene
         const float str = 1;
 
         uint rnd = (uint)(k + rng);
-        if (isprim == 1) {
-            ocol[k] = (float4)(0, 0, 0, 0.2f);
-        }
         float4 col = ocol[k];
-
+        
         if (col.w >= 0) {
             if (shape_id != -1 && prim_id != -1)
             {
@@ -203,13 +190,11 @@ __kernel void Shading(//scene
 
                 //triangle diffuse color
                 int color_id = ind + prim_id*3;
-                float4 diff_col = (float4)( colors[color_id],
+                float3 diff_col = (float3)( colors[color_id],
                                             colors[color_id + 1],
-                                            colors[color_id + 2], 1.f);
+                                            colors[color_id + 2]);
 
                 if (ray[k].o.w > 0.01f) {
-                    float dif = diff_col.x + diff_col.y + diff_col.z;
-                    
                     float3 ro = ray[k].o.xyz;
                     float3 rd = normalize(ray[k].d.xyz);
 
@@ -217,12 +202,11 @@ __kernel void Shading(//scene
                     frr *= frr;
                     float fres = frr + (1 - frr)*pow(1 - dot(-rd, norm), 5);
                     //if (Randf(&rnd) < (1 - ((1 - fres) * (1 - mat.specular)))) {
-                    if ((Randf(&rnd) < (1 - ((1 - fres) * 0.95f))) || dif > 0.1f) {
+                    if (Randf(&rnd) < (1 - ((1 - fres) * 0.7))) {
                         //Beckmann(&norm, 1 - mat.gloss, &rnd);
-                        if (dif > 0.01f) Beckmann(&norm, 0.02f, &rnd);
-                        else Beckmann(&norm, 0.01f, &rnd);
+                        Beckmann(&norm, 0.001f, &rnd);
                         norm = rd - 2 * dot(rd, norm.xyz) / (norm.x*norm.x + norm.y*norm.y + norm.z*norm.z) * norm;
-                        diff_col.xyz = (float3)(1, 1, 1);
+                        diff_col = (float3)(1, 1, 1);
                     }
                     else {
                         float3 t1, t2;
@@ -231,14 +215,13 @@ __kernel void Shading(//scene
                         float3 nrm = t1*rh.x + t2*rh.y + norm*rh.z;
                         ocol[k].xyz *= dot(nrm, norm);
                         norm = nrm;
-                        if (dif < 0.01f)
-                            diff_col.xyz = (float3)(1, 1, 1);
+                        diff_col = (float3)(1, 1, 1);
                     }
 
                     if (ocol[k].w < 0.5f)
-                        ocol[k].xyz = diff_col.xyz;
+                        ocol[k].xyz = diff_col;
                     else
-                        ocol[k].xyz *= diff_col.xyz;
+                        ocol[k].xyz *= diff_col;
                     ocol[k].w = 1;
 
 
@@ -251,29 +234,20 @@ __kernel void Shading(//scene
                 float3 bgc = SkyAt(normalize(ray[k].d.xyz), bg);
                 
                 if (col.w < 0.5f) {
-                    col.xyz = (float3)(1, 1, 1) * 0.1f;
+                    col.xyz = bgc;//(float3)(0, 0, 0);
                 }
                 else
                     col.xyz *= bgc;
-#ifdef ACCUM
                 accum[k * 3] += max(col.x, 0.0f);
                 accum[k * 3 + 1] += max(col.y, 0.0f);
                 accum[k * 3 + 2] += max(col.z, 0.0f);
-#else
-                accum[k * 3] = max(col.x, 0.0f);
-                accum[k * 3 + 1] = max(col.y, 0.0f);
-                accum[k * 3 + 2] = max(col.z, 0.0f);
-#endif
                 ray[k].o = 0;
                 ocol[k].w = -1;
             }
         }
-#ifndef ACCUM
-        smps = 1;
-#endif
-        out[k * 4] = clamp(accum[k * 3] / smps * 255, 0.0f, 255.0f);
-        out[k * 4 + 1] = clamp(accum[k * 3 + 1] / smps * 255, 0.0f, 255.0f);
-        out[k * 4 + 2] = clamp(accum[k * 3 + 2] / smps * 255, 0.0f, 255.0f);
+        out[k * 4] = clamp(accum[k * 3] / smps, 0.0f, 1.0f) * 255;
+        out[k * 4 + 1] = clamp(accum[k * 3 + 1] / smps, 0.0f, 1.0f) * 255;
+        out[k * 4 + 2] = clamp(accum[k * 3 + 2] / smps, 0.0f, 1.0f) * 255;
         out[k * 4 + 3] = 255;
     }
 }

@@ -417,8 +417,10 @@ The hash for this program is )" << VisSystem::version_hash
 			main_openfiles.erase(main_openfiles.begin());
 		}
 
-		if (option_min) Display::Resize(500, 500, false);
-		else Display::Resize(1024, 600, false);
+		//if (option_min)
+			Display::Resize(500, 500, false);
+		//else
+		//	Display::Resize(1024, 600, false);
 
 		auto lastMillis = Time::millis;
 
