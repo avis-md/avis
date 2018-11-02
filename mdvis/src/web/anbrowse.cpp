@@ -197,7 +197,7 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 			if (Engine::Button(2.f + 5 * layer, off, 150.f, 16.f, white(1, 0.35f)) == MOUSE_RELEASE) {
 				if (Input::dbclick) {
 					AnWeb::selScript = nullptr;
-					AnNode* pn;
+					AnNode* pn = 0;
 					switch (fs->type) {
 					case AN_SCRTYPE::PYTHON:
 						pn = new PyNode(dynamic_cast<PyScript*>(fs));
