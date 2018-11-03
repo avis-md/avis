@@ -6,7 +6,7 @@ public:
 
 	static void Draw();
 
-private:
 	static bool show;
+private:
 	static std::vector<std::string> logs;
 };

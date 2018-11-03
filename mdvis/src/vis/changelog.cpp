@@ -8,11 +8,11 @@ void ChangeLog::Init() {
 	auto txt = IO::GetText(IO::path + "lastversion.txt");
 	if (txt != APPVERSION) {
 		IO::WriteFile(IO::path + "lastversion.txt", APPVERSION);
-		auto s = IO::GetText(IO::path + "CHANGELOG");
-		logs = string_split(s, '\n', true);
 		show = true;
 	}
 	else show = false;
+	auto s = IO::GetText(IO::path + "CHANGELOG");
+	logs = string_split(s, '\n', true);
 }
 
 void ChangeLog::Draw() {

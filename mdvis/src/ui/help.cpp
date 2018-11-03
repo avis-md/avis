@@ -47,7 +47,7 @@ void HelpMenu::Draw() {
 }
 
 void HelpMenu::Link(float x, float y, const std::string& path) {
-	if (Engine::Button(x + 1, y + 1, 14, 14, Icons::circle) == MOUSE_RELEASE) {
-		IO::OpenEx(IO::path + "../../docs/_build/html/Reference/" + path);
+	if (Engine::Button(x + 1, y + 1, 14, 14, Icons::help) == MOUSE_RELEASE) {
+		IO::OpenEx(IO::path + "docs/reference/" + path);
 	}
 }

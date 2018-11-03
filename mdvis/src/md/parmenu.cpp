@@ -183,7 +183,7 @@ void ParMenu::Draw_List(float off) {
 	}
 	Engine::BeginStencil(0, off, expandPos, hmax);
 	if (Rect(0, off, expandPos, Display::height - 18 - off).Inside(Input::mousePos)) {
-		listHOff += Input::mouseScroll * 20;
+		listHOff -= Input::mouseScroll * 20;
 		listHOff = std::min(listHOff, listH * 17 - hmax);
 		listHOff = std::max(listHOff, 0.f);
 	}

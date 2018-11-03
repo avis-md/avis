@@ -845,8 +845,8 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 
 void ParGraphics::Reblit() {
 	auto& cam = ChokoLait::mainCamera;
-	if (!AnWeb::drawFull || Scene::dirty) tfboDirty = true;
-	//tfboDirty = Scene::dirty;
+	//if (!AnWeb::drawFull || Scene::dirty)
+		tfboDirty = true;
 	if (tfboDirty) {
 		if (!!Particles::particleSz) {
 			if (RayTracer::resTex) {
@@ -870,7 +870,7 @@ void ParGraphics::Reblit() {
 		//if (tfboDirty && AnWeb::drawFull)
 		tfboDirty = false;
 	}
-	
+
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glEnable(GL_BLEND);
 	//glBlendFunc(GL_ONE, GL_ONE);
@@ -916,7 +916,7 @@ void ParGraphics::BlitSky() {
 		glUniform1f(reflProgLocs[11], specStr);
 		if (AnWeb::drawFull) {
 			glUniform4f(reflProgLocs[12], 0, 0, 0, 1);
-			glUniform3f(reflProgLocs[13], 0, 0, 0);
+			glUniform4f(reflProgLocs[13], 0, 0, 0, 1);
 		}
 		else {
 			glUniform4f(reflProgLocs[12], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
@@ -984,7 +984,7 @@ void ParGraphics::DrawOverlay() {
 
 void ParGraphics::DrawColMenu() {
 	auto& exps = ParMenu::expandPos;
-	float off = 20;
+	float off = UI::BeginScroll(exps - 150, 19, 150, Display::height - 38);
 	UI::Label(exps - 148, off, 12, "Attributes", white());
 	off += 18;
 	UI::Quad(exps - 149, off - 1, 149, 17 * (Particles::attrs.size() + 1) + 2, white(0.9f, 0.1f));
@@ -1164,11 +1164,12 @@ void ParGraphics::DrawColMenu() {
 		}
 	}
 	auto _ors = orientStr;
-	orientStr = UI2::Slider(exps - 147, off, 146, "Strength", 0, 2, orientStr);
+	orientStr = UI2::Slider(exps - 147, off, 146, "Strength", 0, 2, orientStr); off += 17;
 	if (_ors != orientStr) {
 		_ors = orientStr;
 		Scene::dirty = true;
 	}
+	UI::EndScroll(off);
 }
 
 void ParGraphics::DrawMenu() {
@@ -1179,16 +1180,13 @@ void ParGraphics::DrawMenu() {
 
 	auto& expandPos = ParMenu::expandPos;
 
-	UI2::Dropdown(expandPos - 148, 20, 146, _("Shading"), _usePBRItems);
+	auto off = UI::BeginScroll(expandPos - 150, 19, 150, Display::height - 38);
 
-	float off = 37;
-
+	UI2::Dropdown(expandPos - 148, off, 146, _("Shading"), _usePBRItems); off += 17;
 	UI::Label(expandPos - 148, off, 12, _("Lighting"), white());
 	if (usePBR && !!_usePBRItems.target) {
-		UI::Quad(expandPos - 149, off + 17, 148, 17, white(0.9f, 0.1f));
-		off += 1;
-		UI2::Dropdown(expandPos - 147, off + 17, 146, _("Sky"), reflItms);
-		off += 17;
+		UI::Quad(expandPos - 149, off + 17, 148, 17, white(0.9f, 0.1f)); off += 1;
+		UI2::Dropdown(expandPos - 147, off + 17, 146, _("Sky"), reflItms); off += 17;
 	}
 	off += 17;
 	UI::Quad(expandPos - 149, off - 1, 148, 17 * (fogUseBgCol? 5 : 6) + 3, white(0.9f, 0.1f));
@@ -1299,7 +1297,9 @@ void ParGraphics::DrawMenu() {
 	
 	off = Eff::DrawMenu(off);
 
-	Shadows::DrawMenu(off + 1);
+	off = Shadows::DrawMenu(off + 1);
+
+	UI::EndScroll(off);
 
 	if (rf != rotCenterTrackId || s0 != rotScale || rz0 != rotZ || rw0 != rotW || center0 != rotCenter) Scene::dirty = true;
 }

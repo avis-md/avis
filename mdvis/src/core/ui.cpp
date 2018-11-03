@@ -1,6 +1,10 @@
 #include "Engine.h"
 #include "res/shddata.h"
 
+std::unordered_map<size_t, Vec2> UI::scrollWs;
+Vec2* UI::currentScroll;
+float UI::currentScrollW0;
+
 bool UI::_isDrawingLoop = false;
 uintptr_t UI::_activeEditText[UI_MAX_EDIT_TEXT_FRAMES] = {};
 uintptr_t UI::_lastEditText[UI_MAX_EDIT_TEXT_FRAMES] = {};
@@ -600,4 +604,20 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
+}
+
+float UI::BeginScroll(float x, float y, float w, float h) {
+	Engine::PushStencil(x, y, w, h);
+	uintptr_t buf[3];
+	Debug::StackTrace(3, (void**)buf);
+	currentScroll = &scrollWs[buf[2]];
+	if (currentScroll->x > h) currentScroll->y = Clamp(currentScroll->y + Input::mouseScroll * 10, h - currentScroll->x, 0.f);
+	else currentScroll->y = 0;
+	currentScrollW0 = y + currentScroll->y;
+	return currentScrollW0;
+}
+
+void UI::EndScroll(float off) {
+	currentScroll->x = (off - currentScrollW0);
+	Engine::EndStencil();
 }

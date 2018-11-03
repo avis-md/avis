@@ -1,8 +1,9 @@
 #include "system.h"
+#include "pargraphics.h"
+#include "renderer.h"
+#include "changelog.h"
 #include "md/parmenu.h"
 #include "md/parloader.h"
-#include "vis/pargraphics.h"
-#include "vis/renderer.h"
 #include "web/anweb.h"
 #include "ui/icons.h"
 #include "ui/help.h"
@@ -177,11 +178,14 @@ void VisSystem::Init() {
 	});
 
 	auto& mi3 = menuItems[4];
-	mi3.resize(2);
+	mi3.resize(3);
 	mi3[0].Set(0, "User Manual", []() {
 		IO::OpenEx(IO::path + "docs/index.html");
 	});
-	mi3[1].Set(Icons::vis_atom, "Splash Screen", []() {
+	mi3[1].Set(0, "Change Log", []() {
+		ChangeLog::show = true;
+	});
+	mi3[2].Set(Icons::vis_atom, "Splash Screen", []() {
 		ParMenu::showSplash = true;
 	});
 }

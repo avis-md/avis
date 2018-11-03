@@ -246,11 +246,10 @@ void AnBrowse::Draw() {
 	if (Popups::type == POPUP_TYPE::NONE) doAddFd = nullptr;
 	UI::Quad(0, 0, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
 	if (expanded) {
-		float f = 20;
-		Engine::BeginStencil(0, 0, expandPos, Display::height - 18.f);
 		UI::Label(5, 3, 12.f, "Scripts", white());
-		HelpMenu::Link(expandPos - 16, 3, "Analysis/index.html");
+		HelpMenu::Link(expandPos - 16, 3, "anl/index.html");
 
+		float f = UI::BeginScroll(0, 19, expandPos, Display::height - 38);
 #define BT(nm) (byte)(AN_NODE_ ## nm)
 #define MSC1(n, nm) UI::Quad(2, f, 150.f, 16.f, white(1, 0.3f)); \
 		if (Engine::Button(2, f, 16.f, 16.f, mscFdExpanded[n] ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) \
@@ -305,7 +304,8 @@ void AnBrowse::Draw() {
 		}
 
 		DoDraw(&folder, f, 0);
-		Engine::EndStencil();
+		UI::EndScroll(f);
+
 		UI::Quad(expandPos, Display::height - 34.f, 16.f, 16.f, white(1, 0.2f));
 		if ((!UI::editingText && Input::KeyUp(Key_S)) || Engine::Button(expandPos, Display::height - 34.f, 16.f, 16.f, Icons::collapse) == MOUSE_RELEASE)
 			expanded = false;

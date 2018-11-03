@@ -13,7 +13,7 @@ Icons::dm_none, Icons::dm_point, Icons::dm_ball, Icons::dm_vdw, Icons::dm_line, 
 Icons::colorwheel,
 Icons::vis_atom, Icons::vis_prot,
 Icons::pro_col, Icons::pro_grad,
-Icons::details, Icons::compile, Icons::exec, Icons::tick;
+Icons::details, Icons::compile, Icons::exec, Icons::tick, Icons::help;
 
 #define TEXN(nm) Texture(res::nm ## _png, res::nm ## _png_sz)
 #define TEX(nm) nm = Texture(res::nm ## _png, res::nm ## _png_sz)
@@ -71,6 +71,7 @@ void Icons::Init() {
 	TEX(compile);
 	TEX(exec);
 	TEX(tick);
+	TEX(help);
 }
 
 const Texture& Icons::OfDM(byte b) {
