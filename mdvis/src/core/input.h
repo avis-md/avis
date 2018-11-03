@@ -21,6 +21,7 @@ public:
 	static bool KeyDown(InputKey key), KeyHold(InputKey key), KeyUp(InputKey key);
 
 	static void PreLoop();
+	static bool CheckCopy(const char* loc, size_t len);
 
 	friend class ChokoLait;
 	friend class Engine;

@@ -1,0 +1,13 @@
+#General
+- Changed name to AVIS (read: ayy-vis)
+- New Documentation!
+
+#Improvements
+- Bounding box can now be animated
+- Export to GIF / AVI now supported
+- Information tab now shows info for selected atoms
+- Scripts now load in a separate thread
+- Utility to offset periodic boundary
+- Generic SSV format introduced
+- Attributes can now be saved / loaded
+- Improved control for text box

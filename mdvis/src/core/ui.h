@@ -49,6 +49,7 @@ public:
 	static uint _editTextCursorPos, _editTextCursorPos2;
 	static std::string _editTextString;
 	static float _editTextBlinkTime;
+	static float _editTextHoff;
 
 	static Style _defaultStyle;
 	static float alpha;

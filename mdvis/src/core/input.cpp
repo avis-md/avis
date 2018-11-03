@@ -90,6 +90,10 @@ void Input::UpdateMouseNKeyboard(bool* src) {
 
 	mouseDelta = mousePos - mousePosOld;
 	mousePosOld = mousePos;
+
+	if (KeyHold(Key_LeftControl) && KeyDown(Key_V)) {
+		_inputString += glfwGetClipboardString(Display::window);
+	}
 }
 
 void Input::PreLoop() {
@@ -97,4 +101,18 @@ void Input::PreLoop() {
 	_inputString.clear();
 	mouseScroll = _mouseScroll;
 	_mouseScroll = 0;
+}
+
+bool Input::CheckCopy(const char* loc, size_t len) {
+	if (KeyHold(Key_LeftControl)) {
+		if (KeyDown(Key_X)) {
+			glfwSetClipboardString(Display::window, std::string(loc, len).c_str());
+			return true;
+		}
+		else if (KeyDown(Key_C)) {
+			glfwSetClipboardString(Display::window, std::string(loc, len).c_str());
+			return false;
+		}
+	}
+	return false;
 }

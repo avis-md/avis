@@ -315,7 +315,7 @@ void AnWeb::DrawSide() {
 			Scene::dirty = true;
 		}
 
-		bool canexec = (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
+		bool canexec = !!Particles::particleSz &&(!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
 		if (Engine::Button(expos + 1, 38, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
 			if (canexec) AnWeb::Execute(false);
 		}

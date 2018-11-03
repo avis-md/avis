@@ -15,6 +15,7 @@ uint UI::_editTextCursorPos = 0;
 uint UI::_editTextCursorPos2 = 0;
 std::string UI::_editTextString = "";
 float UI::_editTextBlinkTime = 0;
+float UI::_editTextHoff;
 
 UI::Style UI::_defaultStyle = {};
 float UI::alpha = 1;
@@ -267,8 +268,7 @@ std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol,
 			}
 			else {
 				_editTextString = _editTextString.substr(0, std::min(_editTextCursorPos, _editTextCursorPos2)) + _editTextString.substr(std::max(_editTextCursorPos, _editTextCursorPos2));
-				_editTextCursorPos = std::min(_editTextCursorPos, _editTextCursorPos2);
-				_editTextCursorPos2 = _editTextCursorPos;
+				_editTextCursorPos2 = _editTextCursorPos = std::min(_editTextCursorPos, _editTextCursorPos2);
 			}
 			if (!delayed && changed) *changed = true;
 			_editTextBlinkTime = 0;
@@ -278,39 +278,57 @@ std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol,
 			if (!delayed && changed) *changed = true;
 			_editTextBlinkTime = 0;
 		}
+		if (_editTextCursorPos != _editTextCursorPos2) {
+			auto met = std::min(_editTextCursorPos, _editTextCursorPos2);
+			auto mex = std::max(_editTextCursorPos, _editTextCursorPos2);
+			if (Input::CheckCopy(&_editTextString[met], mex - met)) {
+				_editTextString = _editTextString.substr(0, met) + _editTextString.substr(mex);
+				_editTextCursorPos2 = _editTextCursorPos = met;
+			}
+		}
 		UI::Quad(x, y, w, h, black());
 		UI::Quad(x + 1, y + 1, w - 2, h - 2, white());
-		UI::Label(x + 2, y + 0.4f*h, s, _editTextString);
+		UI::Label(x + 2 - _editTextHoff, y + 0.4f*h, s, _editTextString);
 
 		auto szz = _editTextString.size();
-		if (!!Input::mouse0State && !!szz && Rect(x, y, w, h).Inside(Input::mousePos)) {
+		if (!!Input::mouse0State && !!szz && Rect(x, y, w, h).Inside(Input::mouseDownPos)) {
 			_editTextCursorPos = 0;
 			for (uint i = 1; i <= szz; ++i)  {
 				_editTextCursorPos += (Input::mousePos.x > Display::width*(font->poss[i * 4 - 2].x + font->poss[i * 4].x) / 2);
 			}
-			_editTextCursorPos2 = 0;
-			for (uint i = 1; i <= szz; ++i)  {
-				_editTextCursorPos2 += (Input::mouseDownPos.x > Display::width*(font->poss[i * 4 - 2].x + font->poss[i * 4].x) / 2);
+			if (Input::mouse0State == MOUSE_DOWN) {
+				_editTextCursorPos2 = 0;
+				for (uint i = 1; i <= szz; ++i)  {
+					_editTextCursorPos2 += (Input::mouseDownPos.x > Display::width*(font->poss[i * 4 - 2].x + font->poss[i * 4].x) / 2);
+				}
 			}
 			_editTextBlinkTime = 0;
 		}
 
 		float xp;
-		if (!_editTextCursorPos) xp = x + 2;
+		if (!_editTextCursorPos) xp = x + 2 - _editTextHoff;
 		else xp = font->poss[_editTextCursorPos * 4].x*Display::width;
+
 		float xp2;
-		if (!_editTextCursorPos2) xp2 = x + 2;
+		if (!_editTextCursorPos2) xp2 = x + 2 - _editTextHoff;
 		else xp2 = font->poss[_editTextCursorPos2 * 4].x*Display::width;
 		if (_editTextCursorPos != _editTextCursorPos2) {
 			UI::Quad(xp, y + 2, xp2 - xp, h - 4, hcol);
 			UI::Label(std::min(xp, xp2), y + 0.4f*h, s, _editTextString.substr(std::min(_editTextCursorPos, _editTextCursorPos2), abs((int)_editTextCursorPos - (int)_editTextCursorPos2)), acol);
 		}
 		_editTextBlinkTime += Time::delta;
-		if (fmod(_editTextBlinkTime, 1) < 0.5f) Engine::DrawLine(Vec2(xp, y + 2), Vec2(xp, y + h - 2), (_editTextCursorPos == _editTextCursorPos2) ? black() : white(), 1);
+		if (fmod(_editTextBlinkTime, 1) < 0.5f) Engine::DrawLine(Vec2(xp + 2, y + 2), Vec2(xp + 2, y + h - 2), (_editTextCursorPos == _editTextCursorPos2) ? black() : white(), 1);
 		font->Align(al);
+		
+		if (xp < x + 2) {
+			_editTextHoff -= (x - xp + 2);
+		}
+		else if (xp > x + w - 2) {
+			_editTextHoff += (xp - x - w + 2);
+		}
 
 		Engine::PopStencil();
-		if ((Input::mouse0State == MOUSE_UP && !Rect(x, y, w, h).Inside(Input::mousePos)) || Input::KeyDown(Key_Enter)) {
+		if ((Input::mouse0State == MOUSE_DOWN && !Rect(x, y, w, h).Inside(Input::mouseDownPos)) || Input::KeyDown(Key_Enter)) {
 			memset(_editingEditText, 0, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
 			_activeEditTextId = 0;
 			if (changed && delayed) *changed = true;

@@ -21,6 +21,7 @@
 #include "md/CDV.h"
 #include "md/lammps.h"
 #include "md/dlpoly.h"
+#include "vis/changelog.h"
 #include "vis/cubemarcher.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
@@ -213,7 +214,8 @@ void paintfunc() {
 	}
 
 	VisRenderer::Draw();
-	if (ParMenu::showSplash) ParMenu::DrawSplash();
+	ParMenu::DrawSplash();
+	ChangeLog::Draw();
 	HelpMenu::Draw();
 
 	UI::Quad(0, 0, Display::width, Display::height, RayTracer::resTex);
@@ -360,6 +362,7 @@ The hash for this program is )" << VisSystem::version_hash
 		INIT(Effects, 0xffff);
 		INIT(SSH);
 		INIT(AnBrowse);
+		INIT(ChangeLog);
 		ParMenu::LoadRecents();
 
 		AnBrowse::Scan();
@@ -417,10 +420,10 @@ The hash for this program is )" << VisSystem::version_hash
 			main_openfiles.erase(main_openfiles.begin());
 		}
 
-		//if (option_min)
+		if (option_min)
 			Display::Resize(500, 500, false);
-		//else
-		//	Display::Resize(1024, 600, false);
+		else
+			Display::Resize(1024, 600, false);
 
 		auto lastMillis = Time::millis;
 

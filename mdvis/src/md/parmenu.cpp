@@ -391,6 +391,7 @@ void ParMenu::DrawStart() {
 }
 
 void ParMenu::DrawSplash() {
+	if (!showSplash) return;
 	UI::IncLayer();
 	UI::Quad(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), black(0.7f));
 	UI::Texture(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, ParGraphics::splash);
@@ -459,7 +460,7 @@ void ParMenu::DrawSplash() {
 	if (sub.size()) {
 		UI::Label(Display::width*0.5f - 190, pos.y + pos.w + 1, 12, sub, white(0.7f));
 	}
- 	if ((Input::KeyDown(Key_Escape) && UI::_layer == UI::_layerMax) || (Input::mouse0State == 1 && !Rect(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250).Inside(Input::mousePos))) {
+ 	if ((UI::_layer == UI::_layerMax) && (Input::KeyDown(Key_Escape) || (Input::mouse0State == 1 && !Rect(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250).Inside(Input::mousePos)))) {
 		showSplash = false;
 	}
 }
