@@ -367,6 +367,29 @@ void ParGraphics::UpdateDrawLists() {
 	Scene::dirty = true;
 }
 
+void ParGraphics::OnLoadConfig() {
+	int rx = 0;
+	for (int a = 0; a < Particles::attrs.size(); ++a) {
+		if (Particles::attrNms[a] == "rotx") {
+			orientParam[0] = a;
+			rx++;
+		}
+		if (Particles::attrNms[a] == "roty") {
+			orientParam[1] = a;
+			rx++;
+		}
+		if (Particles::attrNms[a] == "rotz") {
+			orientParam[2] = a;
+			rx++;
+		}
+	}
+	if (rx == 3) {
+		orientType = ORIENT::STRETCH;
+		orientStr = 1.5f;
+	}
+	clipPlane.center = clipCube.center = Particles::bboxCenter;
+}
+
 void ParGraphics::FillRad(byte* rads) {
 	for (auto& p : drawLists) {
 		float ml = 1;
@@ -543,11 +566,11 @@ void ParGraphics::UpdateClipping() {
 		break;
 	case CLIPPING::PLANE:
 	{
-		auto nl = glm::length(clipPlane.norm);
-		if (nl > 0)
-			clipPlane.norm /= nl;
+		//auto nl = glm::length(clipPlane.norm);
+		//if (nl > 0)
+		//	clipPlane.norm /= nl;
 		Vec4 cents[2] = {}, dirs[2] = {};
-		TTF(dirs[0], clipPlane.norm);
+		TTF(dirs[0], glm::normalize(clipPlane.norm));
 		TTF(dirs[1], -clipPlane.norm);
 		TTF(cents[0], clipPlane.center + clipPlane.norm * clipPlane.size * 0.5f);
 		TTF(cents[1], clipPlane.center - clipPlane.norm * clipPlane.size * 0.5f);

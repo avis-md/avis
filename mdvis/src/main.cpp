@@ -60,14 +60,6 @@ void rendFunc() {
 void updateFunc() {
 	if (ParLoader::parDirty) {
 		ParLoader::parDirty = false;
-		Particles::UpdateColorTex();
-		Particles::UpdateBufs();
-		Particles::UpdateBBox();
-		//if (Protein::Refresh()) {
-			Particles::GenTexBufs();
-			ParGraphics::UpdateDrawLists();
-		//}
-		ParMenu::CalcH();
 		if (ParLoader::impId == 0) {
 			for (auto& a : GenericSSV::attrs) {
 				Particles::AddParam();
@@ -79,6 +71,15 @@ void updateFunc() {
 			}
 			GenericSSV::attrs.clear();
 		}
+		Particles::UpdateColorTex();
+		Particles::UpdateBufs();
+		Particles::UpdateBBox();
+		//if (Protein::Refresh()) {
+			Particles::GenTexBufs();
+			ParGraphics::OnLoadConfig();
+			ParGraphics::UpdateDrawLists();
+		//}
+		ParMenu::CalcH();
 		VisSystem::lastSave = Time::time;
 
 		if (!!main_openfiles.size()) {
@@ -171,7 +172,7 @@ void paintfunc() {
 	if (!UI::_layerMax && !stealFocus && VisSystem::InMainWin(Input::mousePos) && !ParGraphics::dragging) {
 
 		auto id = ChokoLait::mainCamera->GetIdAt((uint)Input::mousePos.x, (uint)Input::mousePos.y);
-		if (!!id) {
+		if (id > 0 && id <= Particles::particleSz) {
 			ParGraphics::hlIds.push_back(id);
 			if ((Input::mouse0State == MOUSE_UP) && (Input::mouseDownPos == Input::mousePos)) {
 				if (Input::dbclick) {

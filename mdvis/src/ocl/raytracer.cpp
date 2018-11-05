@@ -2,6 +2,7 @@
 #include "hdr.h"
 #include "kernel.h"
 #include "tmp/tiny_obj_loader.h"
+#include "vis/pargraphics.h"
 
 RadeonRays::matrix RadeonRays::MatFunc::Glm2RR(const glm::mat4& mat) {
 	auto m = glm::transpose(mat);
@@ -115,6 +116,10 @@ void RayTracer::SetScene() {
 void RayTracer::Refine() {
 	const int wh = Display::width * Display::height;
 
+	if (Scene::dirty) {
+		samples = 0;
+	}
+
 	CLWBuffer<RR::ray> ray_buffer_cl = GeneratePrimaryRays();
 	RR::Buffer* ray_buffer = CreateFromOpenClBuffer(api, ray_buffer_cl);
 	// Intersection data
@@ -211,23 +216,18 @@ void RayTracer::DrawMenu() {
 CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 	struct Cam
 	{
-		// Camera coordinate frame
-		RR::float3 forward = RR::float3(0, 0, 1);
-		RR::float3 up = RR::float3(0, 1, 0);
-		RR::float3 p = RR::float3(0, 1, 5);
-		// Near and far Z
-		RR::float2 zcap = RR::float2(1, 1000);
+		Mat4x4 ip = glm::transpose(glm::inverse(ParGraphics::lastMVP));
+		Vec2 zcap = Vec2(1, 1000);
 	} cam = Cam();
-	CLWBuffer<Cam> cambuf = CLWBuffer<Cam>::Create(context, CL_MEM_READ_ONLY, 1, &cam);
+	CLWBuffer<Cam> cam_buf = CLWBuffer<Cam>::Create(context, CL_MEM_READ_ONLY, 1, &cam);
 
 	//run kernel
 	CLWBuffer<RR::ray> ray_buf = CLWBuffer<RR::ray>::Create(context, CL_MEM_READ_WRITE, Display::width * Display::height);
-	CLWKernel kernel = program.GetKernel("GeneratePerspectiveRays");
+	CLWKernel kernel = program.GetKernel("GenerateCameraRays");
 	kernel.SetArg(0, ray_buf);
-	kernel.SetArg(1, cambuf);
+	kernel.SetArg(1, cam_buf);
 	kernel.SetArg(2, Display::width);
 	kernel.SetArg(3, Display::height);
-
 	// Run generation kernel
 	size_t gs[] = { static_cast<size_t>((Display::width + 7) / 8 * 8), static_cast<size_t>((Display::height + 7) / 8 * 8) };
 	size_t ls[] = { 8, 8 };
@@ -243,11 +243,7 @@ void RayTracer::SetObjs() {
 	Tetrahedron tet = Tetrahedron();
 	for (int a = 0; a < 4; a++)
 		tet.Subdivide();
-	tet.ToSphere(0.2f);
-
-	for (auto& v : tet.verts) {
-		v.y += 1;
-	}
+	tet.ToSphere(0.02f);
 
 	g_objshapes.push_back(TO::shape_t());
 	auto& m = g_objshapes.back().mesh;
@@ -255,22 +251,20 @@ void RayTracer::SetObjs() {
 	v.resize(tet.verts.size() * 3);
 	memcpy(&v[0], &tet.verts[0], tet.verts.size() * sizeof(Vec3));
 	m.indices = tet.tris;
-	m.material_ids.resize(tet.tris.size(), 0);
+	m.material_ids.resize(tet.tris.size()/3, 0);
 	m.normals.resize(tet.norms.size() * 3);
 	memcpy(&m.normals[0], &tet.norms[0], tet.norms.size() * sizeof(Vec3));
-	g_objmaterials.push_back(TO::material_t());
-
-	for (int a = 0; a < 500; a++) {
-		g_objshapes.push_back(g_objshapes[0]);
-		auto& p = g_objshapes.back().mesh.positions;
-		float rx = (Random::Value() - 0.5f) * 2;
-		float ry = (Random::Value() - 0.5f) * 2;
-		float rz = (Random::Value() - 0.5f) * 2;
+	g_objshapes.resize(1000, g_objshapes[0]);
+	g_objmaterials.resize(1000, TO::material_t());
+	for (int a = 0; a < 1000; a++) {
+		auto& p = g_objshapes[a].mesh.positions;
 		for (int v = 0; v < p.size()/3; v++) {
-			p[v * 3] += rx;
-			p[v * 3 + 1] += ry;
-			p[v * 3 + 2] += rz;
+			((Vec3*)p.data())[v] *= Particles::radii[a];
+			((Vec3*)p.data())[v] += Particles::poss[a];
 		}
+		for (auto& m : g_objshapes[a].mesh.material_ids)
+			m = a;
+		memcpy(g_objmaterials[a].diffuse, &Particles::_colorPallete[Particles::colors[a]], sizeof(Vec3));
 	}
 
 	std::vector<float> verts;

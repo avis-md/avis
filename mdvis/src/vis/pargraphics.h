@@ -108,6 +108,7 @@ public:
 
 	static void Init(), InitClippingMesh();
 	static void UpdateDrawLists();
+	static void OnLoadConfig();
 
 	static void FillRad(byte* rads);
 
