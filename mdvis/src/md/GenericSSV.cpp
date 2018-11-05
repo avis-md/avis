@@ -71,7 +71,7 @@ bool GenericSSV::Read(ParInfo* info) {
 	bnd[0] = bnd[1] = (float)info->pos[0];
 	bnd[2] = bnd[3] = (float)info->pos[1];
 	bnd[4] = bnd[5] = (float)info->pos[2];
-	for (uint32_t i = 1; i < sz; ++i)  {
+	for (uint32_t i = 1; i < sz; ++i) {
 		bnd[0] = std::min(bnd[0], info->pos[i * 3]);
 		bnd[1] = std::max(bnd[1], info->pos[i * 3]);
 		bnd[2] = std::min(bnd[2], info->pos[i * 3 + 1]);

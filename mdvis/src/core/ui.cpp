@@ -113,7 +113,7 @@ void UI::SetVao(uint sz, void* verts, void* uvs) {
 }
 
 bool UI::IsSameId(uintptr_t* left, uintptr_t* right) {
-	for (byte a = 0; a < UI_MAX_EDIT_TEXT_FRAMES; ++a)  {
+	for (byte a = 0; a < UI_MAX_EDIT_TEXT_FRAMES; ++a) {
 		if (left[a] != right[a]) return false;
 	}
 	return true;
@@ -147,7 +147,7 @@ void UI::Quad(float x, float y, float w, float h, Vec4 col) {
 	quadPoss[2].y = y + h;
 	quadPoss[3].x = x + w;
 	quadPoss[3].y = y + h;
-	for (int y = 0; y < 4; ++y)  {
+	for (int y = 0; y < 4; ++y) {
 		quadPoss[y].z = 1;
 		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
 	}
@@ -171,7 +171,7 @@ void UI::Quad(float x, float y, float w, float h, GLuint tex, Vec4 col, Vec2 uv0
 	quadPoss[1].x = x + w;	quadPoss[1].y = y;
 	quadPoss[2].x = x;		quadPoss[2].y = y + h;
 	quadPoss[3].x = x + w;	quadPoss[3].y = y + h;
-	for (int y = 0; y < 4; ++y)  {
+	for (int y = 0; y < 4; ++y) {
 		quadPoss[y].z = 1;
 		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
 	}
@@ -297,12 +297,12 @@ std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol,
 		auto szz = _editTextString.size();
 		if (!!Input::mouse0State && !!szz && Rect(x, y, w, h).Inside(Input::mouseDownPos)) {
 			_editTextCursorPos = 0;
-			for (uint i = 1; i <= szz; ++i)  {
+			for (uint i = 1; i <= szz; ++i) {
 				_editTextCursorPos += (Input::mousePos.x > Display::width*(font->poss[i * 4 - 2].x + font->poss[i * 4].x) / 2);
 			}
 			if (Input::mouse0State == MOUSE_DOWN) {
 				_editTextCursorPos2 = 0;
-				for (uint i = 1; i <= szz; ++i)  {
+				for (uint i = 1; i <= szz; ++i) {
 					_editTextCursorPos2 += (Input::mouseDownPos.x > Display::width*(font->poss[i * 4 - 2].x + font->poss[i * 4].x) / 2);
 				}
 			}
@@ -423,11 +423,11 @@ std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 b
 		auto szz = _editTextString.size();
 		if (!!Input::mouse0State && !!szz && Rect(x, y, w, h).Inside(Input::mousePos)) {
 			_editTextCursorPos = 0;
-			for (uint i = 1; i <= szz; ++i)  {
+			for (uint i = 1; i <= szz; ++i) {
 				_editTextCursorPos += (Input::mousePos.x > Display::width*(font->poss[i * 4 - 2].x + font->poss[i * 4].x) / 2);
 			}
 			_editTextCursorPos2 = 0;
-			for (uint i = 1; i <= szz; ++i)  {
+			for (uint i = 1; i <= szz; ++i) {
 				_editTextCursorPos2 += (Input::mouseDownPos.x > Display::width*(font->poss[i * 4 - 2].x + font->poss[i * 4].x) / 2);
 			}
 			_editTextBlinkTime = 0;
@@ -520,7 +520,7 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 			else font2->glyph(si, mk);
 		}
 	}
-	for (uint i = 0; i < usz; ++i)  {
+	for (uint i = 0; i < usz; ++i) {
 		auto& c = ucs[i];
 		if (c < 0x0100) totalW += font->params[(uint)s][0].o2s[c & 0x00ff];
 		else totalW += font2->params[(uint)s][c & 0xff00].o2s[c & 0x00ff];

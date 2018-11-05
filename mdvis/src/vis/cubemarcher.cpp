@@ -14,9 +14,9 @@ CubeMarcher::CubeMarcher(Texture3D* tex) : tex(tex) {
 	float* cff = new float[_sz * _sz * _sz];
 	byte* bb = new byte[_sz * _sz * _sz];
 	byte* cbb = new byte[_sz * _sz * _sz];
-	for (byte a = 0; a < _sz; ++a)  {
-		for (byte b = 0; b < _sz; ++b)  {
-			for (byte c = 0; c < _sz; ++c)  {
+	for (byte a = 0; a < _sz; ++a) {
+		for (byte b = 0; b < _sz; ++b) {
+			for (byte c = 0; c < _sz; ++c) {
 				float a2 = powf(a - (_sz - 1.f) / 2, 2);
 				float b2 = powf(b - (_sz - 1.f) / 2, 2);
 				float c2 = powf(c - (_sz - 1.f) / 2, 2);
@@ -25,9 +25,9 @@ CubeMarcher::CubeMarcher(Texture3D* tex) : tex(tex) {
 			}
 		}
 	}
-	for (byte a = 0; a < _sz; ++a)  {
-		for (byte b = 0; b < _sz; ++b)  {
-			for (byte c = 0; c < _sz; ++c)  {
+	for (byte a = 0; a < _sz; ++a) {
+		for (byte b = 0; b < _sz; ++b) {
+			for (byte c = 0; c < _sz; ++c) {
 				float a2 = powf(a - 3 * (_sz - 1.f) / 4, 2);
 				float b2 = powf(b - (_sz - 1.f) / 2, 2);
 				float c2 = powf(c - (_sz - 1.f) / 2, 2);
@@ -36,9 +36,9 @@ CubeMarcher::CubeMarcher(Texture3D* tex) : tex(tex) {
 			}
 		}
 	}
-	for (byte a = 0; a < _sz; ++a)  {
-		for (byte b = 0; b < _sz; ++b)  {
-			for (byte c = 0; c < _sz; ++c)  {
+	for (byte a = 0; a < _sz; ++a) {
+		for (byte b = 0; b < _sz; ++b) {
+			for (byte c = 0; c < _sz; ++c) {
 				float a2 = powf(a - (_sz - 1.f) / 2, 2);
 				float b2 = powf(b - (_sz - 1.f) / 2, 2);
 				float c2 = powf(c - 3 * (_sz - 1.f) / 4, 2);
@@ -47,9 +47,9 @@ CubeMarcher::CubeMarcher(Texture3D* tex) : tex(tex) {
 			}
 		}
 	}
-	for (byte a = 0; a < _sz; ++a)  {
-		for (byte b = 0; b < _sz; ++b)  {
-			for (byte c = 0; c < _sz; ++c)  {
+	for (byte a = 0; a < _sz; ++a) {
+		for (byte b = 0; b < _sz; ++b) {
+			for (byte c = 0; c < _sz; ++c) {
 				float a2 = powf(a - 16.f, 2);
 				float b2 = powf(b - 16.f, 2);
 				float c2 = powf(c - 8.f, 2);

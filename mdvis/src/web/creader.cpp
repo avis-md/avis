@@ -62,8 +62,9 @@ bool CReader::Read(CScript* scr) {
 	std::string& path = scr->path;
 	std::string fp = IO::path + "nodes/" + path;
 	auto ls = fp.find_last_of('/');
-	std::string nm = fp.substr(ls + 1);
-	std::string fp2 = fp.substr(0, ls + 1) + "__ccache__/";
+	const std::string nm = fp.substr(ls + 1);
+	const std::string fd = fp.substr(0, ls);
+	const std::string fp2 = fp.substr(0, ls + 1) + "__ccache__/";
     
 	auto s = IO::GetText(fp + EXT_CS);
 
@@ -97,12 +98,11 @@ bool CReader::Read(CScript* scr) {
 #else
 			#define EXTERN "extern \"C\" __attribute__((visibility(\"default\"))) "
 #endif
+			const std::string tmpPath = fp2 + nm + "_temp__" EXT_CS;
 			{
 				std::ifstream strm(fp + EXT_CS);
-				std::ofstream ostrm(fp + "_temp__.cpp");
+				std::ofstream ostrm(tmpPath);
 				std::string s;
-				int tp = 0;
-				size_t loc = -1;
 				while (std::getline(strm, s)) {
 					if (s[0] == '/' && s[1] == '/') {
 						auto ss = string_split(s, ' ');
@@ -158,7 +158,7 @@ bool CReader::Read(CScript* scr) {
 			}
 
 			if (fail) {
-				remove((fp + "_temp__.cpp").c_str());
+				remove(tmpPath.c_str());
 				return false;
 			}
 
@@ -168,10 +168,10 @@ bool CReader::Read(CScript* scr) {
 				if (useOMP) {
 					cl += " /openmp";
 				}
-				cl += " /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + fp + "_temp__.cpp\"";
+				cl += " /EHsc /Fo\"" + fp2 + nm + ".obj\" \"" + tmpPath + "\"";
 				const std::string lk = "link /nologo /dll /out:\"" + fp2 + nm + ".so\" \"" + fp2 + nm + ".obj\"";
 				RunCmd::Run("\"" + vcbatPath + "\">NUL && " + cl + " > \"" + fp2 + nm + "_log.txt\" && " + lk + " > \"" + fp2 + nm + "_log.txt\"");
-				scr->errorCount = ErrorView::Parse_MSVC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
+				scr->errorCount = ErrorView::Parse_MSVC(fp2 + nm + "_log.txt", tmpPath, nm + ".cpp", scr->compileLog);
 			}
 			else {
 				std::string cmd = "g++ -std=c++11 -static-libstdc++ -shared -fPIC " + flags1;
@@ -179,12 +179,12 @@ bool CReader::Read(CScript* scr) {
 					cmd += " -fopenmp";
 					if (useOMP2) cmd += " -lomp";
 				}
-				cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + IO::path + "res/noterminate.o\" \"" + fp + "_temp__.cpp\" -Wl,--export-all-symbols 2> \"" + fp2 + nm + "_log.txt\"";
+				cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + IO::path + "res/noterminate.o\" \"" + tmpPath + "\" -Wl,--export-all-symbols 2> \"" + fp2 + nm + "_log.txt\"";
 				RunCmd::Run(SETPATH cmd);
-				scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
+				scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", tmpPath, nm + ".cpp", scr->compileLog);
 			}
 #else
-			std::string cmd = gpp + " -std=c++11 -shared -fPIC -fvisibility=hidden "
+			std::string cmd = gpp + " -std=c++11 -shared -fPIC -I\"" + fd + "\" -fvisibility=hidden "
 #ifdef PLATFORM_LNX
 				"-fno-gnu-unique "
 #endif
@@ -197,15 +197,15 @@ bool CReader::Read(CScript* scr) {
 #endif
 				if (useOMP2) cmd += " -lomp";
 			}
-			cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + fp + "_temp__.cpp\" 2> " + fp2 + nm + "_log.txt";
+			cmd += " -lm -o \"" + fp2 + nm + ".so\" \"" + tmpPath + "\" 2> " + fp2 + nm + "_log.txt";
 			RunCmd::Run(cmd);
-			scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", fp + "_temp__.cpp", nm + ".cpp", scr->compileLog);
+			scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", tmpPath, nm + ".cpp", scr->compileLog);
 #endif
 			for (auto& m : scr->compileLog) {
 				m.path = fp + EXT_CS;
 			}
 			ErrorView::compileMsgs.insert(ErrorView::compileMsgs.end(), scr->compileLog.begin(), scr->compileLog.end());
-			remove((fp + "_temp__.cpp").c_str());
+			remove(tmpPath.c_str());
 		}
 	
 #endif
@@ -388,7 +388,7 @@ bool CReader::Read(CScript* scr) {
 				if (ira) {
 					auto sz = bk->dimVals.size();
 					bk->data.dims.resize(sz);
-					for (size_t a = 0; a < sz; ++a)  {
+					for (size_t a = 0; a < sz; ++a) {
 						int es = TryParse(bk->dimNames[a], 0);
 						if (es > 0) {
 							if (iso) { //temp fix for mac access error

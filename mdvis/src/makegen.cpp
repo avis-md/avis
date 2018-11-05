@@ -37,7 +37,7 @@ void makegen(const std::string& path) {
 	}
 	ostrm << std::endl << std::endl;
 	ostrm << "../build/.out: $(OBJS)" << std::endl << "\t$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)" << std::endl << std::endl;
-	for (uint i = 0; i < cpps.size(); ++i)  {
+	for (uint i = 0; i < cpps.size(); ++i) {
 		ostrm << objs[i] << ": " << cpps[i] << " $(HEADERS)" << std::endl;
 		ostrm << "\t$(CXX) $(CXXFLAGS) -c -o $@ " << cpps[i] << std::endl << std::endl;
 	}

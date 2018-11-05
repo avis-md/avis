@@ -251,7 +251,7 @@ void ParLoader::ScanFrames(const std::string& first) {
 	auto ps = first.find_last_of('/');
 	auto nm = first.substr(ps + 1);
 	int n1 = -1, n2 = 0;
-	for (uint a = 0; a < nm.size() - 1; ++a)  {
+	for (uint a = 0; a < nm.size() - 1; ++a) {
 		if (nm[a + 1] == '.' && ISNUM(nm[a])) {
 			n1 = a;
 			break;
@@ -434,7 +434,7 @@ void ParLoader::DoOpen() {
 	}
 	else loadName = "Post processing";
 	std::unordered_map<ushort, int> cnms;
-	for (uint i = 0; i < info.num; ++i)  {
+	for (uint i = 0; i < info.num; ++i) {
 		info.progress = i * 1.f / info.num;
 		auto id1 = info.type[i];//info.name[i * PAR_MAX_NAME_LEN];
 		auto& resId = info.resId[i];
@@ -482,7 +482,7 @@ void ParLoader::DoOpen() {
 		auto vec = *((glm::dvec3*)(&info.pos[i * 3]));
 		int cnt = int(lastCnt + tr->cnt);
 		if (useConn && (!useConnCache || !hasConnCache || ovwConnCache)) {
-			for (int j = 0; j < cnt; ++j)  {
+			for (int j = 0; j < cnt; ++j) {
 				Vec3 dp = Particles::poss[lastOff + j] - vec;
 				if (fabsf(dp.x) < 0.25f && fabsf(dp.y) < 0.25f && fabsf(dp.z) < 0.25f) {
 					auto dst = glm::length2(dp);
@@ -497,7 +497,7 @@ void ParLoader::DoOpen() {
 				}
 			}
 		}
-		for (auto& dp : Particles::defColors)  {
+		for (auto& dp : Particles::defColors) {
 			if (id1 == dp.type) {
 				if (dp.id == -1) {
 					dp.id = Particles::colorPallete.size();
@@ -541,9 +541,9 @@ void ParLoader::DoOpen() {
 		_StreamWrite(&conn.cnt, &ostrm, 4);
 		_StreamWrite(&conn.ids[0], &ostrm, conn.cnt * sizeof(Int2));
 		_StreamWrite("XX", &ostrm, 2);
-		for (uint a = 0; a < Particles::residueListSz; ++a)  {
+		for (uint a = 0; a < Particles::residueListSz; ++a) {
 			auto& rsl = Particles::residueLists[a];
-			for (uint b = 0; b < rsl.residueSz; ++b)  {
+			for (uint b = 0; b < rsl.residueSz; ++b) {
 				_StreamWrite(&rsl.residues[b].offset_b, &ostrm, sizeof(uint));
 				_StreamWrite(&rsl.residues[b].cnt_b, &ostrm, sizeof(ushort));
 			}
@@ -562,7 +562,7 @@ void ParLoader::DoOpen() {
 		anm.reading = true;
 
 		anm.AllocFrames(trj.frames);
-		for (uint16_t i = 0; i < trj.frames; ++i)  {
+		for (uint16_t i = 0; i < trj.frames; ++i) {
 			anm.poss[i].resize(info.num);
 			memcpy(&anm.poss[i][0], trj.poss[i], info.num * sizeof(glm::dvec3));
 			delete[](trj.poss[i]);
@@ -577,7 +577,7 @@ void ParLoader::DoOpen() {
 		if (trj.vels) delete[](trj.vels);
 		if (trj.bounds) {
 			anm.bboxs.resize(6*trj.frames);
-			for (uint16_t i = 0; i < trj.frames; ++i)  {
+			for (uint16_t i = 0; i < trj.frames; ++i) {
 				memcpy(&anm.bboxs[i*6], trj.bounds[i], 6*sizeof(double));
 			}
 			delete[](trj.bounds);
@@ -657,7 +657,7 @@ void ParLoader::DoOpenAnim() {
 	Engine::AcquireLock(1);
 
 	anm.AllocFrames(info.frames);
-	for (uint16_t i = 0; i < info.frames; ++i)  {
+	for (uint16_t i = 0; i < info.frames; ++i) {
 		anm.poss[i].resize(info.parNum);
 		memcpy(&anm.poss[i][0], info.poss[i], info.parNum * sizeof(glm::dvec3));
 		delete[](info.poss[i]);

@@ -24,7 +24,7 @@ void Node_GetCenter::Execute() {
 		
 	}
 	else { //just get the average
-		for (int a = 0; a < dm; ++a)  {
+		for (int a = 0; a < dm; ++a) {
 
 		}
 	}

@@ -15,7 +15,7 @@ void MakeRes::Do() {
 		std::ofstream strm(IO::path + "res/src/_res/" + f + ".h");
 		strm << "namespace res {\nconst unsigned int " << f << "_png_sz = " + std::to_string(bb.size()) + ";\n"
 			<< "const unsigned char " << f << "_png[] = {";
-		for (size_t a = 0, s = bb.size(); a < s; ++a)  {
+		for (size_t a = 0, s = bb.size(); a < s; ++a) {
 			strm << std::to_string(bb[a]);
 			if (a < s-1) strm << ",";
 		}

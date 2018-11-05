@@ -4,7 +4,7 @@ std::vector<std::complex<float>> FFT::Evaluate(const std::vector<float>& vals, F
 	const auto& sz = vals.size();
 	assert(isGoodLength(sz));
 	std::vector<std::complex<float>> res(sz);
-	for (uint i = 0; i < sz; ++i)  {
+	for (uint i = 0; i < sz; ++i) {
 		res[i] = applyWindow(vals[i], i * 1.f / (sz - 1));
 	}
 	doFft(&res[0], sz);
@@ -12,7 +12,7 @@ std::vector<std::complex<float>> FFT::Evaluate(const std::vector<float>& vals, F
 }
 
 bool FFT::isGoodLength(uint v) {
-	for (uint a = 1; a <= 31; ++a)  {
+	for (uint a = 1; a <= 31; ++a) {
 		if (v == (1 << a)) return true;
 	}
 	return false;
@@ -28,7 +28,7 @@ void FFT::doFft(std::complex<float>* v, uint c) {
 		separate(v, hc);
 		doFft(v, hc);
 		doFft(v + hc, hc);
-		for (uint i = 0; i < hc; ++i)  {
+		for (uint i = 0; i < hc; ++i) {
 			auto e = v[i];
 			auto o = v[i + hc];
 			auto w = exp(std::complex<float>(0, -2.f*PI * i / c));
@@ -40,13 +40,13 @@ void FFT::doFft(std::complex<float>* v, uint c) {
 
 void FFT::separate(std::complex<float>* v, uint hc) {
 	auto t = new std::complex<float>[hc];
-	for (uint i = 0; i < hc; ++i)  {
+	for (uint i = 0; i < hc; ++i) {
 		t[i] = v[i * 2 + 1];
 	}
-	for (uint i = 0; i < hc; ++i)  {
+	for (uint i = 0; i < hc; ++i) {
 		v[i] = v[i * 2];
 	}
-	for (uint i = 0; i < hc; ++i)  {
+	for (uint i = 0; i < hc; ++i) {
 		v[i + hc] = t[i];
 	}
 	delete[](t);

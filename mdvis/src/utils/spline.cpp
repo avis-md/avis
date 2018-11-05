@@ -15,11 +15,11 @@ void Spline::ToSpline(Vec3* pts, uint cnt, uint dim, Vec3* res) {
 	Vec3* cps = new Vec3[cnt * 3 - 2];
 	cps[0] = pts[0];
 	cps[(cnt-1)*3] = pts[cnt-1];
-	for (uint a = 0; a < cnt - 1; ++a)  {
+	for (uint a = 0; a < cnt - 1; ++a) {
 		cps[a * 3 + 1] = FLerp(pts[a], pts[a + 1], 0.33333f);
 		cps[a * 3 + 2] = FLerp(pts[a], pts[a + 1], 0.66667f);
 	}
-	for (uint a = 1; a < cnt - 1; ++a)  {
+	for (uint a = 1; a < cnt - 1; ++a) {
 		cps[a * 3] = FLerp(cps[a * 3 - 1], cps[a * 3 + 1], 0.5f);
 	}
 
@@ -28,9 +28,9 @@ void Spline::ToSpline(Vec3* pts, uint cnt, uint dim, Vec3* res) {
 	
 	//res[0] = pts[0];
 	res[(cnt-1) * dim] = pts[cnt-1];
-	for (uint a = 0; a < cnt - 1; ++a)  {
+	for (uint a = 0; a < cnt - 1; ++a) {
 		res[a * dim] = cps[a * 3];
-		for (byte b = 1; b < dim; ++b)  {
+		for (byte b = 1; b < dim; ++b) {
 			res[a * dim + b] = Bezier(cps[a * 3], cps[a * 3 + 1], cps[a * 3 + 2], cps[a * 3 + 3], (float)(b) / dim);
 		}
 	}

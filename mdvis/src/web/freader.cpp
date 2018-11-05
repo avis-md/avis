@@ -59,9 +59,10 @@ bool FReader::Read(FScript* scr) {
 			std::string lp(fp2 + nm + ".so");
 			remove(&lp[0]);
 
+			const std::string tmpPath = fp2 + nm + "_temp__" EXT_FS;
 			{
 				std::ifstream strm(fp + EXT_FS);
-				std::ofstream ostrm(fp + "_temp__" EXT_FS);
+				std::ofstream ostrm(tmpPath);
 				std::vector<typestring> arr_i;
 				std::vector<std::string> arr_o;
 				std::string s;
@@ -132,7 +133,7 @@ bool FReader::Read(FScript* scr) {
 			}
 
 			if (fail) {
-				remove((fp + "_temp__.cpp").c_str());
+				remove(tmpPath.c_str());
 				return false;
 			}
 
@@ -145,14 +146,14 @@ bool FReader::Read(FScript* scr) {
 				"-D/tmp/ -fvisibility=hidden "
 			#endif
 			"-fPIC \"" + IO::path + "res/noterminate.o\" -J \"" + fp2 + "\" -o \""
-				+ fp2 + nm + ".so\" \"" + fp + "_temp__" EXT_FS "\" -lgfortran 2> \"" + fp2 + nm + "_log.txt\"";
+				+ fp2 + nm + ".so\" \"" + tmpPath + "\" -lgfortran 2> \"" + fp2 + nm + "_log.txt\"";
 			RunCmd::Run(SETPATH cmd);
-			scr->errorCount = ErrorView::Parse_GFortran(fp2 + nm + "_log.txt", fp + "_temp__" EXT_FS, nm + EXT_FS, scr->compileLog);
+			scr->errorCount = ErrorView::Parse_GFortran(fp2 + nm + "_log.txt", tmpPath, nm + EXT_FS, scr->compileLog);
 			for (auto& m : scr->compileLog) {
 				m.path = fp + EXT_FS;
 			}
 
-			remove((fp + "_temp__" EXT_FS).c_str());
+			remove(tmpPath.c_str());
 		}
 
 #endif

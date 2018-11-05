@@ -74,7 +74,7 @@ std::string Color::Col2Hex(Vec4 col) {
 std::string Color::Col2Hex(byte* bs) {
 	const char* hx = "0123456789ABCDEF";
 	std::string res = "XXXXXXXX";
-	for (byte a = 0; a < 4; ++a)  {
+	for (byte a = 0; a < 4; ++a) {
 		auto i = bs[a];
 		res[a * 2] = hx[i >> 4];
 		res[a * 2 + 1] = hx[i & 15];
@@ -138,7 +138,7 @@ void Color::DrawSV(float x, float y, float w, float h, float hue) {
 	quadPoss[2].y = y + h;
 	quadPoss[3].x = x + w;
 	quadPoss[3].y = y + h;
-	for (int y = 0; y < 4; ++y)  {
+	for (int y = 0; y < 4; ++y) {
 		quadPoss[y].z = 1;
 		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
 	}
@@ -168,7 +168,7 @@ void Color::DrawH(float x, float y, float w, float h) {
 	quadPoss[2].y = y + h;
 	quadPoss[3].x = x + w;
 	quadPoss[3].y = y + h;
-	for (int y = 0; y < 4; ++y)  {
+	for (int y = 0; y < 4; ++y) {
 		quadPoss[y].z = 1;
 		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
 	}
@@ -194,7 +194,7 @@ void Color::DrawH2(float x, float y, float w, float h, Vec4* grad) {
 	quadPoss[2].y = y + h;
 	quadPoss[3].x = x + w;
 	quadPoss[3].y = y + h;
-	for (int y = 0; y < 4; ++y)  {
+	for (int y = 0; y < 4; ++y) {
 		quadPoss[y].z = 1;
 		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
 	}

@@ -21,7 +21,7 @@ void UI2::Init() {
 
 void UI2::LabelMul(float x, float y, float sz, const std::string& s) {
 	auto ss = string_split(s, '\n');
-	for (size_t a = 0; a < ss.size(); ++a)  {
+	for (size_t a = 0; a < ss.size(); ++a) {
 		UI::Label(x, std::roundf(y + sz * 1.2f * a), sz, ss[a], white());
 	}
 }
@@ -145,7 +145,7 @@ void UI2::Switch(float x, float y, float w, const std::string& title, int c, std
 	UI::Label(x, y, 12, title, white());
 	x += w*sepw;
 	float dw = w*sepw2 / c;
-	for (int a = 0; a < c; ++a)  {
+	for (int a = 0; a < c; ++a) {
 		if (Engine::Button(x + dw * a, y, dw - 1, 16, white(1, (a == i) ? 0.1f : 0.3f), nms[a], 12, white(), true) == MOUSE_RELEASE) {
 			i = a;
 		}

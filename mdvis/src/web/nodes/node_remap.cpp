@@ -27,7 +27,7 @@ void Node_Remap::Execute() {
 	vals.resize(*sz);
 	val0 = &vals[0];
 	float* ins = *((float**)cv.value);
-	for (int a = 0; a < *sz; ++a)  {
+	for (int a = 0; a < *sz; ++a) {
 		vals[a] = graph.Eval(ins[a]);
 	}
 }

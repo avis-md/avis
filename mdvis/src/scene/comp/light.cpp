@@ -20,12 +20,12 @@ void Light::CalcShadowMatrix() {
 			Vec4(-1, -1, md, 1), Vec4(-1, 1, md, 1), Vec4(1, -1, md, 1), Vec4(1, 1, md, 1) };
 		
 		Vec3 min, max;
-		for (auto i = 0; i < 8; ++i)  {
+		for (auto i = 0; i < 8; ++i) {
 			edges[i] = LP * IP * edges[i];
 			edges[i] /= edges[i].w;
 			if (!i) min = max = edges[i];
 			else {
-				for (byte b = 0; b < 3; ++b)  {
+				for (byte b = 0; b < 3; ++b) {
 					if (min[b] > edges[i][b]) min[b] = edges[i][b];
 					if (max[b] < edges[i][b]) max[b] = edges[i][b];
 				}

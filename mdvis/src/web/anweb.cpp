@@ -41,7 +41,7 @@ bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
 void AnWeb::Init() {
 	Insert(new Node_Inputs());
 	Insert(new Node_Info());
-	for (int a = 0; a < 10; ++a)  {
+	for (int a = 0; a < 10; ++a) {
 		AnBrowse::mscFdExpanded[a] = true;
 	}
 	ChokoLait::focusFuncs.push_back(CheckChanges);
@@ -55,7 +55,7 @@ void AnWeb::Clear() {
 }
 
 void AnWeb::Clear0() {
-	for (int a = 1; a < nodes.size(); ++a)  {
+	for (int a = 1; a < nodes.size(); ++a) {
 		delete(nodes[a]);
 	}
 	nodes.resize(1);
@@ -239,7 +239,7 @@ void AnWeb::Draw() {
 			selScript = nullptr;
 		}
 		else {
-			for (auto nn = nodes.begin() + 1; nn != nodes.end(); nn++)  {
+			for (auto nn = nodes.begin() + 1; nn != nodes.end(); nn++) {
 				auto& n = *nn;
 				if (n->op == ANNODE_OP::REMOVE) {
 					if ((nn + 1) != nodes.end()) {
@@ -263,6 +263,7 @@ void AnWeb::Draw() {
 		else {
 			drawFull = false;
 			AnBrowse::expandPos = AnOps::expandPos = 0;
+			ParGraphics::tfboDirty = true;
 		}
 	}
 	if (selScript) {
@@ -279,6 +280,7 @@ void AnWeb::Draw() {
 	if (Engine::Button(Display::width - 71.f, 1.f, 70.f, 16.f, white(1, 0.4f), _("Done"), 12.f, white(), true) == MOUSE_RELEASE) {
 		drawFull = false;
 		AnBrowse::expandPos = AnOps::expandPos = 0;
+		ParGraphics::tfboDirty = true;
 	}
 	
 	if (Engine::Button(200, 1, 70.f, 16.f, white(1, 0.4f), _("Save"), 12.f, white(), true) == MOUSE_RELEASE)
@@ -296,7 +298,7 @@ void AnWeb::Draw() {
 	UI::Texture(350, 1, 16, 16, Icons::playall);
 	if (drawLerp < 1) {
 		drawLerp = std::min(drawLerp + 10 * Time::delta, 1.f);
-		Scene::dirty = true;
+		ParGraphics::tfboDirty = true;
 	}
 #endif
 }
@@ -312,7 +314,6 @@ void AnWeb::DrawSide() {
 
 		if (Engine::Button(expos + 109, 20, 70, 16, white(1, 0.4f), _("Edit"), 12, white(), true) == MOUSE_RELEASE){
 			drawFull = true;
-			Scene::dirty = true;
 		}
 
 		bool canexec = !!Particles::particleSz &&(!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
@@ -396,7 +397,7 @@ void AnWeb::DoExecute(bool all) {
 	if (all) {
 		auto f = Particles::anim.currentFrame;
 		ApplyFrameCount(Particles::anim.frameCount);
-		for (uint _a = 0; _a < Particles::anim.frameCount; ++_a)  {
+		for (uint _a = 0; _a < Particles::anim.frameCount; ++_a) {
 			uint a = invertRun? Particles::anim.frameCount - _a - 1U : _a;
 #ifdef VERBOSE
 			Debug::Message("AnWeb", "Frame " + std::to_string(a));
@@ -589,7 +590,7 @@ void AnWeb::Save(const std::string& s) {
 		SV(tile, nd->canTile);
 		nd->SaveConn();
 		auto nc = n->addchild("conns");
-		for (size_t a = 0; a < nd->_connInfo.size(); ++a)  {
+		for (size_t a = 0; a < nd->_connInfo.size(); ++a) {
 			auto& c = nd->_connInfo[a];
 			auto n = nc->addchild("item");
 			SVS(name, c.mynm);

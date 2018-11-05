@@ -15,7 +15,7 @@ std::string rm_st_ed_spaces(const std::string& s) {
 }
 
 bool NodeHasChild(std::string& s, int first) {
-	for (size_t a = first; a < s.size(); ++a)  {
+	for (size_t a = first; a < s.size(); ++a) {
 		if (s[a] == '<') return true;
 		else if (s[a] > 0x20) return false;
 	}
@@ -62,7 +62,7 @@ bool Xml::Read(std::string& s, uint& pos, XmlNode* parent) {
 	n.name = ss[0];
 	
 	std::string ps = "";
-	for (uint a = 1; a < ss.size(); ++a)  {
+	for (uint a = 1; a < ss.size(); ++a) {
 		if (ss[a] == "") continue;
 		auto ss2 = string_split(ss[a], '=');
 		ps = ss2[0];

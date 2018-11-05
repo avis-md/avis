@@ -162,7 +162,7 @@ void ErrorView::Draw() {
 		}
 		y += 19;
 		std::vector<Message>& msgs = showExec ? execMsgs : compileMsgs;
-		for (size_t a = 0; a < msgs.size(); ++a)  {
+		for (size_t a = 0; a < msgs.size(); ++a) {
 			auto& err = msgs[a];
 			if (Engine::Button(0, y + a * 17, static_cast<float>(Display::width), 17, white((a == descId) ? 0.1f : 0), white(0.2f), black(0.1f)) == MOUSE_RELEASE) {
 				if (Input::dbclick) {

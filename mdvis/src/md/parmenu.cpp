@@ -40,11 +40,11 @@ void ParMenu::Init() {
 
 void ParMenu::CalcH() {
 	listH = Particles::residueListSz;
-	for (uint i = 0; i < Particles::residueListSz; ++i)  {
+	for (uint i = 0; i < Particles::residueListSz; ++i) {
 		auto& rli = Particles::residueLists[i];
 		if (rli.expanded) {
 			listH += rli.residueSz;
-			for (uint j = 0; j < rli.residueSz; ++j)  {
+			for (uint j = 0; j < rli.residueSz; ++j) {
 				auto& rl = rli.residues[j];
 				if (rl.expanded) listH += rl.cnt;
 			}
@@ -92,7 +92,7 @@ void ParMenu::Draw() {
 			}
 		}
 
-		for (uint i = 0; i < 5; ++i)  {
+		for (uint i = 0; i < 5; ++i) {
 			if (i == activeMenu)
 				UI::Quad(expandPos, 81.f * i + 18, 17, 81, white(0.9f, 0.15f));
 			else
@@ -103,7 +103,7 @@ void ParMenu::Draw() {
 
 		Engine::RotateUI(90, Vec2(expandPos + 16, 18));
 		UI::font->Align(ALIGN_TOPCENTER);
-		for (uint i = 0; i < 5; ++i)  {
+		for (uint i = 0; i < 5; ++i) {
 			UI::Label(expandPos + 56 + 81 * i, 18, 12, menuNames[i], (i == activeMenu) ? VisSystem::accentColor : white());
 		}
 		UI::font->Align(ALIGN_TOPLEFT);
@@ -143,7 +143,7 @@ void ParMenu::Draw_List(float off) {
 		}
 		if ((Popups::type == POPUP_TYPE::DRAWMODE) && (_drawTypeAll != drawTypeAll)) {
 			drawTypeAll = _drawTypeAll;
-			for (uint i = 0; i < Particles::residueListSz; ++i)  {
+			for (uint i = 0; i < Particles::residueListSz; ++i) {
 				auto& rli = Particles::residueLists[i];
 				if (rli.selected) rli.drawType = drawTypeAll;
 			}
@@ -151,11 +151,11 @@ void ParMenu::Draw_List(float off) {
 		}
 		if (Engine::Button(76, off, 16, 16, visibleAll ? Icons::visible : Icons::hidden, white(0.8f), white(), white(1, 0.7f)) == MOUSE_RELEASE) {
 			visibleAll = !visibleAll;
-			for (uint i = 0; i < Particles::residueListSz; ++i)  {
+			for (uint i = 0; i < Particles::residueListSz; ++i) {
 				auto& rli = Particles::residueLists[i];
 				if (rli.selected) rli.visible = visibleAll;
 				if (rli.expanded) {
-					for (uint j = 0; j < rli.residueSz; ++j)  {
+					for (uint j = 0; j < rli.residueSz; ++j) {
 						auto& rl = rli.residues[j];
 						if (rl.selected)
 							rl.visible = visibleAll;
@@ -190,7 +190,7 @@ void ParMenu::Draw_List(float off) {
 	float mof = off;
 	off -= listHOff;
 	static byte drawTypeOld;
-	for (uint i = 0; i < Particles::residueListSz; ++i)  {
+	for (uint i = 0; i < Particles::residueListSz; ++i) {
 		auto& rli = Particles::residueLists[i];
 		if (off - mof + 16 > 0) {
 			UI::Quad(expandPos - 148, off, 146.f - bar, 16, rli.selected ? Vec4(0.45f, 0.3f, 0.1f, 1) : white(1, 0.3f));
@@ -228,7 +228,7 @@ void ParMenu::Draw_List(float off) {
 			}
 			else if (Popups::type == POPUP_TYPE::DRAWMODE && Popups::data == &rli.drawType && drawTypeOld != rli.drawType) {
 				drawTypeOld = rli.drawType;
-				for (uint n = 0; n < rli.residueSz; ++n)  {
+				for (uint n = 0; n < rli.residueSz; ++n) {
 					rli.residues[n].drawType = rli.drawType;
 				}
 				ParGraphics::UpdateDrawLists();
@@ -236,7 +236,7 @@ void ParMenu::Draw_List(float off) {
 			if (Engine::Button(expandPos - 18.f - bar, off, 16, 16, rli.visible ? Icons::visible : Icons::hidden) == MOUSE_RELEASE) {
 				rli.visible = !rli.visible;
 				rli.visibleAll = true;
-				for (uint n = 0; n < rli.residueSz; ++n)  {
+				for (uint n = 0; n < rli.residueSz; ++n) {
 					rli.residues[n].drawType = rli.visible;
 				}
 				ParGraphics::UpdateDrawLists();
@@ -246,7 +246,7 @@ void ParMenu::Draw_List(float off) {
 		if (off - mof > hmax)
 			goto loopout;
 		if (rli.expanded) {
-			for (uint j = 0; j < rli.residueSz; ++j)  {
+			for (uint j = 0; j < rli.residueSz; ++j) {
 				auto& rj = rli.residues[j];
 				if (off - mof + 16 > 0) {
 					UI::Quad(expandPos - 143, off, 141.f - bar, 16, rj.selected ? Vec4(0.5f, 0.35f, 0.15f, 1) : white(1, 0.35f));
@@ -428,7 +428,7 @@ void ParMenu::DrawSplash() {
 	if (!!recentFiles.size()) {
 		UI::Label(pos.x + 2, pos.y + 1, 12, _("Recent Files"), white());
 		UI::Quad(pos.x, pos.y + 17, pos.z, pos.w - 35, white(0.7f, 0.05f));
-		for (uint i = 0; i < recentFiles.size(); ++i)  {
+		for (uint i = 0; i < recentFiles.size(); ++i) {
 			if (53 + 17 * i > pos.w) break;
 			ms = Engine::Button(pos.x + 5, pos.y + 20 + 17 * i, pos.z - 10, 16, white(0, 0.4f), recentFilesN[i], 12, white());
 			if (ms & MOUSE_HOVER_FLAG) {
@@ -519,13 +519,13 @@ void ParMenu::DrawConnMenu(Particles::conninfo& cn, float x, float& off, float w
 void ParMenu::SelAll() {
 	drawTypeAll = Particles::residueLists[0].drawType;
 	visibleAll = false;
-	for (uint i = 0; i < Particles::residueListSz; ++i)  {
+	for (uint i = 0; i < Particles::residueListSz; ++i) {
 		auto& rli = Particles::residueLists[i];
 		rli.selected = true;
 		if (drawTypeAll != rli.drawType) drawTypeAll = 255;
 		if (rli.visible) visibleAll = true;
 		if (rli.expanded) {
-			for (uint j = 0; j < rli.residueSz; ++j)  {
+			for (uint j = 0; j < rli.residueSz; ++j) {
 				auto& rl = rli.residues[j];
 				rl.selected = true;
 				if (drawTypeAll != rl.drawType) drawTypeAll = 255;
@@ -537,12 +537,12 @@ void ParMenu::SelAll() {
 
 void ParMenu::SelInv() {
 	drawTypeAll = Particles::residueLists[0].drawType;
-	for (uint i = 0; i < Particles::residueListSz; ++i)  {
+	for (uint i = 0; i < Particles::residueListSz; ++i) {
 		auto& rli = Particles::residueLists[i];
 		rli.selected = !rli.selected;
 		if (rli.selected && drawTypeAll != rli.drawType) drawTypeAll = 255;
 		if (rli.expanded) {
-			for (uint j = 0; j < rli.residueSz; ++j)  {
+			for (uint j = 0; j < rli.residueSz; ++j) {
 				auto& rl = rli.residues[j];
 				rl.selected = !rl.selected;
 				if (rl.selected && drawTypeAll != rl.drawType) drawTypeAll = 255;
@@ -553,11 +553,11 @@ void ParMenu::SelInv() {
 }
 
 void ParMenu::SelClear() {
-	for (uint i = 0; i < Particles::residueListSz; ++i)  {
+	for (uint i = 0; i < Particles::residueListSz; ++i) {
 		auto& rli = Particles::residueLists[i];
 		rli.selected = false;
 		if (rli.expanded) {
-			for (uint j = 0; j < rli.residueSz; ++j)  {
+			for (uint j = 0; j < rli.residueSz; ++j) {
 				auto& rl = rli.residues[j];
 				rl.selected = false;
 			}
@@ -575,7 +575,7 @@ void ParMenu::DrawSelPopup() {
 	}
 	float off = 38;
 	Engine::BeginStencil(0, off, expandPos, Display::height - 18 - off);
-	for (uint i = 0; i < Particles::residueListSz; ++i)  {
+	for (uint i = 0; i < Particles::residueListSz; ++i) {
 		auto& rli = Particles::residueLists[i];
 		UI::Quad(expandPos - 148, off, 146, 16, white(1, 0.3f));
 		//UI::Label(expandPos - 132, off, 12, rli.name, white());
@@ -591,7 +591,7 @@ void ParMenu::DrawSelPopup() {
 			if (off > Display::height)
 				goto loopout;
 			if (rli.expanded) {
-				for (uint j = 0; j < rli.residueSz; ++j)  {
+				for (uint j = 0; j < rli.residueSz; ++j) {
 					auto& rj = rli.residues[j];
 					UI::Quad(expandPos - 143, off, 141, 16, white(1, 0.35f));
 					if (Engine::Button(expandPos - 126, off, 124, 16, white(0), rj.name, 12, white()) == MOUSE_RELEASE && Popups::type == POPUP_TYPE::RESID) {

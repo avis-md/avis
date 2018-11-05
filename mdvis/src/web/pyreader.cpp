@@ -113,7 +113,7 @@ bool PyReader::Read(PyScript* scr) {
 		if (ln2 == "#in ") {
 			auto ss = string_split(ln, ' ');
 			auto sz = ss.size() - 1;
-			for (uint i = 0; i < sz; ++i)  {
+			for (uint i = 0; i < sz; ++i) {
 				scr->_invars.push_back(PyVar());
 				auto& bk = scr->_invars.back();
 				bk.typeName = ss[i + 1];
@@ -138,7 +138,7 @@ bool PyReader::Read(PyScript* scr) {
 			}
 			scr->pArgl = (AnWeb::hasPy) ? PyTuple_New(sz) : nullptr;
 			scr->pArgs.resize(sz, 0);
-			for (uint i = 0; i < sz; ++i)  {
+			for (uint i = 0; i < sz; ++i) {
 				auto ns = ss[i].find_first_not_of(' ');
 				auto ss2 = (ns == std::string::npos) ? ss[i] : ss[i].substr(ns);
 				auto tn = scr->_invars[i].typeName;

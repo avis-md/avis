@@ -1693,7 +1693,7 @@ xdrfile_compress_coord_double(double   *ptr,
 			is_smaller = 0;
 		while (is_small && run < 8*3) {
 			tmpsum=0;
-			for(j=0;j<3;++j)  {
+			for(j=0;j<3;++j) {
 				tmp=thiscoord[j] - prevcoord[j];
 				tmpsum+=tmp*tmp;
 			}

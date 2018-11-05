@@ -75,18 +75,18 @@ void Shadows::UpdateBox() {
 	Vec4 wps[8];
 	auto p = MVP::projection();
 	auto ip = glm::inverse(p);
-	for (uint a = 0; a < 8; ++a)  {
+	for (uint a = 0; a < 8; ++a) {
 		wps[a] = ip * es[a];
 		wps[a] /= wps[a].w;
 	}
-	for (uint a = 4; a < 8; ++a)  {
+	for (uint a = 4; a < 8; ++a) {
 		wps[a] = Lerp(wps[a - 4], wps[a], dst);
 	}
 	pos = Vec3();
 		//pos += *(Vec3*)&wps[a];
 	pos /= 8.f;
 	memset(box, 0, sizeof(float) * 6);
-	for (uint a = 0; a < 8; ++a)  {
+	for (uint a = 0; a < 8; ++a) {
 		Vec4 rs = _p * wps[a];
 		rs /= rs.w;
 		box[0] = std::min(box[0], rs.x);

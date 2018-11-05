@@ -28,12 +28,12 @@ void Node_SetAttribute::Execute() {
 	tar.resize(sz);
 	switch (cv.typeName[6]) {
 	case 's':
-		for (int i = 0; i < sz; ++i)  {
+		for (int i = 0; i < sz; ++i) {
 			tar[i] = ((short*)src)[i];
 		}
 		break;
 	case 'i':
-		for (int i = 0; i < sz; ++i)  {
+		for (int i = 0; i < sz; ++i) {
 			tar[i] = ((int*)src)[i];
 		}
 		break;

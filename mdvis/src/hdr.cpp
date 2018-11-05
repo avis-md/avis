@@ -141,7 +141,7 @@ unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int
 	}
     /* Do the RLE compression stuff
      * Some of the RLE decoding stuff comes from ggLibrary */
-    for (unsigned int y = 0; y < (*h); ++y)  {
+    for (unsigned int y = 0; y < (*h); ++y) {
         int start = bFlippedY ? ((*h)-y-1)*(*w) : y*(*w);
         int step = bFlippedX ? -1 : 1;
 
@@ -173,7 +173,7 @@ unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int
                     }
                     if (num <= 128) {
                         /* No run, just values, just just read all the values */
-                        for (i=0; i<num; ++i)  {
+                        for (i=0; i<num; ++i) {
                             if (fread(&imagergbe[component+pos*4], 1, 1, fp) != 1) {
                                 fprintf(stderr, "read_hdr(): unexpected EOF reading data\n");
                                 free(imagergbe);
@@ -192,7 +192,7 @@ unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int
                             return NULL;
                         }
                         num -= 128;
-                        for (i=0; i<num; ++i)  {
+                        for (i=0; i<num; ++i) {
                             imagergbe[component+pos*4] = value;
                             pos += step;
                         }
@@ -206,7 +206,7 @@ unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int
              * All it contains is either runs or raw data, runs have
              * their header, which we check for right away. */
             int pos = start;
-            for (unsigned int x=0; x<(*w); ++x)  {
+            for (unsigned int x=0; x<(*w); ++x) {
                 if (x > 0) {
                     if (fread(col, 1, 4, fp) != 4) {
                         fprintf(stderr, "read_hdr(): unexpected EOF reading data\n");
@@ -225,7 +225,7 @@ unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int
                     unsigned char b = imagergbe[(pos-step)*4+2];
                     unsigned char e = imagergbe[(pos-step)*4+3];
 
-                    for (i=0; i<num; ++i)  {
+                    for (i=0; i<num; ++i) {
                         imagergbe[pos*4+0] = r;
                         imagergbe[pos*4+1] = g;
                         imagergbe[pos*4+2] = b;

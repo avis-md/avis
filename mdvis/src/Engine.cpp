@@ -357,7 +357,7 @@ void Engine::DrawLine(Vec3 v1, Vec3 v2, Vec4 col, float width) {
 	Vec3 quadPoss[2];
 	quadPoss[0] = v1;
 	quadPoss[1] = v2;
-	for (int y = 0; y < 2; ++y)  {
+	for (int y = 0; y < 2; ++y) {
 		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
 	}
 	UI::SetVao(2, quadPoss);

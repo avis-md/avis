@@ -29,7 +29,7 @@ void _printstack() {
 #ifndef PLATFORM_WIN
 	remove((IO::path + "trace.txt").c_str());
 	auto bs = backtrace_symbols(buf, c);
-	for (uint a = 0; a < c; ++a)  {
+	for (uint a = 0; a < c; ++a) {
 		std::string str(bs[a]);
 		Debug::Error("System", str);
 		int pos = string_find(str, "avis");

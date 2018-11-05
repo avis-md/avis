@@ -229,7 +229,7 @@ void VisSystem::UpdateTitle() {
 	auto& c = menuItems[0][5].child;
 	auto s = ParMenu::recentFiles.size();
 	c.resize(s);
-	for (size_t i = 0; i < s; ++i)  {
+	for (size_t i = 0; i < s; ++i) {
 		c[i].Set(0, ParMenu::recentFilesN[i], []() {
 			const char* cc[1] = { ParMenu::recentFiles[Popups::selectedMenu].c_str() };
 			ParLoader::OnDropFile(1, cc);
@@ -244,7 +244,7 @@ void VisSystem::DrawTitle() {
 	const std::string menu[] = {_("File"), _("Edit"), _("Options"), _("Render"), _("Help")};
 	bool iso = Popups::type == POPUP_TYPE::MENU && Popups::data >= menuItems && Popups::data < (menuItems + 5) && UI::_layerMax == UI::_layer+1;
 	UI::ignoreLayers = iso; 
-	for (uint i = 0; i < 5; ++i)  {
+	for (uint i = 0; i < 5; ++i) {
 		auto st = Engine::Button(2.f + 60 * i, 1, 59, 16, white(0), menu[i], 12, white(), true);
 		if (st == MOUSE_RELEASE || (!!(st & MOUSE_HOVER_FLAG) && iso)) {
 			Popups::type = POPUP_TYPE::MENU;
@@ -342,7 +342,7 @@ void VisSystem::DrawBar() {
 		UI::Label(172, Display::height - 16.f, 12, _("No Animation Data"), white(0.5f));
 
 	byte sel = (byte)mouseMode;
-	for (byte b = 0; b < 3; ++b)  {
+	for (byte b = 0; b < 3; ++b) {
 		if (Engine::Button(Display::width - 60.f + 17 * b, Display::height - 17.f, 16, 16, (&Icons::toolRot)[b], (sel == b) ? Vec4(1, 0.7f, 0.4f, 1) : white(0.7f), white(), white(0.5f)) == MOUSE_RELEASE) {
 			mouseMode = (VIS_MOUSE_MODE)b;
 		}

@@ -114,7 +114,7 @@ GLuint Font::CreateGlyph(uint sz, uint mask) {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	bool recalc = (params.count(sz) == 0) || (params[sz].count(mask) == 0);
 	auto& pr = params[sz][mask];
-	for (ushort a = 0; a < 256; ++a)  {
+	for (ushort a = 0; a < 256; ++a) {
 		if (FT_Load_Char(_face, mask + a, FT_LOAD_RENDER) != FT_Err_Ok) continue;
 		byte x = a % 16, y = a / 16;
 		FT_Bitmap bmp = _face->glyph->bitmap;

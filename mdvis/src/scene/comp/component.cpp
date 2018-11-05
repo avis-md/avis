@@ -40,7 +40,7 @@ COMPONENT_TYPE Component::Name2Type(std::string nm) {
 		COMP_SCR
 	};
 
-	for (uint i = 0; i < sizeof(types); ++i)  {
+	for (uint i = 0; i < sizeof(types); ++i) {
 		if ((nm) == names[i]) return types[i];
 	}
 	return COMP_UNDEF;

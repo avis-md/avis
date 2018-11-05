@@ -130,7 +130,7 @@ void RayTracer::Refine() {
 	// Shading
 	RR::Event* e = nullptr;
 
-	for (int a = 0; a < maxRefl-1; ++a)  {
+	for (int a = 0; a < maxRefl-1; ++a) {
 		ShadeKernel(out_buff, isect_buffer_cl, col_buff, ray_buffer_cl, 1 + samples, a==0);
 		delete(ray_buffer);
 		ray_buffer = CreateFromOpenClBuffer(api, ray_buffer_cl);

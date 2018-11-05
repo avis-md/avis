@@ -19,7 +19,7 @@ Node_Info::Node_Info() :AnNode(new DmScript(sig)) {
 	script->outvars.resize(sz);
 	conV.resize(sz);
 
-	for (int a = 0; a < sz; ++a)  {
+	for (int a = 0; a < sz; ++a) {
 		script->outvars[a] = std::pair<std::string, std::string>(vars[a * 2], vars[a * 2 + 1]);
 		conV[a].typeName = vars[a * 2 + 1];
 	}

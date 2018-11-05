@@ -235,7 +235,7 @@ int main(int argc, char **argv) {
 	try {
 #endif
 		Time::startMillis = milliseconds();
-		for (auto a = 1; a < argc; ++a)  {
+		for (auto a = 1; a < argc; ++a) {
 			if (argv[a][0] == '-') {
 				if (argv[a][1] == '-') {
 					argv[a] += 2;

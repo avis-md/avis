@@ -96,7 +96,7 @@ std::string PyScript::Exec() {
 		PyErr_Print();
 		throw "\x01";
 	}
-	for (uint i = 0; i < outvars.size(); ++i)  {
+	for (uint i = 0; i < outvars.size(); ++i) {
 		Py_DECREF(pRets[i]);
 		pRets[i] = PyObject_GetAttrString(pModule, _outvars[i].name.c_str());
 	}
@@ -139,7 +139,7 @@ void CVar::Write(std::ofstream& strm) {
 			int totalSz = 1;
 			auto sz = dimVals.size();
 			_StreamWrite(&sz, &strm, 1);
-			for (uint a = 0; a < sz; ++a)  {
+			for (uint a = 0; a < sz; ++a) {
 				_StreamWrite((int32_t*)dimVals[a], &strm, 4);
 				totalSz *= *dimVals[a];
 			}
@@ -177,7 +177,7 @@ void CVar::Read(std::ifstream& strm) {
 			dimVals.resize(sz);
 			data.dims.resize(sz);
 			int totalSz = 1;
-			for (auto a = 0; a < sz; ++a)  {
+			for (auto a = 0; a < sz; ++a) {
 				dimVals[a] = &data.dims[a];
 				_Strm2Val(strm, data.dims[a]);
 				totalSz *= data.dims[a];

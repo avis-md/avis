@@ -51,10 +51,10 @@ void Input::UpdateMouseNKeyboard(bool* src) {
 	memcpy(keyStatusOld, keyStatusNew, 325);
 	if (src) std::swap_ranges(src, src + 325, keyStatusNew);
 	else {
-		for (uint i = 32; i < 97; ++i)  {
+		for (uint i = 32; i < 97; ++i) {
 			keyStatusNew[i - 32] = !!glfwGetKey(Display::window, i);
 		}
-		for (uint i = 256; i < 347; ++i)  {
+		for (uint i = 256; i < 347; ++i) {
 			keyStatusNew[i - 32] = !!glfwGetKey(Display::window, i);
 		}
 	}

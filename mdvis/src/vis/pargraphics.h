@@ -23,7 +23,7 @@ public:
 	static bool useConCol, useConGradCol;
 	static Vec4 conCol;
 
-	enum class ORIENT : byte {
+	enum class ORIENT : uint {
 		NONE,
 		STRETCH,
 		VECTOR

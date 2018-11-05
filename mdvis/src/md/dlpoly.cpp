@@ -83,7 +83,7 @@ bool DLPoly::Read(ParInfo* info) {
 		
         _ps = new double[sz * 3];
         
-        for (uint32_t a = 0; a != sz; ++a)  {
+        for (uint32_t a = 0; a != sz; ++a) {
 			trj->progress = a * 1.0f / sz;
 			strm.ignore(500, '\n');
 			if (ignores[ign] == a) {

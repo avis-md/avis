@@ -43,7 +43,7 @@ bool Gromacs::Read(ParInfo* info) {
 	auto ns = _find_char_not_of(buf, buf + 10, ' ') + 1;
 	strm.seekg(lc);
 	int of = 8;
-	for (uint i = 0; i < sz; ++i)  {
+	for (uint i = 0; i < sz; ++i) {
 		info->progress = i * 1.f / sz;
 		strm.getline(buf, 100);
 		if (strm.eof()) {
@@ -87,7 +87,7 @@ bool Gromacs::ReadFrm(FrmInfo* info) {
 	strm.getline(buf, 100);
 	strm.getline(buf, 100);
 	int of = 8;
-	for (uint32_t i = 0; i < info->parNum; ++i)  {
+	for (uint32_t i = 0; i < info->parNum; ++i) {
 		strm.getline(buf, 100);
 		if (strm.eof()) {
 			SETERR("File data is incomplete!");
@@ -119,7 +119,7 @@ bool Gromacs::ReadGro2(ParInfo* info, std::ifstream& strm, size_t isz) {
 		info->trajectory.progress = 0.01f;
 		ps = new double[info->num * 3];
 		strm.ignore(100, '\n');
-		for (uint32_t i = 0; i < info->num; ++i)  {
+		for (uint32_t i = 0; i < info->num; ++i) {
 			strm.getline(buf, 100);
 			auto bf = buf + isz;
 			ps[i * 3] = std::atof(bf); bf += 8;

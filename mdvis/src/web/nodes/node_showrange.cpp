@@ -20,7 +20,7 @@ void Node_ShowRange::Execute() {
     double* vals = *((double**)cv.value);
 
 #pragma omp parallel for
-    for (int a = 0; a < Particles::particleSz; ++a)  {
+    for (int a = 0; a < Particles::particleSz; ++a) {
         auto& v = vals[a];
         if (v > rMin && v < rMax)
             Particles::visii[a] = !invert;
