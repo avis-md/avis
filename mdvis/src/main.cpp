@@ -119,6 +119,7 @@ void updateFunc() {
 			}
 			else {
 				RayTracer::Clear();
+				Scene::dirty = true;
 			}
 		}
 		if (Input::KeyDown(Key_F5)) {
@@ -278,15 +279,23 @@ int main(int argc, char **argv) {
 						if (argc == 2)
 							return 0;
 					}
+					else if ISC('b') {
+						if (argv[a][1] == '0') ParLoader::useConn = false;
+						else if (argv[a][1] == '1') ParLoader::useConn = true;
+						else {
+							std::cout << "Value of -b must be either 0 or 1. Type --help for usage guide." << std::endl;
+							return -2;
+						}
+					}
 					else if ISC('f') {
 						ParLoader::maxframes = TryParse(argv[a] + 1, -1);
 					}
-					else if (ISC('m')) {
+					else if ISC('m') {
 						option_min = true;
 						ParMenu::expanded = false;
 						AnWeb::expanded = false;
 					}
-					else if (ISC('i')) {
+					else if ISC('i') {
 						main_openimpsigs.push_back(argv[a]+1);
 					}
 					else {
@@ -414,7 +423,10 @@ The hash for this program is )" << VisSystem::version_hash
 		NEWIMP("DLPoly", dlp, .000, DLPoly::Read)
 		PUSHIMP
 
-		if (main_openfiles.size()) {
+		if (!!main_openimpsigs.size()) {
+			ParLoader::requestSig = main_openimpsigs[0];
+		}
+		if (!!main_openfiles.size()) {
 			for (auto& f : main_openfiles) f = IO::FullPath(f);
 			ParLoader::directLoad = option_silent;
 			ParLoader::OnOpenFile(main_openfiles);

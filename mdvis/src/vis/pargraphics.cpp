@@ -1047,7 +1047,7 @@ void ParGraphics::DrawColMenu() {
 
 	off += 18;
 
-	UI::Label(exps - 148, off, 12, "Coloring", white());
+	UI::Label(exps - 148, off, 12, "Colors", white());
 	off += 17;
 	UI::alpha = (Particles::attrs.size() > 0)? 1 : 0.5f;
 	UI2::Toggle(exps - 148, off, 146, _("Gradient Fill"), useGradCol);
@@ -1109,15 +1109,10 @@ void ParGraphics::DrawColMenu() {
 		UI2::sepw = 0.5f;
 	}
 
-	bool uc = useConCol;
 	UI2::Toggle(exps - 148, off, 146, "Custom Bond Colors", useConCol);
 	if (useConCol) {
-		static auto cc = conCol;
 		UI2::Color(exps - 147, off + 17, 146, "Bond Color", conCol);
-		if (cc != conCol) {
-			cc = conCol;
-			Scene::dirty = true;
-		}
+		CHK(conCol)
 		off += 35;
 	}
 	else {
@@ -1125,8 +1120,12 @@ void ParGraphics::DrawColMenu() {
 		CHK(useConGradCol)
 		off += 35;
 	}
-	if (uc != useConCol) Scene::dirty = true;
-	off++;
+	CHK(useConCol)
+	off += 2;
+
+	UI::Label(exps - 148, off, 12, "Radii", white());
+	off += 17;
+
 	UI::Label(exps - 148, off, 12, "Bounding Box", white());
 	off += 18;
 	UI2::Toggle(exps - 147, off, 146, "Draw", showbbox);

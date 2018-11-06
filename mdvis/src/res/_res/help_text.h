@@ -15,6 +15,7 @@ Switches
     --version   : Print the version of the program and exit
     --path      : Print the install path, can be used like cd $(avis --path)
 Options
+    -b[0/1]     : Generate bonds. Default is 1
     -f[num]     : Limit maximum frames loaded to [num]
     -i[sig]     : Use the importer [sig] when available. One override can be specified for each input file
     -m          : Start with a smaller window, with all toolbars minimized

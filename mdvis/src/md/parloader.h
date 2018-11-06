@@ -54,6 +54,7 @@ public:
 	static std::vector<std::string> exts;
 	
 	static bool showDialog, busy, fault, directLoad;
+	static std::string requestSig;
 	static bool parDirty, trjDirty;
 	static float* loadProgress, *loadProgress2;
 	static uint16_t* loadFrames;

@@ -55,7 +55,7 @@ VIS_MOUSE_MODE VisSystem::mouseMode = VIS_MOUSE_MODE::ROTATE;
 float VisSystem::_defBondLength = 0.0225f; // 0.15
 std::unordered_map<uint, float> VisSystem::_bondLengths;
 std::unordered_map<ushort, Vec3> VisSystem::_type2Col;
-std::unordered_map<ushort, std::array<float, 2>> VisSystem::radii;
+std::unordered_map<ushort, float> VisSystem::radii;
 
 std::unordered_map<std::string, std::string> VisSystem::envs, VisSystem::prefs;
 
@@ -70,9 +70,8 @@ void VisSystem::Init() {
 			auto p = string_split(s, ' ', true);
 			if (p.size() != 5) continue;
 			auto i = *(ushort*)&(p[0])[0];
-			auto ar = std::stof(p[1]);
-			auto vr = std::stof(p[4]);
-			radii.emplace(i, std::array<float,2>({{ar, vr}}));
+			auto vr = std::stof(p[1]);
+			radii.emplace(i, vr);
 		}
 		strm.close();
 	}
