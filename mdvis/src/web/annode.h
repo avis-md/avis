@@ -59,8 +59,8 @@ enum class ANNODE_OP {
 };
 
 union AnVarBase {
+	short s;
 	int i;
-	float f;
 	double d;
 	uint64_t data;
 };

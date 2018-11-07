@@ -14,12 +14,14 @@ enum class AN_SCRTYPE : byte {
 };
 
 enum class AN_VARTYPE : byte {
+	SHORT,
 	INT,
 	DOUBLE,
 	LIST,
 };
 
 union _VarVal {
+	short s;
 	int i;
 	double d;
 	struct arr {
@@ -92,15 +94,16 @@ public:
 
 struct PyVar {
 public:
+	~PyVar();
 	std::string name, typeName;
 	AN_VARTYPE type;
-	PyObject* value;
+	PyObject* value = nullptr;
 	int dim, stride;
 };
 
 class PyScript : public AnScript {
 public:
-	PyScript() : AnScript(AN_SCRTYPE::PYTHON), pModule(nullptr), pArgl(nullptr) {}
+	PyScript() : AnScript(AN_SCRTYPE::PYTHON), pModule(0), pFunc(0) {}
 
 	std::vector<PyVar> _invars, _outvars;
 	
@@ -114,8 +117,7 @@ public:
 	std::string Exec() override;
 	void Set(uint i, int v), Set(uint i, double v), Set(uint i, PyObject* v);
 
-	PyObject* pModule, *pFunc, *pArgl;
-	std::vector<PyObject*> pArgs, pRets;
+	PyObject* pModule, *pFunc;
 
 	static std::unordered_map<std::string, PyScript*> allScrs;
 };

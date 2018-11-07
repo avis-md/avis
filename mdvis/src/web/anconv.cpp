@@ -47,7 +47,6 @@ void* AnConv::FromPy(PyObject* o, int dim, int** szs, int& tsz) {
 	for (int a = 0; a < nd; a++)
 		tsz *= (*(szs[a]) = (int)shp[a]);
 	auto tp = PyArray_TYPE(ao);
-	std::cout << "conv success" << std::endl;
 	return PyArray_DATA(ao);
 }
 
