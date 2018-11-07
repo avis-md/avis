@@ -10,7 +10,7 @@
 #include "vis/system.h"
 #endif
 
-//#define NO_REDIR_LOG
+#define NO_REDIR_LOG
 #define VERBOSE
 
 bool AnWeb::lazyLoad = true;

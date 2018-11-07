@@ -1,6 +1,6 @@
 #include "anweb.h"
 
-//#define NO_PYLOG
+#define NO_PYLOG
 
 PyVar::~PyVar() {
 	if (value) Py_DECREF(value);
