@@ -43,6 +43,8 @@ Vec4 ParGraphics::gradCols[] = { blue(), green(), red() };
 bool ParGraphics::useConCol, ParGraphics::useConGradCol;
 Vec4 ParGraphics::conCol = white();
 
+float ParGraphics::radScl = 1;
+
 ParGraphics::ORIENT ParGraphics::orientType = ParGraphics::ORIENT::NONE;
 float ParGraphics::orientStr;
 uint ParGraphics::orientParam[] = {};
@@ -714,8 +716,8 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		for (auto& p : drawLists) {
 			if (p.second.second == 1) glUniform1f(parProgLocs[7], -1);
 			else if (p.second.second == 0x0f) glUniform1f(parProgLocs[7], 0);
-			else if (p.second.second == 2) glUniform1f(parProgLocs[7], 0.2f);
-			else glUniform1f(parProgLocs[7], 1);
+			else if (p.second.second == 2) glUniform1f(parProgLocs[7], 0.2f * radScl);
+			else glUniform1f(parProgLocs[7], radScl);
 			glDrawArrays(GL_POINTS, p.first, p.second.first);
 		}
 
@@ -1123,8 +1125,9 @@ void ParGraphics::DrawColMenu() {
 	CHK(useConCol)
 	off += 2;
 
-	UI::Label(exps - 148, off, 12, "Radii", white());
-	off += 17;
+	UI::Label(exps - 148, off, 12, "Radii", white()); off += 17;
+	radScl = UI2::Slider(exps - 147, off, 145, "Scale", 0.5f, 2.0f, radScl); off += 17;
+	CHK(radScl);
 
 	UI::Label(exps - 148, off, 12, "Bounding Box", white());
 	off += 18;
