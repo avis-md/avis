@@ -467,16 +467,17 @@ void Particles::UpdateRadBuf(int i) {
 		std::vector<float> res(particleSz);
 #pragma omp parallel for
 		for (int a = 0; a < particleSz; ++a) {
-			res[a] = visii[a] ? radii[a]*radiiscl[a] : -1;
+			res[a] = visii[a] ? std::max(radii[a], 0.001f)*radiiscl[a] : -1;
 		}
 		SetGLSubBuf(radBuffer, &res[0], particleSz);
 	}
 	else {
 		glBindBuffer(GL_ARRAY_BUFFER, radBuffer);
-		float vl = visii[i] ? radii[i]*radiiscl[i] : -1;
+		float vl = visii[i] ? std::max(radii[i], 0.001f)*radiiscl[i] : -1;
 		glBufferSubData(GL_ARRAY_BUFFER, i * sizeof(float), sizeof(float), &vl);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
+	Scene::dirty = true;
 }
 
 void Particles::SaveAttrs(const std::string& path) {

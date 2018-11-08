@@ -68,7 +68,7 @@ void VisSystem::Init() {
 		while (!strm.eof()) {
 			std::getline(strm, s);
 			auto p = string_split(s, ' ', true);
-			if (p.size() != 5) continue;
+			if (p.size() != 2) continue;
 			auto i = *(ushort*)&(p[0])[0];
 			auto vr = std::stof(p[1]);
 			radii.emplace(i, vr);
