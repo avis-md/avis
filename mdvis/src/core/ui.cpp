@@ -58,12 +58,12 @@ void UI::Init() {
 
 	font = new Font(IO::path + "res/font.ttf");
 	font2 = new Font(IO::path + "res/font2.ttf");
-	if (!font) {
+	if (!font->loaded) {
 		Debug::Error("UI", "failed to open default font (/res/font.ttf)!");
-		if (font2) font = font2;
+		if (font2->loaded) font = font2;
 		else Debug::Warning("UI", "failed to open alternate font (/res/font2.ttf)! Non-ascii text will not work!");
 	}
-	else if (!font2) font2 = font;
+	else if (!font2->loaded) font2 = font;
 }
 
 void UI::InitVao() {
@@ -611,8 +611,8 @@ float UI::BeginScroll(float x, float y, float w, float h) {
 	uintptr_t buf[3];
 	Debug::StackTrace(3, (void**)buf);
 	currentScroll = &scrollWs[buf[2]];
-	if (currentScroll->x > h && Rect(x,y,w,h).Inside(Input::mousePos)) currentScroll->y = Clamp(currentScroll->y + Input::mouseScroll * 10, h - currentScroll->x, 0.f);
-	else currentScroll->y = 0;
+	if (Rect(x,y,w,h).Inside(Input::mousePos)) currentScroll->y += Input::mouseScroll * 10;
+	if (currentScroll->x > h) currentScroll->y = Clamp(currentScroll->y, h - currentScroll->x, 0.f);
 	currentScrollW0 = y + currentScroll->y;
 	return currentScrollW0;
 }

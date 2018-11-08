@@ -2,7 +2,7 @@
 
 Node_Vector::Node_Vector() : AnNode(new DmScript(sig)) {
     title = "Set Bounding Box Center";
-    titleCol = NODE_COL_IO;
+    titleCol = NODE_COL_NRM;
     inputR.resize(3);
     auto& vrs = script->invars;
     script->invaropts.resize(3);
