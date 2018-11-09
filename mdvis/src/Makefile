@@ -1,5 +1,6 @@
 OSFLAG :=
 CFLAGS2 :=
+CXXFLAGS2 :=
 LDFLAGS2 :=
 GLLIB :=
 LIBS2 :=
@@ -24,7 +25,8 @@ BINPRE2 := /lib/x86_64-linux-gnu
 ifeq ($(UNAME_S),Linux)
 	OSFLAG += -D PLATFORM_LNX
 	CFLAGS2 += -Wno-ignored-attributes
-	LDFLAGS2 += -Wl,-rpath='$$ORIGIN' -static-libstdc++
+	CXXFLAGS2 += -fopenmp
+	LDFLAGS2 += -Wl,-rpath='$$ORIGIN' -static-libstdc++ -lgomp
 	GLLIB += /usr/lib/x86_64-linux-gnu/libjpeg.a -lssh2 -lOpenCL `pkg-config --static --libs gl glew glfw3 freetype2`
 	#PYLIB += $(shell python3-config --configdir)/libpython3.6m.a -lexpat
 	PYLIB += -L../build -lpython3
@@ -44,7 +46,7 @@ LIBS2 += -L../build $(RRAYL) $(AVIL)
 
 C = gcc
 CXX = g++
-CXXFLAGS = -O0 -g -Wall -std=c++11 -fvisibility=hidden -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ $(NUMPY) -I$(shell python3-config --prefix)/include/python3.6m $(RRAY) $(AVI) $(OSFLAG) $(CFLAGS2)
+CXXFLAGS = -O0 -g -Wall -std=c++11 -fvisibility=hidden -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ $(CXXFLAGS2) $(NUMPY) -I$(shell python3-config --prefix)/include/python3.6m $(RRAY) $(AVI) $(OSFLAG) $(CFLAGS2)
 LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
 LIBS = $(WEAK_LIB) $(PYLIB) -lpthread -lm $(GLLIB) -lz $(LIBS2)
 
@@ -128,7 +130,7 @@ obj/utils/tinyfiledialogs.o: utils/tinyfiledialogs.c
 obj/vis/system.o: vis/system.cpp $(PCH_OUT)
 	echo "\""$(shell git rev-parse --short HEAD)"\"" > ../../githash.h
 	@echo "Compiling" $<
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	@$(CXX) $(CXXFLAGS) -include precompile.h -c $< -o $@
 
 obj/tinyobj.o : tmp/tiny_obj_loader.cpp
 	@echo "Compiling" $<
