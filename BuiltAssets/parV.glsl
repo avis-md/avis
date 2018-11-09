@@ -21,7 +21,7 @@ layout (std140) uniform clipping {
     vec4 clip_planes[6];
 };
 bool clipped(vec3 pos) {
-    for (int a = 0; a < 6; ++a)  {
+    for (int a = 0; a < 6; ++a) {
         if (dot(pos, clip_planes[a].xyz) > clip_planes[a].w)
             return true;
     }
@@ -34,14 +34,14 @@ out float v2f_scl;
 out float v2f_rad;
 
 void main(){
-	vec4 wpos = _MV*vec4(pos, 1);
-	wpos /= wpos.w;
-	if (clipped(wpos.xyz)) {
+	float radTexel = texelFetch(radTex,gl_VertexID).r;
+	if (radTexel < 0) {
 		gl_PointSize = 0;
 		return;
 	}
-	float radTexel = texelFetch(radTex,gl_VertexID).r;
-	if (radTexel < 0) {
+	vec4 wpos = _MV*vec4(pos, 1);
+	wpos /= wpos.w;
+	if (clipped(wpos.xyz)) {
 		gl_PointSize = 0;
 		return;
 	}

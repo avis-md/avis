@@ -23,6 +23,8 @@ public:
 	static bool useConCol, useConGradCol;
 	static Vec4 conCol;
 
+	static float radScl;
+
 	enum class ORIENT : uint {
 		NONE,
 		STRETCH,

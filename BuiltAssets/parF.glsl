@@ -11,7 +11,7 @@ uniform vec2 screenSize;
 uniform samplerBuffer id2col;
 uniform sampler2D colList;
 uniform vec4 gradCols[3];
-uniform int colUseGrad;
+uniform bool colUseGrad;
 
 uniform bool oriented;
 uniform float orienScl;
@@ -35,7 +35,7 @@ vec3 gradfill(float f) {
 
 void SetColor(int id) {
     int cd = int(texelFetch(id2col, id-1).r * 255);
-    if (colUseGrad == 1)
+    if (colUseGrad)
         outColor.rgb = gradfill(cd/255.0f);
     else
         outColor.rgb = texture(colList, vec2((mod(cd, 16) + 0.5) / 16.0, ((cd / 16) + 0.5) / 16.0)).rgb;

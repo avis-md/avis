@@ -44,7 +44,9 @@ void Node_Plot::Execute() {
 	}
 	auto sz = *cv.dimVals[0];
 	auto sz2 = (cv.dimVals.size() > 1)? *cv.dimVals[1] : 1;
-	if (!sz || !sz2) return;
+	if (!sz || !sz2) {
+		RETERR("Size is empty!");
+	}
 	if (sz > 1) {
 		xid = Clamp(xid, -1, sz2 - 1);
 		yid = Clamp(yid, -1, sz2 - 1);

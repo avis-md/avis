@@ -80,21 +80,26 @@ bool RayTracer::Init() {
 	return true;
 }
 
-void RayTracer::Clear() {
-	accum = CLWBuffer<float>();
-
-	resTex = 0;
-}
-
 std::vector<TO::shape_t> g_objshapes;
 std::vector<TO::material_t> g_objmaterials;
 
 CLWBuffer<float> bg_buf;
 CLWBuffer<float> g_positions;
 CLWBuffer<float> g_normals;
-CLWBuffer<int> g_indices;
 CLWBuffer<float> g_colors;
+CLWBuffer<int> g_indices;
 CLWBuffer<int> g_indent;
+
+void RayTracer::Clear() {
+	accum = CLWBuffer<float>();
+	bg_buf = CLWBuffer<float>();
+	g_positions = CLWBuffer<float>();
+	g_normals = CLWBuffer<float>();
+	g_colors = CLWBuffer<float>();
+	g_indices = CLWBuffer<int>();
+	g_indent = CLWBuffer<int>();
+	resTex = 0;
+}
 
 void RayTracer::SetScene() {
 	if (!api) {
@@ -254,9 +259,10 @@ void RayTracer::SetObjs() {
 	m.material_ids.resize(tet.tris.size()/3, 0);
 	m.normals.resize(tet.norms.size() * 3);
 	memcpy(&m.normals[0], &tet.norms[0], tet.norms.size() * sizeof(Vec3));
-	g_objshapes.resize(1000, g_objshapes[0]);
-	g_objmaterials.resize(1000, TO::material_t());
-	for (int a = 0; a < 1000; a++) {
+	const uint mp = std::min(Particles::particleSz, 5000U);
+	g_objshapes.resize(mp, g_objshapes[0]);
+	g_objmaterials.resize(mp, TO::material_t());
+	for (uint a = 0; a < mp; a++) {
 		auto& p = g_objshapes[a].mesh.positions;
 		for (int v = 0; v < p.size()/3; v++) {
 			((Vec3*)p.data())[v] *= Particles::radii[a];

@@ -34,7 +34,7 @@ public:
 	static float _defBondLength;
 	static std::unordered_map<uint, float> _bondLengths;
 	static std::unordered_map<ushort, Vec3> _type2Col;
-	static std::unordered_map<ushort, std::array<float, 2>> radii;
+	static std::unordered_map<ushort, float> radii;
 
 	static std::unordered_map<std::string, std::string> envs, prefs;
 

@@ -30,6 +30,7 @@ std::vector<ParImporter> ParLoader::importers;
 std::vector<std::string> ParLoader::exts;
 
 bool ParLoader::showDialog = false, ParLoader::busy = false, ParLoader::fault = false, ParLoader::directLoad = false;
+std::string ParLoader::requestSig;
 bool ParLoader::parDirty = false, ParLoader::trjDirty = false;
 float* ParLoader::loadProgress = 0, *ParLoader::loadProgress2 = 0;
 uint16_t* ParLoader::loadFrames = 0;
@@ -51,6 +52,8 @@ void ParLoader::Init() {
 		srvport = 22;
 		srvkey = "~/.ssh/id_rsa.pub";
 	}
+
+	useConn = true;
 }
 
 #if defined(PLATFORM_WIN)
@@ -520,9 +523,7 @@ void ParLoader::DoOpen() {
 		}
 		found:;
 
-		float rad = VisSystem::radii[id1][1];
-
-		Particles::radii[i] = rad;
+		Particles::radii[i] = VisSystem::radii[id1];
 		Particles::ress[i] = Int2(Particles::residueListSz - 1, trs->residueSz - 1);
 
 		tr->cnt++;
@@ -615,6 +616,9 @@ void ParLoader::DoOpen() {
 	parDirty = true;
 	busy = false;
 	fault = false;
+
+	Engine::AcquireLock(10);
+	Engine::ReleaseLock();
 
 	//temp
 	if (!isSrv)
@@ -904,6 +908,7 @@ void ParLoader::DrawOpenDialog() {
 			}
 		}
 	}
+	UI2::sepw = 0.4f;
 	maxframes = TryParse(UI2::EditText(woff + 2, hoff + 17 * 8, 200, "Max Frames", std::to_string(maxframes)), 1000);
 	/*
 	std::string line = "";
@@ -930,6 +935,7 @@ void ParLoader::DrawOpenDialog() {
 			td.detach();
 		}
 		showDialog = false;
+		requestSig = "";
 		ff = "";
 	}
 	
@@ -954,7 +960,6 @@ void ParLoader::OnOpenFile(const std::vector<std::string>& files) {
 	FindImpId();
 	//frameskip = FindNextOff(files[0]);
 
-	useConn = true;
 	hasConnCache = false;
 
 	std::string cpt = droppedFiles[0] + ".conn";
@@ -992,6 +997,26 @@ void ParLoader::OnOpenFile(const std::vector<std::string>& files) {
 void ParLoader::FindImpId(bool force) {
 	impId = -1;
 	int id = 0;
+
+	if (requestSig != "") {
+		for (auto& imp : importers) {
+			if (imp.sig == requestSig) {
+				int id2 = 0;
+				for (auto& pr : imp.funcs) {
+					if (force || ((pr.type != ParImporter::Func::FUNC_TYPE::CONFIG) == loadAsTrj)) {
+						impId = id;
+						funcId = id2;
+						if (force) loadAsTrj = (pr.type != ParImporter::Func::FUNC_TYPE::CONFIG);
+						return;
+					}
+					id2++;
+				}
+			}
+			id++;
+		}
+	}
+
+	id = 0;
 	auto sz = droppedFiles[0].size();
 	for (auto& imp : importers) {
 		int id2 = 0;

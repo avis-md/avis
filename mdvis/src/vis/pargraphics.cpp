@@ -43,6 +43,8 @@ Vec4 ParGraphics::gradCols[] = { blue(), green(), red() };
 bool ParGraphics::useConCol, ParGraphics::useConGradCol;
 Vec4 ParGraphics::conCol = white();
 
+float ParGraphics::radScl = 1;
+
 ParGraphics::ORIENT ParGraphics::orientType = ParGraphics::ORIENT::NONE;
 float ParGraphics::orientStr;
 uint ParGraphics::orientParam[] = {};
@@ -714,8 +716,8 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		for (auto& p : drawLists) {
 			if (p.second.second == 1) glUniform1f(parProgLocs[7], -1);
 			else if (p.second.second == 0x0f) glUniform1f(parProgLocs[7], 0);
-			else if (p.second.second == 2) glUniform1f(parProgLocs[7], 0.2f);
-			else glUniform1f(parProgLocs[7], 1);
+			else if (p.second.second == 2) glUniform1f(parProgLocs[7], 0.2f * radScl);
+			else glUniform1f(parProgLocs[7], radScl);
 			glDrawArrays(GL_POINTS, p.first, p.second.first);
 		}
 
@@ -1047,7 +1049,7 @@ void ParGraphics::DrawColMenu() {
 
 	off += 18;
 
-	UI::Label(exps - 148, off, 12, "Coloring", white());
+	UI::Label(exps - 148, off, 12, "Colors", white());
 	off += 17;
 	UI::alpha = (Particles::attrs.size() > 0)? 1 : 0.5f;
 	UI2::Toggle(exps - 148, off, 146, _("Gradient Fill"), useGradCol);
@@ -1105,19 +1107,12 @@ void ParGraphics::DrawColMenu() {
 			Particles::colorOverrides.push_back(Particles::SpecificColor());
 		}
 		off += 19;
-
-		UI2::sepw = 0.5f;
 	}
 
-	bool uc = useConCol;
 	UI2::Toggle(exps - 148, off, 146, "Custom Bond Colors", useConCol);
 	if (useConCol) {
-		static auto cc = conCol;
 		UI2::Color(exps - 147, off + 17, 146, "Bond Color", conCol);
-		if (cc != conCol) {
-			cc = conCol;
-			Scene::dirty = true;
-		}
+		CHK(conCol)
 		off += 35;
 	}
 	else {
@@ -1125,8 +1120,34 @@ void ParGraphics::DrawColMenu() {
 		CHK(useConGradCol)
 		off += 35;
 	}
-	if (uc != useConCol) Scene::dirty = true;
+	CHK(useConCol)
+	off += 2;
+
+	UI::Label(exps - 148, off, 12, "Radii", white()); off += 17;
+	radScl = UI2::Slider(exps - 147, off, 145, "Scale", 0.5f, 2.0f, radScl); off += 17;
+	CHK(radScl);
+	auto ca = VisSystem::radii.size();
+	UI::Quad(exps - 148, off, 146, ca * 17 + 2, white(0.9f, 0.1f));
 	off++;
+	UI2::sepw = 0.33f;
+	for (auto& cp : Particles::colorPallete) {
+		std::string nm = (cp.first >= *(ushort*)"A")? std::string((char*)&cp.first, 2) : std::to_string(cp.first);
+		auto& rad = VisSystem::radii[cp.first];
+		auto r2 = UI2::Slider(exps - 147, off, 145, nm, 0, 3, rad);
+		if (r2 != rad) {
+			rad = r2;
+			for (int a = 0; a < Particles::particleSz; ++a) {
+				if (Particles::types[a] == cp.first) {
+					Particles::radii[a] = rad;
+				}
+			}
+			Particles::UpdateRadBuf();
+		}
+		off += 17;
+	}
+	off += 3;
+	UI2::sepw = 0.5f;
+
 	UI::Label(exps - 148, off, 12, "Bounding Box", white());
 	off += 18;
 	UI2::Toggle(exps - 147, off, 146, "Draw", showbbox);

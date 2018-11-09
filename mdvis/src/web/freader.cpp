@@ -129,7 +129,7 @@ bool FReader::Read(FScript* scr) {
 				}
 
 				GenArrIO(fp2, nm, arr_i, arr_o);
-				ostrm << "\ninclude \"__fcache__/" + nm + ".ext.f95\"";
+				ostrm << "\ninclude \"" + nm + ".ext.f95\"";
 			}
 
 			if (fail) {
@@ -143,9 +143,9 @@ bool FReader::Read(FScript* scr) {
 			#ifdef PLATFORM_WIN
 				"-static-libstdc++ -static-libgcc -Wl,--export-all-symbols "
 			#else
-				"-D/tmp/ -fvisibility=hidden "
+				"-fvisibility=hidden "
 			#endif
-			"-fPIC \"" + IO::path + "res/noterminate.o\" -J \"" + fp2 + "\" -o \""
+				"-fPIC \"" + IO::path + "res/noterminate.o\" -I\"" + fp2 + "\" -J\"" + fp2 + "\" -o \""
 				+ fp2 + nm + ".so\" \"" + tmpPath + "\" -lgfortran 2> \"" + fp2 + nm + "_log.txt\"";
 			RunCmd::Run(SETPATH cmd);
 			scr->errorCount = ErrorView::Parse_GFortran(fp2 + nm + "_log.txt", tmpPath, nm + EXT_FS, scr->compileLog);
@@ -241,6 +241,9 @@ bool FReader::Read(FScript* scr) {
 			auto bk = &_cv.back();
 			_fc.push_back(emptyFunc());
 			auto fk = &_fc.back();
+			if (!iso) {
+				scr->invaropts.push_back(VarOpt());
+			}
 
 			const std::string ios = iso ? "output " : "input ";
 
@@ -252,6 +255,9 @@ bool FReader::Read(FScript* scr) {
 				ss[atn].pop_back();
 				atn++;
 			}
+			int ssp = 0;
+			while (ss[0][ssp] < 65) ssp++;
+			if (ssp > 0) ss[0] = ss[0].substr(ssp);
 			bk->typeName = ss[0];
 			if (!ParseType(bk->typeName, bk)) {
 				_ER("FReader", "arg type \"" + bk->typeName + "\" not recognized!");

@@ -70,6 +70,16 @@ void PyReader::Init() {
 #endif
 }
 
+size_t find_first_not_name_char (const char* c) {
+	auto c0 = c;
+	while (*c) {
+		if (*c == '=' || *c < 48 || *c > 122)
+			return c - c0;
+		++c;
+	}
+	return -1;
+}
+
 bool PyReader::Read(PyScript* scr) {
 	Engine::AcquireLock(6);
 	//Py_BEGIN_ALLOW_THREADS
@@ -91,14 +101,6 @@ bool PyReader::Read(PyScript* scr) {
 			goto FAIL;
 		}
 		scr->pModule = mdl;
-		scr->pFunc = PyObject_GetAttrString(scr->pModule, "Execute");
-		if (!scr->pFunc || !PyCallable_Check(scr->pFunc)) {
-			Debug::Warning("PyReader", "Failed to find \"Execute\" function in " + path + EXT_PS "!");
-			Py_XDECREF(scr->pFunc);
-			Py_DECREF(scr->pModule);
-			goto FAIL;
-		}
-		Py_INCREF(scr->pFunc);
 	}
 	//extract io variables
 	while (!strm.eof()) {
@@ -109,47 +111,47 @@ bool PyReader::Read(PyScript* scr) {
 			std::getline(strm, ln);
 		}
 
-		std::string ln2 = ln.substr(0, 4);
-		if (ln2 == "#in ") {
-			auto ss = string_split(ln, ' ');
-			auto sz = ss.size() - 1;
-			for (uint i = 0; i < sz; ++i) {
-				scr->_invars.push_back(PyVar());
-				auto& bk = scr->_invars.back();
-				bk.typeName = ss[i + 1];
-				if (!ParseType(bk.typeName, &bk)) {
-					Debug::Warning("PyReader::ParseType", "input arg type \"" + bk.typeName + "\" not recognized!");
+		if (ln.substr(0, 6) == "#entry") {
+			std::getline(strm, ln);
+			if (ln.substr(0, 4) != "def ") {
+				Debug::Warning("PyReader::ParseType", "#entry expects a function definition!");
+				goto FAIL;
+			}
+			auto c1 = ln.find_first_of('(');
+			if (c1 == std::string::npos) {
+				Debug::Warning("PyReader::ParseType", "Braces for main function not found!");
+				goto FAIL;
+			}
+			if (ln[c1+1] != ')') {
+				Debug::Warning("PyReader::ParseType", "Main function must have no arguments!");
+				goto FAIL;
+			}
+			if (AnWeb::hasPy) {
+				auto funcNm = ln.substr(4, c1 - 4);
+				scr->pFunc = PyObject_GetAttrString(scr->pModule, funcNm.c_str());
+				if (!scr->pFunc || !PyCallable_Check(scr->pFunc)) {
+					Debug::Warning("PyReader", "Failed to find \"" + funcNm + "\" function in " + path + EXT_PS "!");
+					Py_XDECREF(scr->pFunc);
+					Py_DECREF(scr->pModule);
 					goto FAIL;
 				}
-				scr->invaropts.push_back(VarOpt());
-				auto& opt = scr->invaropts.back();
-				opt.type = VarOpt::NONE;
-			}
-			std::getline(strm, ln);
-			auto c1 = ln.find_first_of('('), c2 = ln.find_first_of(')');
-			if (c1 == std::string::npos || c2 == std::string::npos || c2 <= c1) {
-				Debug::Warning("PyReader::ParseType", "braces for input function not found!");
-				goto FAIL;
-			}
-			ss = string_split(ln.substr(c1 + 1, c2 - c1 - 1), ',');
-			if (ss.size() != sz) {
-				Debug::Warning("PyReader::ParseType", "input function args count not consistent!");
-				goto FAIL;
-			}
-			scr->pArgl = (AnWeb::hasPy) ? PyTuple_New(sz) : nullptr;
-			scr->pArgs.resize(sz, 0);
-			for (uint i = 0; i < sz; ++i) {
-				auto ns = ss[i].find_first_not_of(' ');
-				auto ss2 = (ns == std::string::npos) ? ss[i] : ss[i].substr(ns);
-				auto tn = scr->_invars[i].typeName;
-				scr->_invars[i].name = ss2;
-				scr->invars.push_back(std::pair<std::string, std::string>(scr->_invars[i].name, tn));
-				if (*((int32_t*)&tn[0]) == *((int32_t*)"list")) {
-					//scr->pArgs[i] = AnConv::PyArr(1, tn[6]);
-				}
+				Py_INCREF(scr->pFunc);
 			}
 		}
-		else if (ln2 == "#out") {
+		else if (ln.substr(0, 4) == "#in ") {
+			scr->_invars.push_back(PyVar());
+			auto& bk = scr->_invars.back();
+			bk.typeName = ln.substr(4);
+			if (!ParseType(bk.typeName, &bk)) {
+				Debug::Warning("PyReader::ParseType", "input arg type \"" + bk.typeName + "\" not recognized!");
+				goto FAIL;
+			}
+			std::getline(strm, ln);
+			bk.name = ln.substr(0, find_first_not_name_char(ln.c_str()));
+			scr->invars.push_back(std::pair<std::string, std::string>(bk.name, bk.typeName));
+			scr->invaropts.push_back(VarOpt());
+		}
+		else if (ln.substr(0, 5) == "#out ") {
 			scr->_outvars.push_back(PyVar());
 			auto& bk = scr->_outvars.back();
 			bk.typeName = ln.substr(5);
@@ -158,16 +160,14 @@ bool PyReader::Read(PyScript* scr) {
 				goto FAIL;
 			}
 			std::getline(strm, ln);
-			bk.name = ln.substr(0, ln.find_first_of(' '));
+			bk.name = ln.substr(0, find_first_not_name_char(ln.c_str()));
 			scr->outvars.push_back(std::pair<std::string, std::string>(bk.name, bk.typeName));
-			if (AnWeb::hasPy) scr->pRets.push_back(PyObject_GetAttrString(scr->pModule, bk.name.c_str()));
-			else scr->pRets.push_back(nullptr);
 		}
 	}
 
-	if (!scr->invars.size()) {
-		Debug::Warning("PyReader", "Script has no input parameters!");
-	}
+	//if (!scr->invars.size()) {
+	//	Debug::Warning("PyReader", "Script has no input parameters!");
+	//}
 	if (!scr->outvars.size()) {
 		Debug::Warning("PyReader", "Script has no output parameters!");
 	}

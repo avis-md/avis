@@ -86,14 +86,22 @@ bool Gromacs::ReadFrm(FrmInfo* info) {
 	}
 	strm.getline(buf, 100);
 	strm.getline(buf, 100);
+
+	auto lc = strm.tellg();
+	strm.getline(buf, 100);
+	auto ns = _find_char_not_of(buf, buf + 10, ' ') + 1;
+	strm.seekg(lc);
 	int of = 8;
-	for (uint32_t i = 0; i < info->parNum; ++i) {
+	for (uint i = 0; i < info->parNum; ++i) {
 		strm.getline(buf, 100);
 		if (strm.eof()) {
 			SETERR("File data is incomplete!");
 			return false;
 		}
-		auto bf = buf + 20;
+		auto bf = buf;
+		bf += ns;
+		bf += 5;
+		bf += 5 + ns;
 		while (*(bf+of) != ' ') {
 			of++;
 		}
