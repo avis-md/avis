@@ -94,7 +94,7 @@ bool ParGraphics::animate = false, ParGraphics::seek = false;
 float ParGraphics::animOff;
 int ParGraphics::animTarFps = 30;
 bool ParGraphics::tfboDirty = true;
-Mat4x4 ParGraphics::lastMVP;
+Mat4x4 ParGraphics::lastMV, ParGraphics::lastP, ParGraphics::lastMVP;
 
 //---------------- effects vars -------------------
 
@@ -649,6 +649,8 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 	UpdateClipping();
 
 	if (!Shadows::isPass) {
+		lastMV = _mv;
+		lastP = _p;
 		lastMVP = _p * _mv;
 		auto imvp = glm::inverse(lastMVP);
 		scrX = Vec3(imvp * Vec4(1, 0, 0, 0));

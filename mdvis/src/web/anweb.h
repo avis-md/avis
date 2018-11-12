@@ -66,7 +66,7 @@ public:
 #include "nodes/node_info.h"
 #include "nodes/node_addbond.h"
 #include "nodes/node_camera.h"
-#include "nodes/node_plot.h"
+#include "nodes/misc/node_plot.h"
 #include "nodes/get/node_getattribute.h"
 #include "nodes/set/node_setattribute.h"
 #include "nodes/set/node_setbboxcenter.h"

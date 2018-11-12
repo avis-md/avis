@@ -148,6 +148,21 @@ void Node_Inputs::Execute() {
 			}
 			parcount = (uint)vpos.size();
 		}
+		else if (!!filter) {
+			if (setpos) {
+				vpos.resize(Particles::particleSz);
+				memcpy(vpos.data(), Particles::poss, Particles::particleSz * sizeof(glm::dvec3));
+			}
+			if (setvel) {
+				vvel.resize(Particles::particleSz);
+				memcpy(vvel.data(), Particles::vels, Particles::particleSz * sizeof(glm::dvec3));
+			}
+			if (settyp) {
+				vtyp.resize(Particles::particleSz);
+				memcpy(vtyp.data(), Particles::types.data(), Particles::particleSz * sizeof(short));
+			}
+			parcount = Particles::particleSz;
+		}
 		if ((filter & (int)FILTER::CLP) > 0 && ParGraphics::clippingType != ParGraphics::CLIPPING::NONE) {
 			std::vector<glm::dvec3> tpos; std::swap(tpos, vpos); vpos.reserve(parcount);
 			std::vector<glm::dvec3> tvel; if (setvel) { std::swap(tvel, vvel); vvel.reserve(parcount); }
@@ -156,7 +171,9 @@ void Node_Inputs::Execute() {
 				auto& pos = tpos[a];
 				bool clipped = false;
 				for (int c = 0; c < 6; ++c) {
-					if (glm::dot((Vec3)pos, (Vec3)ParGraphics::clippingPlanes[c]) > ParGraphics::clippingPlanes[c].w) {
+					Vec4 _pos = ParGraphics::lastMV * Vec4(pos, 1);
+					_pos /= _pos.w;
+					if (glm::dot((Vec3)_pos, (Vec3)ParGraphics::clippingPlanes[c]) > ParGraphics::clippingPlanes[c].w) {
 						clipped = true;
 						break;
 					}
@@ -164,7 +181,7 @@ void Node_Inputs::Execute() {
 				if (clipped) continue;
 				vpos.push_back(pos);
 				if (setvel) vvel.push_back(tvel[a]);
-				if (setvel) vtyp.push_back(ttyp[a]);
+				if (settyp) vtyp.push_back(ttyp[a]);
 			}
 			parcount = (uint)vpos.size();
 		}

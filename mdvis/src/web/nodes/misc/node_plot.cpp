@@ -1,11 +1,11 @@
-#include "../anweb.h"
+#include "node_plot.h"
 #ifndef IS_ANSERVER
 #include "utils/plot.h"
 #include "ui/ui_ext.h"
 #include "ui/icons.h"
 #endif
 
-Node_Plot::Node_Plot() : AnNode(new DmScript(sig)) {
+Node_Plot::Node_Plot() : AnNode(new DmScript(sig)), type(TYPE::LINES), tex(0) {
 	title = "Plot Data";
 	titleCol = NODE_COL_SPC;
 	canTile = true;
@@ -16,13 +16,40 @@ Node_Plot::Node_Plot() : AnNode(new DmScript(sig)) {
 	script->invars.push_back(std::pair<std::string, std::string>("Y ID", "int"));
 	script->invaropts.resize(3);
 	inputVDef[1].i = inputVDef[2].i = -1;
+	glGenTextures(1, &tex);
+}
+
+void Node_Plot::DrawHeader(float& off) {
+	AnNode::DrawHeader(off);
+
+	UI::Quad(pos.x, off, width, 17, bgCol);
+	static std::string ss[] = {
+		"Lines",
+		"Scatter",
+		"Density",
+		"Contour",
+		""
+	};
+	static Popups::DropdownItem di((uint*)&type, &ss[0]);
+	UI2::Dropdown(pos.x + 5, off, width - 10, "Type", di);
+	off += 17;
 }
 
 void Node_Plot::DrawFooter(float& y) {
 	UI::Quad(pos.x, y, width, width, bgCol);
-	if (valXs.size()) {
-		auto& vy = valYs;
-		plt::plot(pos.x + 12, y + 2, width - 14, width - 14, &valXs[0], &_valYs[0], valXs.size(), _valYs.size(), UI::font, 10, white(1, 0.8f));
+	switch (type) {
+	case TYPE::LINES:
+		if (valXs.size()) {
+			auto& vy = valYs;
+			plt::plot(pos.x + 12, y + 2, width - 14, width - 14, &valXs[0], &_valYs[0], valXs.size(), _valYs.size(), UI::font, 10, white(1, 0.8f));
+		}
+		break;
+	case TYPE::DENSITY:
+		if (texDirty) SetTex();
+		UI::Quad(pos.x + 2, y + 2, width - 4, width - 4, tex);
+		break;
+	default:
+		break;
 	}
 	y += width;
 }
@@ -59,8 +86,10 @@ void Node_Plot::Execute() {
 		_valYs[a] = &valYs[a][0];
 	}
 	if (ds == 1 || xid == -1) {
-		for (int i = 0; i < sz; ++i) {
-			valXs[i] = (float)i;
+		if (type < TYPE::DENSITY) {
+			for (int i = 0; i < sz; ++i) {
+				valXs[i] = (float)i;
+			}
 		}
 	}
 	else {
@@ -119,6 +148,36 @@ void Node_Plot::Execute() {
 		}
 	}
 #endif
+	texDirty = true;
+}
+
+void Node_Plot::SetTex() {
+	_w = valYs.size();
+	_h = valYs[0].size();
+	float mn;
+	float mx = mn = valYs[0][0];
+	for (auto& ys : valYs) {
+		for (auto& y : ys) {
+			mn = std::min(mn, y);
+			mx = std::max(mx, y);
+		}
+	}
+	std::vector<float> vals(_w * _h * 3);
+#pragma omp parallel for
+	for (int a = 0; a < _w; ++a) {
+		for (int b = 0; b < _h; ++b) {
+			const float hue = InverseLerp(mn, mx, valYs[a][b]) * 4;
+			const int vl = a*_h*3 + b*3;
+			vals[vl] = 1 - Clamp(std::abs(hue - 4) - 1, 0.f, 1.f);
+			vals[vl + 1] = 1 - Clamp(std::abs(hue - 2) - 1, 0.f, 1.f);
+			vals[vl + 2] = Clamp(std::abs(hue - 3) - 1, 0.f, 1.f);
+		}
+	}
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, vals.data());
+	SetTexParams<>(0, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_NEAREST);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	texDirty = false;
 }
 
 void Node_Plot::LoadOut(const std::string& path) {
