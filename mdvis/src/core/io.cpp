@@ -57,7 +57,7 @@ std::vector<std::string> IO::GetFiles(const std::string& folder, std::string ext
 	return names;
 }
 
-void IO::GetFolders(const std::string& folder, std::vector<std::string>* names, bool hidden) {
+void IO::GetFolders(const std::string& folder, std::vector<std::string>* names, bool hidden, bool all) {
 	names->clear();
 #ifdef PLATFORM_WIN
 	std::string search_path = folder + "/*";
@@ -77,7 +77,7 @@ void IO::GetFolders(const std::string& folder, std::vector<std::string>* names, 
 	struct dirent* ep;
 	while ((ep = readdir(dir))) {
 		std::string nm(ep->d_name);
-		if (nm[0] != '.' && ep->d_type == DT_DIR) {
+		if (ep->d_type == DT_DIR && (all || (nm != "." && nm != ".."))) {
 			names->push_back(std::string(ep->d_name));
 		}
 	}

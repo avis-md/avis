@@ -7,10 +7,11 @@
 //#define AUTOSAVE
 
 #include "ui/ui_ext.h"
-#include "ui/localizer.h"
-#include "ui/icons.h"
-#include "ui/popups.h"
+#include "ui/browse.h"
 #include "ui/help.h"
+#include "ui/icons.h"
+#include "ui/localizer.h"
+#include "ui/popups.h"
 #include "web/anweb.h"
 #include "md/parmenu.h"
 #include "md/Protein.h"
@@ -165,7 +166,6 @@ void paintfunc() {
 		VisSystem::DrawTitle();
 
 	ParLoader::DrawOpenDialog();
-	Popups::Draw();
 
 	auto pos = Input::mousePos;
 
@@ -218,7 +218,10 @@ void paintfunc() {
 	VisRenderer::Draw();
 	ParMenu::DrawSplash();
 	ChangeLog::Draw();
+	Browse::Draw();
 	HelpMenu::Draw();
+	
+	Popups::Draw();
 
 	UI::Quad(0, 0, Display::width, Display::height, RayTracer::resTex);
 }
@@ -353,6 +356,7 @@ The hash for this program is )" << VisSystem::version_hash
 		INIT(UI);
 		INIT(UI2);
 		INIT(UI3);
+		INIT(Browse);
 		INIT(CReader);
 		LINIT(PyReader);
 		INIT(FReader);

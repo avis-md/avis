@@ -24,7 +24,7 @@ public:
 	static Vec2* currentScroll;
 	static float currentScrollW0;
 
-	static float BeginScroll(float x, float y, float w, float h);
+	static float BeginScroll(float x, float y, float w, float h, float off = -1);
 	static void EndScroll(float off);
 
 	static bool _isDrawingLoop;

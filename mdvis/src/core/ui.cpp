@@ -606,13 +606,15 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 	glUseProgram(0);
 }
 
-float UI::BeginScroll(float x, float y, float w, float h) {
+float UI::BeginScroll(float x, float y, float w, float h, float off) {
 	Engine::PushStencil(x, y, w, h);
 	uintptr_t buf[3];
 	Debug::StackTrace(3, (void**)buf);
 	currentScroll = &scrollWs[buf[2]];
+	if (off >= 0) currentScroll->y = off;
 	if (Rect(x,y,w,h).Inside(Input::mousePos)) currentScroll->y += Input::mouseScroll * 10;
 	if (currentScroll->x > h) currentScroll->y = Clamp(currentScroll->y, h - currentScroll->x, 0.f);
+	else currentScroll->y = 0;
 	currentScrollW0 = y + currentScroll->y;
 	return currentScrollW0;
 }

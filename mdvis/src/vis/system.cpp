@@ -9,6 +9,7 @@
 #include "ui/help.h"
 #include "ui/ui_ext.h"
 #include "ui/localizer.h"
+#include "ui/browse.h"
 #include "res/resdata.h"
 #include "live/livesyncer.h"
 #include "utils/dialog.h"
@@ -142,8 +143,12 @@ void VisSystem::Init() {
 	mi[5].Set(Icons::openfile, _("Import Recent"), 0);
 	mi[6].Set(Icons::openfile, _("Import Remote"), []() {
 		ParLoader::isSrv = true;
-		const char* e = "";
-		ParLoader::OnDropFile(1, &e);
+		Browse::mode = Browse::MODE::OPENFILE;
+		Browse::callback = [](std::string s) {
+			auto cc = s.c_str();
+			ParLoader::OnDropFile(1, &cc);
+		};
+		if (ParLoader::srv.ok) Browse::system = new RemoteBrowseTarget();
 	});
 
 	auto& mi0 = menuItems[1];

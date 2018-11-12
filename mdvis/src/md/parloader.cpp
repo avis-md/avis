@@ -372,6 +372,7 @@ void ParLoader::DoOpen() {
 				fault = true;
 				return;
 			}
+			Debug::Message("ParLoader", "Running importer: done");
 		}
 		else {
 			Debug::Warning("ParLoader", "No importer set!");
