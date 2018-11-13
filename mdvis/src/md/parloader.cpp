@@ -272,6 +272,22 @@ void ParLoader::ScanFrames(const std::string& first) {
 	auto nm1 = first.substr(0, ps + 2 + n2);
 	auto nm2 = nm.substr(n1 + 1);
 
+	uint frms = 0;
+	std::vector<std::string> nms;
+	do {
+		std::stringstream sstrm;
+		sstrm << std::setw(n1 - n2) << std::setfill('0') << st;
+		std::string nm = nm1 + sstrm.str() + nm2;
+		if (isSrv) {
+			if (!srv.HasFile(nm)) break;
+		}
+		else if (!IO::HasFile(nm)) break;
+		nms.push_back(nm);
+		frms++;
+		st += frameskip;
+	} while (frms != maxframes);
+	if (frms <= 1) return;
+
 	uint i = 0;
 	for (auto& p : importers) {
 		int id2 = 0;
@@ -302,21 +318,6 @@ void ParLoader::ScanFrames(const std::string& first) {
 	return;
 	found:
 
-	uint frms = 0;
-	std::vector<std::string> nms;
-	do {
-		std::stringstream sstrm;
-		sstrm << std::setw(n1 - n2) << std::setfill('0') << st;
-		std::string nm = nm1 + sstrm.str() + nm2;
-		if (isSrv) {
-			if (!srv.HasFile(nm)) break;
-		}
-		else if (!IO::HasFile(nm)) break;
-		nms.push_back(nm);
-		frms++;
-		st += frameskip;
-	} while (frms != maxframes);
-	if (frms <= 1) return;
 	Particles::anim.AllocFrames(frms);
 	for (uint f = 0; f < frms; ++f) {
 		//Particles::anim.status[f] = Particles::AnimData::FRAME_STATUS::UNLOADED;
@@ -524,7 +525,9 @@ void ParLoader::DoOpen() {
 		}
 		found:;
 
-		Particles::radii[i] = VisSystem::radii[id1];
+		auto& r = VisSystem::radii[id1];
+		if (!r) r = 1;
+		Particles::radii[i] = r;
 		Particles::ress[i] = Int2(Particles::residueListSz - 1, trs->residueSz - 1);
 
 		tr->cnt++;

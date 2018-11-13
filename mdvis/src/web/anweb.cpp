@@ -8,6 +8,7 @@
 #include "md/parloader.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
+#include "utils/dialog.h"
 #endif
 
 #define NO_REDIR_LOG
@@ -283,19 +284,30 @@ void AnWeb::Draw() {
 		ParGraphics::tfboDirty = true;
 	}
 	
-	if (Engine::Button(200, 1, 70.f, 16.f, white(1, 0.4f), _("Save"), 12.f, white(), true) == MOUSE_RELEASE)
-		Save(IO::path + "nodes/rdf.anl");
-
+	float wo = 200;
+	bool haf = activeFile != "";
+	if (Engine::Button(wo, 1, 70, 16, white(1, haf? 0.4f : 0.2f), _("Save"), 12.f, white(), true) == MOUSE_RELEASE)
+		if (haf) Save(activeFile);
+	wo += 75;
+	if (Engine::Button(wo, 1, 70, 16, white(1, 0.4f), _("Save As"), 12.f, white(), true) == MOUSE_RELEASE)
+		Save(Dialog::SaveFile(EXT_ANSV));
+	wo += 75;
+	if (Engine::Button(wo, 1, 70, 16, white(1, 0.4f), _("Open"), 12.f, white(), true) == MOUSE_RELEASE) {
+		auto res = Dialog::OpenFile({"*" EXT_ANSV});
+		if (!!res.size()) Load(res[0]);
+	}
+	wo += 75;
 	bool canexec = (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
-	if (Engine::Button(275, 1, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
+	if (Engine::Button(wo, 1, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
 		if (canexec) AnWeb::Execute(false);
 	}
+	UI::Texture(wo, 1, 16, 16, Icons::play);
+	wo += 75;
 	bool canexec2 = (canexec && Particles::anim.frameCount > 1);
-	if (Engine::Button(350, 1, 107, 16, white(1, canexec2 ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
+	if (Engine::Button(wo, 1, 107, 16, white(1, canexec2 ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
 		if (canexec2) AnWeb::Execute(true);
 	}
-	UI::Texture(275, 1, 16, 16, Icons::play);
-	UI::Texture(350, 1, 16, 16, Icons::playall);
+	UI::Texture(wo, 1, 16, 16, Icons::playall);
 	if (drawLerp < 1) {
 		drawLerp = std::min(drawLerp + 10 * Time::delta, 1.f);
 		ParGraphics::tfboDirty = true;
@@ -578,9 +590,9 @@ void AnWeb::RemoveFrames() {
 #define sp << " "
 #define nl << "\n"
 #define wrs(s) _StreamWrite(s.c_str(), &strm, s.size() + 1);
-void AnWeb::Save(const std::string& s) {
 #define SVS(nm, vl) n->addchild(#nm, vl)
 #define SV(nm, vl) SVS(nm, std::to_string(vl))
+void AnWeb::Save(const std::string& s) {
 	XmlNode head = {};
 	head.name = "AViS_Graph_File";
 	for (auto nd : nodes) {
@@ -609,9 +621,9 @@ void AnWeb::Save(const std::string& s) {
 		}
 	}
 	Xml::Write(&head, s);
+}
 #undef SVS
 #undef SV
-}
 
 void AnWeb::SaveIn() {
 	std::string path = IO::path + "nodes/__tmp__/";
@@ -745,8 +757,8 @@ void AnWeb::Load(const std::string& s) {
 #undef GT
 		}
 		n->Reconn();
-		activeFile = s;
 	}
+	activeFile = s;
 }
 
 void AnWeb::LoadIn() {

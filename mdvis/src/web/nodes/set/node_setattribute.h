@@ -7,7 +7,8 @@ public:
 	static const std::string sig;
 	Node_SetAttribute();
 
-    uint attrId;
+    uint attrId, _attrId, attrSz;
+	std::vector<std::string> attrs;
     Popups::DropdownItem di;
 	bool timed;
     

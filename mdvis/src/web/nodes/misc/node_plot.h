@@ -5,6 +5,7 @@ class Node_Plot : public AnNode {
 public:
 	static const std::string sig;
 	Node_Plot();
+	~Node_Plot();
 
 	enum class TYPE : int {
 		LINES,

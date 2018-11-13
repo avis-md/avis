@@ -3,7 +3,7 @@
 #include "ui/ui_ext.h"
 #include "web/anweb.h"
 
-Node_SetAttribute::Node_SetAttribute() : AnNode(new DmScript(sig)), attrId(0), di(&attrId, &Particles::attrNms[0]), timed(true) {
+Node_SetAttribute::Node_SetAttribute() : AnNode(new DmScript(sig)), attrId(0), _attrId(-1), attrSz(-1), di(&attrId, nullptr), timed(true) {
 	title = "Set Attribute";
 	titleCol = NODE_COL_IO;
 	inputR.resize(1);
@@ -49,8 +49,29 @@ void Node_SetAttribute::Execute() {
 void Node_SetAttribute::DrawHeader(float& off) {
 	AnNode::DrawHeader(off);
 	UI::Quad(pos.x, off, width, 35, bgCol);
+	if (attrSz != Particles::attrs.size()) {
+		attrSz = Particles::attrs.size();
+		attrs.clear();
+		for (uint a = 0; a < attrSz; ++a) {
+			if (!Particles::attrs[a]->readonly) {
+				attrs.push_back(Particles::attrNms[a]);
+			}
+		}
+		if (attrId >= attrs.size()) {
+			attrId = (uint)std::max((int)attrs.size()-1, 0);
+		}
+		attrs.push_back("<create new>");
+		attrs.push_back("");
+		di.list = &attrs[0];
+	}
 	UI2::Dropdown(pos.x + 2, off, width - 4, "Attribute", di);
 	off += 17;
+	if (attrId != _attrId) {
+		_attrId = attrId;
+		if (attrId == attrs.size()-2) {
+			Particles::AddParam();
+		}
+	}
 	UI2::Toggle(pos.x + 2, off, width - 4, "Animated", timed);
 	off += 18;
 }

@@ -1128,7 +1128,7 @@ void ParGraphics::DrawColMenu() {
 	UI::Label(exps - 148, off, 12, "Radii", white()); off += 17;
 	radScl = UI2::Slider(exps - 147, off, 145, "Scale", 0.5f, 2.0f, radScl); off += 17;
 	CHK(radScl);
-	auto ca = VisSystem::radii.size();
+	auto ca = Particles::colorPallete.size();
 	UI::Quad(exps - 148, off, 146, ca * 17 + 2, white(0.9f, 0.1f));
 	off++;
 	UI2::sepw = 0.33f;

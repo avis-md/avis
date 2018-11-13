@@ -19,6 +19,10 @@ Node_Plot::Node_Plot() : AnNode(new DmScript(sig)), type(TYPE::LINES), tex(0) {
 	glGenTextures(1, &tex);
 }
 
+Node_Plot::~Node_Plot() {
+	glDeleteTextures(1, &tex);
+}
+
 void Node_Plot::DrawHeader(float& off) {
 	AnNode::DrawHeader(off);
 
@@ -166,11 +170,17 @@ void Node_Plot::SetTex() {
 #pragma omp parallel for
 	for (int a = 0; a < _w; ++a) {
 		for (int b = 0; b < _h; ++b) {
-			const float hue = InverseLerp(mn, mx, valYs[a][b]) * 4;
-			const int vl = a*_h*3 + b*3;
-			vals[vl] = 1 - Clamp(std::abs(hue - 4) - 1, 0.f, 1.f);
-			vals[vl + 1] = 1 - Clamp(std::abs(hue - 2) - 1, 0.f, 1.f);
-			vals[vl + 2] = Clamp(std::abs(hue - 3) - 1, 0.f, 1.f);
+			const int i = a*_h*3 + b*3;
+			const float v = valYs[a][b];
+			if (v != 0) {
+				const float hue = InverseLerp(mn, mx, v) * 4;
+				vals[i] = 1 - Clamp(std::abs(hue - 4) - 1, 0.f, 1.f);
+				vals[i + 1] = 1 - Clamp(std::abs(hue - 2) - 1, 0.f, 1.f);
+				vals[i + 2] = Clamp(std::abs(hue - 3) - 1, 0.f, 1.f);
+			}
+			else {
+				vals[i] = vals[i + 1] = vals[i + 2] = 1;
+			}
 		}
 	}
 	glBindTexture(GL_TEXTURE_2D, tex);
