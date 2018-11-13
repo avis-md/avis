@@ -75,11 +75,10 @@ void updateFunc() {
 		Particles::UpdateColorTex();
 		Particles::UpdateBufs();
 		Particles::UpdateBBox();
-		//if (Protein::Refresh()) {
-			Particles::GenTexBufs();
-			ParGraphics::OnLoadConfig();
-			ParGraphics::UpdateDrawLists();
-		//}
+		Protein::Refresh();
+		Particles::GenTexBufs();
+		ParGraphics::OnLoadConfig();
+		ParGraphics::UpdateDrawLists();
 		ParMenu::CalcH();
 		VisSystem::lastSave = Time::time;
 

@@ -37,24 +37,24 @@ C=O
 */
 
 uint _Has(const std::vector<uint>& c, char _c) {
-    uint i = 0;
-    for (auto& a : c) {
-        if (Particles::names[a * PAR_MAX_NAME_LEN] == _c)
-            return i;
-        i++;
-    }
-    return ~0U;
+	uint i = 0;
+	for (auto& a : c) {
+		if (Particles::names[a * PAR_MAX_NAME_LEN] == _c)
+			return i;
+		i++;
+	}
+	return ~0U;
 }
 
 #define _FOR(conn, c, i) for (auto& i : conn) { \
-    if (Particles::names[i * PAR_MAX_NAME_LEN] == c)
+	if (Particles::names[i * PAR_MAX_NAME_LEN] == c)
 
 byte _CntOf(const std::vector<uint>& c, char _c) {
-    byte i = 0;
-    _FOR(c, _c, a) {
-        i++;
-    }}
-    return i;
+	byte i = 0;
+	_FOR(c, _c, a) {
+		i++;
+	}}
+	return i;
 }
 
 void Protein::Init() {
@@ -83,42 +83,45 @@ void Protein::Clear() {
 }
 
 bool Protein::Refresh() {
-    if (pros) std::free(pros);
-    auto proVec = rawvector<Protein, byte>(pros, proCnt);
-    Protein* p = 0;
-    uint* ch = 0;
+	if (pros) std::free(pros);
+	auto proVec = rawvector<Protein, byte>(pros, proCnt);
+	Protein* p = 0;
+	uint* ch = 0;
 	bool isn = false;
-    for (uint i = 0; i < Particles::residueListSz; ++i) {
-        auto& rl = Particles::residueLists[i];
-        for (uint j = 0; j < rl.residueSz; ++j) {
-            auto& rs = rl.residues[j];
-            if (rs.type != 255) {
-                if (!p) {
-                    proVec.push(Protein());
-                    p = pros + (proCnt-1);
-                    p->first = Int2(i, j);
-                    p->chain = (uint*)std::malloc(sizeof(uint) * 6);
-                    ch = p->chain;
-                    p->cnt = 1;
+	for (uint i = 0; i < Particles::residueListSz; ++i) {
+		auto& rl = Particles::residueLists[i];
+		for (uint j = 0; j < rl.residueSz; ++j) {
+			auto& rs = rl.residues[j];
+			if (rs.type != 255) {
+				if (!p) {
+					Debug::Message("Protein", "Amino chain start " + std::to_string(i)
+						+ "(" + rl.name + ")");
+					proVec.push(Protein());
+					p = pros + (proCnt-1);
+					p->first = Int2(i, j);
+					p->chain = (uint*)std::malloc(sizeof(uint) * 6);
+					ch = p->chain;
+					p->cnt = 1;
 					isn = true;
-                }
-				else isn = false;
+				}
+				else
+					isn = false;
 
-                auto conns = std::vector<std::vector<uint>>(rs.cnt);
+				auto conns = std::vector<std::vector<uint>>(rs.cnt);
 
-                for (uint a = 0; a < rs.cnt; a++) conns[a] = std::vector<uint>();
+				for (uint a = 0; a < rs.cnt; a++) conns[a] = std::vector<uint>();
 
 				bool hascon = isn;
 				uint ls = ch[4];
-                for (uint k = 0; k < rs.cnt_b; ++k) {
-                    auto& cn = Particles::conns.ids[rs.offset_b + k];
+				for (uint k = 0; k < rs.cnt_b; ++k) {
+					auto& cn = Particles::conns.ids[rs.offset_b + k];
 					if (cn[1] >= (int)rs.offset) {
 						conns[cn[0] - rs.offset].push_back(cn[1]);
 						conns[cn[1] - rs.offset].push_back(cn[0]);
 					}
 					else if (cn[1] == ls)
 						hascon = true;
-                }
+				}
 
 				if (!isn) {
 					if (hascon) {
@@ -137,44 +140,44 @@ bool Protein::Refresh() {
 						isn = true;
 					}
 				}
-                
+				
 				int mxf = 0;
-                std::string msg2 = "Amino chain not found for residue ";
+				std::string msg2 = "Amino chain not found for residue ";
 				msg2 += std::string(&rl.name[0]);
 				msg2 += " (" + rs.name + ")\n";
 				for (uint a = 0; a < rs.cnt; ++a) {
-                    if (Particles::names[(a + rs.offset) * PAR_MAX_NAME_LEN] == 'N') {
+					if (Particles::names[(a + rs.offset) * PAR_MAX_NAME_LEN] == 'N') {
 						mxf = 1;
-                        //if (_Has(conns[a], 'H')) {
-                            _FOR(conns[a], 'C', b) {
+						//if (_Has(conns[a], 'H')) {
+							_FOR(conns[a], 'C', b) {
 								mxf = 2;
-                                auto& cb = conns[b - rs.offset];
-                                //uint b2 = _Has(cb, 'H');
-                                //if (b2 < ~0U) {
-                                    _FOR(cb, 'C', c) {
+								auto& cb = conns[b - rs.offset];
+								//uint b2 = _Has(cb, 'H');
+								//if (b2 < ~0U) {
+									_FOR(cb, 'C', c) {
 										mxf = 3;
-                                        auto& cc = conns[c - rs.offset];
-                                        uint c2 = _Has(cc, 'O');
-                                        if (c2 < ~0U) {
+										auto& cc = conns[c - rs.offset];
+										uint c2 = _Has(cc, 'O');
+										if (c2 < ~0U) {
 											mxf = 4;
-                                            if (_CntOf(cc, 'C') == 1) {
-                                                ch[0] = a + rs.offset;
-                                                ch[2] = b;
-                                                //ch[3] = b2;
-                                                ch[4] = c;
+											if (_CntOf(cc, 'C') == 1) {
+												ch[0] = a + rs.offset;
+												ch[2] = b;
+												//ch[3] = b2;
+												ch[4] = c;
 												//ch[5] = c2;
-                                                ch[1] = ch[3] = ch[5] = 0;
-                                                goto found;
-                                            }
-                                        }
-                                    }}
-                                //}
-                            }}
-                        //}
-                    }
-                }
-                //Debug::Error("Protein", "Cannot find amino chain!");
-				ParLoader::fault = true;
+												ch[1] = ch[3] = ch[5] = 0;
+												goto found;
+											}
+										}
+									}}
+								//}
+							}}
+						//}
+					}
+				}
+				//Debug::Error("Protein", "Cannot find amino chain!");
+				//ParLoader::fault = true;
 				if (mxf == 0)
 					msg2 += "Cannot find N atom";
 				else if (mxf == 1)
@@ -187,23 +190,27 @@ bool Protein::Refresh() {
 					msg2 += "2nd C atom has more than 1 C atom attached";
 				msg2 += "\nChain signature is N-C1-C2=O";
 				VisSystem::SetMsg("Protein amino chain error!", 2, msg2);
-				Particles::Clear();
+				Debug::Warning("Protein", msg2);
+				Debug::Warning("Protein", "Aborting from error");
+				//Particles::Clear();
 				return false;
-                found:;
-            }
-            else {
-                if (p) {
+				found:;
+			}
+			else {
+				if (p) {
 					p->ApplyChain();
-
-                    p = 0;
-                }
-            }
-        }
-    }
+					p = nullptr;
+					Debug::Message("Protein", "Amino chain end "+ std::to_string(i-1)
+						+ "(" + Particles::residueLists[i-1].name + ")");
+				}
+			}
+		}
+	}
 	if (p) {
 		p->ApplyChain();
-
-		p = 0;
+		p = nullptr;
+		Debug::Message("Protein", "Amino chain end "+ std::to_string(Particles::residueLists.size()-1)
+			+ "(" + Particles::residueLists.back().name + ")");
 	}
 
 	if (!!proCnt) {
@@ -243,33 +250,33 @@ void Protein::Draw() {
 	auto _mv = MVP::modelview();
 	auto _p = MVP::projection();
 	glEnable(GL_CULL_FACE);
-    for (byte b = 0; b < proCnt; ++b) {
-        auto& p = pros[b];
+	for (byte b = 0; b < proCnt; ++b) {
+		auto& p = pros[b];
 		if (!p.visible) continue;
-        
-        glUseProgram(shad);
-        glUniformMatrix4fv(shadLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
-        glUniformMatrix4fv(shadLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
-        glUniform1i(shadLocs[2], 1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
-        glUniform1i(shadLocs[3], 2);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_BUFFER, p.idBufTex);
-        glUniform1i(shadLocs[4], p.cnt * 3);
-        glUniform1i(shadLocs[5], p.chainReso);
-        glUniform1i(shadLocs[6], p.loopReso);
+		
+		glUseProgram(shad);
+		glUniformMatrix4fv(shadLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
+		glUniformMatrix4fv(shadLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
+		glUniform1i(shadLocs[2], 1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
+		glUniform1i(shadLocs[3], 2);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_BUFFER, p.idBufTex);
+		glUniform1i(shadLocs[4], p.cnt * 3);
+		glUniform1i(shadLocs[5], p.chainReso);
+		glUniform1i(shadLocs[6], p.loopReso);
 		glUniform1i(shadLocs[7], b);
 		glUniform1f(shadLocs[8], p.smoothness);
 		glUniform3f(shadLocs[9], p.tint.r, p.tint.g, p.tint.b);
 		glUniform1i(shadLocs[10], p.drawGrad);
 		glUniform4fv(shadLocs[11], 3, &ParGraphics::gradCols[0][0]);
 
-        glBindVertexArray(Camera::emptyVao);
-        glDrawArrays(GL_TRIANGLES, 0, 6 * (p.cnt * 3 - 1) * p.chainReso * p.loopReso);
-        glBindVertexArray(0);
-        glUseProgram(0);
-    }
+		glBindVertexArray(Camera::emptyVao);
+		glDrawArrays(GL_TRIANGLES, 0, 6 * (p.cnt * 3 - 1) * p.chainReso * p.loopReso);
+		glBindVertexArray(0);
+		glUseProgram(0);
+	}
 	glDisable(GL_CULL_FACE);
 }
 
