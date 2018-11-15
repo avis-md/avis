@@ -129,7 +129,6 @@ Vec4 Color::HueBaseCol(float hue) {
 
 void Color::DrawSV(float x, float y, float w, float h, float hue) {
 	Vec3 quadPoss[4];
-	Vec2 quadUvs[4]{ Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0) };
 	quadPoss[0].x = x;
 	quadPoss[0].y = y;
 	quadPoss[1].x = x + w;
@@ -159,7 +158,6 @@ void Color::DrawSV(float x, float y, float w, float h, float hue) {
 
 void Color::DrawH(float x, float y, float w, float h) {
 	Vec3 quadPoss[4];
-	Vec2 quadUvs[4]{ Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0) };
 	quadPoss[0].x = x;
 	quadPoss[0].y = y;
 	quadPoss[1].x = x + w;
@@ -185,7 +183,6 @@ void Color::DrawH(float x, float y, float w, float h) {
 
 void Color::DrawH2(float x, float y, float w, float h, Vec4* grad) {
 	Vec3 quadPoss[4];
-	Vec2 quadUvs[4]{ Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0) };
 	quadPoss[0].x = x;
 	quadPoss[0].y = y;
 	quadPoss[1].x = x + w;

@@ -1,18 +1,18 @@
 #include "Protein.h"
 #include "md/parmenu.h"
 #include "md/parloader.h"
-#include "utils/rawvector.h"
 #include "utils/spline.h"
 #include "utils/solidify.h"
 #include "vis/pargraphics.h"
 #include "ui/icons.h"
 #include "ui/ui_ext.h"
 #include "res/shddata.h"
+#include "utils/glext.h"
 
 //const byte signature[] = { 2, 'H', 0, 'C', 2, 'H', 0, 'C', 1, 'O', 0 };
 
 byte Protein::proCnt = 0;
-Protein* Protein::pros;
+std::vector<Protein> Protein::pros;
 
 PROGDEF(Protein::shad);
 
@@ -77,14 +77,12 @@ void Protein::Init() {
 }
 
 void Protein::Clear() {
-	std::free(pros);
-	pros = nullptr;
+	pros.clear();
 	proCnt = 0;
 }
 
 bool Protein::Refresh() {
-	if (pros) std::free(pros);
-	auto proVec = rawvector<Protein, byte>(pros, proCnt);
+	Clear();
 	Protein* p = 0;
 	uint* ch = 0;
 	bool isn = false;
@@ -96,11 +94,12 @@ bool Protein::Refresh() {
 				if (!p) {
 					Debug::Message("Protein", "Amino chain start " + std::to_string(i)
 						+ "(" + rl.name + ")");
-					proVec.push(Protein());
-					p = pros + (proCnt-1);
+					pros.push_back(Protein());
+					p = &pros.back();
 					p->first = Int2(i, j);
-					p->chain = (uint*)std::malloc(sizeof(uint) * 6);
-					ch = p->chain;
+					//p->chain = (uint*)std::malloc(sizeof(uint) * 6);
+					p->chain.resize(6);
+					ch = p->chain.data();
 					p->cnt = 1;
 					isn = true;
 				}
@@ -126,16 +125,18 @@ bool Protein::Refresh() {
 				if (!isn) {
 					if (hascon) {
 						p->cnt++;
-						p->chain = (uint*)std::realloc(p->chain, sizeof(uint) * 6 * p->cnt);
-						ch = p->chain + (6 * (p->cnt - 1));
+						//p->chain = (uint*)std::realloc(p->chain, sizeof(uint) * 6 * p->cnt);
+						p->chain.resize(6 * p->cnt);
+						ch = &p->chain[(6 * (p->cnt - 1))];
 					}
 					else {
 						p->ApplyChain();
-						proVec.push(Protein());
-						p = pros + (proCnt - 1);
+						pros.push_back(Protein());
+						p = &pros.back();
 						p->first = Int2(i, j);
-						p->chain = (uint*)std::malloc(sizeof(uint) * 6);
-						ch = p->chain;
+						//p->chain = (uint*)std::malloc(sizeof(uint) * 6);
+						p->chain.resize(6);
+						ch = p->chain.data();
 						p->cnt = 1;
 						isn = true;
 					}
@@ -213,7 +214,7 @@ bool Protein::Refresh() {
 			+ "(" + Particles::residueLists.back().name + ")");
 	}
 
-	if (!!proCnt) {
+	if (!!(proCnt = (byte)pros.size())) {
 		for (byte b = 0; b < proCnt; ++b) {
 			pros[b].tint = Color::HueBaseCol(1 - (float(b) / proCnt));
 		}
@@ -236,9 +237,7 @@ void Protein::ApplyChain() {
 	}
 
 	glGenBuffers(1, &idBuf);
-	glBindBuffer(GL_ARRAY_BUFFER, idBuf);
-	glBufferData(GL_ARRAY_BUFFER, 6 * cnt * sizeof(uint), chain, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	SetGLBuf(idBuf, chain.data(), 6 * cnt);
 
 	glGenTextures(1, &idBufTex);
 	glBindTexture(GL_TEXTURE_BUFFER, idBufTex);

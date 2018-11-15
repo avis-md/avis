@@ -174,6 +174,6 @@ void Node_Volume::Execute() {
 
 	}
 
-	float* src = *((float**)cv.value);
+	//float* src = *((float**)cv.value);
 #endif
 }

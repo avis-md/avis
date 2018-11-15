@@ -31,7 +31,6 @@ std::vector<std::string> string_split(std::string s, char c, bool rm) {
 }
 
 int string_find(const std::string& s, const std::string& s2, int start) {
-	uint ss = s.size();
 	uint s2s = s2.size();
 	int p = start;
 	for (;;) {

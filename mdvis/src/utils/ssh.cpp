@@ -24,7 +24,7 @@ SSH SSH::Connect(const SSHConfig& conf) {
 	Debug::Message("SSH", "Starting session...");
 	
 	struct sockaddr* sin;
-	socklen_t ssz;
+	socklen_t ssz = sizeof (struct sockaddr);
 	
 	if (conf.ip[0] > '0') {
 		struct addrinfo hints = {}, *result;

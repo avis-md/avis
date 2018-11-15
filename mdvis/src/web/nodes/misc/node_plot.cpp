@@ -44,7 +44,6 @@ void Node_Plot::DrawFooter(float& y) {
 	switch (type) {
 	case TYPE::LINES:
 		if (valXs.size()) {
-			auto& vy = valYs;
 			plt::plot(pos.x + 12, y + 2, width - 14, width - 14, &valXs[0], &_valYs[0], valXs.size(), _valYs.size(), UI::font, 10, white(1, 0.8f));
 		}
 		break;

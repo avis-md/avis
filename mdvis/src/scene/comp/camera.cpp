@@ -4,11 +4,10 @@
 Camera* Camera::active;
 
 Camera::Camera() : Component("Camera", COMP_CAM), 
-	ortographic(false), fov(60), orthoSize(10), screenPos(0.f, 0.f, 1.f, 1.f), 
-	clearType(CAM_CLEAR_COLOR), clearColor(black(1)), _tarRT(-1), 
-	nearClip(0.01f), farClip(500), quality(1), quality2(0.5f), 
-	useGBuffer2(false), applyGBuffer2(false), 
-	target(0), scale(1), offset() {
+	ortographic(false), fov(60), orthoSize(10), screenPos(0.f, 0.f, 1.f, 1.f),
+	clearType(CAM_CLEAR_COLOR), clearColor(black(1)), nearClip(0.01f), farClip(500),
+	target(0), scale(1), offset(), 
+	useGBuffer2(false), applyGBuffer2(false), _tarRT(-1), quality(1), quality2(0.5f) {
 	InitGBuffer(Display::width, Display::height);
 }
 
@@ -37,7 +36,6 @@ void Camera::ApplyGL() {
 }
 
 void Camera::InitShaders() {
-	int link_result = 0;
 	GLuint vertex_shader;
 	std::string err = "";
 

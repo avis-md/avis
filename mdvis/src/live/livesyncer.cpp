@@ -1,7 +1,6 @@
 #include "livesyncer.h"
 #include "md/particles.h"
 #include "vis/pargraphics.h"
-#include "utils/rawvector.h"
 #include "lj256.h"
 #include "md/parloader.h"
 #include "ui/icons.h"

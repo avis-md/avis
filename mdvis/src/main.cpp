@@ -166,8 +166,6 @@ void paintfunc() {
 
 	ParLoader::DrawOpenDialog();
 
-	auto pos = Input::mousePos;
-
 	ParGraphics::hlIds.clear();
 	if (!UI::_layerMax && !stealFocus && VisSystem::InMainWin(Input::mousePos) && !ParGraphics::dragging) {
 

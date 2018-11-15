@@ -1,6 +1,6 @@
 #include "Engine.h"
 
-Texture3D::Texture3D(uint x, uint y, uint z, byte chn, byte* data) : width(x), height(y), depth(z), chn(chn) {
+Texture3D::Texture3D(uint x, uint y, uint z, byte chn, byte* data) : chn(chn), width(x), height(y), depth(z) {
 	auto tp = (chn == 1) ? GL_RED : ((chn == 2) ? GL_RG : ((chn == 1) ? GL_RGB : GL_RGBA));
 	glGenTextures(1, &pointer);
 	glBindTexture(GL_TEXTURE_3D, pointer);

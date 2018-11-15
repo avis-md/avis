@@ -168,7 +168,6 @@ float UI2::Scroll(float x, float y, float h, float t, float tot, float fill) {
 
 	bool me = Input::mouse0 && (UI::_layer == UI::_layerMax) && Rect(x, y, 8, h).Inside(Input::mouseDownPos);
 	UI::Quad(x, y, 8, h, black(0.2f));
-	bool clk = Engine::Button(x, y, 8, h) == MOUSE_CLICK;
 	auto scr = Engine::Button(x, y + (h - 2)*t / tot, 8, (h-2)*fill/tot + 2);
 	if (scr > 0 || (me && scrpos >= 0)) {
 		UI::Quad(x, y + (h - 2)*t / tot, 8, (h - 2)*fill / tot + 2, (scr == MOUSE_HOVER_FLAG) ? white() : white(1, 0.5f));

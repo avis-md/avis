@@ -1034,17 +1034,17 @@ void ParGraphics::DrawColMenu() {
 	}
 	off += 18;
 	if (Particles::attrs.size() > 0 && !Particles::attrs.back()->readonly) {
-		if (Engine::Button(exps - 148, off, 74, 16, white(1, 0.4f), "Save", 12, white(), true) == MOUSE_RELEASE) {
+		if (Engine::Button(exps - 148, off, 73, 16, white(1, 0.4f), "Save", 12, white(), true) == MOUSE_RELEASE) {
 			auto path = Dialog::SaveFile(".attr");
 			if (!!path.size()) {
 				Particles::SaveAttrs(path);
 			}
 		}
-		if (Engine::Button(exps - 148, off, 74, 16, white(1, 0.4f), "Save", 12, white(), true) == MOUSE_RELEASE) {
+		if (Engine::Button(exps - 74, off, 73, 16, white(1, 0.4f), "Load", 12, white(), true) == MOUSE_RELEASE) {
 			auto pp = Dialog::OpenFile(std::vector<std::string>(1, ".attr"));
 			if (!!pp.size()) {
 				auto& path = pp[0];
-				
+				Particles::LoadAttrs(path);
 			}
 		}
 	}
@@ -1342,7 +1342,6 @@ void ParGraphics::DrawMenu() {
 
 void ParGraphics::DrawPopupDM() {
 	auto& dt = *((byte*)Popups::data);
-	auto dto = dt;
 	byte a = dt & 0x0f;
 	byte b = dt >> 4;
 	UI::Quad(Popups::pos.x - 1, Popups::pos.y - 1, 18, 18, black(0.7f));

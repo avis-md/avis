@@ -13,7 +13,7 @@ public:
 	
 	friend class Scene;
 protected:
-	SceneSettings() : sky(nullptr), skyId(-1), skyStrength(1), skyBrightness(1) {
+	SceneSettings() : sky(nullptr), skyStrength(1), skyBrightness(1), skyId(-1) {
 		sky = 0;
 	}
 

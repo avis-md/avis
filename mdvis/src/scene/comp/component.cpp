@@ -1,10 +1,10 @@
 #include "Engine.h"
 
 Component::Component(std::string name, COMPONENT_TYPE t, DRAWORDER drawOrder, SceneObject* o, std::vector<COMPONENT_TYPE> dep)
-	: Object(name), componentType(t), active(true), drawOrder(drawOrder), _expanded(true), dependancies(dep) {
-	for (COMPONENT_TYPE t : dependancies) {
-		dependacyPointers.push_back(rComponent());
-	}
+	: Object(name), componentType(t), drawOrder(drawOrder), active(true), dependancies(dep), _expanded(true) {
+	//for (COMPONENT_TYPE t : dependancies) {
+	//	dependacyPointers.push_back(rComponent());
+	//}
 	if (o) object(o);
 }
 

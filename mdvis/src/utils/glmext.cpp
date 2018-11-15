@@ -71,4 +71,4 @@ Quat QuatFunc::LookAt(const Vec3& tarr, const Vec3& up) {
 	return q2 * q1;
 }
 
-BBox::BBox(float x0, float x1, float y0, float y1, float z0, float z1) : x0(x0), x1(x1), y0(y0), y1(y1), z0(z0), z1(z1) {}
+BBox::BBox(float x0, float x1, float y0, float y1, float z0, float z1) : x0(x0), y0(y0), z0(z0), x1(x1), y1(y1), z1(z1) {}

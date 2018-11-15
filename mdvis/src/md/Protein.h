@@ -32,7 +32,8 @@ public:
 
     uint cnt;
     Int2 first;
-    uint* chain; //N[]C[]C[], where [] is any non-chain bond
+    //uint* chain; //N[]C[]C[], where [] is any non-chain bond
+    std::vector<uint> chain;
     pMesh mesh;
     GLuint idBuf, idBufTex;
     byte chainReso, loopReso;
@@ -44,7 +45,7 @@ public:
 	void ApplyChain();
 
     static byte proCnt;
-    static Protein* pros;
+    static std::vector<Protein> pros;
 
     static void Init(), Clear();
     static bool Refresh();

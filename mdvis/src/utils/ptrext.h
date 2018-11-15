@@ -11,7 +11,7 @@ public:
 
 		static_assert(std::is_base_of<Object, T>::value, "Ref class must be derived from Object!");
 	}
-	Ref(std::shared_ptr<T> ref, bool suppress = false) : _suppress(suppress), _object(ref), _empty(false) {
+	Ref(std::shared_ptr<T> ref, bool suppress = false) : _object(ref), _empty(false), _suppress(suppress) {
 		static_assert(std::is_base_of<Object, T>::value, "Ref class must be derived from Object!");
 	}
 

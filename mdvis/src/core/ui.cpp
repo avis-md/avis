@@ -485,8 +485,6 @@ Vec3 AU(Vec3 vec) {
 
 float UI::GetLabelW(float s, std::string str, Font* font) {
 	if (!s || !str[0]) return 0;
-	uint si = (uint)std::roundf(s);
-	size_t sz = str.size();
 	float totalW = 0;
 	char* cc = &str[0];
 	while(cc) {

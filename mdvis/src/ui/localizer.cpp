@@ -70,7 +70,6 @@ void Localizer::_MakeMap(std::string path, std::map<uint32_t, std::string>& strs
     std::vector<std::string> nms = IO::GetFiles(path, ".cpp");
     for (auto& n : nms) {
         std::string cd = IO::GetText(path + "/" + n);
-        auto cds = cd.size();
         int p0 = 0, p1 = 0;
         for(;;) {
             p0 = string_find(cd, "_(\"", p1);

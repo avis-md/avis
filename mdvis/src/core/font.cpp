@@ -61,7 +61,7 @@ void Font::InitVao(uint sz) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-Font::Font(const std::string& path, ALIGNMENT align) : vecSize(0), alignment(align) {
+Font::Font(const std::string& path, ALIGNMENT align) : alignment(align), vecSize(0) {
 	auto err = FT_New_Face(_ftlib, path.c_str(), 0, &_face);
 	if (err != FT_Err_Ok) {
 		Debug::Warning("Font", "Failed to load font! " + std::to_string(err));
@@ -131,8 +131,8 @@ GLuint Font::CreateGlyph(uint sz, uint mask) {
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 	if (recalc && !mask) {
-		pr.o2s[' '] = sz * 0.3f;
-		pr.o2s['\t'] = sz * 0.9f;
+		pr.o2s[(uint)' '] = sz * 0.3f;
+		pr.o2s[(uint)'\t'] = sz * 0.9f;
 	}
 	return _glyphs[sz][mask];
 }

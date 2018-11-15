@@ -50,9 +50,6 @@ CubeMarcher::CubeMarcher(Texture3D* tex) : tex(tex) {
 	for (byte a = 0; a < _sz; ++a) {
 		for (byte b = 0; b < _sz; ++b) {
 			for (byte c = 0; c < _sz; ++c) {
-				float a2 = powf(a - 16.f, 2);
-				float b2 = powf(b - 16.f, 2);
-				float c2 = powf(c - 8.f, 2);
 				bb[a * _sz * _sz + b * _sz + c] = (byte)std::min(ff[a * _sz * _sz + b * _sz + c] * 500, 254.99f);
 				cbb[a * _sz * _sz + b * _sz + c] = (byte)Clamp(cff[a * _sz * _sz + b * _sz + c] * 6400 + 127, 0.f, 254.99f);
 			}

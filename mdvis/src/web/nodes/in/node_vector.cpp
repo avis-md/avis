@@ -6,9 +6,9 @@ Node_Vector::Node_Vector() : AnNode(new DmScript(sig)) {
     inputR.resize(3);
     auto& vrs = script->invars;
     script->invaropts.resize(3);
-	script->invars.resize(3, std::pair<std::string, std::string>("X", "double"));
-	script->invars[1].first = "Y";
-	script->invars[2].first = "Z";
+	vrs.resize(3, std::pair<std::string, std::string>("X", "double"));
+	vrs[1].first = "Y";
+	vrs[2].first = "Z";
 
 	outputR.resize(1);
 	conV.resize(1);
