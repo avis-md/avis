@@ -7,13 +7,13 @@ public:
 	static const std::string sig;
 	Node_SetAttribute();
 
-    uint attrId, _attrId, attrSz;
+	uint attrId, _attrId, attrSz;
 	std::vector<std::string> attrs;
-    Popups::DropdownItem di;
+	Popups::DropdownItem di;
 	bool timed;
-    
+
 	void Execute() override;
-    void DrawHeader(float& off) override;
+	void DrawHeader(float& off) override;
 	void SaveOut(const std::string& path) override {}
 	void LoadOut(const std::string& path) override;
 };

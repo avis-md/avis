@@ -89,6 +89,7 @@ public:
 
 	static std::vector<paramdata*> attrs;
 	static std::vector<std::string> attrNms;
+	static uint readonlyAttrCnt;
 
 	static std::vector<conninfo> particles_Conn2;
 

@@ -3,7 +3,7 @@
 #include "ui/ui_ext.h"
 #include "web/anweb.h"
 
-Node_SetAttribute::Node_SetAttribute() : AnNode(new DmScript(sig)), attrId(0), _attrId(-1), attrSz(-1), di(&attrId, nullptr), timed(true) {
+Node_SetAttribute::Node_SetAttribute() : AnNode(new DmScript(sig)), attrId(0), _attrId(-1), di(&attrId, nullptr), timed(true) {
 	title = "Set Attribute";
 	titleCol = NODE_COL_IO;
 	inputR.resize(1);
@@ -22,7 +22,7 @@ void Node_SetAttribute::Execute() {
 	if (sz != Particles::particleSz)
 		RETERR("Attribute must be for each atom!");
 	auto src = *((void**)cv.value);
-	auto prm = Particles::attrs[attrId];
+	auto prm = Particles::attrs[attrId + Particles::readonlyAttrCnt];
 	prm->timed = (AnWeb::execFrame > 0 && timed);
 	auto& tar = prm->Get(prm->timed? AnWeb::execFrame-1 : 0);
 	tar.resize(sz);
@@ -51,18 +51,16 @@ void Node_SetAttribute::DrawHeader(float& off) {
 	UI::Quad(pos.x, off, width, 35, bgCol);
 	if (attrSz != Particles::attrs.size()) {
 		attrSz = Particles::attrs.size();
-		attrs.clear();
-		for (uint a = 0; a < attrSz; ++a) {
-			if (!Particles::attrs[a]->readonly) {
-				attrs.push_back(Particles::attrNms[a]);
-			}
-		}
+		attrs.resize(attrSz - Particles::readonlyAttrCnt);
 		if (attrId >= attrs.size()) {
 			attrId = (uint)std::max((int)attrs.size()-1, 0);
 		}
 		attrs.push_back("<create new>");
 		attrs.push_back("");
 		di.list = &attrs[0];
+	}
+	for (uint a = Particles::readonlyAttrCnt; a < attrSz; ++a) {
+		attrs[a - Particles::readonlyAttrCnt] = Particles::attrNms[a];
 	}
 	UI2::Dropdown(pos.x + 2, off, width - 4, "Attribute", di);
 	off += 17;

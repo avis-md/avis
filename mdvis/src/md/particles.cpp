@@ -297,6 +297,7 @@ bool Particles::bufDirty = false, Particles::visDirty = false, Particles::pallet
 
 std::vector<Particles::paramdata*> Particles::attrs;
 std::vector<std::string> Particles::attrNms;
+uint Particles::readonlyAttrCnt;
 
 std::vector<Particles::conninfo> Particles::particles_Conn2;
 
@@ -362,6 +363,7 @@ void Particles::Clear() {
 		attrs.clear();
 		attrNms.clear();
 		attrNms.push_back("");
+		readonlyAttrCnt = 0;
 		residueListSz = particleSz = Particles::conns.cnt = 0;
 		
 		anim.Clear();

@@ -70,6 +70,7 @@ void updateFunc() {
 				p->Get(0).swap(a.second);
 				p->dirty = true;
 			}
+			Particles::readonlyAttrCnt = GenericSSV::attrs.size();
 			GenericSSV::attrs.clear();
 		}
 		Particles::UpdateColorTex();
