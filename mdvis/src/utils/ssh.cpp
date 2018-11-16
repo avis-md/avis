@@ -146,10 +146,9 @@ std::string SSH::ResolveUserPath(const std::string& path) {
 }
 
 std::string SSH::Read(uint maxlen) {
-	char* c = new char[maxlen];
-	auto sz = libssh2_channel_read(channel, c, maxlen);
-	std::string s(c, sz);
-	delete[](c);
+	std::vector<char> c(maxlen);
+	auto sz = libssh2_channel_read(channel, c.data(), maxlen);
+	std::string s(c.data(), sz);
 	return s;
 }
 

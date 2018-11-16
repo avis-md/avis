@@ -39,7 +39,7 @@ void FFT::doFft(std::complex<float>* v, uint c) {
 }
 
 void FFT::separate(std::complex<float>* v, uint hc) {
-	auto t = new std::complex<float>[hc];
+	std::vector<std::complex<float>> t(hc);
 	for (uint i = 0; i < hc; ++i) {
 		t[i] = v[i * 2 + 1];
 	}
@@ -49,5 +49,4 @@ void FFT::separate(std::complex<float>* v, uint hc) {
 	for (uint i = 0; i < hc; ++i) {
 		v[i + hc] = t[i];
 	}
-	delete[](t);
 }

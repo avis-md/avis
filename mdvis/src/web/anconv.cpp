@@ -26,11 +26,10 @@ PyObject* AnConv::PyArr(char tp, int nd, int* szs, void* data) {
 		Debug::Warning("AnConv", "unknown type " + std::string(&tp, 1) + "!");
 		return nullptr;
 	}
-	npy_intp* dims = new npy_intp[nd];
+	std::vector<npy_intp> dims(nd);
 	for (int a = 0; a < nd; a++) dims[a] = (npy_int) szs[a];
-	auto res = PyArray_SimpleNewFromData(nd, dims, tn, data);//PyArray_New(&PyArray_Type, nd, szs, tn, NULL, data, sz, NPY_ARRAY_C_CONTIGUOUS, NULL);
+	auto res = PyArray_SimpleNewFromData(nd, dims.data(), tn, data);//PyArray_New(&PyArray_Type, nd, szs, tn, NULL, data, sz, NPY_ARRAY_C_CONTIGUOUS, NULL);
 	//Py_INCREF(res);
-	delete[](dims);
 	return res;
 }
 

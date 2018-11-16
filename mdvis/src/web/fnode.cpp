@@ -40,12 +40,11 @@ void FNode::Execute() {
 			case AN_VARTYPE::LIST:
 			{
 				auto nd = cv.dimVals.size();
-				int32_t* dims = new int32_t[nd];
+				std::vector<int32_t> dims(nd);
 				for (size_t a = 0; a < nd; a++) dims[nd - a - 1] = *cv.dimVals[a];
-				*scr->arr_in_shapeloc = dims;
+				*scr->arr_in_shapeloc = dims.data();
 				*scr->arr_in_dataloc = *(void**)cv.value;
 				scr->_inarr_pre[i]();
-				delete[](dims);
 				break;
 			}
 			default:

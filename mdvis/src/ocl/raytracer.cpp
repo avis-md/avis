@@ -313,11 +313,10 @@ void RayTracer::SetObjs() {
 
 	unsigned int _w, _h;
 	auto d = hdr::read_hdr((IO::path + "res/refl.hdr").c_str(), &_w, &_h);
-	float* dv = new float[_w*_h * 3];
-	hdr::to_float(d, _w, _h, dv);
-	bg_buf = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, 3 * _w * _h, dv);
+	std::vector<float> dv(_w*_h*3);
+	hdr::to_float(d, _w, _h, dv.data());
+	bg_buf = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, 3 * _w * _h, dv.data());
 	delete[](d);
-	delete[](dv);
 
 	for (int id = 0; id < g_objshapes.size(); ++id)
 	{

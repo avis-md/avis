@@ -1,10 +1,11 @@
 #pragma once
 #include "Engine.h"
 
-//TODO: enable copy without pointers
-class Mesh {
+class Mesh : public RefCnt<Mesh> {
 public:
+	Mesh();
 	Mesh(int vsz, Vec3* pos, Vec3* norm, int tsz, int* tri, bool sv = false);
+	~Mesh();
 
 	std::vector<Vec3> vertices;
 	std::vector<Vec3> normals;

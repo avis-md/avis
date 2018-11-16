@@ -1,7 +1,6 @@
 #include "Engine.h"
 
-#define F2ISTREAM(_varname, _pathname) std::ifstream _f2i_ifstream((_pathname).c_str(), std::ios::in | std::ios::binary); \
-std::istream _varname(_f2i_ifstream.rdbuf());
+Mesh::Mesh() : vertCount(~0U) {}
 
 Mesh::Mesh(int vsz, Vec3* pos, Vec3* norm, int tsz, int* tri, bool sv) : vertCount(vsz), triCount(tsz) {
 	if (sv) {
@@ -31,4 +30,12 @@ Mesh::Mesh(int vsz, Vec3* pos, Vec3* norm, int tsz, int* tri, bool sv) : vertCou
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, tsz * 3 * sizeof(int), tri, GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+Mesh::~Mesh() {
+	if (vertCount != ~0U && _IsSingleRef()) {
+		glDeleteBuffers(1, &veo);
+		glDeleteBuffers(2, vbos);
+		glDeleteVertexArrays(1, &vao);
+	}
 }

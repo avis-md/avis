@@ -3,6 +3,8 @@
 #endif
 #include "dylib.h"
 
+DyLib::DyLib() : lib(nullptr) {}
+
 DyLib::DyLib(std::string s) {
 #ifdef PLATFORM_WIN
 	lib = LoadLibrary(&s[0]);
@@ -12,11 +14,34 @@ DyLib::DyLib(std::string s) {
 }
 
 DyLib::~DyLib() {
+	if (_IsSingleRef())
+		Unload();
+}
+
+void* DyLib::GetSym(std::string s) {
 #ifdef PLATFORM_WIN
-	FreeLibrary((HMODULE)lib);
+	return GetProcAddress((HMODULE)lib, &s[0]);
 #else
-	dlclose(lib);
+#ifdef PLATFORM_OSX
+	//s = "_" + s;
 #endif
+	return dlsym(lib, &s[0]);
+#endif
+}
+
+bool DyLib::is_open() {
+	return lib;
+}
+
+void DyLib::Unload() {
+	if (lib) {
+#ifdef PLATFORM_WIN
+		FreeLibrary((HMODULE)lib);
+#else
+		dlclose(lib);
+#endif
+		lib = nullptr;
+	}
 }
 
 bool DyLib::ForceUnload(DyLib* lib, std::string path) {
@@ -33,19 +58,4 @@ bool DyLib::ForceUnload(DyLib* lib, std::string path) {
 	Debug::Warning("DyLib", "failed to force unloading of \"" + path + "\"!");
 	return false;
 #endif
-}
-
-void* DyLib::GetSym(std::string s) {
-#ifdef PLATFORM_WIN
-	return GetProcAddress((HMODULE)lib, &s[0]);
-#else
-#ifdef PLATFORM_OSX
-	//s = "_" + s;
-#endif
-	return dlsym(lib, &s[0]);
-#endif
-}
-
-bool DyLib::is_open() {
-	return lib;
 }

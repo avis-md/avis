@@ -529,29 +529,27 @@ void ParGraphics::Update() {
 		}
 		uint _w, _h;
 		byte* d = hdr::read_hdr((pth + "specular.hdr").c_str(), &_w, &_h);
-		float* dv = new float[_w*_h * 3];
 		if (d) {
-			hdr::to_float(d, _w, _h, dv);
+			std::vector<float> dv(_w*_h*3);
+			hdr::to_float(d, _w, _h, dv.data());
 			//byte* d = Texture::LoadPixels(IO::path + "res/?.png", chn, _w, _h);
 			glGenTextures(1, &refl);
 			glBindTexture(GL_TEXTURE_2D, refl);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv.data());
 			SetTexParams<>(0, GL_REPEAT, GL_MIRRORED_REPEAT);
 			glBindTexture(GL_TEXTURE_2D, 0);
 			delete[](d);
 		}
-		delete[](dv);
 		d = hdr::read_hdr((pth + "diffuse.hdr").c_str(), &_w, &_h);
 		if (d) {
-			dv = new float[_w*_h * 3];
-			hdr::to_float(d, _w, _h, dv);
+			std::vector<float> dv(_w*_h*3);
+			hdr::to_float(d, _w, _h, dv.data());
 			delete[](d);
 			glGenTextures(1, &reflE);
 			glBindTexture(GL_TEXTURE_2D, reflE);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv.data());
 			SetTexParams<>(0, GL_REPEAT, GL_MIRRORED_REPEAT);
 			glBindTexture(GL_TEXTURE_2D, 0);
-			delete[](dv);
 		}
 		ParGraphics::tfboDirty = true;
 	}
