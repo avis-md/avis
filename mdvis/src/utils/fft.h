@@ -1,6 +1,12 @@
 #pragma once
 #include "Engine.h"
 
+enum FFT_WINDOW : byte {
+	FFT_WINDOW_RECTANGLE,
+	FFT_WINDOW_HAMMING,
+	FFT_WINDOW_BLACKMAN
+};
+
 /*! Cooley-Tukey FFT
 [av] */
 class FFT {

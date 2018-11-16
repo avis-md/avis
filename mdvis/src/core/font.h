@@ -9,6 +9,10 @@
 class Font {
 public:
 	Font(const std::string& path, ALIGNMENT align = ALIGN_TOPLEFT);
+	~Font();
+
+	static void Init(), Deinit();
+
 	bool loaded = false;
 	GLuint glyph(uint size, uint mask);
 
@@ -17,8 +21,6 @@ public:
 	Font* Align(ALIGNMENT a);
 
 	static uint utf2unc(char*& c);
-
-	static void Init();
 
 	friend class UI;
 protected:

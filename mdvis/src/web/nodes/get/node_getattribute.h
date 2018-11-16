@@ -12,4 +12,7 @@ public:
     
 	void Execute() override;
     void DrawHeader(float& off) override;
+	
+	void Save(XmlNode* n) override;
+	void Load(XmlNode* n) override;
 };

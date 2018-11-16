@@ -8,8 +8,6 @@ extern "C" {
 }
 #include "lodepng.h"
 
-std::unordered_map<GLuint, int> Texture::_refcnt;
-
 Texture::Texture(const std::string& path, bool mipmap, TEX_FILTERING filter, byte aniso, TEX_WRAPING warp) :
 	Texture(path, mipmap, filter, aniso, (warp == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT, (warp == TEX_WRAP_CLAMP) ? GL_CLAMP_TO_EDGE : GL_REPEAT) {}
 
@@ -56,7 +54,6 @@ Texture::Texture(const std::string& path, bool mipmap, TEX_FILTERING filter, byt
 		(filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	if (dataV.size() == 0) delete[](data);
-	_refcnt[pointer]++;
 	loaded = true;
 }
 
@@ -77,22 +74,11 @@ Texture::Texture(const byte* data, const uint dataSz, TEX_FILTERING filter, TEX_
 		(filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR,
 		(filter == TEX_FILTER_POINT) ? GL_NEAREST : GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	_refcnt[pointer]++;
 	loaded = true;
 }
 
-Texture& Texture::operator= (const Texture& t) {
-	width = t.width;
-	height = t.height;
-	pointer = t.pointer;
-	loaded = t.loaded;
-	if (loaded) _refcnt[pointer]++;
-	return *this;
-}
-
 Texture::~Texture() {
-	auto rc = --_refcnt[pointer];
-	if (pointer>0 && rc == 0)
+	if (loaded && _IsSingleRef())
 		glDeleteTextures(1, &pointer);
 }
 

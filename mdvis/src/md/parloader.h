@@ -34,7 +34,7 @@ struct ParImporter {
 
 class ParLoader {
 public:
-	static void Init(), Scan();
+	static void Init(), Deinit(), Scan();
 
 	static int impId, funcId;
 	static ParImporter* customImp;

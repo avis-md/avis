@@ -140,7 +140,8 @@ public:
 	bool ReadFrame(int f);
 	virtual void RemoveFrames();
 
-	void Save(std::ofstream& strm), Load(std::ifstream& strm);
+	virtual void Save(XmlNode* n) {}
+	virtual void Load(XmlNode* n) {}
 	virtual void SaveIn(const std::string& path) {};
 	virtual void LoadIn(const std::string& path) {};
 	virtual void SaveOut(const std::string& path);

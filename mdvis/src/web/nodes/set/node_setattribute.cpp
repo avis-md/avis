@@ -74,6 +74,18 @@ void Node_SetAttribute::DrawHeader(float& off) {
 	off += 18;
 }
 
+void Node_SetAttribute::Save(XmlNode* n) {
+	n->addchild("id", std::to_string(attrId));
+	n->addchild("timed", timed? "1" : "0");
+}
+
+void Node_SetAttribute::Load(XmlNode* n2) {
+	for (auto& n : n2->children) {
+		if (n.name == "id") attrId = TryParse(n.value, 0U);
+		else if (n.name == "timed") timed = (n.value == "1");
+	}
+}
+
 void Node_SetAttribute::LoadOut(const std::string& path) {
 	Execute();
 }

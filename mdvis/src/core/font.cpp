@@ -25,6 +25,11 @@ void Font::Init() {
 #undef LC
 
 	InitVao(128);
+	Unloader::Reg(Deinit);
+}
+
+void Font::Deinit() {
+	FT_Done_FreeType(_ftlib);
 }
 
 void Font::InitVao(uint sz) {
@@ -73,6 +78,11 @@ Font::Font(const std::string& path, ALIGNMENT align) : alignment(align), vecSize
 	CreateGlyph(12, 0);
 	SizeVec(20);
 	loaded = true;
+}
+
+Font::~Font() {
+	if (loaded)
+		FT_Done_Face(_face);
 }
 
 GLuint Font::glyph(uint size, uint mask) {

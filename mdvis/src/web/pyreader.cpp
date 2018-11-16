@@ -48,6 +48,7 @@ void PyReader::Init() {
 
 		AnWeb::hasPy = true;
 		PyScript::InitLog();
+		Unloader::Reg(Deinit);
 	} catch (char*) {
 		std::string env = "";
 #ifdef PLATFORM_WIN
@@ -68,6 +69,10 @@ void PyReader::Init() {
 		Debug::Warning("Python", "Python3.6 framework not loaded!");
 	}
 #endif
+}
+
+void PyReader::Deinit() {
+	Py_Finalize();
 }
 
 size_t find_first_not_name_char (const char* c) {

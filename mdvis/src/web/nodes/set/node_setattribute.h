@@ -14,6 +14,9 @@ public:
 
 	void Execute() override;
 	void DrawHeader(float& off) override;
+	
+	void Save(XmlNode* n) override;
+	void Load(XmlNode* n) override;
 	void SaveOut(const std::string& path) override {}
 	void LoadOut(const std::string& path) override;
 };

@@ -6,6 +6,7 @@
 #include <libssh2.h>
 #include <libssh2_sftp.h>
 #undef ssize_t
+#include <unordered_set>
 
 enum class SSH_Auth {
 	PUBKEY,
@@ -21,11 +22,11 @@ struct SSHConfig {
 	std::string pw;
 };
 
-class SSH {
+class SSH : public RefCnt<SSH> {
 public:
 	bool ok;
 
-	static void Init();
+	static void Init(), Deinit();
 	static SSH Connect(const SSHConfig& conf);
 	void GetUserPath();
 	std::string ResolveUserPath(const std::string& s);
@@ -43,6 +44,9 @@ public:
 	bool HasCmd(std::string cmd, std::string& path);
 	void Disconnect();
 	void EnableDump(uint rate);
+
+	SSH();
+	~SSH();
 
 	int sock;
 	LIBSSH2_SESSION* session;

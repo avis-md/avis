@@ -286,17 +286,20 @@ void AnWeb::Draw() {
 	
 	float wo = 200;
 	bool haf = activeFile != "";
-	if (Engine::Button(wo, 1, 70, 16, white(1, haf? 0.4f : 0.2f), _("Save"), 12.f, white(), true) == MOUSE_RELEASE)
+	if (!executing && Engine::Button(wo, 1, 70, 16, white(1, haf? 0.4f : 0.2f), _("Save"), 12.f, white(), true) == MOUSE_RELEASE)
 		if (haf) Save(activeFile);
 	wo += 75;
-	if (Engine::Button(wo, 1, 70, 16, white(1, 0.4f), _("Save As"), 12.f, white(), true) == MOUSE_RELEASE)
+	if (!executing && Engine::Button(wo, 1, 70, 16, white(1, 0.4f), _("Save As"), 12.f, white(), true) == MOUSE_RELEASE)
 		Save(Dialog::SaveFile(EXT_ANSV));
 	wo += 75;
-	if (Engine::Button(wo, 1, 70, 16, white(1, 0.4f), _("Open"), 12.f, white(), true) == MOUSE_RELEASE) {
+	if (!executing && Engine::Button(wo, 1, 70, 16, white(1, 0.4f), _("Open"), 12.f, white(), true) == MOUSE_RELEASE) {
 		auto res = Dialog::OpenFile({"*" EXT_ANSV});
 		if (!!res.size()) Load(res[0]);
 	}
 	wo += 75;
+	if (!executing && Engine::Button(wo, 1, 70, 16, white(1, 0.4f), _("Clear"), 12, white(), true) == MOUSE_RELEASE) {
+		Clear0();
+	}
 	bool canexec = (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
 	if (Engine::Button(wo, 1, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
 		if (canexec) AnWeb::Execute(false);
@@ -600,6 +603,7 @@ void AnWeb::Save(const std::string& s) {
 		SV(type, (int)nd->script->type);
 		SVS(name, nd->script->name);
 		SV(tile, nd->canTile);
+		nd->Save(n->addchild("detail"));
 		nd->SaveConn();
 		auto nc = n->addchild("conns");
 		for (size_t a = 0; a < nd->_connInfo.size(); ++a) {
@@ -716,12 +720,20 @@ void AnWeb::Load(const std::string& s) {
 					break;
 				default:
 					Debug::Warning("AnWeb::Load", "Unknown node type: " + std::to_string((byte)tp));
-					continue;
+					return;
+				}
+				if (!n->script) {
+					Debug::Warning("AnWeb::Load", "Cannot find script \"" + nm + "\"!");
+					delete(n);
+					return;
 				}
 				n->id = cnt++;
 				nodes.push_back(n);
 			}
 			else if (c.name == "tile") n->canTile = (c.value == "1");
+			else if (c.name == "detail") {
+				n->Load(&c);
+			}
 			
 #define GTS(nm, vl) if (cc.name == #nm) vl = cc.value
 #define GT(nm, vl) if (cc.name == #nm) vl = TryParse(cc.value, vl)
@@ -745,8 +757,8 @@ void AnWeb::Load(const std::string& s) {
 							if (cc.name == "value") {
 								auto k = n->_connInfo.size();
 								auto& vd = n->inputVDef[k];
-								if (n->script->invars[k].second == "int") vd.i = TryParse(cc.value, -1);
-								else vd.d = TryParse(cc.value, -1.0);
+								if (n->script->invars[k].second == "int") vd.i = TryParse(cc.value, 0);
+								else vd.d = TryParse(cc.value, 0.0);
 							}
 						}
 					}

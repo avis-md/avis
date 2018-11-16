@@ -35,6 +35,8 @@
 #include "ocl/raytracer.h"
 #include "res/resdata.h"
 
+Unloader unloader;
+
 bool __debug = false;
 float autoSaveTime = 10;
 std::vector<std::string> main_openfiles;
@@ -343,7 +345,7 @@ The hash for this program is )" << VisSystem::version_hash
 
 #define INIT(nm, ...) Debug::Message("System", "Initializing " #nm); nm::Init(__VA_ARGS__)
 #ifdef DELAYLOAD
-#define LINIT(nm, ...) Debug::Message("System", "Skipping " #nm);
+#define LINIT(nm, ...) Debug::Message("System", "Skipping " #nm)
 #else
 #define LINIT INIT
 #endif

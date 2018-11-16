@@ -216,3 +216,13 @@ void Node_Plot::OnValChange(int i) {
 void Node_Plot::OnAnimFrame() {
 	Execute();
 }
+
+void Node_Plot::Save(XmlNode* n) {
+	n->addchild("type", std::to_string((int)type));
+}
+
+void Node_Plot::Load(XmlNode* n2) {
+	for (auto& n : n2->children) {
+		if (n.name == "type") type = (TYPE)TryParse(n.value, 0);
+	}
+}

@@ -17,7 +17,7 @@ ParImporter* ParLoader::customImp;
 bool ParLoader::loadAsTrj = false, ParLoader::additive = false;
 uint ParLoader::frameskip = 1;
 int ParLoader::maxframes = -1;
-bool ParLoader::useConn, ParLoader::useConnCache, ParLoader::hasConnCache, ParLoader::oldConnCache, ParLoader::ovwConnCache;
+bool ParLoader::useConn = true, ParLoader::useConnCache, ParLoader::hasConnCache, ParLoader::oldConnCache, ParLoader::ovwConnCache;
 std::string ParLoader::connCachePath;
 
 bool ParLoader::isSrv = false, ParLoader::srvusepass = false;
@@ -52,8 +52,12 @@ void ParLoader::Init() {
 		srvport = 22;
 		srvkey = "~/.ssh/id_rsa.pub";
 	}
+	Unloader::instance->Reg(Deinit);
+}
 
-	useConn = true;
+void ParLoader::Deinit() {
+	if (isSrv)
+		srv.Disconnect();
 }
 
 #if defined(PLATFORM_WIN)

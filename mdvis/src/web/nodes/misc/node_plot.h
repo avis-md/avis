@@ -24,6 +24,9 @@ public:
 	void OnValChange(int i) override;
 	void OnAnimFrame() override;
 
+	void Save(XmlNode* n) override;
+	void Load(XmlNode* n) override;
+
 protected:
 	bool useids;
 	byte style;

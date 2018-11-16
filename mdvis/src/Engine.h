@@ -260,12 +260,6 @@ enum COMPONENT_TYPE : byte {
 	COMP_SCR = 0xff //script
 };
 
-enum FFT_WINDOW : byte {
-	FFT_WINDOW_RECTANGLE,
-	FFT_WINDOW_HAMMING,
-	FFT_WINDOW_BLACKMAN
-};
-
 #pragma endregion
 
 #include "scene/object.h"
@@ -285,7 +279,7 @@ enum FFT_WINDOW : byte {
 #include "core/ui.h"
 #include "core/ui3.h"
 
-#include "utils/fft.h"
+#include "utils/refcnt.h"
 
 #include "AssetObjects.h"
 
@@ -345,3 +339,4 @@ public:
 };
 
 #include "SceneObjects.h"
+#include "unloader.h"

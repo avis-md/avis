@@ -50,7 +50,7 @@ CXXFLAGS = -O0 -g -Wall -std=c++11 -fvisibility=hidden -I../src/ -I/usr/include/
 LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
 LIBS = $(WEAK_LIB) $(PYLIB) -lpthread -lm $(GLLIB) -lz $(LIBS2)
 
-HEADERS = hdr.h lodepng.h AssetObjects.h ChokoLait.h Engine.h SceneObjects.h
+HEADERS = hdr.h lodepng.h AssetObjects.h ChokoLait.h Engine.h SceneObjects.h unloader.h
 HEADERS += asset/mesh.h asset/tetrahedron.h asset/texture.h asset/texture3d.h
 HEADERS += core/bbox.h core/debug.h core/display.h core/font.h core/input.h core/io.h core/math.h core/mvp.h core/time.h core/ui.h core/ui3.h
 HEADERS += md/Protein.h md/GenericSSV.h md/Gromacs.h md/CDV.h md/parmenu.h md/particles.h md/parloader.h md/XYZ.h md/pdb.h md/lammps.h md/dlpoly.h md/CDV.h
@@ -62,13 +62,13 @@ HEADERS += web/nodes/misc/node_plot.h
 HEADERS += scene/object.h scene/scene.h scene/sceneobject.h scene/transform.h scene/comp/camera.h scene/comp/component.h scene/comp/light.h
 HEADERS += ui/popups.h ui/icons.h ui/help.h ui/ui_ext.h ui/localizer.h ui/browse.h ui/browsetarget.h
 HEADERS += vis/pargraphics.h vis/system.h vis/shadows.h vis/renderer.h vis/cubemarcher.h vis/selection.h vis/changelog.h
-HEADERS += utils/avi.h utils/color.h utils/effects.h utils/fft.h utils/ifaddrs.h utils/net.h utils/plot.h utils/ptrext.h utils/random.h utils/rect.h utils/spline.h utils/stream.h utils/strext.h utils/xml.h utils/dialog.h utils/dylib.h utils/runcmd.h utils/ssh.h utils/tinyfiledialogs.h utils/shader.h utils/glmext.h
+HEADERS += utils/avi.h utils/color.h utils/effects.h utils/fft.h utils/ifaddrs.h utils/net.h utils/plot.h utils/ptrext.h utils/random.h utils/rect.h utils/spline.h utils/stream.h utils/strext.h utils/xml.h utils/dialog.h utils/dylib.h utils/runcmd.h utils/ssh.h utils/tinyfiledialogs.h utils/shader.h utils/glmext.h utils/refcnt.h
 HEADERS += live/livesyncer.h live/lj256.h
 HEADERS += ocl/raytracer.h
 HEADERS += res/resdata.h res/shddata.h ocl/kernel.h
 HEADERSX = xdrfile/xdrfile.h xdrfile/xdrfile_trr.h xdrfile/xdrfile_xtc.h
 
-OBJS = obj/hdr.o obj/lodepng.o obj/ChokoLait.o obj/Engine.o obj/main.o obj/RenderEngine.o
+OBJS = obj/hdr.o obj/lodepng.o obj/ChokoLait.o obj/Engine.o obj/main.o obj/RenderEngine.o obj/unloader.o
 OBJS += obj/asset/mesh.o obj/asset/tetrahedron.o obj/asset/texture.o obj/asset/texture3d.o
 OBJS += obj/core/bbox.o obj/core/debug.o obj/core/display.o obj/core/font.o obj/core/input.o obj/core/io.o obj/core/math.o obj/core/mvp.o obj/core/time.o obj/core/ui.o obj/core/ui3.o
 OBJS += obj/md/Protein.o obj/md/GenericSSV.o obj/md/Gromacs.o obj/md/parmenu.o obj/md/particles.o obj/md/parloader.o obj/md/pdb.o obj/md/lammps.o obj/md/CDV.o obj/md/dlpoly.o #obj/md/XYZ.o

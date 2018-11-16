@@ -9,6 +9,15 @@
 
 #define SFTP_BUF_SZ 65535
 
+SSH::SSH() : ok(false), session(nullptr) {}
+
+SSH::~SSH() {
+	if (session) {
+		if (_IsSingleRef())
+			Disconnect();
+	}
+}
+
 void SSH::Init() {
 	int res = libssh2_init(0);
 	if (!!res) {
@@ -16,11 +25,16 @@ void SSH::Init() {
 	}
 	Net::Init();
 	Debug::Message("SSH", "Init finished.");
+	Unloader::Reg(Deinit);
+}
+
+void SSH::Deinit() {
+	Debug::Message("SSH", "Exit");
+	libssh2_exit();
 }
 
 SSH SSH::Connect(const SSHConfig& conf) {
 	SSH ssh;
-	ssh.ok = false;
 	Debug::Message("SSH", "Starting session...");
 	
 	struct sockaddr* sin;
@@ -103,9 +117,14 @@ SSH SSH::Connect(const SSHConfig& conf) {
 }
 
 void SSH::Disconnect() {
-	if (channel) libssh2_channel_free(channel);
-	libssh2_session_disconnect(session, "logout");
-	libssh2_session_free(session);
+	Debug::Message("SSH", "Killing session...");
+	if (session) {
+		DisableSFTP();
+		if (channel) libssh2_channel_close(channel);
+		libssh2_session_disconnect(session, "Bye bye");
+		libssh2_session_free(session);
+	}
+	session = nullptr;
 	ok = false;
 }
 
@@ -197,6 +216,7 @@ void SSH::ListFD(std::string path, std::vector<std::string>& fls, std::vector<st
 	std::vector<std::string> res;
 	auto hnd = libssh2_sftp_opendir(sftpChannel, path.c_str());
 	if (hnd) {
+		/*
 		Write("rm " TD "; rm " TD "__");
 		int tries = 0;
 		auto _sup = Debug::suppress;
@@ -204,16 +224,17 @@ void SSH::ListFD(std::string path, std::vector<std::string>& fls, std::vector<st
 			Debug::suppress = 2;
 			auto cc = GetFile(TD "__");
 			if (!cc.size()) break;
-			if (!!tries++) {
-				if (tries > 50) {
-					Debug::suppress = _sup;
-					Debug::Warning("SSH::ListFD", "cannot clear temp file!");
-					return;
-				}
-				Engine::Sleep(200);
+			if (++tries > 50) {
+				Debug::suppress = _sup;
+				Debug::Warning("SSH::ListFD", "cannot clear temp file!");
+				return;
 			}
+			Engine::Sleep(200);
 		}
 		Debug::suppress = _sup;
+		*/
+		libssh2_sftp_unlink(sftpChannel, TD);
+		libssh2_sftp_unlink(sftpChannel, TD "__");
 		for (;;) {
 			char mem[512], lentry[512];
 			LIBSSH2_SFTP_ATTRIBUTES attr;

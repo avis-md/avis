@@ -8,11 +8,14 @@ public:
     
     bool invert;
 
-    float rMin = 0, rMax = 1;
+    float rMin, rMax;
     
 	void Execute() override;
 	void OnAnimFrame() override { Execute(); }
     void DrawHeader(float& off) override;
+
+	void Save(XmlNode* n) override;
+	void Load(XmlNode* n) override;
 	void SaveOut(const std::string& path) override {}
 	void LoadOut(const std::string& path) override;
 };
