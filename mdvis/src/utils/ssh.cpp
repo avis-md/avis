@@ -110,8 +110,8 @@ void SSH::Disconnect() {
 }
 
 void SSH::GetUserPath() {
-	std::string tpf = "/tmp/avis_userpath.txt";
-	Write("cd && pwd > " + tpf);
+	const std::string tpf = "/tmp/avis_userpath.txt";
+	Write("rm " + tpf + ";cd && pwd > " + tpf);
 	auto res = GetFile(tpf);
 	userPath = std::string(&res[0], res.size());
 	while (userPath.back() == '\n') userPath.pop_back();
@@ -135,6 +135,7 @@ std::string SSH::Read(uint maxlen) {
 }
 
 bool SSH::Write(std::string s) {
+	Debug::Message("SSH::Write", s);
 	s += "\n";
 	auto sz = s.size();
 	int off = 0;
@@ -228,23 +229,16 @@ void SSH::ListFD(std::string path, std::vector<std::string>& fls, std::vector<st
 	if (!res.size()) return;
 	Write("mv " TD "_ " TD);
 	Write("echo \"0\" > " TD "__");
-	int tries = 0;
-	auto _sup = Debug::suppress;
-	for (;;) {
-		Debug::suppress = 2;
-		auto cc = GetFile(TD "__");
-		if (!!cc.size()) break;
-		if (!!tries++) {
-			if (tries > 50) {
-				Debug::suppress = _sup;
-				Debug::Warning("SSH::ListFD", "cannot read temp file!");
-				return;
-			}
-			Engine::Sleep(200);
-		}
+	auto cc = GetFile(TD "__", 50, 200);
+	if (!cc.size()) {
+		Debug::Warning("SSH::ListFD", "cannot read temp file!");
+		return;
 	}
-	Debug::suppress = _sup;
-	auto cc = GetFile(TD);
+	cc = GetFile(TD);
+	if (!cc.size()) {
+		Debug::Warning("SSH::ListFD", "cannot read path file!");
+		return;
+	}
 	std::istringstream strm(&cc[0]);
 	int id;
 	for (auto& r : res) {
@@ -272,29 +266,33 @@ bool SSH::HasFile(std::string path) {
 	return !res;
 }
 
-std::vector<char> SSH::GetFile(std::string from) {
+std::vector<char> SSH::GetFile(std::string from, int tries, uint period) {
 	Debug::Message("SSH", "Get \"" + from + "\"");
 	from = ResolveUserPath(from);
-	auto hnd = libssh2_sftp_open(sftpChannel, &from[0], LIBSSH2_FXF_READ, 0);
+	LIBSSH2_SFTP_HANDLE* hnd = nullptr;
 	std::vector<char> res;
+	for (int a = 0; a < tries && !hnd; ++a) {
+		hnd = libssh2_sftp_open(sftpChannel, &from[0], LIBSSH2_FXF_READ, 0);
+		if (hnd) break;
+		if (a == tries - 1) {
+			Debug::Warning("SSH::GetFile", "cannot open file!");
+			return res;
+		}
+		Engine::Sleep(period);
+	}
 	size_t sz = 0;
 	auto tm = milliseconds();
 	std::array<char, SFTP_BUF_SZ> mem;
-	if (hnd) {
-		for (;;) {
-			auto wc = libssh2_sftp_read(hnd, &mem[0], SFTP_BUF_SZ);
-			if (wc <= 0) break;
-			res.resize(sz + wc);
-			memcpy(&res[sz], &mem[0], wc);
-			sz += wc;
-		}
-		libssh2_sftp_close(hnd);
-		tm = milliseconds() - tm;
-		Debug::Message("SSH", "Got " + std::to_string(sz) + " in " + std::to_string(tm * 0.001f) + " (" + std::to_string((sz * 1000) / tm) + "B/s)");
+	for (;;) {
+		auto wc = libssh2_sftp_read(hnd, &mem[0], SFTP_BUF_SZ);
+		if (wc <= 0) break;
+		res.resize(sz + wc);
+		memcpy(&res[sz], &mem[0], wc);
+		sz += wc;
 	}
-	else {
-		Debug::Message("SSH", "Cannot open file!");
-	}
+	libssh2_sftp_close(hnd);
+	tm = milliseconds() - tm;
+	Debug::Message("SSH", "Got " + std::to_string(sz) + " in " + std::to_string(tm * 0.001f) + " (" + std::to_string((sz * 1000) / tm) + "B/s)");
 	return res;
 }
 

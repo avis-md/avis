@@ -1,14 +1,16 @@
 #include "Engine.h"
 #include "res/shddata.h"
 
+glm::mat3 UI::matrix;
+bool UI::matrixIsI;
+
 std::unordered_map<size_t, Vec2> UI::scrollWs;
 Vec2* UI::currentScroll;
 float UI::currentScrollW0;
 
 bool UI::_isDrawingLoop = false;
-uintptr_t UI::_activeEditText[UI_MAX_EDIT_TEXT_FRAMES] = {};
-uintptr_t UI::_lastEditText[UI_MAX_EDIT_TEXT_FRAMES] = {};
-uintptr_t UI::_editingEditText[UI_MAX_EDIT_TEXT_FRAMES] = {};
+UI::editframes UI::_activeEditText, UI::_lastEditText, UI::_editingEditText;
+std::unordered_map<UI::editframes, ushort> UI::_editTextIds;
 ushort UI::_activeEditTextId = 0;
 ushort UI::_editingEditTextId = 0;
 
@@ -35,6 +37,15 @@ bool UI::ignoreLayers = false;
 
 PROGDEF(UI::quadProgC)
 PROGDEF(UI::quadProgT)
+
+Vec3 AU(Vec3 vec) {
+	if (!UI::matrixIsI) {
+		vec.y = Display::height - vec.y;
+		vec = UI::matrix * vec;
+		vec.y = Display::height - vec.y;
+	}
+	return vec;
+}
 
 void UI::Init() {
 	_defaultStyle.fontSize = 12;
@@ -66,74 +77,28 @@ void UI::Init() {
 	else if (!font2->loaded) font2 = font;
 }
 
-void UI::InitVao() {
-	glGenVertexArrays(1, &_vao);
-	glGenBuffers(1, &_vboV);
-	glGenBuffers(1, &_vboU);
-	glBindBuffer(GL_ARRAY_BUFFER, _vboV);
-	glBufferData(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec3), nullptr, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, _vboU);
-	glBufferData(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec2), nullptr, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(_vao);
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, _vboV);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, _vboU);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glGenTextures(1, &_tvbo);
-	glBindTexture(GL_TEXTURE_BUFFER, _tvbo);
-	glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, _vboV);
-	glBindTexture(GL_TEXTURE_BUFFER, 0);
-}
-
 void UI::IncLayer() {
 	_layer++;
 }
 
-void UI::SetVao(uint sz, void* verts, void* uvs) {
-	assert(!!sz && verts);
-	if (sz > _vboSz) {
-		glDeleteBuffers(1, &_vboV);
-		glDeleteBuffers(1, &_vboU);
-		glDeleteVertexArrays(1, &_vao);
-		_vboSz = sz;
-		InitVao();
-	}
-	glBindBuffer(GL_ARRAY_BUFFER, _vboV);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sz * sizeof(Vec3), verts);
-	if (uvs) {
-		glBindBuffer(GL_ARRAY_BUFFER, _vboU);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sz * sizeof(Vec2), uvs);
-	}
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-bool UI::IsSameId(uintptr_t* left, uintptr_t* right) {
-	for (byte a = 0; a < UI_MAX_EDIT_TEXT_FRAMES; ++a) {
-		if (left[a] != right[a]) return false;
-	}
-	return true;
-}
-
-void UI::GetEditTextId() {
-	memset(_activeEditText, 0, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
-	Debug::StackTrace(UI_MAX_EDIT_TEXT_FRAMES, (void**)_activeEditText);
-	if (IsSameId(_activeEditText, _lastEditText)) _activeEditTextId++;
-	else _activeEditTextId = 0;
-	memcpy(_lastEditText, _activeEditText, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
-}
-
 void UI::PreLoop() {
-	memset(_lastEditText, 0, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
+	_activeEditText = editframes();
 	_activeEditTextId = 0;
+	_editTextIds.clear();
 
 	editingText = !!_editingEditText[0];
 	_layerMax = _layer;
 	_layer = 0;
+}
+
+void UI::Rotate(float aa, Vec2 point) {
+	float a = -aa * deg2rad;
+	matrix = glm::mat3(1, 0, 0, 0, 1, 0, point.x, point.y, 1)*glm::mat3(cos(a), -sin(a), 0, sin(a), cos(a), 0, 0, 0, 1)*glm::mat3(1, 0, 0, 0, 1, 0, -point.x, -point.y, 1) * matrix;
+	matrixIsI = false;
+}
+void UI::ResetMatrix() {
+	matrix = glm::mat3();
+	matrixIsI = true;
 }
 
 void UI::Quad(float x, float y, float w, float h, Vec4 col) {
@@ -149,7 +114,7 @@ void UI::Quad(float x, float y, float w, float h, Vec4 col) {
 	quadPoss[3].y = y + h;
 	for (int y = 0; y < 4; ++y) {
 		quadPoss[y].z = 1;
-		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
+		quadPoss[y] = Ds(UI::matrix*quadPoss[y]);
 	}
 
 	UI::SetVao(4, quadPoss);
@@ -173,7 +138,7 @@ void UI::Quad(float x, float y, float w, float h, GLuint tex, Vec4 col, Vec2 uv0
 	quadPoss[3].x = x + w;	quadPoss[3].y = y + h;
 	for (int y = 0; y < 4; ++y) {
 		quadPoss[y].z = 1;
-		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
+		quadPoss[y] = Ds(UI::matrix*quadPoss[y]);
 	}
 	Vec2 quadUvs[4]{ uv0, uv1, uv2, uv3 };
 
@@ -232,7 +197,7 @@ std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol,
 	std::string str = str2;
 	if (!str22.size()) str22 = str2;
 	GetEditTextId();
-	bool isActive = (UI::IsSameId(_activeEditText, _editingEditText) && (_activeEditTextId == _editingEditTextId));
+	bool isActive = (_activeEditText == _editingEditText) && (_activeEditTextId == _editingEditTextId);
 
 	if (changed) *changed = false;
 
@@ -333,21 +298,21 @@ std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol,
 
 		Engine::PopStencil();
 		if ((Input::mouse0State == MOUSE_DOWN && !Rect(x, y, w, h).Inside(Input::mouseDownPos)) || Input::KeyDown(Key_Enter)) {
-			memset(_editingEditText, 0, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
+			_editingEditText = editframes();
 			_activeEditTextId = 0;
 			if (changed && delayed) *changed = true;
 
 			return delayed ? _editTextString : str;
 		}
 		if (Input::KeyDown(Key_Escape)) {
-			memset(_editingEditText, 0, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
+			_editingEditText = editframes();
 			_activeEditTextId = 0;
 			return str;
 		}
 		return delayed ? str : _editTextString;
 	}
 	else if (Engine::Button(x, y, w, h, bcol, str22, s, fcol) == MOUSE_RELEASE) {
-		memcpy(_editingEditText, _activeEditText, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
+		_editingEditText = _activeEditText;
 		_editingEditTextId = _activeEditTextId;
 		_editTextCursorPos = str.size();
 		_editTextCursorPos2 = 0;
@@ -363,7 +328,7 @@ std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 b
 	std::string str = str2;
 	std::string pstr = "";
 	GetEditTextId();
-	bool isActive = (UI::IsSameId(_activeEditText, _editingEditText) && (_activeEditTextId == _editingEditTextId));
+	bool isActive = (_activeEditText == _editingEditText) && (_activeEditTextId == _editingEditTextId);
 
 	if (changed) *changed = false;
 
@@ -449,13 +414,13 @@ std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 b
 		font->Align(al);
 
 		if ((Input::mouse0State == MOUSE_UP && !Rect(x, y, w, h).Inside(Input::mousePos)) || Input::KeyDown(Key_Enter)) {
-			memset(_editingEditText, 0, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
+			_editingEditText = editframes();
 			_activeEditTextId = 0;
 			if (changed && delayed) *changed = true;
 			return delayed ? _editTextString : str;
 		}
 		if (Input::KeyDown(Key_Escape)) {
-			memset(_editingEditText, 0, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
+			_editingEditText = editframes();
 			_activeEditTextId = 0;
 			return str;
 		}
@@ -464,7 +429,7 @@ std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 b
 	else {
 		pstr.resize(str.size(), repl);
 		if (Engine::Button(x, y, w, h, bcol, pstr, s, fcol, false) == MOUSE_RELEASE) {
-			memcpy(_editingEditText, _activeEditText, UI_MAX_EDIT_TEXT_FRAMES * sizeof(uintptr_t));
+			_editingEditText = _activeEditText;
 			_editingEditTextId = _activeEditTextId;
 			_editTextCursorPos = str.size();
 			_editTextCursorPos2 = 0;
@@ -473,14 +438,6 @@ std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 b
 		}
 	}
 	return str;
-}
-Vec3 AU(Vec3 vec) {
-	if (!Display::uiMatrixIsI) {
-		vec.y = Display::height - vec.y;
-		vec = Display::uiMatrix * vec;
-		vec.y = Display::height - vec.y;
-	}
-	return vec;
 }
 
 float UI::GetLabelW(float s, std::string str, Font* font) {
@@ -620,4 +577,58 @@ float UI::BeginScroll(float x, float y, float w, float h, float off) {
 void UI::EndScroll(float off) {
 	currentScroll->x = (off - currentScrollW0);
 	Engine::EndStencil();
+}
+
+void UI::GetEditTextId() {
+	_activeEditText = editframes();
+	Debug::StackTrace(UI_MAX_EDIT_TEXT_FRAMES, (void**)_activeEditText.data());
+	if (_activeEditText == _lastEditText) {
+		_activeEditTextId++;
+		auto& id = _editTextIds[_activeEditText];
+		_activeEditTextId = ++id;
+	}
+	else _activeEditTextId = 0;
+	_lastEditText = _activeEditText;
+}
+
+void UI::InitVao() {
+	glGenVertexArrays(1, &_vao);
+	glGenBuffers(1, &_vboV);
+	glGenBuffers(1, &_vboU);
+	glBindBuffer(GL_ARRAY_BUFFER, _vboV);
+	glBufferData(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec3), nullptr, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, _vboU);
+	glBufferData(GL_ARRAY_BUFFER, _vboSz * sizeof(Vec2), nullptr, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(_vao);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, _vboV);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glBindBuffer(GL_ARRAY_BUFFER, _vboU);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glGenTextures(1, &_tvbo);
+	glBindTexture(GL_TEXTURE_BUFFER, _tvbo);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, _vboV);
+	glBindTexture(GL_TEXTURE_BUFFER, 0);
+}
+
+void UI::SetVao(uint sz, void* verts, void* uvs) {
+	assert(!!sz && verts);
+	if (sz > _vboSz) {
+		glDeleteBuffers(1, &_vboV);
+		glDeleteBuffers(1, &_vboU);
+		glDeleteVertexArrays(1, &_vao);
+		_vboSz = sz;
+		InitVao();
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, _vboV);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sz * sizeof(Vec3), verts);
+	if (uvs) {
+		glBindBuffer(GL_ARRAY_BUFFER, _vboU);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sz * sizeof(Vec2), uvs);
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

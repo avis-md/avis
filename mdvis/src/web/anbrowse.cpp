@@ -225,9 +225,9 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 			UI::Label(22.f + 5 * layer, off, 12.f, fs->name, white());
 			if (!fs->ok) {
 				if (fs->busy) {
-					Engine::RotateUI(Time::time * 180, Vec2(137, off + 8));
+					UI::Rotate(Time::time * 180, Vec2(137, off + 8));
 					UI::Texture(129, off, 16, 16, Icons::refresh);
-					Engine::ResetUIMatrix();
+					UI::ResetMatrix();
 				}
 				else {
 					UI::font->Align(ALIGN_TOPRIGHT);

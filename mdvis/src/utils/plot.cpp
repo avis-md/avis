@@ -66,12 +66,12 @@ void plt::plot(float x, float y, float w, float h, float* dx, float** dy, uint c
 		UI::Label(x, y + h + 2, (float)sz, to_string_scientific(x1), col);
 		font->Align(ALIGN_TOPRIGHT);
 		UI::Label(x + w, y + h + 2, (float)sz, to_string_scientific(x2), col);
-		Engine::RotateUI(-90.f, Vec2(x, y + w));
+		UI::Rotate(-90.f, Vec2(x, y + w));
 		font->Align(ALIGN_TOPLEFT);
 		UI::Label(x, y + h - 4 - sz, (float)sz, to_string_scientific(y1), col);
 		font->Align(ALIGN_TOPRIGHT);
 		UI::Label(x + w, y + h - 4 - sz, (float)sz, to_string_scientific(y2), col);
-		Engine::ResetUIMatrix();
+		UI::ResetMatrix();
 		font->Align(ALIGN_TOPLEFT);
 	}
 }

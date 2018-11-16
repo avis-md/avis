@@ -38,7 +38,7 @@ public:
 	std::vector<std::string> ListFiles(std::string path);
 	std::vector<std::string> ListDirs(std::string path);
 	bool HasFile(std::string path);
-	std::vector<char> GetFile(std::string from);
+	std::vector<char> GetFile(std::string from, int tries = 1, uint period = 100);
 	void GetFile(std::string from, std::string to), SendFile(std::string from, std::string to);
 	bool HasCmd(std::string cmd, std::string& path);
 	void Disconnect();

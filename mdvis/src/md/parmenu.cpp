@@ -101,13 +101,13 @@ void ParMenu::Draw() {
 				}
 		}
 
-		Engine::RotateUI(90, Vec2(expandPos + 16, 18));
+		UI::Rotate(90, Vec2(expandPos + 16, 18));
 		UI::font->Align(ALIGN_TOPCENTER);
 		for (uint i = 0; i < 5; ++i) {
 			UI::Label(expandPos + 56 + 81 * i, 18, 12, menuNames[i], (i == activeMenu) ? VisSystem::accentColor : white());
 		}
 		UI::font->Align(ALIGN_TOPLEFT);
-		Engine::ResetUIMatrix();
+		UI::ResetMatrix();
 
 		UI::Quad(expandPos, Display::height - 34.f, 16, 16, white(0.9f, 0.15f));
 		if ((!UI::editingText && Input::KeyUp(Key_T)) || Engine::Button(expandPos, Display::height - 34.f, 16, 16, Icons::collapse) == MOUSE_RELEASE)

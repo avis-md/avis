@@ -139,7 +139,7 @@ void Color::DrawSV(float x, float y, float w, float h, float hue) {
 	quadPoss[3].y = y + h;
 	for (int y = 0; y < 4; ++y) {
 		quadPoss[y].z = 1;
-		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
+		quadPoss[y] = Ds(UI::matrix*quadPoss[y]);
 	}
 
 	UI::SetVao(4, quadPoss);
@@ -168,7 +168,7 @@ void Color::DrawH(float x, float y, float w, float h) {
 	quadPoss[3].y = y + h;
 	for (int y = 0; y < 4; ++y) {
 		quadPoss[y].z = 1;
-		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
+		quadPoss[y] = Ds(UI::matrix*quadPoss[y]);
 	}
 
 	UI::SetVao(4, quadPoss);
@@ -193,7 +193,7 @@ void Color::DrawH2(float x, float y, float w, float h, Vec4* grad) {
 	quadPoss[3].y = y + h;
 	for (int y = 0; y < 4; ++y) {
 		quadPoss[y].z = 1;
-		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
+		quadPoss[y] = Ds(UI::matrix*quadPoss[y]);
 	}
 
 	UI::SetVao(4, quadPoss);

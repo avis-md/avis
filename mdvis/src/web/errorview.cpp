@@ -116,9 +116,9 @@ int ErrorView::Parse_MSVC(const std::string& path, const std::string& sig, const
 
 void ErrorView::Draw() {
 	if (AnBrowse::busy) {
-		Engine::RotateUI(Time::time * 180, Vec2(13, Display::height - 9));
+		UI::Rotate(Time::time * 180, Vec2(13, Display::height - 9));
 		UI::Texture(5, Display::height - 17.f, 16, 16, Icons::refresh);
-		Engine::ResetUIMatrix();
+		UI::ResetMatrix();
 	}
 	else {
 		if (Engine::Button(3, Display::height - 17.f, 35, 16, white(0), white(0.2f), black(0.2f)) == MOUSE_RELEASE) {

@@ -291,6 +291,8 @@ enum FFT_WINDOW : byte {
 
 class Engine { //why do I have this class again?
 public:
+	static void Init();
+
 	static void BeginStencil(float x, float y, float w, float h);
 	static void PushStencil(float x, float y, float w, float h);
 	static void PopStencil();
@@ -314,9 +316,6 @@ public:
 	//scaleType: 0=scale, 1=clip, 2=tile
 	static void DrawProgressBar(float x, float y, float w, float h, float progress, Vec4 background, const Texture& foreground, Vec4 tint, int padding, byte scaleType);
 
-	static void RotateUI(float a, Vec2 point);
-	static void ResetUIMatrix();
-
 	static void Sleep(uint ms);
 
 	static GLuint defProgram, defProgramW, unlitProgram, unlitProgramA, unlitProgramC, skyProgram;
@@ -332,8 +331,6 @@ public:
 	static void DrawCube(Vec3 pos, float dx, float dy, float dz, Vec4 col);
 
 	static std::thread::id _mainThreadId;
-
-	static void Init();
 
 	static std::vector<Rect> stencilRects;
 	static Rect* stencilRect;

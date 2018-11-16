@@ -1,11 +1,37 @@
 #pragma once
 #include "Engine.h"
 
+namespace std
+{
+    template<typename T, size_t N>
+    struct hash<array<T, N> >
+    {
+        typedef array<T, N> argument_type;
+        typedef size_t result_type;
+
+        result_type operator()(const argument_type& a) const
+        {
+            hash<T> hasher;
+            result_type h = 0;
+            for (result_type i = 0; i < N; ++i)
+            {
+                h = h * 31 + hasher(a[i]);
+            }
+            return h;
+        }
+    };
+}
+
 /*! 2D drawing to the screen.
 [av] */
 class UI {
 public:
 	static void Init(), IncLayer();
+
+	static void PreLoop();
+
+	static void Rotate(float a, Vec2 point);
+	static void ResetMatrix();
 
 	static void Quad(float x, float y, float w, float h, Vec4 col);
 	static void Quad(float x, float y, float w, float h, GLuint tex, Vec4 col = white(), Vec2 uv0 = Vec2(0, 1), Vec2 uv1 = Vec2(1, 1), Vec2 uv2 = Vec2(0, 0), Vec2 uv3 = Vec2(1, 0));
@@ -28,12 +54,12 @@ public:
 	static void EndScroll(float off);
 
 	static bool _isDrawingLoop;
-	static void PreLoop();
-	static uintptr_t _activeEditText[UI_MAX_EDIT_TEXT_FRAMES], _lastEditText[UI_MAX_EDIT_TEXT_FRAMES], _editingEditText[UI_MAX_EDIT_TEXT_FRAMES];
+	typedef std::array<uintptr_t, UI_MAX_EDIT_TEXT_FRAMES> editframes;
+	static editframes _activeEditText, _lastEditText, _editingEditText;
+	static std::unordered_map<editframes, ushort> _editTextIds;
 	static ushort _activeEditTextId, _editingEditTextId;
 
 	static void GetEditTextId();
-	static bool IsSameId(uintptr_t* left, uintptr_t* right);
 
 	struct StyleColor {
 		Vec4 backColor, fontColor;
@@ -48,6 +74,9 @@ public:
 		StyleColor normal, mouseover, highlight, press;
 		int fontSize;
 	};
+
+	static glm::mat3 matrix;
+	static bool matrixIsI;
 
 	static Font* font, *font2;
 

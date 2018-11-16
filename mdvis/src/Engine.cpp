@@ -305,16 +305,6 @@ void Engine::DrawProgressBar(float x, float y, float w, float h, float progress,
 	UI::Quad(x + padding, y + padding, w*progress - 2 * padding, h - 2 * padding, foreground.pointer, tint, Vec2(0, 1), Vec2(tx, 1), Vec2(0, 0), Vec2(tx, 0));
 }
 
-void Engine::RotateUI(float aa, Vec2 point) {
-	float a = -aa * deg2rad;
-	Display::uiMatrix = glm::mat3(1, 0, 0, 0, 1, 0, point.x, point.y, 1)*glm::mat3(cos(a), -sin(a), 0, sin(a), cos(a), 0, 0, 0, 1)*glm::mat3(1, 0, 0, 0, 1, 0, -point.x, -point.y, 1)*Display::uiMatrix;
-	Display::uiMatrixIsI = false;
-}
-void Engine::ResetUIMatrix() {
-	Display::uiMatrix = glm::mat3();
-	Display::uiMatrixIsI = true;
-}
-
 void Engine::Sleep(uint ms) {
 #ifdef PLATFORM_WIN
 	::Sleep(ms);
@@ -358,7 +348,7 @@ void Engine::DrawLine(Vec3 v1, Vec3 v2, Vec4 col, float width) {
 	quadPoss[0] = v1;
 	quadPoss[1] = v2;
 	for (int y = 0; y < 2; ++y) {
-		quadPoss[y] = Ds(Display::uiMatrix*quadPoss[y]);
+		quadPoss[y] = Ds(UI::matrix*quadPoss[y]);
 	}
 	UI::SetVao(2, quadPoss);
 
