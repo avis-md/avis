@@ -3,7 +3,7 @@
 #include "ui/ui_ext.h"
 #include "web/anweb.h"
 
-Node_SetAttribute::Node_SetAttribute() : AnNode(new DmScript(sig)), attrId(0), _attrId(-1), di(&attrId, nullptr), timed(true) {
+Node_SetAttribute::Node_SetAttribute() : AnNode(new DmScript(sig)), attrId(0), _attrId(-1),  attrSz(-1), di(&attrId, nullptr), timed(true) {
 	title = "Set Attribute";
 	titleCol = NODE_COL_IO;
 	inputR.resize(1);
@@ -63,13 +63,13 @@ void Node_SetAttribute::DrawHeader(float& off) {
 		attrs[a - Particles::readonlyAttrCnt] = Particles::attrNms[a];
 	}
 	UI2::Dropdown(pos.x + 2, off, width - 4, "Attribute", di);
-	off += 17;
 	if (attrId != _attrId) {
 		_attrId = attrId;
 		if (attrId == attrs.size()-2) {
 			Particles::AddParam();
 		}
 	}
+	off += 17;
 	UI2::Toggle(pos.x + 2, off, width - 4, "Animated", timed);
 	off += 18;
 }
@@ -83,6 +83,9 @@ void Node_SetAttribute::Load(XmlNode* n2) {
 	for (auto& n : n2->children) {
 		if (n.name == "id") attrId = TryParse(n.value, 0U);
 		else if (n.name == "timed") timed = (n.value == "1");
+	}
+	while (Particles::attrs.size() - Particles::readonlyAttrCnt <= attrId) {
+		Particles::AddParam();
 	}
 }
 

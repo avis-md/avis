@@ -98,6 +98,7 @@ void Browse::Draw() {
 				if (callback) callback(system->path + system->files[selId]);
 				delete(system);
 				system = nullptr;
+				return;
 			}
 		}
 
@@ -111,25 +112,34 @@ void Browse::Draw() {
 		}
 		UI::EndScroll(off);
 
-		off = UI::BeginScroll(115, 60, Display::width - 120, Display::height - 80);
+		off = UI::BeginScroll(115, 60, Display::width - 120, Display::height - 65);
 		int wn = (int)std::floorf((Display::width - 120) / 160);
 		float ws = (Display::width - 120) / wn;
-		int i = 0, wi = 0;
+		int wi = 0;
 		float woff = 115;
-		for (auto& f : system->files) {
+		off -= 17;
+		for (int i = 0, j = (int)system->files.size(); i < j; i++) {
+			if (!(i%wn)) {
+				off += 17;
+				if (off < 0 || off > Display::height) {
+					i += wn-1;
+					continue;
+				}
+			}
+			const auto& f = system->files[i];
 			if (Engine::Button(woff, off, ws-1, 16, white((i == selId)? 0.3f : 0.05f + 0.05f * (wi%2)), f, 12, white()) == MOUSE_RELEASE) {
 				if (Input::dbclick) {
 					mode = MODE::NONE;
 					if (callback) callback(system->path + f);
 					delete(system);
 					system = nullptr;
+					goto end2;
 				}
 				else {
 					selId = i;
 				}
 			}
-			if (!(++i%wn)) {
-				off += 17;
+			if (!((i+1)%wn)) {
 				wi = 0;
 				woff = 115;
 			}
@@ -138,6 +148,7 @@ void Browse::Draw() {
 				woff += ws;
 			}
 		}
+	end2:
 		UI::EndScroll(off);
 	}
 }

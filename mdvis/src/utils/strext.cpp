@@ -19,7 +19,7 @@ namespace std {
 }
 
 std::vector<std::string> string_split(std::string s, char c, bool rm) {
-	std::vector<std::string> o = std::vector<std::string>();
+	std::vector<std::string> o = {};
 	size_t pos = -1;
 	do {
 		s = s.substr(pos + 1);

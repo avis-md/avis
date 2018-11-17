@@ -207,66 +207,34 @@ void SSH::DisableSFTP() {
 	}
 }
 
+//list files and folders. Please reimplement this with a more elegant solution if possible.
 #define TD "/tmp/avis_testdir"
 void SSH::ListFD(std::string path, std::vector<std::string>& fls, std::vector<std::string>& fds) {
 	fls.clear();
 	fds.clear();
 	path = ResolveUserPath(path);
 	std::vector<std::string> res;
-	auto hnd = libssh2_sftp_opendir(sftpChannel, path.c_str());
-	if (hnd) {
-		/*
-		Write("rm " TD "; rm " TD "__");
-		int tries = 0;
-		auto _sup = Debug::suppress;
-		for (;;) {
-			Debug::suppress = 2;
-			auto cc = GetFile(TD "__");
-			if (!cc.size()) break;
-			if (++tries > 50) {
-				Debug::suppress = _sup;
-				Debug::Warning("SSH::ListFD", "cannot clear temp file!");
-				return;
-			}
-			Engine::Sleep(200);
-		}
-		Debug::suppress = _sup;
-		*/
-		libssh2_sftp_unlink(sftpChannel, TD);
-		libssh2_sftp_unlink(sftpChannel, TD "__");
-		for (;;) {
-			char mem[512], lentry[512];
-			LIBSSH2_SFTP_ATTRIBUTES attr;
-			auto rc = libssh2_sftp_readdir_ex(hnd, mem, 512, lentry, 512, &attr);
-			if (rc > 0) {
-				std::string s(mem, rc);
-				Write("test -d \"" + path + s + "\"  && echo 1 >> " TD "_ || echo 0 >> " TD "_");
-				res.push_back(s);
-			}
-			else break;
-		}
-	}
-	if (!res.size()) return;
-	Write("mv " TD "_ " TD);
-	Write("echo \"0\" > " TD "__");
-	auto cc = GetFile(TD "__", 50, 200);
+	libssh2_sftp_unlink(sftpChannel, TD);
+	libssh2_sftp_unlink(sftpChannel, TD "__");
+	Write("ls -pA " + path + " > " TD + "; echo 1 > " TD "__");
+	auto cc = GetFile(TD "__", 50, 100);
 	if (!cc.size()) {
-		Debug::Warning("SSH::ListFD", "cannot read temp file!");
+		Debug::Warning("SSH::ListFD", "cannot read temp path file!");
 		return;
 	}
 	cc = GetFile(TD);
-	if (!cc.size()) {
-		Debug::Warning("SSH::ListFD", "cannot read path file!");
-		return;
-	}
-	std::istringstream strm(&cc[0]);
-	int id;
-	for (auto& r : res) {
-		strm >> id;
-		if (!!id) fds.push_back(r);
-		else fls.push_back(r);
+	auto ss = string_split(std::string(cc.data(), cc.size()), '\n', true);
+	for (auto& s : ss) {
+		if (!s.size()) continue;
+		if (s.back() == '/') {
+			s.pop_back();
+			fds.push_back(s);
+		}
+		else
+			fls.push_back(s);
 	}
 }
+
 std::vector<std::string> SSH::ListFiles(std::string path) {
 	std::vector<std::string> fls, fds;
 	ListFD(path, fls, fds);
@@ -305,7 +273,10 @@ std::vector<char> SSH::GetFile(std::string from, int tries, uint period) {
 	std::array<char, SFTP_BUF_SZ> mem;
 	for (;;) {
 		auto wc = libssh2_sftp_read(hnd, &mem[0], SFTP_BUF_SZ);
-		if (wc <= 0) break;
+		if (wc <= 0) {
+			if (wc < 0) Debug::Warning("SSH::GetFile", "read returns " + std::to_string(wc) + "!");
+			break;
+		}
 		res.resize(sz + wc);
 		memcpy(&res[sz], &mem[0], wc);
 		sz += wc;

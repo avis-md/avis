@@ -32,7 +32,8 @@ void Node_AdjList::Execute() {
 	auto ccnt = *cv.dimVals[0];
 	count = inputR[1].first? *(int*)inputR[1].getval() : inputVDef[1].i;
 	listsize = inputR[2].first? *(int*)inputR[2].getval() : inputVDef[2].i;
-	if (!ccnt || !count) return;
+	if (listsize <= 0) RETERR("list size must be > 0!");
+	if (count <= 0) RETERR("atom count is 0!");
 	conns.clear();
 	conns.resize(count*listsize, -1);
 	for (int a = 0; a < ccnt; ++a) {
