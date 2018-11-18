@@ -542,7 +542,7 @@ bool AnNode::HasConnO(int i) {
 }
 
 bool AnNode::CanConn(std::string lhs, std::string rhs) {
-	if (rhs[0] == '*' && lhs.substr(0, 4) != "list") return true;
+	if (rhs[0] == '*') return true;
 	auto s = lhs.size();
 	if (s != rhs.size()) return false;
 	for (size_t a = 0; a < s; ++a) {

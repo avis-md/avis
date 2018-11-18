@@ -9,6 +9,7 @@ public:
 
 	enum class TYPE : int {
 		LINES,
+		ALINES,
 		SCATTER,
 		DENSITY,
 		CONTOUR
