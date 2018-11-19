@@ -5,8 +5,7 @@ class Node_Info : public AnNode {
 public:
 	static const std::string sig;
 	Node_Info();
-
-	float DrawSide() override { return 0; }
+	
 	void Execute() override;
 
 	void SaveIn(const std::string& path) override {}

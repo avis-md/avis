@@ -401,7 +401,20 @@ void AnNode::DrawToolbar() {
 #endif
 }
 
-AnNode::AnNode(AnScript* scr) : script(scr), canTile(false) {
+void AnNode::AddInput() {
+	inputR.push_back(nodecon());
+	inputVDef.push_back(AnVarBase());
+}
+
+void AnNode::AddOutput() {
+	outputR.push_back(std::vector<nodecon>());
+	conV.push_back(CVar());
+	if (saveConV) conVAll.push_back(std::vector<VarVal>());
+}
+
+AnNode::AnNode(AnScript* scr, ANNODE_FLAGS flags) : script(scr), canTile(false), 
+		saveConV(!(flags & AN_FLAG_NOSAVECONV)),
+		runOnSeek(!!(flags & AN_FLAG_RUNONSEEK)) {
 	if (!scr) return;
 	title = scr->name;
 	inputR.resize(scr->invars.size());
@@ -417,9 +430,41 @@ void AnNode::ApplyFrameCount(int f) {
 	}
 }
 
+void AnNode::WriteFrame(int f) {
+	if (!saveConV) return;
+	for (int a = 0; a < conV.size(); ++a) {
+		auto& c = conV[a];
+		auto& ca = conVAll[a][f];
+		switch (c.type) {
+		case AN_VARTYPE::SHORT:
+			ca.val.i = *(short*)c.value;
+			break;
+		case AN_VARTYPE::INT:
+			ca.val.i = *(int*)c.value;
+			break;
+		case AN_VARTYPE::DOUBLE:
+			ca.val.d = *(double*)c.value;
+			break;
+		case AN_VARTYPE::LIST: {
+			int n = 1;
+			auto ds = c.dimVals.size();
+			ca.dims.resize(ds);
+			for (size_t d = 0; d < ds; ++d) {
+				n *= ca.dims[d] = *c.dimVals[d];
+			}
+			n *= c.stride;
+			ca.val.arr.data.resize(n);
+			memcpy(&ca.val.arr.data[0], *(char**)c.value, n);
+			ca.val.arr.p = &ca.val.arr.data[0];
+			break;
+		}
+		}
+	}
+}
+
 bool AnNode::ReadFrame(int f) {
-	if (!conVAll.size()) return true;
- 	for (int a = 0; a < conV.size(); ++a) {
+	if (!saveConV || !conVAll.size()) return true;
+	for (int a = 0; a < conV.size(); ++a) {
 		auto& c = conV[a];
 		if (conVAll[a].size() <= f) return false;
 		auto& ca = conVAll[a][f];
@@ -596,4 +641,9 @@ void AnNode::CatchExp(char* c) {
 	msg.name = script->name;
 	msg.msg = ss;
 	ErrorView::execMsgs.push_back(msg);
+}
+
+void AnNode::OnAnimFrame() {
+	if (runOnSeek)
+		Execute();
 }

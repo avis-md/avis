@@ -71,6 +71,8 @@ void CNode::Execute() {
 }
 
 void CNode::WriteFrame(int f) {
+	AnNode::WriteFrame(f);
+	return;
 	auto scr = (CScript*)script;
 	for (int a = 0; a < conV.size(); ++a) {
 		auto& c = conV[a];

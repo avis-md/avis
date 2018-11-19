@@ -65,10 +65,17 @@ union AnVarBase {
 	uint64_t data;
 };
 
+typedef uint ANNODE_FLAGS;
+#define AN_FLAG_NOSAVECONV 1
+#define AN_FLAG_RUNONSEEK 2
+
 class AnNode {
 public:
 	virtual ~AnNode() {}
-	
+
+	const bool saveConV = true;
+	const bool runOnSeek = false;
+
 	AnScript* script;
 	bool selected;
 	Vec2 pos;
@@ -134,9 +141,11 @@ public:
 	virtual void DrawScene() {}
 	void DrawToolbar();
 
+	virtual void AddInput(), AddOutput();
+
 	virtual void Execute() = 0;
 	void ApplyFrameCount(int f);
-	virtual void WriteFrame(int f) {};
+	virtual void WriteFrame(int f);
 	bool ReadFrame(int f);
 	virtual void RemoveFrames();
 
@@ -157,11 +166,11 @@ public:
 	virtual void CatchExp(char* c);
 
 	virtual void OnSceneUpdate() {}
-	virtual void OnAnimFrame() {}
+	virtual void OnAnimFrame();
 	virtual void OnConn(bool o, int i) {}
 	virtual void OnValChange(int i) {}
 protected:
-	AnNode(AnScript* scr);
+	AnNode(AnScript* scr, ANNODE_FLAGS flags = 0);
 
 	static Texture tex_circle_open, tex_circle_conn;
 };

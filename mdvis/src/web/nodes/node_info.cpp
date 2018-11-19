@@ -2,7 +2,7 @@
 #include "node_inputs.h"
 #include "md/particles.h"
 
-Node_Info::Node_Info() :AnNode(new DmScript(sig)) {
+Node_Info::Node_Info() :AnNode(new DmScript(sig), AN_FLAG_NOSAVECONV) {
 	title = "System Info";
 	titleCol = NODE_COL_IO;
 	canTile = true;

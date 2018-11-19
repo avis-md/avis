@@ -300,6 +300,7 @@ void AnWeb::Draw() {
 	if (!executing && Engine::Button(wo, 1, 70, 16, white(1, 0.4f), _("Clear"), 12, white(), true) == MOUSE_RELEASE) {
 		Clear0();
 	}
+	wo += 75;
 	bool canexec = (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
 	if (Engine::Button(wo, 1, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
 		if (canexec) AnWeb::Execute(false);
@@ -353,11 +354,13 @@ void AnWeb::DrawSide() {
 		else
 			UI::Texture(expos + 72, 38, 16, 16, Icons::playall);
 
-		Vec2 poss(expos + 1, 17 * 3 + 4);
+		float off = UI::BeginScroll(expos, 17*3+4, 180, Display::height - 17*3-23);
+		Vec2 poss(expos + 1, off);
 		for (auto n : nodes) {
 			n->pos = poss;
 			poss.y += n->DrawSide();
 		}
+		UI::EndScroll(poss.y);
 		UI::Quad(expos - 16.f, Display::height - 34.f, 16.f, 16.f, white(0.9f, 0.15f));
 		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(expos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
@@ -625,6 +628,7 @@ void AnWeb::Save(const std::string& s) {
 		}
 	}
 	Xml::Write(&head, s);
+	activeFile = s;
 }
 #undef SVS
 #undef SV

@@ -1,7 +1,7 @@
 #include "node_setradscl.h"
 #include "md/particles.h"
 
-Node_SetRadScl::Node_SetRadScl() : AnNode(new DmScript(sig)) {
+Node_SetRadScl::Node_SetRadScl() : AnNode(new DmScript(sig), AN_FLAG_RUNONSEEK) {
 	title = "Set Radius Scale";
 	titleCol = NODE_COL_IO;
     canTile = false;
@@ -19,7 +19,7 @@ void Node_SetRadScl::Execute() {
 
 #pragma omp parallel for
     for (int a = 0; a < Particles::particleSz; ++a) {
-        Particles::radiiscl[a] = (float)vals[a];
+        Particles::radiiscl[a] = std::max((float)vals[a], 0.0001f);
     }
     Particles::visDirty = true;
 }

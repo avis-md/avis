@@ -6,7 +6,7 @@
 #include "md/particles.h"
 #endif
 
-Node_Plot::Node_Plot() : AnNode(new DmScript(sig)), type(TYPE::LINES), tex(0) {
+Node_Plot::Node_Plot() : AnNode(new DmScript(sig), AN_FLAG_RUNONSEEK), type(TYPE::LINES), tex(0) {
 	title = "Plot Data";
 	titleCol = NODE_COL_SPC;
 	canTile = true;
@@ -36,7 +36,9 @@ void Node_Plot::DrawHeader(float& off) {
 		"Contour",
 		""
 	};
-	static Popups::DropdownItem di((uint*)&type, &ss[0]);
+	static Popups::DropdownItem di(nullptr, nullptr);
+	di.target = (uint*)&type;
+	di.list = &ss[0];
 	UI2::Dropdown(pos.x + 5, off, width - 10, "Type", di);
 	static auto _type = type;
 	if (_type != type) {
@@ -48,20 +50,46 @@ void Node_Plot::DrawHeader(float& off) {
 }
 
 void Node_Plot::DrawFooter(float& y) {
+	//
+	static bool drawFull;
 	UI::Quad(pos.x, y, width, width, bgCol);
-	switch (type) {
-	case TYPE::LINES:
-	case TYPE::ALINES:
-		if (valXs.size()) {
-			plt::plot(pos.x + 12, y + 2, width - 14, width - 14, &valXs[0], &_valYs[0], valXs.size(), _valYs.size(), UI::font, 10, white(1, 0.8f));
+	if (drawFull) {
+		switch (type) {
+		case TYPE::LINES:
+		case TYPE::ALINES:
+			if (valXs.size()) {
+				plt::plot(Display::width*0.5f - Display::height*0.45f, Display::height*0.05f, Display::height*0.9f, Display::height*0.9f, &valXs[0], &_valYs[0], valXs.size(), _valYs.size(), UI::font, 10, white(1, 0.8f));
+			}
+			break;
+		case TYPE::DENSITY:
+			if (texDirty) SetTex();
+			UI::Quad(Display::width*0.5f - Display::height*0.45f, Display::height*0.05f, Display::height*0.9f, Display::height*0.9f, tex);
+			break;
+		default:
+			break;
 		}
-		break;
-	case TYPE::DENSITY:
-		if (texDirty) SetTex();
-		UI::Quad(pos.x + 2, y + 2, width - 4, width - 4, tex);
-		break;
-	default:
-		break;
+		if (Engine::Button(2, 2, 16, 16, blue()) == MOUSE_RELEASE) {
+			drawFull = false;
+		}
+	}
+	else {
+		switch (type) {
+		case TYPE::LINES:
+		case TYPE::ALINES:
+			if (valXs.size()) {
+				plt::plot(pos.x + 12, y + 2, width - 14, width - 14, &valXs[0], &_valYs[0], valXs.size(), _valYs.size(), UI::font, 10, white(1, 0.8f));
+			}
+			break;
+		case TYPE::DENSITY:
+			if (texDirty) SetTex();
+			UI::Quad(pos.x + 2, y + 2, width - 4, width - 4, tex);
+			break;
+		default:
+			break;
+		}
+		if (Engine::Button(pos.x + width - 20, y + 2, 16, 16, white(0)) == MOUSE_RELEASE) {
+			drawFull = true;
+		}
 	}
 	y += width;
 }
@@ -280,16 +308,15 @@ void Node_Plot::OnValChange(int i) {
 	Execute();
 }
 
-void Node_Plot::OnAnimFrame() {
-	Execute();
-}
-
 void Node_Plot::Save(XmlNode* n) {
 	n->addchild("type", std::to_string((int)type));
 }
 
 void Node_Plot::Load(XmlNode* n2) {
 	for (auto& n : n2->children) {
-		if (n.name == "type") type = (TYPE)TryParse(n.value, 0);
+		if (n.name == "type") {
+			type = (TYPE)TryParse(n.value, 0);
+			script->invars[0].second = (type == TYPE::ALINES)? "*" : "list(**)";
+		}
 	}
 }

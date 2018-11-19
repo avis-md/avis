@@ -96,6 +96,7 @@ void Browse::Draw() {
 			if (Engine::Button(Display::width - 110, 20, 100, 16, Vec4(0.2f, 0.4f, 0.2f, 1), "Open", 12, white(), true) == MOUSE_RELEASE) {
 				mode = MODE::NONE;
 				if (callback) callback(system->path + system->files[selId]);
+				selId = -1;
 				delete(system);
 				system = nullptr;
 				return;
@@ -131,6 +132,7 @@ void Browse::Draw() {
 				if (Input::dbclick) {
 					mode = MODE::NONE;
 					if (callback) callback(system->path + f);
+					selId = -1;
 					delete(system);
 					system = nullptr;
 					goto end2;

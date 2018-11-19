@@ -7,7 +7,8 @@
 
 uint Node_Inputs::frame = 0, Node_Inputs::parcount = 0;
 
-Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig)), filter(0) {
+//enable saveconv?
+Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig), AN_FLAG_NOSAVECONV), filter(0) {
 	DmScript* scr = (DmScript*)script;
 	script->desc = R"(Particle coordinates and trajectory
  positions: [atomId, xyz]

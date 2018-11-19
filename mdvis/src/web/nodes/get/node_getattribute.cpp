@@ -3,7 +3,9 @@
 #include "ui/ui_ext.h"
 #include "web/anweb.h"
 
-Node_GetAttribute::Node_GetAttribute() : AnNode(new DmScript(sig)), attrId(0), di(&attrId, &Particles::attrNms[0]) {
+Node_GetAttribute::Node_GetAttribute() : 
+		AnNode(new DmScript(sig), AN_FLAG_NOSAVECONV | AN_FLAG_RUNONSEEK),
+		attrId(0), di(&attrId, &Particles::attrNms[0]) {
 	title = "Get Attribute";
 	titleCol = NODE_COL_IO;
 	outputR.resize(1);
@@ -12,6 +14,8 @@ Node_GetAttribute::Node_GetAttribute() : AnNode(new DmScript(sig)), attrId(0), d
 	conVAll.resize(1);
 	auto& cv = conV[0];
 	cv.type = AN_VARTYPE::DOUBLE;
+	cv.typeName = "list(1d)";
+	cv.stride = 8;
 	cv.dimVals.resize(1);
 	cv.value = &cv.data.val.arr.p;
 }
@@ -23,7 +27,8 @@ void Node_GetAttribute::Execute() {
 		RETERR("No attribute available!");
 	auto& cv = conV[0];
 	cv.dimVals[0] = (int*)&Particles::particleSz;
-	cv.data.val.arr.p = Particles::attrs[attrId]->Get((!AnWeb::execFrame)? Particles::anim.currentFrame : AnWeb::execFrame-1).data();
+	cv.data.val.arr.p = Particles::attrs[attrId]->Get(
+		(!AnWeb::execFrame)? Particles::anim.currentFrame : AnWeb::execFrame-1).data();
 }
 
 void Node_GetAttribute::DrawHeader(float& off) {
