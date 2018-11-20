@@ -644,6 +644,8 @@ void AnNode::CatchExp(char* c) {
 }
 
 void AnNode::OnAnimFrame() {
-	if (runOnSeek)
+	if (runOnSeek) {
+		Debug::Message("AnNode", "autorun " + title);
 		Execute();
+	}
 }

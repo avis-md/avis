@@ -400,7 +400,10 @@ void ParLoader::DoOpen() {
 
 	loadFrames = nullptr;
 
+	Engine::AcquireLock(10);
 	Particles::Resize(info.num);
+	Particles::particleSz = 0;
+	Engine::ReleaseLock();
 	memcpy(&Particles::names[0], info.name, info.num * PAR_MAX_NAME_LEN);
 	memcpy(&Particles::resNames[0], info.resname, info.num * PAR_MAX_NAME_LEN);
 	Particles::poss = (glm::dvec3*)info.pos;
@@ -585,9 +588,9 @@ void ParLoader::DoOpen() {
 		delete[](trj.poss);
 		if (trj.vels) delete[](trj.vels);
 		if (trj.bounds) {
-			anm.bboxs.resize(6*trj.frames);
+			anm.bboxs.resize(trj.frames);
 			for (uint16_t i = 0; i < trj.frames; ++i) {
-				memcpy(&anm.bboxs[i*6], trj.bounds[i], 6*sizeof(double));
+				memcpy(&anm.bboxs[i][0], trj.bounds[i], 6*sizeof(double));
 			}
 			delete[](trj.bounds);
 		}
@@ -621,16 +624,15 @@ void ParLoader::DoOpen() {
 		Particles::anim.dirty = true;
 	}
 
+	Engine::AcquireLock(10);
+	Particles::particleSz = info.num;
 	parDirty = true;
 	busy = false;
 	fault = false;
-
-	Engine::AcquireLock(10);
+	//
+	//if (!isSrv)
+	//	anm.maxFramesInMem = anm.frameCount;
 	Engine::ReleaseLock();
-
-	//temp
-	if (!isSrv)
-		anm.maxFramesInMem = anm.frameCount;
 }
 
 void ParLoader::DoOpenAnim() {
@@ -738,19 +740,27 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 		ErrorView::execMsgs.push_back(msg);
 		anm.status[f] = FS::BAD;
 	}
-	else anm.status[f] = FS::LOADED;
-
-	if (!ParLoader::impId) {
-		for (int a = 0, s = GenericSSV::_attrs.size(); a < s; a++) {
-			auto& tr = GenericSSV::_attrs[a];
-			if (!!tr.size()) {
-				Particles::attrs[a]->timed = true;
-				Particles::attrs[a]->Get(f) = tr;
-				tr.clear();
+	else {
+		anm.status[f] = FS::LOADED;
+		if (!!anm.bboxs.size()) {
+			if (anm.bboxState[f] == Particles::AnimData::BBOX_STATE::PERIODIC) {
+				auto per = Particles::boxPeriodic;
+				Particles::boxPeriodic = true;
+				Particles::BoundParticlesF(f);
+				Particles::boxPeriodic = per;
+			}
+		}
+		if (!ParLoader::impId) {
+			for (int a = 0, s = GenericSSV::_attrs.size(); a < s; a++) {
+				auto& tr = GenericSSV::_attrs[a];
+				if (!!tr.size()) {
+					Particles::attrs[a]->timed = true;
+					Particles::attrs[a]->Get(f) = tr;
+					tr.clear();
+				}
 			}
 		}
 	}
-
 	anm.reading = false;
 	if (isSrv) remove(path.c_str());
 	busy = false;

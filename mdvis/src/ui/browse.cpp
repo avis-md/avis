@@ -114,7 +114,7 @@ void Browse::Draw() {
 		UI::EndScroll(off);
 
 		off = UI::BeginScroll(115, 60, Display::width - 120, Display::height - 65);
-		int wn = (int)std::floorf((Display::width - 120) / 160);
+		int wn = (int)std::floor((Display::width - 120) / 160);
 		float ws = (Display::width - 120) / wn;
 		int wi = 0;
 		float woff = 115;

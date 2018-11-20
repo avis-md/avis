@@ -116,7 +116,13 @@ public:
 		std::vector<std::vector<glm::dvec3>> poss, vels;
 		std::vector<Particles::conndata> conns;
 		std::vector<std::vector<Particles::conndata>> conns2;
-		std::vector<double> bboxs;
+		std::vector<std::array<double, 6>> bboxs;
+		enum class BBOX_STATE {
+			ORI,
+			CHANGED,
+			PERIODIC
+		};
+		std::vector<BBOX_STATE> bboxState;
 		
 		int impId, funcId;
 

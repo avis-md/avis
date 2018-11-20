@@ -1038,12 +1038,12 @@ void ParGraphics::DrawColMenu() {
 				Particles::SaveAttrs(path);
 			}
 		}
-		if (Engine::Button(exps - 74, off, 73, 16, white(1, 0.4f), "Load", 12, white(), true) == MOUSE_RELEASE) {
-			auto pp = Dialog::OpenFile(std::vector<std::string>(1, ".attr"));
-			if (!!pp.size()) {
-				auto& path = pp[0];
-				Particles::LoadAttrs(path);
-			}
+	}
+	if (Engine::Button(exps - 74, off, 73, 16, white(1, 0.4f), "Load", 12, white(), true) == MOUSE_RELEASE) {
+		auto pp = Dialog::OpenFile({});
+		if (!!pp.size()) {
+			auto& path = pp[0];
+			Particles::LoadAttrs(path);
 		}
 	}
 
@@ -1156,23 +1156,27 @@ void ParGraphics::DrawColMenu() {
 	auto _bc = Particles::bboxCenter;
 	_bc = UI2::EditVec(exps - 147, off, 146, "Center", _bc, true);
 	if (_bc != Particles::bboxCenter) {
+		bool per = Particles::boxPeriodic;
+		Particles::boxPeriodic = false;
 		Particles::Rebound(_bc);
+		Particles::boxPeriodic = per;
 	}
 	off += 17*3;
-	auto _bp = Particles::boxPeriodic;
 	UI2::Toggle(exps - 147, off, 146, "Periodic", Particles::boxPeriodic);
-	if (_bp != Particles::boxPeriodic) {
-		Particles::BoundParticles();
-	}
-	if (Particles::anim.frameCount > 1) {
+	if (Particles::boxPeriodic) {
 		off += 17;
-		if (Engine::Button(exps - 147, off, 100, 16, white(0.2f), "Apply All", 12, white(), true) == MOUSE_RELEASE) {
-			auto frm = Particles::anim.currentFrame;
-			for (uint a = 0; a < Particles::anim.frameCount; ++a) {
-				Particles::SetFrame(a);
-				Particles::Rebound(_bc);
+		if (Engine::Button(exps - 147, off, 71, 16, white(0.2f), "Apply", 12, white(), true) == MOUSE_RELEASE) {
+			Particles::Rebound(_bc);
+		}
+		if (Particles::anim.frameCount > 1) {
+			if (Engine::Button(exps - 75, off, 74, 16, white(0.2f), "Apply All", 12, white(), true) == MOUSE_RELEASE) {
+				auto frm = Particles::anim.currentFrame;
+				for (uint a = 0; a < Particles::anim.frameCount; ++a) {
+					Particles::SetFrame(a);
+					Particles::Rebound(_bc);
+				}
+				Particles::SetFrame(frm);
 			}
-			Particles::SetFrame(frm);
 		}
 	}
 	off += 19;

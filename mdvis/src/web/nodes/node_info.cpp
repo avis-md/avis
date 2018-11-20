@@ -1,5 +1,6 @@
 #include "node_info.h"
 #include "node_inputs.h"
+#include "web/anweb.h"
 #include "md/particles.h"
 
 Node_Info::Node_Info() :AnNode(new DmScript(sig), AN_FLAG_NOSAVECONV) {
@@ -31,6 +32,9 @@ void Node_Info::Execute() {
 	conV[0].value = &Particles::particleSz;
 	conV[1].value = &Particles::anim.frameCount;
 	conV[2].value = &Node_Inputs::frame;
-	static double* bbx = &Particles::boundingBox[0];
+	static double* bbx = nullptr;
+	if (!Particles::anim.bboxs.size()) bbx = &Particles::boundingBox[0];
+	else if (!AnWeb::execFrame) bbx = &Particles::anim.bboxs[Particles::anim.currentFrame][0];
+	else bbx = &Particles::anim.bboxs[AnWeb::execFrame-1][0];
 	conV[3].value = &bbx;
 }

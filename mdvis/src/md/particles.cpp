@@ -57,12 +57,6 @@ std::string Particles::paramdata::Export() {
 	}
 	strm << Particles::particleSz << " " << (timed? Particles::anim.frameCount : 1) << "\n";
 	if (timed) {
-		for (auto& d : dataAll) {
-			strm << d.size() << " ";
-			for (auto& d2 : d) {
-				strm << d2 << " ";
-			}
-		}
 		for (int a = 0; a < Particles::anim.frameCount; a++) {
 			auto& d = Get(a);
 			strm << d.size() << " ";
@@ -88,20 +82,21 @@ void Particles::paramdata::Import(const std::string& buf) {
 		Debug::Warning("Attr::Import", "not atom count!");
 		return;
 	}
-	strm >> psz;
-	if (psz != 1 && psz != Particles::anim.frameCount) {
+	int fsz;
+	strm >> fsz;
+	if (fsz != 1 && fsz != Particles::anim.frameCount) {
 		Debug::Warning("Attr::Import", "not frame count!");
 		return;
 	}
 
-	timed = (psz > 1);
+	timed = (fsz > 1);
 	if (timed) {
 		int n;
-		for (int f = 0; f < psz; ++f) {
+		for (int f = 0; f < fsz; ++f) {
 			strm >> n;
 			if (!n) continue;
 			auto& d = Get(f);
-			d.resize(Particles::particleSz);
+			d.resize(psz);
 			for (auto& d2 : d) {
 				strm >> d2;
 			}
@@ -128,10 +123,11 @@ void Particles::AnimData::AllocFrames(uint frames) {
 }
 
 void Particles::AnimData::FillBBox() {
-	bboxs.resize(frameCount * 6);
+	bboxs.resize(frameCount);
 	for (int a = 0; a < frameCount; a++) {
-		memcpy(&bboxs[a*6], boundingBox, 6*sizeof(double));
+		memcpy(&bboxs[a][0], boundingBox, 6*sizeof(double));
 	}
+	bboxState.resize(frameCount, BBOX_STATE::ORI);
 }
 
 void Particles::AnimData::Clear() {
@@ -554,7 +550,7 @@ void Particles::SetFrame(uint frm) {
 				}
 			}
 			if (!!anim.bboxs.size()) {
-				memcpy(boundingBox, &anim.bboxs[6*frm], 6*sizeof(double));
+				memcpy(boundingBox, &anim.bboxs[frm][0], 6*sizeof(double));
 				UpdateBBox();
 			}
 		}
@@ -597,7 +593,11 @@ void Particles::Rebound(glm::dvec3 center) {
 	boundingBox[4] += co.z;
 	boundingBox[5] += co.z;
 	bboxCenter = center;
-	if (!!anim.bboxs.size()) memcpy(&anim.bboxs[6*anim.currentFrame], boundingBox, 6*sizeof(double));
+	if (!Particles::anim.bboxs.size()) {
+		Particles::anim.FillBBox();
+	}
+	memcpy(&anim.bboxs[anim.currentFrame][0], boundingBox, 6*sizeof(double));
+	anim.bboxState[anim.currentFrame] = AnimData::BBOX_STATE::CHANGED;
 	BoundParticles();
 	Scene::dirty = true;
 }
@@ -606,7 +606,7 @@ void Particles::ReboundF(glm::dvec3 center, int f) {
 	if (!Particles::anim.bboxs.size()) {
 		Particles::anim.FillBBox();
 	}
-	auto bx = &Particles::anim.bboxs[f*6];
+	auto& bx = Particles::anim.bboxs[f];
 	auto co = center - glm::dvec3((bx[1] + bx[0]),
 		(bx[3] + bx[2]),
 		(bx[5] + bx[4])) * 0.5;
@@ -616,6 +616,7 @@ void Particles::ReboundF(glm::dvec3 center, int f) {
 	bx[3] += co.y;
 	bx[4] += co.z;
 	bx[5] += co.z;
+	anim.bboxState[f] = AnimData::BBOX_STATE::CHANGED;
 	BoundParticlesF(f);
 }
 
@@ -632,25 +633,36 @@ void Particles::BoundParticles() {
 		dp *= sz;
 		poss[a] -= dp;
 	}
+	if (!Particles::anim.bboxs.size()) {
+		Particles::anim.FillBBox();
+	}
+	anim.bboxState[anim.currentFrame] = AnimData::BBOX_STATE::PERIODIC;
 	bufDirty = true;
 	Scene::dirty = true;
 }
 
 void Particles::BoundParticlesF(int f) {
 	if (!boxPeriodic) return;
-	auto bx = &Particles::anim.bboxs[f*6];
+	if (!Particles::anim.bboxs.size()) {
+		Particles::anim.FillBBox();
+	}
+	auto& bx = Particles::anim.bboxs[f];
 	glm::dvec3 sz (bx[1] - bx[0],
 		bx[3] - bx[2],
 		bx[5] - bx[4]);
+	auto co = glm::dvec3((bx[1] + bx[0]),
+		(bx[3] + bx[2]),
+		(bx[5] + bx[4])) * 0.5;
 	glm::dvec3 isz = glm::dvec3(1, 1, 1) / sz;
 	auto& ps = anim.poss[f];
 	#pragma omp parallel for
 	for (int a = 0; a < particleSz; ++a) {
-		glm::dvec3 dp = ps[a] - bboxCenter;
+		glm::dvec3 dp = ps[a] - co;
 		dp *= isz;
 		dp = sz * glm::round(dp);
 		ps[a] -= dp;
 	}
+	anim.bboxState[f] = AnimData::BBOX_STATE::PERIODIC;
 }
 
 void Particles::Serialize(XmlNode* nd) {

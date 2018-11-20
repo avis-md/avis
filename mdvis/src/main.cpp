@@ -199,6 +199,7 @@ void paintfunc() {
 			}
 
 			id--;
+#if 0
 			UI::Quad(Input::mousePos.x + 14, Input::mousePos.y + 2, 120, 90, white(0.8f, 0.1f));
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Atom ID: " + std::to_string(id), white());
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, "Residue: " + std::string(&Particles::resNames[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN), white());
@@ -206,7 +207,7 @@ void paintfunc() {
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, "X: " + std::to_string(Particles::poss[id].x), white());
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 62, 12, "Y: " + std::to_string(Particles::poss[id].y), white());
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 77, 12, "Z: " + std::to_string(Particles::poss[id].z), white());
-
+#endif
 		}
 		else {
 			if ((Input::mouse0State == MOUSE_UP) && (Input::mouseDownPos == Input::mousePos)) {
@@ -240,6 +241,7 @@ int main(int argc, char **argv) {
 	try {
 #endif
 		Time::startMillis = milliseconds();
+		Debug::suppress = 1;
 		for (auto a = 1; a < argc; ++a) {
 			if (argv[a][0] == '-') {
 				if (argv[a][1] == '-') {
@@ -259,7 +261,6 @@ int main(int argc, char **argv) {
 						return 0;
 					}
 					else if ISS(path) {
-						Debug::suppress = 1;
 						IO::InitPath();
 						std::cout << IO::path << std::endl;
 						return 0;
@@ -320,10 +321,8 @@ The hash for this program is )" << VisSystem::version_hash
 			<< "\n(I may need this hash to fix bugs)"
 			<< "\n----------------------------------------------" << std::endl;
 		}
-		if (!__debug) {
-			Debug::suppress = 1;
-			if (!nologo) std::cout << "Starting in silent mode. You can enable all logs using the --debug switch." << std::endl;
-		}
+		if (__debug) Debug::suppress = 0;
+		else if (!nologo) std::cout << "Starting in silent mode. You can enable all logs using the --debug switch." << std::endl;
 		ChokoLait::Init(800, 800);
 
 #ifdef MAKE_LOCL
