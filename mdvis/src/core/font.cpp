@@ -115,11 +115,12 @@ void Font::SizeVec(uint sz) {
 }
 
 GLuint Font::CreateGlyph(uint sz, uint mask) {
-	FT_Set_Pixel_Sizes(_face, 0, sz); // set pixel size directly
+	uint szd = (uint)(sz / Display::dpiScl);
+	FT_Set_Pixel_Sizes(_face, 0, szd);
 	_glyphs.emplace(sz, 0);
 	glGenTextures(1, &_glyphs[sz][mask]);
 	glBindTexture(GL_TEXTURE_2D, _glyphs[sz][mask]);
-	glTexStorage2D(GL_TEXTURE_2D, 1, GL_R8, (sz + 2) * 16, (sz + 2) * 16);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_R8, (szd + 2) * 16, (szd + 2) * 16);
 	SetTexParams<>();
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	bool recalc = (params.count(sz) == 0) || (params[sz].count(mask) == 0);
@@ -128,15 +129,15 @@ GLuint Font::CreateGlyph(uint sz, uint mask) {
 		if (FT_Load_Char(_face, mask + a, FT_LOAD_RENDER) != FT_Err_Ok) continue;
 		byte x = a % 16, y = a / 16;
 		FT_Bitmap bmp = _face->glyph->bitmap;
-		glTexSubImage2D(GL_TEXTURE_2D, 0, (sz + 2) * x + 1, (sz + 2) * y + 1, bmp.width, bmp.rows, GL_RED, GL_UNSIGNED_BYTE, bmp.buffer);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, (szd + 2) * x + 1, (szd + 2) * y + 1, bmp.width, bmp.rows, GL_RED, GL_UNSIGNED_BYTE, bmp.buffer);
 		if (recalc) {
 			if (bmp.width == 0) {
 				pr.o2s[a] = 0;
 			}
 			else {
-				pr.o2s[a] = (float)(_face->glyph->advance.x >> 6);//_face->glyph->metrics.horiAdvance / sz / 64.f;
+				pr.o2s[a] = (float)(_face->glyph->advance.x >> 6) * Display::dpiScl;
 			}
-			pr.off[a] = Vec2(_face->glyph->bitmap_left, sz - _face->glyph->bitmap_top);
+			pr.off[a] = Vec2(_face->glyph->bitmap_left, szd - _face->glyph->bitmap_top) * Display::dpiScl;
 		}
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);

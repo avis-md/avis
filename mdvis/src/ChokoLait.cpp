@@ -186,7 +186,13 @@ void ChokoLait::Update(emptyCallbackFunc func) {
 void ChokoLait::Paint(emptyCallbackFunc rendFunc, emptyCallbackFunc paintFunc) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+	auto w = Display::width;
+	auto h = Display::height;
+	Display::width /= Display::dpiScl;
+	Display::height /= Display::dpiScl;
 	mainCamera->Render(rendFunc);
+	Display::width = w;
+	Display::height = h;
 
 	MVP::Switch(false);
 	MVP::Clear();
@@ -226,8 +232,8 @@ void ChokoLait::MouseEnterGL(GLFWwindow* window, int e) {
 }
 
 void ChokoLait::MotionGL(GLFWwindow* window, double x, double y) {
-	Input::mousePos = Vec2(x, y);
-	Input::mousePosRelative = Vec2(x*1.f / Display::width, y*1.f / Display::height);
+	Input::mousePos = Vec2(x, y) * Display::dpiScl;
+	Input::mousePosRelative = Input::mousePos / Vec2(Display::width, Display::height);
 }
 
 void ChokoLait::ReshapeGL(GLFWwindow* window, int w, int h) {

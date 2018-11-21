@@ -14,8 +14,7 @@ DyLib::DyLib(std::string s) {
 }
 
 DyLib::~DyLib() {
-	if (_IsSingleRef())
-		Unload();
+	CheckUniqueRef();
 }
 
 void* DyLib::GetSym(std::string s) {

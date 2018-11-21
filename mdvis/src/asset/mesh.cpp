@@ -33,7 +33,11 @@ Mesh::Mesh(int vsz, Vec3* pos, Vec3* norm, int tsz, int* tri, bool sv) : vertCou
 }
 
 Mesh::~Mesh() {
-	if (vertCount != ~0U && _IsSingleRef()) {
+	CheckUniqueRef();
+}
+
+void Mesh::DestroyRef() {
+	if (vertCount != ~0U) {
 		glDeleteBuffers(1, &veo);
 		glDeleteBuffers(2, vbos);
 		glDeleteVertexArrays(1, &vao);

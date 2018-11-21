@@ -22,12 +22,16 @@ struct SSHConfig {
 	std::string pw;
 };
 
-class SSH : public RefCnt<SSH> {
+class SSH : public RefCnt {
 public:
 	bool ok;
 
 	static void Init(), Deinit();
 	static SSH Connect(const SSHConfig& conf);
+
+	SSH();
+	~SSH();
+
 	void GetUserPath();
 	std::string ResolveUserPath(const std::string& s);
 	std::string Read(uint maxlen);
@@ -42,11 +46,9 @@ public:
 	std::vector<char> GetFile(std::string from, int tries = 1, uint period = 100);
 	void GetFile(std::string from, std::string to), SendFile(std::string from, std::string to);
 	bool HasCmd(std::string cmd, std::string& path);
+	void DestroyRef() override { Disconnect(); }
 	void Disconnect();
 	void EnableDump(uint rate);
-
-	SSH();
-	~SSH();
 
 	int sock;
 	LIBSSH2_SESSION* session;

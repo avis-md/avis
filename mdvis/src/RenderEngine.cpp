@@ -96,8 +96,8 @@ uint Camera::GetIdAt(uint x, uint y) {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, texs.fbo);
 	glReadBuffer(GL_COLOR_ATTACHMENT1);
 	uint pixel[2];
-	x = uint(x * quality);
-	y = uint(y * quality);
+	x = uint(x * quality / Display::dpiScl);
+	y = uint(y * quality / Display::dpiScl);
 	glReadPixels(x, d_h - y - 1, 1, 1, GL_RG_INTEGER, GL_UNSIGNED_INT, pixel);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	if (pixel[1] != 0) return 0;

@@ -10,7 +10,7 @@ void SetTexParams(int mp = 0, GLenum ws = GL_CLAMP_TO_EDGE, GLenum wt = GL_CLAMP
 	glTexParameteri(T, GL_TEXTURE_MAG_FILTER, mg);
 }
 
-class Texture : public RefCnt<Texture> {
+class Texture : public RefCnt {
 public:
 	Texture() : loaded(false) {}
 	Texture(std::nullptr_t) : loaded(false) {}
@@ -26,7 +26,7 @@ public:
 	uint width, height;
 	GLuint pointer = 0;
 
-	void Destroy() { glDeleteTextures(1, &pointer); }
+	void DestroyRef() override { glDeleteTextures(1, &pointer); }
 
 	static byte* LoadPixels(const std::string& path, byte& chn, uint& w, uint& h);
 	static byte* LoadPixels(const byte* data, const uint dataSz, uint& w, uint& h);

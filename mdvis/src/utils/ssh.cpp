@@ -12,10 +12,7 @@
 SSH::SSH() : ok(false), session(nullptr) {}
 
 SSH::~SSH() {
-	if (session) {
-		if (_IsSingleRef())
-			Disconnect();
-	}
+	CheckUniqueRef();
 }
 
 void SSH::Init() {
@@ -117,8 +114,8 @@ SSH SSH::Connect(const SSHConfig& conf) {
 }
 
 void SSH::Disconnect() {
-	Debug::Message("SSH", "Killing session...");
 	if (session) {
+		Debug::Message("SSH", "Killing session...");
 		DisableSFTP();
 		if (channel) libssh2_channel_close(channel);
 		libssh2_session_disconnect(session, "Bye bye");

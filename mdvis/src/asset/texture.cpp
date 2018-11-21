@@ -78,8 +78,7 @@ Texture::Texture(const byte* data, const uint dataSz, TEX_FILTERING filter, TEX_
 }
 
 Texture::~Texture() {
-	if (loaded && _IsSingleRef())
-		glDeleteTextures(1, &pointer);
+	if (loaded) CheckUniqueRef();
 }
 
 byte* Texture::LoadPixels(const std::string& path, byte& chn, uint& w, uint& h) {
