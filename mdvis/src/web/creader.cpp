@@ -213,8 +213,8 @@ bool CReader::Read(CScript* scr) {
 		Engine::AcquireLock(5);
 #define FAIL0 Engine::ReleaseLock(); return false
 		scr->libpath = fp2 + nm + ".so";
-		scr->lib = new DyLib(scr->libpath);
-		if (!scr->lib->is_open()) {
+		scr->lib = DyLib(scr->libpath);
+		if (!scr->lib.is_open()) {
 			std::string err =
 #ifdef PLATFORM_WIN
 				std::to_string(GetLastError());
@@ -233,7 +233,7 @@ bool CReader::Read(CScript* scr) {
 			prs >> progrsNm;
 		}
 
-		scr->funcLoc = (emptyFunc)scr->lib->GetSym(funcNm);
+		scr->funcLoc = (emptyFunc)scr->lib.GetSym(funcNm);
 		if (!scr->funcLoc) {
 			std::string err =
 #ifdef PLATFORM_WIN
@@ -246,7 +246,7 @@ bool CReader::Read(CScript* scr) {
 		}
 
 		if (progrsNm.size() > 0) {
-			scr->progress = (double*)scr->lib->GetSym(progrsNm);
+			scr->progress = (double*)scr->lib.GetSym(progrsNm);
 			if (!scr->progress) {
 				Debug::Warning("CReader", "Failed to load progress \"" + progrsNm + "\" into memory! Ignoring...");
 			}
@@ -254,14 +254,14 @@ bool CReader::Read(CScript* scr) {
 
 #ifdef PLATFORM_WIN
 		if (!useMsvc) {
-			auto fhlc = (emptyFunc*)scr->lib->GetSym("__noterm_cFunc");
+			auto fhlc = (emptyFunc*)scr->lib.GetSym("__noterm_cFunc");
 			if (!fhlc) {
 				_ER("CReader", "Failed to register function pointer! Please tell the monkey!");
 				FAIL0;
 			}
 			*fhlc = scr->funcLoc;
 
-			scr->wFuncLoc = (wrapFunc)scr->lib->GetSym("_Z5ExecCv");
+			scr->wFuncLoc = (wrapFunc)scr->lib.GetSym("_Z5ExecCv");
 			if (!scr->funcLoc) {
 				_ER("CReader", "Failed to register entry function! Please tell the monkey!");
 				FAIL0;
@@ -381,7 +381,7 @@ bool CReader::Read(CScript* scr) {
 			}
 
 			if (AnWeb::hasC) {
-				if (!(bk->value = scr->lib->GetSym(bk->name))) {
+				if (!(bk->value = scr->lib.GetSym(bk->name))) {
 					_ER("CReader", "cannot find \"" + bk->name + "\" from memory!");
 					goto FAIL;
 				}
@@ -396,7 +396,7 @@ bool CReader::Read(CScript* scr) {
 								bk->dimVals[a] = &bk->data.dims[a];
 							}
 						}
-						else if (!(bk->dimVals[a] = (int*)scr->lib->GetSym(bk->dimNames[a]))) {
+						else if (!(bk->dimVals[a] = (int*)scr->lib.GetSym(bk->dimNames[a]))) {
 							_ER("CReader", "cannot find \"" + bk->dimNames[a] + "\" from memory!");
 							goto FAIL;
 						}

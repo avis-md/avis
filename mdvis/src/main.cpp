@@ -199,7 +199,7 @@ void paintfunc() {
 			}
 
 			id--;
-#if 0
+#if 1
 			UI::Quad(Input::mousePos.x + 14, Input::mousePos.y + 2, 120, 90, white(0.8f, 0.1f));
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Atom ID: " + std::to_string(id), white());
 			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, "Residue: " + std::string(&Particles::resNames[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN), white());

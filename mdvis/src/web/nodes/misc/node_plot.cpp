@@ -36,10 +36,9 @@ void Node_Plot::DrawHeader(float& off) {
 		"Contour",
 		""
 	};
-	static Popups::DropdownItem di(nullptr, nullptr);
-	di.target = (uint*)&type;
-	di.list = &ss[0];
-	UI2::Dropdown(pos.x + 5, off, width - 10, "Type", di);
+	_di.target = (uint*)&type;
+	_di.list = &ss[0];
+	UI2::Dropdown(pos.x + 5, off, width - 10, "Type", _di);
 	static auto _type = type;
 	if (_type != type) {
 		_type = type;
@@ -112,6 +111,7 @@ void Node_Plot::Execute() {
 	else if (ds == 2 && type == TYPE::ALINES) {
 		RETERR("Data of 3+ dimensions cannot be accumulated!");
 	}
+	else if (ds > 0 && !*(void**)cv.value) return;
 	int sz;
 	int sz2;
 	if (type == TYPE::ALINES) {
@@ -129,8 +129,14 @@ void Node_Plot::Execute() {
 		RETERR("Size is empty!");
 	}
 	if (sz > 1) {
-		xid = Clamp(xid, -1, sz2 - 1);
-		yid = Clamp(yid, -1, sz2 - 1);
+		if (type == TYPE::ALINES) {
+			xid = -1;
+			yid = Clamp(yid, -1, *cv.dimVals[0] - 1);
+		}
+		else {
+			xid = Clamp(xid, -1, sz2 - 1);
+			yid = Clamp(yid, -1, sz2 - 1);
+		}
 	}
 	valXs.resize(sz);
 	valYs.resize(sz2);
@@ -169,7 +175,7 @@ void Node_Plot::Execute() {
 		}
 	}
 	if (type == TYPE::ALINES) {
-		if (ds == 1) {
+		if (ds == 1 && yid == -1) {
 			switch (cv.typeName[6]) {
 #define cs(_c, _t) \
 			case _c:\
@@ -188,18 +194,35 @@ void Node_Plot::Execute() {
 		else {
 			valYs.resize(1);
 			_valYs.resize(1);
-			switch (cv.typeName[0]) {
+			if (!ds) {
+				switch (cv.typeName[0]) {
 #define cs(_c, _t) \
-			case _c:\
-				valYs[0][Particles::anim.currentFrame] = (float)(*(_t*)cv.value);\
-				break
-				cs('s', short);
-				cs('i', int);
-				cs('d', double);
-			default:
-				valXs.clear();
-				RETERR("Unexpected data type " + cv.typeName + "!");
+				case _c:\
+					valYs[0][Particles::anim.currentFrame] = (float)(*(_t*)cv.value);\
+					break
+					cs('s', short);
+					cs('i', int);
+					cs('d', double);
+				default:
+					valXs.clear();
+					RETERR("Unexpected data type " + cv.typeName + "!");
 #undef cs
+				}
+			}
+			else {
+				switch (cv.typeName[6]) {
+#define cs(_c, _t) \
+				case _c:\
+					valYs[0][Particles::anim.currentFrame] = (float)(*(_t**)cv.value)[yid];\
+					break
+					cs('s', short);
+					cs('i', int);
+					cs('d', double);
+				default:
+					valXs.clear();
+					RETERR("Unexpected data type " + cv.typeName + "!");
+#undef cs
+				}
 			}
 		}
 	}

@@ -84,7 +84,7 @@ bool CScript::Clear() {
 	if (AnWeb::hasC) {
 		if (!DyLib::ForceUnload(lib, libpath))
 			return false;
-		delete(lib);
+		lib = DyLib();
 	}
 	return true;
 }

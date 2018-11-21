@@ -61,7 +61,7 @@ class AnScript {
 public:
 	std::string name, path, libpath;
 	time_t chgtime;
-	AN_SCRTYPE type;
+	const AN_SCRTYPE type;
 	std::vector<std::pair<std::string, std::string>> invars, outvars;
 	std::vector<VarOpt> invaropts;
 	double* progress = 0;
@@ -144,7 +144,7 @@ typedef char* (*wrapFunc)();
 
 class CScript : public AnScript {
 public:
-	CScript() : AnScript(AN_SCRTYPE::C), lib(nullptr) {}
+	CScript() : AnScript(AN_SCRTYPE::C) {}
 
 	std::vector<CVar> _invars, _outvars;
 
@@ -155,7 +155,7 @@ public:
 		*((T*)_invars[i].value) = val;
 	}
 	
-	DyLib* lib;
+	DyLib lib;
 	
 	emptyFunc funcLoc;
 	wrapFunc wFuncLoc;
@@ -165,7 +165,7 @@ public:
 
 class FScript : public AnScript {
 public:
-	FScript() : AnScript(AN_SCRTYPE::FORTRAN), lib(nullptr) {}
+	FScript() : AnScript(AN_SCRTYPE::FORTRAN) {}
 
 	std::vector<CVar> _invars, _outvars;
 	std::vector<emptyFunc> _inarr_pre, _outarr_post;
@@ -183,7 +183,7 @@ public:
 		*((T*)_invars[i].value) = val;
 	}
 	
-	DyLib* lib;
+	DyLib lib;
 	
 	wrapFunc funcLoc;
 

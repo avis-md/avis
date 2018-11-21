@@ -174,6 +174,7 @@ void Particles::AnimData::Update() {
 			for (uint a = 0; a < frameMemPos; ++a) {
 				if (a + frameCount - frameMemPos < maxFramesInMem) continue;
 				if (status[a] == FRAME_STATUS::LOADED) {
+					if (a == retainFrame) continue;
 					std::vector<glm::dvec3>().swap(poss[a]);
 					std::vector<glm::dvec3>().swap(vels[a]);
 					status[a] = FRAME_STATUS::UNLOADED;
@@ -181,6 +182,7 @@ void Particles::AnimData::Update() {
 			}
 			for (uint a = frameMemPos + maxFramesInMem; a < frameCount; ++a) {
 				if (status[a] == FRAME_STATUS::LOADED) {
+					if (a == retainFrame) continue;
 					std::vector<glm::dvec3>().swap(poss[a]);
 					std::vector<glm::dvec3>().swap(vels[a]);
 					status[a] = FRAME_STATUS::UNLOADED;

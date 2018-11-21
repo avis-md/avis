@@ -161,8 +161,8 @@ bool FReader::Read(FScript* scr) {
 		Engine::AcquireLock(7);
 #define FAIL0 Engine::ReleaseLock(); return false
 		scr->libpath = fp2 + nm + ".so";
-		scr->lib = new DyLib(scr->libpath);
-		if (!scr->lib->is_open()) {
+		scr->lib = DyLib(scr->libpath);
+		if (!scr->lib.is_open()) {
 			_ER("FReader", "Failed to load script into memory!");
 			FAIL0;
 		}
@@ -170,7 +170,7 @@ bool FReader::Read(FScript* scr) {
 			std::ifstream ets(fp2 + nm + ".entry");
 			ets >> funcNm;
 		}
-		auto acf = (emptyFunc)scr->lib->GetSym(funcNm);
+		auto acf = (emptyFunc)scr->lib.GetSym(funcNm);
 		if (!acf) {
 			std::string err = 
 #ifdef PLATFORM_WIN
@@ -181,7 +181,7 @@ bool FReader::Read(FScript* scr) {
 			_ER("FReader", "Failed to load function \"" + funcNm + "\" into memory! " + err);
 			FAIL0;
 		}
-		auto fhlc = (emptyFunc*)scr->lib->GetSym("__noterm_ftFunc");
+		auto fhlc = (emptyFunc*)scr->lib.GetSym("__noterm_ftFunc");
 		if (!fhlc) {
 			_ER("FReader", "Failed to register function pointer! Please tell the monkey!");
 			FAIL0;
@@ -190,29 +190,29 @@ bool FReader::Read(FScript* scr) {
 
 #define _ER2(info) _ER("FReader", "Failed to register " info "! Please tell the monkey!");
 		
-		scr->funcLoc = (wrapFunc)scr->lib->GetSym("_Z5ExecFv");
+		scr->funcLoc = (wrapFunc)scr->lib.GetSym("_Z5ExecFv");
 		if (!scr->funcLoc) {
 			_ER2("entry function");
 			FAIL0;
 		}
 
-		scr->arr_in_shapeloc = (int32_t**)scr->lib->GetSym("imp_arr_shp");
+		scr->arr_in_shapeloc = (int32_t**)scr->lib.GetSym("imp_arr_shp");
 		if (!scr->arr_in_shapeloc) {
 			_ER2("input array shape pointer");
 			FAIL0;
 		}
-		scr->arr_in_dataloc = (void**)scr->lib->GetSym("imp_arr_ptr");
+		scr->arr_in_dataloc = (void**)scr->lib.GetSym("imp_arr_ptr");
 		if (!scr->arr_in_dataloc) {
 			_ER2("input array data pointer");
 			FAIL0;
 		}
 
-		scr->arr_out_shapeloc = (int32_t**)scr->lib->GetSym("__mod_exp_MOD_exp_arr_shp");
+		scr->arr_out_shapeloc = (int32_t**)scr->lib.GetSym("__mod_exp_MOD_exp_arr_shp");
 		if (!scr->arr_out_shapeloc) {
 			_ER2("output array shape pointer");
 			FAIL0;
 		}
-		scr->arr_out_dataloc = (void**)scr->lib->GetSym("exp_arr_ptr");
+		scr->arr_out_dataloc = (void**)scr->lib.GetSym("exp_arr_ptr");
 		if (!scr->arr_out_dataloc) {
 			_ER2("output array data pointer");
 			FAIL0;
@@ -291,11 +291,11 @@ bool FReader::Read(FScript* scr) {
 			if (AnWeb::hasFt) {
 				auto nml = to_lowercase(bk->name);
 				if (!isa)
-					bk->value = scr->lib->GetSym(nml);
+					bk->value = scr->lib.GetSym(nml);
 				else {
-					bk->value = scr->lib->GetSym("__" + to_lowercase(scr->name) + "_MOD_" + nml);
-					if (iso) *fk = (emptyFunc)scr->lib->GetSym("exp_get_" + nml);
-					else *fk = (emptyFunc)scr->lib->GetSym("imp_set_" + nml);
+					bk->value = scr->lib.GetSym("__" + to_lowercase(scr->name) + "_MOD_" + nml);
+					if (iso) *fk = (emptyFunc)scr->lib.GetSym("exp_get_" + nml);
+					else *fk = (emptyFunc)scr->lib.GetSym("imp_set_" + nml);
 					if (!fk) {
 						_ER2("array convert function")
 						goto FAIL;

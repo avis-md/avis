@@ -1,5 +1,6 @@
 #pragma once
 #include "web/anweb.h"
+#include "ui/popups.h"
 
 class Node_Plot : public AnNode {
 public:
@@ -38,6 +39,8 @@ protected:
 	std::vector<float> valXs;
 	std::vector<std::vector<float>> valYs;
 	std::vector<float*> _valYs;
+
+	Popups::DropdownItem _di;
 
 	void SetTex();
 };

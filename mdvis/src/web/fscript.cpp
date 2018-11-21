@@ -9,7 +9,7 @@ bool FScript::Clear() {
 	if (AnWeb::hasFt) {
 		if (!DyLib::ForceUnload(lib, libpath))
 			return false;
-		delete(lib);
+		lib = DyLib();
 	}
 	return true;
 }

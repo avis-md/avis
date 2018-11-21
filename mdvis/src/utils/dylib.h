@@ -12,7 +12,7 @@ public:
 	void DestroyRef() override { Unload(); }
 	void Unload();
 
-	static bool ForceUnload(DyLib* lib, std::string nm);
+	static bool ForceUnload(DyLib& lib, std::string nm);
 private:
 	void* lib;
 };

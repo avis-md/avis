@@ -110,7 +110,7 @@ public:
 		bool reading = false, dirty = false, dynamicBonds;
 		static uint maxFramesInMem;
 		uint frameMemPos;
-		uint frameCount = 0, currentFrame = 0;
+		uint frameCount = 0, currentFrame = 0, retainFrame = ~0U;
 		std::vector<std::string> paths;
 		std::vector<FRAME_STATUS> status;
 		std::vector<std::vector<glm::dvec3>> poss, vels;

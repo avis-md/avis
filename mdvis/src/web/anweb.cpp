@@ -413,7 +413,7 @@ void AnWeb::DoExecute(bool all) {
 	
 	RemoveFrames();
 	if (all) {
-		auto f = Particles::anim.currentFrame;
+		auto f = Particles::anim.retainFrame = Particles::anim.currentFrame;
 		ApplyFrameCount(Particles::anim.frameCount);
 		for (uint _a = 0; _a < Particles::anim.frameCount; ++_a) {
 			uint a = invertRun? Particles::anim.frameCount - _a - 1U : _a;
@@ -436,6 +436,7 @@ void AnWeb::DoExecute(bool all) {
 			AnWeb::WriteFrame(a);
 		}
 		execFrame = 0;
+		Particles::anim.retainFrame = ~0U;
 		Particles::anim.Seek(f);
 	}
 	else {
