@@ -122,8 +122,8 @@ bool FReader::Read(FScript* scr) {
 					}
 					else {
 						if (s == "!in") tp = 1;
-						if (s == "!out") tp = 2;
-						if (s == "!entry") tp = 3;
+						else if (s == "!out") tp = 2;
+						else if (s == "!entry") tp = 3;
 						ostrm << "\n";
 					}
 				}
@@ -181,14 +181,15 @@ bool FReader::Read(FScript* scr) {
 			_ER("FReader", "Failed to load function \"" + funcNm + "\" into memory! " + err);
 			FAIL0;
 		}
+
+#define _ER2(info) _ER("FReader", "Failed to register " info "! Please tell the monkey!");
+
 		auto fhlc = (emptyFunc*)scr->lib.GetSym("__noterm_ftFunc");
 		if (!fhlc) {
-			_ER("FReader", "Failed to register function pointer! Please tell the monkey!");
+			_ER2("function pointer");
 			FAIL0;
 		}
 		*fhlc = acf;
-
-#define _ER2(info) _ER("FReader", "Failed to register " info "! Please tell the monkey!");
 		
 		scr->funcLoc = (wrapFunc)scr->lib.GetSym("_Z5ExecFv");
 		if (!scr->funcLoc) {
@@ -328,6 +329,10 @@ void FReader::Refresh(FScript* scr) {
 
 bool FReader::ParseType(std::string& s, CVar* var) {
 	s = to_lowercase(s);
+	if (s == "integer*2") {
+		var->type = AN_VARTYPE::SHORT;
+		s = "short";
+	}
 	if (s == "integer") {
 		var->type = AN_VARTYPE::INT;
 		s = "int";
@@ -347,19 +352,19 @@ void FReader::GenArrIO(std::string path, std::string name, std::vector<typestrin
  use iso_c_binding
  use )" << name << R"(
  implicit none
-    type(c_ptr), bind(c) :: imp_arr_shp
-    type(c_ptr), bind(c) :: imp_arr_ptr
+	type(c_ptr), bind(c) :: imp_arr_shp
+	type(c_ptr), bind(c) :: imp_arr_ptr
 
  contains
 )";
 	for (auto& v : invars) {
-		strm << "    subroutine imp_set_" + v.name + "() bind(c)\n\
-        integer, pointer :: imp_p_arr_shp (:)\n\
-        " + v.type + ", pointer :: imp_p_arr_ptr " + v.dims << "\n\
-        call c_f_pointer(imp_arr_shp, imp_p_arr_shp, [" + std::to_string((v.dims.size() - 1) / 2) + "])\n\
-        call c_f_pointer(imp_arr_ptr, imp_p_arr_ptr, imp_p_arr_shp)\n\
-        " + v.name + " = imp_p_arr_ptr\n\
-    end subroutine imp_set_" + v.name + "\n";
+		strm << "	subroutine imp_set_" + v.name + "() bind(c)\n\
+		integer, pointer :: imp_p_arr_shp (:)\n\
+		" + v.type + ", pointer :: imp_p_arr_ptr " + v.dims << "\n\
+		call c_f_pointer(imp_arr_shp, imp_p_arr_shp, [" + std::to_string((v.dims.size() - 1) / 2) + "])\n\
+		call c_f_pointer(imp_arr_ptr, imp_p_arr_ptr, imp_p_arr_shp)\n\
+		" + v.name + " = imp_p_arr_ptr\n\
+	end subroutine imp_set_" + v.name + "\n";
 	}
 	strm << "end module mod_imp\n\n";
 
@@ -367,16 +372,16 @@ void FReader::GenArrIO(std::string path, std::string name, std::vector<typestrin
  use iso_c_binding
  use )" << name << R"(
  implicit none
-    integer, allocatable, target :: exp_arr_shp(:)
-    type(c_ptr), bind(c) :: exp_arr_ptr
+	integer, allocatable, target :: exp_arr_shp(:)
+	type(c_ptr), bind(c) :: exp_arr_ptr
 
  contains 
 )";
 	for (auto& v : outvars) {
 		strm << "    subroutine exp_get_" + v + "() bind(c)\n\
-        exp_arr_shp = shape(" + v + ")\n\
-        exp_arr_ptr = c_loc(" + v + ")\n\
-    end subroutine exp_get_" + v + "\n";
+		exp_arr_shp = shape(" + v + ")\n\
+		exp_arr_ptr = c_loc(" + v + ")\n\
+	end subroutine exp_get_" + v + "\n";
 	}
 	strm << "end module mod_exp";
 }

@@ -1,8 +1,18 @@
 #General
-- Changed name to AVIS (read: ayy-vis)
-- New Documentation!
+- The remote file browser is now faster
+- Garbage collector is improved, now (hopefully) crashes less
+- New plot option: Lines (accumulate)
 
-#Improvements
+#Bug fixes
+- Multiple text boxes activating at the same time
+- Loading bonds not showing the loading screen
+- Multiple plot nodes with different settings
+- Crash when mouse-over atoms during Run All
+- Internal node to internal node connections crash on Run All
+
+#----Previous changes----
+
+#Version 0.02
 - Bounding box can now be animated
 - Export to GIF / AVI now supported
 - Information tab now shows info for selected atoms
@@ -11,3 +21,5 @@
 - Generic SSV format introduced
 - Attributes can now be saved / loaded
 - Improved control for text box
+- UI is now faster when scene is static
+- Some new command line options

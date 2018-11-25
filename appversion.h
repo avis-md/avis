@@ -1,1 +1,1 @@
-#define APPVERSION "0.02"
+#define APPVERSION "0.02b"
