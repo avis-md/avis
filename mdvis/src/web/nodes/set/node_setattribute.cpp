@@ -24,7 +24,7 @@ void Node_SetAttribute::Execute() {
 	auto src = *((void**)cv.value);
 	auto prm = Particles::attrs[attrId + Particles::readonlyAttrCnt];
 	prm->timed = (AnWeb::execFrame > 0 && timed);
-	auto& tar = prm->Get(prm->timed? AnWeb::execFrame-1 : 0);
+	auto& tar = prm->Get(AnWeb::execFrame-1);
 	tar.resize(sz);
 	switch (cv.typeName[6]) {
 	case 's':
@@ -44,6 +44,7 @@ void Node_SetAttribute::Execute() {
 		RETERR("Unexpected data type " + cv.typeName + "!");
 	}
 	prm->dirty = true;
+	if (prm->timed) prm->Set((uint)(AnWeb::execFrame-1));
 }
 
 void Node_SetAttribute::DrawHeader(float& off) {

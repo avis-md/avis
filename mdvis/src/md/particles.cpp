@@ -47,7 +47,7 @@ void Particles::animdata::Seek(uint f) {
 	}
 	if (std::this_thread::get_id() == Engine::_mainThreadId) {
 		for (auto& a : attrs) {
-			a->Update();
+			a->Seek(currentFrame);
 		}
 	}
 	UpdateMemRange();
@@ -103,6 +103,10 @@ void Particles::animdata::Update() {
 				return;
 			}
 		}
+	}
+
+	for (auto& a : attrs) {
+		a->Update();
 	}
 }
 

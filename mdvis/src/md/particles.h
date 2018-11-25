@@ -47,6 +47,13 @@ public:
 		std::vector<Int2> ids;
 	};
 	struct attrdata {
+		enum class FRAME_STATUS {
+			EMPTY,
+			LOADED,
+			WAITWRITE,
+			UNLOADED,
+		};
+
 		attrdata();
 		~attrdata();
 
@@ -56,18 +63,23 @@ public:
 		GLuint buf, texBuf;
 		
 		std::vector<double>& Get(uint frm);
+		void Set(uint frm);
 		void ApplyParCnt(), ApplyFrmCnt();
-		void Update();
+		void Update(), Seek(uint frm);
 		void Clear();
-		void ToDisk(int i), FromDisk(int i);
 		std::string Export();
 		void Import(const std::string& data);
 	private:
 		attrdata(const attrdata& rhs) = delete;
 		attrdata& operator= (const attrdata& rhs) = delete;
-		
+
 		std::vector<double> data;
 		std::vector<std::vector<double>> dataAll;
+		std::vector<FRAME_STATUS> status;
+
+		bool _timed;
+		std::string diskFd;
+		void ToDisk(int i), FromDisk(int i);
 
 		const int instanceId;
 		static int _ids;

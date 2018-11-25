@@ -3,7 +3,8 @@
 
 int Particles::attrdata::_ids = 0;
 
-Particles::attrdata::attrdata() : instanceId(++_ids) {
+Particles::attrdata::attrdata() : instanceId(++_ids), timed(false), _timed(false) {
+	diskFd = IO::path + "tmp/attr_" + std::to_string(instanceId) + "_";
 	glGenBuffers(1, &buf);
 	SetGLBuf<float>(buf, nullptr, particleSz);
 	glGenTextures(1, &texBuf);
@@ -21,7 +22,18 @@ Particles::attrdata::~attrdata() {
 
 std::vector<double>& Particles::attrdata::Get(uint frm) {
 	if (!frm || !timed) return data;
-	else return dataAll[frm-1];
+	else {
+		if (status[frm] == FRAME_STATUS::UNLOADED) {
+			FromDisk(frm - 1);
+		}
+		return dataAll[frm - 1];
+	}
+}
+
+void Particles::attrdata::Set(uint frm) {
+	if (!!frm && !!Get(frm).size()) {
+		status[frm - 1] = FRAME_STATUS::WAITWRITE;
+	}
 }
 
 void Particles::attrdata::ApplyParCnt() {
@@ -32,10 +44,48 @@ void Particles::attrdata::ApplyParCnt() {
 void Particles::attrdata::ApplyFrmCnt() {
 	if (Particles::anim.frameCount < 2) return;
 	dataAll.resize(Particles::anim.frameCount-1);
+	status.resize(Particles::anim.frameCount-1);
 }
 
 void Particles::attrdata::Update() {
-	auto& dt = Get(anim.currentFrame);
+	if (_timed != timed) {
+		if (Particles::anim.frameCount < 2) timed = false;
+		else {
+			_timed = timed;
+			if (!timed && Particles::anim.frameCount > 1) {
+				std::vector<std::vector<double>>(Particles::anim.frameCount - 1).swap(dataAll);
+			}
+		}
+	}
+
+	if (timed) {
+		for (uint f = 0; f < Particles::anim.frameCount-1; f++) {
+			switch (status[f]) {
+			case FRAME_STATUS::WAITWRITE:
+				ToDisk(f);
+				status[f] = FRAME_STATUS::LOADED;
+				break;
+			case FRAME_STATUS::LOADED:
+				if (anim.status[f] == animdata::FRAME_STATUS::UNLOADED) {
+					std::vector<double>().swap(Get(f + 1));
+					status[f] = FRAME_STATUS::UNLOADED;
+				}
+				break;
+			case FRAME_STATUS::UNLOADED:
+				if (anim.status[f] == animdata::FRAME_STATUS::LOADED) {
+					FromDisk(f);
+					status[f] = FRAME_STATUS::LOADED;
+				}
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}
+
+void Particles::attrdata::Seek(uint frm) {
+	auto& dt = Get(frm);
 	auto sz = dt.size();
 	if (!sz) return;
 	SetGLSubBuf<>(buf, dt.data(), particleSz);
@@ -49,11 +99,16 @@ void Particles::attrdata::Clear() {
 }
 
 void Particles::attrdata::ToDisk(int i) {
-
+	std::ofstream strm(diskFd + std::to_string(i), std::ios::binary);
+	auto& d = dataAll[i];
+	strm.write((char*)d.data(), d.size() * sizeof(double));
 }
 
 void Particles::attrdata::FromDisk(int i) {
-
+	std::ifstream strm(diskFd + std::to_string(i), std::ios::binary);
+	auto& d = dataAll[i];
+	d.resize(Particles::particleSz);
+	strm.read((char*)d.data(), d.size() * sizeof(double));
 }
 
 std::string Particles::attrdata::Export() {

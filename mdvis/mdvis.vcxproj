@@ -259,8 +259,13 @@
     <ClCompile Include="src\md\dlpoly.cpp" />
     <ClCompile Include="src\md\GenericSSV.cpp" />
     <ClCompile Include="src\md\lammps.cpp" />
+    <ClCompile Include="src\md\particles_attrdata.cpp" />
     <ClCompile Include="src\md\pdb.cpp" />
     <ClCompile Include="src\tmp\tiny_obj_loader.cpp" />
+    <ClCompile Include="src\ui\browse.cpp" />
+    <ClCompile Include="src\ui\localbrowsetarget.cpp" />
+    <ClCompile Include="src\ui\remotebrowsetarget.cpp" />
+    <ClCompile Include="src\unloader.cpp" />
     <ClCompile Include="src\utils\shader.cpp" />
     <ClCompile Include="src\hdr.cpp" />
     <ClCompile Include="src\live\livesyncer.cpp" />
@@ -282,7 +287,6 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\makeres.cpp" />
     <ClCompile Include="src\md\Gromacs.cpp" />
-    <ClCompile Include="src\makegen.cpp" />
     <ClCompile Include="src\md\parloader.cpp" />
     <ClCompile Include="src\md\ParMenu.cpp" />
     <ClCompile Include="src\md\Particles.cpp" />
@@ -326,7 +330,7 @@
     <ClCompile Include="src\web\nodes\node_gromacs.cpp" />
     <ClCompile Include="src\web\nodes\node_info.cpp" />
     <ClCompile Include="src\web\nodes\node_inputs.cpp" />
-    <ClCompile Include="src\web\nodes\node_plot.cpp" />
+    <ClCompile Include="src\web\nodes\misc\node_plot.cpp" />
     <ClCompile Include="src\web\nodes\node_remap.cpp" />
     <ClCompile Include="src\web\nodes\set\node_setattribute.cpp" />
     <ClCompile Include="src\web\nodes\node_setradscl.cpp" />
@@ -383,6 +387,9 @@
     <ClInclude Include="src\libjpeg\jversion.h" />
     <ClInclude Include="src\md\GenericSSV.h" />
     <ClInclude Include="src\tmp\tiny_obj_loader.h" />
+    <ClInclude Include="src\ui\browse.h" />
+    <ClInclude Include="src\ui\browsetarget.h" />
+    <ClInclude Include="src\unloader.h" />
     <ClInclude Include="src\vis\changelog.h" />
     <ClInclude Include="src\vis\options.h" />
     <ClInclude Include="src\utils\glmext.h" />
@@ -410,7 +417,6 @@
     <ClInclude Include="src\md\lammps.h" />
     <ClInclude Include="src\md\mdvbin.h" />
     <ClInclude Include="src\md\Gromacs.h" />
-    <ClInclude Include="src\makegen.h" />
     <ClInclude Include="src\md\parloader.h" />
     <ClInclude Include="src\md\parmenu.h" />
     <ClInclude Include="src\md\particles.h" />
@@ -454,7 +460,7 @@
     <ClInclude Include="src\web\nodes\node_gromacs.h" />
     <ClInclude Include="src\web\nodes\node_info.h" />
     <ClInclude Include="src\web\nodes\node_inputs.h" />
-    <ClInclude Include="src\web\nodes\node_plot.h" />
+    <ClInclude Include="src\web\nodes\misc\node_plot.h" />
     <ClInclude Include="src\web\nodes\node_remap.h" />
     <ClInclude Include="src\web\nodes\set\node_setattribute.h" />
     <ClInclude Include="src\web\nodes\node_setradscl.h" />

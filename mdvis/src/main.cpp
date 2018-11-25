@@ -348,6 +348,7 @@ The hash for this program is )" << VisSystem::version_hash
 #else
 #define LINIT INIT
 #endif
+		IO::RmDirectory(IO::path + "tmp/");
 		IO::MakeDirectory(IO::path + "tmp/");
 
 		Random::Seed((uint)milliseconds());
@@ -468,6 +469,7 @@ The hash for this program is )" << VisSystem::version_hash
 			Engine::WaitForLockValue();
 		}
 		glfwDestroyWindow(Display::window);
+		IO::RmDirectory(IO::path + "tmp/");
 #ifndef NOCATCH
 	}
 	catch (...) {

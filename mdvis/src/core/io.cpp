@@ -5,6 +5,7 @@
 
 #ifdef PLATFORM_WIN
 #include <io.h>
+#include <Shlobj.h>
 #include <shellapi.h>
 #pragma comment(lib, "Shell32.lib")
 #else
@@ -343,6 +344,11 @@ void IO::InitPath() {
 	std::ifstream strm(path + "currpath.txt");
 	std::getline(strm, currPath);
 	std::replace(currPath.begin(), currPath.end(), '\\', '/');
+	WCHAR path[MAX_PATH];
+	if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, path))) {
+		userPath = IO::_frw(path);
+		std::replace(userPath.begin(), userPath.end(), '\\', '/');
+	}
 #else
 	RunCmd::Run("pwd>/tmp/avis_currpath.txt&&cd&&pwd>/tmp/avis_userpath.txt");
 	std::ifstream strm("/tmp/avis_currpath.txt");
