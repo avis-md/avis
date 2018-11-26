@@ -54,12 +54,12 @@ public:
 			UNLOADED,
 		};
 
-		attrdata();
+		attrdata(bool readonly = false);
 		~attrdata();
 
 		bool dirty = false;
+		const bool readonly;
 		bool timed = false;
-		bool readonly = false;
 		GLuint buf, texBuf;
 		
 		std::vector<double>& Get(uint frm);
@@ -193,7 +193,7 @@ public:
 	static void Init(), Clear(), GenTexBufs();
 	static void Resize(uint i);
 	static void Update(), UpdateBBox(), UpdateBufs(), UpdateColorTex(), UpdateRadBuf(int i = -1);
-	static void AddParam(), RmParam(int i);
+	static void AddAttr(bool readonly = false), RmAttr(int i);
 
 	static void Rebound(glm::dvec3 center);
 	static void ReboundF(glm::dvec3 center, int f);

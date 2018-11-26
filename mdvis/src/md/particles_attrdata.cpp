@@ -3,7 +3,7 @@
 
 int Particles::attrdata::_ids = 0;
 
-Particles::attrdata::attrdata() : instanceId(++_ids), timed(false), _timed(false) {
+Particles::attrdata::attrdata(bool ro) : instanceId(++_ids), readonly(ro), timed(false), _timed(false) {
 	diskFd = IO::path + "tmp/attr_" + std::to_string(instanceId) + "_";
 	glGenBuffers(1, &buf);
 	SetGLBuf<float>(buf, nullptr, particleSz);
@@ -44,7 +44,7 @@ void Particles::attrdata::ApplyParCnt() {
 void Particles::attrdata::ApplyFrmCnt() {
 	if (Particles::anim.frameCount < 2) return;
 	dataAll.resize(Particles::anim.frameCount-1);
-	status.resize(Particles::anim.frameCount-1);
+	status.resize(readonly? Particles::anim.frameCount : Particles::anim.frameCount-1);
 }
 
 void Particles::attrdata::Update() {
@@ -59,26 +59,38 @@ void Particles::attrdata::Update() {
 	}
 
 	if (timed) {
-		for (uint f = 0; f < Particles::anim.frameCount-1; f++) {
-			switch (status[f]) {
-			case FRAME_STATUS::WAITWRITE:
-				ToDisk(f);
-				status[f] = FRAME_STATUS::LOADED;
-				break;
-			case FRAME_STATUS::LOADED:
-				if (anim.status[f] == animdata::FRAME_STATUS::UNLOADED) {
-					std::vector<double>().swap(Get(f + 1));
-					status[f] = FRAME_STATUS::UNLOADED;
+		if (readonly) {
+			for (uint f = 0; f < Particles::anim.frameCount; ++f) {
+				if (status[f] != FRAME_STATUS::UNLOADED) {
+					if (anim.status[f] == animdata::FRAME_STATUS::UNLOADED) {
+						std::vector<double>().swap(Get(f));
+						status[f] = FRAME_STATUS::UNLOADED;
+					}
 				}
-				break;
-			case FRAME_STATUS::UNLOADED:
-				if (anim.status[f] == animdata::FRAME_STATUS::LOADED) {
-					FromDisk(f);
+			}
+		}
+		else {
+			for (uint f = 0; f < Particles::anim.frameCount-1; ++f) {
+				switch (status[f]) {
+				case FRAME_STATUS::WAITWRITE:
+					ToDisk(f);
 					status[f] = FRAME_STATUS::LOADED;
+					break;
+				case FRAME_STATUS::LOADED:
+					if (anim.status[f+1] == animdata::FRAME_STATUS::UNLOADED) {
+						std::vector<double>().swap(Get(f + 1));
+						status[f] = FRAME_STATUS::UNLOADED;
+					}
+					break;
+				case FRAME_STATUS::UNLOADED:
+					if (anim.status[f+1] == animdata::FRAME_STATUS::LOADED) {
+						FromDisk(f);
+						status[f] = FRAME_STATUS::LOADED;
+					}
+					break;
+				default:
+					break;
 				}
-				break;
-			default:
-				break;
 			}
 		}
 	}
@@ -161,6 +173,7 @@ void Particles::attrdata::Import(const std::string& buf) {
 			for (auto& d2 : d) {
 				strm >> d2;
 			}
+			if (f > 0) status[f-1] = FRAME_STATUS::WAITWRITE;
 		}
 	}
 	else {

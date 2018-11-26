@@ -91,7 +91,7 @@ void Particles::animdata::Update() {
 			if (st == FRAME_STATUS::UNLOADED) {
 				st = FRAME_STATUS::READING;
 				ParLoader::OpenFrame(f, paths[f]);
-				return;
+				goto skip;
 			}
 		}
 		for (int f = currentFrame - 1; f >= (int)frameMemPos; --f) {
@@ -100,10 +100,12 @@ void Particles::animdata::Update() {
 			if (st == FRAME_STATUS::UNLOADED) {
 				st = FRAME_STATUS::READING;
 				ParLoader::OpenFrame(f, paths[f]);
-				return;
+				break;
 			}
 		}
 	}
+
+	skip:
 
 	for (auto& a : attrs) {
 		a->Update();
@@ -398,12 +400,12 @@ void Particles::LoadAttrs(const std::string& path) {
 	int asz = attrs.size();
 	for (; asz > 0; --asz) {
 		if (!attrs[asz-1]->readonly) {
-			RmParam(asz-1);
+			RmAttr(asz-1);
 		}
 		else break;
 	}
 	for (int a = 0; a < ssz/2; ++a) {
-		AddParam();
+		AddAttr();
 		attrNms[asz++] = ss[a*2];
 		auto& at = attrs.back();
 		at->Import(ss[a*2+1]);
@@ -468,17 +470,17 @@ void Particles::SetFrame(uint frm) {
 	}
 }
 
-void Particles::AddParam() {
+void Particles::AddAttr(bool readonly) {
 	if (attrs.size() > 48) {
-		Debug::Error("Particles::AddParam", "attrdata count limit reached!");
+		Debug::Error("Particles::AddAttr", "attrdata count limit reached!");
 		return;
 	}
-	attrs.push_back(new attrdata());
+	attrs.push_back(new attrdata(readonly));
 	attrNms.push_back("");
 	attrNms.rbegin()[1] = "Unnamed " + std::to_string(attrs.size());
 }
 
-void Particles::RmParam(int i) {
+void Particles::RmAttr(int i) {
 	delete(attrs[i]);
 	attrs.erase(attrs.begin() + i);
 	attrNms.erase(attrNms.begin() + i);

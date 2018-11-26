@@ -65,10 +65,9 @@ void updateFunc() {
 		ParLoader::parDirty = false;
 		if (ParLoader::impId == 0) {
 			for (auto& a : GenericSSV::attrs) {
-				Particles::AddParam();
+				Particles::AddAttr(true);
 				Particles::attrNms[Particles::attrs.size()-1] = a.first;
 				auto& p = Particles::attrs.back();
-				p->readonly = true;
 				p->Get(0).swap(a.second);
 				p->dirty = true;
 			}

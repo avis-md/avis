@@ -67,7 +67,7 @@ void Node_SetAttribute::DrawHeader(float& off) {
 	if (attrId != _attrId) {
 		_attrId = attrId;
 		if (attrId == attrs.size()-2) {
-			Particles::AddParam();
+			Particles::AddAttr();
 		}
 	}
 	off += 17;
@@ -86,7 +86,7 @@ void Node_SetAttribute::Load(XmlNode* n2) {
 		else if (n.name == "timed") timed = (n.value == "1");
 	}
 	while (Particles::attrs.size() - Particles::readonlyAttrCnt <= attrId) {
-		Particles::AddParam();
+		Particles::AddAttr();
 	}
 }
 

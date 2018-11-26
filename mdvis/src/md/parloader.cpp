@@ -754,8 +754,10 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 			for (int a = 0, s = GenericSSV::_attrs.size(); a < s; a++) {
 				auto& tr = GenericSSV::_attrs[a];
 				if (!!tr.size()) {
-					Particles::attrs[a]->timed = true;
-					Particles::attrs[a]->Get(f) = tr;
+					auto& atra = Particles::attrs[a];
+					atra->timed = true;
+					atra->Get(f) = tr;
+					atra->Set(f);
 					tr.clear();
 				}
 			}

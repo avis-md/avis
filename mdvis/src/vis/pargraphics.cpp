@@ -1021,14 +1021,14 @@ void ParGraphics::DrawColMenu() {
 		Particles::attrNms[a] = UI::EditText(exps - 130, off, 110, 16, 12, white(1, 0.4f), Particles::attrNms[a], true, white());
 		if (!Particles::attrs[a]->readonly) {
 			if (Engine::Button(exps - 19, off, 16, 16, Icons::cross, red()) == MOUSE_RELEASE) {
-				Particles::RmParam(a);
+				Particles::RmAttr(a);
 				break;
 			}
 		}
 		off += 17;
 	}
 	if (Engine::Button(exps - 130, off, 110, 16, white(1, 0.4f), "+", 12, white(), true) == MOUSE_RELEASE) {
-		Particles::AddParam();
+		Particles::AddAttr();
 	}
 	off += 18;
 	if (Particles::attrs.size() > 0 && !Particles::attrs.back()->readonly) {
