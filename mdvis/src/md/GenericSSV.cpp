@@ -110,7 +110,7 @@ bool GenericSSV::ReadFrm(FrmInfo* info) {
 			case TYPES::VELZ: info->vel[a*3 + 2] = std::stod(p); break;
 			case TYPES::ATTR: {
 					auto& at = _attrs[attri++];
-					at.resize(info->parNum);
+					if (!a) at.resize(info->parNum);
 					at[a] = std::stod(p);
 					break;
 				}

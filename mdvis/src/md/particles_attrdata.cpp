@@ -23,8 +23,9 @@ Particles::attrdata::~attrdata() {
 std::vector<double>& Particles::attrdata::Get(uint frm) {
 	if (!frm || !timed) return data;
 	else {
-		if (status[frm] == FRAME_STATUS::UNLOADED) {
+		if (!readonly && (status[frm - 1] == FRAME_STATUS::UNLOADED)) {
 			FromDisk(frm - 1);
+			status[frm - 1] == FRAME_STATUS::LOADED;
 		}
 		return dataAll[frm - 1];
 	}
@@ -44,7 +45,7 @@ void Particles::attrdata::ApplyParCnt() {
 void Particles::attrdata::ApplyFrmCnt() {
 	if (Particles::anim.frameCount < 2) return;
 	dataAll.resize(Particles::anim.frameCount-1);
-	status.resize(readonly? Particles::anim.frameCount : Particles::anim.frameCount-1);
+	status.resize(Particles::anim.frameCount - 1 + (int)readonly);
 }
 
 void Particles::attrdata::Update() {
@@ -61,7 +62,7 @@ void Particles::attrdata::Update() {
 	if (timed) {
 		if (readonly) {
 			for (uint f = 0; f < Particles::anim.frameCount; ++f) {
-				if (status[f] != FRAME_STATUS::UNLOADED) {
+				if (status[f] == FRAME_STATUS::WAITWRITE) {
 					if (anim.status[f] == animdata::FRAME_STATUS::UNLOADED) {
 						std::vector<double>().swap(Get(f));
 						status[f] = FRAME_STATUS::UNLOADED;
