@@ -423,7 +423,7 @@ void AnWeb::DoExecute(bool all) {
 			execFrame = a+1;
 			Particles::anim.Seek(a);
 			auto st = Particles::anim.status[a];
-			if (st != Particles::AnimData::FRAME_STATUS::LOADED){
+			if (st != Particles::animdata::FRAME_STATUS::LOADED){
 				Debug::Warning("AnWeb::Execute", "failed to seek to frame " + std::to_string(a) + "! " + std::to_string((int)st));
 				executing = false;
 				Engine::stateLock2.unlock();

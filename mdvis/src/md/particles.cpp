@@ -5,116 +5,10 @@
 #include "web/anweb.h"
 #include "utils/glext.h"
 
-Particles::paramdata::paramdata() {
-	glGenBuffers(1, &buf);
-	SetGLBuf<float>(buf, nullptr, particleSz);
-	glGenTextures(1, &texBuf);
-	glBindTexture(GL_TEXTURE_BUFFER, texBuf);
-	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, buf);
-	glBindTexture(GL_TEXTURE_BUFFER, 0);
-	ApplyParCnt();
-	ApplyFrmCnt();
-}
 
-Particles::paramdata::~paramdata() {
-	glDeleteBuffers(1, &buf);
-	glDeleteTextures(1, &texBuf);
-}
+uint Particles::animdata::maxFramesInMem = 20;
 
-std::vector<double>& Particles::paramdata::Get(uint frm) {
-	if (!frm || !timed) return data;
-	else return dataAll[frm-1];
-}
-
-void Particles::paramdata::ApplyParCnt() {
-	if (!particleSz) return;
-	SetGLBuf<float>(buf, nullptr, particleSz);
-}
-
-void Particles::paramdata::ApplyFrmCnt() {
-	if (Particles::anim.frameCount < 2) return;
-	dataAll.resize(Particles::anim.frameCount-1);
-}
-
-void Particles::paramdata::Update() {
-	auto& dt = Get(anim.currentFrame);
-	auto sz = (int)dt.size();
-	if (!sz) return;
-	SetGLSubBuf<>(buf, dt.data(), particleSz);
-	dirty = false;
-}
-
-void Particles::paramdata::Clear() {
-	timed = false;
-	std::vector<double>().swap(data);
-	std::vector<std::vector<double>>().swap(dataAll);
-}
-
-std::string Particles::paramdata::Export() {
-	std::ostringstream strm;
-	if ((!timed && !data.size())) {
-		return "0";
-	}
-	strm << Particles::particleSz << " " << (timed? Particles::anim.frameCount : 1) << "\n";
-	if (timed) {
-		for (int a = 0; a < Particles::anim.frameCount; a++) {
-			auto& d = Get(a);
-			strm << d.size() << " ";
-			for (auto& d2 : d) {
-				strm << d2 << " ";
-			}
-		}
-	}
-	else {
-		for (auto& d : data) {
-			strm << d << " ";
-		}
-	}
-	return strm.str();
-}
-
-void Particles::paramdata::Import(const std::string& buf) {
-	std::istringstream strm(buf);
-	int psz;
-	strm >> psz;
-	if (!psz) return;
-	else if (psz != Particles::particleSz) {
-		Debug::Warning("Attr::Import", "not atom count!");
-		return;
-	}
-	int fsz;
-	strm >> fsz;
-	if (fsz != 1 && fsz != Particles::anim.frameCount) {
-		Debug::Warning("Attr::Import", "not frame count!");
-		return;
-	}
-
-	timed = (fsz > 1);
-	if (timed) {
-		int n;
-		for (int f = 0; f < fsz; ++f) {
-			strm >> n;
-			if (!n) continue;
-			auto& d = Get(f);
-			d.resize(psz);
-			for (auto& d2 : d) {
-				strm >> d2;
-			}
-		}
-	}
-	else {
-		data.resize(Particles::particleSz);
-		for (auto& d : data) {
-			strm >> d;
-		}
-	}
-	dirty = true;
-}
-
-
-uint Particles::AnimData::maxFramesInMem = 20;
-
-void Particles::AnimData::AllocFrames(uint frames) {
+void Particles::animdata::AllocFrames(uint frames) {
 	frameCount = frames;
 	status.resize(frames, FRAME_STATUS::UNLOADED);
 	poss.resize(frames);
@@ -122,7 +16,7 @@ void Particles::AnimData::AllocFrames(uint frames) {
 	paths.resize(frames);
 }
 
-void Particles::AnimData::FillBBox() {
+void Particles::animdata::FillBBox() {
 	bboxs.resize(frameCount);
 	for (int a = 0; a < frameCount; a++) {
 		memcpy(&bboxs[a][0], boundingBox, 6*sizeof(double));
@@ -130,7 +24,7 @@ void Particles::AnimData::FillBBox() {
 	bboxState.resize(frameCount, BBOX_STATE::ORI);
 }
 
-void Particles::AnimData::Clear() {
+void Particles::animdata::Clear() {
 	frameCount = currentFrame = 0;
 	status.clear();
 	poss.clear();
@@ -141,7 +35,7 @@ void Particles::AnimData::Clear() {
 	paths.clear();
 }
 
-void Particles::AnimData::Seek(uint f) {
+void Particles::animdata::Seek(uint f) {
 	currentFrame = f;
 	if (frameCount <= 1) return;
 	if (status[f] != FRAME_STATUS::LOADED) {
@@ -159,7 +53,7 @@ void Particles::AnimData::Seek(uint f) {
 	UpdateMemRange();
 }
 
-void Particles::AnimData::Update() {
+void Particles::animdata::Update() {
 	if (frameCount <= 1) return;
 
 	if (dirty) {
@@ -212,7 +106,7 @@ void Particles::AnimData::Update() {
 	}
 }
 
-void Particles::AnimData::UpdateMemRange() {
+void Particles::animdata::UpdateMemRange() {
 	frameMemPos = (uint)std::max((int)currentFrame - (int)maxFramesInMem/2, 0);
 }
 
@@ -293,13 +187,13 @@ Particles::conninfo Particles::conns;
 
 bool Particles::bufDirty = false, Particles::visDirty = false, Particles::palleteDirty = false;
 
-std::vector<Particles::paramdata*> Particles::attrs;
+std::vector<Particles::attrdata*> Particles::attrs;
 std::vector<std::string> Particles::attrNms;
 uint Particles::readonlyAttrCnt;
 
 std::vector<Particles::conninfo> Particles::particles_Conn2;
 
-Particles::AnimData Particles::anim = {};
+Particles::animdata Particles::anim = {};
 
 double Particles::boundingBox[] = {};
 glm::dvec3 Particles::bboxCenter;
@@ -543,7 +437,7 @@ void Particles::SetFrame(uint frm) {
 	else {
 		if (anim.currentFrame != -1) {
 			anim.Seek(frm);
-			if (anim.status[frm] != AnimData::FRAME_STATUS::LOADED) return;
+			if (anim.status[frm] != animdata::FRAME_STATUS::LOADED) return;
 			poss = &anim.poss[anim.currentFrame][0];
 			SetGLSubBuf(posBuffer, (double*)&poss[0], particleSz * 3);
 			for (auto& a : attrs) {
@@ -572,10 +466,10 @@ void Particles::SetFrame(uint frm) {
 
 void Particles::AddParam() {
 	if (attrs.size() > 48) {
-		Debug::Error("Particles::AddParam", "Attribute count limit reached!");
+		Debug::Error("Particles::AddParam", "attrdata count limit reached!");
 		return;
 	}
-	attrs.push_back(new paramdata());
+	attrs.push_back(new attrdata());
 	attrNms.push_back("");
 	attrNms.rbegin()[1] = "Unnamed " + std::to_string(attrs.size());
 }
@@ -599,7 +493,7 @@ void Particles::Rebound(glm::dvec3 center) {
 		Particles::anim.FillBBox();
 	}
 	memcpy(&anim.bboxs[anim.currentFrame][0], boundingBox, 6*sizeof(double));
-	anim.bboxState[anim.currentFrame] = AnimData::BBOX_STATE::CHANGED;
+	anim.bboxState[anim.currentFrame] = animdata::BBOX_STATE::CHANGED;
 	BoundParticles();
 	Scene::dirty = true;
 }
@@ -618,7 +512,7 @@ void Particles::ReboundF(glm::dvec3 center, int f) {
 	bx[3] += co.y;
 	bx[4] += co.z;
 	bx[5] += co.z;
-	anim.bboxState[f] = AnimData::BBOX_STATE::CHANGED;
+	anim.bboxState[f] = animdata::BBOX_STATE::CHANGED;
 	BoundParticlesF(f);
 }
 
@@ -638,7 +532,7 @@ void Particles::BoundParticles() {
 	if (!Particles::anim.bboxs.size()) {
 		Particles::anim.FillBBox();
 	}
-	anim.bboxState[anim.currentFrame] = AnimData::BBOX_STATE::PERIODIC;
+	anim.bboxState[anim.currentFrame] = animdata::BBOX_STATE::PERIODIC;
 	bufDirty = true;
 	Scene::dirty = true;
 }
@@ -664,7 +558,7 @@ void Particles::BoundParticlesF(int f) {
 		dp = sz * glm::round(dp);
 		ps[a] -= dp;
 	}
-	anim.bboxState[f] = AnimData::BBOX_STATE::PERIODIC;
+	anim.bboxState[f] = animdata::BBOX_STATE::PERIODIC;
 }
 
 void Particles::Serialize(XmlNode* nd) {

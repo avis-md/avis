@@ -46,9 +46,9 @@ public:
 		uint count;
 		std::vector<Int2> ids;
 	};
-	struct paramdata {
-		paramdata();
-		~paramdata();
+	struct attrdata {
+		attrdata();
+		~attrdata();
 
 		bool dirty = false;
 		bool timed = false;
@@ -59,45 +59,20 @@ public:
 		void ApplyParCnt(), ApplyFrmCnt();
 		void Update();
 		void Clear();
+		void ToDisk(int i), FromDisk(int i);
 		std::string Export();
 		void Import(const std::string& data);
 	private:
+		attrdata(const attrdata& rhs) = delete;
+		attrdata& operator= (const attrdata& rhs) = delete;
+		
 		std::vector<double> data;
 		std::vector<std::vector<double>> dataAll;
+
+		const int instanceId;
+		static int _ids;
 	};
-
-	static uint residueListSz;
-	static uint particleSz, _particleSz;
-
-	static std::string cfgFile, trjFile;
-
-	static glm::dvec3* poss, *vels;
-
-	static std::vector<ResidueList> residueLists;
-	static std::vector<std::string> reslist;
-
-	static std::vector<char> names, resNames;
-	static std::vector<short> types;
-	static std::vector<byte> colors;
-	static std::vector<float> radii;
-	static std::vector<float> radiiscl;
-	static std::vector<bool> visii;
-	static std::vector<Int2> ress;
-	static conninfo conns;
-
-	static bool bufDirty, visDirty, palleteDirty;
-
-	static std::vector<paramdata*> attrs;
-	static std::vector<std::string> attrNms;
-	static uint readonlyAttrCnt;
-
-	static std::vector<conninfo> particles_Conn2;
-
-	static void SaveAttrs(const std::string& path);
-	static void LoadAttrs(const std::string& path);
-	static void UpdateConBufs2();
-
-	struct AnimData {
+	struct animdata {
 		enum class FRAME_STATUS {
 			UNLOADED,
 			READING,
@@ -105,7 +80,7 @@ public:
 			BAD
 		};
 
-		AnimData () {}
+		animdata () {}
 
 		bool reading = false, dirty = false, dynamicBonds;
 		static uint maxFramesInMem;
@@ -133,8 +108,41 @@ public:
 		void Update();
 		void UpdateMemRange();
 	private:
-		AnimData(const AnimData&) = delete;
-	} static anim;
+		animdata(const animdata&) = delete;
+	};
+
+	static uint residueListSz;
+	static uint particleSz, _particleSz;
+
+	static std::string cfgFile, trjFile;
+
+	static glm::dvec3* poss, *vels;
+
+	static std::vector<ResidueList> residueLists;
+	static std::vector<std::string> reslist;
+
+	static std::vector<char> names, resNames;
+	static std::vector<short> types;
+	static std::vector<byte> colors;
+	static std::vector<float> radii;
+	static std::vector<float> radiiscl;
+	static std::vector<bool> visii;
+	static std::vector<Int2> ress;
+	static conninfo conns;
+
+	static bool bufDirty, visDirty, palleteDirty;
+
+	static std::vector<attrdata*> attrs;
+	static std::vector<std::string> attrNms;
+	static uint readonlyAttrCnt;
+
+	static std::vector<conninfo> particles_Conn2;
+
+	static void SaveAttrs(const std::string& path);
+	static void LoadAttrs(const std::string& path);
+	static void UpdateConBufs2();
+
+	static animdata anim;
 	static void IncFrame(bool loop);
 	static void SetFrame(uint frm);
 

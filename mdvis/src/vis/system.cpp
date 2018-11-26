@@ -304,7 +304,7 @@ void VisSystem::DrawBar() {
 			float al = float(Particles::anim.currentFrame) / (ssz - 1);
 			al = Engine::DrawSliderFill(175, Display::height - 13.f, Display::width - 310.f, 9, 0, 1, al, white(1, 0.3f), white(0));
 
-			using fs = Particles::AnimData::FRAME_STATUS;
+			using fs = Particles::animdata::FRAME_STATUS;
 			fs sold = Particles::anim.status[0];
 			auto pw = float(Display::width - 310.f) / ssz;
 			size_t p0 = 0;

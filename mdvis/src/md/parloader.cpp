@@ -324,7 +324,7 @@ void ParLoader::ScanFrames(const std::string& first) {
 
 	Particles::anim.AllocFrames(frms);
 	for (uint f = 0; f < frms; ++f) {
-		//Particles::anim.status[f] = Particles::AnimData::FRAME_STATUS::UNLOADED;
+		//Particles::anim.status[f] = Particles::animdata::FRAME_STATUS::UNLOADED;
 		Particles::anim.paths[f] = nms[f];
 	}
 
@@ -583,7 +583,7 @@ void ParLoader::DoOpen() {
 				memcpy(&anm.vels[i][0], trj.vels[i], info.num * sizeof(glm::dvec3));
 				delete[](trj.vels[i]);
 			}
-			anm.status[i] = Particles::AnimData::FRAME_STATUS::LOADED;
+			anm.status[i] = Particles::animdata::FRAME_STATUS::LOADED;
 		}
 		delete[](trj.poss);
 		if (trj.vels) delete[](trj.vels);
@@ -620,7 +620,7 @@ void ParLoader::DoOpen() {
 			delete[](Particles::vels);
 			Particles::vels = &Particles::anim.vels[0][0];
 		}
-		Particles::anim.status[0] = Particles::AnimData::FRAME_STATUS::LOADED;
+		Particles::anim.status[0] = Particles::animdata::FRAME_STATUS::LOADED;
 		Particles::anim.dirty = true;
 	}
 
@@ -680,7 +680,7 @@ void ParLoader::DoOpenAnim() {
 			memcpy(&anm.vels[i][0], info.poss[i], info.parNum * sizeof(glm::dvec3));
 			delete[](info.poss[i]);
 		}
-		anm.status[i] = Particles::AnimData::FRAME_STATUS::LOADED;
+		anm.status[i] = Particles::animdata::FRAME_STATUS::LOADED;
 	}
 	anm.maxFramesInMem = 10000000;
 	delete[](info.poss);
@@ -703,7 +703,7 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 	while (busy){}
 	Debug::Message("ParLoader", "Load frame " + std::to_string(f));
 	std::flush(std::cout);
-	using FS = Particles::AnimData::FRAME_STATUS;
+	using FS = Particles::animdata::FRAME_STATUS;
 	busy = true;
 	auto& anm = Particles::anim;
 	anm.reading = true;
@@ -743,7 +743,7 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 	else {
 		anm.status[f] = FS::LOADED;
 		if (!!anm.bboxs.size()) {
-			if (anm.bboxState[f] == Particles::AnimData::BBOX_STATE::PERIODIC) {
+			if (anm.bboxState[f] == Particles::animdata::BBOX_STATE::PERIODIC) {
 				auto per = Particles::boxPeriodic;
 				Particles::boxPeriodic = true;
 				Particles::BoundParticlesF(f);

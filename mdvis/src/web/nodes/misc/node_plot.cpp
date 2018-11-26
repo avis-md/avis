@@ -131,7 +131,7 @@ void Node_Plot::Execute() {
 	if (sz > 1) {
 		if (type == TYPE::ALINES) {
 			xid = -1;
-			yid = Clamp(yid, -1, *cv.dimVals[0] - 1);
+			yid = (cv.type == AN_VARTYPE::LIST)? Clamp(yid, -1, *cv.dimVals[0] - 1) : -1;
 		}
 		else {
 			xid = Clamp(xid, -1, sz2 - 1);
