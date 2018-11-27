@@ -73,6 +73,8 @@ void Particles::attrdata::Update() {
 		else {
 			for (uint f = 0; f < Particles::anim.frameCount-1; ++f) {
 				switch (status[f]) {
+				case FRAME_STATUS::EMPTY:
+					break;
 				case FRAME_STATUS::WAITWRITE:
 					ToDisk(f);
 					status[f] = FRAME_STATUS::LOADED;
@@ -88,8 +90,6 @@ void Particles::attrdata::Update() {
 						FromDisk(f);
 						status[f] = FRAME_STATUS::LOADED;
 					}
-					break;
-				default:
 					break;
 				}
 			}
@@ -109,19 +109,33 @@ void Particles::attrdata::Clear() {
 	timed = false;
 	std::vector<double>().swap(data);
 	std::vector<std::vector<double>>().swap(dataAll);
+	std::vector<FRAME_STATUS>().swap(status);
 }
 
 void Particles::attrdata::ToDisk(int i) {
-	std::ofstream strm(diskFd + std::to_string(i), std::ios::binary);
+	std::string path = diskFd + std::to_string(i);
+	std::ofstream strm(path, std::ios::binary);
+	if (!strm) {
+		Debug::Error("Attr::FromDisk", "Failed to open " + path + "!");
+		return;
+	}
 	auto& d = dataAll[i];
-	strm.write((char*)d.data(), d.size() * sizeof(double));
+	strm.write((char*)d.data(), Particles::particleSz * sizeof(double));
 }
 
 void Particles::attrdata::FromDisk(int i) {
-	std::ifstream strm(diskFd + std::to_string(i), std::ios::binary);
+	std::string path = diskFd + std::to_string(i);
+	std::ifstream strm(path, std::ios::binary);
+	if (!strm) {
+		Debug::Error("Attr::FromDisk", "Failed to open " + path + "!");
+		return;
+	}
 	auto& d = dataAll[i];
 	d.resize(Particles::particleSz);
-	strm.read((char*)d.data(), d.size() * sizeof(double));
+	if (!strm.read((char*)d.data(), Particles::particleSz * sizeof(double))) {
+		Debug::Error("Attr::FromDisk", "Failed to read " + path + " contents!");
+		return;
+	}
 }
 
 std::string Particles::attrdata::Export() {
