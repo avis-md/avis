@@ -431,6 +431,7 @@ void AnWeb::DoExecute(bool all) {
 				execFrame = 0;
 				return;
 			}
+			Particles::UpdateAttrs();
 			Node_Inputs::frame = a;
 			_DoExecute();
 			AnWeb::WriteFrame(a);

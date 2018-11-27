@@ -84,31 +84,29 @@ void Particles::animdata::Update() {
 			}
 		}
 
-		for (uint ff = currentFrame; ff < frameMemPos + maxFramesInMem; ++ff) {
-			auto f = Repeat(ff, 0U, frameCount);
-			auto& st = status[f];
-			if (st == FRAME_STATUS::READING || st == FRAME_STATUS::BAD) return;
-			if (st == FRAME_STATUS::UNLOADED) {
-				st = FRAME_STATUS::READING;
-				ParLoader::OpenFrame(f, paths[f]);
-				goto skip;
+		if (!AnWeb::executing) {
+			for (uint ff = currentFrame; ff < frameMemPos + maxFramesInMem; ++ff) {
+				auto f = Repeat(ff, 0U, frameCount);
+				auto& st = status[f];
+				if (st == FRAME_STATUS::READING || st == FRAME_STATUS::BAD) return;
+				if (st == FRAME_STATUS::UNLOADED) {
+					st = FRAME_STATUS::READING;
+					ParLoader::OpenFrame(f, paths[f]);
+					goto skip;
+				}
 			}
-		}
-		for (int f = currentFrame - 1; f >= (int)frameMemPos; --f) {
-			auto& st = status[f];
-			if (st == FRAME_STATUS::READING || st == FRAME_STATUS::BAD) return;
-			if (st == FRAME_STATUS::UNLOADED) {
-				st = FRAME_STATUS::READING;
-				ParLoader::OpenFrame(f, paths[f]);
-				break;
+			for (int f = currentFrame - 1; f >= (int)frameMemPos; --f) {
+				auto& st = status[f];
+				if (st == FRAME_STATUS::READING || st == FRAME_STATUS::BAD) return;
+				if (st == FRAME_STATUS::UNLOADED) {
+					st = FRAME_STATUS::READING;
+					ParLoader::OpenFrame(f, paths[f]);
+					break;
+				}
 			}
+		skip:
+			UpdateAttrs();
 		}
-	}
-
-	skip:
-
-	for (auto& a : attrs) {
-		a->Update();
 	}
 }
 
@@ -315,11 +313,6 @@ void Particles::Update() {
 		UpdateRadBuf();
 	}
 	anim.Update();
-	for (auto& a : attrs) {
-		if (a->dirty) {
-			a->Update();
-		}
-	}
 }
 
 void Particles::UpdateBBox() {
@@ -484,6 +477,12 @@ void Particles::RmAttr(int i) {
 	delete(attrs[i]);
 	attrs.erase(attrs.begin() + i);
 	attrNms.erase(attrNms.begin() + i);
+}
+
+void Particles::UpdateAttrs() {
+	for (auto& a : attrs) {
+		a->Update();
+	}
 }
 
 void Particles::Rebound(glm::dvec3 center) {

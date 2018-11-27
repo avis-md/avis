@@ -4,11 +4,10 @@
 
 template <typename T>
 T Repeat(T t, T a, T b) {
-	while (t >= b)
-		t -= (b - a);
-	while (t < a)
-		t += (b - a);
-	return t;
+	const T len = b - a;
+	if (len <= 0) return a;
+	const float frc = float(t - a) / len;
+	return a + (T)(len * (frc - std::floor(frc)));
 }
 template <typename T>
 T Clamp(T t, T a, T b) {

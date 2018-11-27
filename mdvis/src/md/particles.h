@@ -193,7 +193,7 @@ public:
 	static void Init(), Clear(), GenTexBufs();
 	static void Resize(uint i);
 	static void Update(), UpdateBBox(), UpdateBufs(), UpdateColorTex(), UpdateRadBuf(int i = -1);
-	static void AddAttr(bool readonly = false), RmAttr(int i);
+	static void AddAttr(bool readonly = false), RmAttr(int i), UpdateAttrs();
 
 	static void Rebound(glm::dvec3 center);
 	static void ReboundF(glm::dvec3 center, int f);
