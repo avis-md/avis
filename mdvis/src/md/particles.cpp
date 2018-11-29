@@ -5,116 +5,6 @@
 #include "web/anweb.h"
 #include "utils/glext.h"
 
-
-uint Particles::animdata::maxFramesInMem = 20;
-
-void Particles::animdata::AllocFrames(uint frames) {
-	frameCount = frames;
-	status.resize(frames, FRAME_STATUS::UNLOADED);
-	poss.resize(frames);
-	vels.resize(frames);
-	paths.resize(frames);
-}
-
-void Particles::animdata::FillBBox() {
-	bboxs.resize(frameCount);
-	for (int a = 0; a < frameCount; a++) {
-		memcpy(&bboxs[a][0], boundingBox, 6*sizeof(double));
-	}
-	bboxState.resize(frameCount, BBOX_STATE::ORI);
-}
-
-void Particles::animdata::Clear() {
-	frameCount = currentFrame = 0;
-	status.clear();
-	poss.clear();
-	vels.clear();
-	conns.clear();
-	conns2.clear();
-	bboxs.clear();
-	paths.clear();
-}
-
-void Particles::animdata::Seek(uint f) {
-	currentFrame = f;
-	if (frameCount <= 1) return;
-	if (status[f] != FRAME_STATUS::LOADED) {
-		while (status[f] == FRAME_STATUS::READING){}
-		if (status[f] == FRAME_STATUS::UNLOADED) {
-			ParLoader::OpenFrameNow(f, paths[f]);
-		}
-		if (status[f] == FRAME_STATUS::BAD) return;
-	}
-	if (std::this_thread::get_id() == Engine::_mainThreadId) {
-		for (auto& a : attrs) {
-			a->Seek(currentFrame);
-		}
-	}
-	UpdateMemRange();
-}
-
-void Particles::animdata::Update() {
-	if (frameCount <= 1) return;
-
-	if (dirty) {
-		dirty = false;
-		for (auto& a : attrs) {
-			a->ApplyFrmCnt();
-		}
-	}
-
-	if (maxFramesInMem < 1000000) {
-		if (maxFramesInMem < frameCount) {
-			for (uint a = 0; a < frameMemPos; ++a) {
-				if (a + frameCount - frameMemPos < maxFramesInMem) continue;
-				if (status[a] == FRAME_STATUS::LOADED) {
-					if (a == retainFrame) continue;
-					std::vector<glm::dvec3>().swap(poss[a]);
-					std::vector<glm::dvec3>().swap(vels[a]);
-					status[a] = FRAME_STATUS::UNLOADED;
-				}
-			}
-			for (uint a = frameMemPos + maxFramesInMem; a < frameCount; ++a) {
-				if (status[a] == FRAME_STATUS::LOADED) {
-					if (a == retainFrame) continue;
-					std::vector<glm::dvec3>().swap(poss[a]);
-					std::vector<glm::dvec3>().swap(vels[a]);
-					status[a] = FRAME_STATUS::UNLOADED;
-				}
-			}
-		}
-
-		if (!AnWeb::executing) {
-			for (uint ff = currentFrame; ff < frameMemPos + maxFramesInMem; ++ff) {
-				auto f = Repeat(ff, 0U, frameCount);
-				auto& st = status[f];
-				if (st == FRAME_STATUS::READING || st == FRAME_STATUS::BAD) return;
-				if (st == FRAME_STATUS::UNLOADED) {
-					st = FRAME_STATUS::READING;
-					ParLoader::OpenFrame(f, paths[f]);
-					goto skip;
-				}
-			}
-			for (int f = currentFrame - 1; f >= (int)frameMemPos; --f) {
-				auto& st = status[f];
-				if (st == FRAME_STATUS::READING || st == FRAME_STATUS::BAD) return;
-				if (st == FRAME_STATUS::UNLOADED) {
-					st = FRAME_STATUS::READING;
-					ParLoader::OpenFrame(f, paths[f]);
-					break;
-				}
-			}
-		skip:
-			UpdateAttrs();
-		}
-	}
-}
-
-void Particles::animdata::UpdateMemRange() {
-	frameMemPos = (uint)std::max((int)currentFrame - (int)maxFramesInMem/2, 0);
-}
-
-
 byte Particles::SpecificColor::nextId = 255;
 
 Particles::SpecificColor::SpecificColor() {
@@ -144,7 +34,7 @@ void Particles::SpecificColor::UpdateMask() {
 	type.resize(std::min<size_t>(type.size(), PAR_MAX_NAME_LEN));
 	auto rls = reslist.size();
 	for (auto& rli : residueLists) {
-		for (int a = 0; a < rls; a++) {
+		for (size_t a = 0; a < rls; ++a) {
 			if (!!(resFlags & (1 << a))) {
 				if (rli.name == reslist[a]) goto use;
 			}
@@ -153,7 +43,7 @@ void Particles::SpecificColor::UpdateMask() {
 	use:
 		uint first = rli.residues[0].offset;
 		uint last = rli.residues.back().offset + rli.residues.back().cnt;
-		for (uint a = first; a < last; a++) {
+		for (uint a = first; a < last; ++a) {
 			auto nm = &names[a*PAR_MAX_NAME_LEN];
 			if (!std::string(nm, PAR_MAX_NAME_LEN).compare(0, type.size(), type)) {
 				mask.push_back(a);
@@ -359,7 +249,7 @@ void Particles::UpdateRadBuf(int i) {
 	if (i == -1) {
 		std::vector<float> res(particleSz);
 #pragma omp parallel for
-		for (int a = 0; a < particleSz; ++a) {
+		for (int a = 0; a < (int)particleSz; ++a) {
 			res[a] = visii[a] ? std::max(radii[a], 0.001f)*radiiscl[a] : -1;
 		}
 		SetGLSubBuf(radBuffer, &res[0], particleSz);
@@ -375,7 +265,7 @@ void Particles::UpdateRadBuf(int i) {
 
 void Particles::SaveAttrs(const std::string& path) {
 	std::string s;
-	for (int a = 0; a < attrs.size(); ++a) {
+	for (size_t a = 0; a < attrs.size(); ++a) {
 		if (!attrs[a]->readonly) {
 			s += attrNms[a] + "#";
 			s += attrs[a]->Export();
@@ -390,14 +280,14 @@ void Particles::LoadAttrs(const std::string& path) {
 	auto ss = string_split(data, '#', true);
 	auto ssz = ss.size();
 	if (!ssz) return;
-	int asz = attrs.size();
+	auto asz = attrs.size();
 	for (; asz > 0; --asz) {
 		if (!attrs[asz-1]->readonly) {
 			RmAttr(asz-1);
 		}
 		else break;
 	}
-	for (int a = 0; a < ssz/2; ++a) {
+	for (size_t a = 0; a < ssz/2; ++a) {
 		AddAttr();
 		attrNms[asz++] = ss[a*2];
 		auto& at = attrs.back();
@@ -434,7 +324,7 @@ void Particles::IncFrame(bool loop) {
 void Particles::SetFrame(uint frm) {
 	if (frm == anim.currentFrame) return;
 	else {
-		if (anim.currentFrame != -1) {
+		if (anim.currentFrame != ~0U) {
 			anim.Seek(frm);
 			if (anim.status[frm] != animdata::FRAME_STATUS::LOADED) return;
 			poss = &anim.poss[anim.currentFrame][0];
@@ -527,7 +417,7 @@ void Particles::BoundParticles() {
 		boundingBox[3] - boundingBox[2],
 		boundingBox[5] - boundingBox[4]);
 	#pragma omp parallel for
-	for (int a = 0; a < particleSz; ++a) {
+	for (uint a = 0; a < particleSz; ++a) {
 		glm::dvec3 dp = poss[a] - bboxCenter;
 		dp /= sz;
 		dp = glm::round(dp);
@@ -557,7 +447,7 @@ void Particles::BoundParticlesF(int f) {
 	glm::dvec3 isz = glm::dvec3(1, 1, 1) / sz;
 	auto& ps = anim.poss[f];
 	#pragma omp parallel for
-	for (int a = 0; a < particleSz; ++a) {
+	for (uint a = 0; a < particleSz; ++a) {
 		glm::dvec3 dp = ps[a] - co;
 		dp *= isz;
 		dp = sz * glm::round(dp);

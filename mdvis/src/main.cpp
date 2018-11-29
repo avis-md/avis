@@ -69,7 +69,7 @@ void updateFunc() {
 				Particles::attrNms[Particles::attrs.size()-1] = a.first;
 				auto& p = Particles::attrs.back();
 				p->Get(0).swap(a.second);
-				p->dirty = true;
+				p->Seek(0);
 			}
 			Particles::readonlyAttrCnt = GenericSSV::attrs.size();
 			GenericSSV::attrs.clear();

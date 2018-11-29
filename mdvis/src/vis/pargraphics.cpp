@@ -1065,9 +1065,14 @@ void ParGraphics::DrawColMenu() {
 		off += 20;
 		Color::DrawH2(exps - 115, off + 8, 16, 17*5 - 16, gradCols);
 		static const std::string ii[] = { "0.0", "0.5", "1.0" };
+		static Vec4 _gradCols[3];
 		for (int a = 0; a < 3; ++a) {
 			UI2::Color(exps - 140, off + 34 * (2 - a), 138, ii[a], gradCols[a]);
 			UI::Texture(exps - 95, off + 34 * a, 16, 16, Icons::left, white(1, 0.4f));
+			if (_gradCols[a] != gradCols[a]) {
+				_gradCols[a] = gradCols[a];
+				Scene::dirty = true;
+			}
 		}
 		off += 17 * 5 + 2;
 	}

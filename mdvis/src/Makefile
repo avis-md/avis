@@ -72,7 +72,7 @@ HEADERSX = xdrfile/xdrfile.h xdrfile/xdrfile_trr.h xdrfile/xdrfile_xtc.h
 OBJS = obj/hdr.o obj/lodepng.o obj/ChokoLait.o obj/Engine.o obj/main.o obj/RenderEngine.o obj/unloader.o
 OBJS += obj/asset/mesh.o obj/asset/tetrahedron.o obj/asset/texture.o obj/asset/texture3d.o
 OBJS += obj/core/bbox.o obj/core/debug.o obj/core/display.o obj/core/font.o obj/core/input.o obj/core/io.o obj/core/math.o obj/core/mvp.o obj/core/time.o obj/core/ui.o obj/core/ui3.o
-OBJS += obj/md/Protein.o obj/md/GenericSSV.o obj/md/Gromacs.o obj/md/parmenu.o obj/md/particles.o obj/md/particles_attrdata.o obj/md/parloader.o obj/md/pdb.o obj/md/lammps.o obj/md/CDV.o obj/md/dlpoly.o #obj/md/XYZ.o
+OBJS += obj/md/Protein.o obj/md/GenericSSV.o obj/md/Gromacs.o obj/md/parmenu.o obj/md/particles.o obj/md/particles_animdata.o obj/md/particles_attrdata.o obj/md/parloader.o obj/md/pdb.o obj/md/lammps.o obj/md/CDV.o obj/md/dlpoly.o #obj/md/XYZ.o
 OBJS += obj/web/anbrowse.o obj/web/anconv.o obj/web/annode.o obj/web/anops.o obj/web/anscript.o obj/web/anweb.o obj/web/errorview.o
 OBJS += obj/web/creader.o obj/web/cnode.o obj/web/cscript.o
 OBJS += obj/web/pyreader.o obj/web/pynode.o obj/web/pyscript.o
@@ -94,19 +94,19 @@ PCH = precompile.h
 PCH_OUT = precompile.h.gch
 
 ../build/avis: $(OBJS) $(OBJSX)
+	@echo "Copying libraries..."
 ifeq ($(UNAME_S),Darwin)
-	cp $(RRAYPRE)/build/bin/libRadeonRays.dylib ../build/libRadeonRays.dylib
+	@cp $(RRAYPRE)/build/bin/libRadeonRays.dylib ../build/libRadeonRays.dylib
 endif
 ifeq ($(UNAME_S),Linux)
-	cp $(BINPRE)/libpython3.6m.so.1.0 ../build/libpython3.6m.so.1.0
-	cp $(BINPRE)/libssh2.so.1 ../build/libssh2.so.1
-	cp $(BINPRE)/libOpenCL.so.1 ../build/libOpenCL.so.1
-	cp $(BINPRE)/libGLEW.so.2.0 ../build/libGLEW.so.2.0
-	cp $(BINPRE)/libglfw.so.3 ../build/libglfw.so.3
-	cp $(BINPRE2)/libgcrypt.so.20 ../build/libgcrypt.so.20
-	cp $(RRAYPRE)/build/bin/libRadeonRays.so.2.0 ../build/libRadeonRays.so.2.0
+	@cp $(BINPRE)/libssh2.so.1 ../build/libssh2.so.1
+	@cp $(BINPRE)/libOpenCL.so.1 ../build/libOpenCL.so.1
+	@cp $(BINPRE)/libGLEW.so.2.0 ../build/libGLEW.so.2.0
+	@cp $(BINPRE)/libglfw.so.3 ../build/libglfw.so.3
+	@cp $(BINPRE2)/libgcrypt.so.20 ../build/libgcrypt.so.20
+	@cp $(RRAYPRE)/build/bin/libRadeonRays.so.2.0 ../build/libRadeonRays.so.2.0
 endif
-	ar rvs obj/libgwavi.a $(AVIPRE)/obj/*.o
+	@ar rvs obj/libgwavi.a $(AVIPRE)/obj/*.o > /dev/null
 	@echo "Linking..."
 	@$(CXX) -o $@ $(OBJS) $(OBJSX) $(LDFLAGS) $(LIBS)
 ifeq ($(UNAME_S),Darwin)
