@@ -6,6 +6,7 @@ const Vec3 NODE_COL_NRM = Vec3(0.5f, 0.4f, 0.3f);
 const Vec3 NODE_COL_IO = Vec3(0.3f, 0.3f, 0.5f);
 const Vec3 NODE_COL_MOD = Vec3(0.3f, 0.5f, 0.3f);
 const Vec3 NODE_COL_SPC = Vec3(0.5f, 0.3f, 0.3f);
+const Vec3 NODE_COL_CTRL = Vec3(0.3f, 0.45f, 0.45f);
 
 enum class AN_NODE_SCN : byte {
 	NUM0 = 0x80,
@@ -47,9 +48,10 @@ enum class AN_NODE_MISC {
 	SRNG,
 	ADJL,
 	ADJLI,
+	DOWHL,
 	NUM
 };
-const std::string AN_NODE_MISCS[] = { "Plot graph", "Show Range", "To Adjacency List", "To Paired List" };
+const std::string AN_NODE_MISCS[] = { "Plot graph", "Show Range", "To Adjacency List", "To Paired List", "Do While" };
 
 enum class ANNODE_OP {
 	NONE,

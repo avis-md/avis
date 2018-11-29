@@ -35,6 +35,7 @@ bool AnWeb::invertRun = false, AnWeb::runOnFrame = false;
 
 std::thread* AnWeb::execThread = nullptr;
 AnNode* AnWeb::execNode = nullptr;
+uint AnWeb::nextNode = 0;
 
 bool AnWeb::hasPy = false, AnWeb::hasC = false, AnWeb::hasFt = false;
 bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
@@ -222,6 +223,7 @@ void AnWeb::Draw() {
 						SW(MISC::SRNG, Node_ShowRange);
 						SW(MISC::ADJL, Node_AdjList);
 						SW(MISC::ADJLI, Node_AdjListI);
+						SW(MISC::DOWHL, Node_DoWhile);
 					default:
 						Debug::Error("AnWeb::Draw", "Unhandled node type: " + std::to_string((int)selSpNode));
 						return;
@@ -454,7 +456,13 @@ void AnWeb::DoExecute(bool all) {
 void AnWeb::_DoExecute() {
 	char* err = 0;
 	static std::string pylog;
-	for (auto n : nodes) {
+	nextNode = ~0U;
+	for (size_t a = 0, s = nodes.size(); a < s; ++a) {
+		if (nextNode != ~0U) {
+			a = (size_t)nextNode;
+			nextNode = ~0U;
+		}
+		auto& n = nodes[a];
 #ifdef VERBOSE
 		Debug::Message("AnWeb", "Executing " + n->script->name);
 #endif
@@ -712,6 +720,7 @@ void AnWeb::Load(const std::string& s) {
 					ND(Node_ShowRange)
 					ND(Node_AdjList)
 					ND(Node_AdjListI)
+					ND(Node_DoWhile)
 					Debug::Warning("AnWeb::Load", "Unknown node name: " + nm);
 		#undef ND
 					break;

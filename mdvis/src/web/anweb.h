@@ -37,6 +37,7 @@ public:
 
 	static std::thread* execThread;
 	static AnNode* execNode;
+	static uint nextNode;
 
 	static bool hasPy, hasC, hasFt;
 	static bool hasPy_s, hasC_s, hasFt_s;
@@ -60,7 +61,6 @@ public:
 	static void OnAnimFrame();
 };
 
-#include "anbrowse.h"
 #include "nodes/in/node_vector.h"
 #include "nodes/node_inputs.h"
 #include "nodes/node_info.h"
@@ -77,3 +77,4 @@ public:
 #include "nodes/node_remap.h"
 #include "nodes/node_gromacs.h"
 #include "nodes/misc/node_adjlist.h"
+#include "nodes/ctrl/node_dowhile.h"
