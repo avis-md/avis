@@ -24,56 +24,14 @@ Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig), AN_FLAG_NOSAVECONV), filt
 	titleCol = NODE_COL_IO;
 	canTile = true;
 	
-	const std::string vars[] = {
-		"positions", "list(2d)",
-		"velocities", "list(2d)",
-		"positions (all)", "list(3d)",
-		"velocities (all)", "list(3d)",
-		"types", "list(1s)"
-	};
-	const int sz = sizeof(vars) / sizeof(vars[0]) / 2;
+	AddOutput(CVar("positions", 'd', 2, { (int*)&parcount, nullptr }, { 3 }));
+	script->AddOutput(conV.back());
 
-	outputR.resize(sz);
-	script->outvars.resize(sz);
-	conV.resize(sz);
+	AddOutput(CVar("velocities", 'd', 2, { (int*)&parcount, nullptr }, { 3 }));
+	script->AddOutput(conV.back());
 
-	for (int a = 0; a < sz; ++a) {
-		script->outvars[a] = std::pair<std::string, std::string>(vars[a * 2], vars[a * 2 + 1]);
-		conV[a].typeName = vars[a * 2 + 1];
-	}
-
-	auto& poss = conV[0];
-	poss.dimVals.resize(2);
-	poss.data.dims.resize(1, 3);
-	poss.type = AN_VARTYPE::LIST;
-#ifndef IS_ANSERVER
-	poss.dimVals[0] = (int*)&parcount;
-#endif
-	poss.dimVals[1] = &poss.data.dims[0];
-	
-	auto& vels = conV[1] = poss;
-	vels.dimVals[1] = &vels.data.dims[0];
-
-	auto& posa = conV[2];
-	posa.dimVals.resize(3);
-	posa.data.dims.resize(1, 3);
-#ifndef IS_ANSERVER
-	posa.dimVals[0] = (int*)&Particles::anim.frameCount;
-	posa.dimVals[1] = (int*)&parcount;
-#endif
-	posa.dimVals[2] = &posa.data.dims[0];
-	conV[3] = posa;
-
-	auto& post = conV[4];
-	post.dimVals.resize(1);
-#ifndef IS_ANSERVER
-	post.dimVals[0] = (int*)&parcount;
-#endif
-	post.stride = 2;
-
-	for (int a = 0; a < sz; ++a) {
-		conV[a].typeName = scr->outvars[a].second;
-	}
+	AddOutput(CVar("types", 's', 1, { (int*)&parcount}));
+	script->AddOutput(conV.back());
 }
 
 void Node_Inputs::DrawHeader(float& off) {
@@ -91,7 +49,7 @@ void Node_Inputs::Execute() {
 #ifndef IS_ANSERVER
 	bool setpos = outputR[0].size() > 0;
 	bool setvel = outputR[1].size() > 0;
-	bool settyp = outputR[4].size() > 0;
+	bool settyp = outputR[2].size() > 0;
 	setpos |= (setvel || settyp) && ((filter & (int)FILTER::CLP) > 0);
 
 	glm::dvec3* pos, *vel;
@@ -109,7 +67,7 @@ void Node_Inputs::Execute() {
 		conV[0].value = &conV[0].data.val.arr.p;
 		conV[1].data.val.arr.p = vel;
 		conV[1].value = &conV[1].data.val.arr.p;
-		conV[4].value = &Particles::types;
+		conV[2].value = &Particles::types;
 	}
 	else {
 		if (setpos) {
@@ -191,7 +149,7 @@ void Node_Inputs::Execute() {
 		typs = &vtyp[0];
 		conV[0].value = &poss;
 		conV[1].value = &vels;
-		conV[4].value = &typs;
+		conV[2].value = &typs;
 	}
 #endif
 }
@@ -201,7 +159,7 @@ void Node_Inputs::SaveIn(const std::string& path) {
 	std::string nm = script->name;
 	std::ofstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
-		for (uint i = 0; i < 4; i++)
+		for (uint i = 0; i < 3; i++)
 			conV[i].Write(strm);
 	}
 }
@@ -210,7 +168,7 @@ void Node_Inputs::LoadIn(const std::string& path) {
 	std::string nm = script->name;
 	std::ifstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
-		for (uint i = 0; i < 4; i++)
+		for (uint i = 0; i < 3; i++)
 			conV[i].Read(strm);
 	}
 	else {

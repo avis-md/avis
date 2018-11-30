@@ -143,7 +143,8 @@ public:
 	virtual void DrawScene() {}
 	void DrawToolbar();
 
-	virtual void AddInput(), AddOutput();
+	virtual void AddInput();
+	virtual void AddOutput(const CVar& cv = CVar());
 
 	virtual void Execute() = 0;
 	void ApplyFrameCount(int f);

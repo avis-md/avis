@@ -8,24 +8,14 @@ Node_Info::Node_Info() :AnNode(new DmScript(sig), AN_FLAG_NOSAVECONV) {
 	titleCol = NODE_COL_IO;
 	canTile = true;
 	
-	const std::string vars[] = {
-		"atom count", "int",
-		"frame count", "int",
-		"current frame", "int",
-		"bounding box", "list(1d)",
-	};
-	const int sz = sizeof(vars) / sizeof(vars[0]) / 2;
-	
-	outputR.resize(sz);
-	script->outvars.resize(sz);
-	conV.resize(sz);
-
-	for (int a = 0; a < sz; ++a) {
-		script->outvars[a] = std::pair<std::string, std::string>(vars[a * 2], vars[a * 2 + 1]);
-		conV[a].typeName = vars[a * 2 + 1];
-	}
-	conV[3].data.dims.resize(1, 6);
-	conV[3].dimVals.resize(1, &conV[3].data.dims[0]);
+	AddOutput();
+	script->AddOutput("atom count", "int");
+	AddOutput();
+	script->AddOutput("frame count", "int");
+	AddOutput();
+	script->AddOutput("current frame", "int");
+	AddOutput(CVar("bounding box", 'd', 1, { nullptr }, { 6 }));
+	script->AddOutput(conV.back());
 }
 
 void Node_Info::Execute() {

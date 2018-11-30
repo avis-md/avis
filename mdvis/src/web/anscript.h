@@ -57,6 +57,8 @@ struct VarOpt {
 	Vec2 range;
 };
 
+struct CVar;
+
 class AnScript {
 public:
 	std::string name, path, libpath;
@@ -74,6 +76,11 @@ public:
 	bool ok = false, busy = false;
 
 	static int StrideOf(char c);
+
+	void AddInput(std::string nm, std::string tp);
+	void AddInput(const CVar& cv);
+	void AddOutput(std::string nm, std::string tp);
+	void AddOutput(const CVar& cv);
 
 	virtual bool Clear();
 	virtual std::string Exec() = 0;
@@ -125,6 +132,8 @@ public:
 struct CVar {
 public:
 	CVar() : value(0) {}
+	CVar(std::string nm, AN_VARTYPE tp);
+	CVar(std::string nm, char tp, int dim, std::initializer_list<int*> szs, std::initializer_list<int> defszs = {});
 
 	std::string name, typeName;
 	AN_VARTYPE type;
@@ -175,7 +184,7 @@ public:
 	void** arr_in_dataloc;
 	int32_t** arr_out_shapeloc;
 	void** arr_out_dataloc;
-	
+
 	bool Clear() override;
 	std::string Exec() override;
 

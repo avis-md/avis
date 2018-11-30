@@ -7,10 +7,9 @@ Node_DoWhile::Node_DoWhile() : AnNode(new DmScript(sig), AN_FLAG_NOSAVECONV),
 	title = "Loop While";
 	titleCol = NODE_COL_SPC;
 	AddInput();
-	script->invars.push_back(std::pair<std::string, std::string>("value", "double"));
+	script->AddInput("value", "double");
 	AddInput();
-	script->invars.push_back(std::pair<std::string, std::string>("target", "double"));
-	script->invaropts.resize(2);
+	script->AddInput("target", "double");
 
 	static std::string ss[] = { "Greater Than", "Less Than", "Not Equal To", "Equal To", "" };
 	cDi.target = (uint*)&type;

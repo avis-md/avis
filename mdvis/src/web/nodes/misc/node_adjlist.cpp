@@ -6,23 +6,18 @@ Node_AdjList::Node_AdjList() : AnNode(new DmScript(sig)) {
 	auto scr = (DmScript*)script;
 	title = "To Adjacency List";
 	titleCol = Vec3(0.3f, 0.5f, 0.3f);
-	inputR.resize(3);
-	scr->invaropts.resize(3);
-	scr->invars.push_back(std::pair<std::string, std::string>("bonds", "list(2i)"));
-	scr->invars.push_back(std::pair<std::string, std::string>("parcount", "int"));
-	scr->invars.push_back(std::pair<std::string, std::string>("size", "int"));
-	inputVDef.resize(3);
-
-	outputR.resize(1);
-	script->outvars.resize(1, std::pair<std::string, std::string>("list", "list(2i)"));
 	
-	conV.resize(1);
+	AddInput();
+	script->AddInput("pairlist", "list(2i)");
+	AddInput();
+	script->AddInput("id count", "int");
+	AddInput();
+	script->AddInput("capacity", "int");
+
+	AddOutput(CVar("adjlist", 'i', 2, { &count, &listsize }));
 	auto& cv = conV[0];
-	cv.type = AN_VARTYPE::LIST;
-	cv.typeName = "list(2i)";
-	cv.dimVals.push_back(&count);
-	cv.dimVals.push_back(&listsize);
-	cv.stride = 4;
+	script->AddOutput(cv);
+	cv.value = &cv.data.val.arr.p;
 }
 
 void Node_AdjList::Execute() {
@@ -56,7 +51,6 @@ void Node_AdjList::Execute() {
 		*p0 = i1; *p1 = i0;
 	}
 	conV[0].data.val.arr.p = &conns[0];
-	conV[0].value = &conV[0].data.val.arr.p;
 }
 
 
@@ -64,22 +58,14 @@ Node_AdjListI::Node_AdjListI() : AnNode(new DmScript(sig)) {
 	auto scr = (DmScript*)script;
 	title = "To Paired List";
 	titleCol = NODE_COL_NRM;
-	inputR.resize(1);
-	scr->invaropts.resize(1);
-	scr->invars.push_back(std::pair<std::string, std::string>("adjlist", "list(2i)"));
-	inputVDef.resize(1);
 
-	outputR.resize(1);
-	script->outvars.resize(1, std::pair<std::string, std::string>("list", "list(2i)"));
-	
-	conV.resize(1);
+	AddInput();
+	script->AddInput("adjlist", "list(2i)");
+
+	AddOutput(CVar("pairlist", 'i', 2, { &count, nullptr }, { 2 }));
 	auto& cv = conV[0];
-	cv.type = AN_VARTYPE::LIST;
-	cv.typeName = "list(2i)";
-	cv.data.dims.resize(2, 2);
-	cv.dimVals.push_back(&count);
-	cv.dimVals.push_back(&cv.data.dims[1]);
-	cv.stride = 4;
+	script->AddOutput(cv);
+	cv.value = &cv.data.val.arr.p;
 }
 
 void Node_AdjListI::Execute() {
@@ -104,5 +90,4 @@ void Node_AdjListI::Execute() {
 		}
 	}
 	conV[0].data.val.arr.p = &conns[0];
-	conV[0].value = &conV[0].data.val.arr.p;
 }

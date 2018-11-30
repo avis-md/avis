@@ -29,7 +29,7 @@ ifeq ($(UNAME_S),Linux)
 	LDFLAGS2 += -Wl,-rpath='$$ORIGIN' -static-libstdc++ -lgomp
 	GLLIB += /usr/lib/x86_64-linux-gnu/libjpeg.a -lssh2 -lOpenCL `pkg-config --static --libs gl glew glfw3 freetype2`
 	#PYLIB += $(shell python3-config --configdir)/libpython3.6m.a -lexpat
-	PYLIB += -L../build -lpython3
+	PYLIB += -L$(shell python3-config --configdir) $(shell python3-config --libs)
 	NUMPY += -I/usr/local/lib/python3.6/dist-packages/numpy/core/include
 	RRAYBIN += libRadeonRays.so.2.0
 endif

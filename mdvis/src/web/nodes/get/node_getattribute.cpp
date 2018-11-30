@@ -8,15 +8,9 @@ Node_GetAttribute::Node_GetAttribute() :
 		attrId(0), di(&attrId, &Particles::attrNms[0]) {
 	title = "Get Attribute";
 	titleCol = NODE_COL_IO;
-	outputR.resize(1);
-	script->outvars.resize(1, std::pair<std::string, std::string>("values", "list(1d)"));
-	conV.resize(1);
-	conVAll.resize(1);
+	AddOutput(CVar("values", 'd', 1, { (int*)&Particles::particleSz }));
+	script->AddOutput(conV[0]);
 	auto& cv = conV[0];
-	cv.type = AN_VARTYPE::DOUBLE;
-	cv.typeName = "list(1d)";
-	cv.stride = 8;
-	cv.dimVals.resize(1);
 	cv.value = &cv.data.val.arr.p;
 }
 
@@ -26,7 +20,6 @@ void Node_GetAttribute::Execute() {
 	if (!Particles::attrs.size())
 		RETERR("No attribute available!");
 	auto& cv = conV[0];
-	cv.dimVals[0] = (int*)&Particles::particleSz;
 	cv.data.val.arr.p = Particles::attrs[attrId]->Get(
 		(!AnWeb::execFrame)? Particles::anim.currentFrame : AnWeb::execFrame-1).data();
 }

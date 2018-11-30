@@ -407,9 +407,9 @@ void AnNode::AddInput() {
 	inputVDef.push_back(AnVarBase());
 }
 
-void AnNode::AddOutput() {
+void AnNode::AddOutput(const CVar& cv) {
 	outputR.push_back(std::vector<nodecon>());
-	conV.push_back(CVar());
+	conV.push_back(cv);
 	if (saveConV) conVAll.push_back(std::vector<VarVal>());
 }
 

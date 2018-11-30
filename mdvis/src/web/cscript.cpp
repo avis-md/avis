@@ -1,5 +1,53 @@
 #include "anweb.h"
 
+CVar::CVar(std::string nm, AN_VARTYPE tp) : name(nm) {
+	switch (tp) {
+	case AN_VARTYPE::SHORT:
+		typeName = "short";
+		break;
+	case AN_VARTYPE::INT:
+		typeName = "int";
+		break;
+	case AN_VARTYPE::DOUBLE:
+		typeName = "double";
+		break;
+	default:
+		break;
+	}
+}
+
+CVar::CVar(std::string nm, char tp, int dim, std::initializer_list<int*> szs, std::initializer_list<int> defszs) : 
+		name(nm), typeName("list(xx)"), type(AN_VARTYPE::LIST) {
+	typeName[5] = '0' + dim;
+	typeName[6] = tp;
+	data.dims.resize(dim);
+	dimVals.resize(dim);
+	auto df = defszs.begin();
+	for (int a = 0; a < dim; ++a) {
+		const auto& p = (szs.size() > a)? szs.begin()[a] : nullptr;
+		if (p) dimVals[a] = p;
+		else {
+			if (df++ < defszs.end()) data.dims[a] = *df;
+			dimVals[a] = &data.dims[a];
+		}
+	}
+
+	switch (tp) {
+	case 's':
+		stride = 2;
+		break;
+	case 'i':
+		stride = 4;
+		break;
+	case 'd':
+		stride = 8;
+		break;
+	default:
+		Debug::Error("CVar", "Unexpected type " + std::string(&tp, 1) + "!");
+		break;
+	}
+}
+
 void CVar::Write(std::ofstream& strm) {
 	_StreamWrite(&type, &strm, 1);
 	switch (type) {
