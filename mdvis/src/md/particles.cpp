@@ -416,8 +416,8 @@ void Particles::BoundParticles() {
 	glm::dvec3 sz (boundingBox[1] - boundingBox[0],
 		boundingBox[3] - boundingBox[2],
 		boundingBox[5] - boundingBox[4]);
-	#pragma omp parallel for
-	for (uint a = 0; a < particleSz; ++a) {
+#pragma omp parallel for
+	for (int a = 0; a < (int)particleSz; ++a) {
 		glm::dvec3 dp = poss[a] - bboxCenter;
 		dp /= sz;
 		dp = glm::round(dp);
@@ -446,8 +446,8 @@ void Particles::BoundParticlesF(int f) {
 		(bx[5] + bx[4])) * 0.5;
 	glm::dvec3 isz = glm::dvec3(1, 1, 1) / sz;
 	auto& ps = anim.poss[f];
-	#pragma omp parallel for
-	for (uint a = 0; a < particleSz; ++a) {
+#pragma omp parallel for
+	for (int a = 0; a < (uint)particleSz; ++a) {
 		glm::dvec3 dp = ps[a] - co;
 		dp *= isz;
 		dp = sz * glm::round(dp);

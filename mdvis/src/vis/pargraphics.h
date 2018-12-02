@@ -6,6 +6,8 @@
 class ParGraphics {
 public:
 	static Texture bg, splash, logo;
+	static std::vector<std::string> bgs;
+	static int bgi;
 	static GLuint refl, reflE;
 	static float reflStr, reflStrDecay, reflStrDecayOff, specStr;
 	static bool fogUseBgCol;

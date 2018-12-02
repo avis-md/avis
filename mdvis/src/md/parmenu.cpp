@@ -348,6 +348,7 @@ void ParMenu::DrawStart() {
 		auto& cam = ChokoLait::mainCamera;
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[0]);
 		UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::bg, DRAWTEX_CROP);
+		UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::logo, white(0.8f), DRAWTEX_CROP);
 		
 		Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1], AnWeb::drawLerp, Display::width, Display::height);
 		
@@ -360,9 +361,14 @@ void ParMenu::DrawStart() {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	}
-	else
+	else {
 		UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::bg, DRAWTEX_CROP);
-
+		UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::logo, white(0.8f), DRAWTEX_CROP);
+		if (!UI::_layerMax && Input::KeyDown(Key_Space) && !!ParGraphics::bgs.size()) {
+			ParGraphics::bgi = (ParGraphics::bgi + 1) % ParGraphics::bgs.size();
+			ParGraphics::bg = Texture(ParGraphics::bgs[ParGraphics::bgi], false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
+		}
+	}
 
 	if (ParLoader::busy) {
 #ifdef HATENA
