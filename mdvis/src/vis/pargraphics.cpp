@@ -26,6 +26,8 @@
 
 
 Texture ParGraphics::bg, ParGraphics::splash, ParGraphics::logo;
+std::vector<std::string> ParGraphics::bgs;
+int ParGraphics::bgi;
 GLuint ParGraphics::refl, ParGraphics::reflE;
 float ParGraphics::reflStr = 2, ParGraphics::reflStrDecay = 2, ParGraphics::reflStrDecayOff = 0, ParGraphics::specStr = 0.2f;
 bool ParGraphics::fogUseBgCol = true;
@@ -195,8 +197,13 @@ void ParGraphics::Init() {
 	reflNms.push_back("\0");
 	reflItms.list = &reflNms[0];
 
-	bg = Texture(IO::path + "res/bg.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
+	auto bgfs = IO::GetFiles(IO::path + "res/bg");
+	for (auto& f : bgfs) {
+		bgs.push_back(IO::path + "res/bg/" + f);
+	}
+	if (!!bgs.size()) bg = Texture(bgs[0], false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	splash = Texture(IO::path + "res/bg_splash.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
+	logo = Texture(IO::path + "res/bg_logo.png", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	GLuint mv;
 	Shader::LoadShader(GL_VERTEX_SHADER, glsl::minVert, mv);
 	reflProg = Shader::FromF(mv, glsl::reflFrag);

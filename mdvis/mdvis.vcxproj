@@ -259,6 +259,7 @@
     <ClCompile Include="src\md\dlpoly.cpp" />
     <ClCompile Include="src\md\GenericSSV.cpp" />
     <ClCompile Include="src\md\lammps.cpp" />
+    <ClCompile Include="src\md\particles_animdata.cpp" />
     <ClCompile Include="src\md\particles_attrdata.cpp" />
     <ClCompile Include="src\md\pdb.cpp" />
     <ClCompile Include="src\tmp\tiny_obj_loader.cpp" />
@@ -288,8 +289,8 @@
     <ClCompile Include="src\makeres.cpp" />
     <ClCompile Include="src\md\Gromacs.cpp" />
     <ClCompile Include="src\md\parloader.cpp" />
-    <ClCompile Include="src\md\ParMenu.cpp" />
-    <ClCompile Include="src\md\Particles.cpp" />
+    <ClCompile Include="src\md\parmenu.cpp" />
+    <ClCompile Include="src\md\particles.cpp" />
     <ClCompile Include="src\md\Protein.cpp" />
     <ClCompile Include="src\ocl\raytracer.cpp" />
     <ClCompile Include="src\ui\help.cpp" />
@@ -322,6 +323,7 @@
     <ClCompile Include="src\web\fnode.cpp" />
     <ClCompile Include="src\web\freader.cpp" />
     <ClCompile Include="src\web\fscript.cpp" />
+    <ClCompile Include="src\web\nodes\ctrl\node_dowhile.cpp" />
     <ClCompile Include="src\web\nodes\get\node_getattribute.cpp" />
     <ClCompile Include="src\web\nodes\in\node_vector.cpp" />
     <ClCompile Include="src\web\nodes\misc\node_adjlist.cpp" />
@@ -452,6 +454,7 @@
     <ClInclude Include="src\web\creader.h" />
     <ClInclude Include="src\web\errorview.h" />
     <ClInclude Include="src\web\freader.h" />
+    <ClInclude Include="src\web\nodes\ctrl\node_dowhile.h" />
     <ClInclude Include="src\web\nodes\get\node_getattribute.h" />
     <ClInclude Include="src\web\nodes\in\node_vector.h" />
     <ClInclude Include="src\web\nodes\misc\node_adjlist.h" />
