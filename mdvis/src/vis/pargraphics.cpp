@@ -68,6 +68,7 @@ std::string ParGraphics::_usePBRNms[] = {"", "", "\0"};
 const Popups::DropdownItem ParGraphics::_usePBRItems = Popups::DropdownItem(&ParGraphics::usePBR, (std::string*)&ParGraphics::_usePBRNms[0]);
 
 Vec3 ParGraphics::rotCenter = Vec3();
+ParGraphics::ROTTRACK ParGraphics::rotCenterTrackType = ParGraphics::ROTTRACK::NONE;
 uint ParGraphics::rotCenterTrackId = -1;
 float ParGraphics::rotW = 0, ParGraphics::rotZ = 0;
 float ParGraphics::rotWs = 0, ParGraphics::rotZs = 0;
@@ -638,7 +639,18 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 	float s = std::pow(2.f, rotScale);
 	MVP::Scale(s, s, s);
 	if (rotCenterTrackId < ~0) {
-		rotCenter = Particles::poss[rotCenterTrackId];
+	}
+	switch (rotCenterTrackType) {
+	case ROTTRACK::ATOM:
+		if (rotCenterTrackId != ~0U) {
+			rotCenter = Particles::poss[rotCenterTrackId];
+		}
+		break;
+	case ROTTRACK::BBOX:
+		rotCenter = (Vec3)Particles::bboxCenter;
+		break;
+	default:
+		break;
 	}
 	MVP::Translate(-rotCenter.x, -rotCenter.y, -rotCenter.z);
 	auto _mv = MVP::modelview();
@@ -1244,45 +1256,59 @@ void ParGraphics::DrawMenu() {
 	off += 18;
 
 	UI::Label(expandPos - 148, off, 12, _("Camera"), white());
-	UI::Quad(expandPos - 149, off + 17, 148, 17 * 9 + 2, white(0.9f, 0.1f));
+	//UI::Quad(expandPos - 149, off + 17, 148, 17 * 9 + 2, white(0.9f, 0.1f));
 	off += 18;
-	UI::Label(expandPos - 147, off, 12, _("Target"), white());
-	bool htr = (rotCenterTrackId < ~0);
-	auto rf = rotCenterTrackId;
-	rotCenterTrackId = TryParse(UI::EditText(expandPos - 74, off, 55, 16, 12, white(1, 0.5f), htr? std::to_string(rotCenterTrackId) : "", true, white()), ~0U);
-	if (htr && Engine::Button(expandPos - 91, off, 16, 16, red()) == MOUSE_RELEASE) {
-		rotCenterTrackId = -1;
+	static std::string dinms[] = { "None", "Particle", "Residue", "Residue Group", "Bounding Box", "" };
+	static Popups::DropdownItem di((uint*)&rotCenterTrackType, dinms);
+	UI2::Dropdown(expandPos - 147, off, 146, "Follow", di);
+	CHK(rotCenterTrackType);
+	off += 17;
+	bool htr = (rotCenterTrackType != ROTTRACK::NONE);
+	switch (rotCenterTrackType) {
+	case ROTTRACK::ATOM:
+		htr = (rotCenterTrackId != ~0U);
+		UI::Label(expandPos - 147, off, 12, _("Target"), white());
+		rotCenterTrackId = TryParse(UI::EditText(expandPos - 74, off, 55, 16, 12, white(1, 0.5f), htr? std::to_string(rotCenterTrackId) : "", true, white()), ~0U);
+		if (htr && Engine::Button(expandPos - 91, off, 16, 16, red()) == MOUSE_RELEASE) {
+			rotCenterTrackId = -1;
+		}
+		if (Engine::Button(expandPos - 18, off, 16, 16, white(1, 0.5f)) == MOUSE_RELEASE) {
+			
+		}
+		off += 17;
+		break;
+	case ROTTRACK::BBOX:
+		break;
+	default:
+		rotCenter = UI2::EditVec(expandPos - 147, off, 146, _("Center"), rotCenter, !htr);
+		off += 17 * 3;
+		break;
 	}
-	if (Engine::Button(expandPos - 18, off, 16, 16, white(1, 0.5f)) == MOUSE_RELEASE) {
-		
-	}
-	rotCenter = UI2::EditVec(expandPos - 147, off + 17, 146, _("Center"), rotCenter, !htr);
 
-	rotZs = rotZ = TryParse(UI2::EditText(expandPos - 147, off + 17 * 4, 146, _("Rotation") + " W", std::to_string(rotZ), true, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.f);
-	rotWs = rotW = TryParse(UI2::EditText(expandPos - 147, off + 17 * 5, 146, _("Rotation") + " Y", std::to_string(rotW), true, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.f);
+	rotZs = rotZ = TryParse(UI2::EditText(expandPos - 147, off, 146, _("Rotation") + " W", std::to_string(rotZ), true, Vec4(0.6f, 0.4f, 0.4f, 1)), 0.f); off += 17;
+	rotWs = rotW = TryParse(UI2::EditText(expandPos - 147, off, 146, _("Rotation") + " Y", std::to_string(rotW), true, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.f); off += 17;
 
-	rotScale = TryParse(UI2::EditText(expandPos - 147, off + 17 * 6, 146, _("Scale"), std::to_string(rotScale)), 0.f);
+	rotScale = TryParse(UI2::EditText(expandPos - 147, off, 146, _("Scale"), std::to_string(rotScale)), 0.f); off += 17;
 
 	auto& cam = ChokoLait::mainCamera;
 	auto ql = cam->quality;
-	ql = UI2::Slider(expandPos - 147, off + 17 * 7, 146, _("Quality"), 0.25f, 1.5f, ql, std::to_string(int(ql * 100)) + "%");
-	if (Engine::Button(expandPos - 91, off + 17 * 7, 16, 16, Icons::refresh) == MOUSE_RELEASE)
+	ql = UI2::Slider(expandPos - 147, off, 146, _("Quality"), 0.25f, 1.5f, ql, std::to_string(int(ql * 100)) + "%");
+	if (Engine::Button(expandPos - 91, off, 16, 16, Icons::refresh) == MOUSE_RELEASE)
 		ql = 1;
-
 	if (ql != cam->quality) {
 		cam->quality = ql;
 		Scene::dirty = true;
 	}
+	off += 17;
 	bool a2 = cam->useGBuffer2;
-	UI::Label(expandPos - 147, off + 17 * 8, 12, _("Use Dynamic Quality"), white());
-	a2 = Engine::Toggle(expandPos - 19, off + 17 * 8, 16, Icons::checkbox, a2, white(), ORIENT_HORIZONTAL);
+	UI::Label(expandPos - 147, off, 12, _("Use Dynamic Quality"), white());
+	a2 = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, a2, white(), ORIENT_HORIZONTAL);
 	if (a2 != cam->useGBuffer2) {
 		cam->useGBuffer2 = a2;
 		if (a2) cam->GenGBuffer2();
 		//Scene::dirty = true;
 	}
-
-	off += 17 * 9 + 3;
+	off += 19;
 
 	if (a2) {
 		UI::Quad(expandPos - 149, off - 2, 148, 18, white(0.9f, 0.1f));
@@ -1300,8 +1326,8 @@ void ParGraphics::DrawMenu() {
 	UI::Quad(expandPos - 149, off + 17, 148, 17 * ns[(int)clippingType] + 2.f, white(0.9f, 0.1f));
 	off += 18;
 	static std::string nms[] = { _("None"), _("Slice"), _("Cube"), "" };
-	static Popups::DropdownItem di = Popups::DropdownItem((uint*)&clippingType, nms);
-	UI2::Dropdown(expandPos - 147, off, 146, _("Mode"), di);
+	static Popups::DropdownItem di2 = Popups::DropdownItem((uint*)&clippingType, nms);
+	UI2::Dropdown(expandPos - 147, off, 146, _("Mode"), di2);
 	if (_clippingType != clippingType) {
 		_clippingType = clippingType;
 		UpdateClipping();
@@ -1344,7 +1370,7 @@ void ParGraphics::DrawMenu() {
 
 	UI::EndScroll(off);
 
-	if (rf != rotCenterTrackId || s0 != rotScale || rz0 != rotZ || rw0 != rotW || center0 != rotCenter) Scene::dirty = true;
+	if (s0 != rotScale || rz0 != rotZ || rw0 != rotW || center0 != rotCenter) Scene::dirty = true;
 }
 
 void ParGraphics::DrawPopupDM() {

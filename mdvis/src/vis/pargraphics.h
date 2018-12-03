@@ -50,6 +50,13 @@ public:
 	static const Popups::DropdownItem _usePBRItems;
 
 	static Vec3 rotCenter;
+	static enum class ROTTRACK : uint {
+		NONE,
+		ATOM,
+		RES,
+		RESL,
+		BBOX
+	} rotCenterTrackType;
 	static uint rotCenterTrackId;
 	static float rotW, rotZ;
 	static float rotWs, rotZs;
