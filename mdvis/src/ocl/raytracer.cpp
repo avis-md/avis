@@ -265,7 +265,7 @@ void RayTracer::SetObjs() {
 	for (uint a = 0; a < mp; a++) {
 		auto& p = g_objshapes[a].mesh.positions;
 		for (int v = 0; v < p.size()/3; v++) {
-			((Vec3*)p.data())[v] *= Particles::radii[a];
+			((Vec3*)p.data())[v] *= Particles::radii[a] * Particles::radiiscl[a] * 4;
 			((Vec3*)p.data())[v] += Particles::poss[a];
 		}
 		for (auto& m : g_objshapes[a].mesh.material_ids)

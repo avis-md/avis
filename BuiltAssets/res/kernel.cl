@@ -1,4 +1,6 @@
 #define EPSILON 0.00001f
+#define PI 3.14159f
+#define STRAN 4
 
 typedef struct _Ray {
     /// xyz - origin, w - max range
@@ -107,16 +109,15 @@ static float Randf(uint* r) {
 	return 0.0001f*(*r % 10000);
 }
 
-static float3 RandVec(uint* r) {
-	float th = 2 * 3.14159f * Randf(r);
-	float z = -1 + 2 * Randf(r);
-	float sz = sqrt(1 - z*z);
-	return (float3)(sz * cos(th), sz * sin(th), z);
+static float RandfStra(uint* r, int i, int n) {
+    float rnd = Randf(r);
+    i %= n;
+    return (i + rnd) / n;
 }
 
-static float3 RandHemi(uint* r) {
-    float r1 = sqrt(Randf(r));
-    float r2 = Randf(r) * 2 * 3.14159f;
+static float3 RandHemi(uint* r, int s) {
+    float r1 = sqrt(RandfStra(r, s, STRAN));
+    float r2 = RandfStra(r, s, STRAN+1) * 2 * PI;
     return (float3)(r1 * cos(r2), r1 * sin(r2), sqrt(max(1 - r1, 0.0f)));
 }
 
@@ -125,11 +126,11 @@ static void GetTans(float3 n, float3* t1, float3* t2) {
     *t2 = normalize(cross(n, *t1));
 }
 
-static void Beckmann(float3* nrm, float rough, uint* rnd) {
+static void Beckmann(float3* nrm, float rough, uint* rnd, int s) {
     if (rough == 0) return;
 	float a = rough * rough;
-	float t1 = atan(sqrt(-a*log(1 - Randf(rnd))));
-	float t2 = Randf(rnd) * 2 * 3.14159f;
+	float t1 = atan(sqrt(-a*log(1 - RandfStra(rnd, s, STRAN))));
+	float t2 = RandfStra(rnd, s, STRAN+1) * 2 * PI;
 	float3 n1, n2;
     GetTans(*nrm, &n1, &n2);
 	*nrm = *nrm * cos(t1) + (n1 * cos(t2) + n2 * sin(t2)) * sin(t1);
@@ -140,9 +141,9 @@ static float3 SkyAt(float3 dir, __global float* bg) {
     const int bgh = bgw/2;
     
 	float2 rf = -(float2)(dir.x, dir.z);
-	float cx = acos(clamp(rf.x, -0.9999f, 0.9999f))/(3.14159f*2);
+	float cx = acos(clamp(rf.x, -0.9999f, 0.9999f))/(PI*2);
 	cx = mix(1-cx, cx, ceil(rf.y));
-	float sy = asin(clamp(dir.y, -0.9999f, 0.9999f))/3.14159f;
+	float sy = asin(clamp(dir.y, -0.9999f, 0.9999f))/PI;
     int x = (int)(cx * bgw);
     //x = (x + 200) % bgw;
     int y = (int)((sy + 0.5f) * bgh);
@@ -203,6 +204,7 @@ __kernel void Shading(//scene
                 float3 diff_col = (float3)( colors[color_id],
                                             colors[color_id + 1],
                                             colors[color_id + 2]);
+                diff_col = (float3)(1, 1, 1);
 
                 if (ray[k].o.w > 0.01f) {
                     float3 ro = ray[k].o.xyz;
@@ -214,16 +216,15 @@ __kernel void Shading(//scene
                     //if (Randf(&rnd) < (1 - ((1 - fres) * (1 - mat.specular)))) {
                     if (Randf(&rnd) < (1 - ((1 - fres) * 0.95f))) {
                         //Beckmann(&norm, 1 - mat.gloss, &rnd);
-                        Beckmann(&norm, 0.001f, &rnd);
+                        Beckmann(&norm, 0.005f, &rnd, rng);
                         norm = rd - 2 * dot(rd, norm.xyz) / (norm.x*norm.x + norm.y*norm.y + norm.z*norm.z) * norm;
-                        diff_col = (float3)(1, 1, 1);
                     }
                     else {
                         float3 t1, t2;
                         GetTans(norm, &t1, &t2);
-                        float3 rh = RandHemi(&rnd);
+                        float3 rh = RandHemi(&rnd, rng);
                         float3 nrm = t1*rh.x + t2*rh.y + norm*rh.z;
-                        ocol[k].xyz *= dot(nrm, norm);
+                        //ocol[k].xyz *= dot(nrm, norm);
                         norm = nrm;
                         //diff_col = (float3)(1, 1, 1);
                     }
