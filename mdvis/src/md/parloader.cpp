@@ -337,9 +337,9 @@ void ParLoader::DoOpen() {
 
 	busy = true;
 	ParInfo info = {};
-	loadProgress = &info.progress;
-	loadProgress2 = &info.trajectory.progress;
 	loadFrames = &info.trajectory.frames;
+	loadProgress2 = &info.trajectory.progress;
+	loadProgress = &info.progress;
 
 	if (isSrv) {
 		*loadProgress = 0.001f;
@@ -397,8 +397,6 @@ void ParLoader::DoOpen() {
 	}
 
 	if (isSrv) remove(path.c_str());
-
-	loadFrames = nullptr;
 
 	Engine::AcquireLock(10);
 	Particles::Resize(info.num);
@@ -592,6 +590,7 @@ void ParLoader::DoOpen() {
 			for (uint16_t i = 0; i < trj.frames; ++i) {
 				memcpy(&anm.bboxs[i][0], trj.bounds[i], 6*sizeof(double));
 			}
+			anm.bboxState.resize(trj.frames);
 			delete[](trj.bounds);
 		}
 		anm.reading = false;

@@ -29,7 +29,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "/Users/chokopan/Github/mdvis/mdvis/build/avis",
-            "args": ["--debug", "--nologo"],
+            "args": ["--debug", "--nologo", "-s", "-ilammps", "-b0", "-f1000", "~/Documents/dump.atom"],
             "stopAtEntry": false,
             "cwd": "/Users/chokopan/Github/mdvis/mdvis/build",
             "environment": [],

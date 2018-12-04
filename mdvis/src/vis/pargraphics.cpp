@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <random>
 #include "pargraphics.h"
 #include "md/parmenu.h"
 #include "md/Protein.h"
@@ -199,9 +201,17 @@ void ParGraphics::Init() {
 
 	auto bgfs = IO::GetFiles(IO::path + "res/bg");
 	for (auto& f : bgfs) {
-		bgs.push_back(IO::path + "res/bg/" + f);
+		if (f.size() > 4) {
+			auto ff = f.substr(f.size() - 4);
+			if (ff == ".png" || ff == ".jpg")
+				bgs.push_back(IO::path + "res/bg/" + f);
+		}
 	}
-	if (!!bgs.size()) bg = Texture(bgs[0], false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
+	if (!!bgs.size()) {
+		auto rng = std::default_random_engine {};
+		std::shuffle(bgs.begin(), bgs.end(), rng);
+		bg = Texture(bgs[0], false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
+	}
 	splash = Texture(IO::path + "res/bg_splash.jpg", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	logo = Texture(IO::path + "res/bg_logo.png", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	GLuint mv;
@@ -1267,7 +1277,9 @@ void ParGraphics::DrawMenu() {
 	off += 18;
 	static std::string dinms[] = { "None", "Particle", "Residue", "Residue Group", "Bounding Box", "" };
 	static Popups::DropdownItem di((uint*)&rotCenterTrackType, dinms);
+	UI2::sepw = 0.4f;
 	UI2::Dropdown(expandPos - 147, off, 146, "Follow", di);
+	UI2::sepw = 0.5f;
 	CHK(rotCenterTrackType);
 	off += 17;
 	bool htr = (rotCenterTrackType != ROTTRACK::NONE);

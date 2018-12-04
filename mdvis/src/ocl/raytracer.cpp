@@ -262,15 +262,25 @@ void RayTracer::SetObjs() {
 	const uint mp = std::min(Particles::particleSz, 5000U);
 	g_objshapes.resize(mp, g_objshapes[0]);
 	g_objmaterials.resize(mp, TO::material_t());
+	std::vector<double>* attr = 0;
+	if (ParGraphics::useGradCol) {
+		attr = &Particles::attrs[ParGraphics::gradColParam]->Get(Particles::anim.currentFrame);
+	}
 	for (uint a = 0; a < mp; a++) {
 		auto& p = g_objshapes[a].mesh.positions;
 		for (int v = 0; v < p.size()/3; v++) {
-			((Vec3*)p.data())[v] *= Particles::radii[a] * Particles::radiiscl[a] * 4;
+			((Vec3*)p.data())[v] *= Particles::radii[a] * Particles::radiiscl[a] * ParGraphics::radScl * 5;
 			((Vec3*)p.data())[v] += Particles::poss[a];
 		}
 		for (auto& m : g_objshapes[a].mesh.material_ids)
 			m = a;
-		memcpy(g_objmaterials[a].diffuse, &Particles::_colorPallete[Particles::colors[a]], sizeof(Vec3));
+		if (!ParGraphics::useGradCol || !attr->size()) {
+			memcpy(g_objmaterials[a].diffuse, &Particles::_colorPallete[Particles::colors[a]], sizeof(Vec3));
+		}
+		else {
+			auto col = Color::HueBaseCol(Clamp((1 - (float)(*attr)[a]), 0.f, 1.f) * 0.6667f);
+			memcpy(g_objmaterials[a].diffuse, &col, sizeof(Vec3));
+		}
 	}
 
 	std::vector<float> verts;
