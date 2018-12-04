@@ -70,5 +70,6 @@
         "condition_variable": "cpp"
     },
     "python.linting.pylintEnabled": false,
-    "python.pythonPath": "/usr/local/bin/python3"
+    "python.pythonPath": "/usr/local/bin/python3",
+    "terminal.explorerKind": "external"
 }

@@ -220,7 +220,7 @@ __kernel void Shading(//scene
                     GetTans(norm, &t1, &t2);
                     float3 rh = RandHemi(&rnd);
                     float3 nrm = t1*rh.x + t2*rh.y + norm*rh.z;
-                    ocol[k].xyz *= dot(nrm, norm);
+                    //ocol[k].xyz *= dot(nrm, norm);
                     norm = nrm;
                     if (dif < 0.01f)
                         diff_col.xyz = (float3)(1, 1, 1);
