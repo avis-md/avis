@@ -56,6 +56,7 @@ float AnNode::GetHeaderSz() {
 Vec2 AnNode::DrawConn() {
 #ifndef IS_ANSERVER
 	if (script->ok) {
+		const float connrad = 6;
 		auto cnt = (script->invars.size() + script->outvars.size());
 		float y = pos.y + 18 + hdrSz;
 		for (uint i = 0; i < script->invars.size(); i++, y += 17) {
@@ -64,8 +65,19 @@ Vec2 AnNode::DrawConn() {
 				Vec2 p2 = Vec2(pos.x, expanded ? y + 8 : pos.y + 8);
 				Vec2 p1 = Vec2(ri.first->pos.x + ri.first->width, ri.first->expanded ? ri.first->pos.y + 28 + ri.first->hdrSz + (ri.second + ri.first->inputR.size()) * 17 : ri.first->pos.y + 8);
 				Vec2 hx = Vec2((p2.x > p1.x) ? (p2.x - p1.x) / 2 : (p1.x - p2.x) / 3, 0);
-				UI2::Bezier(p1, p1 + hx, p2 - hx, p2, white(), 30);
+				auto col = white();
+				if (!AnWeb::selConnNode) {
+					if (ri.hoverdel) {
+						col = red();
+					}
+					else if (Rect(p1.x - connrad, p1.y - connrad, connrad * 2, connrad * 2).Inside(Input::mousePos)
+						|| Rect(p2.x - connrad, p2.y - connrad, connrad * 2, connrad * 2).Inside(Input::mousePos)) {
+						col = Vec4(1, 0.7f, 0, 1);
+					}
+				}
+				UI2::Bezier(p1, p1 + hx, p2 - hx, p2, col, 5, 30);
 			}
+			ri.hoverdel = false;
 		}
 		if (expanded) return Vec2(width, 19 + 17 * cnt + hdrSz + ftrSz + DrawLog(19 + 17 * cnt + hdrSz + ftrSz));
 		else return Vec2(width, 16 + DrawLog(16));
@@ -123,7 +135,7 @@ void AnNode::Draw() {
 					Vec2 p2(pos.x, y + 8);
 					Vec2 p1 = Input::mousePos;
 					Vec2 hx = Vec2((p2.x > p1.x) ? (p2.x - p1.x)/2 : (p1.x - p2.x)/3, 0);
-					UI2::Bezier(p1, p1 + hx, p2 - hx, p2, white(), 30);
+					UI2::Bezier(p1, p1 + hx, p2 - hx, p2, yellow(), 5, 30);
 					UI::Texture(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, hi ? tex_circle_conn : tex_circle_open);
 				}
 				else {
@@ -146,6 +158,7 @@ void AnNode::Draw() {
 						UI::Label(pos.x + width * 0.33f, y, 12, "<connected>", yellow());
 					}
 					else {
+						inputR[i].hoverdel = true;
 						UI::Label(pos.x + width * 0.33f, y, 12, "disconnect", red(1, (bt==MOUSE_PRESS)? 0.5f : 1));
 						if (bt == MOUSE_RELEASE) {
 							Disconnect(i, false);
@@ -175,7 +188,7 @@ void AnNode::Draw() {
 					Vec2 p2 = Input::mousePos;
 					Vec2 p1(pos.x + width, y + 8);
 					Vec2 hx = Vec2((p2.x > p1.x) ? (p2.x - p1.x) / 2 : (p1.x - p2.x) / 3, 0);
-					UI2::Bezier(p1, p1 + hx, p2 - hx, p2, white(), 30);
+					UI2::Bezier(p1, p1 + hx, p2 - hx, p2, yellow(), 5, 30);
 					UI::Texture(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, ho ? tex_circle_conn : tex_circle_open);
 				}
 				else {
@@ -189,6 +202,8 @@ void AnNode::Draw() {
 					UI::Label(pos.x + width - 10, y, 12, script->outvars[i].first, white());
 				}
 				else {
+					auto& ors = outputR[i];
+					for (auto& o : ors) o.first->inputR[o.second].hoverdel = true;
 					UI::Label(pos.x + width - 10, y, 12, "disconnect", red(1, (bt==MOUSE_PRESS)? 0.5f : 1));
 					if (bt == MOUSE_RELEASE) {
 						Disconnect(i, true);
@@ -249,8 +264,6 @@ float AnNode::DrawSide() {
 						(rf ? rf->script->outvars[rs].first : "no input");
 					UI2::Dropdown(pos.x + width * 0.33f, y, width * 0.67f - 5, di, [&](){
 						tmp = nullptr; opt = this; opi = i;
-						ss.resize(2);
-						ss[1] = "Parameter";
 						for (uint a = 0; a < id; a++)
 							ss.push_back(AnWeb::nodes[a]->title);
 						ss.push_back("");
@@ -263,25 +276,23 @@ float AnNode::DrawSide() {
 							if (!di.seld) opt = nullptr;
 							else if (!si) rf = opt = nullptr;
 							else if (!tmp) {
-								if (si > 1) { //TODO: implement parameters
-									rf = nullptr;
-									tmp = AnWeb::nodes[si - 2];
-									ss.resize(1);
-									ssi.clear();
-									int k = 0;
-									for (auto& v : tmp->script->outvars) {
-										if (CanConn(v.second, script->invars[i].second)) {
-											ss.push_back(v.first);
-											ssi.push_back(k);
-										}
-										k++;
+								rf = nullptr;
+								tmp = AnWeb::nodes[si - 1];
+								ss.resize(1);
+								ssi.clear();
+								int k = 0;
+								for (auto& v : tmp->script->outvars) {
+									if (CanConn(v.second, script->invars[i].second)) {
+										ss.push_back(v.first);
+										ssi.push_back(k);
 									}
-									ss.push_back("");
-									di.list = &ss[0];
-									di.target = &si;
-									si = 0;
-									Popups::type = POPUP_TYPE::DROPDOWN;
+									k++;
 								}
+								ss.push_back("");
+								di.list = &ss[0];
+								di.target = &si;
+								si = 0;
+								Popups::type = POPUP_TYPE::DROPDOWN;
 							}
 							else {
 								tmp->ConnectTo(ssi[si - 1], this, i);

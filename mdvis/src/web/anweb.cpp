@@ -173,10 +173,10 @@ void AnWeb::Draw() {
 	}
 	if (Input::mouse0State == MOUSE_UP && selPreClear) selConnNode = nullptr;
 
-	float canScroll = std::max(maxScroll - (Display::width - AnBrowse::expandPos - AnOps::expandPos), 0.f);
-	//if (Input::KeyHold(Key_RightArrow)) scrollPos += 1000 * Time::delta;
-	//if (Input::KeyHold(Key_LeftArrow)) scrollPos -= 1000 * Time::delta;
-	scrollPos = Clamp(scrollPos - Input::mouseScroll * 1000 * Time::delta, 0.f, canScroll);
+	if (Input::mousePos.x > AnBrowse::expandPos && Input::mousePos.x < Display::width - AnOps::expandPos) {
+		float canScroll = std::max(maxScroll - (Display::width - AnBrowse::expandPos - AnOps::expandPos), 0.f);
+		scrollPos = Clamp(scrollPos - Input::mouseScroll * 1000 * Time::delta, 0.f, canScroll);
+	}
 
 	Input::mouse0State = ms;
 	Input::mouse0 = (Input::mouse0State == 1) || (Input::mouse0State == 2);

@@ -15,6 +15,7 @@ void UI2::Init() {
 	int i = 0;
 	LC(pts);
 	LC(count);
+	LC(thick);
 	LC(col);
 #undef LC
 }
@@ -152,14 +153,16 @@ void UI2::Switch(float x, float y, float w, const std::string& title, int c, std
 	}
 }
 
-void UI2::Bezier(Vec2 p1, Vec2 t1, Vec2 t2, Vec2 p2, Vec4 col, int reso) {
+void UI2::Bezier(Vec2 p1, Vec2 t1, Vec2 t2, Vec2 p2, Vec4 col, float thick, int reso) {
+	thick /= 2;
 	glUseProgram(bezierProg);
 	Vec2 pts[4] = { Ds2(p1), Ds2(t1), Ds2(t2), Ds2(p2) };
 	glUniform2fv(bezierProgLocs[0], 4, &pts[0][0]);
-	glUniform1i(bezierProgLocs[1], reso-1);
-	glUniform4f(bezierProgLocs[2], col.r, col.g, col.b, col.a);
+	glUniform1i(bezierProgLocs[1], reso);
+	glUniform2f(bezierProgLocs[2], thick / Display::width, thick / Display::height);
+	glUniform4f(bezierProgLocs[3], col.r, col.g, col.b, col.a);
 	glBindVertexArray(Camera::emptyVao);
-	glDrawArrays(GL_LINE_STRIP, 0, reso);
+	glDrawArrays(GL_TRIANGLES, 0, reso * 6);
 	glUseProgram(0);
 }
 

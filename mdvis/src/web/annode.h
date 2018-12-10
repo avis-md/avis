@@ -102,7 +102,8 @@ public:
 		AnNode* first;
 		uint second;
 		bool use;
-		nodecon(AnNode* f = 0, uint s = 0, bool use = true) : first(f), second(s), use(true) {}
+		bool hoverdel;
+		nodecon(AnNode* f = 0, uint s = 0, bool use = true) : first(f), second(s), use(true), hoverdel(false) {}
 		CVar& getconv() { return first->conV[second]; }
 		void*& getval() { return getconv().value; }
 	};
