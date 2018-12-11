@@ -128,6 +128,8 @@ public:
 
 	bool Select();
 	virtual float GetHeaderSz();
+
+	virtual void Update() {}
 	virtual Vec2 DrawConn();
 	virtual void Draw();
 	virtual float DrawSide();

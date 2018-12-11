@@ -17,6 +17,7 @@ const std::string Node_SetAttribute::sig = ".sattr";
 const std::string Node_ShowRange::sig = ".srng";
 const std::string Node_SetRadScl::sig = ".rscl";
 const std::string Node_SetBBoxCenter::sig = ".sbxc";
+const std::string Node_AddSurface::sig = ".surf";
 const std::string Node_TraceTrj::sig = ".trrj";
 const std::string Node_Volume::sig = ".vol";
 const std::string Node_Remap::sig = ".remap";

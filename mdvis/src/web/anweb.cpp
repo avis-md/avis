@@ -82,6 +82,10 @@ void AnWeb::Insert(AnNode* node, Vec2 pos) {
 
 void AnWeb::Update() {
 #ifndef IS_ANSERVER
+	for (auto n : nodes) {
+		n->Update();
+	}
+
 	if (Input::mouse0) {
 		if (Input::mouse0State == MOUSE_DOWN) {
 			for (auto n : nodes) n->selected = false;

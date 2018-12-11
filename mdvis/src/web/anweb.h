@@ -70,6 +70,7 @@ public:
 #include "nodes/get/node_getattribute.h"
 #include "nodes/set/node_setattribute.h"
 #include "nodes/set/node_setbboxcenter.h"
+#include "nodes/mod/node_addsurface.h"
 #include "nodes/node_showrange.h"
 #include "nodes/node_setradscl.h"
 #include "nodes/node_tracetrj.h"
