@@ -31,15 +31,16 @@ Node_AddSurface::~Node_AddSurface() {
 void Node_AddSurface::Execute() {
 	//
 	std::lock_guard<std::mutex> locker(lock);
-	data.resize(pow(8, 3));
-	for (int a = 0; a < 8; ++a) {
-		for (int b = 0; b < 8; ++b) {
-			for (int c = 0; c < 8; ++c) {
-				data[a * 64 + b * 8 + c] = sqrtf(a*a + b*b + c*c) * 0.3f;
+	data.resize(pow(32, 3));
+	for (int a = 0; a < 32; ++a) {
+		for (int b = 0; b < 32; ++b) {
+			for (int c = 0; c < 32; ++c) {
+				data[a * 32 * 32 + b * 32 + c] = 5.f / glm::length(Vec3(a, b, c) - Vec3(10.5f, 10.5f, 10.5f))
+					+ 2.f / glm::length(Vec3(a, b, c) - Vec3(20.5f, 10.5f, 10.5f));
 			}
 		}
 	}
-	shape[0] = shape[1] = shape[2] = 8;
+	shape[0] = shape[1] = shape[2] = 32;
 }
 
 void Node_AddSurface::Update() {
@@ -57,7 +58,8 @@ void Node_AddSurface::DrawScene() {
 
 	auto e = glGetError();
 	glUseProgram(drawProg);
-	glUniformMatrix4fv(drawProgLocs[0], 1, GL_FALSE, glm::value_ptr(MVP::projection() * MVP::modelview()));
+	glUniformMatrix4fv(drawProgLocs[0], 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
+	glUniformMatrix4fv(drawProgLocs[1], 1, GL_FALSE, glm::value_ptr(MVP::projection() * MVP::modelview()));
 	glBindVertexArray(vao);
 	glDrawArrays(GL_TRIANGLES, 0, genSz*3);
 	e = glGetError();
@@ -113,6 +115,7 @@ void Node_AddSurface::Init() {
 	drawProg = Shader::FromVF(IO::GetText(IO::path + "surfDVert.glsl"), IO::GetText(IO::path + "surfDFrag.glsl"));
 	i = 0;
 #define LOC(nm) drawProgLocs[i++] = glGetUniformLocation(drawProg, #nm)
+	LOC(_MV);
 	LOC(_MVP);
 #undef LOC
 
@@ -195,12 +198,6 @@ void Node_AddSurface::ExecMC() {
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
-
-	std::vector<Vec4> poss(genSz * 3);
-	glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, outPos);
-	glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, genSz * 3 * sizeof(Vec4), poss.data());
-	glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
-	for (auto& a : poss) std::cout << std::to_string(a) << std::endl;
 }
 
 const float Node_AddSurface::triTable[] = {
