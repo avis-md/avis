@@ -14,6 +14,9 @@ uniform float skyStrength;
 uniform float skyStrDecay;
 uniform float skyStrDecayOff;
 uniform float specStr;
+uniform float glass;
+uniform float ior;
+uniform int bgType;
 uniform vec4 bgCol;
 uniform vec4 fogCol;
 uniform bool isOrtho;
@@ -22,6 +25,14 @@ out vec4 fragCol;
 
 float length2(vec3 v) {
     return v.x*v.x + v.y*v.y + v.z*v.z;
+}
+
+vec3 refract2(vec3 i, vec3 n, float ior) {
+    ior = 1 / ior;
+    float ni = dot(n, i);
+    float k = 1 - ior*ior*(1 - ni*ni);
+    if (k < 0) return vec3(0, 0, 0);
+    else return ior*i - (ior*ni + sqrt(k))*n;
 }
 
 vec4 skyColAt(sampler2D sky, vec3 dir) {
@@ -53,18 +64,32 @@ void main () {
     vec3 fwd = normalize(wPos.xyz - wPos2.xyz);
 	
     if (z >= 1) {
-        fragCol = bgCol;
+        if (bgType == 0)
+            fragCol = bgCol;
+        else {
+            if (bgType == 1)
+                fragCol.rgb = skyColAt(inSkyE, fwd).rgb;
+            else
+                fragCol.rgb = skyColAt(inSky, fwd).rgb;
+            fragCol *= skyStrength;
+            fragCol.a = 1;
+        }
         return;
     }
     else if (length2(nCol.xyz) == 0) {
         fragCol.rgb = dCol.rgb;
     }
     else {
-        vec3 skycol = skyColAt(inSkyE, nCol.xyz).rgb;
+        vec3 skycol = skyColAt(inSkyE, nCol.xyz).rgb * dCol.rgb;
         vec3 refl = reflect(fwd, nCol.xyz);
+        vec3 refr = refract2(fwd, nCol.xyz, ior);
         vec3 skycol2 = skyColAt(inSky, refl.xyz).rgb;
+        vec3 skycolr = skyColAt(inSky, refr.xyz).rgb;
         float fres = pow(1-dot(-fwd, nCol.xyz), 5);
-        fragCol.rgb = mix(skycol * dCol.rgb, skycol2 * mix(vec3(1, 1, 1), dCol.rgb, specStr), (1 - ((1-fres) * (1-specStr)))) * skyStrength;
+        skycol2 = skycol2 * mix(vec3(1, 1, 1), dCol.rgb, specStr);
+        skycol = mix(skycol, skycol2, specStr);
+        skycol = mix(skycol, skycolr, glass);
+        fragCol.rgb = mix(skycol, skycol2, fres) * skyStrength;
     }
     if (fogCol.a > 0) {
         fragCol.rgb = mix(fragCol.rgb, fogCol.rgb, clamp(skyStrDecay * (zLinear - skyStrDecayOff), 0, 1));

@@ -31,8 +31,10 @@ Texture ParGraphics::bg, ParGraphics::splash, ParGraphics::logo;
 std::vector<std::string> ParGraphics::bgs;
 int ParGraphics::bgi;
 GLuint ParGraphics::refl, ParGraphics::reflE;
-float ParGraphics::reflStr = 2, ParGraphics::reflStrDecay = 2, ParGraphics::reflStrDecayOff = 0, ParGraphics::specStr = 0.2f;
+float ParGraphics::reflStr = 2, ParGraphics::reflTr = 0, ParGraphics::reflIor = 1;
+float ParGraphics::reflStrDecay = 2, ParGraphics::reflStrDecayOff = 0, ParGraphics::specStr = 0.2f;
 bool ParGraphics::fogUseBgCol = true;
+uint ParGraphics::bgType = 0;
 Vec4 ParGraphics::bgCol = Vec4(1, 1, 1, 1), ParGraphics::fogCol = Vec4(0, 0, 0, 1);
 
 bool ParGraphics::showbbox = true;
@@ -221,8 +223,9 @@ void ParGraphics::Init() {
 	uint i = 0;
 	LC(_IP); LC(screenSize); LC(inColor); LC(inNormal);
 	LC(inEmit); LC(inDepth); LC(inSky); LC(inSkyE);
-	LC(skyStrength); LC(skyStrDecay); LC(skyStrDecayOff); 
-	LC(specStr); LC(bgCol); LC(fogCol); LC(isOrtho);
+	LC(skyStrength); LC(skyStrDecay); LC(skyStrDecayOff);
+	LC(specStr); LC(glass), LC(ior), LC(bgType),
+	LC(bgCol); LC(fogCol); LC(isOrtho);
 #undef LC
 	
 	reflCProg = Shader::FromF(mv, glsl::reflFragC);
@@ -971,20 +974,23 @@ void ParGraphics::BlitSky() {
 		glUniform1f(reflProgLocs[9], reflStrDecay);
 		glUniform1f(reflProgLocs[10], reflStrDecayOff);
 		glUniform1f(reflProgLocs[11], specStr);
+		glUniform1f(reflProgLocs[12], reflTr);
+		glUniform1f(reflProgLocs[13], reflIor);
+		glUniform1i(reflProgLocs[14], bgType);
 		if (AnWeb::drawFull) {
-			glUniform4f(reflProgLocs[12], 0, 0, 0, 1);
-			glUniform4f(reflProgLocs[13], 0, 0, 0, 1);
+			glUniform4f(reflProgLocs[15], 0, 0, 0, 1);
+			glUniform4f(reflProgLocs[16], 0, 0, 0, 1);
 		}
 		else {
-			glUniform4f(reflProgLocs[12], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
+			glUniform4f(reflProgLocs[15], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
 			if (fogUseBgCol) {
-				glUniform4f(reflProgLocs[13], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
+				glUniform4f(reflProgLocs[16], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
 			}
 			else {
-				glUniform4f(reflProgLocs[13], fogCol.r, fogCol.g, fogCol.b, 1);
+				glUniform4f(reflProgLocs[16], fogCol.r, fogCol.g, fogCol.b, 1);
 			}
 		}
-		glUniform1i(reflProgLocs[14], cam->ortographic? 1 : 0);
+		glUniform1i(reflProgLocs[17], cam->ortographic? 1 : 0);
 	}
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, cam->texs.colTex);
@@ -1185,7 +1191,7 @@ void ParGraphics::DrawColMenu() {
 	UI::Label(exps - 148, off, 12, "Bounding Box", white());
 	off += 18;
 	UI2::Toggle(exps - 147, off, 146, "Draw", showbbox);
-	CHKT(showbbox)
+	CHK(showbbox)
 	off += 17;
 	auto _bc = Particles::bboxCenter;
 	_bc = UI2::EditVec(exps - 147, off, 146, "Center", _bc, true);
@@ -1265,10 +1271,16 @@ void ParGraphics::DrawMenu() {
 	UI2::Toggle(expandPos - 147, off, 146, _("Inherit Color"), fogUseBgCol); off += 17;
 	if (!fogUseBgCol) { UI2::Color(expandPos - 147, off, 146, _("Color"), fogCol); off += 17; }
 	specStr = UI2::Slider(expandPos - 147, off, 146, _("Specular"), 0, 1, specStr); off += 17;
-	UI2::Color(expandPos - 147, off, 146, _("Background"), bgCol);
+	reflTr = UI2::Slider(expandPos - 147, off, 146, _("Transparency"), 0, 1, reflTr); off += 17;
+	if (reflTr > 0) { reflIor = UI2::Slider(expandPos - 147, off, 146, _("IOR"), 0.5f, 5.f, reflIor); off += 17; }
+	static std::string bgTypeNms[] = { "Color", "Ambient", "Sky", "" };
+	static Popups::DropdownItem bgTypeDi(&bgType, bgTypeNms);
+	UI2::Dropdown(expandPos - 148, off, 146, _("Background"), bgTypeDi); off += 17;
+	if (!bgType) { UI2::Color(expandPos - 147, off, 146, _(" Color"), bgCol); }
 
 	CHKT(reflStr) CHKT(reflStrDecay) CHKT(reflStrDecayOff)
-	CHKT(fogUseBgCol) CHKT(fogCol) CHKT(specStr) CHKT(bgCol)
+	CHKT(fogUseBgCol) CHKT(fogCol) CHKT(specStr)
+	CHKT(reflTr) CHKT(reflIor) CHKT(bgCol) CHKT(bgType)
 
 	off += 18;
 

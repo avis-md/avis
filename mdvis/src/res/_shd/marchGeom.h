@@ -1,4 +1,5 @@
-#version 330 core
+namespace glsl {
+	const char marchGeom[] = R"(#version 330 core
 
 layout(points) in;
 layout(triangle_strip, max_vertices = 15) out;
@@ -98,6 +99,8 @@ void main() {
 		0, 4, 1, 5, 2, 6, 3, 7
 	);
 
+	vec3 scl = vec3(1.f / (shp.x-1), 1.f / (shp.y-1), 1.f / (shp.z-1));
+
 	for (int a = 0; a < 5; a++) {
 		int a0 = index*15 + a*3;
 		int vi = int(texelFetch(triBuf, a0).x);
@@ -106,21 +109,22 @@ void main() {
 		float v2 = vs[i2v[vi*2+1]];
 		vec3 p1 = ps[i2v[vi*2]];
 		vec3 p2 = ps[i2v[vi*2+1]];
-		emit(interp(v1, v2, p1, p2), interp(v1, v2, getnrm(p1, v1), getnrm(p2, v2)));
+		emit(interp(v1, v2, p1, p2) * scl, interp(v1, v2, getnrm(p1, v1), getnrm(p2, v2)));
 
 		vi = int(texelFetch(triBuf, a0 + 1).x);
 		v1 = vs[i2v[vi*2]];
 		v2 = vs[i2v[vi*2+1]];
 		p1 = ps[i2v[vi*2]];
 		p2 = ps[i2v[vi*2+1]];
-		emit(interp(v1, v2, p1, p2), interp(v1, v2, getnrm(p1, v1), getnrm(p2, v2)));
+		emit(interp(v1, v2, p1, p2) * scl, interp(v1, v2, getnrm(p1, v1), getnrm(p2, v2)));
 
 		vi = int(texelFetch(triBuf, a0 + 2).x);
 		v1 = vs[i2v[vi*2]];
 		v2 = vs[i2v[vi*2+1]];
 		p1 = ps[i2v[vi*2]];
 		p2 = ps[i2v[vi*2+1]];
-		emit(interp(v1, v2, p1, p2), interp(v1, v2, getnrm(p1, v1), getnrm(p2, v2)));
+		emit(interp(v1, v2, p1, p2) * scl, interp(v1, v2, getnrm(p1, v1), getnrm(p2, v2)));
 		EndPrimitive();
 	}
-}
+}	
+)";}

@@ -10,10 +10,6 @@ public:
 	void Execute() override;
 	void Update() override;
 	void DrawScene() override;
-	//void DrawSettings(float& off) override;
-	//float DrawSide() override;
-	//void SaveOut(const std::string& path) override {}
-	//void LoadOut(const std::string& path) override;
 protected:
 	static bool initd;
 	PROGDEF_H(marcherProg, 10);
@@ -21,11 +17,12 @@ protected:
 
 	std::vector<float> data;
 	int shape[3];
+	float cutoff;
 
 	static size_t bufSz, outSz;
 	static uint genSz;
-	static GLuint inBuf, inBufT;
-	static GLuint vao, outPos, outNrm, query;
+	static GLuint inBuf, inBufT, query;
+	GLuint vao, outPos, outNrm;
 
 	static std::mutex lock;
 

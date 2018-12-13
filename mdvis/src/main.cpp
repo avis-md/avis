@@ -450,10 +450,6 @@ The hash for this program is )" << VisSystem::version_hash
 
 		glfwShowWindow(Display::window);
 
-		auto surf = new Node_AddSurface();
-		AnWeb::Insert(surf);
-		surf->Execute();
-
 		while (ChokoLait::alive()) {
 			Engine::stateLock.lock();
 			if (!Display::width || !Display::height)

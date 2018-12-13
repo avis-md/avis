@@ -427,7 +427,8 @@ void AnNode::AddOutput(const CVar& cv) {
 
 AnNode::AnNode(AnScript* scr, ANNODE_FLAGS flags) : script(scr), canTile(false), 
 		saveConV(!(flags & AN_FLAG_NOSAVECONV)),
-		runOnSeek(!!(flags & AN_FLAG_RUNONSEEK)) {
+		runOnSeek(!!(flags & AN_FLAG_RUNONSEEK)),
+		runOnValChg(!!(flags & AN_FLAG_RUNONVALCHG)) {
 	if (!scr) return;
 	title = scr->name;
 	inputR.resize(scr->invars.size());
@@ -658,7 +659,13 @@ void AnNode::CatchExp(char* c) {
 
 void AnNode::OnAnimFrame() {
 	if (runOnSeek) {
-		Debug::Message("AnNode", "autorun " + title);
+		//Debug::Message("AnNode", "autorun " + title);
+		Execute();
+	}
+}
+
+void AnNode::OnValChange(int i) {
+	if (runOnValChg) {
 		Execute();
 	}
 }

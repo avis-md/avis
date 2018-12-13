@@ -23,7 +23,6 @@ public:
 	void LoadOut(const std::string& path) override;
 	
 	void OnConn(bool o, int i) override;
-	void OnValChange(int i) override;
 
 	void Save(XmlNode* n) override;
 	void Load(XmlNode* n) override;

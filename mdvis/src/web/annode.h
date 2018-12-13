@@ -37,10 +37,11 @@ const std::string AN_NODE_MODS[] = { "Get Param", "Set Param", "Set Radii Scale"
 enum class AN_NODE_GEN {
 	NUM0 = 0x40,
 	BOND,
+	SURF,
 	TRJ,
 	NUM
 };
-const std::string AN_NODE_GENS[] = { "Add Bonds", "Trace Trajectory" };
+const std::string AN_NODE_GENS[] = { "Add Bonds", "Draw Surface", "Trace Trajectory" };
 
 enum class AN_NODE_MISC {
 	NUM0 = 0x60,
@@ -70,6 +71,7 @@ union AnVarBase {
 typedef uint ANNODE_FLAGS;
 #define AN_FLAG_NOSAVECONV 1
 #define AN_FLAG_RUNONSEEK 2
+#define AN_FLAG_RUNONVALCHG 4
 
 class AnNode {
 public:
@@ -77,6 +79,7 @@ public:
 
 	const bool saveConV = true;
 	const bool runOnSeek = false;
+	const bool runOnValChg = false;
 
 	AnScript* script;
 	bool selected;
@@ -174,7 +177,7 @@ public:
 	virtual void OnSceneUpdate() {}
 	virtual void OnAnimFrame();
 	virtual void OnConn(bool o, int i) {}
-	virtual void OnValChange(int i) {}
+	virtual void OnValChange(int i);
 protected:
 	AnNode(AnScript* scr, ANNODE_FLAGS flags = 0);
 

@@ -10,7 +10,9 @@ public:
 	static int bgi;
 	static GLuint refl, reflE;
 	static float reflStr, reflStrDecay, reflStrDecayOff, specStr;
+	static float reflTr, reflIor;
 	static bool fogUseBgCol;
+	static uint bgType;
 	static Vec4 bgCol, fogCol;
 
 	static bool showbbox;
@@ -36,7 +38,7 @@ public:
 	static float orientStr;
 	static uint orientParam[3];
 	
-	PROGDEF_H(reflProg, 15);
+	PROGDEF_H(reflProg, 20);
 	PROGDEF_H(reflCProg, 10);
 	PROGDEF_H(parProg, 20);
 	PROGDEF_H(parConProg, 20);

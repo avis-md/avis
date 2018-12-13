@@ -1,5 +1,7 @@
 #include "node_addsurface.h"
 #include "vis/pargraphics.h"
+#include "md/particles.h"
+#include "res/shddata.h"
 
 bool Node_AddSurface::initd = false;
 PROGDEF(Node_AddSurface::marcherProg);
@@ -7,12 +9,11 @@ PROGDEF(Node_AddSurface::drawProg);
 
 size_t Node_AddSurface::bufSz = 0, Node_AddSurface::outSz = 0;
 uint Node_AddSurface::genSz = 0;
-GLuint Node_AddSurface::inBuf, Node_AddSurface::inBufT;
-GLuint Node_AddSurface::vao, Node_AddSurface::outPos, Node_AddSurface::outNrm, Node_AddSurface::query;
+GLuint Node_AddSurface::inBuf, Node_AddSurface::inBufT, Node_AddSurface::query;
 
 std::mutex Node_AddSurface::lock;
 
-Node_AddSurface::Node_AddSurface() : AnNode(new DmScript(sig)) {
+Node_AddSurface::Node_AddSurface() : AnNode(new DmScript(sig), AN_FLAG_RUNONVALCHG) {
 	if (!initd) Init();
 
 	title = "Draw Surface";
@@ -22,25 +23,35 @@ Node_AddSurface::Node_AddSurface() : AnNode(new DmScript(sig)) {
 	script->AddInput("density", "list(3d)");
 	AddInput();
 	script->AddInput("value", "double");
+
+	glGenVertexArrays(1, &vao);
+	glGenBuffers(1, &outPos);
+	glGenBuffers(1, &outNrm);
 }
 
 Node_AddSurface::~Node_AddSurface() {
-
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &outPos);
+	glDeleteBuffers(1, &outNrm);
 }
 
 void Node_AddSurface::Execute() {
-	//
+	genSz = 0;
+	if (!inputR[0].first) return;
+	auto& cv = inputR[0].getconv();
+	auto& vl = *(double**)cv.value;
+	shape[0] = *cv.dimVals[0];
+	shape[1] = *cv.dimVals[1];
+	shape[2] = *cv.dimVals[2];
+	const int sz = shape[0] * shape[1] * shape[2];
+	if (!sz) return;
 	std::lock_guard<std::mutex> locker(lock);
-	data.resize(pow(32, 3));
-	for (int a = 0; a < 32; ++a) {
-		for (int b = 0; b < 32; ++b) {
-			for (int c = 0; c < 32; ++c) {
-				data[a * 32 * 32 + b * 32 + c] = 5.f / glm::length(Vec3(a, b, c) - Vec3(10.5f, 10.5f, 10.5f))
-					+ 2.f / glm::length(Vec3(a, b, c) - Vec3(20.5f, 10.5f, 10.5f));
-			}
-		}
+	data.resize(sz);
+#pragma omp parallel for
+	for (int a = 0; a < sz; a++) {
+		data[a] = (float)vl[a];
 	}
-	shape[0] = shape[1] = shape[2] = 32;
+	cutoff = (float)(inputR[1].first? *(double*)inputR[1].getval() : inputVDef[1].d);
 }
 
 void Node_AddSurface::Update() {
@@ -50,6 +61,7 @@ void Node_AddSurface::Update() {
 		Set();
 		ExecMC();
 		data.clear();
+		if (!!genSz) Scene::dirty = true;
 	}
 }
 
@@ -60,6 +72,9 @@ void Node_AddSurface::DrawScene() {
 	glUseProgram(drawProg);
 	glUniformMatrix4fv(drawProgLocs[0], 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
 	glUniformMatrix4fv(drawProgLocs[1], 1, GL_FALSE, glm::value_ptr(MVP::projection() * MVP::modelview()));
+	auto& bboxs = Particles::boundingBox;
+	glUniform3f(drawProgLocs[2], bboxs[0], bboxs[2], bboxs[4]);
+	glUniform3f(drawProgLocs[3], bboxs[1], bboxs[3], bboxs[5]);
 	glBindVertexArray(vao);
 	glDrawArrays(GL_TRIANGLES, 0, genSz*3);
 	e = glGetError();
@@ -70,11 +85,11 @@ void Node_AddSurface::DrawScene() {
 void Node_AddSurface::Init() {
 	GLuint vs, gs;
 	std::string err;
-	if (!Shader::LoadShader(GL_VERTEX_SHADER, IO::GetText(IO::path + "surfVert.glsl"), vs, &err)) {
+	if (!Shader::LoadShader(GL_VERTEX_SHADER, glsl::marchVert, vs, &err)) {
 		Debug::Error("AddSurface::Init", "Failed to load vertex shader! " + err);
 		return;
 	}
-	if (!Shader::LoadShader(GL_GEOMETRY_SHADER, IO::GetText(IO::path + "surfGeom.glsl"), gs, &err)) {
+	if (!Shader::LoadShader(GL_GEOMETRY_SHADER, glsl::marchGeom, gs, &err)) {
 		Debug::Error("AddSurface::Init", "Failed to load geometry shader! " + err);
 		return;
 	}
@@ -117,14 +132,12 @@ void Node_AddSurface::Init() {
 #define LOC(nm) drawProgLocs[i++] = glGetUniformLocation(drawProg, #nm)
 	LOC(_MV);
 	LOC(_MVP);
+	LOC(bbox1);
+	LOC(bbox2);
 #undef LOC
 
 	glGenBuffers(1, &inBuf);
 	glGenTextures(1, &inBufT);
-
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &outPos);
-	glGenBuffers(1, &outNrm);
 	glGenQueries(1, &query);
 
 	glGenBuffers(1, &triBuf);
@@ -180,7 +193,7 @@ void Node_AddSurface::ExecMC() {
 	glUniform1i(marcherProgLocs[0], 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_BUFFER, inBufT);
-	glUniform1f(marcherProgLocs[1], 1);
+	glUniform1f(marcherProgLocs[1], cutoff);
 	glUniform3i(marcherProgLocs[2], shape[0], shape[1], shape[2]);
 	glUniform1i(marcherProgLocs[3], 2);
 	glActiveTexture(GL_TEXTURE2);

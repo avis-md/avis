@@ -26,3 +26,5 @@
 #include "_shd/bezierVert.h"
 #include "_shd/ssaoFrag.h"
 #include "_shd/ssaoFrag2.h"
+#include "_shd/marchVert.h"
+#include "_shd/marchGeom.h"

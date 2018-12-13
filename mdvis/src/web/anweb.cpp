@@ -221,6 +221,7 @@ void AnWeb::Draw() {
 						SW(MOD::SBXC, Node_SetBBoxCenter);
 
 						SW(GEN::BOND, Node_AddBond);
+						SW(GEN::SURF, Node_AddSurface);
 						SW(GEN::TRJ, Node_TraceTrj);
 
 						SW(MISC::PLOT, Node_Plot);
@@ -713,7 +714,7 @@ void AnWeb::Load(const std::string& s) {
 					ND(Node_Info)
 					ND(Node_Vector)
 					ND(Node_AddBond)
-					//ND(Node_AddVolume)
+					ND(Node_AddSurface);
 					ND(Node_TraceTrj)
 					ND(Node_Camera_Out)
 					ND(Node_GetAttribute)

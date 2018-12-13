@@ -6,7 +6,7 @@
 #include "md/particles.h"
 #endif
 
-Node_Plot::Node_Plot() : AnNode(new DmScript(sig), AN_FLAG_RUNONSEEK), type(TYPE::LINES), tex(0) {
+Node_Plot::Node_Plot() : AnNode(new DmScript(sig), AN_FLAG_RUNONSEEK | AN_FLAG_RUNONVALCHG), type(TYPE::LINES), tex(0) {
 	title = "Plot Data";
 	titleCol = NODE_COL_SPC;
 	canTile = true;
@@ -325,10 +325,6 @@ void Node_Plot::OnConn(bool o, int i) {
 		}
 		//inputR[1].use = inputR[2].use = useids;
 	}
-}
-
-void Node_Plot::OnValChange(int i) {
-	Execute();
 }
 
 void Node_Plot::Save(XmlNode* n) {
