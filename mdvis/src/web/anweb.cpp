@@ -108,8 +108,6 @@ void AnWeb::Update() {
 		Particles::anim.currentFrame = -1;
 		Particles::SetFrame(frm);
 	}
-
-	if (Input::KeyDown(Key_P)) Save(IO::path + "nodes/test.web");
 #endif
 }
 

@@ -13,7 +13,7 @@ GLuint Node_AddSurface::inBuf, Node_AddSurface::inBufT, Node_AddSurface::query;
 
 std::mutex Node_AddSurface::lock;
 
-Node_AddSurface::Node_AddSurface() : AnNode(new DmScript(sig), AN_FLAG_RUNONVALCHG) {
+Node_AddSurface::Node_AddSurface() : AnNode(new DmScript(sig), AN_FLAG_RUNONSEEK | AN_FLAG_RUNONVALCHG) {
 	if (!initd) Init();
 
 	title = "Draw Surface";
@@ -154,7 +154,7 @@ void Node_AddSurface::Init() {
 
 void Node_AddSurface::Set() {
 	const auto sz = data.size();
-	if (sz != bufSz) {
+	//if (sz != bufSz) {
 		bufSz = sz;
 		outSz = (shape[0]-1)*(shape[1]-1)*(shape[2]-1) * 15;
 		glBindBuffer(GL_ARRAY_BUFFER, inBuf);
@@ -176,12 +176,12 @@ void Node_AddSurface::Set() {
 		glBindBuffer(GL_ARRAY_BUFFER, outNrm);
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, NULL);
 		glBindVertexArray(0);
-	}
-	else {
-		glBindBuffer(GL_ARRAY_BUFFER, inBuf);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, bufSz, data.data());
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
+	//}
+	//else {
+	//	glBindBuffer(GL_ARRAY_BUFFER, inBuf);
+	//	glBufferSubData(GL_ARRAY_BUFFER, 0, bufSz, data.data());
+	//	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//}
 }
 
 void Node_AddSurface::ExecMC() {

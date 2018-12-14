@@ -1,11 +1,12 @@
 #include "renderer.h"
 #include "pargraphics.h"
-#include "gif/gif.h"
-#include "utils/avi.h"
 #include "md/parmenu.h"
 #include "ui/ui_ext.h"
 #include "ui/localizer.h"
+#include "web/anweb.h"
 #include "utils/tinyfiledialogs.h"
+#include "utils/avi.h"
+#include "gif/gif.h"
 
 VisRenderer::IMG_TYPE VisRenderer::imgType;
 VisRenderer::VID_TYPE VisRenderer::vidType;
@@ -294,6 +295,7 @@ void VisRenderer::ToVid() {
 		Debug::Message("Renderer::ToVid", "Rendering frame " + std::to_string(f));
 		Particles::SetFrame(f);
 		Particles::Update();
+		AnWeb::Update();
 		if (vidMsaa > 0) {
 			for (int c = 0; c < 4; ++c) {
 				Scene::dirty = true;

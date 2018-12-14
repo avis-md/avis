@@ -14,6 +14,7 @@ public:
 	static bool fogUseBgCol;
 	static uint bgType;
 	static Vec4 bgCol, fogCol;
+	static float bgMul;
 
 	static bool showbbox;
 	

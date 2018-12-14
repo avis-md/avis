@@ -36,6 +36,7 @@ float ParGraphics::reflStrDecay = 2, ParGraphics::reflStrDecayOff = 0, ParGraphi
 bool ParGraphics::fogUseBgCol = true;
 uint ParGraphics::bgType = 0;
 Vec4 ParGraphics::bgCol = Vec4(1, 1, 1, 1), ParGraphics::fogCol = Vec4(0, 0, 0, 1);
+float ParGraphics::bgMul = 1;
 
 bool ParGraphics::showbbox = true;
 
@@ -982,7 +983,10 @@ void ParGraphics::BlitSky() {
 			glUniform4f(reflProgLocs[16], 0, 0, 0, 1);
 		}
 		else {
-			glUniform4f(reflProgLocs[15], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
+			if (bgType == 0)
+				glUniform4f(reflProgLocs[15], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
+			else
+				glUniform4f(reflProgLocs[15], 0, 0, 0, bgMul);
 			if (fogUseBgCol) {
 				glUniform4f(reflProgLocs[16], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
 			}
@@ -1276,11 +1280,12 @@ void ParGraphics::DrawMenu() {
 	static std::string bgTypeNms[] = { "Color", "Ambient", "Sky", "" };
 	static Popups::DropdownItem bgTypeDi(&bgType, bgTypeNms);
 	UI2::Dropdown(expandPos - 148, off, 146, _("Background"), bgTypeDi); off += 17;
-	if (!bgType) { UI2::Color(expandPos - 147, off, 146, _(" Color"), bgCol); }
+	if (!bgType) { UI2::Color(expandPos - 147, off, 146, _(" Color"), bgCol); off += 17; }
+	else { bgMul = UI2::Slider(expandPos - 147, off, 146, _(" Brightness"), 0, 2, bgMul); off += 17; }
 
 	CHKT(reflStr) CHKT(reflStrDecay) CHKT(reflStrDecayOff)
 	CHKT(fogUseBgCol) CHKT(fogCol) CHKT(specStr)
-	CHKT(reflTr) CHKT(reflIor) CHKT(bgCol) CHKT(bgType)
+	CHKT(reflTr) CHKT(reflIor) CHKT(bgCol) CHKT(bgType) CHKT(bgMul)
 
 	off += 18;
 

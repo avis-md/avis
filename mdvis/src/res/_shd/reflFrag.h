@@ -71,7 +71,7 @@ void main () {
                 fragCol.rgb = skyColAt(inSkyE, fwd).rgb;
             else
                 fragCol.rgb = skyColAt(inSky, fwd).rgb;
-            fragCol *= skyStrength;
+            fragCol *= skyStrength * bgCol.a;
             fragCol.a = 1;
         }
         return;
