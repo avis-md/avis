@@ -25,7 +25,7 @@ std::vector<double>& Particles::attrdata::Get(uint frm) {
 	else {
 		if (!readonly && (status[frm - 1] == FRAME_STATUS::UNLOADED)) {
 			FromDisk(frm - 1);
-			status[frm - 1] == FRAME_STATUS::LOADED;
+			status[frm - 1] = FRAME_STATUS::LOADED;
 		}
 		return dataAll[frm - 1];
 	}

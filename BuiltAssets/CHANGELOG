@@ -1,16 +1,36 @@
 #General
+- Significant memory usage improvement for attributes
+- More settings for rendering (transparency etc)
+- Custom loading screens can now be put in the res/bg/ folder
+
+#Analysis
+- New nodes:
+  - Draw Surface: equal-value surface from 3d density array
+  - Do while: returns execution to target node until condition
+- New plot option: Density
+
+#Visualization
+- New effects:
+  - Bloom
+  - Depth of Field
+
+#Bug fixes
+- System node -> System node connection crash during Run All
+- Bounding box visibility not reflected immediately
+- Gradient color not reflected immediately
+
+#----Previous changes----
+
+#Version 0.02b
 - The remote file browser is now faster
 - Garbage collector is improved, now (hopefully) crashes less
 - New plot option: Lines (accumulate)
-
-#Bug fixes
-- Multiple text boxes activating at the same time
-- Loading bonds not showing the loading screen
-- Multiple plot nodes with different settings
-- Crash when mouse-over atoms during Run All
-- Internal node to internal node connections crash on Run All
-
-#----Previous changes----
+- Bug fixes:
+  - Multiple text boxes activating at the same time
+  - Loading bonds not showing the loading screen
+  - Multiple plot nodes with different settings
+  - Crash when mouse-over atoms during Run All
+  - Internal node to internal node connections crash on Run All
 
 #Version 0.02
 - Bounding box can now be animated
@@ -23,3 +43,6 @@
 - Improved control for text box
 - UI is now faster when scene is static
 - Some new command line options
+
+#Version 0.01
+- Hello, world!

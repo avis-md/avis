@@ -104,13 +104,16 @@ public:
 	class Eff {
 	public:
 		static bool expanded;
-		static bool showSSAO, showGlow;
-		static bool useSSAO, useGlow;
+		static bool showSSAO, showGlow, showDof;
+		static bool useSSAO, useGlow, useDof;
+
+		static float glowThres, glowRad, glowStr;
 
 		static float ssaoRad, ssaoStr, ssaoBlur;
 		static int ssaoSamples;
 
-		static float glowThres, glowRad, glowStr;
+		static float dofDepth, dofFocal, dofAper;
+		static int dofIter;
 
 		static void Apply();
 		static float DrawMenu(float off);

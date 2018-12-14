@@ -109,7 +109,7 @@ void IO::RmDirectory(std::string path) {
 #ifdef PLATFORM_WIN
 	RunCmd::Run("rmdir /Q /S \"" + path + "\"");
 #else
-	RunCmd::Run("rm -r \"" + path + "\"");
+	RunCmd::Run("rm -rf \"" + path + "\"");
 #endif
 }
 

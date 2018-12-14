@@ -107,30 +107,57 @@ Mat4x4 ParGraphics::lastMV, ParGraphics::lastP, ParGraphics::lastMVP;
 //---------------- effects vars -------------------
 
 bool ParGraphics::Eff::expanded;
-bool ParGraphics::Eff::showSSAO, ParGraphics::Eff::showGlow;
-bool ParGraphics::Eff::useSSAO, ParGraphics::Eff::useGlow;
+bool ParGraphics::Eff::showSSAO, ParGraphics::Eff::showGlow, ParGraphics::Eff::showDof;
+bool ParGraphics::Eff::useSSAO, ParGraphics::Eff::useGlow, ParGraphics::Eff::useDof;
+
+float ParGraphics::Eff::glowThres = 0.7f, ParGraphics::Eff::glowRad = 1, ParGraphics::Eff::glowStr = 1;
 
 float ParGraphics::Eff::ssaoRad, ParGraphics::Eff::ssaoStr, ParGraphics::Eff::ssaoBlur;
 int ParGraphics::Eff::ssaoSamples;
 
-float ParGraphics::Eff::glowThres, ParGraphics::Eff::glowRad, ParGraphics::Eff::glowStr;
+float ParGraphics::Eff::dofDepth = 0, ParGraphics::Eff::dofFocal = 1, ParGraphics::Eff::dofAper = 1;
+int ParGraphics::Eff::dofIter = 1;
 
 void ParGraphics::Eff::Apply() {
 	auto& cam = ChokoLait::mainCamera;
 	byte cnt = 0;
-	if (useSSAO) cnt += Effects::SSAO(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[2], cam->blitTexs[0], cam->blitTexs[1], cam->blitTexs[2],
-		cam->texs.normTex, cam->texs.depthTex, ssaoStr, ssaoSamples, ssaoRad, ssaoBlur, Display::width, Display::height);
-
-	if ((cnt % 2) == 1) {
-		std::swap(cam->blitFbos[0], cam->blitFbos[1]);
-		std::swap(cam->blitTexs[0], cam->blitTexs[1]);
-		cnt = 0;
+	if (useGlow) {
+		cnt += Effects::Glow(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[2], cam->blitTexs[0], cam->blitTexs[1], cam->blitTexs[2],
+			glowThres, glowRad, glowStr, Display::width, Display::height);
+		if ((cnt % 2) == 1) {
+			std::swap(cam->blitFbos[0], cam->blitFbos[1]);
+			std::swap(cam->blitTexs[0], cam->blitTexs[1]);
+			cnt = 0;
+		}
 	}
-	if (AnWeb::drawFull) cnt += Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1], AnWeb::drawLerp, Display::width, Display::height);
 
-	if (cnt%2 != 0) {
-		std::swap(cam->blitTexs[0], cam->blitTexs[1]);
-		std::swap(cam->blitFbos[0], cam->blitFbos[1]);
+	if (useSSAO) {
+		cnt += Effects::SSAO(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[2], cam->blitTexs[0], cam->blitTexs[1], cam->blitTexs[2],
+			cam->texs.normTex, cam->texs.depthTex, ssaoStr, ssaoSamples, ssaoRad, ssaoBlur, Display::width, Display::height);
+		if ((cnt % 2) == 1) {
+			std::swap(cam->blitFbos[0], cam->blitFbos[1]);
+			std::swap(cam->blitTexs[0], cam->blitTexs[1]);
+			cnt = 0;
+		}
+	}
+
+	if (useDof) {
+		cnt += Effects::Dof(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1],
+			cam->texs.depthTex, dofDepth / 500, dofFocal, dofAper, dofIter, Display::width, Display::height);
+		if ((cnt % 2) == 1) {
+			std::swap(cam->blitFbos[0], cam->blitFbos[1]);
+			std::swap(cam->blitTexs[0], cam->blitTexs[1]);
+			cnt = 0;
+		}
+	}
+
+	if (AnWeb::drawFull) {
+		cnt += Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1],
+		AnWeb::drawLerp, Display::width, Display::height);
+		if (cnt%2 != 0) {
+			std::swap(cam->blitTexs[0], cam->blitTexs[1]);
+			std::swap(cam->blitFbos[0], cam->blitFbos[1]);
+		}
 	}
 }
 
@@ -140,7 +167,16 @@ float ParGraphics::Eff::DrawMenu(float off) {
 	UI::Label(expandPos - 148, off, 12, _("Effects"), white());
 
 	off += 17;
-	UI::Quad(expandPos - 148, off - 1, 147, 17 * 5 + 2, white(0.9f, 0.1f));
+	UI::Label(expandPos - 146, off, 12, _("Glow"), white());
+	useGlow = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, useGlow, white(), ORIENT_HORIZONTAL);
+	glowThres = UI2::Slider(expandPos - 147, off + 17, 146, _("Threshold"), 0, 2, glowThres);
+	glowRad = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Radius"), 0, 1, glowRad);
+	glowStr = UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Strength"), 0, 3, glowStr);
+
+	CHKT(useGlow) CHKT(glowThres) CHKT(glowRad) CHKT(glowStr)
+
+	off += 17 * 4 + 1;
+
 	UI::Label(expandPos - 146, off, 12, _("Ambient Occlusion"), white());
 	useSSAO = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, useSSAO, white(), ORIENT_HORIZONTAL);
 	ssaoSamples = (int)UI2::Slider(expandPos - 147, off + 17, 146, _("Samples"), 5, 100, (float)ssaoSamples, std::to_string(ssaoSamples));
@@ -151,7 +187,18 @@ float ParGraphics::Eff::DrawMenu(float off) {
 
 	CHKT(useSSAO) CHKT(ssaoSamples) CHKT(ssaoRad) CHKT(ssaoStr) CHKT(ssaoBlur)
 
-	return off + 17 * 5 + 1;
+	off += 17 * 5 + 1;
+
+	UI::Label(expandPos - 146, off, 12, _("Depth of Field"), white());
+	useDof = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, useDof, white(), ORIENT_HORIZONTAL);
+	dofDepth = UI2::Slider(expandPos - 147, off + 17, 146, _("Distance"), 0, 5, dofDepth);
+	//dofFocal = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Focal"), 0.001f, 1, dofFocal);
+	dofAper = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Aperture"), 0, 4, dofAper);
+	dofIter = (int)UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Iterations"), 1, 5, (float)dofIter, std::to_string(dofIter));
+
+	CHKT(useDof) CHKT(dofDepth) CHKT(dofAper) CHKT(dofIter)
+
+	return off + 17 * 4 + 1;
 }
 
 void ParGraphics::Eff::Serialize(XmlNode* nd) {
