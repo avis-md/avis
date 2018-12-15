@@ -157,7 +157,7 @@ void VisRenderer::ToImage() {
 	Display::width = Display::actualWidth = Display::frameWidth = iw;
 	Display::height = Display::actualHeight = Display::frameHeight = ih;
 	ParGraphics::hlIds.clear();
-	if (imgUseAlpha) ParGraphics::bgCol.a = 0;
+	if (imgUseAlpha) ParGraphics::bgCol.a = -1;
 
 	MakeTex(res_fbo, res_img, imgW, imgH);
 	if (imgSlices > 1 || imgMsaa > 0) {
@@ -257,7 +257,7 @@ void VisRenderer::ToVid() {
 	Display::width = Display::actualWidth = Display::frameWidth = vidW;
 	Display::height = Display::actualHeight = Display::frameHeight = vidH;
 	ParGraphics::hlIds.clear();
-	if (imgUseAlpha) ParGraphics::bgCol.a = 0;
+	if (imgUseAlpha) ParGraphics::bgCol.a = -1;
 
 	MakeTex(tmp_fbo, tmp_img, vidW, vidH);
 	if (vidMsaa > 0) {

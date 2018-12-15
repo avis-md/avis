@@ -167,38 +167,46 @@ float ParGraphics::Eff::DrawMenu(float off) {
 	UI::Label(expandPos - 148, off, 12, _("Effects"), white());
 
 	off += 17;
-	UI::Label(expandPos - 146, off, 12, _("Glow"), white());
-	useGlow = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, useGlow, white(), ORIENT_HORIZONTAL);
-	glowThres = UI2::Slider(expandPos - 147, off + 17, 146, _("Threshold"), 0, 2, glowThres);
-	glowRad = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Radius"), 0, 1, glowRad);
-	glowStr = UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Strength"), 0, 3, glowStr);
+	UI2::Toggle(expandPos - 147, off, 145, _("Glow"), useGlow);
+	if (useGlow) {
+		glowThres = UI2::Slider(expandPos - 147, off + 17, 146, _("Threshold"), 0, 2, glowThres);
+		glowRad = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Radius"), 0, 1, glowRad);
+		glowStr = UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Strength"), 0, 3, glowStr);
 
-	CHKT(useGlow) CHKT(glowThres) CHKT(glowRad) CHKT(glowStr)
+		CHKT(glowThres) CHKT(glowRad) CHKT(glowStr)
+		off += 17 * 4 + 1;
+	}
+	else off += 18;
+	CHKT(useGlow)
 
-	off += 17 * 4 + 1;
+	UI2::Toggle(expandPos - 147, off, 145, _("Ambient Occlusion"), useSSAO);
+	if (useSSAO) {
+		ssaoSamples = (int)UI2::Slider(expandPos - 147, off + 17, 146, _("Samples"), 5, 100, (float)ssaoSamples, std::to_string(ssaoSamples));
+		ssaoSamples = Clamp(ssaoSamples, 10, 100);
+		ssaoRad = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Radius"), 0.001f, 0.05f, ssaoRad);
+		ssaoStr = UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Strength"), 0, 3, ssaoStr);
+		ssaoBlur = UI2::Slider(expandPos - 147, off + 17 * 4, 146, _("Blur"), 0, 40, ssaoBlur);
 
-	UI::Label(expandPos - 146, off, 12, _("Ambient Occlusion"), white());
-	useSSAO = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, useSSAO, white(), ORIENT_HORIZONTAL);
-	ssaoSamples = (int)UI2::Slider(expandPos - 147, off + 17, 146, _("Samples"), 5, 100, (float)ssaoSamples, std::to_string(ssaoSamples));
-	ssaoSamples = Clamp(ssaoSamples, 10, 100);
-	ssaoRad = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Radius"), 0.001f, 0.05f, ssaoRad);
-	ssaoStr = UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Strength"), 0, 3, ssaoStr);
-	ssaoBlur = UI2::Slider(expandPos - 147, off + 17 * 4, 146, _("Blur"), 0, 40, ssaoBlur);
+		CHKT(ssaoSamples) CHKT(ssaoRad) CHKT(ssaoStr) CHKT(ssaoBlur)
+		off += 17 * 5 + 1;
+	}
+	else off += 18;
+	CHKT(useSSAO)
 
-	CHKT(useSSAO) CHKT(ssaoSamples) CHKT(ssaoRad) CHKT(ssaoStr) CHKT(ssaoBlur)
+	UI2::Toggle(expandPos - 147, off, 145, _("Depth Of Field"), useDof);
+	if (useDof) {
+		dofDepth = UI2::Slider(expandPos - 147, off + 17, 146, _("Distance"), 0, 5, dofDepth);
+		//dofFocal = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Focal"), 0.001f, 1, dofFocal);
+		dofAper = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Aperture"), 0, 20, dofAper);
+		dofIter = (int)UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Iterations"), 1, 20, (float)dofIter, std::to_string(dofIter));
 
-	off += 17 * 5 + 1;
+		CHKT(dofDepth) CHKT(dofAper) CHKT(dofIter)
+		off + 17 * 4 + 1;
+	}
+	else off += 18;
+	CHKT(useDof)
 
-	UI::Label(expandPos - 146, off, 12, _("Depth of Field"), white());
-	useDof = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, useDof, white(), ORIENT_HORIZONTAL);
-	dofDepth = UI2::Slider(expandPos - 147, off + 17, 146, _("Distance"), 0, 5, dofDepth);
-	//dofFocal = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Focal"), 0.001f, 1, dofFocal);
-	dofAper = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Aperture"), 0, 4, dofAper);
-	dofIter = (int)UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Iterations"), 1, 5, (float)dofIter, std::to_string(dofIter));
-
-	CHKT(useDof) CHKT(dofDepth) CHKT(dofAper) CHKT(dofIter)
-
-	return off + 17 * 4 + 1;
+	return off;
 }
 
 void ParGraphics::Eff::Serialize(XmlNode* nd) {
@@ -1030,12 +1038,12 @@ void ParGraphics::BlitSky() {
 			glUniform4f(reflProgLocs[16], 0, 0, 0, 1);
 		}
 		else {
-			if (bgType == 0)
+			if (bgType == 0 || bgCol.a < 0)
 				glUniform4f(reflProgLocs[15], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
 			else
 				glUniform4f(reflProgLocs[15], 0, 0, 0, bgMul);
 			if (fogUseBgCol) {
-				glUniform4f(reflProgLocs[16], bgCol.r, bgCol.g, bgCol.b, bgCol.a);
+				glUniform4f(reflProgLocs[16], -1, 0, 0, bgCol.a);
 			}
 			else {
 				glUniform4f(reflProgLocs[16], fogCol.r, fogCol.g, fogCol.b, 1);
@@ -1449,7 +1457,7 @@ void ParGraphics::DrawMenu() {
 	
 	off = Eff::DrawMenu(off);
 
-	off = Shadows::DrawMenu(off + 1);
+	//off = Shadows::DrawMenu(off + 1);
 
 	UI::EndScroll(off);
 

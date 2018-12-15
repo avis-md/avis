@@ -64,16 +64,19 @@ void main () {
     vec3 fwd = normalize(wPos.xyz - wPos2.xyz);
 	
     if (z >= 1) {
-        if (bgType == 0)
-            fragCol = bgCol;
-        else {
-            if (bgType == 1)
-                fragCol.rgb = skyColAt(inSkyE, fwd).rgb;
-            else
-                fragCol.rgb = skyColAt(inSky, fwd).rgb;
-            fragCol *= skyStrength * bgCol.a;
-            fragCol.a = 1;
+        if (bgCol.a >= 0) {
+            if (bgType == 0)
+                fragCol = bgCol;
+            else {
+                if (bgType == 1)
+                    fragCol.rgb = skyColAt(inSkyE, fwd).rgb;
+                else
+                    fragCol.rgb = skyColAt(inSky, fwd).rgb;
+                fragCol *= skyStrength * bgCol.a;
+                fragCol.a = 1;
+            }
         }
+        else fragCol = vec4(0, 0, 0, 0);
         return;
     }
     else if (length2(nCol.xyz) == 0) {
@@ -91,8 +94,21 @@ void main () {
         skycol = mix(skycol, skycolr, glass);
         fragCol.rgb = mix(skycol, skycol2, fres) * skyStrength;
     }
-    if (fogCol.a > 0) {
-        fragCol.rgb = mix(fragCol.rgb, fogCol.rgb, clamp(skyStrDecay * (zLinear - skyStrDecayOff), 0, 1));
+    if (bgCol.a >= 0) {
+        vec3 fc;
+        if (fogCol.r < 0) {
+            if (bgType == 0)
+                fc = bgCol.rgb;
+            else {
+                if (bgType == 1)
+                    fc = skyColAt(inSkyE, fwd).rgb;
+                else
+                    fc = skyColAt(inSky, fwd).rgb;
+                fc *= skyStrength * bgCol.a;
+            }
+        }
+        else fc = fogCol.rgb;
+        fragCol.rgb = mix(fragCol.rgb, fc, clamp(skyStrDecay * (zLinear - skyStrDecayOff), 0, 1));
         fragCol.a = 1;
     }
     else
