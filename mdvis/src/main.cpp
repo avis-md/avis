@@ -34,6 +34,7 @@
 #include "live/livesyncer.h"
 #include "ocl/raytracer.h"
 #include "res/resdata.h"
+#include "hdr.h"
 
 Unloader unloader;
 
@@ -251,7 +252,8 @@ int main(int argc, char **argv) {
 						__debug = true;
 					else if ISS(version) {
 						std::cout << VERSIONSTRING << std::endl
-							<< "hash: " << VisSystem::version_hash << std::endl;
+							<< "hash: " << VisSystem::version_hash << std::endl
+							<< "built on " << __DATE__ << std::endl;
 						return 0;
 					}
 					else if ISS(help) {
@@ -278,7 +280,8 @@ int main(int argc, char **argv) {
 						option_silent = true;
 					else if ISC('v') {
 						std::cout << VERSIONSTRING << std::endl
-							<< "hash: " << VisSystem::version_hash << std::endl;
+							<< "hash: " << VisSystem::version_hash << std::endl
+							<< "built on " << __DATE__ << std::endl;
 						if (argc == 2)
 							return 0;
 					}
@@ -313,7 +316,8 @@ int main(int argc, char **argv) {
 			}
 		}
 		if (!nologo) {
-			std::cout << "AViS " APPVERSION "\n" R"(Thanks for trying out this program! :)
+			std::cout << "AViS " APPVERSION "\n" R"(Pua Kai, 2018
+Thanks for trying out this program!
 You can view a copy of all logs in Log.txt.
 Raw compile output for each script is in __[]cache__/name_log.txt.
 The hash for this program is )" << VisSystem::version_hash
