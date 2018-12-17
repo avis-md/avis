@@ -18,7 +18,7 @@ public:
 	static std::string EditPass(float x, float y, uint w, const std::string& title, const std::string& val, bool enabled = true, Vec4 col = white(1, 0.5f));
 	static float Slider(float x, float y, float w, const std::string& title, float a, float b, float t);
 	static float Slider(float x, float y, float w, const std::string& title, float a, float b, float t, const std::string& lbl);
-	static float Slider(float x, float y, float w, float a, float b, float t);
+	static float Slider(float x, float y, float w, float a, float b, float t, const std::string& lbl = "\1");
 	static void Color(float x, float y, float w, const std::string& title, Vec4& col);
 	static void File(float x, float y, float w, const std::string& title, const std::string& fl, filecallback func);
 	static MOUSE_STATUS Button2(float x, float y, float w, const std::string& s, const Texture& tex, Vec4 col = white(1, 0.4f), Vec4 col2 = white());

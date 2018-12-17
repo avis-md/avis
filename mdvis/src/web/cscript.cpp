@@ -27,7 +27,7 @@ CVar::CVar(std::string nm, char tp, int dim, std::initializer_list<int*> szs, st
 		const auto& p = (szs.size() > a)? szs.begin()[a] : nullptr;
 		if (p) dimVals[a] = p;
 		else {
-			if (df++ < defszs.end()) data.dims[a] = *df;
+			if (df < defszs.end()) data.dims[a] = *(df++);
 			dimVals[a] = &data.dims[a];
 		}
 	}
@@ -46,6 +46,51 @@ CVar::CVar(std::string nm, char tp, int dim, std::initializer_list<int*> szs, st
 		Debug::Error("CVar", "Unexpected type " + std::string(&tp, 1) + "!");
 		break;
 	}
+}
+
+CVar::CVar(const CVar& cv) {
+	name = cv.name;
+	typeName = cv.typeName;
+	type = cv.type;
+	data = cv.data;
+	if (type == AN_VARTYPE::LIST && cv.data.val.arr.data.size() > 0 && cv.data.val.arr.p == cv.data.val.arr.data.data()) {
+		data.val.arr.p = data.val.arr.data.data();
+	}
+	if (cv.value == &cv.data.val.arr.p) {
+		value = data.val.arr.p;
+	}
+	else value = cv.value;
+	dimNames = cv.dimNames;
+	dimVals = cv.dimVals;
+	for (size_t a = 0; a < dimVals.size(); ++a) {
+		if (cv.dimVals[a] == &cv.data.dims[a]) {
+			dimVals[a] = &data.dims[a];
+		}
+	}
+	stride = cv.stride;
+}
+
+CVar& CVar::operator= (const CVar& cv) {
+	name = cv.name;
+	typeName = cv.typeName;
+	type = cv.type;
+	std::memcpy(&data, &cv.data, sizeof(data));
+	if (type == AN_VARTYPE::LIST && cv.data.val.arr.data.size() > 0 && cv.data.val.arr.p == cv.data.val.arr.data.data()) {
+		data.val.arr.p = data.val.arr.data.data();
+	}
+	if (cv.value == &cv.data.val.arr.p) {
+		value = data.val.arr.p;
+	}
+	else value = cv.value;
+	dimNames = cv.dimNames;
+	dimVals = cv.dimVals;
+	for (size_t a = 0; a < dimVals.size(); ++a) {
+		if (cv.dimVals[a] == &cv.data.dims[a]) {
+			dimVals[a] = &data.dims[a];
+		}
+	}
+	stride = cv.stride;
+	return *this;
 }
 
 void CVar::Write(std::ofstream& strm) {

@@ -225,6 +225,8 @@ void paintfunc() {
 	Popups::Draw();
 
 	UI::Quad(0, 0, Display::width, Display::height, RayTracer::resTex);
+
+	//UI::Quad(0, 0, w/2, h/2, bg, white(), 8);
 }
 
 #ifdef MAKE_RES

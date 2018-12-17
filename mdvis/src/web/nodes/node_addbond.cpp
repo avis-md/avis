@@ -39,7 +39,8 @@ void Node_AddBond::Execute() {
 
 	if (!inputR[0].first) return;
 	CVar& cv = inputR[0].first->conV[inputR[0].second];
-	if (*cv.dimVals[1] != 2) RETERR("dimension 1 must be of size 2!");
+	auto d1 = *cv.dimVals[1];
+	if (d1 != 2) RETERR("dimension 1 is " + std::to_string(d1) + ", expected 2!");
 	auto& c = Particles::anim.conns2[animId];
 	c.resize(Particles::anim.frameCount);
 	auto& c2 = c[Node_Inputs::frame];

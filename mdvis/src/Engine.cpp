@@ -202,7 +202,7 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4,
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h, const Texture& texture, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, float uvx, float uvy, float uvw, float uvh) {
 	if (!texture) return MOUSE_NONE;
 	if (!UI::focused || (UI::_layer < UI::_layerMax && !UI::ignoreLayers) || (Input::mouse0State != 0 && !Rect(x, y, w, h).Inside(Input::mouseDownPos))) {
-		UI::Quad(x, y, w, h, texture.pointer, normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
+		UI::Quad(x, y, w, h, texture.pointer, normalVec4, -1, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
 		return MOUSE_NONE;
 	}
 	bool inside = Rect(x, y, w, h).Inside(Input::mousePos);
@@ -213,11 +213,11 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, const Texture& t
 	switch (Input::mouse0State) {
 	case 0:
 	case MOUSE_UP:
-		UI::Quad(x, y, w, h, texture.pointer, inside ? highlightVec4 : normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
+		UI::Quad(x, y, w, h, texture.pointer, inside ? highlightVec4 : normalVec4, -1, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
 		break;
 	case MOUSE_DOWN:
 	case MOUSE_HOLD:
-		UI::Quad(x, y, w, h, texture.pointer , inside ? pressVec4 : normalVec4, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
+		UI::Quad(x, y, w, h, texture.pointer , inside ? pressVec4 : normalVec4, -1, Vec2(uvx, 1 - uvy), Vec2(uvx + uvw, 1 - uvy), Vec2(uvx, 1 - uvy - uvh), Vec2(uvx + uvw, 1 - uvy - uvh));
 		break;
 	}
 	return (inside && (UI::_layer == UI::_layerMax || UI::ignoreLayers)) ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
@@ -302,7 +302,7 @@ void Engine::DrawProgressBar(float x, float y, float w, float h, float progress,
 	UI::Quad(x, y, w, h, background);
 	progress = Clamp(progress, 0.f, 100.f)*0.01f;
 	float tx = (clip == 0) ? 1 : ((clip == 1) ? progress : w*progress / h);
-	UI::Quad(x + padding, y + padding, w*progress - 2 * padding, h - 2 * padding, foreground.pointer, tint, Vec2(0, 1), Vec2(tx, 1), Vec2(0, 0), Vec2(tx, 0));
+	UI::Quad(x + padding, y + padding, w*progress - 2 * padding, h - 2 * padding, foreground.pointer, tint, -1, Vec2(0, 1), Vec2(tx, 1), Vec2(0, 0), Vec2(tx, 0));
 }
 
 void Engine::Sleep(uint ms) {

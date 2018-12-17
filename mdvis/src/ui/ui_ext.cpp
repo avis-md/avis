@@ -55,12 +55,12 @@ float UI2::Slider(float x, float y, float w, const std::string& title, float a, 
 
 float UI2::Slider(float x, float y, float w, const std::string& title, float a, float b, float t, const std::string& lbl) {
 	UI::Label(x, y, 12, title, white());
-	return Slider(x + w*sepw, y, w*sepw2 - 1.f, a, b, t);
+	return Slider(x + w*sepw, y, w*sepw2 - 1.f, a, b, t, (lbl == "\1")? std::to_string(t) : lbl);
 }
 
-float UI2::Slider(float x, float y, float w, float a, float b, float t) {
+float UI2::Slider(float x, float y, float w, float a, float b, float t, const std::string& lbl) {
 	t = Engine::DrawSliderFill(x, y, w, 16, a, b, t, white(1, 0.5f), white());
-	UI::Label(x + 2, y, 12, std::to_string(t), white(1, 0.2f));
+	UI::Label(x + 2, y, 12, lbl, white(1, 0.2f));
 	return t;
 }
 

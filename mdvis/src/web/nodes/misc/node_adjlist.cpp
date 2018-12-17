@@ -65,11 +65,13 @@ Node_AdjListI::Node_AdjListI() : AnNode(new DmScript(sig)) {
 	AddOutput(CVar("pairlist", 'i', 2, { &count, nullptr }, { 2 }));
 	auto& cv = conV[0];
 	script->AddOutput(cv);
+	auto v = *conV[0].dimVals[1];
 	cv.value = &cv.data.val.arr.p;
 }
 
 void Node_AdjListI::Execute() {
 	count = 0;
+	auto v = *conV[0].dimVals[1];
 	if (!inputR[0].first) return;
 	auto& cv = inputR[0].first->conV[inputR[0].second];
 	auto data = *(int**)cv.value;

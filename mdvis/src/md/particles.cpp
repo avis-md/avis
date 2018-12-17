@@ -534,7 +534,10 @@ void Particles::Deserialize(XmlNode* nd) {
 							else
 								ParLoader::OnOpenFile(std::vector<std::string>{ n3.value });
 							//
+							Engine::stateLock.unlock();
 							while (ParLoader::busy){}
+							Engine::WaitForLockValue();
+							Engine::stateLock.lock();
 						}
 						else if (!!particleSz) {
 							if (n3.name == "trajectory" && n3.value != "") {
@@ -544,7 +547,10 @@ void Particles::Deserialize(XmlNode* nd) {
 								else
 									ParLoader::OnOpenFile(std::vector<std::string>{ n3.value });
 								//
-								//while (ParLoader::busy){}
+								Engine::stateLock.unlock();
+								while (ParLoader::busy){}
+								Engine::WaitForLockValue();
+								Engine::stateLock.lock();
 							}
 							else if (n3.name == "visibility") {
 								DeserializeVis(&n3);

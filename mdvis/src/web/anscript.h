@@ -134,6 +134,8 @@ public:
 	CVar() : value(0) {}
 	CVar(std::string nm, AN_VARTYPE tp);
 	CVar(std::string nm, char tp, int dim, std::initializer_list<int*> szs, std::initializer_list<int> defszs = {});
+	CVar(const CVar&);
+	CVar& operator= (const CVar&);
 
 	std::string name, typeName;
 	AN_VARTYPE type;

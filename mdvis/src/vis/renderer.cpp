@@ -18,7 +18,7 @@ VisRenderer::STATUS VisRenderer::status = STATUS::READY;
 bool VisRenderer::imgUseAlpha = true;
 uint VisRenderer::imgW = RESO, VisRenderer::imgH = RESO, VisRenderer::vidW = VRESO, VisRenderer::vidH = VRESO;
 uint VisRenderer::imgSlices = 4;
-uint VisRenderer::imgMsaa = 4, VisRenderer::vidMsaa = 4;
+uint VisRenderer::imgMsaa = 4, VisRenderer::vidMsaa = 1;
 uint VisRenderer::vidMaxFrames = 1000;
 float VisRenderer::resLerp = -1;
 
@@ -99,7 +99,7 @@ void VisRenderer::DrawMenu() {
 
 	UI::Label(ep - 148, off, 12, _("Image (GLSL)"), white());
 	off += 17;
-	UI::Quad(ep - 149, off - 1, 148, 17 * 5 + 3, white(0.9f, 0.1f));
+	UI::Quad(ep - 149, off - 1, 148, 17 * 6 + 3, white(0.9f, 0.1f));
 	if (Engine::Button(ep - 147, off, 145, 16, Vec4(0.2f, 0.4f, 0.2f, 1), _("Render"), 12, white(), true) == MOUSE_RELEASE) {
 		ToImage();
 	}
@@ -113,6 +113,8 @@ void VisRenderer::DrawMenu() {
 	bool ms = !!imgMsaa;
 	UI2::Toggle(ep - 147, off, 145, _("MSAA"), ms);
 	imgMsaa = ms? 4 : 0;
+	off += 17;
+	UI2::Toggle(ep - 147, off, 145, _("Transparency"), imgUseAlpha);
 	off += 20;
 
 	UI::Label(ep - 148, off, 12, _("Movie (GLSL)"), white());

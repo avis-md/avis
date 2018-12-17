@@ -50,7 +50,7 @@ void Particles::animdata::Seek(uint f) {
 }
 
 void Particles::animdata::Update() {
-	if (frameCount <= 1) return;
+	if (frameCount <= 1) goto skip;
 
 	if (dirty) {
 		dirty = false;
@@ -100,10 +100,10 @@ void Particles::animdata::Update() {
 					break;
 				}
 			}
-		skip:
-			UpdateAttrs();
 		}
 	}
+	skip:
+		UpdateAttrs();
 }
 
 void Particles::animdata::UpdateMemRange() {

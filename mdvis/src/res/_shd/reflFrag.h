@@ -35,13 +35,13 @@ vec3 refract2(vec3 i, vec3 n, float ior) {
     else return ior*i - (ior*ni + sqrt(k))*n;
 }
 
-vec4 skyColAt(sampler2D sky, vec3 dir) {
+vec4 skyColAt(sampler2D sky, vec3 dir, float mip) {
     vec2 refla = normalize(-vec2(dir.x, dir.z));
     float cx = acos(refla.x)/(3.14159 * 2);
     cx = mix(1-cx, cx, sign(refla.y) * 0.5 + 0.5);
     float sy = asin(dir.y)/(3.14159);
 
-    return texture(sky, vec2(cx + 0.125, sy + 0.5));
+    return textureLod(sky, vec2(cx + 0.125, sy + 0.5), mip);
 }
 
 void main () {
@@ -69,9 +69,9 @@ void main () {
                 fragCol = bgCol;
             else {
                 if (bgType == 1)
-                    fragCol.rgb = skyColAt(inSkyE, fwd).rgb;
+                    fragCol.rgb = skyColAt(inSky, fwd, 8).rgb;
                 else
-                    fragCol.rgb = skyColAt(inSky, fwd).rgb;
+                    fragCol.rgb = skyColAt(inSky, fwd, 0).rgb;
                 fragCol *= skyStrength * bgCol.a;
                 fragCol.a = 1;
             }
@@ -83,11 +83,11 @@ void main () {
         fragCol.rgb = dCol.rgb;
     }
     else {
-        vec3 skycol = skyColAt(inSkyE, nCol.xyz).rgb * dCol.rgb;
+        vec3 skycol = skyColAt(inSky, nCol.xyz, 8).rgb * dCol.rgb;
         vec3 refl = reflect(fwd, nCol.xyz);
         vec3 refr = refract2(fwd, nCol.xyz, ior);
-        vec3 skycol2 = skyColAt(inSky, refl.xyz).rgb;
-        vec3 skycolr = skyColAt(inSky, refr.xyz).rgb;
+        vec3 skycol2 = skyColAt(inSky, refl.xyz, 0).rgb;
+        vec3 skycolr = skyColAt(inSky, refr.xyz, 0).rgb;
         float fres = pow(1-dot(-fwd, nCol.xyz), 5);
         skycol2 = skycol2 * mix(vec3(1, 1, 1), dCol.rgb, specStr);
         skycol = mix(skycol, skycol2, specStr);
@@ -101,9 +101,9 @@ void main () {
                 fc = bgCol.rgb;
             else {
                 if (bgType == 1)
-                    fc = skyColAt(inSkyE, fwd).rgb;
+                    fc = skyColAt(inSky, fwd, 0).rgb;
                 else
-                    fc = skyColAt(inSky, fwd).rgb;
+                    fc = skyColAt(inSky, fwd, 8).rgb;
                 fc *= skyStrength * bgCol.a;
             }
         }

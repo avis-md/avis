@@ -129,7 +129,7 @@ void UI::Quad(float x, float y, float w, float h, Vec4 col) {
 	glUseProgram(0);
 }
 
-void UI::Quad(float x, float y, float w, float h, GLuint tex, Vec4 col, Vec2 uv0, Vec2 uv1, Vec2 uv2, Vec2 uv3) {
+void UI::Quad(float x, float y, float w, float h, GLuint tex, Vec4 col, int mip, Vec2 uv0, Vec2 uv1, Vec2 uv2, Vec2 uv3) {
 	if (!tex || col.a <= 0) return;
 	Vec3 quadPoss[4];
 	quadPoss[0].x = x;		quadPoss[0].y = y;
@@ -149,7 +149,7 @@ void UI::Quad(float x, float y, float w, float h, GLuint tex, Vec4 col, Vec2 uv0
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glUniform4f(quadProgTLocs[1], col.r, col.g, col.b, col.a * UI::alpha);
-	glUniform1f(quadProgTLocs[2], 0);
+	glUniform1f(quadProgTLocs[2], mip);
 	glBindVertexArray(UI::_vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Engine::quadBuffer);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -168,27 +168,27 @@ void UI::Texture(float x, float y, float w, float h, const ::Texture& texture, V
 	if (!texture) return;
 	auto tex = texture.pointer;
 	if (scl == DRAWTEX_STRETCH)
-		UI::Quad(x, y, w, h, tex, tint, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));
+		UI::Quad(x, y, w, h, tex, tint, miplevel, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));
 	else if (scl == DRAWTEX_FIT) {
 		float w2h = ((float)texture.width) / texture.height;
 		if (w / h > w2h)
-			UI::Quad(x + 0.5f*(w - h*w2h), y, h*w2h, h, tex, tint, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));
+			UI::Quad(x + 0.5f*(w - h*w2h), y, h*w2h, h, tex, tint, miplevel, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));
 		else
-			UI::Quad(x, y + 0.5f*(h - w / w2h), w, w / w2h, tex, tint, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));
+			UI::Quad(x, y + 0.5f*(h - w / w2h), w, w / w2h, tex, tint, miplevel, Vec2(0, 1), Vec2(1, 1), Vec2(0, 0), Vec2(1, 0));
 	}
 	else if (scl == DRAWTEX_CROP) {
 		float w2h = ((float)texture.width) / texture.height;
 		if (w / h > w2h) {
 			float dh = (1 - ((h * texture.width / w) / texture.height)) / 2;
-			UI::Quad(x, y, w, h, tex, tint, Vec2(0, 1-dh), Vec2(1, 1-dh), Vec2(0, dh), Vec2(1, dh));
+			UI::Quad(x, y, w, h, tex, tint, miplevel, Vec2(0, 1-dh), Vec2(1, 1-dh), Vec2(0, dh), Vec2(1, dh));
 		}
 		else {
 			float dw = (1 - ((w * texture.height / h) / texture.width)) / 2;
-			UI::Quad(x, y, w, h, tex, tint, Vec2(dw, 1), Vec2(1 - dw, 1), Vec2(dw, 0), Vec2(1 - dw, 0));
+			UI::Quad(x, y, w, h, tex, tint, miplevel, Vec2(dw, 1), Vec2(1 - dw, 1), Vec2(dw, 0), Vec2(1 - dw, 0));
 		}
 	}
 	else {
-		UI::Quad(x, y, w, h, tex, tint);
+		UI::Quad(x, y, w, h, tex, tint, miplevel);
 	}
 }
 

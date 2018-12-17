@@ -32,7 +32,7 @@ std::vector<std::string> ParGraphics::bgs;
 int ParGraphics::bgi;
 GLuint ParGraphics::refl, ParGraphics::reflE;
 float ParGraphics::reflStr = 2, ParGraphics::reflTr = 0, ParGraphics::reflIor = 1;
-float ParGraphics::reflStrDecay = 2, ParGraphics::reflStrDecayOff = 0, ParGraphics::specStr = 0.2f;
+float ParGraphics::reflStrDecay = 2, ParGraphics::reflStrDecayOff = 0, ParGraphics::specStr = 0.05f;
 bool ParGraphics::fogUseBgCol = true;
 uint ParGraphics::bgType = 0;
 Vec4 ParGraphics::bgCol = Vec4(1, 1, 1, 1), ParGraphics::fogCol = Vec4(0, 0, 0, 1);
@@ -197,11 +197,11 @@ float ParGraphics::Eff::DrawMenu(float off) {
 	if (useDof) {
 		dofDepth = UI2::Slider(expandPos - 147, off + 17, 146, _("Distance"), 0, 5, dofDepth);
 		//dofFocal = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Focal"), 0.001f, 1, dofFocal);
-		dofAper = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Aperture"), 0, 20, dofAper);
-		dofIter = (int)UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Iterations"), 1, 20, (float)dofIter, std::to_string(dofIter));
+		dofAper = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Aperture"), 0, 10, dofAper);
+		dofIter = (int)UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Iterations"), 1, 10, (float)dofIter, std::to_string(dofIter));
 
 		CHKT(dofDepth) CHKT(dofAper) CHKT(dofIter)
-		off + 17 * 4 + 1;
+		off += 17 * 4 + 1;
 	}
 	else off += 18;
 	CHKT(useDof)
@@ -613,7 +613,8 @@ void ParGraphics::Update() {
 			glGenTextures(1, &refl);
 			glBindTexture(GL_TEXTURE_2D, refl);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv.data());
-			SetTexParams<>(0, GL_REPEAT, GL_MIRRORED_REPEAT);
+			SetTexParams<>(8, GL_REPEAT, GL_MIRRORED_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+			glGenerateMipmap(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, 0);
 			delete[](d);
 		}
@@ -1034,7 +1035,7 @@ void ParGraphics::BlitSky() {
 		glUniform1f(reflProgLocs[13], reflIor);
 		glUniform1i(reflProgLocs[14], bgType);
 		if (AnWeb::drawFull) {
-			glUniform4f(reflProgLocs[15], 0, 0, 0, 1);
+			glUniform4f(reflProgLocs[15], 0, 0, 0, 0);
 			glUniform4f(reflProgLocs[16], 0, 0, 0, 1);
 		}
 		else {

@@ -237,10 +237,11 @@ unsigned char *hdr::read_hdr(const char *filename, unsigned int *w, unsigned int
 				}
 				else {
 					/* No runs here, so just read the data thats there */
-					imagergbe[pos*4+0] = buf[0];
-					imagergbe[pos*4+1] = buf[1];
-					imagergbe[pos*4+2] = buf[2];
-					imagergbe[pos*4+3] = buf[3];
+					//edit: buf is wrong, use col instead
+					imagergbe[pos*4+0] = col[0];
+					imagergbe[pos*4+1] = col[1];
+					imagergbe[pos*4+2] = col[2];
+					imagergbe[pos*4+3] = col[3];
 					pos += step;
 				}
 			}

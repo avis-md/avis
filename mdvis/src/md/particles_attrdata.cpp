@@ -21,7 +21,7 @@ Particles::attrdata::~attrdata() {
 }
 
 std::vector<double>& Particles::attrdata::Get(uint frm) {
-	if (!frm || !timed) return data;
+	if (!frm || frm == ~0U || !timed) return data;
 	else {
 		if (!readonly && (status[frm - 1] == FRAME_STATUS::UNLOADED)) {
 			FromDisk(frm - 1);
@@ -57,6 +57,10 @@ void Particles::attrdata::Update() {
 				std::vector<std::vector<double>>(Particles::anim.frameCount - 1).swap(dataAll);
 			}
 		}
+	}
+
+	if (dirty) {
+		Seek(Particles::anim.currentFrame);
 	}
 
 	if (timed) {
