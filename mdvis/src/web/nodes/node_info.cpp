@@ -8,11 +8,12 @@ Node_Info::Node_Info() :AnNode(new DmScript(sig), AN_FLAG_NOSAVECONV) {
 	titleCol = NODE_COL_IO;
 	canTile = true;
 	
-	AddOutput();
+	const CVar cv("", AN_VARTYPE::INT);
+	AddOutput(cv);
 	script->AddOutput("atom count", "int");
-	AddOutput();
+	AddOutput(cv);
 	script->AddOutput("frame count", "int");
-	AddOutput();
+	AddOutput(cv);
 	script->AddOutput("current frame", "int");
 	AddOutput(CVar("bounding box", 'd', 1, { nullptr }, { 6 }));
 	script->AddOutput(conV.back());

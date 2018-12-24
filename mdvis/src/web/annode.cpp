@@ -172,16 +172,52 @@ void AnNode::Draw() {
 			for (uint i = 0; i < script->outvars.size(); i++, y += 17) {
 				bool ho = HasConnO(i);
 				if (!AnWeb::selConnNode || ((!AnWeb::selConnIdIsOut) && (AnWeb::selConnNode != this))) {
-					if (Engine::Button(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, ho ? tex_circle_conn : tex_circle_open, white(), Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f)) == MOUSE_RELEASE) {
-						if (!AnWeb::selConnNode) {
-							AnWeb::selConnNode = this;
-							AnWeb::selConnId = i;
-							AnWeb::selConnIdIsOut = true;
-							AnWeb::selPreClear = false;
-						}
+					const auto cirbt = Engine::Button(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, ho ? tex_circle_conn : tex_circle_open, white(), Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f));
+					if ((cirbt & MOUSE_HOVER_FLAG) > 0) {
+						std::string str = "";
+						const auto& cv = conV[i];
+						if (!cv.value) str = "0x0 (????)";
 						else {
-							ConnectTo(i, AnWeb::selConnNode, AnWeb::selConnId);
-							AnWeb::selConnNode = nullptr;
+							switch (cv.type) {
+							case AN_VARTYPE::SHORT:
+								str = std::to_string(*(short*)cv.value);
+								break;
+							case AN_VARTYPE::INT:
+								str = std::to_string(*(int*)cv.value);
+								break;
+							case AN_VARTYPE::DOUBLE:
+								str = std::to_string(*(double*)cv.value);
+								break;
+							case AN_VARTYPE::LIST:
+								str = "[";
+								for (auto& d : cv.dimVals) {
+									str += std::to_string(*d) + "x";
+								}
+								str.back() = ']';
+								str += " array (press F3 to view contents)";
+								if (Input::KeyDown(Key_F3)) {
+									ArrayView::data = *(void**)cv.value;
+									ArrayView::type = cv.typeName[6];
+									ArrayView::dims = cv.dimVals;
+									ArrayView::scrNm = title;
+									ArrayView::varNm = script->outvars[i].first;
+									ArrayView::show = true;
+								}
+								break;
+							}
+						}
+						UI2::Tooltip(cirbt, pos.x + width - connrad, y + 8 - connrad, str);
+						if (cirbt == MOUSE_RELEASE) {
+							if (!AnWeb::selConnNode) {
+								AnWeb::selConnNode = this;
+								AnWeb::selConnId = i;
+								AnWeb::selConnIdIsOut = true;
+								AnWeb::selPreClear = false;
+							}
+							else {
+								ConnectTo(i, AnWeb::selConnNode, AnWeb::selConnId);
+								AnWeb::selConnNode = nullptr;
+							}
 						}
 					}
 				}

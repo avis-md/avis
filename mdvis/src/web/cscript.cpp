@@ -1,6 +1,6 @@
 #include "anweb.h"
 
-CVar::CVar(std::string nm, AN_VARTYPE tp) : name(nm) {
+CVar::CVar(std::string nm, AN_VARTYPE tp) : name(nm), type(tp) {
 	switch (tp) {
 	case AN_VARTYPE::SHORT:
 		typeName = "short";

@@ -9,10 +9,8 @@ Vec2* UI::currentScroll;
 float UI::currentScrollW0;
 
 bool UI::_isDrawingLoop = false;
-UI::editframes UI::_activeEditText, UI::_lastEditText, UI::_editingEditText;
-std::unordered_map<UI::editframes, ushort> UI::_editTextIds;
-ushort UI::_activeEditTextId = 0;
-ushort UI::_editingEditTextId = 0;
+
+UniqueCallerList UI::_editTextCallee;
 
 Font* UI::font, *UI::font2;
 
@@ -82,11 +80,9 @@ void UI::IncLayer() {
 }
 
 void UI::PreLoop() {
-	_activeEditText = editframes();
-	_activeEditTextId = 0;
-	_editTextIds.clear();
+	_editTextCallee.Preloop();
 
-	editingText = !!_editingEditText[0];
+	editingText = _editTextCallee.last.frames[0];
 	_layerMax = _layer;
 	_layer = 0;
 }
@@ -196,8 +192,7 @@ std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol,
 	Engine::PushStencil(x, y, w, h);
 	std::string str = str2;
 	if (!str22.size()) str22 = str2;
-	GetEditTextId();
-	bool isActive = (_activeEditText == _editingEditText) && (_activeEditTextId == _editingEditTextId);
+	bool isActive = _editTextCallee.Add();
 
 	if (changed) *changed = false;
 
@@ -298,22 +293,19 @@ std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol,
 
 		Engine::PopStencil();
 		if ((Input::mouse0State == MOUSE_DOWN && !Rect(x, y, w, h).Inside(Input::mouseDownPos)) || Input::KeyDown(Key_Enter)) {
-			_editingEditText = editframes();
-			_activeEditTextId = 0;
+			_editTextCallee.Clear();
 			if (changed && delayed) *changed = true;
 
 			return delayed ? _editTextString : str;
 		}
 		if (Input::KeyDown(Key_Escape)) {
-			_editingEditText = editframes();
-			_activeEditTextId = 0;
+			_editTextCallee.Clear();
 			return str;
 		}
 		return delayed ? str : _editTextString;
 	}
 	else if (Engine::Button(x, y, w, h, bcol, str22, s, fcol) == MOUSE_RELEASE) {
-		_editingEditText = _activeEditText;
-		_editingEditTextId = _activeEditTextId;
+		_editTextCallee.Set();
 		_editTextCursorPos = str.size();
 		_editTextCursorPos2 = 0;
 		_editTextBlinkTime = 0;
@@ -327,8 +319,7 @@ std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol,
 std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, const std::string& str2, char repl, bool delayed, Vec4 fcol, bool* changed, Font* font, Vec4 hcol, Vec4 acol, bool ser) {
 	std::string str = str2;
 	std::string pstr = "";
-	GetEditTextId();
-	bool isActive = (_activeEditText == _editingEditText) && (_activeEditTextId == _editingEditTextId);
+	bool isActive = _editTextCallee.Add();
 
 	if (changed) *changed = false;
 
@@ -414,14 +405,12 @@ std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 b
 		font->Align(al);
 
 		if ((Input::mouse0State == MOUSE_UP && !Rect(x, y, w, h).Inside(Input::mousePos)) || Input::KeyDown(Key_Enter)) {
-			_editingEditText = editframes();
-			_activeEditTextId = 0;
+			_editTextCallee.Clear();
 			if (changed && delayed) *changed = true;
 			return delayed ? _editTextString : str;
 		}
 		if (Input::KeyDown(Key_Escape)) {
-			_editingEditText = editframes();
-			_activeEditTextId = 0;
+			_editTextCallee.Clear();
 			return str;
 		}
 		return delayed ? str : _editTextString;
@@ -429,8 +418,7 @@ std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 b
 	else {
 		pstr.resize(str.size(), repl);
 		if (Engine::Button(x, y, w, h, bcol, pstr, s, fcol, false) == MOUSE_RELEASE) {
-			_editingEditText = _activeEditText;
-			_editingEditTextId = _activeEditTextId;
+			_editTextCallee.Set();
 			_editTextCursorPos = str.size();
 			_editTextCursorPos2 = 0;
 			_editTextBlinkTime = 0;
@@ -444,7 +432,7 @@ float UI::GetLabelW(float s, std::string str, Font* font) {
 	if (!s || !str[0]) return 0;
 	float totalW = 0;
 	char* cc = &str[0];
-	while(cc) {
+	while(*cc) {
 		auto c = Font::utf2unc(cc);
 		if (c < 0x0100) totalW += font->params[(uint)s][0].o2s[c & 0x00ff];
 		else totalW += font2->params[(uint)s][c & 0xff00].o2s[c & 0x00ff];
@@ -577,18 +565,6 @@ float UI::BeginScroll(float x, float y, float w, float h, float off) {
 void UI::EndScroll(float off) {
 	currentScroll->x = (off - currentScrollW0);
 	Engine::EndStencil();
-}
-
-void UI::GetEditTextId() {
-	_activeEditText = editframes();
-	Debug::StackTrace(UI_MAX_EDIT_TEXT_FRAMES, (void**)_activeEditText.data());
-	if (_activeEditText == _lastEditText) {
-		_activeEditTextId++;
-		auto& id = _editTextIds[_activeEditText];
-		_activeEditTextId = ++id;
-	}
-	else _activeEditTextId = 0;
-	_lastEditText = _activeEditText;
 }
 
 void UI::InitVao() {

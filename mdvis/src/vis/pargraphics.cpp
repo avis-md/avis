@@ -181,7 +181,7 @@ float ParGraphics::Eff::DrawMenu(float off) {
 
 	UI2::Toggle(expandPos - 147, off, 145, _("Ambient Occlusion"), useSSAO);
 	if (useSSAO) {
-		ssaoSamples = (int)UI2::Slider(expandPos - 147, off + 17, 146, _("Samples"), 5, 100, (float)ssaoSamples, std::to_string(ssaoSamples));
+		ssaoSamples = UI2::SliderI(expandPos - 147, off + 17, 146, _("Samples"), 5, 100, ssaoSamples);
 		ssaoSamples = Clamp(ssaoSamples, 10, 100);
 		ssaoRad = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Radius"), 0.001f, 0.05f, ssaoRad);
 		ssaoStr = UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Strength"), 0, 3, ssaoStr);
@@ -198,7 +198,7 @@ float ParGraphics::Eff::DrawMenu(float off) {
 		dofDepth = UI2::Slider(expandPos - 147, off + 17, 146, _("Distance"), 0, 5, dofDepth);
 		//dofFocal = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Focal"), 0.001f, 1, dofFocal);
 		dofAper = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Aperture"), 0, 10, dofAper);
-		dofIter = (int)UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Iterations"), 1, 10, (float)dofIter, std::to_string(dofIter));
+		dofIter = UI2::SliderI(expandPos - 147, off + 17 * 3, 146, _("Iterations"), 1, 10, dofIter);
 
 		CHKT(dofDepth) CHKT(dofAper) CHKT(dofIter)
 		off += 17 * 4 + 1;
@@ -1325,19 +1325,19 @@ void ParGraphics::DrawMenu() {
 	}
 	off += 17;
 	UI::Quad(expandPos - 149, off - 1, 148, 17 * (fogUseBgCol? 5 : 6) + 3, white(0.9f, 0.1f));
-	reflStr = UI2::Slider(expandPos - 147, off, 146, _("Strength"), 0, 5, reflStr); off += 17;
-	reflStrDecay = UI2::Slider(expandPos - 147, off, 146, _("Falloff"), 0, 500, reflStrDecay); off += 17;
-	reflStrDecayOff = UI2::Slider(expandPos - 147, off, 146, _(" Offset"), 0, 0.005, reflStrDecayOff); off += 17;
+	reflStr = UI2::Slider(expandPos - 147, off, 146, _("Strength"), 0, 5, reflStr, "Illumination brightness"); off += 17;
+	reflStrDecay = UI2::Slider(expandPos - 147, off, 146, _("Falloff"), 0, 500, reflStrDecay, "Exponential fade over distance"); off += 17;
+	reflStrDecayOff = UI2::Slider(expandPos - 147, off, 146, _(" Offset"), 0, 0.005, reflStrDecayOff, "Exponential fade offset"); off += 17;
 	UI2::Toggle(expandPos - 147, off, 146, _("Inherit Color"), fogUseBgCol); off += 17;
 	if (!fogUseBgCol) { UI2::Color(expandPos - 147, off, 146, _("Color"), fogCol); off += 17; }
-	specStr = UI2::Slider(expandPos - 147, off, 146, _("Specular"), 0, 1, specStr); off += 17;
-	reflTr = UI2::Slider(expandPos - 147, off, 146, _("Transparency"), 0, 1, reflTr); off += 17;
-	if (reflTr > 0) { reflIor = UI2::Slider(expandPos - 147, off, 146, _("IOR"), 0.5f, 5.f, reflIor); off += 17; }
+	specStr = UI2::Slider(expandPos - 147, off, 146, _("Specular"), 0, 1, specStr, "Reflection ratio"); off += 17;
+	reflTr = UI2::Slider(expandPos - 147, off, 146, _("Transparency"), 0, 1, reflTr, "Refraction ratio"); off += 17;
+	if (reflTr > 0) { reflIor = UI2::Slider(expandPos - 147, off, 146, _("IOR"), 0.5f, 5.f, reflIor, "Index of refraction"); off += 17; }
 	static std::string bgTypeNms[] = { "Color", "Ambient", "Sky", "" };
 	static Popups::DropdownItem bgTypeDi(&bgType, bgTypeNms);
 	UI2::Dropdown(expandPos - 148, off, 146, _("Background"), bgTypeDi); off += 17;
 	if (!bgType) { UI2::Color(expandPos - 147, off, 146, _(" Color"), bgCol); off += 17; }
-	else { bgMul = UI2::Slider(expandPos - 147, off, 146, _(" Brightness"), 0, 2, bgMul); off += 17; }
+	else { bgMul = UI2::Slider(expandPos - 147, off, 146, _(" Strength"), 0, 2, bgMul, "Background brightness"); off += 17; }
 
 	CHKT(reflStr) CHKT(reflStrDecay) CHKT(reflStrDecayOff)
 	CHKT(fogUseBgCol) CHKT(fogCol) CHKT(specStr)
@@ -1384,7 +1384,7 @@ void ParGraphics::DrawMenu() {
 
 	auto& cam = ChokoLait::mainCamera;
 	auto ql = cam->quality;
-	ql = UI2::Slider(expandPos - 147, off, 146, _("Quality"), 0.25f, 1.5f, ql, std::to_string(int(ql * 100)) + "%");
+	ql = UI2::Slider(expandPos - 147, off, 146, _("Quality"), 0.25f, 1.5f, ql, "Resolution of the 3D view", std::to_string(int(ql * 100)) + "%");
 	if (Engine::Button(expandPos - 91, off, 16, 16, Icons::refresh) == MOUSE_RELEASE)
 		ql = 1;
 	if (ql != cam->quality) {
@@ -1405,7 +1405,7 @@ void ParGraphics::DrawMenu() {
 	if (a2) {
 		UI::Quad(expandPos - 149, off - 2, 148, 18, white(0.9f, 0.1f));
 		ql = cam->quality2;
-		ql = UI2::Slider(expandPos - 147, off - 1, 146, _("Quality") + " 2", 0.25f, 1.f, ql, std::to_string(int(ql * 100)) + "%");
+		ql = UI2::Slider(expandPos - 147, off - 1, 146, _("Quality") + " 2", 0.25f, 1.f, ql, "Resolution of the 3D view when moving / rotating", std::to_string(int(ql * 100)) + "%");
 		if (ql != cam->quality2) {
 			cam->quality2 = ql;
 			//Scene::dirty = true;

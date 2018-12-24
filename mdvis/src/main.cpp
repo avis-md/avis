@@ -163,6 +163,7 @@ void paintfunc() {
 	VisSystem::DrawBar();
 
 	ErrorView::Draw();
+	ArrayView::Draw();
 
 	if (!AnWeb::drawFull)
 		VisSystem::DrawTitle();
@@ -223,6 +224,7 @@ void paintfunc() {
 	HelpMenu::Draw();
 	
 	Popups::Draw();
+	UI2::DrawTooltip();
 
 	UI::Quad(0, 0, Display::width, Display::height, RayTracer::resTex);
 
@@ -461,6 +463,7 @@ The hash for this program is )" << VisSystem::version_hash
 			if (!Display::width || !Display::height)
 				glfwPollEvents();
 			else {
+				UI2::PreLoop();
 				ChokoLait::Update(updateFunc);
 				bool dirty = Scene::dirty;
 				ChokoLait::Paint(rendFunc, paintfunc);

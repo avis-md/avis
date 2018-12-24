@@ -44,8 +44,8 @@ bool CDV::Read(ParInfo* info) {
 
 	info->resname = new char[sz * info->nameSz]{};
 	info->name = new char[sz * info->nameSz]{};
-	info->type = new uint16_t[sz];
-	info->resId = new uint16_t[sz];
+	info->type = new uint16_t[sz]{};
+	info->resId = new uint16_t[sz]{};
 	info->pos = new double[sz * 3];
 	info->vel = new double[sz * 3];
 

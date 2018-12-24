@@ -4,10 +4,15 @@
 #include "utils/dialog.h"
 #include "res/shddata.h"
 
-PROGDEF(UI2::bezierProg)
-
 float UI2::sepw = 0.5f;
 #define sepw2 (1-sepw)
+
+PROGDEF(UI2::bezierProg)
+
+UniqueCallerList UI2::tooltipCallee;
+float UI2::tooltipX, UI2::tooltipY;
+std::string UI2::tooltipStr;
+long long UI2::tooltipTime;
 
 void UI2::Init() {
 	bezierProg = Shader::FromVF(glsl::bezierVert, glsl::coreFrag3);
@@ -18,6 +23,26 @@ void UI2::Init() {
 	LC(thick);
 	LC(col);
 #undef LC
+}
+
+void UI2::PreLoop() {
+	tooltipCallee.Preloop();
+	if (tooltipX == -10) {
+		tooltipCallee.Clear();
+		tooltipTime = 0;
+	}
+	else tooltipX = -10;
+	tooltipStr.clear();
+}
+
+void UI2::DrawTooltip() {
+	if (tooltipTime > 0 && !!tooltipStr.size()) {
+		const auto a = std::min((Time::millis - tooltipTime - 500) / 200.f, 1.f);
+		const auto mw = UI::GetLabelW(12, tooltipStr);
+		UI::Quad(tooltipX, tooltipY - 21, mw + 6, 20, black(a * 0.7f));
+		UI::Quad(tooltipX + 1, tooltipY - 20, mw + 4, 18, white(a * 0.7f, 0.15f));
+		UI::Label(tooltipX + 3, tooltipY - 18, 12, tooltipStr, white(a, 0.9f));
+	}
 }
 
 void UI2::LabelMul(float x, float y, float sz, const std::string& s) {
@@ -49,11 +74,18 @@ std::string UI2::EditPass(float x, float y, uint w, const std::string& title, co
 	}
 }
 
-float UI2::Slider(float x, float y, float w, const std::string& title, float a, float b, float t) {
-	return Slider(x, y, w, title, a, b, t, std::to_string(t));
+int UI2::SliderI(float x, float y, float w, const std::string& title, int a, int b, int t, const std::string& desc, const std::string& lbl) {
+	if (desc != "") {
+		Tooltip(Engine::Button(x, y, w, 16), x, y, desc);
+	}
+	UI::Label(x, y, 12, title, white());
+	return (int)Slider(x + w*sepw, y, w*sepw2 - 1.f, (float)a, (float)b, (float)t, (lbl == "\1")? std::to_string(t) : lbl);
 }
 
-float UI2::Slider(float x, float y, float w, const std::string& title, float a, float b, float t, const std::string& lbl) {
+float UI2::Slider(float x, float y, float w, const std::string& title, float a, float b, float t, const std::string& desc, const std::string& lbl) {
+	if (desc != "") {
+		Tooltip(Engine::Button(x, y, w, 16), x, y, desc);
+	}
 	UI::Label(x, y, 12, title, white());
 	return Slider(x + w*sepw, y, w*sepw2 - 1.f, a, b, t, (lbl == "\1")? std::to_string(t) : lbl);
 }
@@ -193,4 +225,21 @@ Vec3 UI2::EditVec(float x, float y, float w, const std::string& t, Vec3 v, bool 
 	res.y = TryParse(UI2::EditText(x, y + 17, w, t + " Y", std::to_string(v.y), ena, Vec4(0.4f, 0.6f, 0.4f, 1)), 0.f);
 	res.z = TryParse(UI2::EditText(x, y + 34, w, t + " Z", std::to_string(v.z), ena, Vec4(0.4f, 0.4f, 0.6f, 1)), 0.f);
 	return res;
+}
+
+MOUSE_STATUS UI2::Tooltip(MOUSE_STATUS status, float x, float y, const std::string str) {
+	if (!!(status & MOUSE_HOVER_FLAG)) {
+		tooltipX = x;
+		tooltipY = y;
+		if (tooltipCallee.Add() && !Input::mouse0) {
+			if (Time::millis - tooltipTime > 500) {
+				tooltipStr = str;
+			}
+		}
+		else {
+			tooltipCallee.Set();
+			tooltipTime = Time::millis;
+		}
+	}
+	return status;
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine.h"
 #include "popups.h"
+#include "utils/uniquecaller.h"
 #include <functional>
 
 //UI with default style settings
@@ -10,14 +11,16 @@ public:
 	typedef void(*filecallback) (std::vector<std::string>);
 
 	static void Init();
+	static void PreLoop();
+	static void DrawTooltip();
 
 	static float sepw;
 
 	static void LabelMul(float x, float y, float sz, const std::string& s);
 	static std::string EditText(float x, float y, uint w, const std::string& title, const std::string& val, bool enabled = true, Vec4 col = white(1, 0.5f));
 	static std::string EditPass(float x, float y, uint w, const std::string& title, const std::string& val, bool enabled = true, Vec4 col = white(1, 0.5f));
-	static float Slider(float x, float y, float w, const std::string& title, float a, float b, float t);
-	static float Slider(float x, float y, float w, const std::string& title, float a, float b, float t, const std::string& lbl);
+	static int SliderI(float x, float y, float w, const std::string& title, int a, int b, int t, const std::string& desc = "", const std::string& lbl = "\1");
+	static float Slider(float x, float y, float w, const std::string& title, float a, float b, float t, const std::string& desc = "", const std::string& lbl = "\1");
 	static float Slider(float x, float y, float w, float a, float b, float t, const std::string& lbl = "\1");
 	static void Color(float x, float y, float w, const std::string& title, Vec4& col);
 	static void File(float x, float y, float w, const std::string& title, const std::string& fl, filecallback func);
@@ -31,5 +34,13 @@ public:
 
 	static Vec3 EditVec(float x, float y, float w, const std::string& title, Vec3 v, bool ena);
 
+	static MOUSE_STATUS Tooltip(MOUSE_STATUS status, float x, float y, const std::string str);
+
 	PROGDEF_H(bezierProg, 5)
+
+private:
+	static UniqueCallerList tooltipCallee;
+	static float tooltipX, tooltipY;
+	static std::string tooltipStr;
+	static long long tooltipTime;
 };

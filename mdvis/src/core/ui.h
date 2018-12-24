@@ -1,26 +1,6 @@
 #pragma once
 #include "Engine.h"
-
-namespace std
-{
-    template<typename T, size_t N>
-    struct hash<array<T, N> >
-    {
-        typedef array<T, N> argument_type;
-        typedef size_t result_type;
-
-        result_type operator()(const argument_type& a) const
-        {
-            hash<T> hasher;
-            result_type h = 0;
-            for (result_type i = 0; i < N; ++i)
-            {
-                h = h * 31 + hasher(a[i]);
-            }
-            return h;
-        }
-    };
-}
+#include "utils/uniquecaller.h"
 
 /*! 2D drawing to the screen.
 [av] */
@@ -54,12 +34,8 @@ public:
 	static void EndScroll(float off);
 
 	static bool _isDrawingLoop;
-	typedef std::array<uintptr_t, UI_MAX_EDIT_TEXT_FRAMES> editframes;
-	static editframes _activeEditText, _lastEditText, _editingEditText;
-	static std::unordered_map<editframes, ushort> _editTextIds;
-	static ushort _activeEditTextId, _editingEditTextId;
 
-	static void GetEditTextId();
+	static UniqueCallerList _editTextCallee;
 
 	struct StyleColor {
 		Vec4 backColor, fontColor;
