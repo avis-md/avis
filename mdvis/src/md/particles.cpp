@@ -264,22 +264,17 @@ void Particles::UpdateRadBuf(int i) {
 }
 
 void Particles::SaveAttrs(const std::string& path) {
-	std::string s;
+	std::ofstream strm(path, std::ios::binary);
 	for (size_t a = 0; a < attrs.size(); ++a) {
 		if (!attrs[a]->readonly) {
-			s += attrNms[a] + "#";
-			s += attrs[a]->Export();
-			s += "\n#";
+			strm.write(attrNms[a].data(), attrNms[a].size() + 1);
+			attrs[a]->Export(strm);
 		}
 	}
-	IO::WriteFile(path, s);
 }
 
 void Particles::LoadAttrs(const std::string& path) {
 	auto data = IO::GetText(path);
-	auto ss = string_split(data, '#', true);
-	auto ssz = ss.size();
-	if (!ssz) return;
 	auto asz = attrs.size();
 	for (; asz > 0; --asz) {
 		if (!attrs[asz-1]->readonly) {
@@ -287,11 +282,14 @@ void Particles::LoadAttrs(const std::string& path) {
 		}
 		else break;
 	}
-	for (size_t a = 0; a < ssz/2; ++a) {
+	std::ifstream strm(path, std::ios::binary);
+	while (strm) {
+		char cc[100];
+		strm.getline(cc, 100, 0);
+		if (!cc[0]) break;
 		AddAttr();
-		attrNms[asz++] = ss[a*2];
-		auto& at = attrs.back();
-		at->Import(ss[a*2+1]);
+		attrNms[asz++] = std::string(cc);
+		attrs.back()->Import(strm);
 	}
 }
 

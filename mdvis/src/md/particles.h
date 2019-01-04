@@ -67,8 +67,8 @@ public:
 		void ApplyParCnt(), ApplyFrmCnt();
 		void Update(), Seek(uint frm);
 		void Clear();
-		std::string Export();
-		void Import(const std::string& data);
+		void Export(std::ostream& strm);
+		void Import(std::istream& strm);
 	private:
 		attrdata(const attrdata& rhs) = delete;
 		attrdata& operator= (const attrdata& rhs) = delete;

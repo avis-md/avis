@@ -17,12 +17,12 @@ Node_Info::Node_Info() :AnNode(new DmScript(sig), AN_FLAG_NOSAVECONV) {
 	script->AddOutput("current frame", "int");
 	AddOutput(CVar("bounding box", 'd', 1, { nullptr }, { 6 }));
 	script->AddOutput(conV.back());
-}
-
-void Node_Info::Execute() {
 	conV[0].value = &Particles::particleSz;
 	conV[1].value = &Particles::anim.frameCount;
 	conV[2].value = &Node_Inputs::frame;
+}
+
+void Node_Info::Execute() {
 	static double* bbx = nullptr;
 	if (!Particles::anim.bboxs.size()) bbx = &Particles::boundingBox[0];
 	else if (!AnWeb::execFrame) bbx = &Particles::anim.bboxs[Particles::anim.currentFrame][0];

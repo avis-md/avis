@@ -47,7 +47,7 @@ bool option_min = false;
 
 void rendFunc() {
 	auto& cm = ChokoLait::mainCameraObj->transform;
-	ParGraphics::Rerender(cm.position(), cm.forward(), static_cast<float>(Display::width), static_cast<float>(Display::height));
+	ParGraphics::Rerender(cm.position(), cm.forward(), (float)Display::width, (float)Display::height);
 	if (!!Particles::particleSz && Shadows::show) {
 		Shadows::UpdateBox();
 		Mat4x4 _p = MVP::projection();

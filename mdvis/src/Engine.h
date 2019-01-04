@@ -38,7 +38,12 @@ forked from ChokoEngine -- Chokomancarr 2018
 #define __debugbreak() raise(SIGTRAP)
 #endif
 
+#ifdef PLATFORM_OSX
+#define GLFW_INCLUDE_GLCOREARB
+#define GLFW_INCLUDE_GLEXT
+#else
 #include <GL/glew.h>
+#endif
 #include <GLFW/glfw3.h>
 typedef GLFWwindow NativeWindow;
 #ifdef PLATFORM_WIN

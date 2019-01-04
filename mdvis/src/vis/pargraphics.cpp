@@ -609,11 +609,10 @@ void ParGraphics::Update() {
 		if (d) {
 			std::vector<float> dv(_w*_h*3);
 			hdr::to_float(d, _w, _h, dv.data());
-			//byte* d = Texture::LoadPixels(IO::path + "res/?.png", chn, _w, _h);
 			glGenTextures(1, &refl);
 			glBindTexture(GL_TEXTURE_2D, refl);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _w, _h, 0, GL_RGB, GL_FLOAT, dv.data());
-			SetTexParams<>(8, GL_REPEAT, GL_MIRRORED_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+			SetTexParams<>(0, GL_REPEAT, GL_MIRRORED_REPEAT);
 			glGenerateMipmap(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, 0);
 			delete[](d);

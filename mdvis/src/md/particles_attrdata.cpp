@@ -142,40 +142,41 @@ void Particles::attrdata::FromDisk(int i) {
 	}
 }
 
-std::string Particles::attrdata::Export() {
-	std::ostringstream strm;
+void Particles::attrdata::Export(std::ostream& strm) {
 	if ((!timed && !data.size())) {
-		return "0";
+		strm.write("\0\0\0\0", 4);
+		return;
 	}
-	strm << Particles::particleSz << " " << (timed? Particles::anim.frameCount : 1) << "\n";
+	strm.write((char*)&Particles::particleSz, 4);
 	if (timed) {
+		strm.write((char*)&Particles::anim.frameCount, 4);
 		for (int a = 0; a < Particles::anim.frameCount; a++) {
 			auto& d = Get(a);
 			strm << d.size() << " ";
 			for (auto& d2 : d) {
 				strm << d2 << " ";
 			}
+			const auto sz = d.size();
+			strm.write((char*)&sz, 4);
+			strm.write((char*)d.data(), sz * sizeof(double));
 		}
 	}
 	else {
-		for (auto& d : data) {
-			strm << d << " ";
-		}
+		strm.write("\1\0\0\0", 4);
+		strm.write((char*)data.data(), Particles::particleSz * sizeof(double));
 	}
-	return strm.str();
 }
 
-void Particles::attrdata::Import(const std::string& buf) {
-	std::istringstream strm(buf);
-	int psz;
-	strm >> psz;
+void Particles::attrdata::Import(std::istream& strm) {
+	int psz = 0;
+	strm.read((char*)&psz, 4);
 	if (!psz) return;
 	else if (psz != Particles::particleSz) {
 		Debug::Warning("Attr::Import", "not atom count!");
 		return;
 	}
-	int fsz;
-	strm >> fsz;
+	int fsz = 0;
+	strm.read((char*)&fsz, 4);
 	if (fsz != 1 && fsz != Particles::anim.frameCount) {
 		Debug::Warning("Attr::Import", "not frame count!");
 		return;
@@ -183,23 +184,19 @@ void Particles::attrdata::Import(const std::string& buf) {
 
 	timed = (fsz > 1);
 	if (timed) {
-		int n;
+		int n = 0;
 		for (int f = 0; f < fsz; ++f) {
-			strm >> n;
+			strm.read((char*)&n, 4);
 			if (!n) continue;
 			auto& d = Get(f);
 			d.resize(psz);
-			for (auto& d2 : d) {
-				strm >> d2;
-			}
+			strm.read((char*)d.data(), psz * sizeof(double));
 			if (f > 0) status[f-1] = FRAME_STATUS::WAITWRITE;
 		}
 	}
 	else {
-		data.resize(Particles::particleSz);
-		for (auto& d : data) {
-			strm >> d;
-		}
+		data.resize(psz);
+		strm.read((char*)data.data(), psz * sizeof(double));
 	}
 	dirty = true;
 }

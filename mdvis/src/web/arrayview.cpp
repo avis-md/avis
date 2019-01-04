@@ -16,7 +16,7 @@ void ArrayView::Draw() {
 			show = !show;
 		}
 		if (show) {
-			UI::IncLayer();
+			//UI::IncLayer();
 			float y = Display::height - 18.f - windowSize;
 			UI::Quad(0, y, (float)Display::width, (float)windowSize, white(0.95f, 0.1f));
 			y++;
@@ -59,7 +59,7 @@ void ArrayView::Draw() {
 						vl = std::to_string(((double*)data)[a]);
 						break;
 					default:
-						Debug::Error("ArrayView", "Unexpected type: " + std::string(1, type) + "!");
+						OHNO("ArrayView", "Unexpected type: " + std::string(1, type) + "!");
 						return;
 					}
 					const int x = 5 + ix * dw;

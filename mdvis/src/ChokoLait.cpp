@@ -1,5 +1,12 @@
 #include "ChokoLait.h"
 
+#ifdef PLATFORM_OSX
+#include </usr/include/mach-o/getsect.h>
+#include </usr/include/mach-o/dyld.h>
+
+std::string _mac_debug_base_address = "";
+#endif
+
 //#define USE_DEBUG_CONTEXT
 //#define SIMULATE_FRAMESCALE 2
 
@@ -31,17 +38,26 @@ void _printstack() {
 	auto bs = backtrace_symbols(buf, c);
 	for (uint a = 0; a < c; ++a) {
 		std::string str(bs[a]);
-		Debug::Error("System", str);
+		if (!Debug::suppress) Debug::Error("System", str);
 		int pos = string_find(str, "avis");
 		if (pos > -1) {
 			str = str.substr(string_find(str, "(+") + 2);
 			str = str.substr(0, str.find_first_of(")"));
+#ifdef PLATFORM_LNX
 			auto cmd = ("addr2line -a " + str + " -e " + IO::path + "avis >> " + IO::path + "trace.txt");
+#else
+			auto cmd = ("atos -o " + IO::path + "avis " + "-l " + _mac_debug_base_address + " " + str + " >> " + IO::path + "trace.txt");
+#endif
 			system(cmd.c_str());
 		}
 	}
-	std::cout << "Addr2Line below:" << std::endl;
+	if (!Debug::suppress) std::cout << "monkey-readable text below:" << std::endl;
+	else std::cout << "monkey-readable text below:" << std::endl;
+#ifdef PLATFORM_LNX
 	system(("cat " + IO::path + "trace.txt").c_str());
+#else
+	system(("cat " + IO::path + "trace.txt | grep \"(in avis)\"").c_str());
+#endif
 #endif
 }
 
@@ -77,16 +93,22 @@ void _sigtrm(int i) {
 void ChokoLait::_InitVars() {
 #ifdef PLATFORM_WIN
 	SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
-#else
-
 #endif
 	signal(SIGABRT, &_dieded);
 	signal(SIGFPE, &_sigfpe);
 	signal(SIGSEGV, &_sigseg);
 	signal(SIGTERM, &_sigtrm);
+
 	IO::InitPath();
 	Debug::Init();
 	Debug::Message("IO", "Path is " + IO::path);
+
+	const struct segment_command_64* command = getsegbyname("__TEXT");
+    uint64_t addr0 = command->vmaddr;
+	uint64_t addr1 = _dyld_get_image_vmaddr_slide(0);
+	std::ostringstream ss;
+	ss << std::hex << addr0 + addr1;
+	_mac_debug_base_address = ss.str();
 
 	Debug::Message("System", "Opening GL context");
 	if (!glfwInit()) {
@@ -115,7 +137,7 @@ void ChokoLait::_InitVars() {
 	}
 	glfwMakeContextCurrent(window);
 
-
+#ifndef PLATFORM_OSX
 	glewExperimental = true;
 	GLint GlewInitResult = glewInit();
 	if (GLEW_OK != GlewInitResult)
@@ -123,6 +145,7 @@ void ChokoLait::_InitVars() {
 		Debug::Error("System", "Glew error: " + std::string((const char*)glewGetErrorString(GlewInitResult)));
 		abort();
 	}
+#endif
 
 #ifdef USE_DEBUG_CONTEXT
 	GLint flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
