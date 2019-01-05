@@ -1,12 +1,14 @@
+PYTHON_VERSION = 3.7
+PYTHON = python$(PYTHON_VERSION)
 OSFLAG :=
 CFLAGS2 :=
-CXXFLAGS2 :=
+CXXFLAGS2 := `pkg-config --cflags freetype2`
 LDFLAGS2 :=
-GLLIB :=
-LIBS2 :=
+GLLIB := `pkg-config --libs glfw3`
+LIBS2 := `pkg-config --libs freetype2 libssh2 libjpeg`
 PYLIB :=
 WEAK_LIB :=
-NUMPY :=
+NUMPY := -I$(shell $(PYTHON) -c "import site; print(site.getsitepackages()[0])")/numpy/core/include
 USR := /usr
 UNAME_S := $(shell uname -s)
 
@@ -19,35 +21,28 @@ AVIPRE := ../../libgwavi
 AVI := -I$(AVIPRE)/inc/
 AVIL := obj/libgwavi.a
 
-BINPRE := /usr/lib/x86_64-linux-gnu
-BINPRE2 := /lib/x86_64-linux-gnu
-
 ifeq ($(UNAME_S),Linux)
 	OSFLAG += -D PLATFORM_LNX
 	CFLAGS2 += -Wno-ignored-attributes
 	CXXFLAGS2 += -fopenmp
 	LDFLAGS2 += -Wl,-rpath='$$ORIGIN' -static-libstdc++ -lgomp
-	GLLIB += /usr/lib/x86_64-linux-gnu/libjpeg.a -lssh2 -lOpenCL `pkg-config --static --libs gl glew glfw3 freetype2`
-	#PYLIB += $(shell python3-config --configdir)/libpython3.6m.a -lexpat
-	PYLIB += -L$(shell python3-config --configdir) $(shell python3-config --libs)
-	NUMPY += -I/usr/local/lib/python3.6/dist-packages/numpy/core/include
+	GLLIB += -lOpenCL `pkg-config --libs gl glew`
+	PYLIB += -L$(shell $(PYTHON)-config --configdir) $(shell $(PYTHON)-config --libs)
 	RRAYBIN += libRadeonRays.so.2.0
 endif
 ifeq ($(UNAME_S),Darwin)
 	OSFLAG += -D PLATFORM_OSX
 	CXXFLAGS2 += -D_GLIBCXX_DEBUG -fno-pie
-	GLLIB += -framework OpenGL -framework OpenCL /usr/local/Cellar/jpeg/9c/lib/libjpeg.a /usr/local/Cellar/freetype/2.9.1/lib/libfreetype.a /usr/local/Cellar/libpng/1.6.34/lib/libpng.a -lbz2 -lglfw3 -framework Cocoa -framework IOKit -framework CoreVideo
-	LIBS2 += /usr/local/Cellar/libssh2/1.8.0/lib/libssh2.a /usr/local/Cellar/openssl/1.0.2o_1/lib/libcrypto.a
+	GLLIB += -framework OpenGL -framework OpenCL -framework Cocoa -framework IOKit -framework CoreVideo
 	WEAK_LIB += -weak_library
-	PYLIB += $(shell python3-config --configdir)/libpython3.6m.a
-	NUMPY +=  -I/usr/local/lib/python3.6/site-packages/numpy/core/include
+	PYLIB += $(shell $(PYTHON)-config --configdir)/lib$(PYTHON)m.a
 	RRAYBIN += libRadeonRays.dylib
 endif
 LIBS2 += -L../build $(RRAYL) $(AVIL)
 
 C = gcc
 CXX = g++
-CXXFLAGS = -O0 -g -Wall -std=c++11 -fvisibility=hidden -I../src/ -I/usr/include/freetype2/ -I/usr/local/include/freetype2/ $(CXXFLAGS2) $(NUMPY) -I$(shell python3-config --prefix)/include/python3.6m $(RRAY) $(AVI) $(OSFLAG) $(CFLAGS2)
+CXXFLAGS = -O0 -g -Wall -std=c++11 -fvisibility=hidden -I../src/ $(CXXFLAGS2) $(NUMPY) -I$(shell $(PYTHON)-config --prefix)/include/$(PYTHON)m $(RRAY) $(AVI) $(OSFLAG) $(CFLAGS2)
 LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
 LIBS = $(WEAK_LIB) $(PYLIB) -lpthread -lm $(GLLIB) -lz $(LIBS2)
 
@@ -103,11 +98,6 @@ ifeq ($(UNAME_S),Darwin)
 	@cp $(RRAYPRE)/build/bin/libRadeonRays.dylib ../build/libRadeonRays.dylib
 endif
 ifeq ($(UNAME_S),Linux)
-	@cp $(BINPRE)/libssh2.so.1 ../build/libssh2.so.1
-	@cp $(BINPRE)/libOpenCL.so.1 ../build/libOpenCL.so.1
-	@cp $(BINPRE)/libGLEW.so.2.0 ../build/libGLEW.so.2.0
-	@cp $(BINPRE)/libglfw.so.3 ../build/libglfw.so.3
-	@cp $(BINPRE2)/libgcrypt.so.20 ../build/libgcrypt.so.20
 	@cp $(RRAYPRE)/build/bin/libRadeonRays.so.2.0 ../build/libRadeonRays.so.2.0
 endif
 	@ar rvs obj/libgwavi.a $(AVIPRE)/obj/*.o > /dev/null
@@ -115,7 +105,7 @@ endif
 	@$(CXX) -o $@ $(OBJS) $(OBJSX) $(LDFLAGS) $(LIBS)
 ifeq ($(UNAME_S),Darwin)
 	install_name_tool -add_rpath "@executable_path" ../build/avis
-	install_name_tool -change $(shell python3-config --exec)/Python /tmpp/Python ../build/avis
+	install_name_tool -change $(shell $(PYTHON)-config --exec)/Python /tmpp/Python ../build/avis
 	cp ../build/avis ../build/avis_clean
 	cd ../build && rm .pyregfin && ./regpython.sh
 endif

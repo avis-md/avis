@@ -7,6 +7,6 @@ if [ -f .pyregfin ]; then
     exit
 fi
 
-install_name_tool -add_rpath "$(python3-config --exec)" mdvis
+install_name_tool -change /tmpp/Python "$(python3.7-config --exec)"/Python avis
 
 touch .pyregfin
