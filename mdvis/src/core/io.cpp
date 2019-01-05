@@ -107,7 +107,9 @@ void IO::MakeDirectory(std::string path) {
 
 void IO::RmDirectory(std::string path) {
 #ifdef PLATFORM_WIN
-	RunCmd::Run("rmdir /Q /S \"" + path + "\"");
+	std::replace(path.begin(), path.end(), '/', '\\');
+	//RunCmd::Run("rmdir /Q /S \"" + path + "\">NUL");
+	RemoveDirectoryW(_tow(path).c_str());
 #else
 	RunCmd::Run("rm -rf \"" + path + "\"");
 #endif
@@ -115,6 +117,7 @@ void IO::RmDirectory(std::string path) {
 
 bool IO::HasFile(std::string path) {
 #ifdef PLATFORM_WIN
+	std::replace(path.begin(), path.end(), '/', '\\');
 	DWORD dwAttrib = GetFileAttributesW(_tow(path).c_str());
 	return (dwAttrib != INVALID_FILE_ATTRIBUTES);
 #else

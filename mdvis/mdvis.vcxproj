@@ -160,18 +160,23 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include;C:\Intel\OpenCL\sdk\include;C:\Anaconda64\include;C:\Anaconda64\Lib\site-packages\numpy\core\include;../radeonrays/RadeonRays/include/;../radeonrays/CLW/;./src;./src/winonly;./src/libjpeg/;../libgwavi/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include;C:\Intel\OpenCL\sdk\include;C:\Python37\include;C:\Python37\Lib\site-packages\numpy\core\include;../radeonrays/RadeonRays/include/;../radeonrays/CLW/;./src;./src/winonly;./src/libjpeg/;../libgwavi/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;PLATFORM_WIN;GLEW_STATIC;USE_OPENCL;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OpenMPSupport>true</OpenMPSupport>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>SyncCThrow</ExceptionHandling>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>libssh2.lib;libjpeg.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\lib\x64;C:\Intel\OpenCL\sdk\lib\x64;C:\Anaconda64\libs;.\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\lib\x64;C:\Intel\OpenCL\sdk\lib\x64;C:\Python37\libs;.\lib\x64</AdditionalLibraryDirectories>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <SubSystem>Console</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
@@ -304,6 +309,7 @@
     <ClCompile Include="src\utils\runcmd.cpp" />
     <ClCompile Include="src\utils\ssh.cpp" />
     <ClCompile Include="src\utils\tinyfiledialogs.c" />
+    <ClCompile Include="src\utils\uniquecaller.cpp" />
     <ClCompile Include="src\vis\changelog.cpp" />
     <ClCompile Include="src\vis\cubemarcher.cpp" />
     <ClCompile Include="src\vis\options.cpp" />
@@ -316,6 +322,7 @@
     <ClCompile Include="src\web\anscript.cpp" />
     <ClCompile Include="src\web\anops.cpp" />
     <ClCompile Include="src\web\anweb.cpp" />
+    <ClCompile Include="src\web\arrayview.cpp" />
     <ClCompile Include="src\web\cnode.cpp" />
     <ClCompile Include="src\web\creader.cpp" />
     <ClCompile Include="src\web\cscript.cpp" />
@@ -327,6 +334,7 @@
     <ClCompile Include="src\web\nodes\get\node_getattribute.cpp" />
     <ClCompile Include="src\web\nodes\in\node_vector.cpp" />
     <ClCompile Include="src\web\nodes\misc\node_adjlist.cpp" />
+    <ClCompile Include="src\web\nodes\mod\node_addsurface.cpp" />
     <ClCompile Include="src\web\nodes\node_addbond.cpp" />
     <ClCompile Include="src\web\nodes\node_camera.cpp" />
     <ClCompile Include="src\web\nodes\node_gromacs.cpp" />
@@ -392,6 +400,8 @@
     <ClInclude Include="src\ui\browse.h" />
     <ClInclude Include="src\ui\browsetarget.h" />
     <ClInclude Include="src\unloader.h" />
+    <ClInclude Include="src\utils\refcnt.h" />
+    <ClInclude Include="src\utils\uniquecaller.h" />
     <ClInclude Include="src\vis\changelog.h" />
     <ClInclude Include="src\vis\options.h" />
     <ClInclude Include="src\utils\glmext.h" />
@@ -451,6 +461,7 @@
     <ClInclude Include="src\web\anscript.h" />
     <ClInclude Include="src\web\anops.h" />
     <ClInclude Include="src\web\anweb.h" />
+    <ClInclude Include="src\web\arrayview.h" />
     <ClInclude Include="src\web\creader.h" />
     <ClInclude Include="src\web\errorview.h" />
     <ClInclude Include="src\web\freader.h" />
@@ -458,6 +469,7 @@
     <ClInclude Include="src\web\nodes\get\node_getattribute.h" />
     <ClInclude Include="src\web\nodes\in\node_vector.h" />
     <ClInclude Include="src\web\nodes\misc\node_adjlist.h" />
+    <ClInclude Include="src\web\nodes\mod\node_addsurface.h" />
     <ClInclude Include="src\web\nodes\node_addbond.h" />
     <ClInclude Include="src\web\nodes\node_camera.h" />
     <ClInclude Include="src\web\nodes\node_gromacs.h" />

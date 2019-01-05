@@ -1,4 +1,7 @@
 #pragma once
+class UniqueCaller;
+class UniqueCallerList;
+
 #include "Engine.h"
 
 namespace std

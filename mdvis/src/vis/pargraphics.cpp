@@ -24,7 +24,7 @@
 #define SCL_MIN -7.f
 #define SCL_MAX 2.f
 
-#define TUBESIZE 0.01
+#define TUBESIZE 0.008
 
 
 Texture ParGraphics::bg, ParGraphics::splash, ParGraphics::logo;

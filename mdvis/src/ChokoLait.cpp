@@ -103,12 +103,14 @@ void ChokoLait::_InitVars() {
 	Debug::Init();
 	Debug::Message("IO", "Path is " + IO::path);
 
+#ifdef PLATFORM_OSX
 	const struct segment_command_64* command = getsegbyname("__TEXT");
     uint64_t addr0 = command->vmaddr;
 	uint64_t addr1 = _dyld_get_image_vmaddr_slide(0);
 	std::ostringstream ss;
 	ss << std::hex << addr0 + addr1;
 	_mac_debug_base_address = ss.str();
+#endif
 
 	Debug::Message("System", "Opening GL context");
 	if (!glfwInit()) {
