@@ -1,3 +1,4 @@
+#pragma once
 #include "Engine.h"
 #include <stdint.h>
 #include <cstdio>

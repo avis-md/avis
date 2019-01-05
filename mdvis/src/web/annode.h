@@ -8,52 +8,6 @@ const Vec3 NODE_COL_MOD = Vec3(0.3f, 0.5f, 0.3f);
 const Vec3 NODE_COL_SPC = Vec3(0.5f, 0.3f, 0.3f);
 const Vec3 NODE_COL_CTRL = Vec3(0.3f, 0.45f, 0.45f);
 
-enum class AN_NODE_SCN : byte {
-	NUM0 = 0x80,
-	OCAM,
-	NUM	
-};
-const std::string AN_NODE_SCNS[] = { "Camera (Set)" };
-
-enum class AN_NODE_IN : byte {
-	NUM0 = 0,
-	PARS,
-	PINFO,
-	VEC,
-	NUM
-};
-const std::string AN_NODE_INS[] = { "Particle data", "System info", "Vector" };
-
-enum class AN_NODE_MOD {
-	NUM0 = 0x20,
-	GATTR,
-	SATTR,
-	RSCL,
-	SBXC,
-	NUM
-};
-const std::string AN_NODE_MODS[] = { "Get Param", "Set Param", "Set Radii Scale", "Set BBox Center" };
-
-enum class AN_NODE_GEN {
-	NUM0 = 0x40,
-	BOND,
-	SURF,
-	TRJ,
-	NUM
-};
-const std::string AN_NODE_GENS[] = { "Add Bonds", "Draw Surface", "Trace Trajectory" };
-
-enum class AN_NODE_MISC {
-	NUM0 = 0x60,
-	PLOT,
-	SRNG,
-	ADJL,
-	ADJLI,
-	DOWHL,
-	NUM
-};
-const std::string AN_NODE_MISCS[] = { "Plot graph", "Show Range", "To Adjacency List", "To Paired List", "Do While" };
-
 enum class ANNODE_OP {
 	NONE,
 	LEFT,

@@ -6,32 +6,13 @@
 #include "res/resdata.h"
 #endif
 
-const std::string Node_Inputs::sig = ".in";
-const std::string Node_Info::sig = ".info";
-const std::string Node_Vector::sig = ".vec";
-const std::string Node_AddBond::sig = ".abnd";
-const std::string Node_Camera_Out::sig = ".camo";
-const std::string Node_Plot::sig = ".plot";
-const std::string Node_GetAttribute::sig = ".gattr";
-const std::string Node_SetAttribute::sig = ".sattr";
-const std::string Node_ShowRange::sig = ".srng";
-const std::string Node_SetRadScl::sig = ".rscl";
-const std::string Node_SetBBoxCenter::sig = ".sbxc";
-const std::string Node_AddSurface::sig = ".surf";
-const std::string Node_TraceTrj::sig = ".trrj";
-const std::string Node_Volume::sig = ".vol";
-const std::string Node_Remap::sig = ".remap";
-const std::string Node_Gromacs::sig = ".gro";
-const std::string Node_AdjList::sig = ".adjl";
-const std::string Node_AdjListI::sig = ".adjli";
-const std::string Node_DoWhile::sig = ".dwhl";
-
 Vec4 AnNode::bgCol = white(0.7f, 0.25f);
 
 Texture AnNode::tex_circle_open, AnNode::tex_circle_conn;
 float AnNode::width = 220;
 
 void AnNode::Init() {
+	AnNode_Internal::Init();
 #ifndef IS_ANSERVER
 	tex_circle_open = Texture(res::node_open_png, res::node_open_png_sz);
 	tex_circle_conn = Texture(res::node_conn_png, res::node_conn_png_sz);

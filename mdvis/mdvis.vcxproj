@@ -330,9 +330,11 @@
     <ClCompile Include="src\web\fnode.cpp" />
     <ClCompile Include="src\web\freader.cpp" />
     <ClCompile Include="src\web\fscript.cpp" />
+    <ClCompile Include="src\web\annode_internal.cpp" />
     <ClCompile Include="src\web\nodes\ctrl\node_dowhile.cpp" />
     <ClCompile Include="src\web\nodes\get\node_getattribute.cpp" />
     <ClCompile Include="src\web\nodes\in\node_vector.cpp" />
+    <ClCompile Include="src\web\nodes\misc\node_accum.cpp" />
     <ClCompile Include="src\web\nodes\misc\node_adjlist.cpp" />
     <ClCompile Include="src\web\nodes\mod\node_addsurface.cpp" />
     <ClCompile Include="src\web\nodes\node_addbond.cpp" />
@@ -465,9 +467,11 @@
     <ClInclude Include="src\web\creader.h" />
     <ClInclude Include="src\web\errorview.h" />
     <ClInclude Include="src\web\freader.h" />
+    <ClInclude Include="src\web\annode_internal.h" />
     <ClInclude Include="src\web\nodes\ctrl\node_dowhile.h" />
     <ClInclude Include="src\web\nodes\get\node_getattribute.h" />
     <ClInclude Include="src\web\nodes\in\node_vector.h" />
+    <ClInclude Include="src\web\nodes\misc\node_accum.h" />
     <ClInclude Include="src\web\nodes\misc\node_adjlist.h" />
     <ClInclude Include="src\web\nodes\mod\node_addsurface.h" />
     <ClInclude Include="src\web\nodes\node_addbond.h" />

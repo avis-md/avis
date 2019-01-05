@@ -25,7 +25,7 @@ public:
 	static uint selConnId;
 	static bool selConnIdIsOut, selPreClear;
 	static AnScript* selScript;
-	static byte selSpNode;
+	static uint selSpNode;
 
 	static std::string activeFile;
 	static std::vector<AnNode*> nodes;
@@ -62,21 +62,4 @@ public:
 	static void OnAnimFrame();
 };
 
-#include "nodes/in/node_vector.h"
-#include "nodes/node_inputs.h"
-#include "nodes/node_info.h"
-#include "nodes/node_addbond.h"
-#include "nodes/node_camera.h"
-#include "nodes/misc/node_plot.h"
-#include "nodes/get/node_getattribute.h"
-#include "nodes/set/node_setattribute.h"
-#include "nodes/set/node_setbboxcenter.h"
-#include "nodes/mod/node_addsurface.h"
-#include "nodes/node_showrange.h"
-#include "nodes/node_setradscl.h"
-#include "nodes/node_tracetrj.h"
-#include "nodes/node_volume.h"
-#include "nodes/node_remap.h"
-#include "nodes/node_gromacs.h"
-#include "nodes/misc/node_adjlist.h"
-#include "nodes/ctrl/node_dowhile.h"
+#include "annode_internal.h"

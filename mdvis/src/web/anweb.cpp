@@ -20,7 +20,7 @@ AnNode* AnWeb::selConnNode = nullptr;
 uint AnWeb::selConnId = 0;
 bool AnWeb::selConnIdIsOut = false, AnWeb::selPreClear = false;
 AnScript* AnWeb::selScript = nullptr;
-byte AnWeb::selSpNode = 0;
+uint AnWeb::selSpNode = 0;
 
 std::string AnWeb::activeFile = "";
 std::vector<AnNode*> AnWeb::nodes;
@@ -228,7 +228,7 @@ void AnWeb::Draw() {
 						SW(MISC::ADJLI, Node_AdjListI);
 						SW(MISC::DOWHL, Node_DoWhile);
 					default:
-						Debug::Error("AnWeb::Draw", "Unhandled node type: " + std::to_string((int)selSpNode));
+						Debug::Error("AnWeb::Draw", "Unhandled node type: " + std::to_string(selSpNode));
 						return;
 					}
 #undef SW
@@ -707,25 +707,13 @@ void AnWeb::Load(const std::string& s) {
 				nm = c.value;
 				switch (tp) {
 				case AN_SCRTYPE::NONE:
-		#define ND(scr) if (nm == scr::sig) n = new scr(); else
-					ND(Node_Inputs)
-					ND(Node_Info)
-					ND(Node_Vector)
-					ND(Node_AddBond)
-					ND(Node_AddSurface);
-					ND(Node_TraceTrj)
-					ND(Node_Camera_Out)
-					ND(Node_GetAttribute)
-					ND(Node_SetAttribute)
-					ND(Node_SetRadScl)
-					ND(Node_SetBBoxCenter)
-					ND(Node_Plot)
-					ND(Node_ShowRange)
-					ND(Node_AdjList)
-					ND(Node_AdjListI)
-					ND(Node_DoWhile)
+					for (auto& ss : AnNode_Internal::scrs) {
+						for (auto& a : ss) {
+							if (nm == a.sig) n = a.spawner();
+							break;
+						}
+					}
 					Debug::Warning("AnWeb::Load", "Unknown node name: " + nm);
-		#undef ND
 					break;
 				case AN_SCRTYPE::C:
 					n = new CNode(CScript::allScrs[nm]);
