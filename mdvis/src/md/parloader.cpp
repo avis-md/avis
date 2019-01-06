@@ -267,12 +267,12 @@ void ParLoader::ScanFrames(const std::string& first) {
 	if (n1 == -1) return;
 	for (int a = n1 - 1; a >= 0; --a) {
 		if (!ISNUM(nm[a])) {
-			n2 = a;
+			n2 = a + 1;
 			break;
 		}
 	}
 
-	int st = std::stoi(nm.substr(n2 + 1, n1 - n2));
+	int st = std::stoi(nm.substr(n2, n1 - n2 + 1));
 	auto nm1 = first.substr(0, ps + 2 + n2);
 	auto nm2 = nm.substr(n1 + 1);
 

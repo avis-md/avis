@@ -341,6 +341,7 @@ The hash for this program is )" << VisSystem::version_hash
 #else
 		VisSystem::InitEnv();
 		Localizer::Init(VisSystem::prefs["SYS_LOCALE"]);
+		Display::dpiScl = 1.f / TryParse(VisSystem::prefs["SYS_DPI_SCALE"], 1.0f);
 #endif
 		//GLFWimage icon;
 		//icon.pixels = Texture::LoadPixels(res::icon_png, res::icon_png_sz, (uint&)icon.width, (uint&)icon.height);
