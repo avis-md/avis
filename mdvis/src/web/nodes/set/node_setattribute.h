@@ -1,10 +1,11 @@
 #pragma once
-#include "web/annode.h"
+#include "web/annode_internal.h"
 #include "ui/popups.h"
 
 class Node_SetAttribute : public AnNode {
 public:
-	static const std::string sig;
+	INODE_DEF_H
+
 	Node_SetAttribute();
 
 	uint attrId, _attrId, attrSz;

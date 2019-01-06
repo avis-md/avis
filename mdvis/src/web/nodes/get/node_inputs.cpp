@@ -1,37 +1,37 @@
-#include "../anweb.h"
+#include "node_inputs.h"
+#include "web/anweb.h"
 #ifndef IS_ANSERVER
 #include "md/particles.h"
 #include "ui/ui_ext.h"
 #include "vis/pargraphics.h"
 #endif
 
+INODE_DEF(__("Particle Data"), Inputs, GET)
+
 uint Node_Inputs::frame = 0, Node_Inputs::parcount = 0;
 
 //enable saveconv?
-Node_Inputs::Node_Inputs() : AnNode(new DmScript(sig), AN_FLAG_NOSAVECONV), filter(0) {
-	DmScript* scr = (DmScript*)script;
-	script->desc = R"(Particle coordinates and trajectory
- positions: [atomId, xyz]
- velocities: [atomId, xyz]
- positions (all): [frame, atomId, xyz]
- velocities (all): [frame, atomId, xyz]
- types: [atomid]
- * type is the ascii of the atom name,
-   so C is 67, O is 79 etc.)";
+Node_Inputs::Node_Inputs() : INODE_INITF(AN_FLAG_NOSAVECONV), filter(0) {
+	INODE_TITLE(NODE_COL_IO);
+
+	scr.desc = R"(Particle coordinates and trajectory
+positions: [atomId, xyz]
+velocities: [atomId, xyz]
+positions (all): [frame, atomId, xyz]
+velocities (all): [frame, atomId, xyz]
+types: [atomid]
+* type is the ascii of the atom name,
+so C is 67, O is 79 etc.)";
 	script->descLines = 8;
-	
-	title = "Particle Data";
-	titleCol = NODE_COL_IO;
-	canTile = true;
-	
-	AddOutput(CVar("positions", 'd', 2, { (int*)&parcount, nullptr }, { 3 }));
-	script->AddOutput(conV.back());
 
-	AddOutput(CVar("velocities", 'd', 2, { (int*)&parcount, nullptr }, { 3 }));
-	script->AddOutput(conV.back());
+	AddOutput(CVar(_("positions"), 'd', 2, { (int*)&parcount, nullptr }, { 3 }));
+	scr.AddOutput(conV.back());
 
-	AddOutput(CVar("types", 's', 1, { (int*)&parcount}));
-	script->AddOutput(conV.back());
+	AddOutput(CVar(_("velocities"), 'd', 2, { (int*)&parcount, nullptr }, { 3 }));
+	scr.AddOutput(conV.back());
+
+	AddOutput(CVar(_("types"), 's', 1, { (int*)&parcount }));
+	scr.AddOutput(conV.back());
 }
 
 void Node_Inputs::DrawHeader(float& off) {
@@ -156,7 +156,7 @@ void Node_Inputs::Execute() {
 
 void Node_Inputs::SaveIn(const std::string& path) {
 	Execute();
-	std::string nm = script->name;
+	const auto& nm = scr.name;
 	std::ofstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
 		for (uint i = 0; i < 3; i++)
@@ -165,7 +165,7 @@ void Node_Inputs::SaveIn(const std::string& path) {
 }
 
 void Node_Inputs::LoadIn(const std::string& path) {
-	std::string nm = script->name;
+	const auto& nm = scr.name;
 	std::ifstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
 		for (uint i = 0; i < 3; i++)

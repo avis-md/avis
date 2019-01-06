@@ -3,9 +3,11 @@
 #include "ui/ui_ext.h"
 #include "web/anweb.h"
 
-Node_SetAttribute::Node_SetAttribute() : AnNode(new DmScript(sig)), attrId(0), _attrId(-1),  attrSz(-1), di(&attrId, nullptr), timed(true) {
-	title = "Set Attribute";
-	titleCol = NODE_COL_IO;
+INODE_DEF(__("Set Attribute"), SetAttribute, SET)
+
+Node_SetAttribute::Node_SetAttribute() : INODE_INIT, attrId(0), _attrId(-1),  attrSz(-1), di(&attrId, nullptr), timed(true) {
+	INODE_TITLE(NODE_COL_IO);
+
 	inputR.resize(1);
 	script->invars.push_back(std::pair<std::string, std::string>("values", "list(1*)"));
 }

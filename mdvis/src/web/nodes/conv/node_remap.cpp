@@ -2,10 +2,11 @@
 #include "md/particles.h"
 #include "ui/ui_ext.h"
 
-Node_Remap::Node_Remap() : AnNode(new DmScript(sig)) {
-	title = "Remap";
-	titleCol = NODE_COL_NRM;
-    canTile = false;
+INODE_DEF(__("Remap"), Remap, CONV)
+
+Node_Remap::Node_Remap() : INODE_INIT {
+	INODE_TITLE(NODE_COL_NRM);
+
 	inputR.resize(1);
 	script->invars.push_back(std::pair<std::string, std::string>("values", "list(1f)"));
 

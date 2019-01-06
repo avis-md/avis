@@ -227,8 +227,6 @@ void paintfunc() {
 	UI2::DrawTooltip();
 
 	UI::Quad(0, 0, Display::width, Display::height, RayTracer::resTex);
-
-	//UI::Quad(0, 0, w/2, h/2, bg, white(), 8);
 }
 
 #ifdef MAKE_RES
@@ -333,12 +331,12 @@ The hash for this program is )" << VisSystem::version_hash
 		ChokoLait::Init(800, 800);
 
 #ifdef MAKE_LOCL
-		Localizer::MakeMap(
+		std::string path = __FILE__;
 #ifdef PLATFORM_WIN
-			"../mdvis/src");
-#else
-			"../src");
+		std::replace(path.begin(), path.end(), '\\', '/');
 #endif
+		path = path.substr(0, path.find_last_of('/'));
+		Localizer::MakeMap(path);
 		return 0;
 #else
 		VisSystem::InitEnv();

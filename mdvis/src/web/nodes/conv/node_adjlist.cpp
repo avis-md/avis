@@ -2,17 +2,17 @@
 
 #define RETERR(msg) { std::cerr << msg << std::endl; return; }
 
-Node_AdjList::Node_AdjList() : AnNode(new DmScript(sig)) {
-	auto scr = (DmScript*)script;
-	title = "To Adjacency List";
-	titleCol = Vec3(0.3f, 0.5f, 0.3f);
-	
+INODE_DEF(__("To Adjacency List"), AdjList, CONV)
+
+Node_AdjList::Node_AdjList() : INODE_INIT {
+	INODE_TITLE(NODE_COL_NRM);
+
 	AddInput();
-	script->AddInput("pairlist", "list(2i)");
+	scr.AddInput("pairlist", "list(2i)");
 	AddInput();
-	script->AddInput("id count", "int");
+	scr.AddInput("id count", "int");
 	AddInput();
-	script->AddInput("capacity", "int");
+	scr.AddInput("capacity", "int");
 
 	AddOutput(CVar("adjlist", 'i', 2, { &count, &listsize }));
 	auto& cv = conV[0];
@@ -54,18 +54,17 @@ void Node_AdjList::Execute() {
 }
 
 
-Node_AdjListI::Node_AdjListI() : AnNode(new DmScript(sig)) {
-	auto scr = (DmScript*)script;
-	title = "To Paired List";
-	titleCol = NODE_COL_NRM;
+INODE_DEF(__("To Paired List"), AdjListI, CONV)
+
+Node_AdjListI::Node_AdjListI() : INODE_INIT {
+	INODE_TITLE(NODE_COL_NRM);
 
 	AddInput();
-	script->AddInput("adjlist", "list(2i)");
+	scr.AddInput("adjlist", "list(2i)");
 
 	AddOutput(CVar("pairlist", 'i', 2, { &count, nullptr }, { 2 }));
 	auto& cv = conV[0];
-	script->AddOutput(cv);
-	auto v = *conV[0].dimVals[1];
+	scr.AddOutput(cv);
 	cv.value = &cv.data.val.arr.p;
 }
 

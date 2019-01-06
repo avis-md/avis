@@ -6,10 +6,11 @@
 #include "md/particles.h"
 #endif
 
-Node_Plot::Node_Plot() : AnNode(new DmScript(sig), AN_FLAG_RUNONSEEK | AN_FLAG_RUNONVALCHG), type(TYPE::LINES), tex(0) {
-	title = "Plot Data";
-	titleCol = NODE_COL_SPC;
-	canTile = true;
+INODE_DEF(__("Plot Data"), Plot, MISC)
+
+Node_Plot::Node_Plot() : INODE_INITF(AN_FLAG_RUNONSEEK | AN_FLAG_RUNONVALCHG), type(TYPE::LINES), tex(0) {
+	INODE_TITLE(NODE_COL_SPC);
+
 	inputR.resize(3, nodecon(0, 0, false));
 	inputVDef.resize(3);
 	script->invars.push_back(std::pair<std::string, std::string>("array", "list(**)"));

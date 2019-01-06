@@ -1,9 +1,10 @@
 #pragma once
-#include "web/annode.h"
+#include "web/annode_internal.h"
 
 class Node_AddSurface : public AnNode {
 public:
-	static const std::string sig;
+	INODE_DEF_H
+
 	Node_AddSurface();
 	~Node_AddSurface();
 	

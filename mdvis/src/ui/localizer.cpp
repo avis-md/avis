@@ -1,5 +1,7 @@
 #include "localizer.h"
 
+#define USE_ORI_HASH 1
+
 bool Localizer::useDict = false;
 
 void Localizer::Init(const std::string& nm) {
@@ -43,7 +45,6 @@ void Localizer::Init(const std::string& nm) {
 
 void Localizer::MakeMap(std::string path) {
 	std::cout << "Scanning keywords..." << std::endl;
-    path = IO::path + "" + path;
     std::map<uint32_t, std::string> strs;
     _MakeMap(path, strs);
 	std::cout << "Writing " << strs.size() << " keywords..." << std::endl;
@@ -76,7 +77,11 @@ void Localizer::_MakeMap(std::string path, std::map<uint32_t, std::string>& strs
             if (p0 == -1) break;
             p1 = string_find(cd, "\")", p0);
             auto str = cd.substr(p0 + 3, p1 - p0 - 3);
-            strs[HASH(str.c_str())] = str;
+			auto& sd = strs[HASH(str.c_str())];
+			if (sd != "" && sd != str) {
+				Debug::Error("Localizer::MakeMap", "Same hash for \"" + sd + "\" and \"" + str + "\"!");
+			}
+			sd = str;
         }
     }
     nms.clear();
@@ -107,15 +112,16 @@ void Localizer::Merge(std::string path, std::map<uint32_t, std::string> strs) {
 				Debug::Warning("Localizer", path + "Locale syntax error at line " + std::to_string(l + 1));
 				return;
 			}
+			uint32_t h = USE_ORI_HASH ? i : HASH(&buf[1]);
 			strm.getline(buf, 500);
 			if (buf[0] != '>') {
 				Debug::Warning("Localizer", path + "Locale syntax error at line " + std::to_string(l + 2));
 				return;
 			}
-			if (strs.count(i) == 1) {
-				auto s = strs[i];
-				ostrm << i << "\n<" << s << "\n" << std::string(buf) << "\n";
-				strs.erase(i);
+			if (strs.count(h) == 1) {
+				auto s = strs[h];
+				ostrm << h << "\n<" << s << "\n" << std::string(buf) << "\n";
+				strs.erase(h);
 			}
 			l += 3;
 		}

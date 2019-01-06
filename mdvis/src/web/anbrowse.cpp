@@ -216,12 +216,12 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 					AnWeb::selScript = fs;
 				}
 			}
-			Texture& icon = Icons::lang_ft;
+			Texture* icon = &Icons::lang_ft;
 			if (fs->type == AN_SCRTYPE::C)
-				icon = Icons::lang_c;
+				icon = &Icons::lang_c;
 			else if (fs->type == AN_SCRTYPE::PYTHON)
-				icon = Icons::lang_py;
-			UI::Texture(2.f + 5 * layer, off, 16.f, 16.f, icon);
+				icon = &Icons::lang_py;
+			UI::Texture(2.f + 5 * layer, off, 16.f, 16.f, *icon);
 			UI::Label(22.f + 5 * layer, off, 12.f, fs->name, white());
 			if (!fs->ok) {
 				if (fs->busy) {
@@ -250,56 +250,24 @@ void AnBrowse::Draw() {
 		HelpMenu::Link(expandPos - 16, 3, "anl/index.html");
 
 		float f = UI::BeginScroll(0, 19, expandPos, Display::height - 38);
-#define BT(nm) (byte)(AN_NODE_ ## nm)
-#define MSC1(n, nm) UI::Quad(2, f, 150.f, 16.f, white(1, 0.3f)); \
-		if (Engine::Button(2, f, 16.f, 16.f, mscFdExpanded[n] ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) \
-			mscFdExpanded[n] = !mscFdExpanded[n]; \
-		UI::Label(22, f, 12.f, nm, white()); \
-		f += 17; \
-		if (mscFdExpanded[n])
-#define MSC2() if (Engine::Button(7, f, 150.f, 16.f, white(1, 0.35f)) == MOUSE_RELEASE) { \
-					AnWeb::selScript = (AnScript*)1; \
-					AnWeb::selSpNode = a; \
-				} \
-				UI::Texture(7, f, 16.f, 16.f, Icons::lightning);
-
-		MSC1(0, "Scene IO") {
-			for (byte a = BT(SCN::NUM0) + 1; a < BT(SCN::NUM); ++a) {
-				MSC2()
-				UI::Label(27, f, 12.f, AN_NODE_SCNS[a - BT(SCN::NUM0) - 1], white());
-				f += 17;
-			}
-		}
-
-		MSC1(1, _("Inputs")) {
-			for (byte a = BT(IN::NUM0) + 1; a < BT(IN::NUM); ++a) {
-				MSC2()
-				UI::Label(27, f, 12.f, AN_NODE_INS[a - BT(IN::NUM0) - 1], white());
-				f += 17;
-			}
-		}
-
-		MSC1(2, _("Modifiers")) {
-			for (byte a = BT(MOD::NUM0) + 1; a < BT(MOD::NUM); ++a) {
-				MSC2()
-				UI::Label(27, f, 12.f, AN_NODE_MODS[a - BT(MOD::NUM0) - 1], white());
-				f += 17;
-			}
-		}
-
-		MSC1(3, _("Generators")) {
-			for (byte a = BT(GEN::NUM0) + 1; a < BT(GEN::NUM); ++a) {
-				MSC2()
-				UI::Label(27, f, 12.f, AN_NODE_GENS[a - BT(GEN::NUM0) - 1], white());
-				f += 17;
-			}
-		}
-
-		MSC1(4, _("Miscellaneous")) {
-			for (byte a = BT(MISC::NUM0) + 1; a < BT(MISC::NUM); ++a) {
-				MSC2()
-				UI::Label(27, f, 12.f, AN_NODE_MISCS[a - BT(MISC::NUM0) - 1], white());
-				f += 17;
+		for (int n = 0; n < ANNODE_GROUP_COUNT; ++n) {
+			UI::Quad(2, f, 150.f, 16.f, white(1, 0.3f));
+			if (Engine::Button(2, f, 16.f, 16.f, mscFdExpanded[n] ? Icons::expand : Icons::collapse) == MOUSE_RELEASE)
+				mscFdExpanded[n] = !mscFdExpanded[n];
+			UI::Label(22, f, 12.f, AnNode_Internal::groupNms[n], white());
+			f += 17;
+			if (mscFdExpanded[n]) {
+				const auto& lst = AnNode_Internal::scrs[n];
+				const size_t sz = lst.size();
+				for (size_t a = 0; a < sz; a++) {
+					if (Engine::Button(7, f, 150.f, 16.f, white(1, 0.35f)) == MOUSE_RELEASE) {
+						AnWeb::selScript = (AnScript*)1;
+						AnWeb::selSpNode = (n << 8) | a;
+					}
+					UI::Texture(7, f, 16.f, 16.f, Icons::lightning);
+					UI::Label(27, f, 12.f, lst[a].name, white());
+					f += 17;
+				}
 			}
 		}
 

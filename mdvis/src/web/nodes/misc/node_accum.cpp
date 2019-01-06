@@ -3,9 +3,9 @@
 #include "web/anweb.h"
 #include "ui/ui_ext.h"
 
-INODE_DEF("Accumulate", Accum, MISC)
+INODE_DEF(__("Accumulate"), Accum, MISC)
 
-Node_Accum::Node_Accum() : AnNode(&scr) {
+Node_Accum::Node_Accum() : INODE_INIT {
 	INODE_TITLE(NODE_COL_MOD)
 	AddInput();
 	script->AddInput("value", "*");

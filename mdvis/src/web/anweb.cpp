@@ -41,8 +41,7 @@ bool AnWeb::hasPy = false, AnWeb::hasC = false, AnWeb::hasFt = false;
 bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
 
 void AnWeb::Init() {
-	Insert(new Node_Inputs());
-	Insert(new Node_Info());
+	Clear0();
 	for (int a = 0; a < 10; ++a) {
 		AnBrowse::mscFdExpanded[a] = true;
 	}
@@ -57,11 +56,10 @@ void AnWeb::Clear() {
 }
 
 void AnWeb::Clear0() {
-	for (int a = 1; a < nodes.size(); ++a) {
-		delete(nodes[a]);
-	}
-	nodes.resize(1);
+	Clear();
+	nodes.push_back(new Node_Inputs());
 	nodes.push_back(new Node_Info());
+	nodes[0]->canTile = nodes[1]->canTile = true;
 }
 
 void AnWeb::Insert(AnScript* scr, Vec2 pos) {
@@ -205,33 +203,7 @@ void AnWeb::Draw() {
 					}
 				}
 				else {
-#define SW(nm, scr) case (byte)AN_NODE_ ## nm: pn = new scr(); break
-					switch (selSpNode) {
-						SW(SCN::OCAM, Node_Camera_Out);
-
-						SW(IN::PARS, Node_Inputs);
-						SW(IN::PINFO, Node_Info);
-						SW(IN::VEC, Node_Vector);
-
-						SW(MOD::GATTR, Node_GetAttribute);
-						SW(MOD::SATTR, Node_SetAttribute);
-						SW(MOD::RSCL, Node_SetRadScl);
-						SW(MOD::SBXC, Node_SetBBoxCenter);
-
-						SW(GEN::BOND, Node_AddBond);
-						SW(GEN::SURF, Node_AddSurface);
-						SW(GEN::TRJ, Node_TraceTrj);
-
-						SW(MISC::PLOT, Node_Plot);
-						SW(MISC::SRNG, Node_ShowRange);
-						SW(MISC::ADJL, Node_AdjList);
-						SW(MISC::ADJLI, Node_AdjListI);
-						SW(MISC::DOWHL, Node_DoWhile);
-					default:
-						Debug::Error("AnWeb::Draw", "Unhandled node type: " + std::to_string(selSpNode));
-						return;
-					}
-#undef SW
+					pn = AnNode_Internal::scrs[selSpNode >> 8][selSpNode & 255].spawner();
 				}
 				if (iterTile) {
 					if (iterTileTop) nodes[iter + 1]->canTile = true;

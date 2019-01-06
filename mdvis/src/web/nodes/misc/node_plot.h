@@ -1,10 +1,12 @@
 #pragma once
+#include "web/annode_internal.h"
 #include "web/anweb.h"
 #include "ui/popups.h"
 
 class Node_Plot : public AnNode {
 public:
-	static const std::string sig;
+	INODE_DEF_H
+
 	Node_Plot();
 	~Node_Plot();
 

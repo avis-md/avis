@@ -1,11 +1,12 @@
 #pragma once
-#include "../annode.h"
+#include "web/annode_internal.h"
 #include "ui/popups.h"
 #include "utils/plot.h"
 
 class Node_Remap : public AnNode {
 public:
-	static const std::string sig;
+	INODE_DEF_H
+
 	Node_Remap();
     
 	std::vector<float> vals;

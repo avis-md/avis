@@ -3,13 +3,15 @@
 #include "ui/ui_ext.h"
 #include "web/anweb.h"
 
+INODE_DEF(__("Get Attribute"), GetAttribute, GET)
+
 Node_GetAttribute::Node_GetAttribute() : 
-		AnNode(new DmScript(sig), AN_FLAG_NOSAVECONV | AN_FLAG_RUNONSEEK),
+		INODE_INITF(AN_FLAG_NOSAVECONV | AN_FLAG_RUNONSEEK),
 		attrId(0), di(&attrId, &Particles::attrNms[0]) {
-	title = "Get Attribute";
-	titleCol = NODE_COL_IO;
+	INODE_TITLE(NODE_COL_IO);
+
 	AddOutput(CVar("values", 'd', 1, { (int*)&Particles::particleSz }));
-	script->AddOutput(conV[0]);
+	scr.AddOutput(conV[0]);
 	auto& cv = conV[0];
 	cv.value = &cv.data.val.arr.p;
 }

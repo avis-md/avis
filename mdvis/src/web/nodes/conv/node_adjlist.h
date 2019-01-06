@@ -1,9 +1,9 @@
 #pragma once
-#include "web/annode.h"
+#include "web/annode_internal.h"
 
 class Node_AdjList : public AnNode {
 public:
-	static const std::string sig;
+	INODE_DEF_H
 	Node_AdjList();
 
 	void Execute() override;
@@ -15,7 +15,7 @@ protected:
 
 class Node_AdjListI : public AnNode {
 public:
-	static const std::string sig;
+	INODE_DEF_H
 	Node_AdjListI();
 
 	void Execute() override;

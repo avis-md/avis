@@ -118,7 +118,7 @@ void ParMenu::Draw() {
 		if ((!UI::editingText && Input::KeyUp(Key_T)) || Engine::Button(expandPos, Display::height - 34.f, 115, 16, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(expandPos, Display::height - 34.f, 16, 16, Icons::expand);
-		UI::Label(expandPos + 18, Display::height - 33.f, 12, _("Toolbar (T)"), white());
+		UI::Label(expandPos + 18, Display::height - 33.f, 12, _("Toolbar") + " (T)", white());
 		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.f, 150.f);
 	}
 }

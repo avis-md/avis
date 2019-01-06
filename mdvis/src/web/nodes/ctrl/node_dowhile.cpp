@@ -2,10 +2,12 @@
 #include "web/anweb.h"
 #include "ui/ui_ext.h"
 
-Node_DoWhile::Node_DoWhile() : AnNode(new DmScript(sig), AN_FLAG_NOSAVECONV),
+INODE_DEF(__("Loop While"), DoWhile, MISC)
+
+Node_DoWhile::Node_DoWhile() : INODE_INITF(AN_FLAG_NOSAVECONV),
 		start(0), type(COMP::GT), _nodeCnt(~0U) {
-	title = "Loop While";
-	titleCol = NODE_COL_SPC;
+	INODE_TITLE(NODE_COL_CTRL);
+	
 	AddInput();
 	script->AddInput("value", "double");
 	AddInput();

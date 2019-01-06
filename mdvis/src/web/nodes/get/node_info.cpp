@@ -3,20 +3,20 @@
 #include "web/anweb.h"
 #include "md/particles.h"
 
-Node_Info::Node_Info() :AnNode(new DmScript(sig), AN_FLAG_NOSAVECONV) {
-	title = "System Info";
-	titleCol = NODE_COL_IO;
-	canTile = true;
+INODE_DEF(__("System Info"), Info, GET)
+
+Node_Info::Node_Info() : INODE_INITF(AN_FLAG_NOSAVECONV) {
+	INODE_TITLE(NODE_COL_IO)
 	
 	const CVar cv("", AN_VARTYPE::INT);
 	AddOutput(cv);
-	script->AddOutput("atom count", "int");
+	scr.AddOutput(_("atom count"), "int");
 	AddOutput(cv);
-	script->AddOutput("frame count", "int");
+	scr.AddOutput(_("frame count"), "int");
 	AddOutput(cv);
-	script->AddOutput("current frame", "int");
+	scr.AddOutput(_("current frame"), "int");
 	AddOutput(CVar("bounding box", 'd', 1, { nullptr }, { 6 }));
-	script->AddOutput(conV.back());
+	scr.AddOutput(conV.back());
 	conV[0].value = &Particles::particleSz;
 	conV[1].value = &Particles::anim.frameCount;
 	conV[2].value = &Node_Inputs::frame;

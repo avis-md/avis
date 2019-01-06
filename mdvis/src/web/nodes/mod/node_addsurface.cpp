@@ -3,6 +3,8 @@
 #include "md/particles.h"
 #include "res/shddata.h"
 
+INODE_DEF(__("Draw Surface"), AddSurface, GEN);
+
 bool Node_AddSurface::initd = false;
 PROGDEF(Node_AddSurface::marcherProg);
 PROGDEF(Node_AddSurface::drawProg);
@@ -13,16 +15,15 @@ GLuint Node_AddSurface::inBuf, Node_AddSurface::inBufT, Node_AddSurface::query;
 
 std::mutex Node_AddSurface::lock;
 
-Node_AddSurface::Node_AddSurface() : AnNode(new DmScript(sig), AN_FLAG_RUNONSEEK | AN_FLAG_RUNONVALCHG) {
+Node_AddSurface::Node_AddSurface() : INODE_INITF(AN_FLAG_RUNONSEEK | AN_FLAG_RUNONVALCHG) {
 	if (!initd) Init();
 
-	title = "Draw Surface";
-	titleCol = NODE_COL_MOD;
+	INODE_TITLE(NODE_COL_MOD);
 
 	AddInput();
-	script->AddInput("density", "list(3d)");
+	scr.AddInput("density", "list(3d)");
 	AddInput();
-	script->AddInput("value", "double");
+	scr.AddInput("value", "double");
 
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &outPos);

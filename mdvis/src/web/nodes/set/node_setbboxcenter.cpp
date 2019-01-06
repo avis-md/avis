@@ -2,9 +2,11 @@
 #include "md/particles.h"
 #include "web/anweb.h"
 
-Node_SetBBoxCenter::Node_SetBBoxCenter() : AnNode(new DmScript(sig)) {
-	title = "Set Bounding Box Center";
-	titleCol = NODE_COL_IO;
+INODE_DEF(__("Set Bounding Box Center"), SetBBoxCenter, SET)
+
+Node_SetBBoxCenter::Node_SetBBoxCenter() : INODE_INIT {
+	INODE_TITLE(NODE_COL_IO);
+	
 	AddInput();
 	script->AddInput("center", "list(1d)");
 }

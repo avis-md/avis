@@ -172,6 +172,7 @@
       </PrecompiledHeaderFile>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
+      <UseFullPaths>true</UseFullPaths>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -335,18 +336,17 @@
     <ClCompile Include="src\web\nodes\get\node_getattribute.cpp" />
     <ClCompile Include="src\web\nodes\in\node_vector.cpp" />
     <ClCompile Include="src\web\nodes\misc\node_accum.cpp" />
-    <ClCompile Include="src\web\nodes\misc\node_adjlist.cpp" />
+    <ClCompile Include="src\web\nodes\conv\node_adjlist.cpp" />
     <ClCompile Include="src\web\nodes\mod\node_addsurface.cpp" />
-    <ClCompile Include="src\web\nodes\node_addbond.cpp" />
+    <ClCompile Include="src\web\nodes\mod\node_addbond.cpp" />
     <ClCompile Include="src\web\nodes\node_camera.cpp" />
-    <ClCompile Include="src\web\nodes\node_gromacs.cpp" />
-    <ClCompile Include="src\web\nodes\node_info.cpp" />
-    <ClCompile Include="src\web\nodes\node_inputs.cpp" />
+    <ClCompile Include="src\web\nodes\get\node_info.cpp" />
+    <ClCompile Include="src\web\nodes\get\node_inputs.cpp" />
     <ClCompile Include="src\web\nodes\misc\node_plot.cpp" />
-    <ClCompile Include="src\web\nodes\node_remap.cpp" />
+    <ClCompile Include="src\web\nodes\conv\node_remap.cpp" />
     <ClCompile Include="src\web\nodes\set\node_setattribute.cpp" />
-    <ClCompile Include="src\web\nodes\node_setradscl.cpp" />
-    <ClCompile Include="src\web\nodes\node_showrange.cpp" />
+    <ClCompile Include="src\web\nodes\set\node_setradscl.cpp" />
+    <ClCompile Include="src\web\nodes\set\node_showrange.cpp" />
     <ClCompile Include="src\web\nodes\node_tracetrj.cpp" />
     <ClCompile Include="src\web\nodes\node_volume.cpp" />
     <ClCompile Include="src\web\nodes\set\node_setbboxcenter.cpp" />
@@ -472,18 +472,17 @@
     <ClInclude Include="src\web\nodes\get\node_getattribute.h" />
     <ClInclude Include="src\web\nodes\in\node_vector.h" />
     <ClInclude Include="src\web\nodes\misc\node_accum.h" />
-    <ClInclude Include="src\web\nodes\misc\node_adjlist.h" />
+    <ClInclude Include="src\web\nodes\conv\node_adjlist.h" />
     <ClInclude Include="src\web\nodes\mod\node_addsurface.h" />
-    <ClInclude Include="src\web\nodes\node_addbond.h" />
+    <ClInclude Include="src\web\nodes\mod\node_addbond.h" />
     <ClInclude Include="src\web\nodes\node_camera.h" />
-    <ClInclude Include="src\web\nodes\node_gromacs.h" />
-    <ClInclude Include="src\web\nodes\node_info.h" />
-    <ClInclude Include="src\web\nodes\node_inputs.h" />
+    <ClInclude Include="src\web\nodes\get\node_info.h" />
+    <ClInclude Include="src\web\nodes\get\node_inputs.h" />
     <ClInclude Include="src\web\nodes\misc\node_plot.h" />
-    <ClInclude Include="src\web\nodes\node_remap.h" />
+    <ClInclude Include="src\web\nodes\conv\node_remap.h" />
     <ClInclude Include="src\web\nodes\set\node_setattribute.h" />
-    <ClInclude Include="src\web\nodes\node_setradscl.h" />
-    <ClInclude Include="src\web\nodes\node_showrange.h" />
+    <ClInclude Include="src\web\nodes\set\node_setradscl.h" />
+    <ClInclude Include="src\web\nodes\set\node_showrange.h" />
     <ClInclude Include="src\web\nodes\node_tracetrj.h" />
     <ClInclude Include="src\web\nodes\node_volume.h" />
     <ClInclude Include="src\web\nodes\set\node_setbboxcenter.h" />

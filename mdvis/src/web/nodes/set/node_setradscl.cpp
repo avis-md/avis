@@ -1,10 +1,11 @@
 #include "node_setradscl.h"
 #include "md/particles.h"
 
-Node_SetRadScl::Node_SetRadScl() : AnNode(new DmScript(sig), AN_FLAG_RUNONSEEK) {
-	title = "Set Radius Scale";
-	titleCol = NODE_COL_IO;
-    canTile = false;
+INODE_DEF(__("Set Radius Scale"), SetRadScl, SET)
+
+Node_SetRadScl::Node_SetRadScl() : INODE_INITF(AN_FLAG_RUNONSEEK) {
+	INODE_TITLE(NODE_COL_IO);
+
 	inputR.resize(1);
 	script->invars.push_back(std::pair<std::string, std::string>("values", "list(1d)"));
 }

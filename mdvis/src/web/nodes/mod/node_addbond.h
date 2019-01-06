@@ -1,9 +1,10 @@
 #pragma once
-#include "../annode.h"
+#include "web/annode_internal.h"
 
 class Node_AddBond : public AnNode {
 public:
-	static const std::string sig;
+	INODE_DEF_H
+
 	Node_AddBond();
 	~Node_AddBond();
 	

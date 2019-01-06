@@ -3,9 +3,10 @@
 #include "vis/pargraphics.h"
 #include "ui/ui_ext.h"
 
-Node_ShowRange::Node_ShowRange() : AnNode(new DmScript(sig)), invert(false), rMin(0), rMax(1) {
-	title = "Show Range";
-	titleCol = NODE_COL_MOD;
+INODE_DEF(__("Show Range"), ShowRange, SET)
+
+Node_ShowRange::Node_ShowRange() : INODE_INIT, invert(false), rMin(0), rMax(1) {
+	INODE_TITLE(NODE_COL_MOD);
 	inputR.resize(1);
 	script->invars.push_back(std::pair<std::string, std::string>("values", "list(1d)"));
 }

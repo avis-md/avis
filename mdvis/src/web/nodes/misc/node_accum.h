@@ -3,7 +3,7 @@
 
 class Node_Accum : public AnNode {
 public:
-	INODE_DEF_H(Accum)
+	INODE_DEF_H
 	Node_Accum();
 
 	void DrawHeader(float& off) override;
