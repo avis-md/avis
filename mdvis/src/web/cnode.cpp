@@ -8,7 +8,7 @@
 
 CNode::CNode(CScript* scr) : AnNode(scr) {
 	if (!scr) return;
-	title += " (c++)";
+	title = scr->name + " (c++)";
 	inputV.resize(scr->invars.size());
 	outputV.resize(scr->outvars.size());
 	inputVDef.resize(scr->invars.size());

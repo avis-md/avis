@@ -136,7 +136,8 @@ public:
 	virtual void OnConn(bool o, int i) {}
 	virtual void OnValChange(int i);
 protected:
-	AnNode(AnScript* scr, ANNODE_FLAGS flags = 0);
+	AnNode(AnScript* scr); //for user scripts
+	AnNode(DmScript* scr, ANNODE_FLAGS flags); //for internal scripts
 
 	static Texture tex_circle_open, tex_circle_conn;
 };

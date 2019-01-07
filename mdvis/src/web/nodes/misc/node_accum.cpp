@@ -6,7 +6,7 @@
 INODE_DEF(__("Accumulate"), Accum, MISC)
 
 Node_Accum::Node_Accum() : INODE_INIT {
-	INODE_TITLE(NODE_COL_MOD)
+	INODE_TITLE(NODE_COL_SPC)
 	AddInput();
 	script->AddInput("value", "*");
 	AddOutput(CVar("result", 'd', 0, {}, {}));

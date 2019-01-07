@@ -11,13 +11,13 @@
 	static AnNode* _Spawn();
 
 #define INODE_DEF(tt, nm, gp) \
-	const std::string Node_ ## nm::sig = "." ## #nm;\
+	const std::string Node_ ## nm::sig = "." #nm;\
 	const char* Node_ ## nm::_name = tt;\
 	AnNode_Internal_Reg Node_ ## nm::_reg = AnNode_Internal_Reg(\
 		Node_ ## nm::sig, Node_ ## nm::_name, ANNODE_GROUP::gp, &Node_ ## nm::_Spawn);\
 	AnNode* Node_ ## nm::_Spawn() { return new Node_ ## nm(); } 
 
-#define INODE_INIT AnNode(&scr), scr(sig)
+#define INODE_INIT AnNode(&scr, 0), scr(sig)
 #define INODE_INITF(f) AnNode(&scr, f), scr(sig)
 
 #define INODE_TITLE(col) \

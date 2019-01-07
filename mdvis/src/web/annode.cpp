@@ -450,18 +450,20 @@ void AnNode::AddOutput(const CVar& cv) {
 	if (saveConV) conVAll.push_back(std::vector<VarVal>());
 }
 
-AnNode::AnNode(AnScript* scr, ANNODE_FLAGS flags) : script(scr), canTile(false), 
-		saveConV(!(flags & AN_FLAG_NOSAVECONV)),
-		runOnSeek(!!(flags & AN_FLAG_RUNONSEEK)),
-		runOnValChg(!!(flags & AN_FLAG_RUNONVALCHG)) {
+AnNode::AnNode(AnScript* scr) : script(scr), canTile(false), 
+		saveConV(true), runOnSeek(false), runOnValChg(false) {
 	if (!scr) return;
-	title = scr->name;
 	inputR.resize(scr->invars.size());
 	auto osz = scr->outvars.size();
 	outputR.resize(osz);
 	conV.resize(osz);
 	conVAll.resize(osz);
 }
+
+AnNode::AnNode(DmScript* scr, ANNODE_FLAGS flags) : script(scr), canTile(false), 
+		saveConV(!(flags & AN_FLAG_NOSAVECONV)),
+		runOnSeek(!!(flags & AN_FLAG_RUNONSEEK)),
+		runOnValChg(!!(flags & AN_FLAG_RUNONVALCHG)) {}
 
 void AnNode::ApplyFrameCount(int f) {
 	for (auto& a : conVAll) {

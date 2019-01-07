@@ -6,12 +6,12 @@
 #define _(s) (Localizer::useDict? Localizer::dict[HASH(s)] : s)
 #define __(s) s
 
+constexpr uint32_t _HASH(char* s, uint32_t v) {
+	return (*s)? _HASH(s+1, v * 33 + *s) : v;
+}
+
 constexpr uint32_t HASH(const char* s) {
-	unsigned long hash = 5381;
-	int c = 0;
-	while (c = *s++)
-		hash = hash * 33 + c;
-	return hash;
+	return _HASH((char*)s, 5381);
 }
 
 class Localizer {

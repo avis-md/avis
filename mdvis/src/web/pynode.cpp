@@ -8,7 +8,7 @@
 
 PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 	if (!scr) return;
-	title += " (python)";
+	title = scr->name + " (python)";
 	inputV.resize(scr->invars.size());
 	outputV.resize(scr->outvars.size());
 	outputVC.resize(scr->outvars.size());

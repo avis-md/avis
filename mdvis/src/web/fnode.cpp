@@ -8,7 +8,7 @@
 
 FNode::FNode(FScript* scr) : AnNode(scr) {
 	if (!scr) return;
-	title += " (fortran)";
+	title = scr->name + " (fortran)";
 	inputV.resize(scr->invars.size());
 	outputV.resize(scr->outvars.size());
 	inputVDef.resize(scr->invars.size());
