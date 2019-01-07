@@ -22,7 +22,7 @@ Node_Remap::Node_Remap() : INODE_INIT {
 
 void Node_Remap::Execute() {
     if (!inputR[0].first) return;
-	CVar& cv = inputR[0].first->conV[inputR[0].second];
+	CVar& cv = inputR[0].getconv();
 	CVar& cvo = conV[0];
 	auto sz = cvo.dimVals[0] = cv.dimVals[0];
 	vals.resize(*sz);

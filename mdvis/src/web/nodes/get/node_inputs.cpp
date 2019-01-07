@@ -8,7 +8,7 @@
 
 INODE_DEF(__("Particle Data"), Inputs, GET)
 
-uint Node_Inputs::frame = 0, Node_Inputs::parcount = 0;
+uint Node_Inputs::parcount = 0;
 
 //enable saveconv?
 Node_Inputs::Node_Inputs() : INODE_INITF(AN_FLAG_NOSAVECONV), filter(0) {
@@ -58,8 +58,8 @@ void Node_Inputs::Execute() {
 		vel = Particles::vels;
 	}
 	else {
-		pos = &Particles::anim.poss[frame][0];
-		vel = &Particles::anim.vels[frame][0];
+		pos = &Particles::anim.poss[AnWeb::realExecFrame][0];
+		vel = &Particles::anim.vels[AnWeb::realExecFrame][0];
 	}
 	if (!filter) {
 		parcount = Particles::particleSz;

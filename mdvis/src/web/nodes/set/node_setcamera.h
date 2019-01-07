@@ -1,10 +1,10 @@
 #pragma once
-#include "../annode.h"
+#include "web/annode_internal.h"
 
-class Node_Camera_Out : public AnNode {
+class Node_SetCamera : public AnNode {
 public:
-	static const std::string sig;
-	Node_Camera_Out();
+	INODE_DEF_H
+	Node_SetCamera();
     
 	void Execute() override;
 

@@ -12,7 +12,7 @@ public:
 	};
 	uint filter;
 
-	static uint frame, parcount;
+	static uint parcount;
 
 	void DrawHeader(float& off) override;
 

@@ -1,4 +1,6 @@
 #include "anweb.h"
+#include "nodes/get/node_inputs.h"
+#include "nodes/get/node_info.h"
 #ifndef IS_ANSERVER
 #include "anops.h"
 #include "errorview.h"
@@ -29,7 +31,7 @@ bool AnWeb::drawFull = false, AnWeb::expanded = true;
 bool AnWeb::executing = false;
 bool AnWeb::apply = false;
 float AnWeb::maxScroll, AnWeb::scrollPos = 0, AnWeb::expandPos = 0;
-int AnWeb::execFrame, AnWeb::execdFrame;
+int AnWeb::execFrame, AnWeb::realExecFrame, AnWeb::execdFrame;
 float AnWeb::drawLerp;
 bool AnWeb::invertRun = false, AnWeb::runOnFrame = false;
 
@@ -398,6 +400,7 @@ void AnWeb::DoExecute(bool all) {
 			Debug::Message("AnWeb", "Frame " + std::to_string(a));
 #endif
 			execFrame = a+1;
+			realExecFrame = a;
 			Particles::anim.Seek(a);
 			auto st = Particles::anim.status[a];
 			if (st != Particles::animdata::FRAME_STATUS::LOADED){
@@ -409,7 +412,6 @@ void AnWeb::DoExecute(bool all) {
 				return;
 			}
 			Particles::UpdateAttrs();
-			Node_Inputs::frame = a;
 			_DoExecute();
 			AnWeb::WriteFrame(a);
 		}
@@ -418,7 +420,7 @@ void AnWeb::DoExecute(bool all) {
 		Particles::anim.Seek(f);
 	}
 	else {
-		Node_Inputs::frame = Particles::anim.currentFrame;
+		realExecFrame = Particles::anim.currentFrame;
 		_DoExecute();
 	}
 

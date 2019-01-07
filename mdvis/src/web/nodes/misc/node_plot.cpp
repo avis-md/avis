@@ -99,9 +99,9 @@ void Node_Plot::DrawFooter(float& y) {
 void Node_Plot::Execute() {
 #ifndef IS_ANSERVER
 	if (!inputR[0].first) return;
-	auto xid = inputR[1].first ? *(int*)inputR[1].first->conV[inputR[1].second].value : inputVDef[1].i;
-	auto yid = inputR[2].first ? *(int*)inputR[2].first->conV[inputR[2].second].value : inputVDef[2].i;
-	CVar& cv = inputR[0].first->conV[inputR[0].second];
+	auto xid = getval_i(1);
+	auto yid = getval_i(2);
+	CVar& cv = inputR[0].getconv();
 	if (!cv.value) {
 		RETERR("Value pointer is empty!");
 	}
@@ -311,7 +311,7 @@ void Node_Plot::LoadOut(const std::string& path) {
 
 void Node_Plot::OnConn(bool o, int i) {
 	if (i == 0) {
-		auto& cv = inputR[0].first->conV[inputR[0].second];
+		auto& cv = inputR[0].getconv();
 		auto sz = cv.dimVals.size();
 		if (type == TYPE::ALINES && sz > 1) {
 			Debug::Warning("Node::Plot", "Data of 2+ dimensions cannot be accumulated!");

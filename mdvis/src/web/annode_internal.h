@@ -53,29 +53,3 @@ class AnNode_Internal_Reg {
 public:
 	AnNode_Internal_Reg(const std::string sig, const std::string nm, ANNODE_GROUP grp, AnNode* (*func)());
 };
-
-#include "nodes/get/node_inputs.h"
-#include "nodes/get/node_info.h"
-#include "nodes/get/node_getattribute.h"
-
-#include "nodes/set/node_setattribute.h"
-#include "nodes/set/node_setbboxcenter.h"
-#include "nodes/set/node_showrange.h"
-#include "nodes/set/node_setradscl.h"
-
-#include "nodes/in/node_vector.h"
-
-#include "nodes/mod/node_addbond.h"
-#include "nodes/mod/node_addsurface.h"
-
-#include "nodes/conv/node_adjlist.h"
-#include "nodes/conv/node_remap.h"
-
-#include "nodes/misc/node_plot.h"
-#include "nodes/misc/node_accum.h"
-
-#include "nodes/ctrl/node_dowhile.h"
-
-#include "nodes/node_tracetrj.h"
-#include "nodes/node_volume.h"
-#include "nodes/node_camera.h"

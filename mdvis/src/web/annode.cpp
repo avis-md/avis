@@ -11,13 +11,21 @@ Vec4 AnNode::bgCol = white(0.7f, 0.25f);
 Texture AnNode::tex_circle_open, AnNode::tex_circle_conn;
 float AnNode::width = 220;
 
+short& AnNode::getval_s(const uint i) {
+	return inputR[0].first ? *(short*)inputR[0].getval() : inputVDef[0].s;
+}
+int& AnNode::getval_i(const uint i) {
+	return inputR[0].first ? *(int*)inputR[0].getval() : inputVDef[0].i;
+}
+double& AnNode::getval_d(const uint i) {
+	return inputR[0].first ? *(double*)inputR[0].getval() : inputVDef[0].d;
+}
+
 void AnNode::Init() {
 	AnNode_Internal::Init();
 #ifndef IS_ANSERVER
 	tex_circle_open = Texture(res::node_open_png, res::node_open_png_sz);
 	tex_circle_conn = Texture(res::node_conn_png, res::node_conn_png_sz);
-
-	Node_Volume::Init();
 #endif
 }
 

@@ -28,7 +28,7 @@ void CNode::Execute() {
 	for (uint i = 0; i < scr->invars.size(); ++i) {
 		auto& mv = scr->_invars[i];
 		if (HasConnI(i)) {
-			auto& cv = inputR[i].first->conV[inputR[i].second];
+			auto& cv = inputR[i].getconv();
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
 				scr->Set(i, *(int*)cv.value);

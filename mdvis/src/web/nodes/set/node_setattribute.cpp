@@ -19,14 +19,14 @@ void Node_SetAttribute::Execute() {
 	if (!Particles::attrs.size()) {
 		RETERR("No attribute available!");
 	}
-	CVar& cv = inputR[0].first->conV[inputR[0].second];
+	CVar& cv = inputR[0].getconv();
 	auto sz = *cv.dimVals[0];
 	if (sz != Particles::particleSz)
 		RETERR("Attribute must be for each atom!");
 	auto src = *((void**)cv.value);
 	auto prm = Particles::attrs[attrId + Particles::readonlyAttrCnt];
 	prm->timed = (AnWeb::execFrame > 0 && timed);
-	auto& tar = prm->Get(AnWeb::execFrame-1);
+	auto& tar = prm->Get(AnWeb::realExecFrame);
 	tar.resize(sz);
 	switch (cv.typeName[6]) {
 	case 's':
@@ -46,7 +46,7 @@ void Node_SetAttribute::Execute() {
 		RETERR("Unexpected data type " + cv.typeName + "!");
 	}
 	prm->dirty = true;
-	if (prm->timed) prm->Set((uint)(AnWeb::execFrame-1));
+	if (prm->timed) prm->Set((uint)(AnWeb::realExecFrame));
 }
 
 void Node_SetAttribute::DrawHeader(float& off) {

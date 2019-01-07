@@ -32,7 +32,7 @@ public:
 
 	static bool drawFull, expanded, executing, apply;
 	static float maxScroll, scrollPos, expandPos;
-	static int execFrame, execdFrame;
+	static int execFrame, realExecFrame, execdFrame;
 	static float drawLerp;
 	static bool invertRun, runOnFrame;
 

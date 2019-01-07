@@ -41,8 +41,8 @@ void Node_DoWhile::DrawHeader(float& off) {
 }
 
 void Node_DoWhile::Execute() {
-	double vl = inputR[0].first? *(double*)inputR[0].getval() : inputVDef[0].d;
-	double cmp = inputR[1].first? *(double*)inputR[1].getval() : inputVDef[1].d;
+	double vl = getval_d(0);
+	double cmp = getval_d(1);
 	bool loop = false;
 	switch (type) {
 	case COMP::GT:

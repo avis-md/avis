@@ -1,11 +1,6 @@
 #include "annode_internal.h"
 #include "web/anweb.h"
 
-const std::string Node_Vector::sig = ".vec";
-const std::string Node_TraceTrj::sig = ".trrj";
-const std::string Node_Volume::sig = ".vol";
-const std::string Node_Camera_Out::sig = ".ocam";
-
 std::array<std::vector<AnNode_Internal::noderef>, ANNODE_GROUP_COUNT> AnNode_Internal::scrs;
 std::array<std::string, ANNODE_GROUP_COUNT> AnNode_Internal::groupNms;
 

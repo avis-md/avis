@@ -13,7 +13,7 @@ Node_ShowRange::Node_ShowRange() : INODE_INIT, invert(false), rMin(0), rMax(1) {
 
 void Node_ShowRange::Execute() {
     if (!inputR[0].first) return;
-	CVar& cv = inputR[0].first->conV[inputR[0].second];
+	CVar& cv = inputR[0].getconv();
 	auto& sz = *cv.dimVals[0];
 	if (sz != Particles::particleSz) return;
 

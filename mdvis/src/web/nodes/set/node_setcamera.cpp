@@ -1,11 +1,12 @@
-#include "node_camera.h"
+#include "node_setcamera.h"
 #include "vis/pargraphics.h"
 #include "md/particles.h"
 
-Node_Camera_Out::Node_Camera_Out() : AnNode(new DmScript(sig)) {
-    title = "Camera (Set)";
-    titleCol = NODE_COL_IO;
-    canTile = false;
+INODE_DEF(__("Set Camera"), SetCamera, SET)
+
+Node_SetCamera::Node_SetCamera() : INODE_INIT {
+    INODE_TITLE(NODE_COL_IO);
+
     inputR.resize(6);
     auto& vrs = script->invars;
     std::pair<std::string, std::string> pr("center X", "double");
@@ -20,11 +21,11 @@ Node_Camera_Out::Node_Camera_Out() : AnNode(new DmScript(sig)) {
     OnSceneUpdate();
 }
 
-void Node_Camera_Out::Execute() {
+void Node_SetCamera::Execute() {
     OnSceneUpdate();
 #define ST(a, nm)\
     if (inputR[a].first) {\
-        ParGraphics::nm = (float)(*(double*)inputR[a].first->conV[inputR[a].second].value);\
+        ParGraphics::nm = (float)getval_d(a);\
         Scene::dirty = true;\
     }
     ST(0, rotCenter.x)
@@ -36,7 +37,7 @@ void Node_Camera_Out::Execute() {
 #undef ST
 }
 
-void Node_Camera_Out::OnSceneUpdate() {
+void Node_SetCamera::OnSceneUpdate() {
     inputVDef[0].d = ParGraphics::rotCenter.x;
     inputVDef[1].d = ParGraphics::rotCenter.y;
     inputVDef[2].d = ParGraphics::rotCenter.z;
@@ -45,6 +46,6 @@ void Node_Camera_Out::OnSceneUpdate() {
     inputVDef[5].d = ParGraphics::rotScale;
 }
 
-void Node_Camera_Out::OnAnimFrame() {
+void Node_SetCamera::OnAnimFrame() {
     Execute();
 }

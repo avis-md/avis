@@ -52,7 +52,7 @@ void Node_AddSurface::Execute() {
 	for (int a = 0; a < sz; a++) {
 		data[a] = (float)vl[a];
 	}
-	cutoff = (float)(inputR[1].first? *(double*)inputR[1].getval() : inputVDef[1].d);
+	cutoff = (float)getval_d(1);
 }
 
 void Node_AddSurface::Update() {

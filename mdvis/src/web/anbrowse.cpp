@@ -1,5 +1,6 @@
 #include "anweb.h"
 #include "ui/localizer.h"
+#include "ui/popups.h"
 #ifndef IS_ANSERVER
 #include "ui/icons.h"
 #include "ui/help.h"

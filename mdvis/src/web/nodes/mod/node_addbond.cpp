@@ -1,4 +1,5 @@
 #include "node_addbond.h"
+#include "web/anweb.h"
 #ifndef IS_ANSERVER
 #include "md/particles.h"
 #include "md/parmenu.h"
@@ -38,12 +39,12 @@ void Node_AddBond::Execute() {
 	}
 
 	if (!inputR[0].first) return;
-	CVar& cv = inputR[0].first->conV[inputR[0].second];
+	CVar& cv = inputR[0].getconv();
 	auto d1 = *cv.dimVals[1];
 	if (d1 != 2) RETERR("dimension 1 is " + std::to_string(d1) + ", expected 2!");
 	auto& c = Particles::anim.conns2[animId];
 	c.resize(Particles::anim.frameCount);
-	auto& c2 = c[Node_Inputs::frame];
+	auto& c2 = c[AnWeb::realExecFrame];
 	c2.count = *cv.dimVals[0];
 	c2.ids.resize(c2.count);
 	memcpy(&c2.ids[0], *((Int2**)cv.value), c2.count * sizeof(Int2));

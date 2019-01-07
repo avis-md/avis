@@ -1,5 +1,4 @@
 #include "node_info.h"
-#include "node_inputs.h"
 #include "web/anweb.h"
 #include "md/particles.h"
 
@@ -19,7 +18,7 @@ Node_Info::Node_Info() : INODE_INITF(AN_FLAG_NOSAVECONV) {
 	scr.AddOutput(conV.back());
 	conV[0].value = &Particles::particleSz;
 	conV[1].value = &Particles::anim.frameCount;
-	conV[2].value = &Node_Inputs::frame;
+	conV[2].value = &AnWeb::realExecFrame;
 }
 
 void Node_Info::Execute() {

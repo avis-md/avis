@@ -68,6 +68,9 @@ public:
 	std::vector<std::vector<nodecon>> outputR;
 	std::vector<union AnVarBase> inputVDef;
 	std::vector<CVar> conV;
+	short&  getval_s(const uint i);
+	int&    getval_i(const uint i);
+	double& getval_d(const uint i);
 
 	std::vector<std::vector<VarVal>> conVAll;
 

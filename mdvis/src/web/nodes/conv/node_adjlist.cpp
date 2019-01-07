@@ -25,8 +25,8 @@ void Node_AdjList::Execute() {
 	auto& cv = inputR[0].getconv();
 	auto data = *(int**)cv.value;
 	auto ccnt = *cv.dimVals[0];
-	count = inputR[1].first? *(int*)inputR[1].getval() : inputVDef[1].i;
-	listsize = inputR[2].first? *(int*)inputR[2].getval() : inputVDef[2].i;
+	count = getval_i(1);
+	listsize = getval_i(2);
 	if (listsize <= 0) RETERR("list size must be > 0!");
 	if (count <= 0) RETERR("atom count is 0!");
 	conns.clear();
@@ -72,7 +72,7 @@ void Node_AdjListI::Execute() {
 	count = 0;
 	auto v = *conV[0].dimVals[1];
 	if (!inputR[0].first) return;
-	auto& cv = inputR[0].first->conV[inputR[0].second];
+	auto& cv = inputR[0].getconv();
 	auto data = *(int**)cv.value;
 	auto cnt = *cv.dimVals[0];
 	auto lsz = *cv.dimVals[1];
