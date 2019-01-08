@@ -320,9 +320,9 @@ void hdr::to_rgbe(float* rgb, int w, int h, unsigned char* res) {
 		float mx = std::max(std::max(r, g), b);
 		if (mx == 0) memset(res + i*4, 0, 4);
 		else {
-			int e = (int)std::ceilf(std::log2f(mx));
+			int e = (int)std::ceil(std::log2f(mx));
 			res[i*4 + 3] = (unsigned char)(e + 128);
-			float mul = std::powf(2, e);
+			float mul = std::pow(2, e);
 			res[i*4] = (unsigned char)(r * 255 / mul + 0.5f);
 			res[i*4 + 1] = (unsigned char)(g * 255 / mul + 0.5f);
 			res[i*4 + 2] = (unsigned char)(b * 255 / mul + 0.5f);
