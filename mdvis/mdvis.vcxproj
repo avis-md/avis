@@ -271,6 +271,7 @@
     <ClCompile Include="src\tmp\tiny_obj_loader.cpp" />
     <ClCompile Include="src\ui\browse.cpp" />
     <ClCompile Include="src\ui\localbrowsetarget.cpp" />
+    <ClCompile Include="src\ui\preferences.cpp" />
     <ClCompile Include="src\ui\remotebrowsetarget.cpp" />
     <ClCompile Include="src\unloader.cpp" />
     <ClCompile Include="src\utils\shader.cpp" />
@@ -397,9 +398,11 @@
     <ClInclude Include="src\libjpeg\jpeglib.h" />
     <ClInclude Include="src\libjpeg\jversion.h" />
     <ClInclude Include="src\md\GenericSSV.h" />
+    <ClInclude Include="src\res\prefdata.h" />
     <ClInclude Include="src\tmp\tiny_obj_loader.h" />
     <ClInclude Include="src\ui\browse.h" />
     <ClInclude Include="src\ui\browsetarget.h" />
+    <ClInclude Include="src\ui\preferences.h" />
     <ClInclude Include="src\unloader.h" />
     <ClInclude Include="src\utils\refcnt.h" />
     <ClInclude Include="src\utils\uniquecaller.h" />
