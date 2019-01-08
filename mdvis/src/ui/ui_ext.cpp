@@ -1,8 +1,10 @@
+#include "ChokoLait.h"
 #include "ui_ext.h"
 #include "icons.h"
 #include "popups.h"
 #include "utils/dialog.h"
 #include "res/shddata.h"
+#include "vis/system.h"
 
 float UI2::sepw = 0.5f;
 #define sepw2 (1-sepw)
@@ -217,6 +219,17 @@ float UI2::Scroll(float x, float y, float h, float t, float tot, float fill) {
 		UI::Quad(x + 1, y + 1 + (h - 2)*t / tot, 6, (h - 2)*fill / tot, white(0.5f));
 	}
 	return t;
+}
+
+void UI2::BackQuad(float x, float y, float w, float h, Vec4 col) {
+	if (VisSystem::opacity < 1) {
+		const float dw = 1.f / Display::width;
+		const float dh = 1.f / Display::height;
+		#define H(v) (Display::height - (v)) * dh
+		UI::Quad(x, y, w, h, ChokoLait::mainCamera->blitTexs[1], white(), 0,
+			Vec2(x*dw, H(y)), Vec2((x+w)*dw, H(y)), Vec2(x*dw, H(y+h)), Vec2((x+w)*dw, H(y+h)));
+	}
+	UI::Quad(x, y, w, h, white(VisSystem::opacity) * col);
 }
 
 Vec3 UI2::EditVec(float x, float y, float w, const std::string& t, Vec3 v, bool ena) {

@@ -152,13 +152,17 @@ void ParGraphics::Eff::Apply() {
 	}
 
 	if (AnWeb::drawFull) {
-		cnt += Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1],
+		cnt += Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[0], cam->blitTexs[0], cam->blitTexs[1],
 		AnWeb::drawLerp, Display::width, Display::height);
 		if (cnt%2 != 0) {
 			std::swap(cam->blitTexs[0], cam->blitTexs[1]);
 			std::swap(cam->blitFbos[0], cam->blitFbos[1]);
 		}
 	}
+	Effects::Blur(cam->blitFbos[0], cam->blitFbos[2], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[2],
+	5, Display::width, Display::height);
+	Effects::Blur(cam->blitFbos[1], cam->blitFbos[2], cam->blitFbos[1], cam->blitTexs[1], cam->blitTexs[2],
+	1, Display::width, Display::height);
 }
 
 float ParGraphics::Eff::DrawMenu(float off) {
@@ -1034,7 +1038,7 @@ void ParGraphics::BlitSky() {
 		glUniform1f(reflProgLocs[13], reflIor);
 		glUniform1i(reflProgLocs[14], bgType);
 		if (AnWeb::drawFull) {
-			glUniform4f(reflProgLocs[15], 0, 0, 0, 0);
+			glUniform4f(reflProgLocs[15], 0, 0, 0, 1);
 			glUniform4f(reflProgLocs[16], 0, 0, 0, 1);
 		}
 		else {

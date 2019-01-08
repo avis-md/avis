@@ -32,6 +32,8 @@ public:
 	static void Bezier(Vec2 p1, Vec2 t1, Vec2 t2, Vec2 p2, Vec4 col, float thick = 1, int reso = 20);
 	static float Scroll(float x, float y, float h, float t, float tot, float fill);
 
+	static void BackQuad(float x, float y, float w, float h, Vec4 col = white(1, 0.1f));
+
 	static Vec3 EditVec(float x, float y, float w, const std::string& title, Vec3 v, bool ena);
 
 	static MOUSE_STATUS Tooltip(MOUSE_STATUS status, float x, float y, const std::string str);
