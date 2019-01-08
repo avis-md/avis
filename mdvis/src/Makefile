@@ -8,7 +8,7 @@ GLLIB := `pkg-config --libs glfw3`
 LIBS2 := `pkg-config --libs freetype2 libssh2 libjpeg`
 PYLIB :=
 WEAK_LIB :=
-NUMPY := -I$(shell $(PYTHON) -c "import site; print(site.getsitepackages()[0])")/numpy/core/include
+NUMPY := -I$(shell $(PYTHON) -m site --user-site)/numpy/core/include
 USR := /usr
 UNAME_S := $(shell uname -s)
 
@@ -44,7 +44,7 @@ C = gcc
 CXX = g++
 CXXFLAGS = -O0 -g -Wall -std=c++11 -fvisibility=hidden -I../src/ $(CXXFLAGS2) $(NUMPY) -I$(shell $(PYTHON)-config --prefix)/include/$(PYTHON)m $(RRAY) $(AVI) $(OSFLAG) $(CFLAGS2)
 LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
-LIBS = $(WEAK_LIB) $(PYLIB) -lpthread -lm $(GLLIB) -lz $(LIBS2)
+LIBS = $(WEAK_LIB) $(PYLIB) -lpthread -lm $(GLLIB) $(LIBS2) -lz
 
 HEADERS = hdr.h lodepng.h AssetObjects.h ChokoLait.h Engine.h SceneObjects.h unloader.h
 HEADERS += asset/mesh.h asset/tetrahedron.h asset/texture.h asset/texture3d.h

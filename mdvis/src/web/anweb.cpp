@@ -6,6 +6,7 @@
 #include "errorview.h"
 #include "ui/localizer.h"
 #include "ui/icons.h"
+#include "ui/ui_ext.h"
 #include "md/particles.h"
 #include "md/parloader.h"
 #include "vis/pargraphics.h"
@@ -113,8 +114,9 @@ void AnWeb::Update() {
 
 void AnWeb::Draw() {
 #ifndef IS_ANSERVER
+	const float alpha = VisSystem::opacity;
 	AnNode::width = 220;
-	UI::Quad(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f, white(0.8f * drawLerp, 0.05f));
+	UI::Quad(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f, white(alpha * drawLerp, 0.05f));
 	Engine::BeginStencil(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f);
 	byte ms = Input::mouse0State;
 	if (executing) {
@@ -300,8 +302,9 @@ void AnWeb::Draw() {
 
 void AnWeb::DrawSide() {
 #ifndef IS_ANSERVER
+	const float alpha = VisSystem::opacity;
 	const float expos = Display::width - expandPos;
-	UI::Quad(expos, 18, 180.f, Display::height - 36.f, white(0.9f, 0.15f));
+	UI2::BackQuad(expos, 18, 180.f, Display::height - 36.f);
 	if (expanded) {
 		float w = 180;
 		AnNode::width = w - 2;
@@ -340,14 +343,13 @@ void AnWeb::DrawSide() {
 			poss.y += n->DrawSide();
 		}
 		UI::EndScroll(poss.y);
-		UI::Quad(expos - 16.f, Display::height - 34.f, 16.f, 16.f, white(0.9f, 0.15f));
-		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(expos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		UI2::BackQuad(expos - 16.f, Display::height - 34.f, 16, 16);
+		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(expos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = Clamp(expandPos + 1500 * Time::delta, 0.f, 180.f);
 	}
 	else {
-		UI::Quad(expos, 0.f, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
-		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(expos - 110.f, Display::height - 34.f, 110.f, 16.f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
+		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(expos - 110.f, Display::height - 34.f, 110, 16, white(alpha, 0.15f), white(alpha * 2, 0.15f), white(alpha / 2, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(expos - 110.f, Display::height - 34.f, 16.f, 16.f, Icons::expand);
 		UI::Label(expos - 92.f, Display::height - 33.f, 12.f, _("Analysis") +" (A)", white());

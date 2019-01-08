@@ -4,6 +4,7 @@
 #ifndef IS_ANSERVER
 #include "ui/icons.h"
 #include "ui/help.h"
+#include "ui/ui_ext.h"
 #include "utils/runcmd.h"
 #endif
 
@@ -245,7 +246,7 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 void AnBrowse::Draw() {
 #ifndef IS_ANSERVER
 	if (Popups::type == POPUP_TYPE::NONE) doAddFd = nullptr;
-	UI::Quad(0, 0, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
+	UI2::BackQuad(0, 0, expandPos, Display::height - 18.f);
 	if (expanded) {
 		UI::Label(5, 3, 12.f, "Scripts", white());
 		HelpMenu::Link(expandPos - 16, 3, "anl/index.html");
@@ -275,7 +276,7 @@ void AnBrowse::Draw() {
 		DoDraw(&folder, f, 0);
 		UI::EndScroll(f);
 
-		UI::Quad(expandPos, Display::height - 34.f, 16.f, 16.f, white(1, 0.2f));
+		UI2::BackQuad(expandPos, Display::height - 34.f, 16.f, 16.f);
 		if ((!UI::editingText && Input::KeyUp(Key_S)) || Engine::Button(expandPos, Display::height - 34.f, 16.f, 16.f, Icons::collapse) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = std::min(expandPos + 1500 * Time::delta, 150.f);

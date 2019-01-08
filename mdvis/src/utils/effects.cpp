@@ -25,7 +25,7 @@ void Effects::Init(EFF_ENABLE_MASK mask) {
 		_InitDof(vs);
 }
 
-byte Effects::Blur(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, float rad, int w, int h) {
+byte Effects::Blur(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, float rad, int w, int h) {
 	glUseProgram(blurProg);
 	glBindVertexArray(Camera::emptyVao);
 	glUniform1i(blurProgLocs[0], 0);
@@ -39,7 +39,7 @@ byte Effects::Blur(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, float rad, int 
 
 	glBindTexture(GL_TEXTURE_2D, tx2);
 	glUniform1f(blurProgLocs[3], 1);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, t1);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, t3);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	
 	glBindVertexArray(0);
@@ -105,7 +105,7 @@ byte Effects::SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLui
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, t3);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	if (blr > 0) Blur(t3, t2, tx3, tx2, blr / 20, w, h);
+	if (blr > 0) Blur(t3, t2, t3, tx3, tx2, blr / 20, w, h);
 	
 	glUseProgram(ssaoProg2);
 	glUniform1i(ssaoProg2Locs[0], 0);

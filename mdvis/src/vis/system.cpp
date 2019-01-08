@@ -27,7 +27,7 @@ std::string VisSystem::version_hash =
 "";
 
 Vec4 VisSystem::accentColor = Vec4(1, 0.75f, 0, 1);
-float VisSystem::glass = 0.9f;
+float VisSystem::opacity = 0.8f;
 uint VisSystem::renderMs, VisSystem::uiMs;
 
 float VisSystem::lastSave;
@@ -269,7 +269,7 @@ void VisSystem::DrawTitle() {
 }
 
 void VisSystem::DrawBar() {
-	UI::Quad(0, Display::height - 18.f, static_cast<float>(Display::width), 18, white(0.9f, 0.1f));
+	UI2::BackQuad(0, Display::height - 18.f, (float)Display::width, 18, white(1.1f, 0.05f));
 	if (Particles::anim.frameCount > 1) {
 		if (AnWeb::executing) {
 			float w = 172;

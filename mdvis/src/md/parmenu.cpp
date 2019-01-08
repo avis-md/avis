@@ -53,7 +53,8 @@ void ParMenu::CalcH() {
 }
 
 void ParMenu::Draw() {
-	UI::Quad(0, 18, expandPos, Display::height - 36.f, white(0.9f, 0.15f));
+	const float alpha = VisSystem::opacity;
+	UI2::BackQuad(0, 18, expandPos, Display::height - 36.f);
 	if (expanded) {
 		if (!Particles::particleSz) {
 			if (Engine::Button(expandPos - 110, Display::height * 0.4f - 40, 80, 80, Icons::openfile, white(0.4f)) == MOUSE_RELEASE) {
@@ -94,11 +95,12 @@ void ParMenu::Draw() {
 
 		for (uint i = 0; i < 5; ++i) {
 			if (i == activeMenu)
-				UI::Quad(expandPos, 81.f * i + 18, 17, 81, white(0.9f, 0.15f));
-			else
-				if (Engine::Button(expandPos, 81.f * i + 18, 16, 80, white(0.7f, 0.1f), white(1, 0.2f), white(1, 0.05f)) == MOUSE_RELEASE) {
+				UI2::BackQuad(expandPos, 81.f * i + 18, 17, 81);
+			else {
+				if (Engine::Button(expandPos, 81.f * i + 18, 16, 80, white(alpha * 0.8f, 0.1f), white(alpha * 2, 0.2f), white(alpha * 2, 0.05f)) == MOUSE_RELEASE) {
 					activeMenu = i;
 				}
+			}
 		}
 
 		UI::Rotate(90, Vec2(expandPos + 16, 18));
@@ -109,13 +111,13 @@ void ParMenu::Draw() {
 		UI::font->Align(ALIGN_TOPLEFT);
 		UI::ResetMatrix();
 
-		UI::Quad(expandPos, Display::height - 34.f, 16, 16, white(0.9f, 0.15f));
+		UI2::BackQuad(expandPos, Display::height - 34.f, 16, 16);
 		if ((!UI::editingText && Input::KeyUp(Key_T)) || Engine::Button(expandPos, Display::height - 34.f, 16, 16, Icons::collapse) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = Clamp(expandPos + 1500 * Time::delta, 2.f, 150.f);
 	}
 	else {
-		if ((!UI::editingText && Input::KeyUp(Key_T)) || Engine::Button(expandPos, Display::height - 34.f, 115, 16, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
+		if ((!UI::editingText && Input::KeyUp(Key_T)) || Engine::Button(expandPos, Display::height - 34.f, 115, 16, white(alpha, 0.15f), white(alpha * 2, 0.15f), white(alpha / 2, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(expandPos, Display::height - 34.f, 16, 16, Icons::expand);
 		UI::Label(expandPos + 18, Display::height - 33.f, 12, _("Toolbar") + " (T)", white());
@@ -350,7 +352,7 @@ void ParMenu::DrawStart() {
 		UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::bg, DRAWTEX_CROP);
 		UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::logo, white(0.8f), DRAWTEX_CROP);
 		
-		Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1], AnWeb::drawLerp, Display::width, Display::height);
+		Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[0], cam->blitTexs[0], cam->blitTexs[1], AnWeb::drawLerp, Display::width, Display::height);
 		
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->blitFbos[0]);

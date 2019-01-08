@@ -20,7 +20,7 @@ SSH AnOps::ssh;
 void AnOps::Draw() {
 	const float expos = Display::width - expandPos;
 	const float w = 180;
-	UI::Quad(expos, 0.f, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
+	UI2::BackQuad(expos, 0, expandPos, Display::height - 18.f);
 	if (expanded) {
 		UI::Label(expos + 1, 1, 12, "Options", white());
 		
@@ -38,13 +38,12 @@ void AnOps::Draw() {
 		UI::Label(expos + 4, off + 51, 12, "Fortran", white());
 		UI::Quad(expos + 164, off + 51, 14, 14, (remote ? AnWeb::hasFt_s : AnWeb::hasFt) ? green() : red());
 		
-		UI::Quad(expos - 16.f, Display::height - 34.f, 16.f, 16.f, white(0.9f, 0.15f));
+		UI2::BackQuad(expos - 16.f, Display::height - 34.f, 16.f, 16.f);
 		if ((!UI::editingText && (Input::KeyUp(Key_O))) || Engine::Button(expos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = std::min(expandPos + 1500 * Time::delta, w);
 	}
 	else {
-		UI::Quad(expos, 0.f, expandPos, Display::height - 18.f, white(0.9f, 0.15f));
 		if ((!UI::editingText && (Input::KeyUp(Key_O))) || Engine::Button(expos - 110.f, Display::height - 34.f, 110.f, 16.f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(expos - 110.f, Display::height - 34.f, 16.f, 16.f, Icons::expand);
