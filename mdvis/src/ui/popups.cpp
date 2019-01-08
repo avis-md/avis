@@ -75,6 +75,7 @@ bool Popups::DoDrawMenu(std::vector<MenuItem>* mn, float x, float y, size_t* act
 			type = POPUP_TYPE::NONE;
 			selectedMenu = a;
 			if (i.callback) i.callback();
+			return 1;
 		}
 	}
 	if (*act > 0) {

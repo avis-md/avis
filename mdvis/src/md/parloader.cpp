@@ -776,7 +776,7 @@ void ParLoader::DrawOpenDialog() {
 	float hoff = roundf(Display::height * 0.5f - 150);
 
 	if (_showImp || _impPos > 0) {
-		UI::Quad(woff + 400, hoff, _impPos, 300, white(0.8f, 0.1f));
+		UI2::BackQuadC(woff + 400, hoff, _impPos, 300, white(0.85f, 0.05f));
 		Engine::PushStencil(woff + 400, hoff, _impPos, 300);
 		UI::Label(woff + 402, hoff, 12, "Choose Importer", white());
 		uint i = 1;
@@ -803,7 +803,7 @@ void ParLoader::DrawOpenDialog() {
 	}
 	_impPos = _showImp ? std::min(_impPos + 800 * Time::delta, 100.f) : std::max(_impPos - 800 * Time::delta, 0.f);
 
-	UI::Quad(woff, hoff, 400, 300, white(0.8f, 0.15f));
+	UI2::BackQuadC(woff, hoff, 400, 300, white(0.85f, 0.1f));
 	UI::Quad(woff, hoff, 400, 16, white(0.9f, 0.1f));
 	UI::Label(woff + 2, hoff, 12, loadAsTrj ? "Import Trajectory" : "Import Configuration", white());
 	hoff += 17;

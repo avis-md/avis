@@ -7,7 +7,7 @@ Format: signature, name, type[B / I / F / S], {args},
   signature must start with [S(ystem) / A(nalysis) / V(isualization)]
 
 Args:
-	Bool: value[Y / N]
+	Bool: value[0 / 1]
 	Int: value, min, max, use slider
 	Float: value, min, max, use slider
 	String: value
@@ -19,6 +19,12 @@ namespace config {
 	const char* prefs[] = {
 		"SDPI", "DPI Scale Factor", "F", "1", "0.2", "5", "N",
 		"Scale Factor of the User Interface. Large numbers make the icons larger and vice versa.",
+
+		"SHQUI", "High Quality UI", "B", "1",
+		"Blurring of user interface background",
+
+		"SOPUI", "UI Opacity", "F", "0.9", "0", "1", "Y",
+		"Non-see-through-ness of the user interface",
 
 #ifdef PLATFORM_WIN
 		"ACLW", "Additional Compiler Flags", "S", "",

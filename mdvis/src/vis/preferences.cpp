@@ -1,8 +1,11 @@
 #include "preferences.h"
 #include "res/prefdata.h"
+#include "ui/ui_ext.h"
+#include "ui/icons.h"
 
 std::vector<std::pair<std::string, std::vector<Preferences::Pref>>> Preferences::prefs;
 bool Preferences::show = false;
+int Preferences::menu = 0;
 
 #define G2I(s) ((s == 'S')? 0 : ((s == 'A')? 1 : 2))
 
@@ -66,7 +69,27 @@ void Preferences::Init() {
 }
 
 void Preferences::Draw() {
+	if (!show) return;
+	UI::IncLayer();
+	const float x0 = Display::width*0.5f - 200.f;
+	const float y0 = Display::height*0.5f - 150.f;
+	UI2::BackQuad(x0, y0, 400, 300);
+	UI::Quad(x0, y0, 100, 300, black(0.3f));
+	if (Engine::Button(x0 + 384, y0, 16, 16, Icons::cross) == MOUSE_RELEASE)
+		show = false;
+	for (int a = 0; a < 3; ++a) {
+		UI::Label(x0 + 5, y0 + 5 + 25 * a, 16, prefs[a].first, (a == menu)? VisSystem::accentColor : white());
+		if (Engine::Button(x0, y0 + 5 + 25 * a, 100, 20) == MOUSE_RELEASE)
+			menu = a;
+	}
 
+	auto& prf = prefs[menu].second;
+
+	float off = UI::BeginScroll(x0 + 100, y0, 280, 300);
+	for (auto& p : prf) {
+
+	}
+	UI::EndScroll(off);
 }
 
 void Preferences::Link(const std::string sig, bool* b) {
@@ -74,6 +97,7 @@ void Preferences::Link(const std::string sig, bool* b) {
 	for (auto& p : pp.second) {
 		if (p.sig == sig) {
 			p.val_b = b;
+			*b = p.dval_b;
 			break;
 		}
 	}
@@ -84,6 +108,7 @@ void Preferences::Link(const std::string sig, int* i) {
 	for (auto& p : pp.second) {
 		if (p.sig == sig) {
 			p.val_i = i;
+			*i = p.dval_i;
 			break;
 		}
 	}
@@ -94,6 +119,7 @@ void Preferences::Link(const std::string sig, float* f) {
 	for (auto& p : pp.second) {
 		if (p.sig == sig) {
 			p.val_f = f;
+			*f = p.dval_f;
 			break;
 		}
 	}
@@ -104,6 +130,7 @@ void Preferences::Link(const std::string sig, std::string* s) {
 	for (auto& p : pp.second) {
 		if (p.sig == sig) {
 			p.val_s = s;
+			*s = p.dval_s;
 			break;
 		}
 	}

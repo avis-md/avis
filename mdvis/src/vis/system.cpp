@@ -2,6 +2,7 @@
 #include "pargraphics.h"
 #include "renderer.h"
 #include "changelog.h"
+#include "preferences.h"
 #include "md/parmenu.h"
 #include "md/parloader.h"
 #include "web/anweb.h"
@@ -165,6 +166,9 @@ void VisSystem::Init() {
 	mi1[0].Set(0, "Autorotate", []() {
 		ParGraphics::autoRot = true;
 	});
+	mi1[2].Set(0, "Preferences", []() {
+		Preferences::show = true;
+	});
 
 	auto& mi2 = menuItems[3];
 	mi2.resize(5);
@@ -208,20 +212,8 @@ void VisSystem::InitEnv() {
 		}
 	}
 	strm.close();
-	prefs.clear();
-	strm.open(IO::path + "config/preferences.txt");
-	if (strm.is_open()) {
-		std::string s;
-		while (std::getline(strm, s)) {
-			if (!s.size() || s[0] == '#') continue;
-			auto lc = s.find_first_of('=');
-			if (lc != std::string::npos) {
-				prefs.emplace(s.substr(0, lc), s.substr(lc + 1));
-			}
-		}
-	}
 
-	Input::scrollScl = TryParse(prefs["VIS_SCROLL_SPEED"], 1.f);
+	Preferences::Link("VSS", &Input::scrollScl);
 }
 
 bool VisSystem::InMainWin(const Vec2& pos) {
@@ -244,7 +236,7 @@ void VisSystem::UpdateTitle() {
 }
 
 void VisSystem::DrawTitle() {
-	UI::Quad(0,0, static_cast<float>(Display::width), 18, white(0.95f, 0.05f));
+	UI2::BackQuadC(0, 0, (float)Display::width, 18, white(0.85f, 0.05f));
 	const std::string menu[] = {_("File"), _("Edit"), _("Options"), _("Render"), _("Help")};
 	bool iso = Popups::type == POPUP_TYPE::MENU && Popups::data >= menuItems && Popups::data < (menuItems + 5) && UI::_layerMax == UI::_layer+1;
 	UI::ignoreLayers = iso; 
@@ -269,7 +261,7 @@ void VisSystem::DrawTitle() {
 }
 
 void VisSystem::DrawBar() {
-	UI2::BackQuad(0, Display::height - 18.f, (float)Display::width, 18, white(1.1f, 0.05f));
+	UI2::BackQuadC(0, Display::height - 18.f, (float)Display::width, 18, white(0.85f, 0.05f));
 	if (Particles::anim.frameCount > 1) {
 		if (AnWeb::executing) {
 			float w = 172;

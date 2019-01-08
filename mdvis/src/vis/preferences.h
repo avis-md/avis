@@ -1,5 +1,5 @@
 #pragma once
-#include "vis/system.h"
+#include "system.h"
 
 class Preferences {
 	struct Pref {
@@ -21,10 +21,12 @@ class Preferences {
 		std::string dval_s, *val_s = nullptr;
 	};
 	static std::vector<std::pair<std::string, std::vector<Pref>>> prefs;
-	static bool show;
 
 public:
 	static void Init();
+
+	static bool show;
+	static int menu;
 
 	static void Draw();
 

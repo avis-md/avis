@@ -12,6 +12,7 @@
 #include "vis/pargraphics.h"
 #include "vis/selection.h"
 #include "vis/renderer.h"
+#include "vis/preferences.h"
 #include "web/anweb.h"
 
 #define HATENA
@@ -346,30 +347,32 @@ loopout:
 }
 
 void ParMenu::DrawStart() {
-	if (AnWeb::drawFull) {
-		auto& cam = ChokoLait::mainCamera;
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[0]);
-		UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::bg, DRAWTEX_CROP);
-		UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::logo, white(0.8f), DRAWTEX_CROP);
-		
-		Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[0], cam->blitTexs[0], cam->blitTexs[1], AnWeb::drawLerp, Display::width, Display::height);
-		
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->blitFbos[0]);
+	auto& cam = ChokoLait::mainCamera;
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[0]);
+	UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::bg, DRAWTEX_CROP);
+	UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::logo, white(0.8f), DRAWTEX_CROP);
+	
+	if (AnWeb::drawFull)
+		Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[0], cam->blitTexs[0], cam->blitTexs[1],
+			AnWeb::drawLerp, Display::width, Display::height);
 
-		glReadBuffer(GL_COLOR_ATTACHMENT0);
-		glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::frameWidth, Display::frameHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-		
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-	}
-	else {
-		UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::bg, DRAWTEX_CROP);
-		UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), ParGraphics::logo, white(0.8f), DRAWTEX_CROP);
-		if (!UI::_layerMax && Input::KeyDown(Key_Space) && !!ParGraphics::bgs.size()) {
-			ParGraphics::bgi = (ParGraphics::bgi + 1) % ParGraphics::bgs.size();
-			ParGraphics::bg = Texture(ParGraphics::bgs[ParGraphics::bgi], false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
-		}
+	Effects::Blur(cam->blitFbos[0], cam->blitFbos[2], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[2],
+		5, Display::width, Display::height);
+	Effects::Blur(cam->blitFbos[1], cam->blitFbos[2], cam->blitFbos[1], cam->blitTexs[1], cam->blitTexs[2],
+		1, Display::width, Display::height);
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->blitFbos[0]);
+
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::frameWidth, Display::frameHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+
+	if (!AnWeb::drawFull && !UI::editingText && !UI::_layerMax && Input::KeyDown(Key_Space) && !!ParGraphics::bgs.size()) {
+		ParGraphics::bgi = (ParGraphics::bgi + 1) % ParGraphics::bgs.size();
+		ParGraphics::bg = Texture(ParGraphics::bgs[ParGraphics::bgi], false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	}
 
 	if (ParLoader::busy) {
@@ -402,6 +405,7 @@ void ParMenu::DrawSplash() {
 	if (!showSplash) return;
 	UI::IncLayer();
 	UI::Quad(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), black(0.7f));
+	UI2::BackQuadC(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, white(0.85f, 0.05f));
 	UI::Texture(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, ParGraphics::splash);
 	UI::font->Align(ALIGN_TOPRIGHT);
 	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 120, 12, VERSIONSTRING, white());

@@ -29,6 +29,7 @@
 #include "vis/shadows.h"
 #include "vis/renderer.h"
 #include "vis/selection.h"
+#include "vis/preferences.h"
 #include "utils/effects.h"
 #include "utils/ssh.h"
 #include "live/livesyncer.h"
@@ -221,6 +222,7 @@ void paintfunc() {
 	ParMenu::DrawSplash();
 	ChangeLog::Draw();
 	Browse::Draw();
+	Preferences::Draw();
 	HelpMenu::Draw();
 	
 	Popups::Draw();
@@ -339,6 +341,7 @@ The hash for this program is )" << VisSystem::version_hash
 		Localizer::MakeMap(path);
 		return 0;
 #else
+		Preferences::Init();
 		VisSystem::InitEnv();
 		Localizer::Init(VisSystem::prefs["SYS_LOCALE"]);
 		Display::dpiScl = 1.f / TryParse(VisSystem::prefs["SYS_DPI_SCALE"], 1.0f);
