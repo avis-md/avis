@@ -28,6 +28,7 @@ std::string VisSystem::version_hash =
 "";
 
 Vec4 VisSystem::accentColor = Vec4(1, 0.75f, 0, 1);
+bool VisSystem::blur = true;
 float VisSystem::opacity = 0.8f;
 uint VisSystem::renderMs, VisSystem::uiMs;
 

@@ -230,14 +230,14 @@ void UI2::BlurQuad(float x, float y, float w, float h) {
 }
 
 void UI2::BackQuad(float x, float y, float w, float h, Vec4 col) {
-	if (VisSystem::opacity < 1) {
+	if (VisSystem::blur && VisSystem::opacity < 1) {
 		BlurQuad(x, y, w, h);
 	}
 	UI::Quad(x, y, w, h, white(VisSystem::opacity) * col);
 }
 
 void UI2::BackQuadC(float x, float y, float w, float h, Vec4 col) {
-	if (col.a < 1) {
+	if (VisSystem::blur && col.a < 1) {
 		BlurQuad(x, y, w, h);
 	}
 	UI::Quad(x, y, w, h, col);

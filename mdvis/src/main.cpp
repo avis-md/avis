@@ -343,8 +343,11 @@ The hash for this program is )" << VisSystem::version_hash
 #else
 		Preferences::Init();
 		VisSystem::InitEnv();
-		Localizer::Init(VisSystem::prefs["SYS_LOCALE"]);
-		Display::dpiScl = 1.f / TryParse(VisSystem::prefs["SYS_DPI_SCALE"], 1.0f);
+		Localizer::Init("");
+		//Localizer::Init(VisSystem::prefs["SYS_LOCALE"]);
+		Preferences::Link("SDPI", &Display::dpiScl, &Display::OnDpiChange);
+		Preferences::Link("SHQUI", &VisSystem::blur);
+		Preferences::Link("SOPUI", &VisSystem::opacity);
 #endif
 		//GLFWimage icon;
 		//icon.pixels = Texture::LoadPixels(res::icon_png, res::icon_png_sz, (uint&)icon.width, (uint&)icon.height);

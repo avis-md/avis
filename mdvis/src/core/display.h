@@ -18,7 +18,8 @@ public:
 	static bool uiMatrixIsI;
 
 	static float dpiScl;
-
+	
+	static void OnDpiChange();
 	static void Resize(int x, int y, bool maximize = false);
 
 	static void SetCursor(CURSORTYPE);

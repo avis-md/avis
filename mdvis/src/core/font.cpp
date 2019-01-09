@@ -115,7 +115,7 @@ void Font::SizeVec(uint sz) {
 }
 
 GLuint Font::CreateGlyph(uint sz, uint mask) {
-	uint szd = (uint)(sz / Display::dpiScl);
+	uint szd = (uint)(sz * Display::dpiScl);
 	FT_Set_Pixel_Sizes(_face, 0, szd);
 	_glyphs.emplace(sz, 0);
 	glGenTextures(1, &_glyphs[sz][mask]);
@@ -135,9 +135,9 @@ GLuint Font::CreateGlyph(uint sz, uint mask) {
 				pr.o2s[a] = 0;
 			}
 			else {
-				pr.o2s[a] = (float)(_face->glyph->advance.x >> 6) * Display::dpiScl;
+				pr.o2s[a] = (float)(_face->glyph->advance.x >> 6) / Display::dpiScl;
 			}
-			pr.off[a] = Vec2(_face->glyph->bitmap_left, szd - _face->glyph->bitmap_top) * Display::dpiScl;
+			pr.off[a] = Vec2(_face->glyph->bitmap_left, szd - _face->glyph->bitmap_top) / Display::dpiScl;
 		}
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);

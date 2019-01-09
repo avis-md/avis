@@ -19,6 +19,8 @@ class Preferences {
 		int         dval_i, *val_i = nullptr;
 		float       dval_f, *val_f = nullptr;
 		std::string dval_s, *val_s = nullptr;
+
+		void (*callback)();
 	};
 	static std::vector<std::pair<std::string, std::vector<Pref>>> prefs;
 
@@ -30,8 +32,8 @@ public:
 
 	static void Draw();
 
-	static void Link(const std::string sig, bool* b);
-	static void Link(const std::string sig, int* i);
-	static void Link(const std::string sig, float* f);
-	static void Link(const std::string sig, std::string* s);
+	static void Link(const std::string sig, bool* b, void (*callback)() = nullptr);
+	static void Link(const std::string sig, int* i, void (*callback)() = nullptr);
+	static void Link(const std::string sig, float* f, void (*callback)() = nullptr);
+	static void Link(const std::string sig, std::string* s, void (*callback)() = nullptr);
 };

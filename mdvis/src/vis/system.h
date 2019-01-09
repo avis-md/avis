@@ -15,6 +15,7 @@ public:
 	static std::string version_hash;
 
 	static Vec4 accentColor;
+	static bool blur;
 	static float opacity;
 	static uint renderMs, uiMs;
 

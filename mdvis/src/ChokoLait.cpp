@@ -213,8 +213,8 @@ void ChokoLait::Paint(emptyCallbackFunc rendFunc, emptyCallbackFunc paintFunc) {
 	
 	auto w = Display::width;
 	auto h = Display::height;
-	Display::width /= Display::dpiScl;
-	Display::height /= Display::dpiScl;
+	Display::width *= Display::dpiScl;
+	Display::height *= Display::dpiScl;
 	mainCamera->Render(rendFunc);
 	Display::width = w;
 	Display::height = h;
@@ -257,7 +257,7 @@ void ChokoLait::MouseEnterGL(GLFWwindow* window, int e) {
 }
 
 void ChokoLait::MotionGL(GLFWwindow* window, double x, double y) {
-	Input::mousePos = Vec2(x, y) * Display::dpiScl;
+	Input::mousePos = Vec2(x, y) / Display::dpiScl;
 	Input::mousePosRelative = Input::mousePos / Vec2(Display::width, Display::height);
 }
 
@@ -266,8 +266,8 @@ void ChokoLait::ReshapeGL(GLFWwindow* window, int w, int h) {
 	w /= SIMULATE_FRAMESCALE;
 	h /= SIMULATE_FRAMESCALE;
 #endif
-	Display::width = (int)(w * Display::dpiScl);
-	Display::height = (int)(h * Display::dpiScl);
+	Display::width = (int)(w / Display::dpiScl);
+	Display::height = (int)(h / Display::dpiScl);
 	Display::actualWidth = w;
 	Display::actualHeight = h;
 	glfwGetFramebufferSize(window, &Display::frameWidth, &Display::frameHeight);

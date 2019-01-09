@@ -1,4 +1,4 @@
-#include "Engine.h"
+#include "ChokoLait.h"
 
 int Display::width = 256, Display::height = 256;
 int Display::actualWidth = 256, Display::actualHeight = 256;
@@ -8,6 +8,11 @@ float Display::dpiScl = 1;
 
 NativeWindow* Display::window = nullptr;
 CURSORTYPE Display::cursorType;
+
+void Display::OnDpiChange() {
+	ChokoLait::ReshapeGL(window, actualWidth, actualHeight);
+	Scene::dirty = true;
+}
 
 void Display::Resize(int x, int y, bool maximize) {
 	glfwSetWindowSize(window, x, y);
