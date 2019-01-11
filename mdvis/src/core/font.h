@@ -15,6 +15,7 @@ public:
 
 	bool loaded = false;
 	GLuint glyph(uint size, uint mask);
+	void ClearGlyphs();
 
 	ALIGNMENT alignment;
 

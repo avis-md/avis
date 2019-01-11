@@ -230,6 +230,7 @@ void UI2::BlurQuad(float x, float y, float w, float h) {
 }
 
 void UI2::BackQuad(float x, float y, float w, float h, Vec4 col) {
+	if (col.r < 0) col = VisSystem::backColor;
 	if (VisSystem::blur && VisSystem::opacity < 1) {
 		BlurQuad(x, y, w, h);
 	}

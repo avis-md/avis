@@ -14,8 +14,11 @@ class VisSystem {
 public:
 	static std::string version_hash;
 
-	static Vec4 accentColor;
+	static std::string localFd;
+
+	static Vec4 accentColor, backColor;
 	static bool blur;
+	static float blurRad;
 	static float opacity;
 	static uint renderMs, uiMs;
 
@@ -45,6 +48,8 @@ public:
 
 	static void UpdateTitle();
 	static void DrawTitle(), DrawBar(), DrawMsgPopup();
+
+	static void BlurBack();
 
 	static void Save(const std::string& path);
 	static bool Load(const std::string& path);

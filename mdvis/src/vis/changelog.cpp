@@ -18,9 +18,8 @@ void ChangeLog::Init() {
 void ChangeLog::Draw() {
 	if (!show) return;
 	UI::IncLayer();
-	UI::Quad(Display::width/2 - 200.f, Display::height/2 - 250.f, 400, 500, white(0.8f, 0.1f));
+	UI2::BackQuad(Display::width/2 - 200.f, Display::height/2 - 250.f, 400, 500);
 	UI::Label(Display::width/2 - 195.f, Display::height/2 - 247.f, 20, "Change Log " APPVERSION, white());
-	UI::Quad(Display::width/2 - 195.f, Display::height/2 - 220.f, 390, 465, black(0.7f));
 	float off = UI::BeginScroll(Display::width/2 - 195.f, Display::height/2 - 215.f, 390, 455);
 	for (auto& l : logs) {
 		if (l[0] == '#') {

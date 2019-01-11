@@ -94,6 +94,10 @@ GLuint Font::glyph(uint size, uint mask) {
 	return CreateGlyph(size, mask);
 }
 
+void Font::ClearGlyphs() {
+	_glyphs.clear();
+}
+
 void Font::SizeVec(uint sz) {
 	if (vecSize >= sz) return;
 	poss.resize(sz * 4 + 1);

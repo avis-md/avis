@@ -12,6 +12,8 @@ CURSORTYPE Display::cursorType;
 void Display::OnDpiChange() {
 	ChokoLait::ReshapeGL(window, actualWidth, actualHeight);
 	Scene::dirty = true;
+	UI::font->ClearGlyphs();
+	if (UI::font2) UI::font2->ClearGlyphs();
 }
 
 void Display::Resize(int x, int y, bool maximize) {

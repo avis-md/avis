@@ -16,6 +16,7 @@
 #include "utils/dialog.h"
 #include "utils/xml.h"
 #include "utils/runcmd.h"
+#include "utils/effects.h"
 
 #ifdef PLATFORM_WIN
 #define EXPPATH "path=%path%;\"" + IO::path + "\"&&"
@@ -27,9 +28,12 @@ std::string VisSystem::version_hash =
 #include "../../githash.h"
 "";
 
-Vec4 VisSystem::accentColor = Vec4(1, 0.75f, 0, 1);
+std::string VisSystem::localFd = "";
+
+Vec4 VisSystem::accentColor = Vec4(1, 0.75f, 0, 1), VisSystem::backColor = white(1, 0.1f);
 bool VisSystem::blur = true;
-float VisSystem::opacity = 0.8f;
+float VisSystem::blurRad = 10;
+float VisSystem::opacity = 0.7f;
 uint VisSystem::renderMs, VisSystem::uiMs;
 
 float VisSystem::lastSave;
@@ -197,9 +201,24 @@ void VisSystem::Init() {
 	mi3[2].Set(Icons::vis_atom, "Splash Screen", []() {
 		ParMenu::showSplash = true;
 	});
+
+	Preferences::Link("SHQUI", &blur);
+	Preferences::Link("SUIBL", &blurRad, []() {
+		ParGraphics::tfboDirty = true;
+	});
+	Preferences::Link("SOPUI", &opacity);
+	Preferences::Link("SBKCL", &backColor, []() {
+		backColor.a = 1;
+	});
+
+	Preferences::Link("VSS", &Input::scrollScl);
 }
 
 void VisSystem::InitEnv() {
+	localFd = IO::userPath + ".avis/";
+	if (!IO::HasDirectory(localFd))
+		IO::MakeDirectory(localFd);
+
 	envs.clear();
 	std::ifstream strm(IO::path + "config/env.txt");
 	if (strm.is_open()) {
@@ -213,8 +232,6 @@ void VisSystem::InitEnv() {
 		}
 	}
 	strm.close();
-
-	Preferences::Link("VSS", &Input::scrollScl);
 }
 
 bool VisSystem::InMainWin(const Vec2& pos) {
@@ -359,6 +376,23 @@ void VisSystem::DrawMsgPopup() {
 	}
 
 	UI2::LabelMul(Display::width * 0.5f - 195, Display::height * 0.5f - 45, 12, message2);
+}
+
+void VisSystem::BlurBack() {
+	if (!blur) return;
+	const auto& cam = ChokoLait::mainCamera;
+	const auto w = Display::width * Display::dpiScl;
+	const auto h = Display::height * Display::dpiScl;
+	if (blurRad > 1) {
+		Effects::Blur(cam->blitFbos[0], cam->blitFbos[2], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[2],
+		blurRad-1, w, h);
+		Effects::Blur(cam->blitFbos[1], cam->blitFbos[2], cam->blitFbos[1], cam->blitTexs[1], cam->blitTexs[2],
+		1, w, h);
+	}
+	else {
+		Effects::Blur(cam->blitFbos[0], cam->blitFbos[2], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[2],
+		blurRad, w, h);
+	}
 }
 
 void VisSystem::Save(const std::string& path) {

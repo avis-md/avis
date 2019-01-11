@@ -159,10 +159,7 @@ void ParGraphics::Eff::Apply() {
 			std::swap(cam->blitFbos[0], cam->blitFbos[1]);
 		}
 	}
-	Effects::Blur(cam->blitFbos[0], cam->blitFbos[2], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[2],
-	5, Display::width, Display::height);
-	Effects::Blur(cam->blitFbos[1], cam->blitFbos[2], cam->blitFbos[1], cam->blitTexs[1], cam->blitTexs[2],
-	1, Display::width, Display::height);
+	VisSystem::BlurBack();
 }
 
 float ParGraphics::Eff::DrawMenu(float off) {

@@ -11,6 +11,7 @@ Args:
 	Int: value, min, max, use slider
 	Float: value, min, max, use slider
 	String: value
+	Color: value.r, value.g, value.b, value.a
 
   if min == max then no range is imposed
 */
@@ -23,8 +24,14 @@ namespace config {
 		"SHQUI", "High Quality UI", "B", "1",
 		"Blurring of user interface background",
 
-		"SOPUI", "UI Opacity", "F", "0.9", "0", "1", "Y",
+		"SUIBL", "UI Blur Amount", "F", "10", "0.1", "10", "Y",
+		"Blur size of user interface background",
+
+		"SOPUI", "UI Opacity", "F", "0.7", "0", "1", "Y",
 		"Non-see-through-ness of the user interface",
+
+		"SBKCL", "UI Background Color", "C", "0.1", "0.1", "0.1", "1",
+		"Tint color of the user interface",
 
 #ifdef PLATFORM_WIN
 		"ACLW", "Additional Compiler Flags", "S", "",

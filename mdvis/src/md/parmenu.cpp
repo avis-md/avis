@@ -356,16 +356,13 @@ void ParMenu::DrawStart() {
 		Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[0], cam->blitTexs[0], cam->blitTexs[1],
 			AnWeb::drawLerp, Display::width, Display::height);
 
-	Effects::Blur(cam->blitFbos[0], cam->blitFbos[2], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[2],
-		5, Display::width, Display::height);
-	Effects::Blur(cam->blitFbos[1], cam->blitFbos[2], cam->blitFbos[1], cam->blitTexs[1], cam->blitTexs[2],
-		1, Display::width, Display::height);
+	VisSystem::BlurBack();
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->blitFbos[0]);
 
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
-	glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::frameWidth, Display::frameHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, (int)(Display::frameWidth / Display::dpiScl), (int)(Display::frameHeight / Display::dpiScl), GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
@@ -405,7 +402,7 @@ void ParMenu::DrawSplash() {
 	if (!showSplash) return;
 	UI::IncLayer();
 	UI::Quad(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), black(0.5f));
-	UI2::BackQuadC(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, white(0.8f, 0.05f));
+	UI2::BackQuad(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250);
 	UI::Texture(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, ParGraphics::splash);
 	UI::font->Align(ALIGN_TOPRIGHT);
 	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 120, 12, VERSIONSTRING, white());
