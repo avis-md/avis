@@ -28,7 +28,6 @@ Node_Plot::~Node_Plot() {
 void Node_Plot::DrawHeader(float& off) {
 	AnNode::DrawHeader(off);
 
-	UI::Quad(pos.x, off, width, 17, bgCol);
 	static std::string ss[] = {
 		"Lines",
 		"Lines (Accumulate)",
@@ -52,7 +51,6 @@ void Node_Plot::DrawHeader(float& off) {
 void Node_Plot::DrawFooter(float& y) {
 	//
 	static bool drawFull;
-	UI::Quad(pos.x, y, width, width, bgCol);
 	if (drawFull) {
 		switch (type) {
 		case TYPE::LINES:

@@ -21,7 +21,7 @@ positions (all): [frame, atomId, xyz]
 velocities (all): [frame, atomId, xyz]
 types: [atomid]
 * type is the ascii of the atom name,
-so C is 67, O is 79 etc.)";
+  so C is 67, O is 79 etc.)";
 	script->descLines = 8;
 
 	AddOutput(CVar(_("positions"), 'd', 2, { (int*)&parcount, nullptr }, { 3 }));
@@ -37,7 +37,6 @@ so C is 67, O is 79 etc.)";
 void Node_Inputs::DrawHeader(float& off) {
 	AnNode::DrawHeader(off);
 
-	UI::Quad(pos.x, off, width, 17, bgCol);
 	static std::string ss[] = { "Visible", "Clipped", "" };
 	static Popups::DropdownItem di(&filter, &ss[0], true);
 	di.target = &filter;

@@ -6,8 +6,6 @@
 #include "res/resdata.h"
 #endif
 
-Vec4 AnNode::bgCol = white(0.7f, 0.25f);
-
 Texture AnNode::tex_circle_open, AnNode::tex_circle_conn;
 float AnNode::width = 220;
 
@@ -41,6 +39,11 @@ bool AnNode::Select() {
 
 float AnNode::GetHeaderSz() {
 	return (showDesc ? (17 * script->descLines) : 0) + (showSett ? setSz : 0) + hdrSz;
+}
+
+void AnNode::DrawBack() {
+	UI2::BackQuad(pos.x, pos.y, width, height);
+	if (expanded) UI::Quad(pos.x, pos.y, width, height, white(0.7f, 0.1f));
 }
 
 Vec2 AnNode::DrawConn() {
@@ -96,11 +99,13 @@ void AnNode::Draw() {
 	}
 	else {
 		if (expanded) {
-			float y = pos.y + 16, yy = y;
-			DrawHeader(y);
-			hdrSz = y-yy - setSz;
-			UI::Quad(pos.x, y, width, 4.f + 17 * cnt, bgCol);
+			float y = pos.y + 16;
+			UI2::BlurQuad(pos.x, y, width, height - 16, white(0.5f));
+			UI::Quad(pos.x, y, width, height - 16, white(0.6f, 0.2f));
 			y += 2;
+			DrawHeader(y);
+			hdrSz = y - pos.y - 16 - setSz;
+			y += 1;
 			for (uint i = 0; i < script->invars.size(); i++, y += 17) {
 				bool hi = inputR[i].first;
 				if (!inputR[i].use) {
@@ -238,11 +243,13 @@ void AnNode::Draw() {
 				UI::font->Align(ALIGN_TOPLEFT);
 				UI::Label(pos.x + 2, y, 12, script->outvars[i].second, white(0.3f), width * 0.67f - 6);
 			}
-			auto yo = y;
+			auto y1 = y;
 			DrawFooter(y);
-			ftrSz = y - yo;
+			ftrSz = y - y1;
+			height = y - pos.y + 1;
 			if (AnWeb::executing) UI::Quad(pos.x, pos.y + 16, width, 3.f + 17 * cnt, white(0.5f, 0.25f));
 		}
+		else height = 16;
 	}
 #endif
 }
@@ -250,7 +257,7 @@ void AnNode::Draw() {
 float AnNode::DrawSide() {
 #ifndef IS_ANSERVER
 	auto cnt = (script->invars.size());
-	UI::Quad(pos.x, pos.y, width, 16, white(selected ? 1.f : 0.7f, 0.35f));
+	UI::Quad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1 : 0.8f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 20, pos.y + 1, 12, title, white());
 	if (this->log.size() && Engine::Button(pos.x + width - 17, pos.y, 16, 16, Icons::log, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
@@ -263,12 +270,14 @@ float AnNode::DrawSide() {
 		else
 			UI::Quad(pos.x, pos.y + 16, width * 0.1f, 2, red());
 	}
-	float y = pos.y + (executing ? 18 : 16);
+	float dy = (executing ? 18 : 16), y = pos.y + dy;
 	if (expanded) {
+		UI::Quad(pos.x, y, width, height - dy, white(1, 0.2f));
+		y += 2;
 		DrawHeader(y);
 		if (cnt > 0) {
-			UI::Quad(pos.x, y, width, 2.f + 17 * cnt, bgCol);
-			for (uint i = 0; i < script->invars.size(); i++, y += 17) {
+			y += 2;
+			for (uint i = 0; i < cnt; i++, y += 17) {
 				UI::Label(pos.x + 2, y, 12, script->invars[i].first, white());
 				auto& vr = script->invars[i].second;
 				auto isi = (vr == "int");
@@ -333,6 +342,10 @@ float AnNode::DrawSide() {
 
 		DrawFooter(y);
 
+		y += 2;
+
+		height = y - pos.y;
+
 		return y - pos.y + 1 + DrawLog(y);
 	}
 	else return y - pos.y + 1 + DrawLog(y);
@@ -376,11 +389,10 @@ void AnNode::DrawDefVal(int i, float y) {
 
 void AnNode::DrawHeader(float& off) {
 	if (showDesc) {
-		UI::Quad(pos.x, off, width, 17.f * script->descLines, bgCol);
 		UI::alpha = 0.7f;
-		UI2::LabelMul(pos.x + 5, off + 1, 12, script->desc);
+		UI2::LabelMul(pos.x + 5, off, 12, script->desc);
 		UI::alpha = 1;
-		off += 17 * script->descLines;
+		off += std::roundf(12 * 1.2f * script->descLines) + 2;
 	}
 	if (showSett) {
 		float offo = off;

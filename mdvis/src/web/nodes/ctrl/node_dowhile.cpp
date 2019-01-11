@@ -35,7 +35,6 @@ void Node_DoWhile::DrawHeader(float& off) {
 		start = std::min(start, loc - 1U);
 	}
 
-	UI::Quad(pos.x, off, width, 34, bgCol);
 	UI2::Dropdown(pos.x + 5, off, width - 10, "From", tDi); off += 17;
 	UI2::Dropdown(pos.x + 5, off, width - 10, "Comparator", cDi); off += 17;
 }

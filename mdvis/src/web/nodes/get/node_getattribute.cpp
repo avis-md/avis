@@ -28,7 +28,6 @@ void Node_GetAttribute::Execute() {
 
 void Node_GetAttribute::DrawHeader(float& off) {
 	AnNode::DrawHeader(off);
-	UI::Quad(pos.x, off, width, 18, bgCol);
 	UI2::Dropdown(pos.x + 2, off, width - 4, "Attribute", di);
 	off += 18;
 }

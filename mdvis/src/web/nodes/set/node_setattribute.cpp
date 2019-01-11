@@ -51,7 +51,6 @@ void Node_SetAttribute::Execute() {
 
 void Node_SetAttribute::DrawHeader(float& off) {
 	AnNode::DrawHeader(off);
-	UI::Quad(pos.x, off, width, 35, bgCol);
 	if (attrSz != Particles::attrs.size()) {
 		attrSz = Particles::attrs.size();
 		attrs.resize(attrSz - Particles::readonlyAttrCnt);

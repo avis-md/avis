@@ -149,9 +149,8 @@ void AnWeb::Draw() {
 			poss.y += offy + 5;
 		}
 		n->pos = poss;
-		auto o = n->DrawConn();
-		//maxoff = std::max(maxoff, o.x);
-		offy = o.y;
+		n->DrawBack();
+		offy = n->height;
 		if (selScript) {
 			if (Engine::Button(poss.x, poss.y + offy + 3, maxoff, 30, white(0.3f, 0.05f)) == MOUSE_RELEASE) {
 				iter = i;
@@ -172,6 +171,9 @@ void AnWeb::Draw() {
 		i++;
 	}
 	maxScroll += maxoff + (selScript ? 20 : 10);
+	for (auto n : nodes) {
+		n->DrawConn();
+	}
 	for (auto n : nodes) {
 		n->Draw();
 	}
@@ -340,7 +342,7 @@ void AnWeb::DrawSide() {
 		Vec2 poss(expos + 1, off);
 		for (auto n : nodes) {
 			n->pos = poss;
-			poss.y += n->DrawSide();
+			poss.y += n->DrawSide() + 1;
 		}
 		UI::EndScroll(poss.y);
 		UI2::BackQuad(expos - 16.f, Display::height - 34.f, 16, 16);

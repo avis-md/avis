@@ -10,8 +10,6 @@
 #include "ui/ui_ext.h"
 #include <iomanip>
 
-#define EndsWith(s, s2) sz > s2.size() && s.substr(sz - s2.size()) == s2
-
 int ParLoader::impId, ParLoader::funcId;
 ParImporter* ParLoader::customImp;
 bool ParLoader::loadAsTrj = false, ParLoader::additive = false;
@@ -767,6 +765,8 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 	busy = false;
 }
 
+#define EndsWith(s, s2) sz > s2.size() && s.substr(sz - s2.size()) == s2
+
 void ParLoader::DrawOpenDialog() {
 	if (!showDialog) return;
 	UI::IncLayer();
@@ -803,8 +803,8 @@ void ParLoader::DrawOpenDialog() {
 	}
 	_impPos = _showImp ? std::min(_impPos + 800 * Time::delta, 100.f) : std::max(_impPos - 800 * Time::delta, 0.f);
 
-	UI2::BackQuadC(woff, hoff, 400, 300, white(0.85f, 0.1f));
-	UI::Quad(woff, hoff, 400, 16, white(0.9f, 0.1f));
+	UI2::BackQuad(woff, hoff, 400, 300);
+	UI::Quad(woff, hoff, 400, 16, black(0.5f));
 	UI::Label(woff + 2, hoff, 12, loadAsTrj ? "Import Trajectory" : "Import Configuration", white());
 	hoff += 17;
 	
@@ -987,10 +987,7 @@ void ParLoader::OnOpenFile(const std::vector<std::string>& files) {
 		std::getline(strm, connCachePath);
 		if (!!connCachePath.size()) {
 			hasConnCache = true;
-			struct stat st1, st2;
-			stat(&droppedFiles[0][0], &st1);
-			stat(&cpt[0], &st2);
-			oldConnCache = ovwConnCache = st1.st_mtime > st2.st_mtime;
+			oldConnCache = ovwConnCache = (IO::ModTime(&droppedFiles[0][0]) > IO::ModTime(&cpt[0]));
 		}
 	}
 	else connCachePath.clear();

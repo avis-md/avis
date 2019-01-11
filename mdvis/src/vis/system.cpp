@@ -207,6 +207,9 @@ void VisSystem::Init() {
 		ParGraphics::tfboDirty = true;
 	});
 	Preferences::Link("SOPUI", &opacity);
+	Preferences::Link("SACCL", &accentColor, []() {
+		accentColor.a = 1;
+	});
 	Preferences::Link("SBKCL", &backColor, []() {
 		backColor.a = 1;
 	});
@@ -254,7 +257,8 @@ void VisSystem::UpdateTitle() {
 }
 
 void VisSystem::DrawTitle() {
-	UI2::BackQuadC(0, 0, (float)Display::width, 18, white(0.85f, 0.05f));
+	UI2::BackQuad(0, 0, (float)Display::width, 18);
+	UI::Quad(0, 0, (float)Display::width, 18, black(0.5f));
 	const std::string menu[] = {_("File"), _("Edit"), _("Options"), _("Render"), _("Help")};
 	bool iso = Popups::type == POPUP_TYPE::MENU && Popups::data >= menuItems && Popups::data < (menuItems + 5) && UI::_layerMax == UI::_layer+1;
 	UI::ignoreLayers = iso; 
@@ -267,7 +271,7 @@ void VisSystem::DrawTitle() {
 		}
 	}
 	UI::ignoreLayers = false;
-	UI::Quad(Display::width * 0.6f, 1, Display::width * 0.3f, 16, white(1, 0.2f));
+	UI::Quad(Display::width * 0.6f, 1, Display::width * 0.3f, 16, white(0.2f));
 	UI::Label(Display::width * 0.6f + 2, 1, 12, message, (!messageSev) ? white(0.5f) : ((messageSev==1)? yellow(0.8f) : red(0.8f)));
 	if (hasMessage2 && Engine::Button(Display::width * 0.9f - 16, 1, 16, 16, Icons::details, white(0.8f)) == MOUSE_RELEASE) {
 		Popups::type = POPUP_TYPE::SYSMSG;
@@ -279,7 +283,8 @@ void VisSystem::DrawTitle() {
 }
 
 void VisSystem::DrawBar() {
-	UI2::BackQuadC(0, Display::height - 18.f, (float)Display::width, 18, white(0.85f, 0.05f));
+	UI2::BackQuad(0, Display::height - 18.f, (float)Display::width, 18, white(1, 0.5f));
+	UI::Quad(0, Display::height - 18.f, (float)Display::width, 18, black(0.5f));
 	if (Particles::anim.frameCount > 1) {
 		if (AnWeb::executing) {
 			float w = 172;

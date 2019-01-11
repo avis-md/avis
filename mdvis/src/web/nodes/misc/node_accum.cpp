@@ -15,7 +15,6 @@ Node_Accum::Node_Accum() : INODE_INIT {
 
 void Node_Accum::DrawHeader(float& off) {
 	AnNode::DrawHeader(off);
-	UI::Quad(pos.x, off, width, 17, bgCol);
 	UI2::Toggle(pos.x + 5, off, width - 10, "Block", block); off += 17;
 }
 

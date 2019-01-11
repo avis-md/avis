@@ -36,13 +36,13 @@ public:
 	const bool runOnValChg = false;
 
 	AnScript* script;
+	std::string title;
 	bool selected;
 	Vec2 pos;
-	uint id;
 	static float width;
-	std::string title;
+	float height;
+	uint id;
 	Vec3 titleCol = NODE_COL_USR;
-	static Vec4 bgCol;
 
 	bool expanded = true;
 	bool showDesc = false, showSett = false;
@@ -90,7 +90,8 @@ public:
 	virtual float GetHeaderSz();
 
 	virtual void Update() {}
-	virtual Vec2 DrawConn();
+	void DrawBack();
+	Vec2 DrawConn();
 	virtual void Draw();
 	virtual float DrawSide();
 	void DrawDefVal(int i, float y);

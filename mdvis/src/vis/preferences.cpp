@@ -208,21 +208,25 @@ void Preferences::Save() {
 	for (auto& ps : prefs) {
 		auto nd = head.addchild(ps.first);
 		for (auto& p : ps.second) {
-			if (!p.changed) continue;
 			switch (p.type) {
 			case Pref::TYPE::BOOL:
+				if (!p.val_b) break;
 				nd->addchild(p.sig, (*p.val_b)? "1" : "0");
 				break;
 			case Pref::TYPE::INT:
+				if (!p.val_i) break;
 				nd->addchild(p.sig, std::to_string(*p.val_i));
 				break;
 			case Pref::TYPE::FLOAT:
+				if (!p.val_f) break;
 				nd->addchild(p.sig, std::to_string(*p.val_f));
 				break;
 			case Pref::TYPE::STRING:
+				if (!p.val_s) break;
 				nd->addchild(p.sig, *p.val_s);
 				break;
 			case Pref::TYPE::COLOR:
+				if (!p.val_c) break;
 				nd->children.push_back(Xml::FromVec(p.sig, *p.val_c));
 				break;
 			}
@@ -235,7 +239,7 @@ void Preferences::Save() {
 
 void Preferences::Load() {
 	XmlNode* head = Xml::Parse(VisSystem::localFd + "preferences.xml");
-	if (!head && !head->children.size()) return;
+	if (!head || !head->children.size()) return;
 
 	for (auto& nd : head->children[0].children) {
 		for (auto& ps : prefs) {

@@ -33,6 +33,9 @@ namespace config {
 		"SBKCL", "UI Background Color", "C", "0.1", "0.1", "0.1", "1",
 		"Tint color of the user interface",
 
+		"SACCL", "UI Accent Color", "C", "1", "0.75", "0", "1",
+		"Font accent color of the user interface",
+
 #ifdef PLATFORM_WIN
 		"ACLW", "Additional Compiler Flags", "S", "",
 		"Additional flags to pass to the compiler. Include libraries here if necessary.",

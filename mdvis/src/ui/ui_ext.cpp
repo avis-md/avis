@@ -221,16 +221,17 @@ float UI2::Scroll(float x, float y, float h, float t, float tot, float fill) {
 	return t;
 }
 
-void UI2::BlurQuad(float x, float y, float w, float h) {
+void UI2::BlurQuad(float x, float y, float w, float h, Vec4 tint) {
 	const float dw = 1.f / Display::width;
 	const float dh = 1.f / Display::height;
 #define H(v) (Display::height - (v)) * dh
-	UI::Quad(x, y, w, h, ChokoLait::mainCamera->blitTexs[1], white(), 0,
+	UI::Quad(x, y, w, h, ChokoLait::mainCamera->blitTexs[1], tint, 0,
 		Vec2(x*dw, H(y)), Vec2((x + w)*dw, H(y)), Vec2(x*dw, H(y + h)), Vec2((x + w)*dw, H(y + h)));
 }
 
 void UI2::BackQuad(float x, float y, float w, float h, Vec4 col) {
 	if (col.r < 0) col = VisSystem::backColor;
+	else col *= VisSystem::backColor;
 	if (VisSystem::blur && VisSystem::opacity < 1) {
 		BlurQuad(x, y, w, h);
 	}
