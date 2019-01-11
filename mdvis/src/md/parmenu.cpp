@@ -404,8 +404,8 @@ void ParMenu::DrawStart() {
 void ParMenu::DrawSplash() {
 	if (!showSplash) return;
 	UI::IncLayer();
-	UI::Quad(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), black(0.7f));
-	UI2::BackQuadC(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, white(0.85f, 0.05f));
+	UI::Quad(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), black(0.5f));
+	UI2::BackQuadC(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, white(0.8f, 0.05f));
 	UI::Texture(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, ParGraphics::splash);
 	UI::font->Align(ALIGN_TOPRIGHT);
 	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 120, 12, VERSIONSTRING, white());
