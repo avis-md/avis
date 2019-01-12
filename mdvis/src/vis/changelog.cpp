@@ -18,6 +18,7 @@ void ChangeLog::Init() {
 void ChangeLog::Draw() {
 	if (!show) return;
 	UI::IncLayer();
+	UI::Quad(0, 0, Display::width, Display::height, black(0.4f));
 	UI2::BackQuad(Display::width/2 - 200.f, Display::height/2 - 250.f, 400, 500);
 	UI::Label(Display::width/2 - 195.f, Display::height/2 - 247.f, 20, "Change Log " APPVERSION, white());
 	float off = UI::BeginScroll(Display::width/2 - 195.f, Display::height/2 - 215.f, 390, 455);

@@ -10,13 +10,13 @@ Texture AnNode::tex_circle_open, AnNode::tex_circle_conn;
 float AnNode::width = 220;
 
 short& AnNode::getval_s(const uint i) {
-	return inputR[0].first ? *(short*)inputR[0].getval() : inputVDef[0].s;
+	return inputR[i].first ? *(short*)inputR[i].getval() : inputVDef[i].s;
 }
 int& AnNode::getval_i(const uint i) {
-	return inputR[0].first ? *(int*)inputR[0].getval() : inputVDef[0].i;
+	return inputR[i].first ? *(int*)inputR[i].getval() : inputVDef[i].i;
 }
 double& AnNode::getval_d(const uint i) {
-	return inputR[0].first ? *(double*)inputR[0].getval() : inputVDef[0].d;
+	return inputR[i].first ? *(double*)inputR[i].getval() : inputVDef[i].d;
 }
 
 void AnNode::Init() {
