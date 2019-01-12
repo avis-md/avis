@@ -11,10 +11,12 @@ int Preferences::menu = 0;
 #define G2I(s) ((s == 'S')? 0 : ((s == 'A')? 1 : 2))
 
 void Preferences::Init() {
-	prefs.resize(3);
+	prefs.resize(5);
 	prefs[0].first = "System";
 	prefs[1].first = "Analysis";
 	prefs[2].first = "Visualization";
+	prefs[3].first = "Attributes";
+	prefs[4].first = "Environment";
 
 	char** s = (char**)config::prefs;
 	int i = 0;
@@ -95,7 +97,7 @@ void Preferences::Draw() {
 		show = false;
 	}
 	
-	for (int a = 0; a < 3; ++a) {
+	for (int a = 0; a < 5; ++a) {
 		UI::Label(x0 + 5, y0 + 20 + 22 * a, 14, prefs[a].first, (a == menu)? VisSystem::accentColor : white());
 		if (Engine::Button(x0, y0 + 20 + 22 * a, 100, 20) == MOUSE_RELEASE)
 			menu = a;

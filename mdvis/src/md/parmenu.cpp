@@ -9,6 +9,7 @@
 #include "ui/ui_ext.h"
 #include "utils/dialog.h"
 #include "utils/effects.h"
+#include "vis/system.h"
 #include "vis/pargraphics.h"
 #include "vis/selection.h"
 #include "vis/renderer.h"
@@ -641,7 +642,7 @@ loopout:
 void ParMenu::LoadRecents() {
 	recentFiles.clear();
 	recentFilesN.clear();
-	std::ifstream strm(IO::path + ".recentfiles");
+	std::ifstream strm(VisSystem::localFd + ".recentfiles");
 	if (strm.is_open()) {
 		std::string s;
 		while (std::getline(strm, s, '\n')) {
@@ -677,7 +678,7 @@ void ParMenu::RemoveRecent(uint i) {
 }
 
 void ParMenu::WriteRecents() {
-	std::ofstream strm(IO::path + ".recentfiles");
+	std::ofstream strm(VisSystem::localFd + ".recentfiles");
 	for (auto& s : recentFiles) {
 		strm << s << "\n";
 	}
