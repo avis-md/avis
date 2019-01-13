@@ -64,8 +64,6 @@ std::unordered_map<uint, float> VisSystem::_bondLengths;
 std::unordered_map<ushort, Vec3> VisSystem::_type2Col;
 std::unordered_map<ushort, float> VisSystem::radii;
 
-std::unordered_map<std::string, std::string> VisSystem::envs, VisSystem::prefs;
-
 void VisSystem::Init() {
 	message = _("Hello!");
 	radii.clear();
@@ -158,12 +156,9 @@ void VisSystem::Init() {
 	});
 
 	auto& mi0 = menuItems[1];
-	mi0.resize(2);
-	mi0[0].Set(0, _("Config folder"), []() {
-		IO::OpenFd(IO::path + "config");
-	});
-	mi0[1].Set(0, _("Nodes folder"), []() {
-		IO::OpenFd(IO::path + "nodes");
+	mi0.resize(1);
+	mi0[0].Set(0, _("Nodes folder"), []() {
+		IO::OpenFd(AnWeb::nodesPath);
 	});
 
 	auto& mi1 = menuItems[2];
@@ -221,20 +216,6 @@ void VisSystem::InitEnv() {
 	localFd = IO::userPath + ".avis/";
 	if (!IO::HasDirectory(localFd))
 		IO::MakeDirectory(localFd);
-
-	envs.clear();
-	std::ifstream strm(IO::path + "config/env.txt");
-	if (strm.is_open()) {
-		std::string s;
-		while (std::getline(strm, s)) {
-			if (!s.size() || s[0] == '!') continue;
-			auto lc = s.find_first_of('=');
-			if (lc != std::string::npos) {
-				envs.emplace(s.substr(0, lc), s.substr(lc + 1));
-			}
-		}
-	}
-	strm.close();
 }
 
 bool VisSystem::InMainWin(const Vec2& pos) {

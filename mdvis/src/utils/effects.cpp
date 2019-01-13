@@ -164,7 +164,7 @@ void Effects::_InitBlur(const std::string& vs) {
 }
 
 void Effects::_InitGlow(const std::string& vs) {
-	auto prog = glowProg = Shader::FromVF(vs, IO::GetText(IO::path + "glowFrag.glsl"));
+	auto prog = glowProg = Shader::FromVF(vs, glsl::glowFrag);
 	GLint* locs = glowProgLocs;
 	gu(0, mainTex);
 	gu(1, off);
@@ -172,7 +172,7 @@ void Effects::_InitGlow(const std::string& vs) {
 	gu(3, screenSize);
 	gu(4, isY);
 	
-	prog = glowProg2 = Shader::FromVF(vs, IO::GetText(IO::path + "glowFrag2.glsl"));
+	prog = glowProg2 = Shader::FromVF(vs, glsl::glowFrag2);
 	locs = glowProg2Locs;
 	gu(0, mainTex);
 	gu(1, glowTex);
@@ -213,7 +213,7 @@ void Effects::_InitSSAO(const std::string& vs) {
 }
 
 void Effects::_InitDof(const std::string& vs) {
-	auto prog = dofProg = Shader::FromVF(vs, IO::GetText(IO::path + "dofFrag.glsl"));
+	auto prog = dofProg = Shader::FromVF(vs, glsl::dofFrag);
 	GLint* locs = dofProgLocs;
 	gu(0, mainTex);
 	gu(1, depthTex);

@@ -343,6 +343,7 @@ The hash for this program is )" << VisSystem::version_hash
 #else
 		VisSystem::InitEnv();
 		Preferences::Init();
+		Preferences::LoadEnv();
 		Localizer::Init("");
 		//Localizer::Init(VisSystem::prefs["SYS_LOCALE"]);
 		Preferences::Link("SDPI", &Display::dpiScl, &Display::OnDpiChange);

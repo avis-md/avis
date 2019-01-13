@@ -21,6 +21,8 @@ class AnWeb {
 public:
 	static bool lazyLoad;
 	
+	static std::string nodesPath;
+
 	static AnNode* selConnNode;
 	static uint selConnId;
 	static bool selConnIdIsOut, selPreClear;

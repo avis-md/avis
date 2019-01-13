@@ -345,8 +345,12 @@ void IO::InitPath() {
 #ifdef PLATFORM_WIN
 	RunCmd::Run("cd>\"" + p + "\\currpath.txt\"");
 	std::ifstream strm(path + "currpath.txt");
-	std::getline(strm, currPath);
-	std::replace(currPath.begin(), currPath.end(), '\\', '/');
+	if (strm) {
+		std::getline(strm, currPath);
+		std::replace(currPath.begin(), currPath.end(), '\\', '/');
+		strm.close();
+		remove((path + "currpath.txt").c_str());
+	}
 	WCHAR path[MAX_PATH];
 	if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, path))) {
 		userPath = IO::_frw(path);

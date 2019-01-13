@@ -1,13 +1,14 @@
 #include "changelog.h"
 #include "ui/ui_ext.h"
+#include "vis/system.h"
 
 bool ChangeLog::show;
 std::vector<std::string> ChangeLog::logs;
 
 void ChangeLog::Init() {
-	auto txt = IO::GetText(IO::path + "lastversion.txt");
+	auto txt = IO::GetText(VisSystem::localFd + "lastversion.txt");
 	if (txt != APPVERSION) {
-		IO::WriteFile(IO::path + "lastversion.txt", APPVERSION);
+		IO::WriteFile(VisSystem::localFd + "lastversion.txt", APPVERSION);
 		show = true;
 	}
 	else show = false;

@@ -27,7 +27,7 @@ void FReader::Init() {
 
 bool FReader::Read(FScript* scr) {
 	std::string& path = scr->path;
-	std::string fp = IO::path + "nodes/" + path;
+	std::string fp = AnWeb::nodesPath + path;
 	auto s = IO::GetText(fp);
 	auto ls = fp.find_last_of('/');
 	std::string& nm = scr->name;
@@ -318,7 +318,7 @@ FAIL:
 }
 
 void FReader::Refresh(FScript* scr) {
-	auto mt = IO::ModTime(IO::path + "nodes/" + scr->path + EXT_FS);
+	auto mt = IO::ModTime(AnWeb::nodesPath + scr->path + EXT_FS);
 	if (mt > scr->chgtime || !scr->ok) {
 		AnBrowse::busyMsg = "Reloading " + scr->path + EXT_FS;
 		Debug::Message("FReader", AnBrowse::busyMsg);

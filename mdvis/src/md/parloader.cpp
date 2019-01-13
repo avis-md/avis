@@ -41,7 +41,7 @@ float ParLoader::_impPos = 0, ParLoader::_impScr = 0;
 void ParLoader::Init() {
 	ChokoLait::dropFuncs.push_back(OnDropFile);
 
-	std::ifstream strm(IO::path + ".srvinfo");
+	std::ifstream strm(VisSystem::localFd +".srvinfo");
 	if (strm) strm >> srvusepass >> srvuser >> srvhost >> srvport >> srvkey;
 	else {
 		srvusepass = false;
@@ -241,7 +241,7 @@ void ParLoader::SrvDisconnect() {
 }
 
 void ParLoader::SaveSrvInfo() {
-	std::ofstream strm(IO::path + ".srvinfo");
+	std::ofstream strm(VisSystem::localFd + ".srvinfo");
 	strm << srvusepass << "\n"
 	<< srvuser << "\n"
 	<< srvhost << "\n"

@@ -35,10 +35,13 @@ public:
 
 	static void Draw();
 	static void Reset(), Save(), Load();
+	static void SaveEnv(), LoadEnv();
 
 	static void Link(const std::string sig, bool* b, void (*callback)() = nullptr);
 	static void Link(const std::string sig, int* i, void (*callback)() = nullptr);
 	static void Link(const std::string sig, float* f, void (*callback)() = nullptr);
 	static void Link(const std::string sig, std::string* s, void (*callback)() = nullptr);
 	static void Link(const std::string sig, Vec4* c, void (*callback)() = nullptr);
+
+	static void LinkEnv(const std::string sig, std::string* s);
 };

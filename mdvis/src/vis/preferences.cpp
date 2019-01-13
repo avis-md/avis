@@ -1,8 +1,9 @@
 #include "preferences.h"
-#include "res/prefdata.h"
 #include "ui/ui_ext.h"
 #include "ui/icons.h"
 #include "utils/xml.h"
+#include "res/prefdata.h"
+#include "res/envdata.h"
 
 std::vector<std::pair<std::string, std::vector<Preferences::Pref>>> Preferences::prefs;
 bool Preferences::show = false;
@@ -76,6 +77,18 @@ void Preferences::Init() {
 
 		prf.desc = *s++;
 	}
+
+	s = (char**)config::env;
+	
+	while (*s) {
+		prefs[4].second.push_back(Pref());
+		auto& prf = prefs[4].second.back();
+		prf.sig = *s++;
+		prf.name = *s++;
+		prf.type = Pref::TYPE::STRING;
+		prf.dval_s = *s++;
+		prf.desc = *s++;
+	}
 }
 
 void Preferences::Draw() {
@@ -144,9 +157,15 @@ void Preferences::Draw() {
 			chg = (v != *p.val_f);
 			break;
 		}
-		case Pref::TYPE::STRING:
-
+		case Pref::TYPE::STRING: {
+			if (!p.val_s) break;
+			auto v = *p.val_s;
+			UI2::sepw = 0.3f;
+			*p.val_s = UI2::EditText(x1, off, w2, p.name, *p.val_s);
+			UI2::sepw = 0.5f;
+			chg = (v != *p.val_s);
 			break;
+		}
 		case Pref::TYPE::COLOR:
 			if (!p.val_c) break;
 			UI2::Color(x1, off, w2, p.name, *p.val_c);
@@ -213,7 +232,8 @@ void Preferences::Reset() {
 
 void Preferences::Save() {
 	XmlNode head("Preferences");
-	for (auto& ps : prefs) {
+	for (int a = 0; a < 3; a++) {
+		auto& ps = prefs[a];
 		auto nd = head.addchild(ps.first);
 		for (auto& p : ps.second) {
 			switch (p.type) {
@@ -243,6 +263,8 @@ void Preferences::Save() {
 		}
 	}
 	Xml::Write(&head, VisSystem::localFd + "preferences.xml");
+
+	SaveEnv();
 }
 
 void Preferences::Load() {
@@ -292,6 +314,34 @@ void Preferences::Load() {
 		for (auto& p : ps.second) {
 			p.changed = false;
 			if (p.name.back() == '*') p.name.pop_back();
+		}
+	}
+
+	delete(head);
+}
+
+void Preferences::SaveEnv() {
+	XmlNode head("Environment");
+	for (auto& p : prefs[4].second) {
+		if (!p.val_s) break;
+		head.addchild(p.sig, *p.val_s);
+		p.changed = false;
+		if (p.name.back() == '*') p.name.pop_back();
+	}
+	Xml::Write(&head, VisSystem::localFd + "environment.xml");
+
+}
+
+void Preferences::LoadEnv() {
+	XmlNode* head = Xml::Parse(VisSystem::localFd + "environment.xml");
+	if (!head || !head->children.size()) return;
+
+	for (auto& n : head->children[0].children) {
+		for (auto& p : prefs[4].second) {
+			if (n.name == p.sig) {
+				p.dval_s = n.value;
+				std::replace(p.dval_s.begin(), p.dval_s.end(), '\\', '/');
+			}
 		}
 	}
 
@@ -354,6 +404,17 @@ void Preferences::Link(const std::string sig, Vec4* c, void (*cb)()) {
 			p.val_co = *c;
 			*c = p.dval_c;
 			p.callback = cb;
+			break;
+		}
+	}
+}
+
+void Preferences::LinkEnv(const std::string sig, std::string* s) {
+	auto& pp = prefs[4];
+	for (auto& p : pp.second) {
+		if (p.sig == sig) {
+			p.val_s = s;
+			*s = p.dval_s;
 			break;
 		}
 	}

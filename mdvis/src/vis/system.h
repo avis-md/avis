@@ -40,8 +40,6 @@ public:
 	static std::unordered_map<ushort, Vec3> _type2Col;
 	static std::unordered_map<ushort, float> radii;
 
-	static std::unordered_map<std::string, std::string> envs, prefs;
-
 	static void Init(), InitEnv();
 
 	static bool InMainWin(const Vec2& pos);

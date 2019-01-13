@@ -19,6 +19,8 @@
 
 bool AnWeb::lazyLoad = true;
 
+std::string AnWeb::nodesPath = "";
+
 AnNode* AnWeb::selConnNode = nullptr;
 uint AnWeb::selConnId = 0;
 bool AnWeb::selConnIdIsOut = false, AnWeb::selPreClear = false;
@@ -44,6 +46,9 @@ bool AnWeb::hasPy = false, AnWeb::hasC = false, AnWeb::hasFt = false;
 bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
 
 void AnWeb::Init() {
+	nodesPath = VisSystem::localFd + "nodes/";
+	if (!IO::HasDirectory(nodesPath))
+		IO::MakeDirectory(nodesPath);
 	Clear0();
 	for (int a = 0; a < 10; ++a) {
 		AnBrowse::mscFdExpanded[a] = true;
@@ -451,7 +456,7 @@ void AnWeb::_DoExecute() {
 		if (n->script->type == AN_SCRTYPE::PYTHON)
 			PyScript::ClearLog();
 		else
-			IO::RedirectStdio2(IO::path + "nodes/__tmpstd");
+			IO::RedirectStdio2(AnWeb::nodesPath + "__tmpstd");
 #endif
 		execNode = n;
 		n->executing = true;
@@ -486,13 +491,13 @@ void AnWeb::_DoExecute() {
 		}
 		else {
 			IO::RestoreStdio2();
-			auto f = std::ifstream(IO::path + "nodes/__tmpstd_o");
+			auto f = std::ifstream(AnWeb::nodesPath + "__tmpstd_o");
 			std::string s;
 			while (std::getline(f, s)) {
 				n->log.push_back(std::pair<byte, std::string>(0, s));
 			}
 			f.close();
-			f.open(IO::path + "nodes/__tmpstd_e");
+			f.open(AnWeb::nodesPath + "__tmpstd_e");
 			while (std::getline(f, s)) {
 				n->log.push_back(std::pair<byte, std::string>(2, s));
 			}
@@ -513,8 +518,8 @@ void AnWeb::_DoExecute() {
 			break;
 		}
 #ifndef NO_REDIR_LOG
-		remove((IO::path + "nodes/__tmpstd_o").c_str());
-		remove((IO::path + "nodes/__tmpstd_e").c_str());
+		remove((AnWeb::nodesPath + "__tmpstd_o").c_str());
+		remove((AnWeb::nodesPath + "__tmpstd_e").c_str());
 #endif
 #ifdef VERBOSE
 		Debug::Message("AnWeb", "Executed " + n->script->name);
@@ -625,7 +630,7 @@ void AnWeb::Save(const std::string& s) {
 #undef SV
 
 void AnWeb::SaveIn() {
-	std::string path = IO::path + "nodes/__tmp__/";
+	std::string path = AnWeb::nodesPath + "__tmp__/";
 	if (!IO::HasDirectory(path)) IO::MakeDirectory(path);
 	path += "in/";
 	if (!IO::HasDirectory(path)) IO::MakeDirectory(path);
@@ -644,7 +649,7 @@ void AnWeb::SaveOut() {
 #ifdef IS_ANSERVER
 	std::string path = IO::path + "ser/";
 #else
-	std::string path = IO::path + "nodes/__tmp__/";
+	std::string path = AnWeb::nodesPath + "__tmp__/";
 #endif
 	if (!IO::HasDirectory(path)) IO::MakeDirectory(path);
 	path += "out/";
@@ -761,7 +766,7 @@ void AnWeb::LoadIn() {
 #ifdef IS_ANSERVER
 	std::string path = IO::path + "ser/in/";
 #else
-	std::string path = IO::path + "nodes/__tmp__/in/";
+	std::string path = AnWeb::nodesPath + "__tmp__/in/";
 #endif
 	for (auto n : nodes) {
 		n->LoadIn(path);
@@ -769,7 +774,7 @@ void AnWeb::LoadIn() {
 }
 
 void AnWeb::LoadOut() {
-	std::string path = IO::path + "nodes/__tmp__/out/";
+	std::string path = AnWeb::nodesPath + "__tmp__/out/";
 	for (auto n : nodes) {
 		n->LoadOut(path);
 	}

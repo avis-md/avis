@@ -314,7 +314,6 @@
     <ClCompile Include="src\utils\uniquecaller.cpp" />
     <ClCompile Include="src\vis\changelog.cpp" />
     <ClCompile Include="src\vis\cubemarcher.cpp" />
-    <ClCompile Include="src\vis\options.cpp" />
     <ClCompile Include="src\vis\renderer.cpp" />
     <ClCompile Include="src\vis\selection.cpp" />
     <ClCompile Include="src\vis\shadows.cpp" />
@@ -398,7 +397,11 @@
     <ClInclude Include="src\libjpeg\jpeglib.h" />
     <ClInclude Include="src\libjpeg\jversion.h" />
     <ClInclude Include="src\md\GenericSSV.h" />
+    <ClInclude Include="src\res\attrdata.h" />
+    <ClInclude Include="src\res\coldata.h" />
+    <ClInclude Include="src\res\envdata.h" />
     <ClInclude Include="src\res\prefdata.h" />
+    <ClInclude Include="src\res\raddata.h" />
     <ClInclude Include="src\tmp\tiny_obj_loader.h" />
     <ClInclude Include="src\ui\browse.h" />
     <ClInclude Include="src\ui\browsetarget.h" />
@@ -407,7 +410,6 @@
     <ClInclude Include="src\utils\refcnt.h" />
     <ClInclude Include="src\utils\uniquecaller.h" />
     <ClInclude Include="src\vis\changelog.h" />
-    <ClInclude Include="src\vis\options.h" />
     <ClInclude Include="src\utils\glmext.h" />
     <ClInclude Include="src\utils\shader.h" />
     <ClInclude Include="src\hdr.h" />

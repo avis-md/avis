@@ -2,6 +2,7 @@
 #include "anscript.h"
 #include "anconv.h"
 #include "vis/system.h"
+#include "vis/preferences.h"
 #ifndef PLATFORM_WIN
 #include <dlfcn.h>
 #endif
@@ -17,9 +18,10 @@ void PyReader::Init() {
 	//auto lib = dlopen("/Library/Frameworks/Python.framework/Versions/3.6/Python", RTLD_NOW | RTLD_GLOBAL);
 #endif
 	if (dlsym(RTLD_DEFAULT, "Py_Initialize")) {
-#endif
-	static std::string pyenv = VisSystem::envs["PYENV"];
-#ifdef PLATFORM_WIN
+
+#else
+	static std::string pyenv;
+	Preferences::LinkEnv("PYENV", &pyenv);
 	size_t psz;
 	getenv_s(&psz, 0, 0, "PATH");
 	char* pbuf = new char[psz];
@@ -31,14 +33,11 @@ void PyReader::Init() {
 	Py_SetPythonHome(&pyenvw[0]);
 	static std::wstring pynmw = IO::_tow(pyenv + "\\python");
 	Py_SetProgramName(&pynmw[0]);
-#else
-	//Py_SetPythonHome(&pyenv[0]);
-	//Py_SetProgramName("python3");
 #endif
 	try {
 		Py_Initialize();
 		PyObject *sys_path = PySys_GetObject("path");
-		auto path = IO::path + "nodes/";
+		auto path = AnWeb::nodesPath;
 		auto ps = PyUnicode_FromString(path.c_str());
 		PyList_Insert(sys_path, 0, ps);
 		Py_DecRef(ps);
@@ -93,7 +92,7 @@ bool PyReader::Read(PyScript* scr) {
 	std::string& path = scr->path;
 	std::string mdn = path;
 	std::replace(mdn.begin(), mdn.end(), '/', '.');
-	std::string spath = IO::path + "nodes/" + path + EXT_PS;
+	std::string spath = AnWeb::nodesPath + path + EXT_PS;
 	scr->chgtime = IO::ModTime(spath);
 	std::ifstream strm(spath);
 	std::string ln;
@@ -187,7 +186,7 @@ FAIL:
 }
 
 void PyReader::Refresh(PyScript* scr) {
-	auto mt = IO::ModTime(IO::path + "nodes/" + scr->path + EXT_PS);
+	auto mt = IO::ModTime(AnWeb::nodesPath + scr->path + EXT_PS);
 	if (mt > scr->chgtime || !scr->ok) {
 		AnBrowse::busyMsg = "Reloading " + scr->path + EXT_PS;
 		Debug::Message("PyReader", AnBrowse::busyMsg);

@@ -37,17 +37,21 @@ namespace config {
 		"Font accent color of the user interface",
 
 #ifdef PLATFORM_WIN
-		"ACLW", "Additional Compiler Flags", "S", "",
+		"AMSVC", "Use MSVC", "B", "0",
+		"Use the Visual Studio compiler instead of MinGW",
+#endif
+
+		"ACL", "CL Flags", "S", "",
 		"Additional flags to pass to the compiler. Include libraries here if necessary.",
 
-		"ALNKW", "Additional Linker Flags", "S", "",
+		"ALNK", "LNK Flags", "S", "",
 		"Additional flags to pass to the linker. Include libraries here if necessary.",
-#else
-		"ACL", "Additional Compiler Flags", "S", "",
-		"Additional flags to pass to the compiler. Include libraries here if necessary.",
-#endif
+
 		"AOMP", "Enable OpenMP", "B", "0",
-		"Enables OpenMP when compiling. OpenMP libraries must be separately installed.",
+		"Enables OpenMP when compiling. OpenMP must be supported by the compiler.",
+
+		"AOMPL", "Link OpenMP Libs", "B", "0",
+		"Links against the OpenMP libraries. OpenMP libraries must be separately installed.",
 
 		"VSS", "Scroll Speed", "F", "1", "0.2", "5", "Y",
 		"Mouse ScrollWheel Sensitivity",

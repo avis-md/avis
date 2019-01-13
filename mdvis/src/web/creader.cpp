@@ -1,5 +1,6 @@
 #include "anweb.h"
 #include "vis/system.h"
+#include "vis/preferences.h"
 #ifndef IS_ANSERVER
 #include "utils/runcmd.h"
 #endif
@@ -16,11 +17,13 @@ bool CReader::useMsvc, CReader::useOMP, CReader::useOMP2;
 std::string CReader::flags1, CReader::flags2;
 
 void CReader::Init() {
-	flags1 = VisSystem::prefs["ANL_COMP_FLAGS"];
+	Preferences::Link("ACL", &flags1);
+	Preferences::Link("ALNK", &flags2);
 #ifdef PLATFORM_WIN
-	vcbatPath = VisSystem::envs["VCBAT"];
-	mingwPath = VisSystem::envs["MINGW"];
-	useMsvc = (VisSystem::prefs["ANL_WIN_USE_MSVC"] == "true");
+	Preferences::LinkEnv("VCBAT", &vcbatPath);
+	Preferences::LinkEnv("MINGW", &mingwPath);
+	Preferences::LinkEnv("GPP", &gpp);
+	Preferences::Link("AMSVC", &useMsvc);
 	int has = 2;
 	if (!mingwPath.size() || !IO::HasFile(mingwPath + "/g++.exe")) {
 		mingwPath = "";
@@ -34,21 +37,16 @@ void CReader::Init() {
 	}
 	if (!!has) {
 		AnWeb::hasC = true;
-		if (useMsvc) {
-			flags1 = VisSystem::prefs["ANL_CL_FLAGS"];
-			flags2 = VisSystem::prefs["ANL_LINK_FLAGS"];
-		}
 	}
 #else
-	gpp = VisSystem::envs["GPP"];
 	auto res = RunCmd::Run("command -v " + gpp + "> /dev/null 2>&1");
 	if (res == 0)
 		AnWeb::hasC = true;
 	else
 		Debug::Warning("CReader", "C++ compiler \"" + gpp + "\" not available!");
 #endif
-	useOMP = (VisSystem::prefs["ANL_USE_OPENMP"] == "true");
-	useOMP2 = (VisSystem::prefs["ANL_USE_OPENMP_LIB"] == "true");
+	Preferences::Link("AOMP", &useOMP);
+	Preferences::Link("AOMPL", &useOMP2);
 
 	if (AnWeb::hasC && !useMsvc && !IO::HasFile(IO::path + "res/noterminate.o")) {
 		std::string cmd = gpp + " -std=c++11 -fPIC -c -o \""
@@ -60,7 +58,7 @@ void CReader::Init() {
 
 bool CReader::Read(CScript* scr) {
 	std::string& path = scr->path;
-	std::string fp = IO::path + "nodes/" + path;
+	std::string fp = AnWeb::nodesPath + path;
 	auto ls = fp.find_last_of('/');
 	const std::string nm = fp.substr(ls + 1);
 	const std::string fd = fp.substr(0, ls);
@@ -418,7 +416,7 @@ FAIL:
 }
 
 void CReader::Refresh(CScript* scr) {
-	auto mt = IO::ModTime(IO::path + "nodes/" + scr->path + EXT_CS);
+	auto mt = IO::ModTime(AnWeb::nodesPath + scr->path + EXT_CS);
 	if (mt > scr->chgtime || !scr->ok) {
 		AnBrowse::busyMsg = "Reloading " + scr->path + EXT_CS;
 		Debug::Message("CReader", AnBrowse::busyMsg);

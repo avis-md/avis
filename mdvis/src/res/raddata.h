@@ -14,6 +14,7 @@ namespace config {
 		"S",  "1.80",
 		"Cl", "1.75",
 		"K",  "2.75",
-		"M",     "0"
+		"M",     "0",
+		nullptr
 	};
 }

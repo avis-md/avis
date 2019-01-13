@@ -76,7 +76,7 @@ void AnBrowse::Init() {
 void AnBrowse::Scan() {
 	Debug::Message("AnBrowse", "Scanning nodes folder...");
 	folder = Folder(_("Custom"));
-	DoScan(&folder, IO::path + "nodes/", "");
+	DoScan(&folder, AnWeb::nodesPath, "");
 	ErrorView::Refresh();
 }
 

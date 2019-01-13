@@ -330,7 +330,7 @@ void ParGraphics::Init() {
 	LC(usegrad); LC(onecol); 
 #undef LC
 
-	selHlProg = Shader::FromF(mv, IO::GetText(IO::path + "selectorFrag.txt"));
+	selHlProg = Shader::FromF(mv, glsl::selectorFrag);
 #define LC(nm) selHlProgLocs[i++] = glGetUniformLocation(selHlProg, #nm)
 	i = 0;
 	LC(screenSize); LC(myId); LC(idTex); LC(hlCol);
