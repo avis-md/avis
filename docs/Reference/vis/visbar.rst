@@ -54,33 +54,66 @@ Atoms are grouped into Residues -> Residue ID -> atom name.
 
    Add the protein section
 
-Colors Tab
+Attributes Tab
 ----------
 
 Attributes
 ~~~~~~~~~~
-
-.. TODO::
-
-   Why is the attribute section in the `colors` section????
 
 Attributes are general data for each particle, optionally animated. A system can have an arbitary number of attributes.
 Attributes can be filled with the ``Set Attribute`` node, and queried with the ``Get Attribute`` node.
 
 .. image:: img/cattr.png
 
-Coloring
+Colors
 ~~~~~~~~
 
-The colors section controls the color for each type of atom.
+The colors section controls the color for atoms and bonds.
 
 .. image:: img/cols.png
 
-Bonds are colored based on its parents, but it can be set to another color with the ``Custom Bond Colors`` switch.
-
-The atoms can optionally be colored with the values of a selected attribute, by enabling the ``Gradient Fill`` switch.
-
 .. image:: img/grads.png
+
+* Bond colors
+
+=====================   ==============
+Option                  Details
+=====================   ==============
+Custom Bond Colors      Use a custom color instead of atom colors
+Blend Bond Colors       Blend colors inherited from atoms
+=====================   ==============
+
+Radii
+~~~~~~~
+
+=====================   ==============
+Option                  Details
+=====================   ==============
+Scale                   Multiply all radii values by this value
+=====================   ==============
+
+Bounding Box
+~~~~~~~~~~~~~~~
+
+=====================   ==============
+Option                  Details
+=====================   ==============
+Draw                    Draw the Box in 3D view
+Center X, Y, Z          Box center coordinates
+Periodic                Wrap around atoms outside the bounding box
+=====================   ==============
+
+Orientation
+~~~~~~~~~~
+
+* Type
+
+=====================   ==============
+Type                    Details
+=====================   ==============
+Stretch                 Stretch atoms based on directions
+Vector                  Draw per-atom arrows toward directions 
+=====================   ==============
 
 Graphics Tab
 ------------
@@ -105,10 +138,15 @@ PBR         The scene is shaded with Environment Maps. Higher quality but slight
 ============   ==============
 Option         Details
 ============   ==============
+Sky            Environment type (backgrounds are in the backgrounds/ folder)
 Strength       Strength of diffuse lighting (environment strength)
 Falloff        How much the light gets weaker when further away from the camera
+ Offset        Falloff distance starts from this distance from the camera
 Specular       The strength of reflection. For PBR, diffuse intensity = 1 - specular intensity
-Background     Background color
+Transparency   Transparency ratio
+IOR            Index of Refraction for transparency
+Background     Background type: Color, Ambient, Sky
+ Color         Background color
 ============   ==============
 
 * Camera
@@ -118,7 +156,7 @@ Background     Background color
 =====================   ==============
 Option                  Details
 =====================   ==============
-Target                  Camera always centers on target ID
+Follow                  Camera always centers on target
 Center X,Y,Z            Camera axis
 Rotation W, Y           Camera angle
 Scale                   Camera zoom factor
@@ -147,6 +185,16 @@ Additional effects to apply to the scene
 
 List of effects available:
 
+   * Glow
+
+   =====================   ==============
+   Option                  Details
+   =====================   ==============
+   Threshold               Minimum brightness value 
+   Radius                  Blur radius
+   Strength                Additive strength
+   =====================   ==============
+
    * Ambient Occlusion
 
    =====================   ==============
@@ -158,9 +206,15 @@ List of effects available:
    Blur                    Blur radius before darkening
    =====================   ==============
 
-   * Shadows
-
-      Work in progress. Undefined behavior when enabled.
+   * Depth of Field
+   
+   =====================   ==============
+   Option                  Details
+   =====================   ==============
+   Distance                Focal distance from camera
+   Aperture                Blur amount
+   Iterations              Number of blur operations. Larger number is slower but reduces artifacts
+   =====================   ==============
 
 Render Tab
 ----------

@@ -1,25 +1,37 @@
+>PYTHON 3.7 IS NOW USED INSTEAD OF 3.6<
+
 #General
+- Tooltips are now supported
+- UI background can now be blurred
+- Preferences can now be edited from Options->Preferences
+
+#Analysis
+- Bumped the Python version to 3.7
+- Node outputs now show their values as tooltips when hovered
+- New nodes:
+  - Accumulate: combine values over all frames to a list
+
+#Bug Fixes
+- Single digit file names crashing the loader
+
+#----Previous changes----
+
+#Version 0.03
 - Significant memory usage improvement for attributes
 - More settings for rendering (transparency etc)
 - Custom loading screens can now be put in the res/bg/ folder
 
-#Analysis
 - New nodes:
   - Draw Surface: equal-value surface from 3d density array
   - Do while: returns execution to target node until condition
 - New plot option: Density
-
-#Visualization
 - New effects:
   - Bloom
   - Depth of Field
-
-#Bug fixes
-- System node -> System node connection crash during Run All
-- Bounding box visibility not reflected immediately
-- Gradient color not reflected immediately
-
-#----Previous changes----
+- Bug fixes:
+  - System node -> System node connection crash during Run All
+  - Bounding box visibility not reflected immediately
+  - Gradient color not reflected immediately
 
 #Version 0.02b
 - The remote file browser is now faster

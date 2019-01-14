@@ -1,8 +1,8 @@
 Introduction
 ============
 
-AViS adopts the flow-based programming paradigm, meaning a series of functions are applied to the system,
-each of which can be considered a "black box" [`Wikipedia <https://en.wikipedia.org/wiki/Flow-based_programming>`_].
+The analysis framework in AViS is graph-based, where a collection of function is applied to the system,
+each containing an arbitrary number of input and output variables.
 
 Terminology
 -----------

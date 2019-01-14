@@ -157,6 +157,10 @@ Python
 
 .. highlight:: python
 
+.. Note::
+
+      As Python variable declarations are implicit, the type of the variable must be specified beside the ``#in``/``#out`` comment.
+
 The general format of a parse-able script is as follows.
 
 - Description::
@@ -165,14 +169,27 @@ The general format of a parse-able script is as follows.
       # No new-lines must occur before or between these lines.
       # A space must exist between the ! and the text.
 
-rework in progress
+- Input variables::
 
-.. Note::
+      #in int
+      myVar = 0
 
-      As the current implementation is inconsistent with the other languages, the code is being rewritten. Please bear with me. Sorry.
+- Output variables::
+
+      #out double
+      outVar = 0.0
+
+- Progress variable::
+
+      #progress
+      progressOfTheCode = 0;
+
+- Entry point::
+
+      #entry
+      def DoSomething:
+         #do something fancy!
       
-      However, Python code will still run. Please refer to actual examples in the ``Nodes/examples`` folder.
-
 Arrays
 ~~~~~~
 
@@ -182,7 +199,10 @@ Example::
 
       using numpy as np
 
-      #out
+      #in list(1d)
+      myArray = np.zeros(5)
+
+      #out list(2i)
       myArray = np.zeros({100, 3}, dtype=int32)
 
 Fortran
