@@ -23,7 +23,6 @@ namespace config {
 		"C",  "C", "170",
 		"C",  "N", "170",
 		"C",  "O", "150",
-		"O",  "M",   "1",
 		nullptr
 	};
 }

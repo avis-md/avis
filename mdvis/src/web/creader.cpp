@@ -19,10 +19,10 @@ std::string CReader::flags1, CReader::flags2;
 void CReader::Init() {
 	Preferences::Link("ACL", &flags1);
 	Preferences::Link("ALNK", &flags2);
+	Preferences::LinkEnv("GPP", &gpp);
 #ifdef PLATFORM_WIN
 	Preferences::LinkEnv("VCBAT", &vcbatPath);
 	Preferences::LinkEnv("MINGW", &mingwPath);
-	Preferences::LinkEnv("GPP", &gpp);
 	Preferences::Link("AMSVC", &useMsvc);
 	int has = 2;
 	if (!mingwPath.size() || !IO::HasFile(mingwPath + "/g++.exe")) {

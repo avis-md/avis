@@ -67,7 +67,8 @@
         "mutex": "cpp",
         "cstring": "cpp",
         "iomanip": "cpp",
-        "condition_variable": "cpp"
+        "condition_variable": "cpp",
+        "unordered_set": "cpp"
     },
     "python.linting.pylintEnabled": false,
     "python.pythonPath": "/usr/local/bin/python3",

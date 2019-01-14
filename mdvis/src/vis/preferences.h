@@ -27,6 +27,23 @@ class Preferences {
 	};
 	static std::vector<std::pair<std::string, std::vector<Pref>>> prefs;
 
+	struct Bondlen {
+		std::string sig1, sig2;
+		float len;
+	};
+	struct Typecol {
+		std::string sig;
+		Vec4 col;
+	};
+	struct Typerad {
+		std::string sig;
+		float rad;
+	};
+
+	static std::vector<Bondlen> bondlengths;
+	static std::vector<Typecol> typecolors;
+	static std::vector<Typerad> typeradii;
+
 public:
 	static void Init();
 
@@ -35,6 +52,7 @@ public:
 
 	static void Draw();
 	static void Reset(), Save(), Load();
+	static void SaveAttrs(), LoadAttrs();
 	static void SaveEnv(), LoadEnv();
 
 	static void Link(const std::string sig, bool* b, void (*callback)() = nullptr);
@@ -42,6 +60,10 @@ public:
 	static void Link(const std::string sig, float* f, void (*callback)() = nullptr);
 	static void Link(const std::string sig, std::string* s, void (*callback)() = nullptr);
 	static void Link(const std::string sig, Vec4* c, void (*callback)() = nullptr);
+
+	static float GetLen(ushort sig1, ushort sig2);
+	static Vec3 GetCol(ushort sig);
+	static float GetRad(ushort sig);
 
 	static void LinkEnv(const std::string sig, std::string* s);
 };

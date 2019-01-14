@@ -28,6 +28,34 @@ bool clipped(vec3 pos) {
     return false;
 }
 
+float _getquadsize(float z, float w, float r) {
+	float th = atan(w / z);
+	float a = sqrt(z*z + w*w);
+	float ph = asin(r / a);
+	return z * tan(th + ph) - w;
+}
+
+float getquadsize(vec3 wpos, vec3 spos, float r) {
+	const float fov = 60 * 3.14159 / 180;
+	const float tf = tan(fov/2);
+	float tf2 = screenSize.x * tf / screenSize.y;
+
+	vec3 c2o = wpos - camPos;
+	float lc2o = length(c2o);
+	float cth = dot(camFwd, (c2o / lc2o));
+	float z = lc2o * cth;
+	//if (z < r) return 0;
+	vec2 wm = z * vec2(tf2, tf);
+	vec2 w = spos.xy * wm;
+
+	float sx = _getquadsize(z, abs(w.x), r);
+	sx *= screenSize.x / wm.x;
+	float sy = _getquadsize(z, abs(w.y), r);
+	sy *= screenSize.y / wm.y;
+
+	return max(sx, sy);
+}
+
 flat out int v2f_id;
 out vec3 v2f_pos;
 out float v2f_scl;
@@ -59,6 +87,8 @@ void main(){
 	if (radScl == 0) gl_PointSize = 1;
 	else {
 		if (orthoSz < 0) {
+			//gl_PointSize = getquadsize(wpos.xyz, gl_Position.xyz / gl_Position.w, spriteScl * v2f_rad) * 2;
+
 			vec3 wdir = wpos.xyz - camPos;
 			float z = length(wdir);
 			float ca = dot(normalize(wpos.xyz - camPos), camFwd);

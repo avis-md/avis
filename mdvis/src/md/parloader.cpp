@@ -1,6 +1,7 @@
 #include "parloader.h"
 #include "Gromacs.h"
 #include "Protein.h"
+#include "vis/preferences.h"
 #include "vis/pargraphics.h"
 #include "parmenu.h"
 #include "GenericSSV.h"
@@ -495,9 +496,9 @@ void ParLoader::DoOpen() {
 				if (fabsf(dp.x) < 0.25f && fabsf(dp.y) < 0.25f && fabsf(dp.z) < 0.25f) {
 					auto dst = glm::length2(dp);
 					uint32_t id2 = info.type[lastOff + j];
-					float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
-					if (!bst) bst = VisSystem::_defBondLength;
-					if (dst < bst) {
+					//float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
+					float bst = Preferences::GetLen(id1, id2);
+					if (dst < bst * bst) {
 						conn.ids.push_back(Int2(i, lastOff + j));
 						conn.cnt++;
 						tr->cnt_b++;
@@ -528,9 +529,7 @@ void ParLoader::DoOpen() {
 		}
 		found:;
 
-		auto& r = VisSystem::radii[id1];
-		if (!r) r = 1;
-		Particles::radii[i] = r;
+		Particles::radii[i] = Preferences::GetRad(id1);
 		Particles::ress[i] = Int2(Particles::residueListSz - 1, trs->residueSz - 1);
 
 		tr->cnt++;

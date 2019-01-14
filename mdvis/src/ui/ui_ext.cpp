@@ -98,13 +98,18 @@ float UI2::Slider(float x, float y, float w, float a, float b, float t, const st
 	return t;
 }
 
-void UI2::Color(float x, float y, float w, const std::string& title, Vec4& col) {
-	UI::Label(x, y, 12, title, white());
-	if (Engine::Button(x + w*sepw, y, w*sepw2 - 1.f, 16, col) == MOUSE_RELEASE) {
+void UI2::Color(float x, float y, float w, Vec4& col) {
+	if (Engine::Button(x, y, w, 16, col) == MOUSE_RELEASE) {
 		Popups::type = POPUP_TYPE::COLORPICK;
 		Popups::pos = Vec2(x + w*sepw, y + 16);
 		Popups::data = &col;
 	}
+	UI::Texture(x + w - 18, y, 16, 16, Icons::colorwheel);
+}
+
+void UI2::Color(float x, float y, float w, const std::string& title, Vec4& col) {
+	UI::Label(x, y, 12, title, white());
+	Color(x + w*sepw, y, w*sepw2 - 1.f, col);
 	UI::Texture(x + w - 18, y, 16, 16, Icons::colorwheel);
 }
 

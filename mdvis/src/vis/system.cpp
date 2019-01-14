@@ -67,38 +67,7 @@ std::unordered_map<ushort, float> VisSystem::radii;
 void VisSystem::Init() {
 	message = _("Hello!");
 	radii.clear();
-	std::ifstream strm(IO::path + "config/radii.txt");
-	if (strm.is_open()) {
-		std::string s;
-		while (!strm.eof()) {
-			std::getline(strm, s);
-			auto p = string_split(s, ' ', true);
-			if (p.size() != 2) continue;
-			auto i = *(ushort*)&(p[0])[0];
-			auto vr = std::stof(p[1]);
-			radii.emplace(i, vr);
-		}
-		strm.close();
-	}
-	strm.open(IO::path + "config/bondlengths.txt");
-	_bondLengths.clear();
-	if (strm.is_open()) {
-		std::string s;
-		while (!strm.eof()) {
-			std::getline(strm, s);
-			auto p = string_split(s, ' ', true);
-			if (p.size() != 2) continue;
-			auto p2 = string_split(p[0], '-');
-			if (p2.size() != 2) continue;
-			auto i1 = *(ushort*)&(p2[0])[0];
-			auto i2 = *(ushort*)&(p2[1])[0];
-			auto ln = std::pow(std::stof(p[1]) * 0.001f, 2);
-			_bondLengths.emplace(i1 + (i2 << 16), ln);
-			_bondLengths.emplace(i2 + (i1 << 16), ln);
-		}
-		strm.close();
-	}
-	strm.open(IO::path + "config/colors.txt");
+	std::ifstream strm(IO::path + "config/colors.txt");
 	_type2Col.clear();
 	if (strm.is_open()) {
 		std::string s;
