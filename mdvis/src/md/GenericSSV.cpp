@@ -67,6 +67,64 @@ bool GenericSSV::Read(ParInfo* info) {
 		strm.ignore(1000, '\n');
 	}
 
+	auto trj = &info->trajectory;
+	std::vector<double*> poss, vels;
+	double* ps, *vl;
+	while (std::getline(strm, p)) {
+		if (p != _s) break;
+		uint32_t num;
+		strm >> num;
+		if (num != info->num) {
+			SETERR("Consecutive frames must have the same atom count!");
+			break;
+		}
+		ps = new double[num * 3];
+		vl = new double[num * 3];
+
+		for (int a = 0; a < sz; ++a) {
+			int attri = 0;
+			for (auto& t : ts) {
+				strm >> p;
+				switch (t) {
+				case TYPES::RID: break;
+				case TYPES::RNM: break;
+				case TYPES::TYP: break;
+				case TYPES::POSX: info->pos[a * 3] = std::stod(p); break;
+				case TYPES::POSY: info->pos[a * 3 + 1] = std::stod(p); break;
+				case TYPES::POSZ: info->pos[a * 3 + 2] = std::stod(p); break;
+				case TYPES::VELX: info->vel[a * 3] = std::stod(p); break;
+				case TYPES::VELY: info->vel[a * 3 + 1] = std::stod(p); break;
+				case TYPES::VELZ: info->vel[a * 3 + 2] = std::stod(p); break;
+				case TYPES::ATTR: attrs[attri++].second[a] = std::stod(p); break;
+				default: break;
+				}
+			}
+			strm.ignore(1000, '\n');
+		}
+
+
+		char buf[100] = {};
+		isz = 10 + 2 * isz;
+		while (strm.getline(buf, 100)) {
+			info->trajectory.progress = 0.01f;
+			ps = new double[info->num * 3];
+			strm.ignore(100, '\n');
+			for (uint32_t i = 0; i < info->num; ++i) {
+				strm.getline(buf, 100);
+				auto bf = buf + isz;
+				ps[i * 3] = std::atof(bf); bf += 8;
+				ps[i * 3 + 1] = std::atof(bf); bf += 8;
+				ps[i * 3 + 2] = std::atof(bf);
+			}
+			poss.push_back(ps);
+			trj->frames++;
+			strm.ignore(100, '\n');
+		}
+		trj->poss = new double*[trj->frames];
+		memcpy(trj->poss, &poss[0], trj->frames * sizeof(uintptr_t));
+		return true;
+	}
+
 	auto& bnd = info->bounds;
 	bnd[0] = bnd[1] = (float)info->pos[0];
 	bnd[2] = bnd[3] = (float)info->pos[1];
@@ -110,7 +168,9 @@ bool GenericSSV::ReadFrm(FrmInfo* info) {
 			case TYPES::VELZ: info->vel[a*3 + 2] = std::stod(p); break;
 			case TYPES::ATTR: {
 					auto& at = _attrs[attri++];
-					if (!a) at.resize(info->parNum);
+					if (!a) {
+						at.resize(info->parNum);
+					}
 					at[a] = std::stod(p);
 					break;
 				}

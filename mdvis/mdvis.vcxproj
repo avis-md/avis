@@ -397,7 +397,7 @@
     <ClInclude Include="src\libjpeg\jpeglib.h" />
     <ClInclude Include="src\libjpeg\jversion.h" />
     <ClInclude Include="src\md\GenericSSV.h" />
-    <ClInclude Include="src\res\attrdata.h" />
+    <ClInclude Include="src\res\bnddata.h" />
     <ClInclude Include="src\res\coldata.h" />
     <ClInclude Include="src\res\envdata.h" />
     <ClInclude Include="src\res\prefdata.h" />
