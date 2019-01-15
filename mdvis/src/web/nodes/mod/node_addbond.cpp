@@ -60,6 +60,7 @@ float Node_AddBond::DrawSide() {
 	auto& c2 = Particles::particles_Conn2[animId];
 	if (Engine::Button(pos.x + width - 17, pos.y, 16, 16, c2.visible? Icons::visible : Icons::hidden, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
 		c2.visible = !c2.visible;
+		Scene::dirty = true;
 	}
 	if (Engine::Button(pos.x + width - 34, pos.y, 16, 16, Icons::down, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
 		showSett = !showSett;

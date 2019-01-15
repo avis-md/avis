@@ -17,7 +17,7 @@ void Browse::Draw() {
 	if (mode == MODE::NONE) return;
 	UI::IncLayer();
 
-	UI::Quad(0, 0, Display::width, Display::height, white(0.9f, 0.1f));
+	UI2::BackQuad(0, 0, Display::width, Display::height);
 
 	if (Engine::Button(10, 2, 100, 16, Vec4(0.4f, 0.4f, 0.2f, 1), "Cancel", 12, white(), true) == MOUSE_RELEASE) {
 		mode = MODE::NONE;

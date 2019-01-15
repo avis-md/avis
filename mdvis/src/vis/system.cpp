@@ -17,6 +17,7 @@
 #include "utils/xml.h"
 #include "utils/runcmd.h"
 #include "utils/effects.h"
+#include "utils/tinyfiledialogs.h"
 
 #ifdef PLATFORM_WIN
 #define EXPPATH "path=%path%;\"" + IO::path + "\"&&"
@@ -405,4 +406,19 @@ cleanup:
 	IO::RmDirectory(currentSavePath2);
 	currentSavePath = "";
 	return success;
+}
+
+void VisSystem::RegisterPath() {
+#ifdef PLATFORM_WIN
+
+#else
+	if (IO::HasFile("/usr/local/bin/avis")) {
+		if (!tinyfd_messageBox("Register PATH", "/usr/local/bin/avis already exists.\nDo you want to override it?",
+			"yesno", "warning", 0)) return;
+		remove("/usr/local/bin/avis");
+	}
+	if (!!symlink((IO::path + "avis").c_str(), "/usr/local/bin/avis")) {
+		tinyfd_messageBox("Register PATH", "Failed to create link to /usr/local/bin/avis", "ok", "error", 1);
+	}
+#endif
 }

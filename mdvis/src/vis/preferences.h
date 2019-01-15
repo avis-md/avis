@@ -27,6 +27,8 @@ class Preferences {
 	};
 	static std::vector<std::pair<std::string, std::vector<Pref>>> prefs;
 
+	static bool showre;
+
 	struct Bondlen {
 		std::string sig1, sig2;
 		float len;

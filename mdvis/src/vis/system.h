@@ -51,4 +51,6 @@ public:
 
 	static void Save(const std::string& path);
 	static bool Load(const std::string& path);
+
+	static void RegisterPath();
 };

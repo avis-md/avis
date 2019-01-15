@@ -10,6 +10,8 @@
 
 std::vector<std::pair<std::string, std::vector<Preferences::Pref>>> Preferences::prefs;
 
+bool Preferences::showre = false;
+
 std::vector<Preferences::Bondlen> Preferences::bondlengths;
 std::vector<Preferences::Typecol> Preferences::typecolors;
 std::vector<Preferences::Typerad> Preferences::typeradii;
@@ -151,7 +153,13 @@ void Preferences::Draw() {
 			menu = a;
 	}
 
-	float off = UI::BeginScroll(x1, y0 + 18, 295, 264);
+	float off = 0;
+	if (showre) {
+		UI::Label(x1, y0 + 18, 12, "Environment variables are modified.", yellow());
+		UI::Label(x1, y0 + 34, 12, "Consider restarting for changes to take effect.", yellow());
+		off = UI::BeginScroll(x1, y0 + 18 + 33, 295, 264 - 33);
+	}
+	else off = UI::BeginScroll(x1, y0 + 18, 295, 264);
 
 	if (menu == 3) {
 		static bool sb = true;
@@ -259,8 +267,16 @@ void Preferences::Draw() {
 				p.changed = true;
 				if (p.name.back() != '*') p.name.push_back('*');
 				if (p.callback) p.callback();
+				if (menu == 4) showre = true;
 			}
 			off += 17;
+		}
+
+		if (menu == 0) {
+			off += 2;
+			if (Engine::Button(x1, off, w2, 16, white(1, 0.4f), "Install app in PATH", 12, white(), true) == MOUSE_RELEASE) {
+				VisSystem::RegisterPath();
+			}
 		}
 	}
 

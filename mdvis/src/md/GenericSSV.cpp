@@ -101,28 +101,6 @@ bool GenericSSV::Read(ParInfo* info) {
 			}
 			strm.ignore(1000, '\n');
 		}
-
-
-		char buf[100] = {};
-		isz = 10 + 2 * isz;
-		while (strm.getline(buf, 100)) {
-			info->trajectory.progress = 0.01f;
-			ps = new double[info->num * 3];
-			strm.ignore(100, '\n');
-			for (uint32_t i = 0; i < info->num; ++i) {
-				strm.getline(buf, 100);
-				auto bf = buf + isz;
-				ps[i * 3] = std::atof(bf); bf += 8;
-				ps[i * 3 + 1] = std::atof(bf); bf += 8;
-				ps[i * 3 + 2] = std::atof(bf);
-			}
-			poss.push_back(ps);
-			trj->frames++;
-			strm.ignore(100, '\n');
-		}
-		trj->poss = new double*[trj->frames];
-		memcpy(trj->poss, &poss[0], trj->frames * sizeof(uintptr_t));
-		return true;
 	}
 
 	auto& bnd = info->bounds;
