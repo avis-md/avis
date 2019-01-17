@@ -40,7 +40,7 @@ public:
 
 	static std::thread* execThread;
 	static AnNode* execNode;
-	static uint nextNode;
+	static uint currNode, nextNode;
 
 	static bool hasPy, hasC, hasFt;
 	static bool hasPy_s, hasC_s, hasFt_s;

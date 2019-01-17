@@ -20,8 +20,10 @@ PyNode::PyNode(PyScript* scr) : AnNode(scr) {
 	}
 	for (uint i = 0; i < scr->outvars.size(); ++i) {
 		auto& ovi = outputV[i] = scr->_outvars[i];
+		conV[i].name = ovi.name;
 		conV[i].type = ovi.type;
 		conV[i].typeName = ovi.typeName;
+		conV[i].stride = ovi.stride;
 		if (ovi.type == AN_VARTYPE::LIST) {
 			conV[i].dimVals.resize(ovi.dim);
 			outputVC[i].dims.resize(ovi.dim);
@@ -90,7 +92,8 @@ void PyNode::Execute() {
 		{
 			auto& ar = outputVC[i].val.arr;
 			int n;
-			ar.p = AnConv::FromPy(mv.value, (int)conV[i].dimVals.size(), &conV[i].dimVals[0], n);
+			ar.p = AnConv::FromPy(mv.value, (int)conV[i].dimVals.size(), scr->_outvars[i].stride, &conV[i].dimVals[0], n);
+			if (!ar.p) throw "";
 			n *= scr->_outvars[i].stride;
 			ar.data.resize(n);
 			memcpy(&ar.data[0], ar.p, n);

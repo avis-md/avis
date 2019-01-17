@@ -40,7 +40,7 @@ bool AnWeb::invertRun = false, AnWeb::runOnFrame = false;
 
 std::thread* AnWeb::execThread = nullptr;
 AnNode* AnWeb::execNode = nullptr;
-uint AnWeb::nextNode = 0;
+uint AnWeb::currNode = 0, AnWeb::nextNode = 0;
 
 bool AnWeb::hasPy = false, AnWeb::hasC = false, AnWeb::hasFt = false;
 bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
@@ -443,11 +443,12 @@ void AnWeb::_DoExecute() {
 	char* err = 0;
 	static std::string pylog;
 	nextNode = ~0U;
-	for (size_t a = 0, s = nodes.size(); a < s; ++a) {
+	for (size_t a = 0, s = nodes.size(); (a < s) || (nextNode != ~0U); ++a) {
 		if (nextNode != ~0U) {
 			a = (size_t)nextNode;
 			nextNode = ~0U;
 		}
+		currNode = (uint)a;
 		auto& n = nodes[a];
 #ifdef VERBOSE
 		Debug::Message("AnWeb", "Executing " + n->script->name);
@@ -692,11 +693,15 @@ void AnWeb::Load(const std::string& s) {
 				case AN_SCRTYPE::NONE:
 					for (auto& ss : AnNode_Internal::scrs) {
 						for (auto& a : ss) {
-							if (nm == a.sig) n = a.spawner();
-							break;
+							if (nm == a.sig) {
+								n = a.spawner();
+								goto ifound;
+							}
 						}
 					}
-					Debug::Warning("AnWeb::Load", "Unknown node name: " + nm);
+					Debug::Error("AnWeb::Load", "Unknown internal node: " + nm);
+					return;
+					ifound:
 					break;
 				case AN_SCRTYPE::C:
 					n = new CNode(CScript::allScrs[nm]);
