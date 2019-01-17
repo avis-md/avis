@@ -3,7 +3,8 @@
 #define SETERR(msg) memcpy(info->error, msg, sizeof(msg))
 
 std::vector<GenericSSV::AttrTyp> GenericSSV::attrs;
-std::vector<std::vector<double>> GenericSSV::_attrs;
+GenericSSV::vecvecd GenericSSV::_attrs;
+std::vector<GenericSSV::vecvecd> GenericSSV::_attrsf;
 std::vector<GenericSSV::TYPES> GenericSSV::_tps;
 std::string GenericSSV::_s;
 
@@ -70,6 +71,8 @@ bool GenericSSV::Read(ParInfo* info) {
 	auto trj = &info->trajectory;
 	std::vector<double*> poss, vels;
 	double* ps, *vl;
+	_attrsf.clear();
+	const auto sts = attrs.size();
 	while (std::getline(strm, p)) {
 		if (p != _s) break;
 		uint32_t num;
@@ -78,8 +81,16 @@ bool GenericSSV::Read(ParInfo* info) {
 			SETERR("Consecutive frames must have the same atom count!");
 			break;
 		}
+
+		trj->progress = 0.01f;
 		ps = new double[num * 3];
 		vl = new double[num * 3];
+		_attrsf.push_back(vecvecd());
+		auto& _atr = _attrsf.back();
+		_atr.resize(sts);
+		for (size_t a = 0; a < sts; a++) {
+			_atr[a].resize(sz);
+		}
 
 		for (int a = 0; a < sz; ++a) {
 			int attri = 0;
@@ -89,18 +100,28 @@ bool GenericSSV::Read(ParInfo* info) {
 				case TYPES::RID: break;
 				case TYPES::RNM: break;
 				case TYPES::TYP: break;
-				case TYPES::POSX: info->pos[a * 3] = std::stod(p); break;
-				case TYPES::POSY: info->pos[a * 3 + 1] = std::stod(p); break;
-				case TYPES::POSZ: info->pos[a * 3 + 2] = std::stod(p); break;
-				case TYPES::VELX: info->vel[a * 3] = std::stod(p); break;
-				case TYPES::VELY: info->vel[a * 3 + 1] = std::stod(p); break;
-				case TYPES::VELZ: info->vel[a * 3 + 2] = std::stod(p); break;
-				case TYPES::ATTR: attrs[attri++].second[a] = std::stod(p); break;
+				case TYPES::POSX: ps[a * 3] = std::stod(p); break;
+				case TYPES::POSY: ps[a * 3 + 1] = std::stod(p); break;
+				case TYPES::POSZ: ps[a * 3 + 2] = std::stod(p); break;
+				case TYPES::VELX: vl[a * 3] = std::stod(p); break;
+				case TYPES::VELY: vl[a * 3 + 1] = std::stod(p); break;
+				case TYPES::VELZ: vl[a * 3 + 2] = std::stod(p); break;
+				case TYPES::ATTR: _atr[attri++][a] = std::stod(p); break;
 				default: break;
 				}
 			}
 			strm.ignore(1000, '\n');
 		}
+
+		poss.push_back(ps);
+		vels.push_back(vl);
+		trj->frames++;
+	}
+	if (trj->frames > 0) {
+		trj->poss = new double*[trj->frames]{};
+		trj->vels = new double*[trj->frames]{};
+		std::memcpy(trj->poss, poss.data(), trj->frames * sizeof(double*));
+		std::memcpy(trj->vels, vels.data(), trj->frames * sizeof(double*));
 	}
 
 	auto& bnd = info->bounds;

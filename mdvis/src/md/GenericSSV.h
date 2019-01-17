@@ -9,14 +9,15 @@ class GenericSSV {
 		VELX, VELY, VELZ,
 		ATTR
 	};
+	typedef std::vector<std::vector<double>> vecvecd;
 public:
 	static bool Read(ParInfo* info);
 	static bool ReadFrm(FrmInfo* info);
 
 	typedef std::pair<std::string, std::vector<double>> AttrTyp;
 	static std::vector<AttrTyp> attrs;
-	static std::vector<std::vector<double>> _attrs;
-
+	static vecvecd _attrs;
+	static std::vector<vecvecd> _attrsf;
 private:
 	static std::vector<TYPES> _tps;
 	static std::string _s;
