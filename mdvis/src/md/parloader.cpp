@@ -625,6 +625,7 @@ void ParLoader::DoOpen() {
 	parDirty = true;
 	busy = false;
 	fault = false;
+	loadProgress = nullptr;
 	//
 	//if (!isSrv)
 	//	anm.maxFramesInMem = anm.frameCount;
@@ -687,6 +688,7 @@ void ParLoader::DoOpenAnim() {
 	anm.dirty = true;
 	busy = false;
 	fault = false;
+	loadProgress = nullptr;
 	
 	Engine::ReleaseLock();
 }

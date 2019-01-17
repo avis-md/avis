@@ -13,7 +13,13 @@ Node_DoFor::Node_DoFor() : INODE_INIT {
 	scr.AddInput("arr", "list(2d)");
 	AddOutput(CVar("comp", 'd', 1, {&_sz}, {}));
 	scr.AddOutput(conV.back());
+	AddOutput(CVar("index", AN_VARTYPE::INT));
+	scr.AddOutput(conV.back());
+	AddOutput(CVar("count", AN_VARTYPE::INT));
+	scr.AddOutput(conV.back());
 	conV[0].value = &conV[0].data.val.arr.p;
+	conV[1].value = &_i;
+	conV[2].value = &_im;
 }
 
 void Node_DoFor::Execute() {
