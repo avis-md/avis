@@ -30,24 +30,27 @@ typedef uint ANNODE_FLAGS;
 class AnNode {
 public:
 	virtual ~AnNode() {}
+	
+	static void Init();
 
-	const bool saveConV = true;
-	const bool runOnSeek = false;
-	const bool runOnValChg = false;
+	const ANNODE_FLAGS flags;
 
+	uint id;
 	AnScript* script;
 	std::string title;
+	Vec3 titleCol = NODE_COL_USR;
 	bool selected;
 	Vec2 pos;
 	static float width;
 	float height;
-	uint id;
-	Vec3 titleCol = NODE_COL_USR;
+
+	bool canexec;
+	std::vector<AnNode*> parents;
 
 	bool expanded = true;
-	bool showDesc = false, showSett = false;
 	bool canTile = false;
 	bool executing = false;
+	bool showDesc = false, showSett = false;
 	ANNODE_OP op;
 
 	bool logExpanded = true;
@@ -83,8 +86,6 @@ public:
 		std::string tartp;
 	};
 	std::vector<ConnInfo> _connInfo;
-	
-	static void Init();
 
 	bool Select();
 	virtual float GetHeaderSz();
