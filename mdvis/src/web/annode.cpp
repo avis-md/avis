@@ -9,6 +9,14 @@
 Texture AnNode::tex_circle_open, AnNode::tex_circle_conn;
 float AnNode::width = 220;
 
+void AnNode::Init() {
+	AnNode_Internal::Init();
+#ifndef IS_ANSERVER
+	tex_circle_open = Texture(res::node_open_png, res::node_open_png_sz);
+	tex_circle_conn = Texture(res::node_conn_png, res::node_conn_png_sz);
+#endif
+}
+
 short& AnNode::getval_s(const uint i) {
 	return inputR[i].first ? *(short*)inputR[i].getval() : inputVDef[i].s;
 }
@@ -17,14 +25,6 @@ int& AnNode::getval_i(const uint i) {
 }
 double& AnNode::getval_d(const uint i) {
 	return inputR[i].first ? *(double*)inputR[i].getval() : inputVDef[i].d;
-}
-
-void AnNode::Init() {
-	AnNode_Internal::Init();
-#ifndef IS_ANSERVER
-	tex_circle_open = Texture(res::node_open_png, res::node_open_png_sz);
-	tex_circle_conn = Texture(res::node_conn_png, res::node_conn_png_sz);
-#endif
 }
 
 bool AnNode::Select() {
