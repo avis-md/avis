@@ -42,8 +42,13 @@ float AnNode::GetHeaderSz() {
 }
 
 void AnNode::DrawBack() {
-	UI2::BackQuad(pos.x, pos.y, width, height);
-	if (expanded) UI::Quad(pos.x, pos.y, width, height, white(0.7f, 0.1f));
+	if (AnWeb::highContrast) {
+		UI2::BackQuad(pos.x, pos.y, width, height, white(1, 0.1f));
+	}
+	else {
+		UI2::BackQuad(pos.x, pos.y, width, height);
+		UI::Quad(pos.x, pos.y, width, height, white(0.7f, 0.1f));
+	}
 }
 
 Vec2 AnNode::DrawConn() {
@@ -58,7 +63,7 @@ Vec2 AnNode::DrawConn() {
 				Vec2 p2 = Vec2(pos.x, expanded ? y + 8 : pos.y + 8);
 				Vec2 p1 = Vec2(ri.first->pos.x + ri.first->width, ri.first->expanded ? ri.first->pos.y + 28 + ri.first->hdrSz + (ri.second + ri.first->inputR.size()) * 17 : ri.first->pos.y + 8);
 				Vec2 hx = Vec2((p2.x > p1.x) ? (p2.x - p1.x) / 2 : (p1.x - p2.x) / 3, 0);
-				auto col = white();
+				auto col = AnWeb::highContrast? white(1, 0.5f) : white();
 				if (!AnWeb::selConnNode) {
 					if (ri.hoverdel) {
 						col = red();
@@ -100,8 +105,13 @@ void AnNode::Draw() {
 	else {
 		if (expanded) {
 			float y = pos.y + 16;
-			UI2::BlurQuad(pos.x, y, width, height - 16, white(0.5f));
-			UI::Quad(pos.x, y, width, height - 16, white(0.6f, 0.2f));
+			if (AnWeb::highContrast) {
+				UI::Quad(pos.x, y, width, height - 16, white(0.8f, 0.1f));
+			}
+			else {
+				UI2::BlurQuad(pos.x, y, width, height - 16, white(0.5f));
+				UI::Quad(pos.x, y, width, height - 16, white(0.6f, 0.2f));
+			}
 			y += 2;
 			DrawHeader(y);
 			hdrSz = y - pos.y - 16 - setSz;

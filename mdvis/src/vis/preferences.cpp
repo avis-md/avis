@@ -132,8 +132,8 @@ void Preferences::Draw() {
 	if (!show) return;
 	UI::IncLayer();
 	UI::Quad(0, 0, Display::width, Display::height, black(0.4f));
-	const float x0 = Display::width*0.5f - 200.f;
-	const float y0 = Display::height*0.5f - 150.f;
+	const float x0 = Display::width/2 - 200.f;
+	const float y0 = Display::height/2 - 150.f;
 	const float x1 = x0 + 105;
 	const float w2 = 280;
 	UI2::BackQuad(x0, y0, 400, 300);

@@ -37,6 +37,7 @@ float AnWeb::maxScroll, AnWeb::scrollPos = 0, AnWeb::expandPos = 0;
 int AnWeb::execFrame, AnWeb::realExecFrame, AnWeb::execdFrame;
 float AnWeb::drawLerp;
 bool AnWeb::invertRun = false, AnWeb::runOnFrame = false;
+bool AnWeb::highContrast = false;
 
 std::thread* AnWeb::execThread = nullptr;
 AnNode* AnWeb::execNode = nullptr;
@@ -121,7 +122,7 @@ void AnWeb::Draw() {
 #ifndef IS_ANSERVER
 	const float alpha = VisSystem::opacity;
 	AnNode::width = 220;
-	UI::Quad(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f, white(alpha * drawLerp, 0.05f));
+	UI::Quad(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f, highContrast? white() : white(alpha * drawLerp, 0.05f));
 	Engine::BeginStencil(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f);
 	byte ms = Input::mouse0State;
 	if (executing) {

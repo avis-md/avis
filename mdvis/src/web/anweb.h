@@ -37,6 +37,7 @@ public:
 	static int execFrame, realExecFrame, execdFrame;
 	static float drawLerp;
 	static bool invertRun, runOnFrame;
+	static bool highContrast;
 
 	static std::thread* execThread;
 	static AnNode* execNode;
