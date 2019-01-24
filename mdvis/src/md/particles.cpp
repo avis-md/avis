@@ -154,6 +154,8 @@ void Particles::Clear() {
 		
 		anim.Clear();
 		Protein::Clear();
+
+		VisSystem::radii.clear();
 	}
 }
 

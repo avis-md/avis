@@ -586,7 +586,7 @@ Vec3 Preferences::GetCol(ushort sig) {
 float Preferences::GetRad(ushort sig) {
 	for (auto& r : typeradii) {
 		const ushort s = *(ushort*)r.sig.data();
-		if (s == sig) return r.rad;
+		if (s == sig) return std::max(r.rad, 0.0000001f);
 	}
 	return 1;
 }

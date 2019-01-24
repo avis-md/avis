@@ -529,7 +529,7 @@ void ParLoader::DoOpen() {
 		}
 		found:;
 
-		Particles::radii[i] = Preferences::GetRad(id1);
+		VisSystem::radii[id1] = Particles::radii[i] = Preferences::GetRad(id1);
 		Particles::ress[i] = Int2(Particles::residueListSz - 1, trs->residueSz - 1);
 
 		tr->cnt++;
