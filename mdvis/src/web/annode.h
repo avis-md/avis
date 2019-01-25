@@ -143,6 +143,7 @@ protected:
 
 	static Texture tex_circle_open, tex_circle_conn;
 };
+typedef std::shared_ptr<AnNode> pAnNode;
 
 class PyNode : public AnNode {
 public:
