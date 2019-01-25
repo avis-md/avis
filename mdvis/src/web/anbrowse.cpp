@@ -199,16 +199,16 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 			if (Engine::Button(2.f + 5 * layer, off, 150.f, 16.f, white(1, 0.35f)) == MOUSE_RELEASE) {
 				if (Input::dbclick) {
 					AnWeb::selScript = nullptr;
-					AnNode* pn = 0;
+					pAnNode pn;
 					switch (fs->type) {
 					case AN_SCRTYPE::PYTHON:
-						pn = new PyNode(dynamic_cast<PyScript*>(fs));
+						pn = std::make_shared<PyNode>(dynamic_cast<PyScript*>(fs));
 						break;
 					case AN_SCRTYPE::C:
-						pn = new CNode(dynamic_cast<CScript*>(fs));
+						pn = std::make_shared<CNode>(dynamic_cast<CScript*>(fs));
 						break;
 					case AN_SCRTYPE::FORTRAN:
-						pn = new FNode(dynamic_cast<FScript*>(fs));
+						pn = std::make_shared<FNode>(dynamic_cast<FScript*>(fs));
 						break;
 					}
 					pn->canTile = true;

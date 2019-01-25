@@ -312,7 +312,7 @@ float AnNode::DrawSide() {
 							else if (!si) rf = opt = nullptr;
 							else if (!tmp) {
 								rf = nullptr;
-								tmp = AnWeb::nodes[si - 1];
+								tmp = AnWeb::nodes[si - 1].get();
 								ss.resize(1);
 								ssi.clear();
 								int k = 0;
@@ -459,11 +459,10 @@ void AnNode::AddInput() {
 void AnNode::AddOutput(const CVar& cv) {
 	outputR.push_back(std::vector<nodecon>());
 	conV.push_back(cv);
-	if (saveConV) conVAll.push_back(std::vector<VarVal>());
+	if (!(flags & AN_FLAG_NOSAVECONV)) conVAll.push_back(std::vector<VarVal>());
 }
 
-AnNode::AnNode(AnScript* scr) : script(scr), canTile(false), 
-		saveConV(true), runOnSeek(false), runOnValChg(false) {
+AnNode::AnNode(AnScript* scr) : script(scr), canTile(false), flags(0) {
 	if (!scr) return;
 	inputR.resize(scr->invars.size());
 	auto osz = scr->outvars.size();
@@ -472,10 +471,7 @@ AnNode::AnNode(AnScript* scr) : script(scr), canTile(false),
 	conVAll.resize(osz);
 }
 
-AnNode::AnNode(DmScript* scr, ANNODE_FLAGS flags) : script(scr), canTile(false), 
-		saveConV(!(flags & AN_FLAG_NOSAVECONV)),
-		runOnSeek(!!(flags & AN_FLAG_RUNONSEEK)),
-		runOnValChg(!!(flags & AN_FLAG_RUNONVALCHG)) {}
+AnNode::AnNode(DmScript* scr, ANNODE_FLAGS flags) : script(scr), canTile(false), flags(flags) {}
 
 void AnNode::ApplyFrameCount(int f) {
 	for (auto& a : conVAll) {
@@ -484,7 +480,7 @@ void AnNode::ApplyFrameCount(int f) {
 }
 
 void AnNode::WriteFrame(int f) {
-	if (!saveConV) return;
+	if (!(flags & AN_FLAG_NOSAVECONV)) return;
 	for (int a = 0; a < conV.size(); ++a) {
 		auto& c = conV[a];
 		auto& ca = conVAll[a][f];
@@ -516,7 +512,7 @@ void AnNode::WriteFrame(int f) {
 }
 
 bool AnNode::ReadFrame(int f) {
-	if (!saveConV || !conVAll.size()) return true;
+	if (!(flags & AN_FLAG_NOSAVECONV) || !conVAll.size()) return true;
 	for (int a = 0; a < conV.size(); ++a) {
 		auto& c = conV[a];
 		if (conVAll[a].size() <= f) return false;
@@ -697,14 +693,14 @@ void AnNode::CatchExp(char* c) {
 }
 
 void AnNode::OnAnimFrame() {
-	if (runOnSeek) {
+	if (flags && AN_FLAG_RUNONSEEK) {
 		//Debug::Message("AnNode", "autorun " + title);
 		Execute();
 	}
 }
 
 void AnNode::OnValChange(int i) {
-	if (runOnValChg) {
+	if (flags && AN_FLAG_RUNONVALCHG) {
 		Execute();
 	}
 }

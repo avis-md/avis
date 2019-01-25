@@ -17,6 +17,6 @@ void AnNode_Internal::Init() {
 	groupNms[4] = _("Miscellaneous");
 }
 
-AnNode_Internal_Reg::AnNode_Internal_Reg(const std::string sig, const std::string nm, ANNODE_GROUP grp, AnNode* (*func)()) {
+AnNode_Internal_Reg::AnNode_Internal_Reg(const std::string sig, const std::string nm, ANNODE_GROUP grp, spawnFunc func) {
 	AnNode_Internal::scrs[(int)grp].push_back(AnNode_Internal::noderef(sig, nm, func));
 }

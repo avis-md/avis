@@ -30,7 +30,7 @@ public:
 	static uint selSpNode;
 
 	static std::string activeFile;
-	static std::vector<AnNode*> nodes;
+	static std::vector<pAnNode> nodes;
 
 	static bool drawFull, expanded, executing, apply;
 	static float maxScroll, scrollPos, expandPos;
@@ -47,7 +47,7 @@ public:
 
 	static void Clear(), Clear0();
 	static void Insert(AnScript* scr, Vec2 pos = Vec2(100, 100));
-	static void Insert(AnNode* node, Vec2 pos = Vec2(100, 100));
+	static void Insert(const pAnNode& node, Vec2 pos = Vec2(100, 100));
 	static void Init(), Update(), Draw(), DrawSide(), DrawScene();
 	static void Execute(bool all), DoExecute(bool all), _DoExecute(), DoExecute_Srv();
 	static void ApplyFrameCount(int f), WriteFrame(uint f), ReadFrame(uint f), RemoveFrames();

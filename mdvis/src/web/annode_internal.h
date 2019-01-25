@@ -8,14 +8,14 @@
 	static const char* _name;\
 	DmScript scr;\
 	static AnNode_Internal_Reg _reg;\
-	static AnNode* _Spawn();
+	static std::shared_ptr<AnNode> _Spawn();
 
 #define INODE_DEF(tt, nm, gp) \
 	const std::string Node_ ## nm::sig = "." #nm;\
 	const char* Node_ ## nm::_name = tt;\
 	AnNode_Internal_Reg Node_ ## nm::_reg = AnNode_Internal_Reg(\
 		Node_ ## nm::sig, Node_ ## nm::_name, ANNODE_GROUP::gp, &Node_ ## nm::_Spawn);\
-	AnNode* Node_ ## nm::_Spawn() { return new Node_ ## nm(); } 
+	std::shared_ptr<AnNode> Node_ ## nm::_Spawn() { return std::make_shared<Node_ ## nm>(); } 
 
 #define INODE_INIT AnNode(&scr, 0), scr(sig)
 #define INODE_INITF(f) AnNode(&scr, f), scr(sig)
@@ -37,7 +37,7 @@ class AnNode_Internal {
 public:
 	static void Init();
 
-	typedef AnNode* (*spawnFunc)();
+	typedef pAnNode (*spawnFunc)();
 	struct noderef {
 		noderef(std::string s, std::string n, spawnFunc f)
 			: sig(s), name(n), spawner(f) {}
@@ -50,6 +50,7 @@ public:
 };
 
 class AnNode_Internal_Reg {
+	typedef pAnNode (*spawnFunc)();
 public:
-	AnNode_Internal_Reg(const std::string sig, const std::string nm, ANNODE_GROUP grp, AnNode* (*func)());
+	AnNode_Internal_Reg(const std::string sig, const std::string nm, ANNODE_GROUP grp, spawnFunc func);
 };

@@ -28,7 +28,7 @@ AnScript* AnWeb::selScript = nullptr;
 uint AnWeb::selSpNode = 0;
 
 std::string AnWeb::activeFile = "";
-std::vector<AnNode*> AnWeb::nodes;
+std::vector<pAnNode> AnWeb::nodes;
 
 bool AnWeb::drawFull = false, AnWeb::expanded = true;
 bool AnWeb::executing = false;
@@ -57,23 +57,20 @@ void AnWeb::Init() {
 }
 
 void AnWeb::Clear() {
-	for (auto n : nodes) {
-		delete n;
-	}
 	nodes.clear();
 }
 
 void AnWeb::Clear0() {
 	Clear();
-	nodes.push_back(new Node_Inputs());
-	nodes.push_back(new Node_Info());
+	nodes.push_back(Node_Inputs::_Spawn());
+	nodes.push_back(Node_Info::_Spawn());
 	nodes[0]->canTile = nodes[1]->canTile = true;
 }
 
 void AnWeb::Insert(AnScript* scr, Vec2 pos) {
-	AnNode* nd;
+	pAnNode nd;
 	if (scr->type == AN_SCRTYPE::PYTHON)
-		nd = new PyNode((PyScript*)scr);
+		nd = std::make_shared<PyNode>((PyScript*)scr);
 	else {
 		Debug::Error("AnWeb::Insert", "Invalid type!");
 		return;
@@ -81,7 +78,7 @@ void AnWeb::Insert(AnScript* scr, Vec2 pos) {
 	Insert(nd, pos);
 }
 
-void AnWeb::Insert(AnNode* node, Vec2 pos) {
+void AnWeb::Insert(const pAnNode& node, Vec2 pos) {
 	nodes.push_back(node);
 	nodes.back()->pos = pos;
 }
@@ -196,17 +193,17 @@ void AnWeb::Draw() {
 	if (Input::mouse0State == MOUSE_UP) {
 		if (selScript) {
 			if (iter >= 0) {
-				AnNode* pn = 0;
+				pAnNode pn;
 				if ((uintptr_t)selScript > 1) {
 					switch (selScript->type) {
 					case AN_SCRTYPE::PYTHON:
-						pn = new PyNode(dynamic_cast<PyScript*>(selScript));
+						pn = std::make_shared<PyNode>(dynamic_cast<PyScript*>(selScript));
 						break;
 					case AN_SCRTYPE::C:
-						pn = new CNode(dynamic_cast<CScript*>(selScript));
+						pn = std::make_shared<CNode>(dynamic_cast<CScript*>(selScript));
 						break;
 					case AN_SCRTYPE::FORTRAN:
-						pn = new FNode(dynamic_cast<FScript*>(selScript));
+						pn = std::make_shared<FNode>(dynamic_cast<FScript*>(selScript));
 						break;
 					default:
 						Debug::Error("AnWeb::Draw", "Unhandled script type: " + std::to_string((int)selScript->type));
@@ -236,7 +233,6 @@ void AnWeb::Draw() {
 							(*(nn + 1))->canTile = false;
 					}
 					n->ClearConn();
-					delete(n);
 					nodes.erase(nn);
 					break;
 				}
@@ -459,7 +455,7 @@ void AnWeb::_DoExecute() {
 		else
 			IO::RedirectStdio2(AnWeb::nodesPath + "__tmpstd");
 #endif
-		execNode = n;
+		execNode = n.get();
 		n->executing = true;
 		std::exception_ptr cxp;
 		try {
@@ -679,7 +675,7 @@ void AnWeb::Load(const std::string& s) {
 		return;
 	}
 	nodes.clear();
-	AnNode* n = nullptr;
+	pAnNode n;
 	AN_SCRTYPE tp;
 	std::string nm;
 	int cnt = 0;
@@ -704,13 +700,13 @@ void AnWeb::Load(const std::string& s) {
 					ifound:
 					break;
 				case AN_SCRTYPE::C:
-					n = new CNode(CScript::allScrs[nm]);
+					n = std::make_shared<CNode>(CScript::allScrs[nm]);
 					break;
 				case AN_SCRTYPE::PYTHON:
-					n = new PyNode(PyScript::allScrs[nm]);
+					n = std::make_shared<PyNode>(PyScript::allScrs[nm]);
 					break;
 				case AN_SCRTYPE::FORTRAN:
-					n = new FNode(FScript::allScrs[nm]);
+					n = std::make_shared<FNode>(FScript::allScrs[nm]);
 					break;
 				default:
 					Debug::Warning("AnWeb::Load", "Unknown node type: " + std::to_string((byte)tp));
@@ -718,7 +714,6 @@ void AnWeb::Load(const std::string& s) {
 				}
 				if (!n->script) {
 					Debug::Warning("AnWeb::Load", "Cannot find script \"" + nm + "\"!");
-					delete(n);
 					return;
 				}
 				n->id = cnt++;
@@ -742,7 +737,7 @@ void AnWeb::Load(const std::string& s) {
 						else if (ci.cond) {
 							if (cc.name == "tarid") {
 								auto i = TryParse(cc.value, 0xffff);
-								if (i < cnt - 1) ci.tar = nodes[i];
+								if (i < cnt - 1) ci.tar = nodes[i].get();
 							}
 							else GTS(tarname, ci.tarnm);
 							else GTS(tartype, ci.tartp);
