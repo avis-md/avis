@@ -202,13 +202,15 @@ void paintfunc() {
 
 			id--;
 #if 1
-			UI::Quad(Input::mousePos.x + 14, Input::mousePos.y + 2, 120, 90, white(0.8f, 0.1f));
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 2, 12, "Atom ID: " + std::to_string(id), white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 17, 12, "Residue: " + std::string(&Particles::resNames[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN), white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 32, 12, "Atom: " + std::string(&Particles::names[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN), white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 47, 12, "X: " + std::to_string(Particles::poss[id].x), white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 62, 12, "Y: " + std::to_string(Particles::poss[id].y), white());
-			UI::Label(Input::mousePos.x + 14, Input::mousePos.y + 77, 12, "Z: " + std::to_string(Particles::poss[id].z), white());
+			const float x0 = std::round(Input::mousePos.x + 16);
+			const float y0 = std::round(Input::mousePos.y + 2);
+			UI2::BackQuad(x0 - 2, y0, 120, 90);
+			UI::Label(x0, y0, 12, "Atom ID: " + std::to_string(id), white());
+			UI::Label(x0, y0 + 15, 12, "Residue: " + std::string(&Particles::resNames[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN), white());
+			UI::Label(x0, y0 + 30, 12, "Atom: " + std::string(&Particles::names[id * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN), white());
+			UI::Label(x0, y0 + 45, 12, "X: " + std::to_string(Particles::poss[id].x), white());
+			UI::Label(x0, y0 + 60, 12, "Y: " + std::to_string(Particles::poss[id].y), white());
+			UI::Label(x0, y0 + 75, 12, "Z: " + std::to_string(Particles::poss[id].z), white());
 #endif
 		}
 		else {
