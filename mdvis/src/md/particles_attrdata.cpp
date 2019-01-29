@@ -4,7 +4,7 @@
 int Particles::attrdata::_ids = 0;
 
 Particles::attrdata::attrdata(bool ro) : instanceId(++_ids), readonly(ro), timed(false), _timed(false) {
-	diskFd = IO::path + "tmp/attr_" + std::to_string(instanceId) + "_";
+	diskFd = IO::tmpPath + "attr_" + std::to_string(instanceId) + "_";
 	glGenBuffers(1, &buf);
 	SetGLBuf<float>(buf, nullptr, particleSz);
 	glGenTextures(1, &texBuf);

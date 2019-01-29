@@ -56,6 +56,7 @@ void VisSystem::SetMsg(const std::string& msg, byte sev, const std::string& msg2
 	if (hasMessage2 && sev == 2) {
 		Popups::type = POPUP_TYPE::SYSMSG;
 	}
+	Debug::Message("VisSystem", "message set to \"" + msg + "\"");
 }
 
 VIS_MOUSE_MODE VisSystem::mouseMode = VIS_MOUSE_MODE::ROTATE;
@@ -112,7 +113,11 @@ void VisSystem::Init() {
 		if (!!path.size()) VisSystem::Save(path.substr(0, path.size() - strlen_c(EXT_SVFL)));
 	});
 	mi[4].Set(Icons::openfile, _("Import"), []() {
-		ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
+		const auto fs = Dialog::OpenFile(ParLoader::exts);
+		if (!!fs.size()) {
+			ParLoader::isSrv = false;
+			ParLoader::OnOpenFile(fs);
+		}
 	});
 	mi[5].Set(Icons::openfile, _("Import Recent"), 0);
 	mi[6].Set(Icons::openfile, _("Import Remote"), []() {

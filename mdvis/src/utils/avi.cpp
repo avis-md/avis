@@ -15,7 +15,7 @@ void AVI::AddFrame(GLuint tex) {
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, &buf[0]);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	auto path = IO::path + "/tmp/tmpmovieframe.jpg";
+	auto path = IO::tmpPath + "tmpmovieframe.jpg";
 
 	struct jpeg_compress_struct cinfo;
 	struct jpeg_error_mgr jerr;

@@ -35,7 +35,7 @@ public:
 	static void OpenFd(std::string path);
 	static void OpenEx(std::string path);
 
-	static std::string path, userPath, currPath;
+	static std::string path, userPath, currPath, tmpPath;
 
 	static void InitPath();
 	static std::wstring _tow(const std::string& s);

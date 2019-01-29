@@ -19,7 +19,7 @@
 #endif
 #endif
 
-std::string IO::path, IO::userPath, IO::currPath;
+std::string IO::path, IO::userPath, IO::currPath, IO::tmpPath;
 
 std::thread IO::readstdiothread;
 bool IO::readingStdio;
@@ -324,11 +324,11 @@ void IO::OpenEx(std::string path) {
 
 void IO::InitPath() {
 	char cpath[200];
+
 #ifdef PLATFORM_WIN
 	GetModuleFileName(NULL, cpath, 200);
 	path = cpath;
 	path = path.substr(0, path.find_last_of('\\') + 1);
-	auto p = path;
 	std::replace(path.begin(), path.end(), '\\', '/');
 #elif defined(PLATFORM_LNX)
 	readlink("/proc/self/exe", cpath, 200);
@@ -343,16 +343,31 @@ void IO::InitPath() {
 	if (path.back() != '/') path += "/";
 
 #ifdef PLATFORM_WIN
-	RunCmd::Run("cd>\"" + p + "\\currpath.txt\"");
-	std::ifstream strm(path + "currpath.txt");
+	WCHAR path[MAX_PATH];
+	if (SUCCEEDED(SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, 0, path)) {
+		tmpPath = IO::_frw(path);
+		if (tmpPath.back() != '\\') tmpPath += "\\";
+		tmpPath += "Temp\\";
+		std::replace(tmpPath.begin(), tmpPath.end(), '\\', '/');
+	}
+#else
+	tmpPath = "/tmp/";
+#endif
+	tmpPath += "avis/";
+	if (!HasDirectory(tmpPath))
+		MakeDirectory(tmpPath);
+
+#ifdef PLATFORM_WIN
+	std::string tf = tmpPath;
+	std::replace(tf.begin(), tf.end(), '/', '\\');
+	RunCmd::Run("cd>\"" + tf + "currpath.txt\"");
+	std::ifstream strm(tmpPath + "currpath.txt");
 	if (strm) {
 		std::getline(strm, currPath);
 		std::replace(currPath.begin(), currPath.end(), '\\', '/');
 		strm.close();
-		remove((path + "currpath.txt").c_str());
 	}
-	WCHAR path[MAX_PATH];
-	if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, path))) {
+	if (SUCCEEDED(SHGetFolderPathW(0, CSIDL_PROFILE, 0, 0, path))) {
 		userPath = IO::_frw(path);
 		std::replace(userPath.begin(), userPath.end(), '\\', '/');
 	}
@@ -368,6 +383,7 @@ void IO::InitPath() {
 	if (userPath.back() != '/') userPath += "/";
 	Debug::Message("IO", "Working path is \"" + currPath + "\"");
 	Debug::Message("IO", "User path is \"" + userPath + "\"");
+	Debug::Message("IO", "Temp path is \"" + tmpPath + "\"");
 }
 
 std::wstring IO::_tow(const std::string& s) {

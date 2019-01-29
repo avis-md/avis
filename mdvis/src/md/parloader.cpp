@@ -343,7 +343,7 @@ void ParLoader::DoOpen() {
 	if (isSrv) {
 		*loadProgress = 0.001f;
 		loadName = "Downloading";
-		path = IO::path + "tmp/" + nm;
+		path = IO::tmpPath + nm;
 		srv.GetFile(droppedFiles[0], path);
 	}
 
@@ -650,7 +650,7 @@ void ParLoader::DoOpenAnim() {
 	if (isSrv) {
 		*loadProgress = 0.001f;
 		loadName = "Downloading";
-		path = IO::path + "tmp/" + nm;
+		path = IO::tmpPath + nm;
 		srv.GetFile(droppedFiles[0], path);
 	}
 
@@ -709,7 +709,7 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 		if (srv.ok) {
 			auto pl = path.find_last_of('/');
 			auto nm = path.substr(pl + 1);
-			auto p2 = IO::path + "tmp/" + nm;
+			auto p2 = IO::tmpPath + nm;
 			srv.GetFile(path, p2);
 			path = p2;
 		}
