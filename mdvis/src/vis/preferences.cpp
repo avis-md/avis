@@ -330,7 +330,7 @@ void Preferences::Reset() {
 
 void Preferences::Save() {
 	XmlNode head("Preferences");
-	for (int a = 0; a < 2; a++) {
+	for (int a = 0; a < 3; a++) {
 		auto& ps = prefs[a];
 		auto nd = head.addchild(ps.first);
 		for (auto& p : ps.second) {

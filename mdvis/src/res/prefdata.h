@@ -56,6 +56,21 @@ namespace config {
 		"VSS", "Scroll Speed", "F", "1", "0.2", "5", "Y",
 		"Mouse ScrollWheel Sensitivity",
 
+		"VAX", "Show Axes", "B", "1",
+		"Show axes in bottom left corner of 3D view",
+
+		"VAS", "Axes size", "F", "15", "10", "30", "Y",
+		" ",
+
+		"VCX", "X axis color", "C", "1", "0", "0", "1",
+		" ",
+
+		"VCY", "Y axis color", "C", "0", "0.7", "0", "1",
+		" ",
+
+		"VCZ", "Z axis color", "C", "0", "0", "1", "1",
+		" ",
+
 
 		nullptr
 	};

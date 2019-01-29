@@ -17,6 +17,10 @@ public:
 	static float bgMul;
 
 	static bool showbbox;
+
+	static bool showAxes;
+	static float axesSize;
+	static Vec4 axesCols[3];
 	
 	static int reflId, _reflId;
 	static std::vector<std::string> reflNms;
@@ -135,6 +139,7 @@ public:
 	static void Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h);
 
 	static void Reblit();
+	static void DrawAxes();
 
 	static void DrawOverlay();
 

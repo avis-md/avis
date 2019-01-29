@@ -20,6 +20,7 @@
 #include "res/shddata.h"
 #include "utils/dialog.h"
 #include "utils/tinyfiledialogs.h"
+#include "vis/preferences.h"
 
 #define SCL_MIN -7.f
 #define SCL_MAX 2.f
@@ -39,6 +40,10 @@ Vec4 ParGraphics::bgCol = Vec4(1, 1, 1, 1), ParGraphics::fogCol = Vec4(0, 0, 0, 
 float ParGraphics::bgMul = 1;
 
 bool ParGraphics::showbbox = true;
+
+bool ParGraphics::showAxes = true;
+float ParGraphics::axesSize = 15;
+Vec4 ParGraphics::axesCols[] = {};
 
 int ParGraphics::reflId = 0, ParGraphics::_reflId = -1;
 std::vector<std::string> ParGraphics::reflNms;
@@ -364,6 +369,12 @@ void ParGraphics::Init() {
 	Eff::ssaoBlur = 0;
 
 	InitClippingMesh();
+
+	Preferences::Link("VAX", &showAxes);
+	Preferences::Link("VAS", &axesSize);
+	Preferences::Link("VCX", &axesCols[0]);
+	Preferences::Link("VCY", &axesCols[1]);
+	Preferences::Link("VCZ", &axesCols[2]);
 }
 
 void ParGraphics::InitClippingMesh() {
@@ -996,6 +1007,10 @@ void ParGraphics::Reblit() {
 		Shadows::Reblit();
 	if (!!hlIds.size() || !!Selection::atoms.size())
 		BlitHl();
+	
+	if (showAxes) {
+		DrawAxes();
+	}
 }
 
 void ParGraphics::BlitSky() {
@@ -1091,6 +1106,39 @@ void ParGraphics::BlitHl() {
 
 	glBindVertexArray(0);
 	glUseProgram(0);
+}
+
+void ParGraphics::DrawAxes() {
+	struct _axis {
+		Vec4 pos;
+		Vec4 col;
+		std::string nm;
+	} axis[3];
+	
+	axis[0] = _axis{Vec4(1, 0, 0, 0), axesCols[0], "X"};
+	axis[1] = _axis{Vec4(0, 1, 0, 0), axesCols[1], "Y"};
+	axis[2] = _axis{Vec4(0, 0, 1, 0), axesCols[2], "Z"};
+
+	for (int a = 0; a < 3; a++) {
+		auto& p = axis[a].pos;
+		p = normalize(lastMV * p);
+		p.y *= -1;
+	}
+
+	std::sort(axis, axis+3, [](const _axis& a, const _axis& b){
+		return a.pos.z > b.pos.z;
+	});
+
+	const Vec2 center = Vec2(70.f + ParMenu::expandPos, Display::height - 70.f);
+	const float fsz = axesSize * 12.f / 15;
+	UI::font->Align(ALIGN_MIDCENTER);
+	for (int a = 0; a < 3; a++) {
+		const auto& ax = axis[a];
+		Engine::DrawLine(center, center + Vec2(ax.pos) * axesSize, ax.col, 1);
+		const auto tc = center + Vec2(ax.pos) * axesSize * 1.5f;
+		UI::Label(tc.x, tc.y, fsz, ax.nm, ax.col);
+	}
+	UI::font->Align(ALIGN_TOPLEFT);
 }
 
 void ParGraphics::DrawOverlay() {
