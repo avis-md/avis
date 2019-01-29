@@ -18,4 +18,11 @@ protected:
 	static bool useMsvc, useOMP, useOMP2;
 	static std::string flags1, flags2;
 	static bool ParseType(std::string s, CVar* var);
+
+	struct VarInfo {
+		std::string name;
+		AN_VARTYPE type, itemType;
+		std::string error;
+	};
+	static VarInfo ParseVar(std::string s);
 };

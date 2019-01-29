@@ -16,6 +16,10 @@ namespace std {
 
 std::vector<std::string> string_split(std::string s, char c, bool removeBlank = false);
 int string_find(const std::string& s, const std::string& s2, int start = -1);
+void string_triml(std::string& s);
+void string_trimr(std::string& s);
+std::string string_trim(std::string s);
+
 std::string to_uppercase(std::string s);
 std::string to_lowercase(std::string s);
 std::string rm_spaces(const std::string& s);

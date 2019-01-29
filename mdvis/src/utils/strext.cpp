@@ -41,6 +41,24 @@ int string_find(const std::string& s, const std::string& s2, int start) {
 	return -1;
 }
 
+void string_triml(std::string& s) {
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int i) {
+		return !std::isspace(i);
+	}));
+}
+
+void string_trimr(std::string& s) {
+	s.erase(std::find_if(s.rbegin(), s.rend(), [](int i) {
+		return !std::isspace(i);
+	}).base(), s.end());
+}
+
+std::string string_trim(std::string s) {
+	string_triml(s);
+	string_trimr(s);
+	return s;
+}
+
 std::string to_uppercase(std::string s) {
 	for (auto& c : s) {
 		if (c >= 'a' && c <= 'z')
