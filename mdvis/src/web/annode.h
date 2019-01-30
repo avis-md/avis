@@ -159,20 +159,7 @@ public:
 	void CatchExp(char* c) override;
 };
 
-class CNode : public AnNode {
-public:
-	CNode(CScript*);
 
-	std::vector<void*> inputV, outputV;
-
-	void Execute() override;
-	void WriteFrame(int f) override;
-	void RemoveFrames() override;
-
-	void Reconn() override;
-
-	void CatchExp(char* c) override;
-};
 
 class FNode : public AnNode {
 public:

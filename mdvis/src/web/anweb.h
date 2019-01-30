@@ -3,10 +3,7 @@
 #include "anscript.h"
 #include "annode.h"
 #include "anbrowse.h"
-#include "creader.h"
-//#include "pyreader.h"
-//#include "freader.h"
-#include "web/arrayview.h"
+#include "arrayview.h"
 
 #define EXT_PS ".py"
 constexpr int EXT_PS_SZ = strlen_c(EXT_PS);
