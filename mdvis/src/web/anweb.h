@@ -4,8 +4,8 @@
 #include "annode.h"
 #include "anbrowse.h"
 #include "creader.h"
-#include "pyreader.h"
-#include "freader.h"
+//#include "pyreader.h"
+//#include "freader.h"
 #include "web/arrayview.h"
 
 #define EXT_PS ".py"
@@ -47,7 +47,6 @@ public:
 	static bool hasPy_s, hasC_s, hasFt_s;
 
 	static void Clear(), Clear0();
-	static void Insert(AnScript* scr, Vec2 pos = Vec2(100, 100));
 	static void Insert(const pAnNode& node, Vec2 pos = Vec2(100, 100));
 	static void Init(), Update(), Draw(), DrawSide(), DrawScene();
 	static void Execute(bool all), DoExecute(bool all), _DoExecute(), DoExecute_Srv();

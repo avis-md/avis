@@ -160,7 +160,7 @@ bool CReader::Read(CScript* scr) {
 				}
 				ostrm << "\n\n//___magic below___\n\n";
 				for (auto& v : inNms) {
-					ostrm << "//__in__\n" << "extern \"C\" const void* __in_" + v.name
+					ostrm << "//__in__\n" << "extern \"C\" const void* __var_" + v.name
 						 + " = (void*)&((" + nm + "*)nullptr)->" + v.name + "\n";
 				}
 				ostrm << "extern \"C\" " + nm + "* __func_spawn() { return new " + nm + "(); }\n"
@@ -289,30 +289,35 @@ bool CReader::Read(CScript* scr) {
 		bool irg = (lnsz > 1)? (lns[1] == "range") : false;
 		bool iso = (lns[0] == "//out");
 		if (lns[0] == "//in" || iso) {
-			std::vector<std::pair<std::string, std::string>>& cv = iso ? scr->outvars : scr->invars;
-			std::vector<CVar>& _cv = iso ? scr->_outvars : scr->_invars;
 			const std::string ios = iso ? "output " : "input ";
-			_cv.push_back(CVar());
-			auto bk = &_cv.back();
+			
+			auto& vars = iso? scr->outputs : scr->inputs;
+			vars.push_back(AnScript::Var());
+			auto& vr = vars.back();
 
+			auto& cvars = iso? scr->_outputs : scr->_inputs;
+			cvars.push_back(CVar());
+			auto& cvr = cvars.back();
+			
 			std::getline(strm, ln);
 			bool ira = false;
 
 			auto ss = string_split(ln, ' ', true);
-			bk->typeName = ss[0];
-			if (bk->typeName.back() == '*') {
-				bk->typeName.pop_back();
+			vr.typeName = ss[0];
+			if (vr.typeName.back() == '*') {
+				vr.typeName.pop_back();
 				ira = true;
 			}
 			else if (ss[1][0] == '*') {
 				ss[1] = ss[1].substr(1);
 				ira = true;
 			}
+
 			if (ira && lnsz == 1) {
 				_ER("CReader", "Plain " + ios + " must be of non-pointer type!");
 				goto FAIL;
 			}
-			else if (ien && (bk->typeName != "int" || ira)) {
+			else if (ien && (vr.typeName != "int" || ira)) {
 				_ER("CReader", "" + ios + " enum must be of int type!");
 				goto FAIL;
 			}
@@ -338,19 +343,23 @@ bool CReader::Read(CScript* scr) {
 					goto FAIL;
 				}
 			}
-			if (!ira && !ParseType(bk->typeName, bk)) {
+			if (ira) vr.type = AN_VARTYPE::LIST;
+			auto& te = ira? vr.itemType : vr.type;
+			te = ParseType(vr.typeName);
+			if (te == AN_VARTYPE::NONE) {
 				std::string add = "";
-				if (bk->typeName == "float") add = " Did you mean \"double\"?";
-				_ER("CReader", "arg type \"" + bk->typeName + "\" not recognized!" + add);
+				if (vr.typeName == "float") add = " Did you mean \"double\"?";
+				_ER("CReader", "variable of type \"" + vr.typeName + "\" not supported!" + add);
 				goto FAIL;
 			}
 			
+			vr.name = ss[1];
 			std::string::iterator eps;
-			if ((eps = std::find(ss[1].begin(), ss[1].end(), '=')) != ss[1].end()) {
-				bk->name = ss[1].substr(0, eps - ss[1].begin());
+			if ((eps = std::find(vr.name.begin(), vr.name.end(), '=')) != vr.name.end()) {
+				vr.name = vr.name.substr(0, eps - vr.name.begin());
 			}
-			else bk->name = ss[1];
 
+			/*
 			if (ira) {
 				bk->dimVals.resize(lnsz - 1);
 				bk->dimNames.insert(bk->dimNames.end(), lns.begin() + 1, lns.end());
@@ -366,38 +375,41 @@ bool CReader::Read(CScript* scr) {
 				bk->data.val.d = 0;
 			}
 			cv.push_back(std::pair<std::string, std::string>(bk->name, bk->typeName));
+			*/
 			if (!iso) {
-				scr->invaropts.push_back(VarOpt());
-				auto& opt = scr->invaropts.back();
-				opt.type = ien? VarOpt::ENUM : (irg? VarOpt::RANGE : VarOpt::NONE);
+				typedef AnScript::Var::UI_TYPE UI_TYPE;
+				vr.uiType = ien? UI_TYPE::ENUM : (irg? UI_TYPE::RANGE : UI_TYPE::NONE);
 				if (ien) {
-					opt.enums.insert(opt.enums.end(), lns.begin() + 2, lns.end());
-					opt.enums.push_back("");
+					vr.enums.insert(vr.enums.end(), lns.begin() + 2, lns.end());
+					vr.enums.push_back("");
 				}
 				else if (irg) {
-					opt.range = Vec2(TryParse(lns[2], 0.f), TryParse(lns[3], 1.f));
+					vr.range = Vec2(TryParse(lns[2], 0.f), TryParse(lns[3], 1.f));
 				}
 			}
 
 			if (AnWeb::hasC) {
-				if (!(bk->value = scr->lib.GetSym(bk->name))) {
-					_ER("CReader", "cannot find \"" + bk->name + "\" from memory!");
+				if (!(cvr.offset = *(uintptr_t*)scr->lib.GetSym("__var_" + vr.name))) {
+					_ER("CReader", "cannot find \"" + vr.name + "\" from memory!");
 					goto FAIL;
 				}
 				if (ira) {
-					auto sz = bk->dimVals.size();
-					bk->data.dims.resize(sz);
+					auto sz = lns.size() - 1;
+					cvr.szOffsets.resize(sz);
 					for (size_t a = 0; a < sz; ++a) {
-						int es = TryParse(bk->dimNames[a], 0);
+						auto& of = cvr.szOffsets[a];
+						const auto& ln = lns[a+1];
+						uint es = TryParse(ln, 0U);
 						if (es > 0) {
-							if (iso) { //temp fix for mac access error
-								bk->data.dims[a] = es;
-								bk->dimVals[a] = &bk->data.dims[a];
-							}
+							of.useOffset = false;
+							of.size = es;
 						}
-						else if (!(bk->dimVals[a] = (int*)scr->lib.GetSym(bk->dimNames[a]))) {
-							_ER("CReader", "cannot find \"" + bk->dimNames[a] + "\" from memory!");
-							goto FAIL;
+						else {
+							of.useOffset = true;
+							if (!(of.offset = *(uintptr_t*)scr->lib.GetSym("__var_" + ln))) {
+								_ER("CReader", "cannot find \"" + ln + "\" from memory!");
+								goto FAIL;
+							}
 						}
 					}
 				}
@@ -405,9 +417,9 @@ bool CReader::Read(CScript* scr) {
 		}
 	}
 
-	if (!scr->outvars.size()) {
-		Debug::Warning("CReader", "Script has no output parameters!");
-	}
+	//if (!scr->outvars.size()) {
+	//	Debug::Warning("CReader", "Script has no output parameters!");
+	//}
 
 	Engine::ReleaseLock();
 	return true;
@@ -426,11 +438,11 @@ void CReader::Refresh(CScript* scr) {
 	}
 }
 
-bool CReader::ParseType(std::string s, CVar* var) {
-	if (s == "int") var->type = AN_VARTYPE::INT;
-	else if (s == "double") var->type = AN_VARTYPE::DOUBLE;
-	else return false;
-	return true;
+AN_VARTYPE CReader::ParseType(const std::string& s) {
+	if (s == "short") return AN_VARTYPE::SHORT;
+	else if (s == "int") return AN_VARTYPE::INT;
+	else if (s == "double") return AN_VARTYPE::DOUBLE;
+	else return AN_VARTYPE::NONE;
 }
 
 #define ER(msg) { info.error = msg; return info; }

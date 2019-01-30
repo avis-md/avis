@@ -6,6 +6,8 @@ public:
 	std::string libpath;
 	DyLib lib;
 
+	std::vector<CVar> _inputs, _outputs;
+
 	std::shared_ptr<AnScript_I> CreateInstance() override;
 };
 

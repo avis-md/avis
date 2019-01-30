@@ -17,7 +17,7 @@ protected:
 	static std::string vcbatPath, mingwPath;
 	static bool useMsvc, useOMP, useOMP2;
 	static std::string flags1, flags2;
-	static bool ParseType(std::string s, CVar* var);
+	static AN_VARTYPE ParseType(const std::string& s);
 
 	struct VarInfo {
 		std::string name;

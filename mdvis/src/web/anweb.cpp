@@ -68,17 +68,6 @@ void AnWeb::Clear0() {
 	nodes[0]->canTile = nodes[1]->canTile = true;
 }
 
-void AnWeb::Insert(AnScript* scr, Vec2 pos) {
-	pAnNode nd;
-	if (scr->type == AN_SCRTYPE::PYTHON)
-		nd = std::make_shared<PyNode>((PyScript*)scr);
-	else {
-		Debug::Error("AnWeb::Insert", "Invalid type!");
-		return;
-	}
-	Insert(nd, pos);
-}
-
 void AnWeb::Insert(const pAnNode& node, Vec2 pos) {
 	nodes.push_back(node);
 	nodes.back()->pos = pos;
@@ -197,14 +186,14 @@ void AnWeb::Draw() {
 				pAnNode pn;
 				if ((uintptr_t)selScript > 1) {
 					switch (selScript->type) {
-					case AN_SCRTYPE::PYTHON:
-						pn = std::make_shared<PyNode>(dynamic_cast<PyScript*>(selScript));
+					case AnScript::TYPE::PYTHON:
+						//pn = std::make_shared<PyNode>(dynamic_cast<PyScript*>(selScript));
 						break;
-					case AN_SCRTYPE::C:
+					case AnScript::TYPE::C:
 						pn = std::make_shared<CNode>(dynamic_cast<CScript*>(selScript));
 						break;
-					case AN_SCRTYPE::FORTRAN:
-						pn = std::make_shared<FNode>(dynamic_cast<FScript*>(selScript));
+					case AnScript::TYPE::FORTRAN:
+						//pn = std::make_shared<FNode>(dynamic_cast<FScript*>(selScript));
 						break;
 					default:
 						Debug::Error("AnWeb::Draw", "Unhandled script type: " + std::to_string((int)selScript->type));
@@ -256,9 +245,9 @@ void AnWeb::Draw() {
 		Texture icon = Icons::lang_ft;
 		if ((uintptr_t)selScript == 1)
 			icon = Icons::lightning;
-		else if (selScript->type == AN_SCRTYPE::C)
+		else if (selScript->type == AnScript::TYPE::C)
 			icon = Icons::lang_c;
-		else if (selScript->type == AN_SCRTYPE::PYTHON)
+		else if (selScript->type == AnScript::TYPE::PYTHON)
 			icon = Icons::lang_py;
 		UI::Texture(Input::mousePos.x - 16, Input::mousePos.y - 16, 32, 32, icon, white(0.3f));
 	}
@@ -501,7 +490,7 @@ void AnWeb::_DoExecute() {
 			}
 		}
 #endif
-		if (n->script->type == AN_SCRTYPE::PYTHON) {
+		if (n->script->type == AnScript::TYPE::PYTHON) {
 			if (err)
 				n->CatchExp(&pylog[0]);
 			else {
@@ -615,9 +604,9 @@ void AnWeb::Save(const std::string& s) {
 				SVS(tartype, c.tartp);
 			}
 			else {
-				auto& tp = nd->script->invars[a].second;
-				if (tp == "int") SV(value, nd->inputVDef[a].i);
-				else if (tp == "double") SV(value, nd->inputVDef[a].d);
+				//auto& tp = nd->script->invars[a].second;
+				//if (tp == "int") SV(value, nd->inputVDef[a].i);
+				//else if (tp == "double") SV(value, nd->inputVDef[a].d);
 			}
 		}
 	}
@@ -677,17 +666,17 @@ void AnWeb::Load(const std::string& s) {
 	}
 	nodes.clear();
 	pAnNode n;
-	AN_SCRTYPE tp;
+	AnScript::TYPE tp;
 	std::string nm;
 	int cnt = 0;
 	for (auto& nd : head->children[0].children) {
 		if (nd.name != "node") continue;
 		for (auto& c : nd.children) {
-			if (c.name == "type") tp = (AN_SCRTYPE)TryParse(c.value, 0);
+			if (c.name == "type") tp = (AnScript::TYPE)TryParse(c.value, 0);
 			else if (c.name == "name") {
 				nm = c.value;
 				switch (tp) {
-				case AN_SCRTYPE::NONE:
+				case AnScript::TYPE::NONE:
 					for (auto& ss : AnNode_Internal::scrs) {
 						for (auto& a : ss) {
 							if (nm == a.sig) {
@@ -700,14 +689,14 @@ void AnWeb::Load(const std::string& s) {
 					return;
 					ifound:
 					break;
-				case AN_SCRTYPE::C:
-					n = std::make_shared<CNode>(CScript::allScrs[nm]);
+				case AnScript::TYPE::PYTHON:
+					//n = std::make_shared<PyNode>(PyScript::allScrs[nm]);
 					break;
-				case AN_SCRTYPE::PYTHON:
-					n = std::make_shared<PyNode>(PyScript::allScrs[nm]);
+				case AnScript::TYPE::C:
+					//n = std::make_shared<CNode>(CScript::allScrs[nm]);
 					break;
-				case AN_SCRTYPE::FORTRAN:
-					n = std::make_shared<FNode>(FScript::allScrs[nm]);
+				case AnScript::TYPE::FORTRAN:
+					//n = std::make_shared<FNode>(FScript::allScrs[nm]);
 					break;
 				default:
 					Debug::Warning("AnWeb::Load", "Unknown node type: " + std::to_string((byte)tp));
@@ -747,7 +736,7 @@ void AnWeb::Load(const std::string& s) {
 							if (cc.name == "value") {
 								auto k = n->_connInfo.size();
 								auto& vd = n->inputVDef[k];
-								if (n->script->invars[k].second == "int") vd.i = TryParse(cc.value, 0);
+								if (n->script->inputs[k].type == AN_VARTYPE::INT) vd.i = TryParse(cc.value, 0);
 								else vd.d = TryParse(cc.value, 0.0);
 							}
 						}
