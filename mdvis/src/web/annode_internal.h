@@ -1,6 +1,5 @@
 #pragma once
-#include "web/annode.h"
-#include "web/anscript.h"
+#include "web/anweb.h"
 #include "ui/localizer.h"
 
 #define INODE_DEF_H \

@@ -1,4 +1,4 @@
-#include "anscript.h"
+#include "web/anscript.h"
 #include "utils/dylib.h"
 
 class CScript : public AnScript {
@@ -15,4 +15,4 @@ class CScript_I : public AnScript_I {
 public:
 	void SetInput(int i, int val) override;
 	void GetOutput(int i, int* val) override;
-}
+};

@@ -1,4 +1,5 @@
 #pragma once
+#include "anweb.h"
 #include "anscript.h"
 
 const Vec3 NODE_COL_USR = Vec3(0.35f);
@@ -36,7 +37,7 @@ public:
 	const ANNODE_FLAGS flags;
 
 	uint id;
-	AnScript* script;
+	AnScript_I* script;
 	std::string title;
 	Vec3 titleCol = NODE_COL_USR;
 	bool selected;
@@ -57,15 +58,16 @@ public:
 	byte logMask = 7;
 	int logOffset = 0;
 	std::vector<std::pair<byte, std::string>> log;
-
+	
 	struct nodecon {
+		AnScript_I* script;
 		AnNode* first;
 		uint second;
 		bool use;
 		bool hoverdel;
 		nodecon(AnNode* f = 0, uint s = 0, bool use = true) : first(f), second(s), use(true), hoverdel(false) {}
 		CVar& getconv() { return first->conV[second]; }
-		void*& getval() { return getconv().value; }
+		void*& getval();
 	};
 	std::vector<nodecon> inputR;
 	std::vector<std::vector<nodecon>> outputR;
@@ -138,38 +140,11 @@ public:
 	virtual void OnConn(bool o, int i) {}
 	virtual void OnValChange(int i);
 protected:
-	AnNode(AnScript* scr); //for user scripts
-	AnNode(DmScript* scr, ANNODE_FLAGS flags); //for internal scripts
+	AnNode(AnScript_I* scr); //for user scripts
+	AnNode(DmScript_I* scr, ANNODE_FLAGS flags); //for internal scripts
 
 	static Texture tex_circle_open, tex_circle_conn;
 };
 typedef std::shared_ptr<AnNode> pAnNode;
 
-class PyNode : public AnNode {
-public:
-	PyNode(PyScript*);
-	
-	std::vector<PyVar> inputV, outputV;
-	std::vector<VarVal> outputVC;
-	
-	void Execute() override;
-	void WriteFrame(int f) override;
-	void RemoveFrames() override;
-
-	void CatchExp(char* c) override;
-};
-
-
-
-class FNode : public AnNode {
-public:
-	FNode(FScript*);
-
-	std::vector<void*> inputV, outputV;
-	
-	void Execute() override;
-	void WriteFrame(int f) override;
-	void RemoveFrames() override;
-
-	void CatchExp(char* c) override;
-};
+#include "cc/cnode.h"

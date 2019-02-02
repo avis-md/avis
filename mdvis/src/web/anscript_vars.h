@@ -70,4 +70,4 @@ struct CVar {
 
 	uintptr_t offset;
 	std::vector<szItem> szOffsets;
-}
+};

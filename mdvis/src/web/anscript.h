@@ -6,8 +6,9 @@
 class AnScript_I;
 
 class AnScript {
-	virtual ~AnScript() = 0;
 public:
+	virtual ~AnScript();
+
 	struct Var {
 		std::string name;
 		AN_VARTYPE type, itemType;
@@ -51,16 +52,20 @@ public:
 };
 
 class AnScript_I {
-	virtual ~AnScript_I() = 0;
-
 public:
+	virtual ~AnScript_I();
+
 	AnScript* parent;
 	void* instance;
+
+	virtual void* Resolve(uintptr_t offset);
 
 	virtual void SetInput(int i, int val) = 0;
 	virtual void GetOutput(int i, int* val) = 0;
 	
 	virtual void Execute();
+	const float GetProgress();
 };
 
+#include "dmscript.h"
 #include "cc/cscript.h"

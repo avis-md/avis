@@ -173,6 +173,7 @@
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <UseFullPaths>true</UseFullPaths>
+      <ShowIncludes>true</ShowIncludes>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -322,36 +323,16 @@
     <ClCompile Include="src\web\annode.cpp" />
     <ClCompile Include="src\web\anscript.cpp" />
     <ClCompile Include="src\web\anops.cpp" />
+    <ClCompile Include="src\web\anscript_vars.cpp" />
     <ClCompile Include="src\web\anweb.cpp" />
     <ClCompile Include="src\web\arrayview.cpp" />
-    <ClCompile Include="src\web\cnode.cpp" />
-    <ClCompile Include="src\web\creader.cpp" />
-    <ClCompile Include="src\web\cscript.cpp" />
+    <ClCompile Include="src\web\cc\cnode.cpp" />
+    <ClCompile Include="src\web\cc\creader.cpp" />
+    <ClCompile Include="src\web\cc\cscript.cpp" />
     <ClCompile Include="src\web\errorview.cpp" />
-    <ClCompile Include="src\web\fnode.cpp" />
-    <ClCompile Include="src\web\freader.cpp" />
-    <ClCompile Include="src\web\fscript.cpp" />
     <ClCompile Include="src\web\annode_internal.cpp" />
-    <ClCompile Include="src\web\nodes\ctrl\node_dowhile.cpp" />
-    <ClCompile Include="src\web\nodes\get\node_getattribute.cpp" />
-    <ClCompile Include="src\web\nodes\conv\node_vector.cpp" />
-    <ClCompile Include="src\web\nodes\misc\node_accum.cpp" />
-    <ClCompile Include="src\web\nodes\conv\node_adjlist.cpp" />
-    <ClCompile Include="src\web\nodes\mod\node_addsurface.cpp" />
-    <ClCompile Include="src\web\nodes\mod\node_addbond.cpp" />
-    <ClCompile Include="src\web\nodes\set\node_setcamera.cpp" />
     <ClCompile Include="src\web\nodes\get\node_info.cpp" />
     <ClCompile Include="src\web\nodes\get\node_inputs.cpp" />
-    <ClCompile Include="src\web\nodes\misc\node_plot.cpp" />
-    <ClCompile Include="src\web\nodes\conv\node_remap.cpp" />
-    <ClCompile Include="src\web\nodes\set\node_setattribute.cpp" />
-    <ClCompile Include="src\web\nodes\set\node_setradscl.cpp" />
-    <ClCompile Include="src\web\nodes\set\node_showrange.cpp" />
-    <ClCompile Include="src\web\nodes\node_tracetrj.cpp" />
-    <ClCompile Include="src\web\nodes\set\node_setbboxcenter.cpp" />
-    <ClCompile Include="src\web\pynode.cpp" />
-    <ClCompile Include="src\web\pyreader.cpp" />
-    <ClCompile Include="src\web\pyscript.cpp" />
     <ClCompile Include="src\xdrfile\xdrfile.c" />
     <ClCompile Include="src\xdrfile\xdrfile_trr.c" />
     <ClCompile Include="src\xdrfile\xdrfile_xtc.c" />
@@ -466,30 +447,17 @@
     <ClInclude Include="src\web\annode.h" />
     <ClInclude Include="src\web\anscript.h" />
     <ClInclude Include="src\web\anops.h" />
+    <ClInclude Include="src\web\anscript_vars.h" />
     <ClInclude Include="src\web\anweb.h" />
     <ClInclude Include="src\web\arrayview.h" />
-    <ClInclude Include="src\web\creader.h" />
+    <ClInclude Include="src\web\cc\cnode.h" />
+    <ClInclude Include="src\web\cc\creader.h" />
+    <ClInclude Include="src\web\cc\cscript.h" />
+    <ClInclude Include="src\web\dmscript.h" />
     <ClInclude Include="src\web\errorview.h" />
-    <ClInclude Include="src\web\freader.h" />
     <ClInclude Include="src\web\annode_internal.h" />
-    <ClInclude Include="src\web\nodes\ctrl\node_dowhile.h" />
-    <ClInclude Include="src\web\nodes\get\node_getattribute.h" />
-    <ClInclude Include="src\web\nodes\conv\node_vector.h" />
-    <ClInclude Include="src\web\nodes\misc\node_accum.h" />
-    <ClInclude Include="src\web\nodes\conv\node_adjlist.h" />
-    <ClInclude Include="src\web\nodes\mod\node_addsurface.h" />
-    <ClInclude Include="src\web\nodes\mod\node_addbond.h" />
-    <ClInclude Include="src\web\nodes\set\node_setcamera.h" />
     <ClInclude Include="src\web\nodes\get\node_info.h" />
     <ClInclude Include="src\web\nodes\get\node_inputs.h" />
-    <ClInclude Include="src\web\nodes\misc\node_plot.h" />
-    <ClInclude Include="src\web\nodes\conv\node_remap.h" />
-    <ClInclude Include="src\web\nodes\set\node_setattribute.h" />
-    <ClInclude Include="src\web\nodes\set\node_setradscl.h" />
-    <ClInclude Include="src\web\nodes\set\node_showrange.h" />
-    <ClInclude Include="src\web\nodes\node_tracetrj.h" />
-    <ClInclude Include="src\web\nodes\set\node_setbboxcenter.h" />
-    <ClInclude Include="src\web\pyreader.h" />
     <ClInclude Include="src\xdrfile\xdrfile.h" />
     <ClInclude Include="src\xdrfile\xdrfile_trr.h" />
     <ClInclude Include="src\xdrfile\xdrfile_xtc.h" />

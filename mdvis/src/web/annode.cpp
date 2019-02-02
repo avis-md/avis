@@ -6,6 +6,14 @@
 #include "res/resdata.h"
 #endif
 
+#define _script script->parent
+
+void*& AnNode::nodecon::getval() {
+	auto& cv = getconv();
+	return (void*&)script;
+}
+
+
 Texture AnNode::tex_circle_open, AnNode::tex_circle_conn;
 float AnNode::width = 220;
 
@@ -38,7 +46,7 @@ bool AnNode::Select() {
 }
 
 float AnNode::GetHeaderSz() {
-	return (showDesc ? (17 * script->descLines) : 0) + (showSett ? setSz : 0) + hdrSz;
+	return (showDesc ? (17 * _script->descLines) : 0) + (showSett ? setSz : 0) + hdrSz;
 }
 
 void AnNode::DrawBack() {
@@ -53,11 +61,11 @@ void AnNode::DrawBack() {
 
 Vec2 AnNode::DrawConn() {
 #ifndef IS_ANSERVER
-	if (script->ok) {
+	if (_script->ok) {
 		const float connrad = 6;
-		auto cnt = (script->invars.size() + script->outvars.size());
+		auto cnt = (_script->inputs.size() + _script->outputs.size());
 		float y = pos.y + 18 + hdrSz;
-		for (uint i = 0; i < script->invars.size(); i++, y += 17) {
+		for (uint i = 0; i < _script->inputs.size(); i++, y += 17) {
 			auto& ri = inputR[i];
 			if (ri.first) {
 				Vec2 p2 = Vec2(pos.x, expanded ? y + 8 : pos.y + 8);
@@ -90,7 +98,7 @@ void AnNode::Draw() {
 #ifndef IS_ANSERVER
 	const float connrad = 6;
 
-	auto cnt = script->outvars.size();
+	auto cnt = _script->outputs.size();
 	for (auto& i : inputR) {
 		if (i.use) cnt++;
 	}
@@ -98,9 +106,9 @@ void AnNode::Draw() {
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 18, pos.y + 1, 12, title, white());
 	DrawToolbar();
-	if (!script->ok) {
+	if (!_script->ok) {
 		UI::Quad(pos.x, pos.y + 16, width, 19, white(0.7f, 0.25f));
-		UI::Label(pos.x + 5, pos.y + 17, 12, std::to_string(script->errorCount) + " errors", red());
+		UI::Label(pos.x + 5, pos.y + 17, 12, std::to_string(_script->errorCount) + " errors", red());
 	}
 	else {
 		if (expanded) {
@@ -116,7 +124,7 @@ void AnNode::Draw() {
 			DrawHeader(y);
 			hdrSz = y - pos.y - 16 - setSz;
 			y += 1;
-			for (uint i = 0; i < script->invars.size(); i++, y += 17) {
+			for (uint i = 0; i < _script->inputs.size(); i++, y += 17) {
 				bool hi = inputR[i].first;
 				if (!inputR[i].use) {
 					if (hi) Disconnect(i, false);
@@ -146,15 +154,15 @@ void AnNode::Draw() {
 				else {
 					UI::Texture(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, hi ? tex_circle_conn : tex_circle_open, red(0.3f));
 				}
-				UI::Label(pos.x + 10, y, 12, script->invars[i].first, white());
+				UI::Label(pos.x + 10, y, 12, _script->inputs[i].name, white());
 				if (!HasConnI(i)) {
-					auto& vr = script->invars[i].second;
-					auto isi = (vr == "int");
-					if (isi || (vr == "double")) {
+					auto& vr = _script->inputs[i].type;
+					auto isi = (vr == AN_VARTYPE::INT);
+					if (isi || (vr == AN_VARTYPE::DOUBLE)) {
 						DrawDefVal(i, y);
 					}
 					else {
-						UI::Label(pos.x + width*0.33f, y, 12, script->invars[i].second, white(0.3f));
+						UI::Label(pos.x + width*0.33f, y, 12, _script->inputs[i].typeName, white(0.3f));
 					}
 				}
 				else {
@@ -173,14 +181,15 @@ void AnNode::Draw() {
 			}
 			y += 2;
 
-			for (uint i = 0; i < script->outvars.size(); i++, y += 17) {
+			for (uint i = 0; i < _script->outputs.size(); i++, y += 17) {
 				bool ho = HasConnO(i);
 				if (!AnWeb::selConnNode || ((!AnWeb::selConnIdIsOut) && (AnWeb::selConnNode != this))) {
 					const auto cirbt = Engine::Button(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, ho ? tex_circle_conn : tex_circle_open, white(), Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f));
 					if ((cirbt & MOUSE_HOVER_FLAG) > 0) {
 						std::string str = "";
 						const auto& cv = conV[i];
-						if (!cv.value) str = "0x0 (????)";
+						/*
+						if (!cv.) str = "0x0 (????)";
 						else {
 							switch (cv.type) {
 							case AN_VARTYPE::SHORT:
@@ -204,12 +213,13 @@ void AnNode::Draw() {
 									ArrayView::type = cv.typeName[6];
 									ArrayView::dims = cv.dimVals;
 									ArrayView::scrNm = title;
-									ArrayView::varNm = script->outvars[i].first;
+									ArrayView::varNm = _script->outputs[i].first;
 									ArrayView::show = true;
 								}
 								break;
 							}
 						}
+						*/
 						UI2::Tooltip(cirbt, pos.x + width - connrad, y + 8 - connrad, str);
 						if (cirbt == MOUSE_RELEASE) {
 							if (!AnWeb::selConnNode) {
@@ -240,7 +250,7 @@ void AnNode::Draw() {
 				UI::font->Align(ALIGN_TOPRIGHT);
 				auto bt = ho? Engine::Button(pos.x + width*0.67f - 5, y, width * 0.33f, 16) : MOUSE_NONE;
 				if (!bt) {
-					UI::Label(pos.x + width - 10, y, 12, script->outvars[i].first, white());
+					UI::Label(pos.x + width - 10, y, 12, _script->outputs[i].name, white());
 				}
 				else {
 					auto& ors = outputR[i];
@@ -251,7 +261,7 @@ void AnNode::Draw() {
 					}
 				}
 				UI::font->Align(ALIGN_TOPLEFT);
-				UI::Label(pos.x + 2, y, 12, script->outvars[i].second, white(0.3f), width * 0.67f - 6);
+				UI::Label(pos.x + 2, y, 12, _script->outputs[i].typeName, white(0.3f), width * 0.67f - 6);
 			}
 			auto y1 = y;
 			DrawFooter(y);
@@ -266,7 +276,7 @@ void AnNode::Draw() {
 
 float AnNode::DrawSide() {
 #ifndef IS_ANSERVER
-	auto cnt = (script->invars.size());
+	auto cnt = (_script->inputs.size());
 	UI::Quad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1 : 0.8f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) expanded = !expanded;
 	UI::Label(pos.x + 20, pos.y + 1, 12, title, white());
@@ -275,10 +285,7 @@ float AnNode::DrawSide() {
 	}
 	if (executing) {
 		UI::Quad(pos.x, pos.y + 16, width, 2, white(0.7f, 0.25f));
-		if (script->progress)
-			UI::Quad(pos.x, pos.y + 16, 2 + (width - 2) * (float)(*script->progress), 2, red());
-		else
-			UI::Quad(pos.x, pos.y + 16, width * 0.1f, 2, red());
+		UI::Quad(pos.x, pos.y + 16, 2 + (width - 2) * script->GetProgress(), 2, red());
 	}
 	float dy = (executing ? 18 : 16), y = pos.y + dy;
 	if (expanded) {
@@ -288,10 +295,10 @@ float AnNode::DrawSide() {
 		if (cnt > 0) {
 			y += 2;
 			for (uint i = 0; i < cnt; i++, y += 17) {
-				UI::Label(pos.x + 2, y, 12, script->invars[i].first, white());
-				auto& vr = script->invars[i].second;
-				auto isi = (vr == "int");
-				if (isi || (vr == "double")) {
+				UI::Label(pos.x + 2, y, 12, _script->inputs[i].name, white());
+				auto& vr = _script->inputs[i].type;
+				auto isi = (vr == AN_VARTYPE::INT);
+				if (isi || (vr == AN_VARTYPE::DOUBLE)) {
 					DrawDefVal(i, y);
 				}
 				else {
@@ -306,7 +313,7 @@ float AnNode::DrawSide() {
 					bool isme = (opt == this && opi == i);
 					std::string tt = isme ?
 						(tmp ? "Select variable" : "Select node") :
-						(rf ? rf->script->outvars[rs].first : "no input");
+						(rf ? rf->_script->outputs[rs].name : "no input");
 					UI2::Dropdown(pos.x + width * 0.33f, y, width * 0.67f - 5, di, [&](){
 						tmp = nullptr; opt = this; opi = i;
 						for (uint a = 0; a < id; a++)
@@ -326,9 +333,9 @@ float AnNode::DrawSide() {
 								ss.resize(1);
 								ssi.clear();
 								int k = 0;
-								for (auto& v : tmp->script->outvars) {
-									if (CanConn(v.second, script->invars[i].second)) {
-										ss.push_back(v.first);
+								for (auto& v : tmp->_script->outputs) {
+									if (CanConn(v.typeName, _script->inputs[i].typeName)) {
+										ss.push_back(v.name);
 										ssi.push_back(k);
 									}
 									k++;
@@ -365,21 +372,21 @@ float AnNode::DrawSide() {
 }
 
 void AnNode::DrawDefVal(int i, float y) {
-	auto isi = (script->invars[i].second == "int");
-	auto& opt = script->invaropts[i];
+	auto& vr = _script->inputs[i];
+	auto isi = (vr.type == AN_VARTYPE::INT);
 	auto old = inputVDef[i].data;
-	switch (opt.type) {
-	case VarOpt::ENUM: {
+	switch (vr.uiType) {
+	case AnScript::Var::UI_TYPE::ENUM: {
 		static Popups::DropdownItem di;
 		UI2::Dropdown(pos.x + width*0.33f, y, width*0.67f - 6, di, [&]() {
-			di.list = &script->invaropts[i].enums[0];
+			di.list = &vr.enums[0];
 			di.target = (uint*)&inputVDef[i].i;
-		}, script->invaropts[i].enums[inputVDef[i].i]);
+		}, vr.enums[inputVDef[i].i]);
 		break;
 	}
-	case VarOpt::RANGE: {
+	case  AnScript::Var::UI_TYPE::RANGE: {
 		float res = (float)(isi ? inputVDef[i].i : inputVDef[i].d);
-		res = UI2::Slider(pos.x + width*0.33f, y, width*0.67f - 6, opt.range.x, opt.range.y, res);
+		res = UI2::Slider(pos.x + width*0.33f, y, width*0.67f - 6, vr.range.x, vr.range.y, res);
 		if (isi) inputVDef[i].i = (int)std::roundf(res);
 		else inputVDef[i].d = res;
 		break;
@@ -400,9 +407,9 @@ void AnNode::DrawDefVal(int i, float y) {
 void AnNode::DrawHeader(float& off) {
 	if (showDesc) {
 		UI::alpha = 0.7f;
-		UI2::LabelMul(pos.x + 5, off, 12, script->desc);
+		UI2::LabelMul(pos.x + 5, off, 12, _script->desc);
 		UI::alpha = 1;
-		off += std::roundf(12 * 1.2f * script->descLines) + 2;
+		off += std::roundf(12 * 1.2f * _script->descLines) + 2;
 	}
 	if (showSett) {
 		float offo = off;
@@ -450,7 +457,7 @@ void AnNode::DrawToolbar() {
 	if (this->log.size() && Engine::Button(pos.x + width - 67, pos.y, 16, 16, Icons::log, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
 		logExpanded = !logExpanded;
 	}
-	if (!!script->descLines) {
+	if (!!_script->descLines) {
 		if (Engine::Button(pos.x + width - 33, pos.y, 16, 16, Icons::details, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE) {
 			showDesc = !showDesc;
 		}
@@ -472,16 +479,16 @@ void AnNode::AddOutput(const CVar& cv) {
 	if (!(flags & AN_FLAG_NOSAVECONV)) conVAll.push_back(std::vector<VarVal>());
 }
 
-AnNode::AnNode(AnScript* scr) : script(scr), canTile(false), flags(0) {
+AnNode::AnNode(AnScript_I* scr) : script(scr), canTile(false), flags(0) {
 	if (!scr) return;
-	inputR.resize(scr->invars.size());
-	auto osz = scr->outvars.size();
+	inputR.resize(scr->parent->inputs.size());
+	auto osz = scr->parent->outputs.size();
 	outputR.resize(osz);
 	conV.resize(osz);
 	conVAll.resize(osz);
 }
 
-AnNode::AnNode(DmScript* scr, ANNODE_FLAGS flags) : script(scr), canTile(false), flags(flags) {}
+AnNode::AnNode(DmScript_I* scr, ANNODE_FLAGS flags) : script(scr), canTile(false), flags(flags) {}
 
 void AnNode::ApplyFrameCount(int f) {
 	for (auto& a : conVAll) {
@@ -490,6 +497,7 @@ void AnNode::ApplyFrameCount(int f) {
 }
 
 void AnNode::WriteFrame(int f) {
+	/*
 	if (!(flags & AN_FLAG_NOSAVECONV)) return;
 	for (int a = 0; a < conV.size(); ++a) {
 		auto& c = conV[a];
@@ -519,9 +527,11 @@ void AnNode::WriteFrame(int f) {
 		}
 		}
 	}
+	*/
 }
 
 bool AnNode::ReadFrame(int f) {
+	/*
 	if (!(flags & AN_FLAG_NOSAVECONV) || !conVAll.size()) return true;
 	for (int a = 0; a < conV.size(); ++a) {
 		auto& c = conV[a];
@@ -542,6 +552,7 @@ bool AnNode::ReadFrame(int f) {
 			break;
 		}
 	}
+	*/
 	return true;
 }
 
@@ -554,21 +565,20 @@ void AnNode::RemoveFrames() {
 
 
 void AnNode::SaveOut(const std::string& path) {
-	std::string nm = script->name;
-	//std::replace(nm.begin(), nm.end(), '/', '_');
+	std::string nm = _script->name;
 	std::ofstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
 		auto cs = conV.size();
 		_StreamWrite(&cs, &strm, 1);
 		for (auto& c : conV) {
-			c.Write(strm);
+			//c.Write(strm);
 		}
 		strm.close();
 	}
 }
 
 void AnNode::LoadOut(const std::string& path) {
-	std::string nm = script->name;
+	std::string nm = _script->name;
 	std::ifstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
 		byte sz = 0;
@@ -578,7 +588,7 @@ void AnNode::LoadOut(const std::string& path) {
 			return;
 		}
 		for (auto& c : conV) {
-			c.Read(strm);
+			//c.Read(strm);
 		}
 	}
 }
@@ -588,13 +598,13 @@ void AnNode::SaveConn() {
 	_connInfo.resize(sz);
 	for (size_t a = 0; a < sz; ++a) {
 		ConnInfo& cn = _connInfo[a];
-		cn.mynm = script->invars[a].first;
-		cn.mytp = script->invars[a].second;
+		cn.mynm = _script->inputs[a].name;
+		cn.mytp = _script->inputs[a].typeName;
 		auto ra = inputR[a].first;
 		cn.cond = cn.tar = ra;
 		if (cn.cond) {
-			cn.tarnm = ra->script->outvars[inputR[a].second].first;
-			cn.tartp = ra->script->outvars[inputR[a].second].second;
+			cn.tarnm = ra->_script->outputs[inputR[a].second].name;
+			cn.tartp = ra->_script->outputs[inputR[a].second].typeName;
 		}
 	}
 }
@@ -604,25 +614,25 @@ void AnNode::ClearConn() {
 		Disconnect((uint)i, false);
 	}
 	inputR.clear();
-	inputR.resize(script->invars.size());
+	inputR.resize(_script->inputs.size());
 	for (size_t i = 0; i < outputR.size(); ++i) {
 		Disconnect((uint)i, true);
 	}
 	outputR.clear();
-	outputR.resize(script->outvars.size(), std::vector<nodecon>());
+	outputR.resize(_script->outputs.size(), std::vector<nodecon>());
 	conV.resize(outputR.size());
 }
 
 void AnNode::Reconn() {
 	for (auto& cn : _connInfo) {
 		for (size_t a = 0, sz = inputR.size(); a < sz; ++a) {
-			if (script->invars[a].first == cn.mynm) {
-				if (script->invars[a].second == cn.mytp) {
+			if (_script->inputs[a].name == cn.mynm) {
+				if (_script->inputs[a].typeName == cn.mytp) {
 					if (cn.cond) {
 						auto& ra = cn.tar;
 						for (size_t b = 0, sz2 = ra->outputR.size(); b < sz2; ++b) {
-							if (ra->script->outvars[b].first == cn.tarnm) {
-								if (ra->script->outvars[b].second == cn.tartp) {
+							if (ra->_script->outputs[b].name == cn.tarnm) {
+								if (ra->_script->outputs[b].typeName == cn.tartp) {
 									ra->ConnectTo((uint)b, this, (uint)a);
 									goto got;
 								}
@@ -657,11 +667,11 @@ bool AnNode::CanConn(std::string lhs, std::string rhs) {
 
 void AnNode::ConnectTo(uint id, AnNode* tar, uint tarId) {
 	auto& ot = outputR[id];
-	auto& ov = script->outvars[id];
+	auto& ov = _script->outputs[id];
 	auto& it = tar->inputR[tarId];
-	auto& iv = tar->script->invars[tarId];
+	auto& iv = tar->_script->inputs[tarId];
 	if (it.first == this && it.second == id) return;
-	if (CanConn(ov.second, iv.second)) {
+	if (CanConn(ov.typeName, iv.typeName)) {
 		if (it.first) tar->Disconnect(tarId, false);
 		it.first = this;
 		it.second = id;
@@ -697,7 +707,7 @@ void AnNode::CatchExp(char* c) {
 	}
 
 	ErrorView::Message msg{};
-	msg.name = script->name;
+	msg.name = _script->name;
 	msg.msg = ss;
 	ErrorView::execMsgs.push_back(msg);
 }

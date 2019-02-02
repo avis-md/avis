@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine.h"
 #include "anweb.h"
+#include <Python.h>
 
 class AnConv {
 public:

@@ -1,19 +1,20 @@
-#include "anweb.h"
-#include "anconv.h"
+#include "web/anweb.h"
 #ifndef IS_ANSERVER
 #include "ui/icons.h"
 #include "ui/ui_ext.h"
 #include "res/resdata.h"
 #endif
 
-CNode::CNode(CScript* scr) : AnNode(scr) {
+CNode::CNode(CScript_I* scr) : AnNode(scr) {
 	if (!scr) return;
 	title = scr->name + " (c++)";
-	inputV.resize(scr->invars.size());
-	outputV.resize(scr->outvars.size());
-	inputVDef.resize(scr->invars.size());
-	for (uint i = 0; i < scr->invars.size(); ++i) {
-		inputV[i] = scr->_invars[i].value;
+	const auto isz = scr->inputs.size();
+	const auto osz = scr->outputs.size();
+	inputV.resize(isz);
+	outputV.resize(osz);
+	inputVDef.resize(isz);
+	for (size_t i = 0; i < isz; ++i) {
+		inputV[i] = script->Resolve(scr->_inputs[i].offset);
 		if (scr->_invars[i].type == AN_VARTYPE::DOUBLE) inputVDef[i].d = 0;
 		else inputVDef[i].i = 0;
 	}

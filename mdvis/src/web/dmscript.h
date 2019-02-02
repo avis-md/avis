@@ -9,4 +9,4 @@ class DmScript_I : public AnScript_I {
 public:
 	void SetInput(int i, int val) override {}
 	void GetOutput(int i, int* val) override {}
-}
+};

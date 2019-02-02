@@ -1,8 +1,8 @@
-#include "web/annode.h"
+#include "web/anweb.h"
 
 class CNode : public AnNode {
 public:
-	CNode(CScript*);
+	CNode(CScript_I*);
 
 	std::vector<void*> inputV, outputV;
 
