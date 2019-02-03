@@ -191,7 +191,7 @@ void AnWeb::Draw() {
 						//pn = std::make_shared<PyNode>(dynamic_cast<PyScript*>(selScript));
 						break;
 					case AnScript::TYPE::C:
-						pn = std::make_shared<CNode>(dynamic_cast<CScript*>(selScript));
+						//pn = std::make_shared<CNode>((pCScript_I)selScript->CreateInstance());
 						break;
 					case AnScript::TYPE::FORTRAN:
 						//pn = std::make_shared<FNode>(dynamic_cast<FScript*>(selScript));
@@ -438,7 +438,7 @@ void AnWeb::_DoExecute() {
 		currNode = (uint)a;
 		auto& n = nodes[a];
 #ifdef VERBOSE
-		Debug::Message("AnWeb", "Executing " + n->script->name);
+		Debug::Message("AnWeb", "Executing " + n->script->parent->name);
 #endif
 #ifndef NO_REDIR_LOG
 		if (n->script->type == AN_SCRTYPE::PYTHON)
@@ -491,7 +491,7 @@ void AnWeb::_DoExecute() {
 			}
 		}
 #endif
-		if (n->script->type == AnScript::TYPE::PYTHON) {
+		if (n->script->parent->type == AnScript::TYPE::PYTHON) {
 			if (err)
 				n->CatchExp(&pylog[0]);
 			else {
@@ -510,7 +510,7 @@ void AnWeb::_DoExecute() {
 		remove((AnWeb::nodesPath + "__tmpstd_e").c_str());
 #endif
 #ifdef VERBOSE
-		Debug::Message("AnWeb", "Executed " + n->script->name);
+		Debug::Message("AnWeb", "Executed " + n->script->parent->name);
 #endif
 	}
 }
@@ -587,8 +587,8 @@ void AnWeb::Save(const std::string& s) {
 	head.name = "AViS_Graph_File";
 	for (auto nd : nodes) {
 		auto n = head.addchild("node");
-		SV(type, (int)nd->script->type);
-		SVS(name, nd->script->name);
+		SV(type, (int)nd->script->parent->type);
+		SVS(name, nd->script->parent->name);
 		SV(tile, nd->canTile);
 		nd->Save(n->addchild("detail"));
 		nd->SaveConn();
@@ -737,7 +737,7 @@ void AnWeb::Load(const std::string& s) {
 							if (cc.name == "value") {
 								auto k = n->_connInfo.size();
 								auto& vd = n->inputVDef[k];
-								if (n->script->inputs[k].type == AN_VARTYPE::INT) vd.i = TryParse(cc.value, 0);
+								if (n->script->parent->inputs[k].type == AN_VARTYPE::INT) vd.i = TryParse(cc.value, 0);
 								else vd.d = TryParse(cc.value, 0.0);
 							}
 						}

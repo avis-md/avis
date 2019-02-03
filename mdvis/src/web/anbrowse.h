@@ -12,7 +12,7 @@ public:
 
 		std::string name, fullName;
 		bool expanded = true;
-		std::vector<AnScript*> scripts;
+		std::vector<pAnScript> scripts;
 		std::vector<Folder> subfolders;
 		std::vector<std::string> saves;
 	} folder;

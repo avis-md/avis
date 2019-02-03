@@ -22,8 +22,8 @@ velocities (all): [frame, atomId, xyz]
 types: [atomid]
 * type is the ascii of the atom name,
   so C is 67, O is 79 etc.)";
-	script->descLines = 8;
-
+	scr.descLines = 8;
+	/*
 	AddOutput(CVar(_("positions"), 'd', 2, { (int*)&parcount, nullptr }, { 3 }));
 	scr.AddOutput(conV.back());
 
@@ -32,6 +32,7 @@ types: [atomid]
 
 	AddOutput(CVar(_("types"), 's', 1, { (int*)&parcount }));
 	scr.AddOutput(conV.back());
+	*/
 }
 
 void Node_Inputs::DrawHeader(float& off) {
@@ -62,11 +63,13 @@ void Node_Inputs::Execute() {
 	}
 	if (!filter) {
 		parcount = Particles::particleSz;
+		/*
 		conV[0].data.val.arr.p = pos;
 		conV[0].value = &conV[0].data.val.arr.p;
 		conV[1].data.val.arr.p = vel;
 		conV[1].value = &conV[1].data.val.arr.p;
 		conV[2].value = &Particles::types;
+		*/
 	}
 	else {
 		if (setpos) {
@@ -146,9 +149,9 @@ void Node_Inputs::Execute() {
 		poss = &vpos[0][0];
 		vels = &vvel[0][0];
 		typs = &vtyp[0];
-		conV[0].value = &poss;
-		conV[1].value = &vels;
-		conV[2].value = &typs;
+		//conV[0].value = &poss;
+		//conV[1].value = &vels;
+		//conV[2].value = &typs;
 	}
 #endif
 }
@@ -158,8 +161,8 @@ void Node_Inputs::SaveIn(const std::string& path) {
 	const auto& nm = scr.name;
 	std::ofstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
-		for (uint i = 0; i < 3; i++)
-			conV[i].Write(strm);
+		//for (uint i = 0; i < 3; i++)
+		//	conV[i].Write(strm);
 	}
 }
 
@@ -167,8 +170,8 @@ void Node_Inputs::LoadIn(const std::string& path) {
 	const auto& nm = scr.name;
 	std::ifstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
-		for (uint i = 0; i < 3; i++)
-			conV[i].Read(strm);
+		//for (uint i = 0; i < 3; i++)
+		//	conV[i].Read(strm);
 	}
 	else {
 		Debug::Error("Node", "cannot open input file!");

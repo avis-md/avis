@@ -8,9 +8,9 @@
 
 #define _script script->parent
 
-void*& AnNode::nodecon::getval() {
+void* AnNode::nodecon::getval() {
 	auto& cv = getconv();
-	return (void*&)script;
+	return script->Resolve(cv.offset);
 }
 
 
@@ -479,7 +479,7 @@ void AnNode::AddOutput(const CVar& cv) {
 	if (!(flags & AN_FLAG_NOSAVECONV)) conVAll.push_back(std::vector<VarVal>());
 }
 
-AnNode::AnNode(AnScript_I* scr) : script(scr), canTile(false), flags(0) {
+AnNode::AnNode(pAnScript_I scr) : script(scr), canTile(false), flags(0) {
 	if (!scr) return;
 	inputR.resize(scr->parent->inputs.size());
 	auto osz = scr->parent->outputs.size();
@@ -488,7 +488,7 @@ AnNode::AnNode(AnScript_I* scr) : script(scr), canTile(false), flags(0) {
 	conVAll.resize(osz);
 }
 
-AnNode::AnNode(DmScript_I* scr, ANNODE_FLAGS flags) : script(scr), canTile(false), flags(flags) {}
+AnNode::AnNode(pAnScript_I scr, ANNODE_FLAGS flags) : script(scr), canTile(false), flags(flags) {}
 
 void AnNode::ApplyFrameCount(int f) {
 	for (auto& a : conVAll) {

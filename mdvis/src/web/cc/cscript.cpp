@@ -1,4 +1,4 @@
-#include "cscript.h"
+#include "web/anweb.h"
 
 std::shared_ptr<AnScript_I> CScript::CreateInstance() {
 	auto res = std::make_shared<CScript_I>();

@@ -1,6 +1,7 @@
 #include "anweb.h"
 #include "ui/localizer.h"
 #include "ui/popups.h"
+#include "cc/creader.h"
 #ifndef IS_ANSERVER
 #include "ui/icons.h"
 #include "ui/help.h"
@@ -37,7 +38,7 @@ void AnBrowse::DoScan(Folder* fo, const std::string& path, const std::string& in
 			if (iter != hd##Script::allScrs.end())\
 				Debug::Warning("AnBrowse", "Script name \"" + f + "\" already exists!");\
 			else {\
-				auto scr = new hd##Script();\
+				auto scr = std::make_shared<hd##Script>();\
 				fo->scripts.push_back(scr);\
 				scr->name = f;\
 				scr->path = incPath + scr->name;\
@@ -47,12 +48,12 @@ void AnBrowse::DoScan(Folder* fo, const std::string& path, const std::string& in
 		}\
 	}
 
-	READ(EXT_PS, EXT_PS_SZ, f.substr(0, 2) != "__", Py, if (!PyReader::initd) {
-		Debug::Message("System", "Initializing PyReader");
-		PyReader::Init();
-	});
+	//READ(EXT_PS, EXT_PS_SZ, f.substr(0, 2) != "__", Py, if (!PyReader::initd) {
+	//	Debug::Message("System", "Initializing PyReader");
+	//	PyReader::Init();
+	//});
 	READ(EXT_CS, EXT_CS_SZ, 1, C,);
-	READ(EXT_FS, EXT_FS_SZ, 1, F,);
+	//READ(EXT_FS, EXT_FS_SZ, 1, F,);
 
 	std::vector<std::string> fd;
 	IO::GetFolders(path, &fd);
@@ -84,14 +85,14 @@ void AnBrowse::DoRefresh(Folder* fd) {
 	for (auto s : fd->scripts) {
 		s->busy = true;
 		switch (s->type) {
-		case AN_SCRTYPE::C:
-			CReader::Refresh((CScript*)s);
+		case AnScript::TYPE::C:
+			CReader::Refresh((CScript*)s.get());
 			break;
-		case AN_SCRTYPE::PYTHON:
-			PyReader::Refresh((PyScript*)s);
+		case AnScript::TYPE::PYTHON:
+			//PyReader::Refresh((PyScript*)s);
 			break;
-		case AN_SCRTYPE::FORTRAN:
-			FReader::Refresh((FScript*)s);
+		case AnScript::TYPE::FORTRAN:
+			//FReader::Refresh((FScript*)s);
 			break;
 		default:
 			OHNO("AnBrowse::DoRefresh", "Invalid script type " + std::to_string((int)s->type));
@@ -138,21 +139,21 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 				std::ofstream strm(path + nm + EXT_CS);
 				strm << AnBrowse::tmplC;
 				strm.close();
-				auto scr = new CScript();
+				auto scr = std::make_shared<CScript>();
 				AnBrowse::doAddFd->scripts.push_back(scr);
 				scr->name = nm;
 				scr->path = AnBrowse::doAddFd->fullName.substr(IO::path.size() + 6) + nm;
-				scr->ok = CReader::Read(scr);
+				scr->ok = CReader::Read(scr.get());
 				CScript::allScrs.emplace(nm, scr);
 			});
 			vm[2].Set(0, "Python Script", []() {
 				std::string path = AnBrowse::doAddFd->fullName + "/";
 				std::string nm = "newModule";
 				int i = 2;
-				while (IO::HasFile(path + nm + EXT_PS) ||
-					(PyScript::allScrs.find(nm) != PyScript::allScrs.end())) {
-					nm = "newModule" + std::to_string(i++);
-				}
+				//while (IO::HasFile(path + nm + EXT_PS) ||
+					//(PyScript::allScrs.find(nm) != PyScript::allScrs.end())) {
+				//	nm = "newModule" + std::to_string(i++);
+				//}
 				std::ofstream strm(path + nm + EXT_PS);
 				strm << AnBrowse::tmplP;
 			});
@@ -160,10 +161,10 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 				std::string path = AnBrowse::doAddFd->fullName + "/";
 				std::string nm = "newModule";
 				int i = 2;
-				while (IO::HasFile(path + nm + EXT_FS) ||
-					(FScript::allScrs.find(nm) != FScript::allScrs.end())) {
-					nm = "newModule" + std::to_string(i++);
-				}
+				//while (IO::HasFile(path + nm + EXT_FS) ||
+					//(FScript::allScrs.find(nm) != FScript::allScrs.end())) {
+				//	nm = "newModule" + std::to_string(i++);
+				//}
 				std::ofstream strm(path + nm + EXT_FS);
 				std::string scr = AnBrowse::tmplF;
 				size_t pos;
@@ -201,27 +202,27 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 					AnWeb::selScript = nullptr;
 					pAnNode pn;
 					switch (fs->type) {
-					case AN_SCRTYPE::PYTHON:
-						pn = std::make_shared<PyNode>(dynamic_cast<PyScript*>(fs));
+					case AnScript::TYPE::PYTHON:
+						//pn = std::make_shared<PyNode>(dynamic_cast<PyScript*>(fs));
 						break;
-					case AN_SCRTYPE::C:
-						pn = std::make_shared<CNode>(dynamic_cast<CScript*>(fs));
+					case AnScript::TYPE::C:
+						pn = std::make_shared<CNode>(dynamic_cast<CScript*>(fs.get()));
 						break;
-					case AN_SCRTYPE::FORTRAN:
-						pn = std::make_shared<FNode>(dynamic_cast<FScript*>(fs));
+					case AnScript::TYPE::FORTRAN:
+						//pn = std::make_shared<FNode>(dynamic_cast<FScript*>(fs));
 						break;
 					}
 					pn->canTile = true;
 					AnWeb::nodes.push_back(pn);
 				}
 				else {
-					AnWeb::selScript = fs;
+					AnWeb::selScript = fs.get();
 				}
 			}
 			Texture* icon = &Icons::lang_ft;
-			if (fs->type == AN_SCRTYPE::C)
+			if (fs->type == AnScript::TYPE::C)
 				icon = &Icons::lang_c;
-			else if (fs->type == AN_SCRTYPE::PYTHON)
+			else if (fs->type == AnScript::TYPE::PYTHON)
 				icon = &Icons::lang_py;
 			UI::Texture(2.f + 5 * layer, off, 16.f, 16.f, *icon);
 			UI::Label(22.f + 5 * layer, off, 12.f, fs->name, white());

@@ -2,7 +2,7 @@
 
 class CNode : public AnNode {
 public:
-	CNode(CScript_I*);
+	CNode(pCScript_I);
 
 	std::vector<void*> inputV, outputV;
 

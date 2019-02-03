@@ -173,7 +173,7 @@
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <UseFullPaths>true</UseFullPaths>
-      <ShowIncludes>true</ShowIncludes>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -323,7 +323,6 @@
     <ClCompile Include="src\web\annode.cpp" />
     <ClCompile Include="src\web\anscript.cpp" />
     <ClCompile Include="src\web\anops.cpp" />
-    <ClCompile Include="src\web\anscript_vars.cpp" />
     <ClCompile Include="src\web\anweb.cpp" />
     <ClCompile Include="src\web\arrayview.cpp" />
     <ClCompile Include="src\web\cc\cnode.cpp" />

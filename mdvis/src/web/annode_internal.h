@@ -16,8 +16,8 @@
 		Node_ ## nm::sig, Node_ ## nm::_name, ANNODE_GROUP::gp, &Node_ ## nm::_Spawn);\
 	std::shared_ptr<AnNode> Node_ ## nm::_Spawn() { return std::make_shared<Node_ ## nm>(); } 
 
-#define INODE_INIT AnNode(&scr, 0), scr(sig)
-#define INODE_INITF(f) AnNode(&scr, f), scr(sig)
+#define INODE_INIT AnNode(scr.CreateInstance(), 0), scr(sig)
+#define INODE_INITF(f) AnNode(scr.CreateInstance(), f), scr(sig)
 
 #define INODE_TITLE(col) \
 	title = _(_name);\

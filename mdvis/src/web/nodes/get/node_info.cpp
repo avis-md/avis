@@ -6,7 +6,7 @@ INODE_DEF(__("System Info"), Info, GET)
 
 Node_Info::Node_Info() : INODE_INITF(AN_FLAG_NOSAVECONV) {
 	INODE_TITLE(NODE_COL_IO)
-	
+	/*
 	const CVar cv("", AN_VARTYPE::INT);
 	AddOutput(cv);
 	scr.AddOutput(_("atom count"), "int");
@@ -19,6 +19,7 @@ Node_Info::Node_Info() : INODE_INITF(AN_FLAG_NOSAVECONV) {
 	conV[0].value = &Particles::particleSz;
 	conV[1].value = &Particles::anim.frameCount;
 	conV[2].value = &AnWeb::realExecFrame;
+	*/
 }
 
 void Node_Info::Execute() {
@@ -26,5 +27,5 @@ void Node_Info::Execute() {
 	if (!Particles::anim.bboxs.size()) bbx = &Particles::boundingBox[0];
 	else if (!AnWeb::execFrame) bbx = &Particles::anim.bboxs[Particles::anim.currentFrame][0];
 	else bbx = &Particles::anim.bboxs[AnWeb::execFrame-1][0];
-	conV[3].value = &bbx;
+	//conV[3].value = &bbx;
 }

@@ -5,46 +5,51 @@
 #include "res/resdata.h"
 #endif
 
-CNode::CNode(CScript_I* scr) : AnNode(scr) {
+#define _scr ((CScript*)scr->parent)
+
+CNode::CNode(pCScript_I scr) : AnNode(scr) {
 	if (!scr) return;
-	title = scr->name + " (c++)";
-	const auto isz = scr->inputs.size();
-	const auto osz = scr->outputs.size();
+	title = _scr->name + " (c++)";
+	const auto isz = _scr->inputs.size();
+	const auto osz = _scr->outputs.size();
 	inputV.resize(isz);
 	outputV.resize(osz);
 	inputVDef.resize(isz);
 	for (size_t i = 0; i < isz; ++i) {
-		inputV[i] = script->Resolve(scr->_inputs[i].offset);
-		if (scr->_invars[i].type == AN_VARTYPE::DOUBLE) inputVDef[i].d = 0;
+		inputV[i] = script->Resolve(_scr->inputs[i].offset);
+		if (_scr->inputs[i].type == AN_VARTYPE::DOUBLE) inputVDef[i].d = 0;
 		else inputVDef[i].i = 0;
 	}
-	for (uint i = 0; i < scr->outvars.size(); ++i) {
-		outputV[i] = scr->_outvars[i].value;
-		conV[i] = scr->_outvars[i];
+	for (uint i = 0; i < _scr->outputs.size(); ++i) {
+		outputV[i] = script->Resolve(_scr->outputs[i].offset);
+		conV[i] = _scr->_outputs[i];
 	}
 }
 
+#undef _scr
+#define _scr ((CScript*)script->parent)
+
 void CNode::Execute() {
-	auto scr = (CScript*)script;
-	for (uint i = 0; i < scr->invars.size(); ++i) {
-		auto& mv = scr->_invars[i];
+	for (uint i = 0; i < _scr->inputs.size(); ++i) {
+		auto& mv = _scr->inputs[i];
 		if (HasConnI(i)) {
-			auto& cv = inputR[i].getconv();
+			auto v = inputR[i].getval();
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
-				scr->Set(i, *(int*)cv.value);
+				script->SetInput(i, *(int*)v);
 				break;
 			case AN_VARTYPE::DOUBLE:
-				scr->Set(i, *(double*)cv.value);
+				script->SetInput(i, *(double*)v);
 				break;
 			case AN_VARTYPE::LIST:
-				scr->Set(i, *(uintptr_t*)cv.value);
-				
+				script->SetInput(i, *(uintptr_t*)v);
+				/*
 				for (uint j = 0; j < mv.dimVals.size(); ++j) {
 					auto loc = mv.dimVals[j];
 					if (loc)
 						*loc = *cv.dimVals[j];
 				}
+				*/
 				break;
 			default:
 				OHNO("CNode", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
@@ -54,10 +59,10 @@ void CNode::Execute() {
 		else {
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
-				scr->Set(i, inputVDef[i].i);
+				script->SetInput(i, inputVDef[i].i);
 				break;
 			case AN_VARTYPE::DOUBLE:
-				scr->Set(i, inputVDef[i].d);
+				script->SetInput(i, inputVDef[i].d);
 				break;
 			case AN_VARTYPE::LIST:
 				throw("Input variable not set!\1");
@@ -68,22 +73,23 @@ void CNode::Execute() {
 		}
 	}
 
-	script->Exec();
+	script->Execute();
 }
 
 void CNode::WriteFrame(int f) {
 	AnNode::WriteFrame(f);
 	return;
+	/*
 	auto scr = (CScript*)script;
 	for (int a = 0; a < conV.size(); ++a) {
 		auto& c = conV[a];
 		auto& ca = conVAll[a][f];
 		switch (c.type) {
 		case AN_VARTYPE::INT:
-			ca.val.i = *(int*)scr->_outvars[a].value;
+			ca.val.i = *(int*)_scr->_outvars[a].value;
 			break;
 		case AN_VARTYPE::DOUBLE:
-			ca.val.d = *(double*)scr->_outvars[a].value;
+			ca.val.d = *(double*)_scr->_outvars[a].value;
 			break;
 		case AN_VARTYPE::LIST: {
 			int n = 1;
@@ -92,21 +98,21 @@ void CNode::WriteFrame(int f) {
 			for (size_t d = 0; d < ds; ++d) {
 				n *= ca.dims[d] = *conV[a].dimVals[d];
 			}
-			n *= scr->_outvars[a].stride;
+			n *= _scr->_outvars[a].stride;
 			ca.val.arr.data.resize(n);
-			memcpy(&ca.val.arr.data[0], *(char**)scr->_outvars[a].value, n);
+			memcpy(&ca.val.arr.data[0], *(char**)_scr->_outvars[a].value, n);
 			ca.val.arr.p = &ca.val.arr.data[0];
 			break;
 		}
 		}
 	}
+	*/
 }
 
 void CNode::RemoveFrames() {
 	AnNode::RemoveFrames();
-	auto scr = (CScript*)script;
-	for (uint i = 0; i < scr->outvars.size(); ++i) {
-		conV[i] = scr->_outvars[i];
+	for (uint i = 0; i < _scr->_outputs.size(); ++i) {
+		conV[i] = _scr->_outputs[i];
 	}
 }
 
@@ -116,8 +122,8 @@ void CNode::Reconn() {
 
 void CNode::CatchExp(char* c) {
 	ErrorView::Message msg{};
-	msg.name = script->name;
-	msg.path = script->path;
+	msg.name = _scr->name;
+	msg.path = _scr->path;
 	msg.severe = true;
 	msg.msg.resize(1, c);
 	log.push_back(std::pair<byte, std::string>(2, c));

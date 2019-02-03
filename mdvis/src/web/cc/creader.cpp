@@ -250,7 +250,7 @@ bool CReader::Read(CScript* scr) {
 			_ER("CReader", "Failed to load internal function caller into memory!");
 			FAIL0;
 		}
-
+		/*
 #ifdef PLATFORM_WIN
 		if (!useMsvc) {
 			auto fhlc = (emptyFunc*)scr->lib.GetSym("__noterm_cFunc");
@@ -267,6 +267,7 @@ bool CReader::Read(CScript* scr) {
 			}
 		}
 #endif
+		*/
 	}
 	else Engine::AcquireLock(5);
 

@@ -3,7 +3,10 @@
 #include "errorview.h"
 #include "anscript_vars.h"
 
+class AnScript;
+typedef std::shared_ptr<AnScript> pAnScript;
 class AnScript_I;
+typedef std::shared_ptr<AnScript_I> pAnScript_I;
 
 class AnScript {
 public:
@@ -32,6 +35,8 @@ public:
 	typedef void* (*spawnerFunc)(void);
 	typedef void (*callerFunc)(void*);
 
+	AnScript(TYPE t) : type(t) {}
+
 	std::string name, path;
 	const TYPE type;
 
@@ -48,7 +53,7 @@ public:
 	callerFunc caller;
 
 	virtual bool Clear();
-	virtual std::shared_ptr<AnScript_I> CreateInstance() = 0;
+	virtual pAnScript_I CreateInstance() = 0;
 };
 
 class AnScript_I {

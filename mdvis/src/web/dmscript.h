@@ -2,7 +2,11 @@
 
 class DmScript : public AnScript {
 public:
-	std::shared_ptr<AnScript_I> CreateInstance() override;
+	DmScript(std::string nm) : AnScript(AnScript::TYPE::NONE) {
+		ok = true;
+		name = nm;
+	}
+	pAnScript_I CreateInstance() override;
 };
 
 class DmScript_I : public AnScript_I {

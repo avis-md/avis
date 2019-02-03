@@ -1,4 +1,4 @@
-#include "anscript_vars.h"
+#include "anweb.h"
 
 CVar::CVar(std::string nm, AN_VARTYPE tp) : name(nm), type(tp) {
 	switch (tp) {

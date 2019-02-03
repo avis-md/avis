@@ -37,7 +37,7 @@ public:
 	const ANNODE_FLAGS flags;
 
 	uint id;
-	AnScript_I* script;
+	pAnScript_I script;
 	std::string title;
 	Vec3 titleCol = NODE_COL_USR;
 	bool selected;
@@ -67,7 +67,7 @@ public:
 		bool hoverdel;
 		nodecon(AnNode* f = 0, uint s = 0, bool use = true) : first(f), second(s), use(true), hoverdel(false) {}
 		CVar& getconv() { return first->conV[second]; }
-		void*& getval();
+		void* getval();
 	};
 	std::vector<nodecon> inputR;
 	std::vector<std::vector<nodecon>> outputR;
@@ -140,8 +140,8 @@ public:
 	virtual void OnConn(bool o, int i) {}
 	virtual void OnValChange(int i);
 protected:
-	AnNode(AnScript_I* scr); //for user scripts
-	AnNode(DmScript_I* scr, ANNODE_FLAGS flags); //for internal scripts
+	AnNode(pAnScript_I scr); //for user scripts
+	AnNode(pAnScript_I scr, ANNODE_FLAGS flags); //for internal scripts
 
 	static Texture tex_circle_open, tex_circle_conn;
 };
