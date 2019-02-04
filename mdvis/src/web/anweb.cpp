@@ -191,7 +191,7 @@ void AnWeb::Draw() {
 						//pn = std::make_shared<PyNode>(dynamic_cast<PyScript*>(selScript));
 						break;
 					case AnScript::TYPE::C:
-						//pn = std::make_shared<CNode>((pCScript_I)selScript->CreateInstance());
+						pn = std::make_shared<CNode>(std::dynamic_pointer_cast<CScript_I>(selScript->CreateInstance()));
 						break;
 					case AnScript::TYPE::FORTRAN:
 						//pn = std::make_shared<FNode>(dynamic_cast<FScript*>(selScript));

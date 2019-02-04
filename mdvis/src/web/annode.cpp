@@ -187,39 +187,42 @@ void AnNode::Draw() {
 					const auto cirbt = Engine::Button(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, ho ? tex_circle_conn : tex_circle_open, white(), Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f));
 					if ((cirbt & MOUSE_HOVER_FLAG) > 0) {
 						std::string str = "";
+						const auto& ov = script->parent->outputs[i];
 						const auto& cv = conV[i];
-						/*
-						if (!cv.) str = "0x0 (????)";
+						auto ptr = script->Resolve(cv.offset);
+						if (!ptr) str = "failed to read variable";
 						else {
-							switch (cv.type) {
+							switch (ov.type) {
 							case AN_VARTYPE::SHORT:
-								str = std::to_string(*(short*)cv.value);
+								str = std::to_string(*(short*)ptr);
 								break;
 							case AN_VARTYPE::INT:
-								str = std::to_string(*(int*)cv.value);
+								str = std::to_string(*(int*)ptr);
 								break;
 							case AN_VARTYPE::DOUBLE:
-								str = std::to_string(*(double*)cv.value);
+								str = std::to_string(*(double*)ptr);
 								break;
 							case AN_VARTYPE::LIST:
-								str = "[";
-								for (auto& d : cv.dimVals) {
-									str += std::to_string(*d) + "x";
-								}
-								str.back() = ']';
-								str += " array (press F3 to view contents)";
-								if (Input::KeyDown(Key_F3)) {
-									ArrayView::data = *(void**)cv.value;
-									ArrayView::type = cv.typeName[6];
-									ArrayView::dims = cv.dimVals;
-									ArrayView::scrNm = title;
-									ArrayView::varNm = _script->outputs[i].first;
-									ArrayView::show = true;
+								if (!*(void**)ptr) str = "*0x0 (????)";
+								else {
+									str = "[";
+									for (auto& d : cv.szOffsets) {
+										str += std::to_string(script->GetDimValue(d)) + "x";
+									}
+									str.back() = ']';
+									str += " array (press F3 to view contents)";
+									if (Input::KeyDown(Key_F3)) {
+										ArrayView::data = *(void**)ptr;
+										ArrayView::type = ov.name[6];
+										ArrayView::dims;
+										ArrayView::scrNm = title;
+										ArrayView::varNm = ov.name;
+										ArrayView::show = true;
+									}
 								}
 								break;
 							}
 						}
-						*/
 						UI2::Tooltip(cirbt, pos.x + width - connrad, y + 8 - connrad, str);
 						if (cirbt == MOUSE_RELEASE) {
 							if (!AnWeb::selConnNode) {

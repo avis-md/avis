@@ -15,6 +15,10 @@ void* AnScript_I::Resolve(uintptr_t o) {
 	return (void*)((uintptr_t)instance + o);
 }
 
+int AnScript_I::GetDimValue(CVar::szItem i) {
+	return i.useOffset ? *(int*)Resolve(i.offset) : i.size;
+}
+
 void AnScript_I::Execute() {
 	parent->caller(instance);
 }

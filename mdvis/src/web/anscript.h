@@ -64,6 +64,7 @@ public:
 	void* instance;
 
 	virtual void* Resolve(uintptr_t offset);
+	int GetDimValue(CVar::szItem i);
 
 	virtual void SetInput(int i, int val) = 0;
 	virtual void GetOutput(int i, int* val) = 0;

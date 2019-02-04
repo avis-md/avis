@@ -46,6 +46,7 @@ void Node_Inputs::DrawHeader(float& off) {
 }
 
 void Node_Inputs::Execute() {
+	return;
 #ifndef IS_ANSERVER
 	bool setpos = outputR[0].size() > 0;
 	bool setvel = outputR[1].size() > 0;

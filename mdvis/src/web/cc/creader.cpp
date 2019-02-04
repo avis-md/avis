@@ -89,7 +89,7 @@ bool CReader::Read(CScript* scr) {
 			ErrorView::compileMsgs.push_back(msgg);\
 			Debug::Warning(a "(" + scr->name + ")", b);
 
-		if (mt > ot || !IO::HasFile(fp2 + nm + ".entry")) {
+		if (mt > ot) {
 			remove((fp2 + nm + ".so").c_str());
 
 #ifdef PLATFORM_WIN
@@ -370,7 +370,7 @@ bool CReader::Read(CScript* scr) {
 				_ER("CReader", "variable of type \"" + vr.typeName + "\" not supported!" + add);
 				goto FAIL;
 			}
-			
+			if (ira) vr.typeName = "list(" + std::to_string(lnsz - 1) + vr.typeName.substr(0, 1) + ")";
 			vr.name = ss[1];
 			std::string::iterator eps;
 			if ((eps = std::find(vr.name.begin(), vr.name.end(), '=')) != vr.name.end()) {
