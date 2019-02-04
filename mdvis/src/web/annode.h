@@ -53,12 +53,12 @@ public:
 	std::vector<std::pair<byte, std::string>> log;
 	
 	struct nodecon {
-		AnScript_I* script;
 		AnNode* first;
 		uint second;
 		bool use;
 		bool hoverdel;
-		nodecon(AnNode* f = 0, uint s = 0, bool use = true) : first(f), second(s), use(true), hoverdel(false) {}
+		nodecon(AnNode* f = 0, uint i = 0, bool use = true)
+			: first(f), second(i), use(true), hoverdel(false) {}
 		CVar& getconv() { return first->conV[second]; }
 		void* getval();
 	};

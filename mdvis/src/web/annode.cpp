@@ -10,7 +10,7 @@
 
 void* AnNode::nodecon::getval() {
 	auto& cv = getconv();
-	return script->Resolve(cv.offset);
+	return first->script->Resolve(cv.offset);
 }
 
 
