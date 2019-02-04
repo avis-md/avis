@@ -17,7 +17,10 @@ public:
 
 class CScript_I : public AnScript_I {
 public:
+	void SetInput(int i, short val) override;
 	void SetInput(int i, int val) override;
+	void SetInput(int i, double val) override;
+	void SetInput(int i, void* val, char tp, std::vector<int> szs) override;
 	void GetOutput(int i, int* val) override;
 };
 

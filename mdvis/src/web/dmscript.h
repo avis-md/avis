@@ -3,7 +3,7 @@
 class DmScript : public AnScript {
 public:
 	DmScript(std::string nm) : AnScript(AnScript::TYPE::NONE) {
-		ok = true;
+		ok = false;
 		name = nm;
 	}
 	pAnScript_I CreateInstance() override;
@@ -11,6 +11,9 @@ public:
 
 class DmScript_I : public AnScript_I {
 public:
+	void SetInput(int i, short val) override {}
 	void SetInput(int i, int val) override {}
+	void SetInput(int i, double val) override {}
+	void SetInput(int i, void* val, char tp, std::vector<int> szs) override {}
 	void GetOutput(int i, int* val) override {}
 };

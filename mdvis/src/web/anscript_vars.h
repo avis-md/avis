@@ -64,7 +64,7 @@ struct CVar {
 		bool useOffset;
 		union {
 			uintptr_t offset;
-			uint size;
+			int size;
 		};
 	};
 

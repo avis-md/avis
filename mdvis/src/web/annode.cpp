@@ -207,14 +207,17 @@ void AnNode::Draw() {
 								else {
 									str = "[";
 									for (auto& d : cv.szOffsets) {
-										str += std::to_string(script->GetDimValue(d)) + "x";
+										str += std::to_string(*script->GetDimValue(d)) + "x";
 									}
 									str.back() = ']';
 									str += " array (press F3 to view contents)";
 									if (Input::KeyDown(Key_F3)) {
 										ArrayView::data = *(void**)ptr;
-										ArrayView::type = ov.name[6];
-										ArrayView::dims;
+										ArrayView::type = ov.typeName[6];
+										ArrayView::dims.clear();
+										for (auto& d : cv.szOffsets) {
+											ArrayView::dims.push_back(script->GetDimValue(d));
+										}
 										ArrayView::scrNm = title;
 										ArrayView::varNm = ov.name;
 										ArrayView::show = true;

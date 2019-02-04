@@ -41,15 +41,14 @@ void CNode::Execute() {
 			case AN_VARTYPE::DOUBLE:
 				script->SetInput(i, *(double*)v);
 				break;
-			case AN_VARTYPE::LIST:
-				script->SetInput(i, *(uintptr_t*)v);
-				/*
-				for (uint j = 0; j < mv.dimVals.size(); ++j) {
-					auto loc = mv.dimVals[j];
-					if (loc)
-						*loc = *cv.dimVals[j];
+			case AN_VARTYPE::LIST: {
+				auto& iv = _scr->_inputs[i];
+				std::vector<int> szs(iv.szOffsets.size());
+				for (uint j = 0; j < szs.size(); ++j) {
+					szs[j] = *script->GetDimValue(iv.szOffsets[j]);
 				}
-				*/
+				script->SetInput(i, *(void**)v, mv.name[6], szs);
+			}
 				break;
 			default:
 				OHNO("CNode", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));

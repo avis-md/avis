@@ -24,6 +24,11 @@
 	title = _(_name);\
 	titleCol = col;
 
+#define INODE_SINIT(cmd) if (!scr.ok) {\
+	cmd\
+	scr.ok = true;\
+}
+
 enum class ANNODE_GROUP {
 	GET,
 	SET,

@@ -13,8 +13,8 @@ uint Node_Inputs::parcount = 0;
 //enable saveconv?
 Node_Inputs::Node_Inputs() : INODE_INITF(AN_FLAG_NOSAVECONV), filter(0) {
 	INODE_TITLE(NODE_COL_IO);
-
-	scr.desc = R"(Particle coordinates and trajectory
+	INODE_SINIT(
+		scr.desc = R"(Particle coordinates and trajectory
 positions: [atomId, xyz]
 velocities: [atomId, xyz]
 positions (all): [frame, atomId, xyz]
@@ -22,7 +22,13 @@ velocities (all): [frame, atomId, xyz]
 types: [atomid]
 * type is the ascii of the atom name,
   so C is 67, O is 79 etc.)";
-	scr.descLines = 8;
+		scr.descLines = 8;
+		
+		
+	);
+
+	
+	
 	/*
 	AddOutput(CVar(_("positions"), 'd', 2, { (int*)&parcount, nullptr }, { 3 }));
 	scr.AddOutput(conV.back());
