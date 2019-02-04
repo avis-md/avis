@@ -736,7 +736,7 @@ void AnWeb::Load(const std::string& s) {
 						else {
 							if (cc.name == "value") {
 								auto k = n->_connInfo.size();
-								auto& vd = n->inputVDef[k];
+								auto& vd = n->script->defVals[k];
 								if (n->script->parent->inputs[k].type == AN_VARTYPE::INT) vd.i = TryParse(cc.value, 0);
 								else vd.d = TryParse(cc.value, 0.0);
 							}

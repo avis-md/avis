@@ -26,13 +26,13 @@ void AnNode::Init() {
 }
 
 short& AnNode::getval_s(const uint i) {
-	return inputR[i].first ? *(short*)inputR[i].getval() : inputVDef[i].s;
+	return inputR[i].first ? *(short*)inputR[i].getval() : script->defVals[i].s;
 }
 int& AnNode::getval_i(const uint i) {
-	return inputR[i].first ? *(int*)inputR[i].getval() : inputVDef[i].i;
+	return inputR[i].first ? *(int*)inputR[i].getval() : script->defVals[i].i;
 }
 double& AnNode::getval_d(const uint i) {
-	return inputR[i].first ? *(double*)inputR[i].getval() : inputVDef[i].d;
+	return inputR[i].first ? *(double*)inputR[i].getval() : script->defVals[i].d;
 }
 
 bool AnNode::Select() {
@@ -379,33 +379,34 @@ float AnNode::DrawSide() {
 
 void AnNode::DrawDefVal(int i, float y) {
 	auto& vr = _script->inputs[i];
+	auto& dr = script->defVals[i];
 	auto isi = (vr.type == AN_VARTYPE::INT);
-	auto old = inputVDef[i].data;
+	auto old = dr.data;
 	switch (vr.uiType) {
 	case AnScript::Var::UI_TYPE::ENUM: {
 		static Popups::DropdownItem di;
 		UI2::Dropdown(pos.x + width*0.33f, y, width*0.67f - 6, di, [&]() {
 			di.list = &vr.enums[0];
-			di.target = (uint*)&inputVDef[i].i;
-		}, vr.enums[inputVDef[i].i]);
+			di.target = (uint*)&dr.i;
+		}, vr.enums[dr.i]);
 		break;
 	}
 	case  AnScript::Var::UI_TYPE::RANGE: {
-		float res = (float)(isi ? inputVDef[i].i : inputVDef[i].d);
+		float res = (float)(isi ? dr.i : dr.d);
 		res = UI2::Slider(pos.x + width*0.33f, y, width*0.67f - 6, vr.range.x, vr.range.y, res);
-		if (isi) inputVDef[i].i = (int)std::roundf(res);
-		else inputVDef[i].d = res;
+		if (isi) dr.i = (int)std::roundf(res);
+		else dr.d = res;
 		break;
 	}
 	default: {
-		std::string s = isi ? std::to_string(inputVDef[i].i) : std::to_string(inputVDef[i].d);
+		std::string s = isi ? std::to_string(dr.i) : std::to_string(dr.d);
 		s = UI::EditText(pos.x + width * 0.33f, y, width * 0.67f - 6, 16, 12, white(1, 0.5f), s, true, white());
-		if (isi) inputVDef[i].i = TryParse(s, 0);
-		else inputVDef[i].d = TryParse(s, 0.0);
+		if (isi) dr.i = TryParse(s, 0);
+		else dr.d = TryParse(s, 0.0);
 		break;
 	}
 	}
-	if (inputVDef[i].data != old) {
+	if (dr.data != old) {
 		OnValChange(i);
 	}
 }
@@ -476,7 +477,6 @@ void AnNode::DrawToolbar() {
 
 void AnNode::AddInput() {
 	inputR.push_back(nodecon());
-	inputVDef.push_back(AnVarBase());
 }
 
 void AnNode::AddOutput(const CVar& cv) {

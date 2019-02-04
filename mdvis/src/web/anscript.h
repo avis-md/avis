@@ -23,7 +23,6 @@ public:
 		} uiType;
 		std::vector<std::string> enums;
 		Vec2 range;
-		uintptr_t offset;
 	};
 	enum class TYPE : byte {
 		NONE,
@@ -62,6 +61,16 @@ public:
 
 	AnScript* parent;
 	void* instance;
+
+	union DefVal {
+		short s;
+		int i;
+		double d;
+		uint64_t data;
+	};
+	std::vector<DefVal> defVals;
+
+	void Init(AnScript* pr);
 
 	virtual void* Resolve(uintptr_t offset);
 	int* GetDimValue(CVar::szItem i);

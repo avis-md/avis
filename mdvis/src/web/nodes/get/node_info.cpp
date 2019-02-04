@@ -6,6 +6,9 @@ INODE_DEF(__("System Info"), Info, GET)
 
 Node_Info::Node_Info() : INODE_INITF(AN_FLAG_NOSAVECONV) {
 	INODE_TITLE(NODE_COL_IO)
+	INODE_SINIT(
+		
+	);
 	/*
 	const CVar cv("", AN_VARTYPE::INT);
 	AddOutput(cv);

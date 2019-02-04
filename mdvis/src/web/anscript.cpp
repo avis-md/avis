@@ -11,6 +11,11 @@ bool AnScript::Clear() {
 
 AnScript_I::~AnScript_I() {}
 
+void AnScript_I::Init(AnScript* pr) {
+	parent = pr;
+	defVals.resize(pr->inputs.size());
+}
+
 void* AnScript_I::Resolve(uintptr_t o) {
 	return (void*)((uintptr_t)instance + o);
 }

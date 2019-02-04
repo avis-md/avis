@@ -14,14 +14,12 @@ CNode::CNode(pCScript_I scr) : AnNode(scr) {
 	const auto osz = _scr->outputs.size();
 	inputV.resize(isz);
 	outputV.resize(osz);
-	inputVDef.resize(isz);
 	for (size_t i = 0; i < isz; ++i) {
-		inputV[i] = script->Resolve(_scr->inputs[i].offset);
-		if (_scr->inputs[i].type == AN_VARTYPE::DOUBLE) inputVDef[i].d = 0;
-		else inputVDef[i].i = 0;
+		inputV[i] = script->Resolve(_scr->_inputs[i].offset);
+		script->defVals[i].data = 0;
 	}
 	for (uint i = 0; i < _scr->outputs.size(); ++i) {
-		outputV[i] = script->Resolve(_scr->outputs[i].offset);
+		outputV[i] = script->Resolve(_scr->_outputs[i].offset);
 		conV[i] = _scr->_outputs[i];
 	}
 }
@@ -56,12 +54,13 @@ void CNode::Execute() {
 			}
 		}
 		else {
+			auto& dv = script->defVals[i];
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
-				script->SetInput(i, inputVDef[i].i);
+				script->SetInput(i, dv.i);
 				break;
 			case AN_VARTYPE::DOUBLE:
-				script->SetInput(i, inputVDef[i].d);
+				script->SetInput(i, dv.d);
 				break;
 			case AN_VARTYPE::LIST:
 				throw("Input variable not set!\1");

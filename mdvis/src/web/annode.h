@@ -16,13 +16,6 @@ enum class ANNODE_OP {
 	REMOVE
 };
 
-union AnVarBase {
-	short s;
-	int i;
-	double d;
-	uint64_t data;
-};
-
 typedef uint ANNODE_FLAGS;
 #define AN_FLAG_NOSAVECONV 1
 #define AN_FLAG_RUNONSEEK 2
@@ -71,7 +64,6 @@ public:
 	};
 	std::vector<nodecon> inputR;
 	std::vector<std::vector<nodecon>> outputR;
-	std::vector<union AnVarBase> inputVDef;
 	std::vector<CVar> conV;
 	short&  getval_s(const uint i);
 	int&    getval_i(const uint i);
