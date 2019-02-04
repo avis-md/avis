@@ -344,7 +344,7 @@ void IO::InitPath() {
 
 #ifdef PLATFORM_WIN
 	WCHAR path[MAX_PATH];
-	if (SUCCEEDED(SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, 0, path)) {
+	if (SUCCEEDED(SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, 0, path))) {
 		tmpPath = IO::_frw(path);
 		if (tmpPath.back() != '\\') tmpPath += "\\";
 		tmpPath += "Temp\\";

@@ -43,14 +43,14 @@ int string_find(const std::string& s, const std::string& s2, int start) {
 
 void string_triml(std::string& s) {
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int i) {
-		return i == ' ';
+		return i != ' ';
 		//return !std::isspace(i);
 	}));
 }
 
 void string_trimr(std::string& s) {
 	s.erase(std::find_if(s.rbegin(), s.rend(), [](int i) {
-		return i == ' ';
+		return i != ' ';
 		//return !std::isspace(i);
 	}).base(), s.end());
 }

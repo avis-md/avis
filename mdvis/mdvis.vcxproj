@@ -328,6 +328,7 @@
     <ClCompile Include="src\web\cc\cnode.cpp" />
     <ClCompile Include="src\web\cc\creader.cpp" />
     <ClCompile Include="src\web\cc\cscript.cpp" />
+    <ClCompile Include="src\web\dmscript.cpp" />
     <ClCompile Include="src\web\errorview.cpp" />
     <ClCompile Include="src\web\annode_internal.cpp" />
     <ClCompile Include="src\web\nodes\get\node_info.cpp" />

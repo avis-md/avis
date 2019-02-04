@@ -74,7 +74,7 @@ bool CReader::Read(CScript* scr) {
 		if (mt < 0) return false;
 		auto ot = IO::ModTime(fp2 + nm + ".so");
 
-		std::vector<VarInfo> inNms, outNms, vrNms;
+		std::vector<VarInfo> vrNms;
 		std::string funcNm, progrsNm;
 
 		bool fail = false;
@@ -93,7 +93,7 @@ bool CReader::Read(CScript* scr) {
 			remove((fp2 + nm + ".so").c_str());
 
 #ifdef PLATFORM_WIN
-			#define EXTERN "extern \"C\" __declspec(dllexport)"
+			#define EXTERN "extern \"C\" __declspec(dllexport) "
 #else
 			#define EXTERN "extern \"C\" __attribute__((visibility(\"default\"))) "
 #endif
@@ -105,8 +105,8 @@ bool CReader::Read(CScript* scr) {
 				while (std::getline(strm, s)) {
 					const auto sc = string_trim(s);
 					if (sc[0] == '/' && sc[1] == '/') {
-						auto ss = string_split(s, ' ');
-						if (ss[0] == "//in") {
+						auto ss = string_split(sc, ' ', true);
+						if (ss[0] == "//in" || ss[0] == "//out") {
 							std::getline(strm, s);
 							ostrm << "\n" << s << '\n';
 							auto vr = ParseVar(s);
@@ -115,7 +115,23 @@ bool CReader::Read(CScript* scr) {
 								fail = true;
 								break;
 							}
-							inNms.push_back(vr);
+							vrNms.push_back(vr);
+						}
+						else if (ss[0] == "//var") {
+							std::getline(strm, s);
+							ostrm << "\n" << s << '\n';
+							auto vr = ParseVar(s);
+							if (!vr.name[0]) {
+								Debug::Warning("CReader", "ParseVar error: " + vr.error);
+								fail = true;
+								break;
+							}
+							else if (vr.type != AN_VARTYPE::INT) {
+								Debug::Warning("CReader", "var variable must be of type int!");
+								fail = true;
+								break;
+							}
+							vrNms.push_back(vr);
 						}
 						else if (ss[0] == "//entry") {
 							std::getline(strm, s);
@@ -159,16 +175,17 @@ bool CReader::Read(CScript* scr) {
 					fail = true;
 				}
 				ostrm << "\n\n//___magic below___\n\n";
-				for (auto& v : inNms) {
-					ostrm << "//__in__\n" << "extern \"C\" const void* __var_" + v.name
-						 + " = (void*)&((" + nm + "*)nullptr)->" + v.name + "\n";
+				for (auto& v : vrNms) {
+					ostrm << "//__in__\n" << EXTERN "void* __var_" + v.name
+						+ " = (void*)&((" + nm + "*)nullptr)->" + v.name + ";\n";
 				}
-				ostrm << "extern \"C\" " + nm + "* __func_spawn() { return new " + nm + "(); }\n"
-					"extern \"C\" void __func__call(void* t) { (" + nm + "*)t->" + funcNm + "(); }";
+				ostrm << "\n";
+				ostrm << EXTERN + nm + "* __func_spawn() { return new " + nm + "(); }\n"
+					EXTERN "void __func_call(void* t) { ((" + nm + "*)t)->" + funcNm + "(); }";
 			}
 
 			if (fail) {
-				remove(tmpPath.c_str());
+				//remove(tmpPath.c_str());
 				return false;
 			}
 
@@ -215,7 +232,7 @@ bool CReader::Read(CScript* scr) {
 				m.path = fp + EXT_CS;
 			}
 			ErrorView::compileMsgs.insert(ErrorView::compileMsgs.end(), scr->compileLog.begin(), scr->compileLog.end());
-			remove(tmpPath.c_str());
+			//remove(tmpPath.c_str());
 		}
 	
 #endif
@@ -390,10 +407,12 @@ bool CReader::Read(CScript* scr) {
 			}
 
 			if (AnWeb::hasC) {
-				if (!(cvr.offset = *(uintptr_t*)scr->lib.GetSym("__var_" + vr.name))) {
+				auto sym = scr->lib.GetSym("__var_" + vr.name);
+				if (!sym) {
 					_ER("CReader", "cannot find \"" + vr.name + "\" from memory!");
 					goto FAIL;
 				}
+				else cvr.offset = *(uintptr_t*)sym;
 				if (ira) {
 					auto sz = lns.size() - 1;
 					cvr.szOffsets.resize(sz);
@@ -407,10 +426,12 @@ bool CReader::Read(CScript* scr) {
 						}
 						else {
 							of.useOffset = true;
-							if (!(of.offset = *(uintptr_t*)scr->lib.GetSym("__var_" + ln))) {
+							auto sym = scr->lib.GetSym("__var_" + ln);
+							if (!sym) {
 								_ER("CReader", "cannot find \"" + ln + "\" from memory!");
 								goto FAIL;
 							}
+							else of.offset = *(uintptr_t*)sym;
 						}
 					}
 				}
@@ -470,7 +491,7 @@ CReader::VarInfo CReader::ParseVar(std::string s) {
 		s1 = s1.substr(1);
 		info.type = AN_VARTYPE::LIST;
 	}
-	auto& t = (info.type == AN_VARTYPE::LIST)? info.type : info.itemType;
+	auto& t = (info.type == AN_VARTYPE::LIST)? info.itemType : info.type;
 	if (s0 == "short") t = AN_VARTYPE::SHORT;
 	else if (s0 == "int") t = AN_VARTYPE::INT;
 	else if (s0 == "double") t = AN_VARTYPE::DOUBLE;

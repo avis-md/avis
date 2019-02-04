@@ -206,7 +206,7 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 						//pn = std::make_shared<PyNode>(dynamic_cast<PyScript*>(fs));
 						break;
 					case AnScript::TYPE::C:
-						pn = std::make_shared<CNode>(dynamic_cast<CScript*>(fs.get()));
+						pn = std::make_shared<CNode>(std::static_pointer_cast<CScript_I>(fs->CreateInstance()));
 						break;
 					case AnScript::TYPE::FORTRAN:
 						//pn = std::make_shared<FNode>(dynamic_cast<FScript*>(fs));

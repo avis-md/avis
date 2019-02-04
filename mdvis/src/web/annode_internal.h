@@ -5,19 +5,20 @@
 #define INODE_DEF_H \
 	static const std::string sig;\
 	static const char* _name;\
-	DmScript scr;\
+	static DmScript scr;\
 	static AnNode_Internal_Reg _reg;\
 	static std::shared_ptr<AnNode> _Spawn();
 
 #define INODE_DEF(tt, nm, gp) \
 	const std::string Node_ ## nm::sig = "." #nm;\
 	const char* Node_ ## nm::_name = tt;\
+	DmScript Node_ ## nm::scr = DmScript(sig);\
 	AnNode_Internal_Reg Node_ ## nm::_reg = AnNode_Internal_Reg(\
 		Node_ ## nm::sig, Node_ ## nm::_name, ANNODE_GROUP::gp, &Node_ ## nm::_Spawn);\
 	std::shared_ptr<AnNode> Node_ ## nm::_Spawn() { return std::make_shared<Node_ ## nm>(); } 
 
-#define INODE_INIT AnNode(scr.CreateInstance(), 0), scr(sig)
-#define INODE_INITF(f) AnNode(scr.CreateInstance(), f), scr(sig)
+#define INODE_INIT AnNode(scr.CreateInstance(), 0)
+#define INODE_INITF(f) AnNode(scr.CreateInstance(), f)
 
 #define INODE_TITLE(col) \
 	title = _(_name);\

@@ -13,6 +13,7 @@
 #include "ui/localizer.h"
 #include "ui/popups.h"
 #include "web/anweb.h"
+#include "web/cc/creader.h"
 #include "md/parmenu.h"
 #include "md/Protein.h"
 #include "md/parloader.h"
@@ -345,7 +346,6 @@ The hash for this program is )" << VisSystem::version_hash
 #else
 		VisSystem::InitEnv();
 		Preferences::Init();
-		Preferences::LoadEnv();
 		Localizer::Init("");
 		//Localizer::Init(VisSystem::prefs["SYS_LOCALE"]);
 		Preferences::Link("SDPI", &Display::dpiScl, &Display::OnDpiChange);
@@ -369,8 +369,8 @@ The hash for this program is )" << VisSystem::version_hash
 		INIT(UI3);
 		INIT(Browse);
 		INIT(CReader);
-		LINIT(PyReader);
-		INIT(FReader);
+		//LINIT(PyReader);
+		//INIT(FReader);
 		LINIT(RayTracer);
 		INIT(Color);
 		INIT(Icons);

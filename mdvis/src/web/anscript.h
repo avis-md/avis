@@ -10,7 +10,7 @@ typedef std::shared_ptr<AnScript_I> pAnScript_I;
 
 class AnScript {
 public:
-	virtual ~AnScript();
+	virtual ~AnScript() {}
 
 	struct Var {
 		std::string name;
@@ -69,7 +69,7 @@ public:
 	virtual void GetOutput(int i, int* val) = 0;
 	
 	virtual void Execute();
-	const float GetProgress();
+	virtual float GetProgress();
 };
 
 #include "dmscript.h"

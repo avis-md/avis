@@ -419,6 +419,7 @@ void Preferences::Load() {
 	delete(head);
 
 	LoadAttrs();
+	LoadEnv();
 }
 
 void Preferences::SaveAttrs() {
@@ -480,8 +481,9 @@ void Preferences::LoadAttrs() {
 void Preferences::SaveEnv() {
 	XmlNode head("Environment");
 	for (auto& p : prefs[4].second) {
-		if (!p.val_s) break;
-		head.addchild(p.sig, *p.val_s);
+		if (!p.val_s) continue;
+		p.dval_s = *p.val_s;
+		head.addchild(p.sig, p.dval_s);
 		p.changed = false;
 		if (p.name.back() == '*') p.name.pop_back();
 	}
@@ -496,7 +498,8 @@ void Preferences::LoadEnv() {
 		for (auto& p : prefs[4].second) {
 			if (n.name == p.sig) {
 				p.dval_s = n.value;
-				std::replace(p.dval_s.begin(), p.dval_s.end(), '\\', '/');
+				if (p.val_s) *p.val_s = p.dval_s;
+				//std::replace(p.dval_s.begin(), p.dval_s.end(), '\\', '/');
 			}
 		}
 	}
