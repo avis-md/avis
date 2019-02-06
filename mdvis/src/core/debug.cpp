@@ -1,27 +1,29 @@
 #include "Engine.h"
 
-#define DBG_TIMESTAMP " " + std::to_string(milliseconds() - Time::startMillis) + "]"
+#define DBG_TIMESTAMP(n) "["#n" " + std::to_string(milliseconds() - Time::startMillis) + "]"
 
 #ifndef DBG_TIMESTAMP
-#define DBG_TIMESTAMP "]"
+#define DBG_TIMESTAMP(n) "["#n"]"
 #endif
 
 byte Debug::suppress = 0;
 
+#define FLUSH "\n"; std::flush(std::cout)
+
 void Debug::Message(std::string c, std::string s) {
-	if (stream) *stream << "[i" DBG_TIMESTAMP << c << ": " << s << std::endl;
+	if (stream) *stream << DBG_TIMESTAMP(i) + c + ": " + s + FLUSH;
 	if (suppress == 0)
-		std::cout << "[i" DBG_TIMESTAMP << c << ": " << s << std::endl;
+		std::cout << DBG_TIMESTAMP(i) + c + ": " + s + FLUSH;
 }
 void Debug::Warning(std::string c, std::string s) {
-	if (stream) *stream << "[w" DBG_TIMESTAMP << c << ": " << s << std::endl;
+	if (stream) *stream << DBG_TIMESTAMP(w) + c + ": " + s + FLUSH;
 	if (suppress <= 1) {
 #ifdef PLATFORM_WIN
 		SetConsoleTextAttribute(winHandle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 #else
 		std::cout << "\033[33m";
 #endif
-		std::cout << "[w" DBG_TIMESTAMP << c << ": " << s << std::endl;
+		std::cout << DBG_TIMESTAMP(w) + c + ": " + s + FLUSH;
 #ifdef PLATFORM_WIN
 		SetConsoleTextAttribute(winHandle, winTextAttr);
 #else
@@ -31,13 +33,13 @@ void Debug::Warning(std::string c, std::string s) {
 	}
 }
 void Debug::Error(std::string c, std::string s) {
-	if (stream) *stream << "[e" DBG_TIMESTAMP << c << ": " << s << std::endl;
+	if (stream) *stream << DBG_TIMESTAMP(e) + c + ": " + s + FLUSH;
 #ifdef PLATFORM_WIN
 	SetConsoleTextAttribute(winHandle, FOREGROUND_RED | FOREGROUND_INTENSITY);
 #else
 	std::cout << "\033[31m";
 #endif
-	std::cout << "[e" DBG_TIMESTAMP << c << ": " << s << std::endl;
+	std::cout << DBG_TIMESTAMP(e) + c + ": " + s + FLUSH;
 #ifdef PLATFORM_WIN
 	SetConsoleTextAttribute(winHandle, winTextAttr);
 #else

@@ -39,7 +39,9 @@ public:
 	float height;
 
 	bool canexec;
+	bool execd;
 	std::vector<AnNode*> parents;
+	std::mutex execMutex;
 
 	bool expanded = true;
 	bool canTile = false;
@@ -57,6 +59,7 @@ public:
 		uint second;
 		bool use;
 		bool hoverdel;
+		bool execd;
 		nodecon(AnNode* f = 0, uint i = 0, bool use = true)
 			: first(f), second(i), use(true), hoverdel(false) {}
 		CVar& getconv() { return first->conV[second]; }
@@ -105,7 +108,10 @@ public:
 	virtual void AddInput();
 	virtual void AddOutput(const CVar& cv = CVar());
 
+	void PreExecute();
+	bool TryExecute();
 	virtual void Execute() = 0;
+	void ExecuteNext();
 	void ApplyFrameCount(int f);
 	virtual void WriteFrame(int f);
 	bool ReadFrame(int f);
@@ -136,6 +142,8 @@ protected:
 	AnNode(pAnScript_I scr, ANNODE_FLAGS flags); //for internal scripts
 
 	static Texture tex_circle_open, tex_circle_conn;
+
+	static void _Execute(AnNode* n);
 };
 typedef std::shared_ptr<AnNode> pAnNode;
 

@@ -31,6 +31,9 @@ uint AnWeb::selSpNode = 0;
 std::string AnWeb::activeFile = "";
 std::vector<pAnNode> AnWeb::nodes;
 
+std::mutex AnWeb::execNLock;
+int AnWeb::execN;
+
 bool AnWeb::drawFull = false, AnWeb::expanded = true;
 bool AnWeb::executing = false;
 bool AnWeb::apply = false;
@@ -430,6 +433,17 @@ void AnWeb::_DoExecute() {
 	char* err = 0;
 	static std::string pylog;
 	nextNode = ~0U;
+	execN = nodes.size();
+	for (auto& n : nodes) {
+		n->PreExecute();
+	}
+	for (auto& n : nodes) {
+		n->TryExecute();
+	}
+	while (execN > 0) {
+		Engine::Sleep(100);
+	}
+	/*
 	for (size_t a = 0, s = nodes.size(); (a < s) || (nextNode != ~0U); ++a) {
 		if (nextNode != ~0U) {
 			a = (size_t)nextNode;
@@ -513,6 +527,7 @@ void AnWeb::_DoExecute() {
 		Debug::Message("AnWeb", "Executed " + n->script->parent->name);
 #endif
 	}
+	*/
 }
 
 void AnWeb::OnExecLog(std::string s, bool e) {

@@ -499,6 +499,47 @@ AnNode::AnNode(pAnScript_I scr) : script(scr), canTile(false), flags(0) {
 
 AnNode::AnNode(pAnScript_I scr, ANNODE_FLAGS flags) : script(scr), canTile(false), flags(flags) {}
 
+void AnNode::PreExecute() {
+	execd = false;
+	for (auto& i : inputR) {
+		i.execd = !i.first;
+	}
+}
+
+bool AnNode::TryExecute() {
+	std::lock_guard<std::mutex> lock(execMutex);
+	if (!executing) {
+		for (auto& i : inputR) {
+			if (!i.execd) return false;
+		}
+	}
+	std::thread(_Execute, this).detach();
+	return true;
+}
+
+void AnNode::_Execute(AnNode* n) {
+	Debug::Message("AnNode", "Executing " + std::to_string(n->id) + n->title);
+	n->executing = true;
+	n->Execute();
+	n->executing = false;
+	n->execd = true;
+	{
+		std::lock_guard<std::mutex> lock(AnWeb::execNLock);
+		AnWeb::execN--;
+	}
+	Debug::Message("AnNode", "Executed " + std::to_string(n->id) + n->title);
+	n->ExecuteNext();
+}
+
+void AnNode::ExecuteNext() {
+	for (auto& oo : outputR) {
+		for (auto& o : oo) {
+			o.first->inputR[o.second].execd = true;
+			o.first->TryExecute();
+		}
+	}
+}
+
 void AnNode::ApplyFrameCount(int f) {
 	for (auto& a : conVAll) {
 		a.resize(f);
