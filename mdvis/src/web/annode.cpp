@@ -131,7 +131,7 @@ void AnNode::Draw() {
 					continue;
 				}
 				if (!AnWeb::selConnNode || (AnWeb::selConnIdIsOut && AnWeb::selConnNode != this)) {
-					if (Engine::Button(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, hi ? tex_circle_conn : tex_circle_open, white(), Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f)) == MOUSE_RELEASE) {
+					if (Engine::Button(pos.x - connrad, y + 8 - connrad, connrad * 2, connrad * 2, hi ? tex_circle_conn : tex_circle_open, white(), Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f)) == MOUSE_RELEASE) {
 						if (!AnWeb::selConnNode) {
 							AnWeb::selConnNode = this;
 							AnWeb::selConnId = i;
@@ -147,12 +147,12 @@ void AnNode::Draw() {
 				else if (AnWeb::selConnNode == this && AnWeb::selConnId == i && !AnWeb::selConnIdIsOut) {
 					Vec2 p2(pos.x, y + 8);
 					Vec2 p1 = Input::mousePos;
-					Vec2 hx = Vec2((p2.x > p1.x) ? (p2.x - p1.x)/2 : (p1.x - p2.x)/3, 0);
+					Vec2 hx = Vec2((p2.x > p1.x) ? (p2.x - p1.x) / 2 : (p1.x - p2.x) / 3, 0);
 					UI2::Bezier(p1, p1 + hx, p2 - hx, p2, yellow(), 5, 30);
-					UI::Texture(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, hi ? tex_circle_conn : tex_circle_open);
+					UI::Texture(pos.x - connrad, y + 8 - connrad, connrad * 2, connrad * 2, hi ? tex_circle_conn : tex_circle_open);
 				}
 				else {
-					UI::Texture(pos.x - connrad, y + 8-connrad, connrad*2, connrad*2, hi ? tex_circle_conn : tex_circle_open, red(0.3f));
+					UI::Texture(pos.x - connrad, y + 8 - connrad, connrad * 2, connrad * 2, hi ? tex_circle_conn : tex_circle_open, red(0.3f));
 				}
 				UI::Label(pos.x + 10, y, 12, _script->inputs[i].name, white());
 				if (!HasConnI(i)) {
@@ -166,13 +166,13 @@ void AnNode::Draw() {
 					}
 				}
 				else {
-					auto bt = hi? Engine::Button(pos.x + width * 0.33f, y, width * 0.67f - 10, 16) : MOUSE_NONE;
+					auto bt = hi ? Engine::Button(pos.x + width * 0.33f, y, width * 0.67f - 10, 16) : MOUSE_NONE;
 					if (!bt) {
 						UI::Label(pos.x + width * 0.33f, y, 12, "<connected>", yellow());
 					}
 					else {
 						inputR[i].hoverdel = true;
-						UI::Label(pos.x + width * 0.33f, y, 12, "disconnect", red(1, (bt==MOUSE_PRESS)? 0.5f : 1));
+						UI::Label(pos.x + width * 0.33f, y, 12, "disconnect", red(1, (bt == MOUSE_PRESS) ? 0.5f : 1));
 						if (bt == MOUSE_RELEASE) {
 							Disconnect(i, false);
 						}
@@ -184,7 +184,7 @@ void AnNode::Draw() {
 			for (uint i = 0; i < _script->outputs.size(); i++, y += 17) {
 				bool ho = HasConnO(i);
 				if (!AnWeb::selConnNode || ((!AnWeb::selConnIdIsOut) && (AnWeb::selConnNode != this))) {
-					const auto cirbt = Engine::Button(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, ho ? tex_circle_conn : tex_circle_open, white(), Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f));
+					const auto cirbt = Engine::Button(pos.x + width - connrad, y + 8 - connrad, connrad * 2, connrad * 2, ho ? tex_circle_conn : tex_circle_open, white(), Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f));
 					if ((cirbt & MOUSE_HOVER_FLAG) > 0) {
 						std::string str = "";
 						const auto& ov = script->parent->outputs[i];
@@ -246,22 +246,22 @@ void AnNode::Draw() {
 					Vec2 p1(pos.x + width, y + 8);
 					Vec2 hx = Vec2((p2.x > p1.x) ? (p2.x - p1.x) / 2 : (p1.x - p2.x) / 3, 0);
 					UI2::Bezier(p1, p1 + hx, p2 - hx, p2, yellow(), 5, 30);
-					UI::Texture(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, ho ? tex_circle_conn : tex_circle_open);
+					UI::Texture(pos.x + width - connrad, y + 8 - connrad, connrad * 2, connrad * 2, ho ? tex_circle_conn : tex_circle_open);
 				}
 				else {
-					UI::Texture(pos.x + width - connrad, y + 8-connrad, connrad*2, connrad*2, ho ? tex_circle_conn : tex_circle_open, red(0.3f));
+					UI::Texture(pos.x + width - connrad, y + 8 - connrad, connrad * 2, connrad * 2, ho ? tex_circle_conn : tex_circle_open, red(0.3f));
 				}
 
 
 				UI::font->Align(ALIGN_TOPRIGHT);
-				auto bt = ho? Engine::Button(pos.x + width*0.67f - 5, y, width * 0.33f, 16) : MOUSE_NONE;
+				auto bt = ho ? Engine::Button(pos.x + width*0.67f - 5, y, width * 0.33f, 16) : MOUSE_NONE;
 				if (!bt) {
 					UI::Label(pos.x + width - 10, y, 12, _script->outputs[i].name, white());
 				}
 				else {
 					auto& ors = outputR[i];
 					for (auto& o : ors) o.first->inputR[o.second].hoverdel = true;
-					UI::Label(pos.x + width - 10, y, 12, "disconnect", red(1, (bt==MOUSE_PRESS)? 0.5f : 1));
+					UI::Label(pos.x + width - 10, y, 12, "disconnect", red(1, (bt == MOUSE_PRESS) ? 0.5f : 1));
 					if (bt == MOUSE_RELEASE) {
 						Disconnect(i, true);
 					}
@@ -273,7 +273,10 @@ void AnNode::Draw() {
 			DrawFooter(y);
 			ftrSz = y - y1;
 			height = y - pos.y + 1;
-			if (AnWeb::executing) UI::Quad(pos.x, pos.y + 16, width, 3.f + 17 * cnt, white(0.5f, 0.25f));
+			if (AnWeb::executing) {
+				UI::Quad(pos.x, pos.y + 16, width, 3.f + 17 * cnt, white(0.5f, 0.25f));
+				if (executing) UI::Quad(pos.x, pos.y + 16, 2 + (width - 2) * script->GetProgress(), 2, red());
+			}
 		}
 		else height = 16;
 	}

@@ -156,8 +156,6 @@ bool CReader::Read(CScript* scr) {
 							int eq = s.find('=');
 							if (s.substr(0, 6) == "double" && eq > -1) {
 								progrsNm = s.substr(6, eq - 6);
-								std::ofstream ets(fp2 + nm + ".progress");
-								ets << progrsNm;
 							}
 							else {
 								_ER("CReader", "//progress must precede a variable of type double!");
@@ -177,7 +175,11 @@ bool CReader::Read(CScript* scr) {
 				ostrm << "\n\n//___magic below___\n\n";
 				for (auto& v : vrNms) {
 					ostrm << "//__in__\n" << EXTERN "void* __var_" + v.name
-						+ " = (void*)&((" + nm + "*)nullptr)->" + v.name + ";\n";
+						+ " = &((" + nm + "*)nullptr)->" + v.name + ";\n";
+				}
+				if (progrsNm != "") {
+					ostrm << EXTERN "void* __progress"
+						" = &((" + nm + "*)nullptr)->" + progrsNm + ";\n";
 				}
 				ostrm << "\n";
 				ostrm << EXTERN + nm + "* __func_spawn() { return new " + nm + "(); }\n"
@@ -251,14 +253,12 @@ bool CReader::Read(CScript* scr) {
 			_ER("CReader", "Failed to load script into memory! " + err);
 			FAIL0;
 		}
-		{
-			std::ifstream prs(fp2 + nm + ".progress");
-			prs >> progrsNm;
-		}
 
 		scr->spawner = (AnScript::spawnerFunc)scr->lib.GetSym("__func_spawn");
 		scr->caller = (AnScript::callerFunc)scr->lib.GetSym("__func_call");
-		
+		auto prgs = scr->lib.GetSym("__progress");
+		if (prgs) scr->progress = *(uintptr_t*)prgs;
+
 		if (!scr->spawner) {
 			_ER("CReader", "Failed to load internal instance spawner into memory!");
 			FAIL0;

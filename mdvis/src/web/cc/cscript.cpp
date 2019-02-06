@@ -33,3 +33,9 @@ void CScript_I::GetOutput(int i, int* val) {
 	auto scr = ((CScript*)parent);
 	*val = *(int*)Resolve(scr->_inputs[i].offset);
 }
+
+float CScript_I::GetProgress() {
+	auto scr = ((CScript*)parent);
+	if (!scr->progress) return AnScript_I::GetProgress();
+	else return Clamp((float)(*(double*)Resolve(scr->progress)), 0.f, 1.f);
+}
