@@ -108,7 +108,7 @@ public:
 	virtual void AddInput();
 	virtual void AddOutput(const CVar& cv = CVar());
 
-	void PreExecute();
+	virtual void PreExecute();
 	bool TryExecute();
 	virtual void Execute() = 0;
 	void ExecuteNext();

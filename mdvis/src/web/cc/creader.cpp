@@ -191,9 +191,12 @@ bool CReader::Read(CScript* scr) {
 				return false;
 			}
 
+			const auto incfd = "\"" + IO::path + "res/include/\"";
+			
 #ifdef PLATFORM_WIN
 			if (useMsvc) {
-				std::string cl = "cl /nologo /c -Od ";
+				std::string cl = "cl /nologo /c -Od /I " + incfd + 
+					" /D__EXPORT__=__declspec(dllexport) /FI _avis_print.h";
 				if (useOMP) {
 					cl += " /openmp";
 				}
@@ -258,15 +261,18 @@ bool CReader::Read(CScript* scr) {
 		scr->caller = (AnScript::callerFunc)scr->lib.GetSym("__func_call");
 		auto prgs = scr->lib.GetSym("__progress");
 		if (prgs) scr->progress = *(uintptr_t*)prgs;
+		scr->stdioClr = (CScript::clearFunc)scr->lib.GetSym("__stdio_clear");
+		scr->stdioLock = *(std::mutex**)scr->lib.GetSym("__stdio_plock");
+		scr->stdioPtr = (void***)scr->lib.GetSym("__stdio_data");
+		scr->stdioCnt = (int*)scr->lib.GetSym("__stdio_count");
 
-		if (!scr->spawner) {
-			_ER("CReader", "Failed to load internal instance spawner into memory!");
-			FAIL0;
+#define CHKPTR(vr) if (!scr->vr) {\
+			_ER("CReader", "Internal error: failed to register " #vr " from compiled binary!");\
+			FAIL0;\
 		}
-		if (!scr->caller) {
-			_ER("CReader", "Failed to load internal function caller into memory!");
-			FAIL0;
-		}
+
+		CHKPTR(spawner) CHKPTR(caller) CHKPTR(stdioClr) CHKPTR(stdioPtr) CHKPTR(stdioCnt);
+
 		/*
 #ifdef PLATFORM_WIN
 		if (!useMsvc) {

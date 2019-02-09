@@ -27,6 +27,34 @@ CNode::CNode(pCScript_I scr) : AnNode(scr) {
 #undef _scr
 #define _scr ((CScript*)script->parent)
 
+void CNode::Update() {
+	//if (executing) {
+		auto scr = _scr;
+		volatile int cnt = *scr->stdioCnt;
+		while (scr->stdioI < cnt) {
+			std::lock_guard<std::mutex> lock(*scr->stdioLock);
+			auto pptr = *scr->stdioPtr;
+			auto ptr = pptr[scr->stdioI * 2];
+			for (auto& n : AnWeb::nodes) {
+//				if (((CScript*)n->script->parent) == scr) {
+					if (ptr == n->script->instance) {
+						auto msg = (char*)pptr[scr->stdioI * 2 + 1];
+						std::cout << "Node " + std::to_string(n->id) + " says: "
+							+ std::string(msg) << std::endl;
+						scr->stdioI++;
+					}
+//				}
+			}
+		}
+	//}
+}
+
+void CNode::PreExecute() {
+	AnNode::PreExecute();
+	_scr->stdioClr();
+	_scr->stdioI = 0;
+}
+
 void CNode::Execute() {
 	for (uint i = 0; i < _scr->inputs.size(); ++i) {
 		auto& mv = _scr->inputs[i];

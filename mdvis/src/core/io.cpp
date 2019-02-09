@@ -269,8 +269,8 @@ void IO::RedirectStdio2(std::string path) {
 	stdout_o = _dup(1);
 	stderr_o = _dup(2);
 #ifdef PLATFORM_WIN
-	stdout_n = _fsopen(path.c_str(), "w", _SH_DENYWR);
-	stdout_n = _fsopen(path.c_str(), "w", _SH_DENYWR);
+	stdout_n = _fsopen((path + "_o").c_str(), "w", _SH_DENYWR);
+	stderr_n = _fsopen((path + "_e").c_str(), "w", _SH_DENYWR);
 #else
 	stdout_n = fopen((path + "_o").c_str(), "w");
 	stderr_n = fopen((path + "_e").c_str(), "w");

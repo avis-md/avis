@@ -3,13 +3,20 @@
 
 class CScript : public AnScript {
 public:
-	CScript() : AnScript(AnScript::TYPE::C) {}
+	CScript();
 
 	std::string libpath;
 	DyLib lib;
 
 	uintptr_t progress;
 	std::vector<CVar> _inputs, _outputs;
+
+	typedef void (*clearFunc)();
+	clearFunc stdioClr;
+	std::mutex* stdioLock;
+	void*** stdioPtr;
+	int* stdioCnt;
+	int stdioI;
 
 	pAnScript_I CreateInstance() override;
 

@@ -74,7 +74,7 @@ void AnWeb::Clear0() {
 
 void AnWeb::Insert(const pAnNode& node, Vec2 pos) {
 	nodes.push_back(node);
-	nodes.back()->pos = pos;
+	node->pos = pos;
 }
 
 void AnWeb::Update() {
@@ -384,8 +384,10 @@ void AnWeb::Execute(bool all) {
 void AnWeb::DoExecute(bool all) {
 	Engine::stateLock2.lock();
 
+	uint i = 0;
 	for (auto n : nodes) {
 		n->log.clear();
+		n->id = i++;
 	}
 	ErrorView::execMsgs.clear();
 	
