@@ -7,8 +7,13 @@ INODE_DEF(__("System Info"), Info, GET)
 Node_Info::Node_Info() : INODE_INITF(AN_FLAG_NOSAVECONV) {
 	INODE_TITLE(NODE_COL_IO)
 	INODE_SINIT(
-		
+
+		scr->AddOutput(_("atom count"), AN_VARTYPE::INT);
+		script->Init(scr.get());
 	);
+	auto _scr = ((DmScript_I*)script.get());
+
+	IAddConV(&Particles::particleSz);
 	/*
 	const CVar cv("", AN_VARTYPE::INT);
 	AddOutput(cv);

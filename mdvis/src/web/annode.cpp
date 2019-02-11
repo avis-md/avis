@@ -538,11 +538,22 @@ void AnNode::_Execute(AnNode* n) {
 	n->ExecuteNext();
 }
 
+void AnNode::IAddConV(void* p) {
+	auto _scr = (DmScript_I*)script.get();
+	_scr->outputVs.push_back(VarVal());
+	auto& vr = _scr->outputVs.back();
+	vr.pval = p;
+	conV.push_back(CVar());
+	auto& cv = conV.back();
+	cv.offset = (uintptr_t)(conV.size() - 1);
+}
+
 void AnNode::IAddConV(void* p, std::initializer_list<int*> d1, std::initializer_list<int> d2) {
 	auto _scr = (DmScript_I*)script.get();
 	_scr->outputVs.push_back(VarVal());
 	auto& vr = _scr->outputVs.back();
 	vr.val.p = p;
+	vr.pval = &vr.val;
 	conV.push_back(CVar());
 	auto& cv = conV.back();
 	cv.offset = (uintptr_t)(conV.size() - 1);

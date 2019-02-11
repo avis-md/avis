@@ -26,6 +26,7 @@ struct VarVal {
 		double d;
 		void* p;
 	} val;
+	void* pval;
 	std::vector<char> arr;
 	
 	VarVal() = default;
@@ -33,11 +34,15 @@ struct VarVal {
 		val = vv.val;
 		arr = vv.arr;
 		if (arr.size() > 0) val.p = arr.data();
+		if (vv.pval == &vv.val) pval = &val;
+		else pval = vv.pval;
 	}
 	VarVal& operator= (const VarVal& vv) {
 		val = vv.val;
 		arr = vv.arr;
 		if (arr.size() > 0) val.p = arr.data();
+		if (vv.pval == &vv.val) pval = &val;
+		else pval = vv.pval;
 	}
 };
 

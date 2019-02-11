@@ -147,6 +147,7 @@ protected:
 
 	static void _Execute(AnNode* n);
 
+	void IAddConV(void*);
 	void IAddConV(void*, std::initializer_list<int*>, std::initializer_list<int>);
 };
 typedef std::shared_ptr<AnNode> pAnNode;

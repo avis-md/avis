@@ -22,7 +22,7 @@ pAnScript_I DmScript::CreateInstance() {
 }
 
 void* DmScript_I::Resolve(uintptr_t i) {
-	return &outputVs[i].val;
+	return outputVs[i].pval;
 }
 
 int* DmScript_I::GetDimValue(const CVar::szItem& i) {
