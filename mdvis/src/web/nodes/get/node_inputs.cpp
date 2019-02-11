@@ -14,7 +14,7 @@ uint Node_Inputs::parcount = 0;
 Node_Inputs::Node_Inputs() : INODE_INITF(AN_FLAG_NOSAVECONV), filter(0) {
 	INODE_TITLE(NODE_COL_IO);
 	INODE_SINIT(
-		scr.desc = R"(Particle coordinates and trajectory
+		scr->desc = R"(Particle coordinates and trajectory
 positions: [atomId, xyz]
 velocities: [atomId, xyz]
 positions (all): [frame, atomId, xyz]
@@ -22,13 +22,19 @@ velocities (all): [frame, atomId, xyz]
 types: [atomid]
 * type is the ascii of the atom name,
   so C is 67, O is 79 etc.)";
-		scr.descLines = 8;
+		scr->descLines = 8;
 		
-		
+		scr->AddOutput(_("positions"), AN_VARTYPE::DOUBLE, 2);
+		scr->AddOutput(_("velocities"), AN_VARTYPE::DOUBLE, 2);
+		scr->AddOutput(_("types"), AN_VARTYPE::SHORT, 1);
+		script->Init(scr.get());
 	);
+	auto _scr = ((DmScript_I*)script.get());
 
-	
-	
+	IAddConV(0, { (int*)&parcount, 0 }, { 3 });
+	IAddConV(0, { (int*)&parcount, 0 }, { 3 });
+	IAddConV(0, { (int*)&parcount }, {});
+
 	/*
 	AddOutput(CVar(_("positions"), 'd', 2, { (int*)&parcount, nullptr }, { 3 }));
 	scr.AddOutput(conV.back());
@@ -52,7 +58,6 @@ void Node_Inputs::DrawHeader(float& off) {
 }
 
 void Node_Inputs::Execute() {
-	return;
 #ifndef IS_ANSERVER
 	bool setpos = outputR[0].size() > 0;
 	bool setvel = outputR[1].size() > 0;
@@ -70,6 +75,9 @@ void Node_Inputs::Execute() {
 	}
 	if (!filter) {
 		parcount = Particles::particleSz;
+		poss = &pos[0][0];
+		vels = &vel[0][0];
+		typs = Particles::types.data();
 		/*
 		conV[0].data.val.arr.p = pos;
 		conV[0].value = &conV[0].data.val.arr.p;
@@ -160,12 +168,16 @@ void Node_Inputs::Execute() {
 		//conV[1].value = &vels;
 		//conV[2].value = &typs;
 	}
+	auto& ov = ((DmScript_I*)script.get())->outputVs;
+	ov[0].val.p = poss;
+	ov[1].val.p = vels;
+	ov[2].val.p = typs;
 #endif
 }
 
 void Node_Inputs::SaveIn(const std::string& path) {
 	Execute();
-	const auto& nm = scr.name;
+	const auto& nm = scr->name;
 	std::ofstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
 		//for (uint i = 0; i < 3; i++)
@@ -174,7 +186,7 @@ void Node_Inputs::SaveIn(const std::string& path) {
 }
 
 void Node_Inputs::LoadIn(const std::string& path) {
-	const auto& nm = scr.name;
+	const auto& nm = scr->name;
 	std::ifstream strm(path + std::to_string(id) + nm, std::ios::binary);
 	if (strm.is_open()) {
 		//for (uint i = 0; i < 3; i++)

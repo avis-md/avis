@@ -7,10 +7,17 @@ public:
 		name = nm;
 	}
 	pAnScript_I CreateInstance() override;
+
+	Var& AddOutput(const std::string& name, AN_VARTYPE type, int dim = 0);
 };
 
 class DmScript_I : public AnScript_I {
 public:
+	std::vector<VarVal> outputVs;
+
+	void* Resolve(uintptr_t offset) override;
+	int* GetDimValue(const CVar::szItem& i) override;
+
 	void SetInput(int i, short val) override {}
 	void SetInput(int i, int val) override {}
 	void SetInput(int i, double val) override {}

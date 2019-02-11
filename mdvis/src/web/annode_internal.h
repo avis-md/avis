@@ -5,29 +5,31 @@
 #define INODE_DEF_H \
 	static const std::string sig;\
 	static const char* _name;\
-	static DmScript scr;\
+	static std::unique_ptr<DmScript> scr;\
 	static AnNode_Internal_Reg _reg;\
 	static std::shared_ptr<AnNode> _Spawn();
 
 #define INODE_DEF(tt, nm, gp) \
 	const std::string Node_ ## nm::sig = "." #nm;\
 	const char* Node_ ## nm::_name = tt;\
-	DmScript Node_ ## nm::scr = DmScript(sig);\
+	std::unique_ptr<DmScript> Node_ ## nm::scr = std::unique_ptr<DmScript>(new DmScript(sig));\
 	AnNode_Internal_Reg Node_ ## nm::_reg = AnNode_Internal_Reg(\
 		Node_ ## nm::sig, Node_ ## nm::_name, ANNODE_GROUP::gp, &Node_ ## nm::_Spawn);\
 	std::shared_ptr<AnNode> Node_ ## nm::_Spawn() { return std::make_shared<Node_ ## nm>(); } 
 
-#define INODE_INIT AnNode(scr.CreateInstance(), 0)
-#define INODE_INITF(f) AnNode(scr.CreateInstance(), f)
+#define INODE_INIT AnNode(scr->CreateInstance(), 0)
+#define INODE_INITF(f) AnNode(scr->CreateInstance(), f)
 
 #define INODE_TITLE(col) \
 	title = _(_name);\
 	titleCol = col;
 
-#define INODE_SINIT(cmd) if (!scr.ok) {\
-	cmd\
-	scr.ok = true;\
-}
+#define INODE_SINIT(cmd) if (!scr->ok) {\
+		cmd\
+		scr->ok = true;\
+	}\
+	ResizeIO(scr.get());\
+	conV.clear();
 
 enum class ANNODE_GROUP {
 	GET,

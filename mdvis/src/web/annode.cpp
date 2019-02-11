@@ -490,14 +490,18 @@ void AnNode::AddOutput(const CVar& cv) {
 
 AnNode::AnNode(pAnScript_I scr) : script(scr), canTile(false), flags(0) {
 	if (!scr) return;
-	inputR.resize(scr->parent->inputs.size());
-	auto osz = scr->parent->outputs.size();
+	ResizeIO(scr->parent);
+}
+
+AnNode::AnNode(pAnScript_I scr, ANNODE_FLAGS flags) : script(scr), canTile(false), flags(flags) {}
+
+void AnNode::ResizeIO(AnScript* scr) {
+	inputR.resize(scr->inputs.size());
+	auto osz = scr->outputs.size();
 	outputR.resize(osz);
 	conV.resize(osz);
 	conVAll.resize(osz);
 }
-
-AnNode::AnNode(pAnScript_I scr, ANNODE_FLAGS flags) : script(scr), canTile(false), flags(flags) {}
 
 void AnNode::PreExecute() {
 	execd = false;
@@ -518,6 +522,8 @@ bool AnNode::TryExecute() {
 }
 
 void AnNode::_Execute(AnNode* n) {
+	auto lock = n->script->parent->allowParallel ? nullptr : &n->script->parent->parallelLock;
+	if (lock) lock->lock();
 	Debug::Message("AnNode", "Executing " + std::to_string(n->id) + n->title);
 	n->executing = true;
 	n->Execute();
@@ -527,8 +533,28 @@ void AnNode::_Execute(AnNode* n) {
 		std::lock_guard<std::mutex> lock(AnWeb::execNLock);
 		AnWeb::execN--;
 	}
+	if (lock) lock->unlock();
 	Debug::Message("AnNode", "Executed " + std::to_string(n->id) + n->title);
 	n->ExecuteNext();
+}
+
+void AnNode::IAddConV(void* p, std::initializer_list<int*> d1, std::initializer_list<int> d2) {
+	auto _scr = (DmScript_I*)script.get();
+	_scr->outputVs.push_back(VarVal());
+	auto& vr = _scr->outputVs.back();
+	vr.val.p = p;
+	conV.push_back(CVar());
+	auto& cv = conV.back();
+	cv.offset = (uintptr_t)(conV.size() - 1);
+	auto pd1 = d1.begin();
+	auto pd2 = d2.begin();
+	while (pd1 != d1.end()) {
+		if (!*pd1)
+			cv.szOffsets.push_back(CVar::szItem(*pd2++));
+		else
+			cv.szOffsets.push_back(CVar::szItem(*pd1));
+		pd1++;
+	}
 }
 
 void AnNode::ExecuteNext() {

@@ -7,33 +7,38 @@ enum class AN_VARTYPE : byte {
 	INT,
 	DOUBLE,
 	LIST,
+	ANY
 };
 
-union _VarVal {
-	short s;
-	int i;
-	double d;
-	struct arr {
-		void* p;
-		std::vector<char> data;
-	} arr;
-
-	_VarVal() {
-		memset(this, 0, sizeof(_VarVal));
-	}
-	~_VarVal() {}
-	_VarVal(const _VarVal& o) {
-		memcpy(this, &o, sizeof(_VarVal));
-	}
-	_VarVal& operator=(const _VarVal& o) {
-		memcpy(this, &o, sizeof(_VarVal));
-		return *this;
-	}
+const std::string AN_VARTYPE_STRS[] = {
+	"",
+	"short",
+	"int",
+	"double",
+	"list(??)",
+	"*"
 };
 
 struct VarVal {
-	_VarVal val;
-	std::vector<int> dims;
+	union {
+		short s;
+		int i;
+		double d;
+		void* p;
+	} val;
+	std::vector<char> arr;
+	
+	VarVal() = default;
+	VarVal(const VarVal& vv) {
+		val = vv.val;
+		arr = vv.arr;
+		if (arr.size() > 0) val.p = arr.data();
+	}
+	VarVal& operator= (const VarVal& vv) {
+		val = vv.val;
+		arr = vv.arr;
+		if (arr.size() > 0) val.p = arr.data();
+	}
 };
 
 /*
@@ -66,6 +71,9 @@ struct CVar {
 			uintptr_t offset;
 			int size;
 		};
+		szItem() = default;
+		szItem(void* off) : useOffset(true), offset((uintptr_t)off) {}
+		szItem(int val) : useOffset(false), size(val) {}
 	};
 
 	uintptr_t offset;

@@ -84,6 +84,8 @@ public:
 	};
 	std::vector<ConnInfo> _connInfo;
 
+	void ResizeIO(AnScript* scr);
+
 	bool Select();
 	virtual float GetHeaderSz();
 
@@ -144,6 +146,8 @@ protected:
 	static Texture tex_circle_open, tex_circle_conn;
 
 	static void _Execute(AnNode* n);
+
+	void IAddConV(void*, std::initializer_list<int*>, std::initializer_list<int>);
 };
 typedef std::shared_ptr<AnNode> pAnNode;
 

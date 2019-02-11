@@ -15,6 +15,7 @@ public:
 	struct Var {
 		std::string name;
 		AN_VARTYPE type, itemType;
+		int dim;
 		std::string typeName;
 		enum class UI_TYPE {
 			NONE,
@@ -23,6 +24,8 @@ public:
 		} uiType;
 		std::vector<std::string> enums;
 		Vec2 range;
+
+		void InitName();
 	};
 	enum class TYPE : byte {
 		NONE,
@@ -40,6 +43,8 @@ public:
 	const TYPE type;
 
 	bool ok = false, busy = false;
+	bool allowParallel = true;
+	std::mutex parallelLock;
 	time_t chgtime;
 	std::vector<ErrorView::Message> compileLog;
 	int errorCount;
@@ -70,10 +75,10 @@ public:
 	};
 	std::vector<DefVal> defVals;
 
-	void Init(AnScript* pr);
+	virtual void Init(AnScript* pr);
 
 	virtual void* Resolve(uintptr_t offset);
-	int* GetDimValue(CVar::szItem i);
+	virtual int* GetDimValue(const CVar::szItem& i);
 
 	virtual void SetInput(int i, short val) = 0;
 	virtual void SetInput(int i, int val) = 0;
