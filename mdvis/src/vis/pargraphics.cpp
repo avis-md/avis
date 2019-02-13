@@ -271,8 +271,9 @@ void ParGraphics::Init() {
 				bgs.push_back(IO::path + "res/bg/" + f);
 		}
 	}
-	if (!!bgs.size()) {
-		auto rng = std::default_random_engine {};
+	if (bgs.size() > 1) {
+		std::random_device rd;
+		auto rng = std::default_random_engine(rd());
 		std::shuffle(bgs.begin(), bgs.end(), rng);
 		bg = Texture(bgs[0], false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	}

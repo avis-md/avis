@@ -1,5 +1,20 @@
 #include "anweb.h"
 
+AnScript::Var& DmScript::AddInput(const std::string& name, AN_VARTYPE type, int dim) {
+	inputs.push_back(Var());
+	auto& vr = inputs.back();
+	vr.name = name;
+	vr.dim = dim;
+	if (dim != 0) {
+		vr.type = AN_VARTYPE::LIST;
+	}
+	auto& tp = (dim != 0) ? vr.itemType : vr.type;
+	tp = type;
+	vr.InitName();
+	vr.uiType = Var::UI_TYPE::NONE;
+	return vr;
+}
+
 AnScript::Var& DmScript::AddOutput(const std::string& name, AN_VARTYPE type, int dim) {
 	outputs.push_back(Var());
 	auto& vr = outputs.back();

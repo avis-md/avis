@@ -10,7 +10,13 @@ INODE_DEF(__("Plot Data"), Plot, MISC)
 
 Node_Plot::Node_Plot() : INODE_INITF(AN_FLAG_RUNONSEEK | AN_FLAG_RUNONVALCHG), type(TYPE::LINES), tex(0) {
 	INODE_TITLE(NODE_COL_SPC);
+	INODE_SINIT(
+		scr->AddInput(_("data"), AN_VARTYPE::ANY, -1);
+		scr->AddInput(_("X ID"), AN_VARTYPE::INT);
+		scr->AddInput(_("Y ID"), AN_VARTYPE::INT);
+	);
 
+	/*
 	inputR.resize(3, nodecon(0, 0, false));
 	inputVDef.resize(3);
 	script->invars.push_back(std::pair<std::string, std::string>("array", "list(**)"));
@@ -18,6 +24,8 @@ Node_Plot::Node_Plot() : INODE_INITF(AN_FLAG_RUNONSEEK | AN_FLAG_RUNONVALCHG), t
 	script->invars.push_back(std::pair<std::string, std::string>("Y ID", "int"));
 	script->invaropts.resize(3);
 	inputVDef[1].i = inputVDef[2].i = -1;
+	*/
+	script->defVals[1].i = script->defVals[2].i = -1;
 	glGenTextures(1, &tex);
 }
 
@@ -42,8 +50,11 @@ void Node_Plot::DrawHeader(float& off) {
 	static auto _type = type;
 	if (_type != type) {
 		_type = type;
-		script->invars[0].second = (type == TYPE::ALINES)? "*" : "list(**)";
-		if (inputR[0].first) inputR[0].first->ConnectTo(inputR[0].second, this, 0);
+		auto& ip = script->parent->inputs[0];
+		ip.type = (type == TYPE::ALINES) ? AN_VARTYPE::ANY : AN_VARTYPE::LIST;
+		ip.InitName();
+		auto& ir = inputR[0];
+		if (ir.first) ir.first->ConnectTo(ir.second, this, 0);
 	}
 	off += 17;
 }
@@ -96,33 +107,37 @@ void Node_Plot::DrawFooter(float& y) {
 
 void Node_Plot::Execute() {
 #ifndef IS_ANSERVER
-	if (!inputR[0].first) return;
+	auto& ir = inputR[0];
+	if (!ir.first) return;
+	auto& tar = ir.first->script;
 	auto xid = getval_i(1);
 	auto yid = getval_i(2);
-	CVar& cv = inputR[0].getconv();
-	if (!cv.value) {
+	auto& cv = ir.getconv();
+	auto& vr = ir.getvar();
+	auto vl = ir.getval();
+	if (!vl) {
 		RETERR("Value pointer is empty!");
 	}
-	auto ds = cv.dimVals.size();
+	auto ds = cv.szOffsets.size();
 	if (ds > 2) {
 		RETERR("Data of 3+ dimensions cannot be plotted!");
 	}
 	else if (ds == 2 && type == TYPE::ALINES) {
 		RETERR("Data of 3+ dimensions cannot be accumulated!");
 	}
-	else if (ds > 0 && !*(void**)cv.value) return;
+	else if (ds > 0 && !*(void**)vl) return;
 	int sz;
 	int sz2;
 	if (type == TYPE::ALINES) {
 		sz = (int)Particles::anim.frameCount;
-		sz2 = (cv.type == AN_VARTYPE::LIST)? *cv.dimVals[0] : 1;
+		sz2 = (vr.type == AN_VARTYPE::LIST)? *tar->GetDimValue(cv.szOffsets[0]) : 1;
 		if (sz <= 1) {
 			RETERR("Accumulate can only be used when animation data is loaded!");
 		}
 	}
 	else {
-		sz = *cv.dimVals[0];
-		sz2 = (cv.dimVals.size() > 1)? *cv.dimVals[1] : 1;
+		sz = *tar->GetDimValue(cv.szOffsets[0]);
+		sz2 = (cv.szOffsets.size() > 1)? *tar->GetDimValue(cv.szOffsets[1]) : 1;
 	}
 	if (!sz || !sz2) {
 		RETERR("Size is empty!");
@@ -130,7 +145,8 @@ void Node_Plot::Execute() {
 	if (sz > 1) {
 		if (type == TYPE::ALINES) {
 			xid = -1;
-			yid = (cv.type == AN_VARTYPE::LIST)? Clamp(yid, -1, *cv.dimVals[0] - 1) : -1;
+			yid = (vr.type == AN_VARTYPE::LIST)?
+				Clamp(yid, -1, *tar->GetDimValue(cv.szOffsets[1]) - 1) : -1;
 		}
 		else {
 			xid = Clamp(xid, -1, sz2 - 1);
@@ -152,41 +168,41 @@ void Node_Plot::Execute() {
 		}
 	}
 	else {
-		switch (cv.typeName[6]) {
+		switch (vr.typeName[6]) {
 		case 's':
 			for (int i = 0; i < sz; ++i) {
-				valXs[i] = (float)(*(short**)cv.value)[i * 2 + xid];
+				valXs[i] = (float)(*(short**)vl)[i * 2 + xid];
 			}
 			break;
 		case 'i':
 			for (int i = 0; i < sz; ++i) {
-				valXs[i] = (float)(*(int**)cv.value)[i * 2 + xid];
+				valXs[i] = (float)(*(int**)vl)[i * 2 + xid];
 			}
 			break;
 		case 'd':
 			for (int i = 0; i < sz; ++i) {
-				valXs[i] = (float)(*(double**)cv.value)[i * 2 + xid];
+				valXs[i] = (float)(*(double**)vl)[i * 2 + xid];
 			}
 			break;
 		default:
 			valXs.clear();
-			RETERR("Unexpected data type " + cv.typeName + "!");
+			RETERR("Unexpected data type " + vr.typeName + "!");
 		}
 	}
 	if (type == TYPE::ALINES) {
 		if (ds == 1 && yid == -1) {
-			switch (cv.typeName[6]) {
+			switch (vr.typeName[6]) {
 #define cs(_c, _t) \
 			case _c:\
 				for (int i = 0; i < sz2; ++i) {\
-					valYs[i][Particles::anim.currentFrame] = (float)(*(_t**)cv.value)[i];\
+					valYs[i][Particles::anim.currentFrame] = (float)(*(_t**)vl)[i];\
 				} break
 				cs('s', short);
 				cs('i', int);
 				cs('d', double);
 			default:
 				valXs.clear();
-				RETERR("Unexpected data type " + cv.typeName + "!");
+				RETERR("Unexpected data type " + vr.typeName + "!");
 #undef cs
 			}
 		}
@@ -194,32 +210,32 @@ void Node_Plot::Execute() {
 			valYs.resize(1);
 			_valYs.resize(1);
 			if (!ds) {
-				switch (cv.typeName[0]) {
+				switch (vr.typeName[0]) {
 #define cs(_c, _t) \
 				case _c:\
-					valYs[0][Particles::anim.currentFrame] = (float)(*(_t*)cv.value);\
+					valYs[0][Particles::anim.currentFrame] = (float)(*(_t*)vl);\
 					break
 					cs('s', short);
 					cs('i', int);
 					cs('d', double);
 				default:
 					valXs.clear();
-					RETERR("Unexpected data type " + cv.typeName + "!");
+					RETERR("Unexpected data type " + vr.typeName + "!");
 #undef cs
 				}
 			}
 			else {
-				switch (cv.typeName[6]) {
+				switch (vr.typeName[6]) {
 #define cs(_c, _t) \
 				case _c:\
-					valYs[0][Particles::anim.currentFrame] = (float)(*(_t**)cv.value)[yid];\
+					valYs[0][Particles::anim.currentFrame] = (float)(*(_t**)vl)[yid];\
 					break
 					cs('s', short);
 					cs('i', int);
 					cs('d', double);
 				default:
 					valXs.clear();
-					RETERR("Unexpected data type " + cv.typeName + "!");
+					RETERR("Unexpected data type " + vr.typeName + "!");
 #undef cs
 				}
 			}
@@ -228,18 +244,18 @@ void Node_Plot::Execute() {
 	else {
 		if (ds == 2 && yid == -1) {
 			for (int j = 0; j < sz2; ++j) {
-				switch (cv.typeName[6]) {
+				switch (vr.typeName[6]) {
 #define cs(_c, _t) \
 				case _c:\
 					for (int i = 0; i < sz; ++i) {\
-						valYs[j][i] = (float)(*(_t**)cv.value)[i*sz2 + j];\
+						valYs[j][i] = (float)(*(_t**)vl)[i*sz2 + j];\
 					} break
 					cs('s', short);
 					cs('i', int);
 					cs('d', double);
 				default:
 					valXs.clear();
-					RETERR("Unexpected data type " + cv.typeName + "!");
+					RETERR("Unexpected data type " + vr.typeName + "!");
 #undef cs
 				}
 			}
@@ -248,18 +264,18 @@ void Node_Plot::Execute() {
 			valYs.resize(1);
 			_valYs.resize(1);
 			int j = (ds == 1) ? 0 : yid;
-			switch (cv.typeName[6]) {
+			switch (vr.typeName[6]) {
 #define cs(_c, _t) \
 			case _c:\
 				for (int i = 0; i < sz; ++i) {\
-					valYs[0][i] = (float)(*(_t**)cv.value)[i*sz2 + j];\
+					valYs[0][i] = (float)(*(_t**)vl)[i*sz2 + j];\
 				} break
 				cs('s', short);
 				cs('i', int);
 				cs('d', double);
 			default:
 				valXs.clear();
-				RETERR("Unexpected data type " + cv.typeName + "!");
+				RETERR("Unexpected data type " + vr.typeName + "!");
 #undef cs
 			}
 		}
@@ -308,15 +324,17 @@ void Node_Plot::LoadOut(const std::string& path) {
 }
 
 void Node_Plot::OnConn(bool o, int i) {
+	auto& ir = inputR[0];
 	if (i == 0) {
-		auto& cv = inputR[0].getconv();
-		auto sz = cv.dimVals.size();
+		auto& tar = ir.first->script;
+		auto& cv = ir.getconv();
+		auto sz = cv.szOffsets.size();
 		if (type == TYPE::ALINES && sz > 1) {
 			Debug::Warning("Node::Plot", "Data of 2+ dimensions cannot be accumulated!");
 		}
 		else if (sz == 1) useids = false;
 		else if (sz == 2) {
-			auto v = *cv.dimVals[1];
+			auto v = *tar->GetDimValue(cv.szOffsets[0]);
 			useids = (v > 1);
 		}
 		else {
@@ -334,7 +352,9 @@ void Node_Plot::Load(XmlNode* n2) {
 	for (auto& n : n2->children) {
 		if (n.name == "type") {
 			type = (TYPE)TryParse(n.value, 0);
-			script->invars[0].second = (type == TYPE::ALINES)? "*" : "list(**)";
+			auto& ip = script->parent->inputs[0];
+			ip.type = (type == TYPE::ALINES) ? AN_VARTYPE::ANY : AN_VARTYPE::LIST;
+			ip.InitName();
 		}
 	}
 }

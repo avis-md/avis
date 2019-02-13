@@ -8,6 +8,7 @@ public:
 	}
 	pAnScript_I CreateInstance() override;
 
+	Var& AddInput(const std::string& name, AN_VARTYPE type, int dim = 0);
 	Var& AddOutput(const std::string& name, AN_VARTYPE type, int dim = 0);
 };
 

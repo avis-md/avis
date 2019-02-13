@@ -7,13 +7,15 @@ INODE_DEF(__("System Info"), Info, GET)
 Node_Info::Node_Info() : INODE_INITF(AN_FLAG_NOSAVECONV) {
 	INODE_TITLE(NODE_COL_IO)
 	INODE_SINIT(
-
 		scr->AddOutput(_("atom count"), AN_VARTYPE::INT);
-		script->Init(scr.get());
+		scr->AddOutput(_("frame count"), AN_VARTYPE::INT);
+		scr->AddOutput(_("current frame"), AN_VARTYPE::INT);
+		scr->AddOutput(_("bounding box"), AN_VARTYPE::DOUBLE, 1);
 	);
-	auto _scr = ((DmScript_I*)script.get());
-
 	IAddConV(&Particles::particleSz);
+	IAddConV(&Particles::anim.frameCount);
+	IAddConV(&AnWeb::realExecFrame);
+	IAddConV(nullptr, { nullptr }, { 6 });
 	/*
 	const CVar cv("", AN_VARTYPE::INT);
 	AddOutput(cv);
@@ -35,5 +37,6 @@ void Node_Info::Execute() {
 	if (!Particles::anim.bboxs.size()) bbx = &Particles::boundingBox[0];
 	else if (!AnWeb::execFrame) bbx = &Particles::anim.bboxs[Particles::anim.currentFrame][0];
 	else bbx = &Particles::anim.bboxs[AnWeb::execFrame-1][0];
-	//conV[3].value = &bbx;
+	auto& ov = ((DmScript_I*)script.get())->outputVs;
+	ov[3].val.p = bbx;
 }

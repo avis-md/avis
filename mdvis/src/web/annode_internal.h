@@ -27,6 +27,7 @@
 #define INODE_SINIT(cmd) if (!scr->ok) {\
 		cmd\
 		scr->ok = true;\
+		script->Init(scr.get());\
 	}\
 	ResizeIO(scr.get());\
 	conV.clear();

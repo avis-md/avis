@@ -27,7 +27,6 @@ types: [atomid]
 		scr->AddOutput(_("positions"), AN_VARTYPE::DOUBLE, 2);
 		scr->AddOutput(_("velocities"), AN_VARTYPE::DOUBLE, 2);
 		scr->AddOutput(_("types"), AN_VARTYPE::SHORT, 1);
-		script->Init(scr.get());
 	);
 	auto _scr = ((DmScript_I*)script.get());
 

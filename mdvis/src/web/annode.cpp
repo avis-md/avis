@@ -13,6 +13,15 @@ void* AnNode::nodecon::getval() {
 	return first->script->Resolve(cv.offset);
 }
 
+AnScript::Var& AnNode::nodecon::getvar() {
+	auto& cv = getconv();
+	return first->script->parent->outputs[second];
+}
+
+int* AnNode::nodecon::getdim(const CVar::szItem& i) {
+	return first->script->GetDimValue(i);
+}
+
 
 Texture AnNode::tex_circle_open, AnNode::tex_circle_conn;
 float AnNode::width = 220;

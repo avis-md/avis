@@ -64,6 +64,8 @@ public:
 			: first(f), second(i), use(true), hoverdel(false) {}
 		CVar& getconv() { return first->conV[second]; }
 		void* getval();
+		AnScript::Var& getvar();
+		int* getdim(const CVar::szItem& i); //shorthand
 	};
 	std::vector<nodecon> inputR;
 	std::vector<std::vector<nodecon>> outputR;
@@ -71,7 +73,7 @@ public:
 	short&  getval_s(const uint i);
 	int&    getval_i(const uint i);
 	double& getval_d(const uint i);
-
+	
 	std::vector<std::vector<VarVal>> conVAll;
 
 	struct ConnInfo {
