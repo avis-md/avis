@@ -7,17 +7,17 @@ INODE_DEF(__("Show Range"), ShowRange, SET)
 
 Node_ShowRange::Node_ShowRange() : INODE_INIT, invert(false), rMin(0), rMax(1) {
 	INODE_TITLE(NODE_COL_MOD);
-	inputR.resize(1);
-	script->invars.push_back(std::pair<std::string, std::string>("values", "list(1d)"));
+	INODE_SINIT(
+		scr->AddInput(_("values"), AN_VARTYPE::DOUBLE, 1);
+	);
 }
 
 void Node_ShowRange::Execute() {
     if (!inputR[0].first) return;
-	CVar& cv = inputR[0].getconv();
-	auto& sz = *cv.dimVals[0];
-	if (sz != Particles::particleSz) return;
+	auto& ir = inputR[0];
+	if (*ir.getdim(0) != Particles::particleSz) return;
 
-    double* vals = *((double**)cv.value);
+    double* vals = *((double**)ir.getval());
 
 #pragma omp parallel for
     for (int a = 0; a < Particles::particleSz; ++a) {
@@ -28,6 +28,7 @@ void Node_ShowRange::Execute() {
             Particles::visii[a] = invert;
     }
     Particles::visDirty = true;
+	canReset = true;
 }
 
 void Node_ShowRange::DrawHeader(float& off) {
@@ -42,6 +43,20 @@ void Node_ShowRange::DrawHeader(float& off) {
     s = UI2::EditText(pos.x + 2, off + 17, (uint)width - 4, "max", s);
     rMax = TryParse(s, 0.f);
 	off += 35;
+}
+
+void Node_ShowRange::DrawFooter(float& off) {
+	if (canReset) {
+		if (Engine::Button(pos.x + 2, off, width - 4, 16, white(1, 0.4f), "Reset", 12, white(), true) == MOUSE_RELEASE) {
+#pragma omp parallel for
+			for (int a = 0; a < Particles::particleSz; ++a) {
+				Particles::visii[a] = true;
+			}
+			Particles::visDirty = true;
+			canReset = false;
+		}
+		off += 17;
+	}
 }
 
 void Node_ShowRange::Save(XmlNode* n) {

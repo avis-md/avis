@@ -65,7 +65,7 @@ public:
 		CVar& getconv() { return first->conV[second]; }
 		void* getval();
 		AnScript::Var& getvar();
-		int* getdim(const CVar::szItem& i); //shorthand
+		int* getdim(int i); //shorthand
 	};
 	std::vector<nodecon> inputR;
 	std::vector<std::vector<nodecon>> outputR;

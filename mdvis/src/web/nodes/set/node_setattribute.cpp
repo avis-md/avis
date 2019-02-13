@@ -5,30 +5,30 @@
 
 INODE_DEF(__("Set Attribute"), SetAttribute, SET)
 
-Node_SetAttribute::Node_SetAttribute() : INODE_INIT, attrId(0), _attrId(-1),  attrSz(-1), di(&attrId, nullptr), timed(true) {
+Node_SetAttribute::Node_SetAttribute() : INODE_INIT, attrId(0), _attrId(-1), attrSz(-1), di(&attrId, nullptr), timed(true) {
 	INODE_TITLE(NODE_COL_IO);
-
-	inputR.resize(1);
-	script->invars.push_back(std::pair<std::string, std::string>("values", "list(1*)"));
+	INODE_SINIT(
+		scr->AddInput(_("values"), AN_VARTYPE::ANY, 1);
+	);
 }
 
 #define RETERR(msg) { std::cerr << msg << std::endl; return; }
 
 void Node_SetAttribute::Execute() {
-    if (!inputR[0].first) return;
+	auto& ir = inputR[0];
+    if (!ir.first) return;
 	if (!Particles::attrs.size()) {
 		RETERR("No attribute available!");
 	}
-	CVar& cv = inputR[0].getconv();
-	auto sz = *cv.dimVals[0];
+	auto sz = *ir.getdim(0);
 	if (sz != Particles::particleSz)
 		RETERR("Attribute must be for each atom!");
-	auto src = *((void**)cv.value);
+	auto src = *((void**)ir.getval());
 	auto prm = Particles::attrs[attrId + Particles::readonlyAttrCnt];
 	prm->timed = (AnWeb::execFrame > 0 && timed);
 	auto& tar = prm->Get(AnWeb::realExecFrame);
 	tar.resize(sz);
-	switch (cv.typeName[6]) {
+	switch (ir.getvar().typeName[6]) {
 	case 's':
 		for (int i = 0; i < sz; ++i) {
 			tar[i] = ((short*)src)[i];
@@ -43,7 +43,7 @@ void Node_SetAttribute::Execute() {
 		memcpy(tar.data(), src, sz * sizeof(double));
 		break;
 	default:
-		RETERR("Unexpected data type " + cv.typeName + "!");
+		RETERR("Unexpected data type " + ir.getvar().typeName + "!");
 	}
 	prm->dirty = true;
 	if (prm->timed) prm->Set((uint)(AnWeb::realExecFrame));

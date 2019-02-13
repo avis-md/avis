@@ -68,10 +68,10 @@ void CNode::Execute() {
 				script->SetInput(i, *(double*)v);
 				break;
 			case AN_VARTYPE::LIST: {
-				auto& sos = inputR[i].getconv().szOffsets;
-				std::vector<int> szs(sos.size());
-				for (uint j = 0; j < szs.size(); ++j) {
-					szs[j] = *inputR[i].getdim(sos[j]);
+				auto& vr = inputR[i].getvar();
+				std::vector<int> szs(vr.dim);
+				for (uint j = 0; j < vr.dim; ++j) {
+					szs[j] = *inputR[i].getdim(j);
 				}
 				script->SetInput(i, *(void**)v, mv.name[6], szs);
 			}

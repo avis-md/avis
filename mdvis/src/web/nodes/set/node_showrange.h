@@ -7,13 +7,15 @@ public:
 
 	Node_ShowRange();
     
-    bool invert;
+    bool invert = false;
+	bool canReset = false;
 
     float rMin, rMax;
     
 	void Execute() override;
 	void OnAnimFrame() override { Execute(); }
     void DrawHeader(float& off) override;
+	void DrawFooter(float& off) override;
 
 	void Save(XmlNode* n) override;
 	void Load(XmlNode* n) override;

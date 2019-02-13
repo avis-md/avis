@@ -9,17 +9,15 @@
 #define _script script->parent
 
 void* AnNode::nodecon::getval() {
-	auto& cv = getconv();
-	return first->script->Resolve(cv.offset);
+	return first->script->Resolve(getconv().offset);
 }
 
 AnScript::Var& AnNode::nodecon::getvar() {
-	auto& cv = getconv();
 	return first->script->parent->outputs[second];
 }
 
-int* AnNode::nodecon::getdim(const CVar::szItem& i) {
-	return first->script->GetDimValue(i);
+int* AnNode::nodecon::getdim(int i) {
+	return first->script->GetDimValue(getconv().szOffsets[i]);
 }
 
 

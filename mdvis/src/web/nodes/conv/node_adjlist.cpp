@@ -1,4 +1,5 @@
 #include "node_adjlist.h"
+#include "web/anweb.h"
 
 #define RETERR(msg) { std::cerr << msg << std::endl; return; }
 
@@ -6,29 +7,32 @@ INODE_DEF(__("To Adjacency List"), AdjList, CONV)
 
 Node_AdjList::Node_AdjList() : INODE_INIT {
 	INODE_TITLE(NODE_COL_NRM);
+	INODE_SINIT(
+		scr->desc = R"(Converts a pair list into
+an adjacency list)";
+		scr->descLines = 2;
 
-	AddInput();
-	scr.AddInput("pairlist", "list(2i)");
-	AddInput();
-	scr.AddInput("id count", "int");
-	AddInput();
-	scr.AddInput("capacity", "int");
+		scr->AddInput(_("list"), AN_VARTYPE::INT, 2);
+		scr->AddInput(_("max id"), AN_VARTYPE::INT);
+		scr->AddInput(_("capacity"), AN_VARTYPE::INT);
 
-	AddOutput(CVar("adjlist", 'i', 2, { &count, &listsize }));
-	auto& cv = conV[0];
-	script->AddOutput(cv);
-	cv.value = &cv.data.val.arr.p;
+		scr->AddOutput(_("result"), AN_VARTYPE::INT, 2);
+	);
+
+	IAddConV(0, { &count, &listsize }, {});
+
 }
 
 void Node_AdjList::Execute() {
 	if (!inputR[0].first) return;
-	auto& cv = inputR[0].getconv();
-	auto data = *(int**)cv.value;
-	auto ccnt = *cv.dimVals[0];
+	if (*inputR[0].getdim(1) != 2)
+		RETERR("input list dim 2 size is not 2!");
+	auto data = *(int**)inputR[0].getval();
+	auto ccnt = *inputR[0].getdim(0);
 	count = getval_i(1);
 	listsize = getval_i(2);
-	if (listsize <= 0) RETERR("list size must be > 0!");
-	if (count <= 0) RETERR("atom count is 0!");
+	if (listsize <= 0) RETERR("list size must be positive!");
+	if (count <= 0) RETERR("max id must be positive!");
 	conns.clear();
 	conns.resize(count*listsize, -1);
 	for (int a = 0; a < ccnt; ++a) {
@@ -50,7 +54,9 @@ void Node_AdjList::Execute() {
 			RETERR("List size is too short for index " << i1 << "!");
 		*p0 = i1; *p1 = i0;
 	}
-	conV[0].data.val.arr.p = &conns[0];
+
+	auto& ov = ((DmScript_I*)script.get())->outputVs;
+	ov[0].val.p = conns.data();
 }
 
 
@@ -58,24 +64,26 @@ INODE_DEF(__("To Paired List"), AdjListI, CONV)
 
 Node_AdjListI::Node_AdjListI() : INODE_INIT {
 	INODE_TITLE(NODE_COL_NRM);
+	INODE_SINIT(
+		scr->desc = R"(Converts an adjacency list into
+a pair list)";
+	scr->descLines = 2;
 
-	AddInput();
-	scr.AddInput("adjlist", "list(2i)");
+	scr->AddInput(_("list"), AN_VARTYPE::INT, 2);
 
-	AddOutput(CVar("pairlist", 'i', 2, { &count, nullptr }, { 2 }));
-	auto& cv = conV[0];
-	scr.AddOutput(cv);
-	cv.value = &cv.data.val.arr.p;
+	scr->AddOutput(_("result"), AN_VARTYPE::INT, 2);
+	);
+
+	IAddConV(0, { &count, 0 }, { 2 });
 }
 
 void Node_AdjListI::Execute() {
 	count = 0;
-	auto v = *conV[0].dimVals[1];
 	if (!inputR[0].first) return;
-	auto& cv = inputR[0].getconv();
-	auto data = *(int**)cv.value;
-	auto cnt = *cv.dimVals[0];
-	auto lsz = *cv.dimVals[1];
+	auto& ir = inputR[0];
+	auto data = *(int**)ir.getval();
+	auto cnt = *ir.getdim(0);
+	auto lsz = *ir.getdim(1);
 	if (!cnt || !lsz) return;
 	conns.clear();
 	conns.reserve(cnt*lsz/2);
@@ -90,5 +98,6 @@ void Node_AdjListI::Execute() {
 			}
 		}
 	}
-	conV[0].data.val.arr.p = &conns[0];
+	auto& ov = ((DmScript_I*)script.get())->outputVs;
+	ov[0].val.p = conns.data();
 }

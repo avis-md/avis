@@ -331,9 +331,12 @@
     <ClCompile Include="src\web\dmscript.cpp" />
     <ClCompile Include="src\web\errorview.cpp" />
     <ClCompile Include="src\web\annode_internal.cpp" />
+    <ClCompile Include="src\web\nodes\conv\node_adjlist.cpp" />
     <ClCompile Include="src\web\nodes\get\node_info.cpp" />
     <ClCompile Include="src\web\nodes\get\node_inputs.cpp" />
     <ClCompile Include="src\web\nodes\misc\node_plot.cpp" />
+    <ClCompile Include="src\web\nodes\set\node_setattribute.cpp" />
+    <ClCompile Include="src\web\nodes\set\node_showrange.cpp" />
     <ClCompile Include="src\xdrfile\xdrfile.c" />
     <ClCompile Include="src\xdrfile\xdrfile_trr.c" />
     <ClCompile Include="src\xdrfile\xdrfile_xtc.c" />
@@ -457,9 +460,12 @@
     <ClInclude Include="src\web\dmscript.h" />
     <ClInclude Include="src\web\errorview.h" />
     <ClInclude Include="src\web\annode_internal.h" />
+    <ClInclude Include="src\web\nodes\conv\node_adjlist.h" />
     <ClInclude Include="src\web\nodes\get\node_info.h" />
     <ClInclude Include="src\web\nodes\get\node_inputs.h" />
     <ClInclude Include="src\web\nodes\misc\node_plot.h" />
+    <ClInclude Include="src\web\nodes\set\node_setattribute.h" />
+    <ClInclude Include="src\web\nodes\set\node_showrange.h" />
     <ClInclude Include="src\xdrfile\xdrfile.h" />
     <ClInclude Include="src\xdrfile\xdrfile_trr.h" />
     <ClInclude Include="src\xdrfile\xdrfile_xtc.h" />

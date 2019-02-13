@@ -28,7 +28,6 @@ types: [atomid]
 		scr->AddOutput(_("velocities"), AN_VARTYPE::DOUBLE, 2);
 		scr->AddOutput(_("types"), AN_VARTYPE::SHORT, 1);
 	);
-	auto _scr = ((DmScript_I*)script.get());
 
 	IAddConV(0, { (int*)&parcount, 0 }, { 3 });
 	IAddConV(0, { (int*)&parcount, 0 }, { 3 });
