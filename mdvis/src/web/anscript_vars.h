@@ -19,6 +19,15 @@ const std::string AN_VARTYPE_STRS[] = {
 	"*"
 };
 
+const int AN_VARTYPE_STRIDES[] = {
+	0,
+	sizeof(short),
+	sizeof(int),
+	sizeof(double),
+	-1,
+	0
+};
+
 struct VarVal {
 	union {
 		short s;

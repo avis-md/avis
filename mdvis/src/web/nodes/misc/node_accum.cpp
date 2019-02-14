@@ -5,12 +5,14 @@
 
 INODE_DEF(__("Accumulate"), Accum, MISC)
 
-Node_Accum::Node_Accum() : INODE_INIT {
+Node_Accum::Node_Accum() : INODE_INIT{
 	INODE_TITLE(NODE_COL_SPC)
-	AddInput();
-	script->AddInput("value", "*");
-	AddOutput(CVar("result", 'd', 0, {}, {}));
-	script->AddOutput("accumulated", "list(??)");
+	INODE_SINIT(
+		scr->AddInput(_("value"), AN_VARTYPE::ANY);
+		scr->AddOutput(_("result"), AN_VARTYPE::ANY, 1);
+	);
+	
+	IAddConV(0, { (int*)&Particles::anim.frameCount }, {});
 }
 
 void Node_Accum::DrawHeader(float& off) {
@@ -19,18 +21,22 @@ void Node_Accum::DrawHeader(float& off) {
 }
 
 void Node_Accum::Execute() {
-	auto& cv = inputR[0].getconv();
-	if (cv.type == AN_VARTYPE::LIST) {
+	auto& vr = inputR[0].getvar();
+	if (vr.type == AN_VARTYPE::LIST) {
 		throw "Accumulate does not support lists yet!";
 		return;
 	}
-	std::memcpy(&vals[AnWeb::realExecFrame*cv.stride], *(void**)cv.value, cv.stride);
+	std::memcpy(&vals[AnWeb::realExecFrame*vr.stride], *(void**)inputR[0].getval(), vr.stride);
 }
 
 void Node_Accum::OnConn(bool o, int i) {
 	if (!o) {
-		vals.resize(Particles::anim.frameCount * inputR[0].getconv().stride);
-		conV[0].value = vals.data();
 		Disconnect(0, true);
+		vals.resize(Particles::anim.frameCount * inputR[0].getvar().stride);
+		auto& ov = ((DmScript_I*)script.get())->outputVs;
+		ov[0].val.p = vals.data();
+		auto& ot = script->parent->outputs[0];
+		ot.itemType = inputR[0].getvar().type;
+		ot.InitName();
 	}
 }

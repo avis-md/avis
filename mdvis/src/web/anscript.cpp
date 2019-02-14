@@ -5,7 +5,9 @@ void AnScript::Var::InitName() {
 	if (type == AN_VARTYPE::LIST) {
 		typeName[5] = (dim < 0) ? '*' : std::to_string(dim)[0];
 		typeName[6] = AN_VARTYPE_STRS[(int)itemType][0];
+		stride = AN_VARTYPE_STRIDES[(int)itemType];
 	}
+	else stride = AN_VARTYPE_STRIDES[(int)type];
 }
 
 bool AnScript::Clear() {

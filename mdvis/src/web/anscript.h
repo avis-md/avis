@@ -17,6 +17,7 @@ public:
 		AN_VARTYPE type, itemType;
 		int dim;
 		std::string typeName;
+		int stride;
 		enum class UI_TYPE {
 			NONE,
 			ENUM,
