@@ -247,14 +247,6 @@ void AnWeb::Draw() {
 			}
 		}
 
-		if (Input::KeyDown(KEY::Escape)) {
-			if (selScript) selScript = nullptr;
-			else {
-				drawFull = false;
-				AnBrowse::expandPos = AnOps::expandPos = 0;
-				ParGraphics::tfboDirty = true;
-			}
-		}
 		if (selScript) {
 			Texture icon = Icons::lang_ft;
 			if ((uintptr_t)selScript == 1)
@@ -264,12 +256,6 @@ void AnWeb::Draw() {
 			else if (selScript->type == AnScript::TYPE::PYTHON)
 				icon = Icons::lang_py;
 			UI::Texture(Input::mousePos.x - 16, Input::mousePos.y - 16, 32, 32, icon, white(0.3f));
-		}
-
-		if (Engine::Button(Display::width - 71.f, 1.f, 70.f, 16.f, white(1, 0.4f), _("Done"), 12.f, white(), true) == MOUSE_RELEASE) {
-			drawFull = false;
-			AnBrowse::expandPos = AnOps::expandPos = 0;
-			ParGraphics::tfboDirty = true;
 		}
 
 		float wo = 200;
@@ -289,7 +275,7 @@ void AnWeb::Draw() {
 			Clear0();
 		}
 		wo += 75;
-		bool canexec = (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
+		bool canexec = !!Particles::particleSz && (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
 		if (Engine::Button(wo, 1, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
 			if (canexec) AnWeb::Execute(false);
 		}
@@ -315,6 +301,15 @@ void AnWeb::Draw() {
 		UI::font->Align(ALIGN_MIDCENTER);
 		UI::Label(Display::width * 0.5f, Display::height * 0.5f, 12, AnBrowse::busyMsg, white(0.8f));
 		UI::font->Align(ALIGN_TOPLEFT);
+	}
+
+	if (Input::KeyDown(KEY::Escape) || (Engine::Button(Display::width - 71.f, 1.f, 70.f, 16.f, white(1, 0.4f), _("Done"), 12.f, white(), true) == MOUSE_RELEASE)) {
+		if (selScript) selScript = nullptr;
+		else {
+			drawFull = false;
+			AnBrowse::expandPos = AnOps::expandPos = 0;
+			ParGraphics::tfboDirty = true;
+		}
 	}
 #endif
 }

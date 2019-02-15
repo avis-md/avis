@@ -390,6 +390,7 @@ The hash for this program is )" << VisSystem::version_hash
 		ParMenu::LoadRecents();
 
 		Preferences::Load();
+		CReader::LoadReader();
 		AnBrowse::Scan();
 		//AnBrowse::Refresh();
 

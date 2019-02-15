@@ -275,8 +275,8 @@ void ParGraphics::Init() {
 		std::random_device rd;
 		auto rng = std::default_random_engine(rd());
 		std::shuffle(bgs.begin(), bgs.end(), rng);
-		bg = Texture(bgs[0], false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	}
+	bg = Texture(bgs[0], false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	splash = Texture(IO::path + "res/bg_splash.png", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	logo = Texture(IO::path + "res/bg_logo.png", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	GLuint mv;

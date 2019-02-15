@@ -24,6 +24,13 @@ void CReader::Init() {
 	Preferences::LinkEnv("VCBAT", &vcbatPath);
 	Preferences::LinkEnv("MINGW", &mingwPath);
 	Preferences::Link("AMSVC", &useMsvc);
+#endif
+	Preferences::Link("AOMP", &useOMP);
+	Preferences::Link("AOMPL", &useOMP2);
+}
+
+void CReader::LoadReader() {
+#ifdef PLATFORM_WIN
 	int has = 2;
 	if (!mingwPath.size() || !IO::HasFile(mingwPath + "/g++.exe")) {
 		mingwPath = "";
@@ -45,9 +52,6 @@ void CReader::Init() {
 	else
 		Debug::Warning("CReader", "C++ compiler \"" + gpp + "\" not available!");
 #endif
-	Preferences::Link("AOMP", &useOMP);
-	Preferences::Link("AOMPL", &useOMP2);
-
 	if (AnWeb::hasC && !useMsvc && !IO::HasFile(IO::path + "res/noterminate.o")) {
 		std::string cmd = gpp + " -std=c++11 -fPIC -c -o \""
 			+ IO::path + "res/noterminate.o\" \""
@@ -292,7 +296,10 @@ bool CReader::Read(CScript* scr) {
 #endif
 		*/
 	}
-	else Engine::AcquireLock(5);
+	else {
+		scr->chgtime = scr->badtime;
+		Engine::AcquireLock(5);
+	}
 
 	std::ifstream strm(fp + EXT_CS);
 	std::string ln;

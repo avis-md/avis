@@ -5,8 +5,8 @@
 class CReader {
 public:
 	static void Init();
+	static void LoadReader();
 
-	static void Compile(std::string path);
 	static bool Read(CScript* scr);
 	static void Refresh(CScript* scr);
 
