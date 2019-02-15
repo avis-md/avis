@@ -1,7 +1,23 @@
 #include "shader.h"
 
-bool Shader::LoadShader(GLenum shaderType, std::string source, GLuint& shader, std::string* err) {
+Shader& Shader::AddUniform(const std::string& s) {
+	uniforms.push_back(glGetUniformLocation(pointer, s.c_str()));
+	return *this;
+}
 
+void Shader::Bind() {
+	glUseProgram(pointer);
+}
+
+void Shader::Unbind() {
+	glUseProgram(0);
+}
+
+const GLint Shader::Loc(int i) {
+	return uniforms[i];
+}
+
+bool Shader::LoadShader(GLenum shaderType, std::string source, GLuint& shader, std::string* err) {
 	int compile_result = 0;
 
 	shader = glCreateShader(shaderType);
@@ -97,4 +113,9 @@ GLuint Shader::FromF(GLuint vert, const std::string& frag) {
 	glDetachShader(pointer, fragment_shader);
 	glDeleteShader(fragment_shader);
 	return pointer;
+}
+
+void Shader::DestroyRef() {
+	if (!!pointer)
+		glDeleteProgram(pointer);
 }

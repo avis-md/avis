@@ -9,11 +9,12 @@ Node_GetAttribute::Node_GetAttribute() :
 		INODE_INITF(AN_FLAG_NOSAVECONV | AN_FLAG_RUNONSEEK),
 		attrId(0), di(&attrId, &Particles::attrNms[0]) {
 	INODE_TITLE(NODE_COL_IO);
+	INODE_SINIT(
+		scr->AddOutput(_("values"), AN_VARTYPE::DOUBLE, 1);
+	);
 
-	AddOutput(CVar("values", 'd', 1, { (int*)&Particles::particleSz }));
-	scr.AddOutput(conV[0]);
-	auto& cv = conV[0];
-	cv.value = &cv.data.val.arr.p;
+	IAddConV(0, { (int*)&Particles::particleSz }, {});
+
 }
 
 #define RETERR(msg) { std::cerr << msg << std::endl; return; }
@@ -21,8 +22,8 @@ Node_GetAttribute::Node_GetAttribute() :
 void Node_GetAttribute::Execute() {
 	if (!Particles::attrs.size())
 		RETERR("No attribute available!");
-	auto& cv = conV[0];
-	cv.data.val.arr.p = Particles::attrs[attrId]->Get(
+	auto& ov = ((DmScript_I*)script.get())->outputVs;
+	ov[0].val.p = Particles::attrs[attrId]->Get(
 		(!AnWeb::execFrame)? Particles::anim.currentFrame : AnWeb::execFrame-1).data();
 }
 

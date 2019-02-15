@@ -38,7 +38,7 @@ GLint Engine::defColLoc = 0;
 GLint Engine::defWColLoc = 0;
 GLint Engine::defWMVPLoc = 0;
 
-PROGDEF(Engine::lineWProg)
+Shader Engine::lineWProg;
 
 std::vector<Rect> Engine::stencilRects;
 Rect* Engine::stencilRect = nullptr;
@@ -102,7 +102,7 @@ void Engine::InitShaders() {
 
 	lineWProg = Shader::FromVF(glsl::lineWVert, glsl::coreFrag3);
 	int i = 0;
-#define LC(nm) lineWProgLocs[i++] = glGetUniformLocation(lineWProg, #nm)
+#define LC(nm) lineWProg.AddUniform(#nm)
 	LC(poss); LC(width); LC(MVP); LC(col);
 #undef LC
 }
@@ -369,12 +369,12 @@ void Engine::DrawLinesW(Vec3* pts, int num, Vec4 col, float width) {
 	auto mvp = MVP::projection() * MVP::modelview();
 	
 	glUseProgram(lineWProg);
-	glUniform1i(lineWProgLocs[0], 0);
+	glUniform1i(lineWProg.Loc(0), 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_BUFFER, UI::_tvbo);
-	glUniform2f(lineWProgLocs[1], width / Display::width, width / Display::height);
-	glUniformMatrix4fv(lineWProgLocs[2], 1, GL_FALSE, glm::value_ptr(mvp));
-	glUniform4f(lineWProgLocs[3], col.r, col.g, col.b, col.a);
+	glUniform2f(lineWProg.Loc(1), width / Display::width, width / Display::height);
+	glUniformMatrix4fv(lineWProg.Loc(2), 1, GL_FALSE, glm::value_ptr(mvp));
+	glUniform4f(lineWProg.Loc(3), col.r, col.g, col.b, col.a);
 	glBindVertexArray(Camera::emptyVao);
 	glDrawArrays(GL_TRIANGLES, 0, 6 * (num-1));
 	glBindVertexArray(0);

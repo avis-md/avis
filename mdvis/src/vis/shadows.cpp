@@ -22,14 +22,14 @@ bool Shadows::isPass = false;
 
 GLuint Shadows::_fbo, Shadows::_dtex;
 
-PROGDEF(Shadows::_prog);
+Shader Shadows::_prog;
 
 void Shadows::Init() {
 	cam = ChokoLait::mainCamera;
 
 	_prog = Shader::FromVF(glsl::minVert, IO::GetText(IO::path + "shadows.txt"));
 
-#define LOC(nm) _progLocs[i++] = glGetUniformLocation(_prog, #nm)
+#define LOC(nm) _prog.AddUniform(#nm)
 	uint i = 0;
 	LOC(_IP);
 	LOC(screenSize);
@@ -135,22 +135,22 @@ void Shadows::Reblit() {
 	auto _cp = MVP::projection();
 
 	glUseProgram(_prog);
-	glUniformMatrix4fv(_progLocs[0], 1, GL_FALSE, glm::value_ptr(glm::inverse(_cp)));
-	glUniform2f(_progLocs[1], (float)Display::actualWidth, (float)Display::actualHeight);
-	glUniform1i(_progLocs[2], 0);
+	glUniformMatrix4fv(_prog.Loc(0), 1, GL_FALSE, glm::value_ptr(glm::inverse(_cp)));
+	glUniform2f(_prog.Loc(1), (float)Display::actualWidth, (float)Display::actualHeight);
+	glUniform1i(_prog.Loc(2), 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, cam->texs.normTex);
-	glUniform1i(_progLocs[3], 1);
+	glUniform1i(_prog.Loc(3), 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, cam->texs.depthTex);
-	glUniform1i(_progLocs[4], 2);
+	glUniform1i(_prog.Loc(4), 2);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, _dtex);
-	glUniform1f(_progLocs[5], bias / 100);
-	glUniform1f(_progLocs[6], str);
-	glUniform3f(_progLocs[7], cpos.x, cpos.y, cpos.z);
-	glUniform1f(_progLocs[8], _sz / 2048.f);
-	glUniformMatrix4fv(_progLocs[9], 1, GL_FALSE, glm::value_ptr(_p));
+	glUniform1f(_prog.Loc(5), bias / 100);
+	glUniform1f(_prog.Loc(6), str);
+	glUniform3f(_prog.Loc(7), cpos.x, cpos.y, cpos.z);
+	glUniform1f(_prog.Loc(8), _sz / 2048.f);
+	glUniformMatrix4fv(_prog.Loc(9), 1, GL_FALSE, glm::value_ptr(_p));
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

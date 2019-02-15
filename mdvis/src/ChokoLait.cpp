@@ -1,4 +1,5 @@
 #include "ChokoLait.h"
+#include "vis/system.h"
 
 #ifdef PLATFORM_OSX
 #include </usr/include/mach-o/getsect.h>
@@ -100,6 +101,7 @@ void ChokoLait::_InitVars() {
 	signal(SIGTERM, &_sigtrm);
 
 	IO::InitPath();
+	VisSystem::InitEnv();
 	Debug::Init();
 	Debug::Message("IO", "Path is " + IO::path);
 

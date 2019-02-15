@@ -51,5 +51,5 @@ public:
     static bool Refresh();
     static void Draw(), DrawMenu(float off);
 
-    PROGDEF_H(shad, 15);
+    static Shader shad;
 };

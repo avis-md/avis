@@ -320,7 +320,7 @@ public:
 	static GLuint defProgram, defProgramW, unlitProgram, unlitProgramA, unlitProgramC, skyProgram;
 	static GLint defColLoc, defWColLoc, defWMVPLoc;
 	
-	PROGDEF_H(lineWProg, 5)
+	static Shader lineWProg;
 
 	static void InitShaders();
 

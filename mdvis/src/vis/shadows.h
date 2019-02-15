@@ -20,7 +20,7 @@ public:
 
 	static GLuint _fbo, _dtex;
 
-	PROGDEF_H(_prog, 10);
+	static Shader _prog;;
 
 	static void Init();
 	static void UpdateBox();

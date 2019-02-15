@@ -33,8 +33,7 @@ GLuint UI::_tvbo = 0;
 byte UI::_layer, UI::_layerMax;
 bool UI::ignoreLayers = false;
 
-PROGDEF(UI::quadProgC)
-PROGDEF(UI::quadProgT)
+Shader UI::quadProgC, UI::quadProgT;
 
 Vec3 AU(Vec3 vec) {
 	if (!UI::matrixIsI) {
@@ -55,9 +54,8 @@ void UI::Init() {
 	quadProgC = Shader::FromVF(glsl::coreVert, glsl::coreFrag3);
 	quadProgT = Shader::FromVF(glsl::coreVert, glsl::coreFrag);
 
-	quadProgCLocs[0] = glGetUniformLocation(quadProgC, "col");
-#define LC(nm) quadProgTLocs[i++] = glGetUniformLocation(quadProgT, #nm)
-	int i = 0;
+	quadProgC.AddUniform("col");
+#define LC(nm) quadProgT.AddUniform(#nm)
 	LC(sampler);
 	LC(col);
 	LC(level);
@@ -140,12 +138,12 @@ void UI::Quad(float x, float y, float w, float h, GLuint tex, Vec4 col, int mip,
 
 	UI::SetVao(4, quadPoss, quadUvs);
 
-	glUseProgram(quadProgT);
-	glUniform1i(quadProgTLocs[0], 0);
+	quadProgT.Bind();
+	glUniform1i(quadProgT.Loc(0), 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex);
-	glUniform4f(quadProgTLocs[1], col.r, col.g, col.b, col.a * UI::alpha);
-	glUniform1f(quadProgTLocs[2], mip);
+	glUniform4f(quadProgT.Loc(1), col.r, col.g, col.b, col.a * UI::alpha);
+	glUniform1f(quadProgT.Loc(2), mip);
 	glBindVertexArray(UI::_vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Engine::quadBuffer);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -446,7 +444,9 @@ void UI::Label(float x, float y, float s, std::string st, Vec4 col, float maxw, 
 
 void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, float maxw, Font* font) {
 	if (!s || !str[0]) return;
-	uint si = (uint)std::roundf(s);
+	x = std::round(x);
+	y = std::round(y);
+	uint si = (uint)std::round(s);
 	sz = std::min(sz, (uint)strlen(str));
 	font->SizeVec(sz);
 	byte align = (byte)font->alignment;

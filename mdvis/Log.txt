@@ -1,0 +1,46 @@
+[i 203]Debug: Log Initialized
+[i 208]IO: Path is C:/Users/Chokopan/Documents/Github/mdvis/x64/Debug/
+[i 220]System: Opening GL context
+[i 662]System: Initializing Font
+[i 684]System: Initializing UI
+[i 813]System: Initializing UI2
+[i 838]System: Initializing UI3
+[i 840]System: Initializing Browse
+[i 841]System: Initializing CReader
+[i 843]System: Skipping RayTracer
+[i 845]System: Initializing Color
+[i 898]System: Initializing Icons
+[i 990]System: Skipping CubeMarcher
+[i 992]System: Initializing VisSystem
+[i 994]System: Initializing Particles
+[i 996]System: Initializing ParMenu
+[i 998]System: Initializing ParLoader
+[i 1000]System: Initializing ParGraphics
+[i 2124]System: Initializing Protein
+[i 2163]System: Skipping Shadows
+[i 2165]System: Initializing AnWeb
+[i 2166]System: Initializing AnNode
+[i 2170]System: Initializing Effects
+[i 2367]System: Initializing SSH
+[i 2371]SSH: Init finished.
+[i 2372]System: Initializing AnBrowse
+[i 2374]System: Initializing ChangeLog
+[i 2390]AnBrowse: Scanning nodes folder...
+[i 2392]AnBrowse:  Scanning folder: /
+[i 2394]AnBrowse:   file: bar.cpp
+[i 2395]AnBrowse:   file: baz.cpp
+[i 2397]AnBrowse:   file: densityProfile.cpp
+[i 2401]AnBrowse:   file: foo.cpp
+[i 2403]AnBrowse:   file: randcol.cpp
+[i 2406]AnBrowse:   file: tete.cpp
+[i 2439]AnBrowse: Refreshing
+[i 2445]hdr: Opening C:/Users/Chokopan/Documents/Github/mdvis/x64/Debug/backgrounds/FP Court/specular.hdr
+[i 2445]CReader: Reloading bar.cpp
+[i 2576]hdr: Opening C:/Users/Chokopan/Documents/Github/mdvis/x64/Debug/backgrounds/FP Court/diffuse.hdr
+[i 2907]CReader: Reloading baz.cpp
+[i 2918]CReader: Reloading densityProfile.cpp
+[i 3592]CReader: Reloading foo.cpp
+[i 3615]CReader: Reloading randcol.cpp
+[i 3734]CReader: Reloading tete.cpp
+[i 5190]Unloader: Unloading...
+[i 5196]SSH: Exit

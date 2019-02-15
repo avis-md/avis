@@ -452,6 +452,7 @@ void Preferences::LoadAttrs() {
 
 	auto& h = head->children[0].children;
 
+	bondlengths.clear();
 	for (auto& l : h[0].children) {
 		if (l.name != "item") continue;
 		bondlengths.push_back(Bondlen());
@@ -461,6 +462,7 @@ void Preferences::LoadAttrs() {
 		len.len = (float)std::stof(l.children[2].value);
 	}
 
+	typecolors.clear();
 	for (auto& l : h[1].children) {
 		typecolors.push_back(Typecol());
 		auto& len = typecolors.back();
@@ -468,6 +470,7 @@ void Preferences::LoadAttrs() {
 		Xml::ToVec(&l, len.col);
 	}
 
+	typeradii.clear();
 	for (auto& l : h[2].children) {
 		typeradii.push_back(Typerad());
 		auto& rad = typeradii.back();

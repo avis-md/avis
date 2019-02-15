@@ -43,13 +43,13 @@ public:
 	static float orientStr;
 	static uint orientParam[3];
 	
-	PROGDEF_H(reflProg, 20);
-	PROGDEF_H(reflCProg, 10);
-	PROGDEF_H(parProg, 20);
-	PROGDEF_H(parConProg, 20);
-	PROGDEF_H(parConLineProg, 20);
-	PROGDEF_H(selHlProg, 5);
-	PROGDEF_H(colProg, 10);
+	static Shader reflProg;;
+	static Shader reflCProg;;
+	static Shader parProg;;
+	static Shader parConProg;;
+	static Shader parConLineProg;;
+	static Shader selHlProg;;
+	static Shader colProg;;
 
 	static std::vector<uint> hlIds;
 	static std::vector<std::pair<uint, std::pair<uint, byte>>> drawLists, drawListsB;

@@ -14,7 +14,7 @@
 byte Protein::proCnt = 0;
 std::vector<Protein> Protein::pros;
 
-PROGDEF(Protein::shad);
+Shader Protein::shad;
 
 Protein::Protein() : cnt(0), chainReso(8), loopReso(20), expanded(false), visible(true), drawGrad(false) {}
 
@@ -59,7 +59,7 @@ byte _CntOf(const std::vector<uint>& c, char _c) {
 
 void Protein::Init() {
 	shad = Shader::FromVF(IO::GetText(IO::path + "prochainV.txt"), IO::GetText(IO::path + "prochainF.txt"));
-#define LC(nm) shadLocs[i++] = glGetUniformLocation(shad, #nm);
+#define LC(nm) shad.AddUniform(#nm)
 	int i = 0;
 	LC(_MV);
 	LC(_P);
@@ -254,22 +254,22 @@ void Protein::Draw() {
 		if (!p.visible) continue;
 		
 		glUseProgram(shad);
-		glUniformMatrix4fv(shadLocs[0], 1, GL_FALSE, glm::value_ptr(_mv));
-		glUniformMatrix4fv(shadLocs[1], 1, GL_FALSE, glm::value_ptr(_p));
-		glUniform1i(shadLocs[2], 1);
+		glUniformMatrix4fv(shad.Loc(0), 1, GL_FALSE, glm::value_ptr(_mv));
+		glUniformMatrix4fv(shad.Loc(1), 1, GL_FALSE, glm::value_ptr(_p));
+		glUniform1i(shad.Loc(2), 1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
-		glUniform1i(shadLocs[3], 2);
+		glUniform1i(shad.Loc(3), 2);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_BUFFER, p.idBufTex);
-		glUniform1i(shadLocs[4], p.cnt * 3);
-		glUniform1i(shadLocs[5], p.chainReso);
-		glUniform1i(shadLocs[6], p.loopReso);
-		glUniform1i(shadLocs[7], b);
-		glUniform1f(shadLocs[8], p.smoothness);
-		glUniform3f(shadLocs[9], p.tint.r, p.tint.g, p.tint.b);
-		glUniform1i(shadLocs[10], p.drawGrad);
-		glUniform4fv(shadLocs[11], 3, &ParGraphics::gradCols[0][0]);
+		glUniform1i(shad.Loc(4), p.cnt * 3);
+		glUniform1i(shad.Loc(5), p.chainReso);
+		glUniform1i(shad.Loc(6), p.loopReso);
+		glUniform1i(shad.Loc(7), b);
+		glUniform1f(shad.Loc(8), p.smoothness);
+		glUniform3f(shad.Loc(9), p.tint.r, p.tint.g, p.tint.b);
+		glUniform1i(shad.Loc(10), p.drawGrad);
+		glUniform4fv(shad.Loc(11), 3, &ParGraphics::gradCols[0][0]);
 
 		glBindVertexArray(Camera::emptyVao);
 		glDrawArrays(GL_TRIANGLES, 0, 6 * (p.cnt * 3 - 1) * p.chainReso * p.loopReso);

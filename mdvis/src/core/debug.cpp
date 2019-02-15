@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "vis/system.h"
 
 #define DBG_TIMESTAMP(n) "["#n" " + std::to_string(milliseconds() - Time::startMillis) + "]"
 
@@ -66,7 +67,7 @@ std::ofstream* Debug::stream = nullptr;
 	WORD Debug::winTextAttr = 0;
 #endif
 void Debug::Init() {
-	std::string ss = IO::path +"/Log.txt";
+	const std::string ss (VisSystem::localFd + "Log.txt");
 	stream = new std::ofstream(ss.c_str());
 
 #ifdef PLATFORM_WIN

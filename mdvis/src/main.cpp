@@ -344,7 +344,6 @@ The hash for this program is )" << VisSystem::version_hash
 		Localizer::MakeMap(path);
 		return 0;
 #else
-		VisSystem::InitEnv();
 		Preferences::Init();
 		Localizer::Init("");
 		//Localizer::Init(VisSystem::prefs["SYS_LOCALE"]);

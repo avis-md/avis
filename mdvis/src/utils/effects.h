@@ -24,12 +24,12 @@ public:
 	static byte SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLuint tx3, GLuint nrm, GLuint dph, float str, int cnt, float rad, float blr, int w, int h);
 	static byte Dof(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, GLuint dph, float z, float f, float a, int n, int w, int h);
 protected:
-	PROGDEF_H(blurProg, 5)
-	PROGDEF_H(ssaoProg, 10)
-	PROGDEF_H(ssaoProg2, 5)
-	PROGDEF_H(glowProg, 10)
-	PROGDEF_H(glowProg2, 5)
-	PROGDEF_H(dofProg, 10)
+	static Shader blurProg;
+	static Shader ssaoProg;
+	static Shader ssaoProg2;
+	static Shader glowProg;
+	static Shader glowProg2;
+	static Shader dofProg;
 
 	static GLuint noiseTex;
 

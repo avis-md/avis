@@ -41,7 +41,7 @@ public:
 
 	static MOUSE_STATUS Tooltip(MOUSE_STATUS status, float x, float y, const std::string str);
 
-	PROGDEF_H(bezierProg, 5)
+	static Shader bezierProg;
 
 private:
 	static UniqueCallerList tooltipCallee;

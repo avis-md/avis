@@ -9,7 +9,7 @@
 float UI2::sepw = 0.5f;
 #define sepw2 (1-sepw)
 
-PROGDEF(UI2::bezierProg)
+Shader UI2::bezierProg;
 
 UniqueCallerList UI2::tooltipCallee;
 float UI2::tooltipX, UI2::tooltipY;
@@ -18,8 +18,7 @@ long long UI2::tooltipTime;
 
 void UI2::Init() {
 	bezierProg = Shader::FromVF(glsl::bezierVert, glsl::coreFrag3);
-#define LC(nm) bezierProgLocs[i++] = glGetUniformLocation(bezierProg, #nm) 
-	int i = 0;
+#define LC(nm) bezierProg.AddUniform(#nm)
 	LC(pts);
 	LC(count);
 	LC(thick);
@@ -194,12 +193,12 @@ void UI2::Switch(float x, float y, float w, const std::string& title, int c, std
 
 void UI2::Bezier(Vec2 p1, Vec2 t1, Vec2 t2, Vec2 p2, Vec4 col, float thick, int reso) {
 	thick /= 2;
-	glUseProgram(bezierProg);
+	bezierProg.Bind();
 	Vec2 pts[4] = { Ds2(p1), Ds2(t1), Ds2(t2), Ds2(p2) };
-	glUniform2fv(bezierProgLocs[0], 4, &pts[0][0]);
-	glUniform1i(bezierProgLocs[1], reso);
-	glUniform2f(bezierProgLocs[2], thick / Display::width, thick / Display::height);
-	glUniform4f(bezierProgLocs[3], col.r, col.g, col.b, col.a);
+	glUniform2fv(bezierProg.Loc(0), 4, &pts[0][0]);
+	glUniform1i(bezierProg.Loc(1), reso);
+	glUniform2f(bezierProg.Loc(2), thick / Display::width, thick / Display::height);
+	glUniform4f(bezierProg.Loc(3), col.r, col.g, col.b, col.a);
 	glBindVertexArray(Camera::emptyVao);
 	glDrawArrays(GL_TRIANGLES, 0, reso * 6);
 	glUseProgram(0);
