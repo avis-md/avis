@@ -51,8 +51,8 @@ void plt::plot(float x, float y, float w, float h, float* dx, float** dy, uint c
 		}
 		UI::SetVao(cnt, poss);
 
-		glUseProgram(Engine::defProgram);
-		glUniform4f(Engine::defColLoc, cols[j*3], cols[j*3+1], cols[j*3+2], 1.f);
+		Engine::defProg.Bind();
+		glUniform4f(Engine::defProg.Loc(0), cols[j*3], cols[j*3+1], cols[j*3+2], 1.f);
 		glBindVertexArray(UI::_vao);
 		glDrawArrays(GL_LINE_STRIP, 0, cnt);
 		glBindVertexArray(0);

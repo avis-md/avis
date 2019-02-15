@@ -8,7 +8,7 @@ warranty. In no event will the authors be held liable for any damages
 arising from the use of this software.
 
 Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to Key_LeftAlter it and redistribute it
+including commercial applications, and to KEY::LeftAlter it and redistribute it
 freely, subject to the following restrictions:
 
     1. The origin of this software must not be misrepresented; you must not
@@ -16,10 +16,10 @@ freely, subject to the following restrictions:
     in a product, an acknowledgment in the product documentation would be
     appreciated but is not required.
 
-    2. Key_LeftAltered source versions must be plainly marked as such, and must not be
+    2. KEY::LeftAltered source versions must be plainly marked as such, and must not be
     misrepresented as being the original software.
 
-    3. This notice may not be removed or Key_LeftAltered from any source
+    3. This notice may not be removed or KEY::LeftAltered from any source
     distribution.
 */
 
@@ -39,7 +39,7 @@ compiler command to disable them without modifying this header, e.g.
 In addition to those below, you can also define LODEPNG_NO_COMPILE_CRC to
 allow implementing a custom lodepng_crc32.
 */
-/*deflate & zlib. If disabled, you must specify Key_LeftAlternative zlib functions in
+/*deflate & zlib. If disabled, you must specify KEY::LeftAlternative zlib functions in
 the custom_zlib field of the compress and decompress settings*/
 #ifndef LODEPNG_NO_COMPILE_ZLIB
 #define LODEPNG_COMPILE_ZLIB
@@ -384,7 +384,7 @@ Check if the given color info indicates the possibility of having non-opaque pix
 Returns true if the image can have translucent or invisible pixels (it still be opaque if it doesn't use such pixels).
 Returns false if the image can only have opaque pixels.
 In detail, it returns true only if it's a color type with alpha, or has a palette with non-opaque values,
-or if "key_defined" is true.
+or if "KEY::defined" is true.
 */
 unsigned lodepng_can_have_alpha(const LodePNGColorMode* info);
 /*Returns the byte size of a raw image buffer with given width, height and color mode*/

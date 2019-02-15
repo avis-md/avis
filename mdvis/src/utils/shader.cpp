@@ -5,6 +5,12 @@ Shader& Shader::AddUniform(const std::string& s) {
 	return *this;
 }
 
+Shader& Shader::AddUniforms(std::initializer_list<const std::string> ss) {
+	for (auto& s : ss)
+		AddUniform(s);
+	return *this;
+}
+
 void Shader::Bind() {
 	glUseProgram(pointer);
 }

@@ -32,16 +32,16 @@ void Input::TextCallback(GLFWwindow* w, uint i) {
 	_inputString += std::string((char*)&i, 1);
 }
 
-bool Input::KeyDown(InputKey k) {
-	return keyStatusNew[k - 32] && !keyStatusOld[k - 32];
+bool Input::KeyDown(KEY k) {
+	return keyStatusNew[(int)k - 32] && !keyStatusOld[(int)k - 32];
 }
 
-bool Input::KeyHold(InputKey k) {
-	return keyStatusNew[k - 32];
+bool Input::KeyHold(KEY k) {
+	return keyStatusNew[(int)k - 32];
 }
 
-bool Input::KeyUp(InputKey k) {
-	return !keyStatusNew[k - 32] && keyStatusOld[k - 32];
+bool Input::KeyUp(KEY k) {
+	return !keyStatusNew[(int)k - 32] && keyStatusOld[(int)k - 32];
 }
 
 #define SV(val) _ ## val = val
@@ -91,7 +91,7 @@ void Input::UpdateMouseNKeyboard(bool* src) {
 	mouseDelta = mousePos - mousePosOld;
 	mousePosOld = mousePos;
 
-	if (KeyHold(Key_LeftControl) && KeyDown(Key_V)) {
+	if (KeyHold(KEY::LeftControl) && KeyDown(KEY::V)) {
 		_inputString += glfwGetClipboardString(Display::window);
 	}
 }
@@ -104,12 +104,12 @@ void Input::PreLoop() {
 }
 
 bool Input::CheckCopy(const char* loc, size_t len) {
-	if (KeyHold(Key_LeftControl)) {
-		if (KeyDown(Key_X)) {
+	if (KeyHold(KEY::LeftControl)) {
+		if (KeyDown(KEY::X)) {
 			glfwSetClipboardString(Display::window, std::string(loc, len).c_str());
 			return true;
 		}
-		else if (KeyDown(Key_C)) {
+		else if (KeyDown(KEY::C)) {
 			glfwSetClipboardString(Display::window, std::string(loc, len).c_str());
 			return false;
 		}

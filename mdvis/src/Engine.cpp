@@ -28,15 +28,16 @@ Vec2 Ds2(Vec2 v) {
 	return Vec2(Dw(v.x) * 2 - 1, 1 - Dh(v.y) * 2);
 }
 
-GLuint Engine::defProgram = 0;
-GLuint Engine::defProgramW = 0;
-GLuint Engine::unlitProgram = 0;
-GLuint Engine::unlitProgramA = 0;
-GLuint Engine::unlitProgramC = 0;
-GLuint Engine::skyProgram = 0;
-GLint Engine::defColLoc = 0;
-GLint Engine::defWColLoc = 0;
-GLint Engine::defWMVPLoc = 0;
+Shader Engine::defProg, Engine::defProgW, Engine::unlitProgA, Engine::unlitProgC;
+
+//GLuint Engine::defProgram = 0;
+//GLuint Engine::defProgramW = 0;
+//GLuint Engine::unlitProgram = 0;
+//GLuint Engine::unlitProgramA = 0;
+//GLuint Engine::unlitProgramC = 0;
+//GLint Engine::defColLoc = 0;
+//GLint Engine::defWColLoc = 0;
+//GLint Engine::defWMVPLoc = 0;
 
 Shader Engine::lineWProg;
 
@@ -66,9 +67,9 @@ void Engine::Init() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-GLint Engine::drawQuadLocs[] = { 0, 0, 0 };
-GLint Engine::drawQuadLocsA[] = { 0, 0, 0 };
-GLint Engine::drawQuadLocsC[] = { 0 };
+//GLint Engine::drawQuadLocs[] = { 0, 0, 0 };
+//GLint Engine::drawQuadLocsA[] = { 0, 0, 0 };
+//GLint Engine::drawQuadLocsC[] = { 0 };
 
 void Engine::InitShaders() {
 	GLuint vs;
@@ -78,12 +79,19 @@ void Engine::InitShaders() {
 		 OHNO("Engine", "Cannot load coreVert shader! " + err);
 	}
 
+	(defProg = Shader::FromF(vs, glsl::coreFrag3))
+		.AddUniforms({ "col" });
+	(unlitProgA = Shader::FromF(vs, glsl::coreFrag2))
+		.AddUniforms({ "sampler", "col", "level" });
+	(defProgW = Shader::FromVF(glsl::coreVertW, glsl::coreFrag3))
+		.AddUniforms({ "col", "MVP" });
+	
+/*
 	unlitProgram = Shader::FromF(vs, glsl::coreFrag);
 	unlitProgramA = Shader::FromF(vs, glsl::coreFrag2);
 	unlitProgramC = Shader::FromF(vs, glsl::coreFrag3);
 	defProgram = unlitProgramC;
 	defProgramW = Shader::FromVF(glsl::coreVertW, glsl::coreFrag3);
-	skyProgram = Shader::FromF(vs, glsl::coreFragSky);
 	glDeleteShader(vs);
 
 	drawQuadLocs[0] = glGetUniformLocation(unlitProgram, "sampler");
@@ -98,7 +106,7 @@ void Engine::InitShaders() {
 
 	defColLoc = drawQuadLocsC[0];
 	defWColLoc = glGetUniformLocation(defProgramW, "col");
-	defWMVPLoc = glGetUniformLocation(defProgramW, "MVP");
+	defWMVPLoc = glGetUniformLocation(defProgramW, "MVP");*/
 
 	lineWProg = Shader::FromVF(glsl::lineWVert, glsl::coreFrag3);
 	int i = 0;
@@ -330,8 +338,8 @@ void Engine::DrawCube(Vec3 pos, float dx, float dy, float dz, Vec4 Vec4) {
 
 	UI::SetVao(8, quadPoss);
 
-	glUseProgram(Engine::defProgram);
-	glUniform4f(Engine::defColLoc, Vec4.r, Vec4.g, Vec4.b, Vec4.a * UI::alpha);
+	defProg.Bind();
+	glUniform4f(defProg.Loc(1), Vec4.r, Vec4.g, Vec4.b, Vec4.a * UI::alpha);
 
 	glBindVertexArray(UI::_vao);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -352,8 +360,8 @@ void Engine::DrawLine(Vec3 v1, Vec3 v2, Vec4 col, float width) {
 	}
 	UI::SetVao(2, quadPoss);
 
-	glUseProgram(Engine::defProgram);
-	glUniform4f(Engine::defColLoc, col.r, col.g, col.b, col.a * UI::alpha);
+	defProg.Bind();
+	glUniform4f(defProg.Loc(1), col.r, col.g, col.b, col.a * UI::alpha);
 	glBindVertexArray(UI::_vao);
 	glDrawArrays(GL_LINES, 0, 2);
 	glBindVertexArray(0);

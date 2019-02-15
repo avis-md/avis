@@ -15,6 +15,7 @@ public:
 	}
 
 	Shader& AddUniform(const std::string& s);
+	Shader& AddUniforms(std::initializer_list<const std::string> ss);
 
 	void Bind();
 	static void Unbind();

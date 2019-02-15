@@ -114,12 +114,12 @@ void ParMenu::Draw() {
 		UI::ResetMatrix();
 
 		UI2::BackQuad(expandPos, Display::height - 34.f, 16, 16);
-		if ((!UI::editingText && Input::KeyUp(Key_T)) || Engine::Button(expandPos, Display::height - 34.f, 16, 16, Icons::collapse) == MOUSE_RELEASE)
+		if ((!UI::editingText && Input::KeyUp(KEY::T)) || Engine::Button(expandPos, Display::height - 34.f, 16, 16, Icons::collapse) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = Clamp(expandPos + 1500 * Time::delta, 2.f, 150.f);
 	}
 	else {
-		if ((!UI::editingText && Input::KeyUp(Key_T)) || Engine::Button(expandPos, Display::height - 34.f, 115, 16, white(alpha, 0.15f), white(alpha * 2, 0.15f), white(alpha / 2, 0.05f)) == MOUSE_RELEASE)
+		if ((!UI::editingText && Input::KeyUp(KEY::T)) || Engine::Button(expandPos, Display::height - 34.f, 115, 16, white(alpha, 0.15f), white(alpha * 2, 0.15f), white(alpha / 2, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(expandPos, Display::height - 34.f, 16, 16, Icons::expand);
 		UI::Label(expandPos + 18, Display::height - 33.f, 12, _("Toolbar") + " (T)", white());
@@ -204,7 +204,7 @@ void ParMenu::Draw_List(float off) {
 			}
 			UI::Label(expandPos - 132, off, 12, rli.name, white(rli.visible ? 1 : 0.5f));
 			if (Engine::Button(expandPos - 130, off, 96.f - bar, 16) == MOUSE_RELEASE) {
-				if (!Input::KeyHold(Key_LeftShift)) {
+				if (!Input::KeyHold(KEY::LeftShift)) {
 					if (!(selCnt == 1 && rli.selected)) {
 						SelClear();
 						drawTypeAll = rli.drawType;
@@ -260,7 +260,7 @@ void ParMenu::Draw_List(float off) {
 					}
 					UI::Label(expandPos - 128, off, 12, rj.name, white((rli.visible && rj.visible) ? 1 : 0.5f));
 					if (Engine::Button(expandPos - 125, off, 91, 16) == MOUSE_RELEASE) {
-						if (!Input::KeyHold(Key_LeftShift)) {
+						if (!Input::KeyHold(KEY::LeftShift)) {
 							if (!(selCnt == 1 && rj.selected)) {
 								SelClear();
 								drawTypeAll = rj.drawType;
@@ -309,7 +309,7 @@ void ParMenu::Draw_List(float off) {
 							UI::Quad(expandPos - 138, off, 136.f - bar, 16, has ? Vec4(0.3f, 0.5f, 0.3f, 1) : white(1, 0.4f));
 							UI::Label(expandPos - 136, off, 12, &Particles::names[(rj.offset + k)*PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN, white());
 							if (Engine::Button(expandPos - 138, off, 120.f - bar, 16) == MOUSE_RELEASE) {
-								if (!Input::KeyHold(Key_LeftShift)) {
+								if (!Input::KeyHold(KEY::LeftShift)) {
 									if (!(sell.size() == 1 && has)) {
 										sell.resize(1);
 										sell[0] = rj.offset + k + 1;
@@ -368,7 +368,7 @@ void ParMenu::DrawStart() {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 
-	if (!AnWeb::drawFull && !UI::editingText && !UI::_layerMax && Input::KeyDown(Key_Space) && !!ParGraphics::bgs.size()) {
+	if (!AnWeb::drawFull && !UI::editingText && !UI::_layerMax && Input::KeyDown(KEY::Space) && !!ParGraphics::bgs.size()) {
 		ParGraphics::bgi = (ParGraphics::bgi + 1) % ParGraphics::bgs.size();
 		ParGraphics::bg = Texture(ParGraphics::bgs[ParGraphics::bgi], false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	}
@@ -470,7 +470,7 @@ void ParMenu::DrawSplash() {
 	if (sub.size()) {
 		UI::Label(Display::width*0.5f - 190, pos.y + pos.w + 1, 12, sub, white(0.7f));
 	}
- 	if ((UI::_layer == UI::_layerMax) && (Input::KeyDown(Key_Escape) || (Input::mouse0State == 1 && !Rect(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250).Inside(Input::mousePos)))) {
+ 	if ((UI::_layer == UI::_layerMax) && (Input::KeyDown(KEY::Escape) || (Input::mouse0State == 1 && !Rect(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250).Inside(Input::mousePos)))) {
 		showSplash = false;
 	}
 }

@@ -142,7 +142,7 @@ void Preferences::Draw() {
 	UI::Quad(x0, y0 + 16, 100, 284, black(0.3f));
 	if (Engine::Button(x0 + 384, y0, 16, 16, Icons::cross) == MOUSE_RELEASE)
 		show = false;
-	if ((UI::_layer == UI::_layerMax) && (Input::KeyDown(Key_Escape) || (Input::mouse0State == 1 &&
+	if ((UI::_layer == UI::_layerMax) && (Input::KeyDown(KEY::Escape) || (Input::mouse0State == 1 &&
 			!Rect(x0, y0, 400, 300).Inside(Input::mousePos)))) {
 		show = false;
 	}

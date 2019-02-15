@@ -218,7 +218,7 @@ void AnNode::Draw() {
 									}
 									str.back() = ']';
 									str += " array (press F3 to view contents)";
-									if (Input::KeyDown(Key_F3)) {
+									if (Input::KeyDown(KEY::F3)) {
 										ArrayView::data = *(void**)ptr;
 										ArrayView::type = ov.typeName[6];
 										ArrayView::dims.clear();

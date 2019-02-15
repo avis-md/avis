@@ -23,8 +23,8 @@ float HelpMenu::alpha = 0;
 
 void HelpMenu::Draw() {
 	if (!UI::editingText) {
-		if (!show && Input::KeyDown(Key_F1)) show = true;
-		if (show && Input::KeyDown(Key_Escape)) show = false;
+		if (!show && Input::KeyDown(KEY::F1)) show = true;
+		if (show && Input::KeyDown(KEY::Escape)) show = false;
 	}
 	if (alpha > 0) {
 		UI::IncLayer();

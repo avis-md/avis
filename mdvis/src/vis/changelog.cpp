@@ -34,7 +34,7 @@ void ChangeLog::Draw() {
 		}
 	}
 	UI::EndScroll(off);
-	if ((UI::_layer == UI::_layerMax) && (Input::KeyDown(Key_Escape) || (Input::mouse0State == 1 && !Rect(Display::width/2 - 200.f, Display::height/2 - 250.f, 400, 500).Inside(Input::mousePos)))) {
+	if ((UI::_layer == UI::_layerMax) && (Input::KeyDown(KEY::Escape) || (Input::mouse0State == 1 && !Rect(Display::width/2 - 200.f, Display::height/2 - 250.f, 400, 500).Inside(Input::mousePos)))) {
 		show = false;
 	}
 }

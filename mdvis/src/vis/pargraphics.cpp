@@ -549,7 +549,7 @@ void ParGraphics::Update() {
 
 		if (Input::mouse0) {
 			if (Input::mouse0State == MOUSE_DOWN) {
-				if (Input::KeyHold(Key_LeftShift)) dragMode = 2;
+				if (Input::KeyHold(KEY::LeftShift)) dragMode = 2;
 				else dragMode = 0;
 			}
 			else if ((Input::mouse0State == MOUSE_HOLD) && !dragging && (Input::mousePos != Input::mouseDownPos) && VisSystem::InMainWin(Input::mouseDownPos)) {
@@ -568,7 +568,7 @@ void ParGraphics::Update() {
 					rotZ = Repeat<float>(rotZ, 0, 360);
 					rotWs = rotW;
 					rotZs = rotZ;
-					if (Input::KeyHold(Key_LeftShift)) {
+					if (Input::KeyHold(KEY::LeftShift)) {
 						const float dth = 22.5f;
 						rotW = dth * std::roundf(rotW / dth);
 						rotZ = dth * std::roundf(rotZ / dth);
@@ -591,7 +591,7 @@ void ParGraphics::Update() {
 				Scene::dirty = true;
 			}
 			if (Input::mouseScroll != 0 && VisSystem::InMainWin(Input::mousePos)) {
-				if (Input::KeyHold(Key_LeftShift)) {
+				if (Input::KeyHold(KEY::LeftShift)) {
 					rotCenter -= 0.1f * scrZ * Input::mouseScroll / std::pow(2.f, rotScale);
 				}
 				else {
@@ -602,7 +602,7 @@ void ParGraphics::Update() {
 				ChokoLait::mainCamera->applyGBuffer2 = true;
 			}
 			else {
-				if (Input::KeyDown(Key_Escape)) {
+				if (Input::KeyDown(KEY::Escape)) {
 					VisSystem::mouseMode = VIS_MOUSE_MODE::ROTATE;
 				}
 			}

@@ -12,7 +12,7 @@ void Popups::Draw() {
     if (type == POPUP_TYPE::NONE) return;
     UI::IncLayer();
 
-	if (Input::KeyDown(Key_Escape)) {
+	if (Input::KeyDown(KEY::Escape)) {
 		type = POPUP_TYPE::NONE;
 		return;
 	}

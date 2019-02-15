@@ -40,12 +40,12 @@ void AnOps::Draw() {
 		UI::Quad(expos + 164, off + 51, 14, 14, (remote ? AnWeb::hasFt_s : AnWeb::hasFt) ? green() : red());
 		
 		UI2::BackQuad(expos - 16.f, Display::height - 34.f, 16.f, 16.f);
-		if ((!UI::editingText && (Input::KeyUp(Key_O))) || Engine::Button(expos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
+		if ((!UI::editingText && (Input::KeyUp(KEY::O))) || Engine::Button(expos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse, white(0.8f), white(), white(0.5f)) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = std::min(expandPos + 1500 * Time::delta, w);
 	}
 	else {
-		if ((!UI::editingText && (Input::KeyUp(Key_O))) || Engine::Button(expos - 110.f, Display::height - 34.f, 110.f, 16.f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
+		if ((!UI::editingText && (Input::KeyUp(KEY::O))) || Engine::Button(expos - 110.f, Display::height - 34.f, 110.f, 16.f, white(0.9f, 0.15f), white(1, 0.15f), white(1, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(expos - 110.f, Display::height - 34.f, 16.f, 16.f, Icons::expand);
 		UI::Label(expos - 92.f, Display::height - 33.f, 12.f, "Options (O)", white());

@@ -33,9 +33,9 @@ void UI3::Cube(float x1, float x2, float y1, float y2, float z1, float z2, Vec4 
 	UI::SetVao(8, poss);
 	auto mvp = MVP::projection() * MVP::modelview();
 
-	glUseProgram(Engine::defProgramW);
-	glUniform4f(Engine::defWColLoc, col.r, col.g, col.b, col.a);
-	glUniformMatrix4fv(Engine::defWMVPLoc, 1, GL_FALSE, glm::value_ptr(mvp));
+	Engine::defProgW.Bind();
+	glUniform4f(Engine::defProgW.Loc(0), col.r, col.g, col.b, col.a);
+	glUniformMatrix4fv(Engine::defProgW.Loc(1), 1, GL_FALSE, glm::value_ptr(mvp));
 	glBindVertexArray(UI::_vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeProgIds);
 	glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);

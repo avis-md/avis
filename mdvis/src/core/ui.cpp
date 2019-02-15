@@ -113,8 +113,8 @@ void UI::Quad(float x, float y, float w, float h, Vec4 col) {
 
 	UI::SetVao(4, quadPoss);
 
-	glUseProgram(Engine::defProgram);
-	glUniform4f(Engine::defColLoc, col.r, col.g, col.b, col.a * UI::alpha);
+	Engine::defProg.Bind();
+	glUniform4f(Engine::defProg.Loc(0), col.r, col.g, col.b, col.a * UI::alpha);
 	glBindVertexArray(UI::_vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Engine::quadBuffer);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -198,10 +198,10 @@ std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol,
 		auto al = font->alignment;
 		font->Align(ALIGN_MIDLEFT);
 		if (!delayed) _editTextString = str;
-		if (!!_editTextCursorPos) _editTextCursorPos -= Input::KeyDown(Key_LeftArrow);
-		_editTextCursorPos += Input::KeyDown(Key_RightArrow);
+		if (!!_editTextCursorPos) _editTextCursorPos -= Input::KeyDown(KEY::LeftArrow);
+		_editTextCursorPos += Input::KeyDown(KEY::RightArrow);
 		_editTextCursorPos = Clamp<uint>(_editTextCursorPos, 0U, _editTextString.size());
-		if (!Input::KeyHold(Key_LeftShift) && (Input::KeyDown(Key_LeftArrow) || Input::KeyDown(Key_RightArrow))) {
+		if (!Input::KeyHold(KEY::LeftShift) && (Input::KeyDown(KEY::LeftArrow) || Input::KeyDown(KEY::RightArrow))) {
 			_editTextCursorPos2 = _editTextCursorPos;
 			_editTextBlinkTime = 0;
 		}
@@ -220,7 +220,7 @@ std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol,
 			if (!delayed && changed) *changed = true;
 			_editTextBlinkTime = 0;
 		}
-		if (Input::KeyDown(Key_Backspace)) {
+		if (Input::KeyDown(KEY::Backspace)) {
 			if (_editTextCursorPos == _editTextCursorPos2) {
 				_editTextString = _editTextString.substr(0, _editTextCursorPos - 1) + _editTextString.substr(_editTextCursorPos);
 				if (!!_editTextCursorPos) {
@@ -235,7 +235,7 @@ std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol,
 			if (!delayed && changed) *changed = true;
 			_editTextBlinkTime = 0;
 		}
-		if (Input::KeyDown(Key_Delete) && _editTextCursorPos < _editTextString.size()) {
+		if (Input::KeyDown(KEY::Delete) && _editTextCursorPos < _editTextString.size()) {
 			_editTextString = _editTextString.substr(0, _editTextCursorPos) + _editTextString.substr(_editTextCursorPos + 1);
 			if (!delayed && changed) *changed = true;
 			_editTextBlinkTime = 0;
@@ -290,13 +290,13 @@ std::string UI::EditText(float x, float y, float w, float h, float s, Vec4 bcol,
 		}
 
 		Engine::PopStencil();
-		if ((Input::mouse0State == MOUSE_DOWN && !Rect(x, y, w, h).Inside(Input::mouseDownPos)) || Input::KeyDown(Key_Enter)) {
+		if ((Input::mouse0State == MOUSE_DOWN && !Rect(x, y, w, h).Inside(Input::mouseDownPos)) || Input::KeyDown(KEY::Enter)) {
 			_editTextCallee.Clear();
 			if (changed && delayed) *changed = true;
 
 			return delayed ? _editTextString : str;
 		}
-		if (Input::KeyDown(Key_Escape)) {
+		if (Input::KeyDown(KEY::Escape)) {
 			_editTextCallee.Clear();
 			return str;
 		}
@@ -326,10 +326,10 @@ std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 b
 		font->Align(ALIGN_MIDLEFT);
 
 		if (!delayed) _editTextString = str;
-		if (!!_editTextCursorPos) _editTextCursorPos -= Input::KeyDown(Key_LeftArrow);
-		_editTextCursorPos += Input::KeyDown(Key_RightArrow);
+		if (!!_editTextCursorPos) _editTextCursorPos -= Input::KeyDown(KEY::LeftArrow);
+		_editTextCursorPos += Input::KeyDown(KEY::RightArrow);
 		_editTextCursorPos = Clamp<uint>(_editTextCursorPos, 0U, _editTextString.size());
-		if (!Input::KeyHold(Key_LeftShift) && (Input::KeyDown(Key_LeftArrow) || Input::KeyDown(Key_RightArrow))) {
+		if (!Input::KeyHold(KEY::LeftShift) && (Input::KeyDown(KEY::LeftArrow) || Input::KeyDown(KEY::RightArrow))) {
 			_editTextCursorPos2 = _editTextCursorPos;
 			_editTextBlinkTime = 0;
 		}
@@ -348,7 +348,7 @@ std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 b
 			if (!delayed && changed) *changed = true;
 			_editTextBlinkTime = 0;
 		}
-		if (Input::KeyDown(Key_Backspace)) {
+		if (Input::KeyDown(KEY::Backspace)) {
 			if (_editTextCursorPos == _editTextCursorPos2) {
 				_editTextString = _editTextString.substr(0, _editTextCursorPos - 1) + _editTextString.substr(_editTextCursorPos);
 				if (!!_editTextCursorPos) {
@@ -364,7 +364,7 @@ std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 b
 			if (!delayed && changed) *changed = true;
 			_editTextBlinkTime = 0;
 		}
-		if (Input::KeyDown(Key_Delete) && _editTextCursorPos < _editTextString.size()) {
+		if (Input::KeyDown(KEY::Delete) && _editTextCursorPos < _editTextString.size()) {
 			_editTextString = _editTextString.substr(0, _editTextCursorPos) + _editTextString.substr(_editTextCursorPos + 1);
 			if (!delayed && changed) *changed = true;
 			_editTextBlinkTime = 0;
@@ -402,12 +402,12 @@ std::string UI::EditTextPass(float x, float y, float w, float h, float s, Vec4 b
 		if (fmod(_editTextBlinkTime, 1) < 0.5f) Engine::DrawLine(Vec2(xp, y + 2), Vec2(xp, y + h - 2), (_editTextCursorPos == _editTextCursorPos2) ? black() : white(), 1);
 		font->Align(al);
 
-		if ((Input::mouse0State == MOUSE_UP && !Rect(x, y, w, h).Inside(Input::mousePos)) || Input::KeyDown(Key_Enter)) {
+		if ((Input::mouse0State == MOUSE_UP && !Rect(x, y, w, h).Inside(Input::mousePos)) || Input::KeyDown(KEY::Enter)) {
 			_editTextCallee.Clear();
 			if (changed && delayed) *changed = true;
 			return delayed ? _editTextString : str;
 		}
-		if (Input::KeyDown(Key_Escape)) {
+		if (Input::KeyDown(KEY::Escape)) {
 			_editTextCallee.Clear();
 			return str;
 		}

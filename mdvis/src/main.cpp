@@ -112,12 +112,12 @@ void updateFunc() {
 	AnWeb::Update();
 
 	if (!!Particles::particleSz && !ParLoader::busy && !UI::editingText && !AnWeb::drawFull) {
-		if (Input::KeyDown(Key_F)) {
+		if (Input::KeyDown(KEY::F)) {
 			auto& o = ChokoLait::mainCamera->ortographic;
 			o = !o;
 			Scene::dirty = true;
 		}
-		if (Input::KeyDown(Key_X) && Input::KeyHold(Key_LeftShift)) {
+		if (Input::KeyDown(KEY::X) && Input::KeyHold(KEY::LeftShift)) {
 			if (!RayTracer::resTex) {
 				RayTracer::SetScene();
 				//RayTracer::Render();
@@ -127,7 +127,7 @@ void updateFunc() {
 				Scene::dirty = true;
 			}
 		}
-		if (Input::KeyDown(Key_F5)) {
+		if (Input::KeyDown(KEY::F5)) {
 			VisRenderer::ToImage();
 		}
 	}
@@ -136,7 +136,7 @@ void updateFunc() {
 	}
 
 
-	//if (Input::KeyDown(Key_X) && Input::KeyHold(Key_LeftShift))
+	//if (Input::KeyDown(KEY::X) && Input::KeyHold(KEY::LeftShift))
 	//	if (!RayTracer::resTex)
 	//		RayTracer::SetScene();
 }
@@ -183,7 +183,7 @@ void paintfunc() {
 					ParGraphics::rotCenter = Particles::poss[id - 1];
 					Scene::dirty = true;
 				}
-				if (Input::KeyHold(Key_LeftShift)) {
+				if (Input::KeyHold(KEY::LeftShift)) {
 					auto f = std::find(Selection::atoms.begin(), Selection::atoms.end(), id-1);
 					if (f == Selection::atoms.end()) Selection::atoms.push_back(id-1);
 					else if (!Input::dbclick) Selection::atoms.erase(f);

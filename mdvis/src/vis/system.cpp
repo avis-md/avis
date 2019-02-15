@@ -254,14 +254,14 @@ void VisSystem::DrawBar() {
 		else {
 			if (!LiveSyncer::activeRunner) {
 				if (!UI::editingText) {
-					if (Input::KeyDown(Key_RightArrow)) {
+					if (Input::KeyDown(KEY::RightArrow)) {
 						Particles::IncFrame(false);
 					}
-					if (Input::KeyDown(Key_LeftArrow)) {
+					if (Input::KeyDown(KEY::LeftArrow)) {
 						if (!!Particles::anim.currentFrame) Particles::SetFrame(Particles::anim.currentFrame - 1);
 					}
 				}
-				if ((!UI::editingText && Input::KeyDown(Key_Space)) || Engine::Button(100, Display::height - 17.f, 16, 16, Icons::right, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+				if ((!UI::editingText && Input::KeyDown(KEY::Space)) || Engine::Button(100, Display::height - 17.f, 16, 16, Icons::right, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
 					ParGraphics::animate = !ParGraphics::animate;
 					ParGraphics::animOff = 0;
 				}
@@ -331,7 +331,7 @@ void VisSystem::DrawMsgPopup() {
 	UI::Quad(Display::width * 0.5f - 200, Display::height * 0.5f - 50, 400, 100, white(0.95f, 0.15f));
 
  	if ((Engine::Button(Display::width * 0.5f + 120, Display::height * 0.5f + 33, 79, 16, white(1, 0.4f), "Close", 12, white(), true) == MOUSE_RELEASE) ||
-		(Input::KeyDown(Key_Escape) && UI::_layer == UI::_layerMax) || 
+		(Input::KeyDown(KEY::Escape) && UI::_layer == UI::_layerMax) || 
 		(Input::mouse0State == 1 && !Rect(Display::width*0.5f - 200, Display::height*0.5f - 50, 400, 100).Inside(Input::mousePos))) {
 		Popups::type = POPUP_TYPE::NONE;
 	}

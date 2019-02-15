@@ -216,21 +216,21 @@ enum ASSETTYPE : byte {
 	ASSETTYPE_TEXTURE_REND = 0xa0
 };
 
-enum InputKey {
-	Key_None = 0,
-	Key_Space = 32,
-	Key_Apostrophe = 39,
-	Key_Comma = 44, Key_Minus, Key_Dot, Key_Slash,
-	Key_0 = 48, Key_1, Key_2, Key_3, Key_4, Key_5, Key_6, Key_7, Key_8, Key_9,
-	Key_Semicolon = 59, Key_Equal = 61,
-	Key_A = 65, Key_B, Key_C, Key_D, Key_E, Key_F, Key_G, Key_H, Key_I, Key_J, Key_K, Key_L, Key_M, Key_N, Key_O, Key_P, Key_Q, Key_R, Key_S, Key_T, Key_U, Key_V, Key_W, Key_X, Key_Y, Key_Z,
-	Key_LeftBracket = 91, Key_BackSlash, Key_RightBracket, Key_Accent = 96,
-	Key_Escape = 256, Key_Enter, Key_Tab, Key_Backspace, Key_Insert, Key_Delete,
-	Key_RightArrow, Key_LeftArrow, Key_DownArrow, Key_UpArrow, Key_PageUp, Key_PageDown, Key_Home, Key_End, Key_CapsLock, Key_ScrollLock, Key_NumLock,
-	Key_F1 = 290, Key_F2, Key_F3, Key_F4, Key_F5, Key_F6, Key_F7, Key_F8, Key_F9, Key_F10, Key_F11, Key_F12,
-	Key_NumPad0 = 320, Key_NumPad1, Key_NumPad2, Key_NumPad3, Key_NumPad4, Key_NumPad5, Key_NumPad6, Key_NumPad7, Key_NumPad8, Key_NumPad9,
-	Key_NumPadDot, Key_NumPadDivide, Key_NumPadMultiply, Key_NumPadMinus, Key_NumPadAdd, Key_NumPadEnter, Key_NumPadEqual,
-	Key_LeftShift = 340, Key_LeftControl, Key_LeftAlt, Key_RightShift = 344, Key_RightControl, Key_RightAlt
+enum class KEY : int {
+	None = 0,
+	Space = 32,
+	Apostrophe = 39,
+	Comma = 44, Minus, Dot, Slash,
+	Num0 = 48, Num1, Num2, Num3, Num4, Num5, Num6, Num7, Num8, Num9,
+	Semicolon = 59, Equal = 61,
+	A = 65, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
+	LeftBracket = 91, BackSlash, RightBracket, Accent = 96,
+	Escape = 256, Enter, Tab, Backspace, Insert, Delete,
+	RightArrow, LeftArrow, DownArrow, UpArrow, PageUp, PageDown, Home, End, CapsLock, ScrollLock, NumLock,
+	F1 = 290, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
+	NumPad0 = 320, NumPad1, NumPad2, NumPad3, NumPad4, NumPad5, NumPad6, NumPad7, NumPad8, NumPad9,
+	NumPadDot, NumPadDivide, NumPadMultiply, NumPadMinus, NumPadAdd, NumPadEnter, NumPadEqual,
+	LeftShift = 340, LeftControl, LeftAlt, RightShift = 344, RightControl, RightAlt
 };
 
 enum OBJECT_STATUS : byte {
@@ -300,7 +300,6 @@ public:
 	static void DrawLine(Vec3 v1, Vec3 v2, Vec4 col, float width);
 	static void DrawLineW(Vec3 v1, Vec3 v2, Vec4 col, float width);
 	static void DrawLinesW(Vec3* pts, int num, Vec4 col, float width);
-	static void DrawCubeLinesW(Vec3 pos, float dx, float dy, float dz, Vec4 col);
 	static MOUSE_STATUS Button(float x, float y, float w, float h);
 	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4);
 	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4, std::string label, float labelSize, Vec4 labelCol, bool labelCenter = false, Font* labelFont = UI::font);
@@ -317,15 +316,16 @@ public:
 
 	static void Sleep(uint ms);
 
-	static GLuint defProgram, defProgramW, unlitProgram, unlitProgramA, unlitProgramC, skyProgram;
-	static GLint defColLoc, defWColLoc, defWMVPLoc;
+	//static GLuint defProgram, defProgramW, unlitProgram, unlitProgramA, unlitProgramC;
+	//static GLint defColLoc, defWColLoc, defWMVPLoc;
 	
+	static Shader defProg, defProgW, unlitProgA, unlitProgC, skyProg;
 	static Shader lineWProg;
 
 	static void InitShaders();
 
 	static GLuint quadBuffer;
-	static GLint drawQuadLocs[3], drawQuadLocsA[3], drawQuadLocsC[1];
+	//static GLint drawQuadLocs[3], drawQuadLocsA[3], drawQuadLocsC[1];
 
 	static void DrawCube(Vec3 pos, float dx, float dy, float dz, Vec4 col);
 

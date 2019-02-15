@@ -85,7 +85,7 @@ void VisRenderer::Draw() {
 				Scene::dirty = true;
 			}
 		}
-		if (Input::KeyDown(Key_Escape)) {
+		if (Input::KeyDown(KEY::Escape)) {
 			status = STATUS::READY;
 			resLerp = -1;
 			Scene::dirty = true;

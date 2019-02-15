@@ -44,7 +44,7 @@ Quat QuatFunc::FromAxisAngle(Vec3 axis, float angle) {
 	float y = axis.y * factor;
 	float z = axis.z * factor;
 
-	// CalcuKey_LeftAlte the w value by cos( theta / 2 )
+	// CalcuKEY::LeftAlte the w value by cos( theta / 2 )
 	float w = (float)cos(a / 2.0);
 	return glm::normalize(Quat(w, x, y, z));
 }

@@ -237,7 +237,7 @@ void AnWeb::Draw() {
 	AnBrowse::Draw();
 	AnOps::Draw();
 
-	if (Input::KeyDown(Key_Escape)) {
+	if (Input::KeyDown(KEY::Escape)) {
 		if (selScript) selScript = nullptr;
 		else {
 			drawFull = false;
@@ -341,12 +341,12 @@ void AnWeb::DrawSide() {
 		}
 		UI::EndScroll(poss.y);
 		UI2::BackQuad(expos - 16.f, Display::height - 34.f, 16, 16);
-		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(expos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse) == MOUSE_RELEASE)
+		if ((!UI::editingText && Input::KeyUp(KEY::A)) || Engine::Button(expos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse) == MOUSE_RELEASE)
 			expanded = false;
 		expandPos = Clamp(expandPos + 1500 * Time::delta, 0.f, 180.f);
 	}
 	else {
-		if ((!UI::editingText && Input::KeyUp(Key_A)) || Engine::Button(expos - 110.f, Display::height - 34.f, 110, 16, white(alpha, 0.15f), white(alpha * 2, 0.15f), white(alpha / 2, 0.05f)) == MOUSE_RELEASE)
+		if ((!UI::editingText && Input::KeyUp(KEY::A)) || Engine::Button(expos - 110.f, Display::height - 34.f, 110, 16, white(alpha, 0.15f), white(alpha * 2, 0.15f), white(alpha / 2, 0.05f)) == MOUSE_RELEASE)
 			expanded = true;
 		UI::Texture(expos - 110.f, Display::height - 34.f, 16.f, 16.f, Icons::expand);
 		UI::Label(expos - 92.f, Display::height - 33.f, 12.f, _("Analysis") +" (A)", white());
