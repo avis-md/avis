@@ -18,6 +18,7 @@ public:
 	int* stdioCnt;
 	int stdioI;
 
+	void Clear() override;
 	pAnScript_I CreateInstance() override;
 
 	static std::unordered_map<std::string, std::weak_ptr<CScript>> allScrs;

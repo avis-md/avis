@@ -458,11 +458,13 @@ FAIL:
 
 void CReader::Refresh(CScript* scr) {
 	auto mt = IO::ModTime(AnWeb::nodesPath + scr->path + EXT_CS);
-	if (mt > scr->chgtime || !scr->ok) {
+	if ((mt > scr->chgtime) || (!scr->ok && mt > scr->badtime)) {
 		AnBrowse::busyMsg = "Reloading " + scr->path + EXT_CS;
 		Debug::Message("CReader", AnBrowse::busyMsg);
 		scr->Clear();
+		scr->badtime = mt;
 		scr->ok = Read(scr);
+		AnBrowse::changed = true;
 	}
 }
 

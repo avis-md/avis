@@ -45,6 +45,8 @@ public:
 	static bool hasPy, hasC, hasFt;
 	static bool hasPy_s, hasC_s, hasFt_s;
 
+	static bool waitBrowse;
+
 	static void Clear(), Clear0();
 	static void Insert(const pAnNode& node, Vec2 pos = Vec2(100, 100));
 	static void Init(), Update(), Draw(), DrawSide(), DrawScene();

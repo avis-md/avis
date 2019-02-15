@@ -9,7 +9,7 @@
 #include "utils/runcmd.h"
 #endif
 
-bool AnBrowse::busy = false;
+bool AnBrowse::busy = false, AnBrowse::changed = false;
 std::string AnBrowse::busyMsg;
 AnBrowse::Folder AnBrowse::folder = AnBrowse::Folder("");
 bool AnBrowse::expanded = true;
@@ -72,6 +72,15 @@ void AnBrowse::Init() {
 	tmplC = IO::GetText(IO::path + "res/templates/node_cpp");
 	tmplP = IO::GetText(IO::path + "res/templates/node_py");
 	tmplF = IO::GetText(IO::path + "res/templates/node_f90");
+
+	busyMsg.reserve(100);
+}
+
+void AnBrowse::Update() {
+	if (changed && !busy) {
+		changed = false;
+		Refresh();
+	}
 }
 
 void AnBrowse::Scan() {
@@ -83,6 +92,7 @@ void AnBrowse::Scan() {
 
 void AnBrowse::DoRefresh(Folder* fd) {
 	for (auto s : fd->scripts) {
+		busyMsg = "Reading " + s->path;
 		s->busy = true;
 		switch (s->type) {
 		case AnScript::TYPE::C:
@@ -107,10 +117,9 @@ void AnBrowse::DoRefresh(Folder* fd) {
 }
 
 void AnBrowse::Refresh() {
-	if (busy) return; //careful: this will not handle well if script is changed while compiling
+	if (busy || AnWeb::executing) return; //careful: this will not handle well if script is changed while compiling
 	Debug::Message("AnBrowse", "Refreshing");
 	busy = true;
-	//DoRefresh(&folder);
 	std::thread(DoRefresh, &folder).detach();
 }
 

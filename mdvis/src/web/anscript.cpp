@@ -10,13 +10,12 @@ void AnScript::Var::InitName() {
 	else stride = AN_VARTYPE_STRIDES[(int)type];
 }
 
-bool AnScript::Clear() {
+void AnScript::Clear() {
 	inputs.clear();
-	inputs.clear();
+	outputs.clear();
 	desc = "";
 	descLines = 0;
 	ok = false;
-	return true;
 }
 
 AnScript_I::~AnScript_I() {}

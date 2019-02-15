@@ -46,18 +46,18 @@ public:
 	bool ok = false, busy = false;
 	bool allowParallel = true;
 	std::mutex parallelLock;
-	time_t chgtime;
+	time_t chgtime = 0, badtime = 0;
 	std::vector<ErrorView::Message> compileLog;
-	int errorCount;
-	std::string desc;
-	int descLines;
+	int errorCount = 0;
+	std::string desc = "";
+	int descLines = 0;
 
 	std::vector<Var> inputs, outputs;
 	
 	spawnerFunc spawner;
 	callerFunc caller;
 
-	virtual bool Clear();
+	virtual void Clear();
 	virtual pAnScript_I CreateInstance() = 0;
 };
 

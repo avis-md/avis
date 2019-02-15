@@ -4,7 +4,7 @@
 
 class AnBrowse {
 public:
-	static bool busy;
+	static bool busy, changed;
 	static std::string busyMsg;
 
 	static struct Folder {
@@ -24,7 +24,7 @@ public:
 	static Folder* doAddFd;
 	static std::string tmplC, tmplP, tmplF;
 
-	static void Init();
+	static void Init(), Update();
 
 	static void Scan(), DoScan(Folder* f, const std::string& path, const std::string& incPath);
 	static void Refresh(), DoRefresh(Folder* f);

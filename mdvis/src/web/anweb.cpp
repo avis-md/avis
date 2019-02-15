@@ -50,6 +50,8 @@ uint AnWeb::currNode = 0, AnWeb::nextNode = 0;
 bool AnWeb::hasPy = false, AnWeb::hasC = false, AnWeb::hasFt = false;
 bool AnWeb::hasPy_s = false, AnWeb::hasC_s = false, AnWeb::hasFt_s = false;
 
+bool AnWeb::waitBrowse = false;
+
 void AnWeb::Init() {
 	nodesPath = VisSystem::localFd + "nodes/";
 	if (!IO::HasDirectory(nodesPath))
@@ -79,220 +81,240 @@ void AnWeb::Insert(const pAnNode& node, Vec2 pos) {
 
 void AnWeb::Update() {
 #ifndef IS_ANSERVER
-	for (auto n : nodes) {
-		n->Update();
-	}
-
-	if (Input::mouse0) {
-		if (Input::mouse0State == MOUSE_DOWN) {
-			for (auto n : nodes) n->selected = false;
-			for (auto n : nodes) {
-				if (n->Select()) break;
-			}
+	if (waitBrowse) {
+		if (!AnBrowse::busy && !AnBrowse::changed) {
+			waitBrowse = false;
+			ClearConn();
+			Reconn();
 		}
-		//else {
-		//	for (auto n : nodes) {
-		//		if (n->selected) n->pos += Input::mouseDelta;
-		//	}
-		//}
 	}
-	if (!executing && execThread) { //do I need this?
-		if (execThread->joinable()) execThread->join();
-	}
-	if (apply) {
-		apply = false;
-		auto frm = Particles::anim.currentFrame;
-		Particles::anim.currentFrame = -1;
-		Particles::SetFrame(frm);
+	else {
+		for (auto n : nodes) {
+			n->Update();
+		}
+		if (Input::mouse0) {
+			if (Input::mouse0State == MOUSE_DOWN) {
+				for (auto n : nodes) n->selected = false;
+				for (auto n : nodes) {
+					if (n->Select()) break;
+				}
+			}
+			//else {
+			//	for (auto n : nodes) {
+			//		if (n->selected) n->pos += Input::mouseDelta;
+			//	}
+			//}
+		}
+		if (!executing && execThread) { //do I need this?
+			if (execThread->joinable()) execThread->join();
+		}
+		if (apply) {
+			apply = false;
+			auto frm = Particles::anim.currentFrame;
+			Particles::anim.currentFrame = -1;
+			Particles::SetFrame(frm);
+		}
 	}
 #endif
+
+	AnBrowse::Update();
 }
 
 void AnWeb::Draw() {
 #ifndef IS_ANSERVER
-	const float alpha = VisSystem::opacity;
-	AnNode::width = 220;
-	UI::Quad(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f, highContrast? white() : white(alpha * drawLerp, 0.05f));
-	Engine::BeginStencil(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f);
-	byte ms = Input::mouse0State;
-	if (executing) {
-		Input::mouse0 = false;
-		Input::mouse0State = 0;
-	}
-	AnWeb::selPreClear = true;
-	Vec2 poss(AnBrowse::expandPos + 10 - scrollPos, 100);
-	float maxoff = 220, offy = -5;
-	maxScroll = 10;
-	int ns = (int)nodes.size(), i = 0, iter = -1;
-	bool iterTile = false, iterTileTop = false;
-	for (auto n : nodes) {
-		if (!n->canTile) {
-			poss.x += maxoff + 20;
-			maxScroll += maxoff + 20;
-			poss.y = 100;
-			maxoff = 220;
+		const float alpha = VisSystem::opacity;
+		UI::Quad(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f, highContrast ? white() : white(alpha * drawLerp, 0.05f));
+	if (!waitBrowse) {
+		Engine::BeginStencil(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f);
+		byte ms = Input::mouse0State;
+		AnNode::width = 220;
+		if (executing) {
+			Input::mouse0 = false;
+			Input::mouse0State = 0;
+		}
+		AnWeb::selPreClear = true;
+		Vec2 poss(AnBrowse::expandPos + 10 - scrollPos, 100);
+		float maxoff = 220, offy = -5;
+		maxScroll = 10;
+		int ns = (int)nodes.size(), i = 0, iter = -1;
+		bool iterTile = false, iterTileTop = false;
+		for (auto n : nodes) {
+			if (!n->canTile) {
+				poss.x += maxoff + 20;
+				maxScroll += maxoff + 20;
+				poss.y = 100;
+				maxoff = 220;
+				if (selScript) {
+					if (Engine::Button(poss.x, 100, maxoff, 30, white(0.3f, 0.05f)) == MOUSE_RELEASE) {
+						iter = i - 1;
+						iterTile = true;
+						iterTileTop = true;
+					}
+					UI::Texture(poss.x + 95, 100, 30, 30, Icons::expand, white(0.2f));
+					poss.y = 133;
+				}
+			}
+			else {
+				poss.y += offy + 5;
+			}
+			n->pos = poss;
+			n->DrawBack();
+			offy = n->height;
 			if (selScript) {
-				if (Engine::Button(poss.x, 100, maxoff, 30, white(0.3f, 0.05f)) == MOUSE_RELEASE) {
-					iter = i - 1;
-					iterTile = true;
-					iterTileTop = true;
-				}
-				UI::Texture(poss.x + 95, 100, 30, 30, Icons::expand, white(0.2f));
-				poss.y = 133;
-			}
-		}
-		else {
-			poss.y += offy + 5;
-		}
-		n->pos = poss;
-		n->DrawBack();
-		offy = n->height;
-		if (selScript) {
-			if (Engine::Button(poss.x, poss.y + offy + 3, maxoff, 30, white(0.3f, 0.05f)) == MOUSE_RELEASE) {
-				iter = i;
-				iterTile = true;
-				iterTileTop = false;
-			}
-			UI::Texture(poss.x - 15 + maxoff / 2, poss.y + offy + 3, 30, 30, Icons::expand, white(0.2f));
-			offy += 31;
-			if ((ns == i + 1) || !nodes[i + 1]->canTile) {
-				if (Engine::Button(poss.x + maxoff + 10, 100, 30, 200, white(0.3f, 0.05f)) == MOUSE_RELEASE) {
+				if (Engine::Button(poss.x, poss.y + offy + 3, maxoff, 30, white(0.3f, 0.05f)) == MOUSE_RELEASE) {
 					iter = i;
-					iterTile = false;
+					iterTile = true;
+					iterTileTop = false;
 				}
-				UI::Texture(poss.x + maxoff + 10, 100 + 85, 30, 30, Icons::expand, white(0.2f));
-				maxoff += 30;
+				UI::Texture(poss.x - 15 + maxoff / 2, poss.y + offy + 3, 30, 30, Icons::expand, white(0.2f));
+				offy += 31;
+				if ((ns == i + 1) || !nodes[i + 1]->canTile) {
+					if (Engine::Button(poss.x + maxoff + 10, 100, 30, 200, white(0.3f, 0.05f)) == MOUSE_RELEASE) {
+						iter = i;
+						iterTile = false;
+					}
+					UI::Texture(poss.x + maxoff + 10, 100 + 85, 30, 30, Icons::expand, white(0.2f));
+					maxoff += 30;
+				}
+			}
+			i++;
+		}
+		maxScroll += maxoff + (selScript ? 20 : 10);
+		for (auto n : nodes) {
+			n->DrawConn();
+		}
+		for (auto n : nodes) {
+			n->Draw();
+		}
+		if (Input::mouse0State == MOUSE_UP && selPreClear) selConnNode = nullptr;
+
+		if (Input::mousePos.x > AnBrowse::expandPos && Input::mousePos.x < Display::width - AnOps::expandPos) {
+			float canScroll = std::max(maxScroll - (Display::width - AnBrowse::expandPos - AnOps::expandPos), 0.f);
+			scrollPos = Clamp(scrollPos - Input::mouseScroll * 1000 * Time::delta, 0.f, canScroll);
+		}
+
+		Input::mouse0State = ms;
+		Input::mouse0 = (Input::mouse0State == 1) || (Input::mouse0State == 2);
+		Engine::EndStencil();
+
+		if (Input::mouse0State == MOUSE_UP) {
+			if (selScript) {
+				if (iter >= 0) {
+					pAnNode pn;
+					if ((uintptr_t)selScript > 1) {
+						switch (selScript->type) {
+						case AnScript::TYPE::PYTHON:
+							//pn = std::make_shared<PyNode>(dynamic_cast<PyScript*>(selScript));
+							break;
+						case AnScript::TYPE::C:
+							pn = std::make_shared<CNode>(std::dynamic_pointer_cast<CScript_I>(selScript->CreateInstance()));
+							break;
+						case AnScript::TYPE::FORTRAN:
+							//pn = std::make_shared<FNode>(dynamic_cast<FScript*>(selScript));
+							break;
+						default:
+							Debug::Error("AnWeb::Draw", "Unhandled script type: " + std::to_string((int)selScript->type));
+							break;
+						}
+					}
+					else {
+						pn = AnNode_Internal::scrs[selSpNode >> 8][selSpNode & 255].spawner();
+					}
+					if (iterTile) {
+						if (iterTileTop) nodes[iter + 1]->canTile = true;
+						else pn->canTile = true;
+					}
+					else pn->canTile = false;
+					nodes.insert(nodes.begin() + iter + 1, pn);
+					for (size_t a = 0; a < nodes.size(); a++)
+						nodes[a]->id = (uint)a;
+				}
+				selScript = nullptr;
+			}
+			else {
+				for (auto nn = nodes.begin() + 1; nn != nodes.end(); nn++) {
+					auto& n = *nn;
+					if (n->op == ANNODE_OP::REMOVE) {
+						if ((nn + 1) != nodes.end()) {
+							if (!n->canTile && (*(nn + 1))->canTile)
+								(*(nn + 1))->canTile = false;
+						}
+						n->ClearConn();
+						nodes.erase(nn);
+						break;
+					}
+				}
 			}
 		}
-		i++;
-	}
-	maxScroll += maxoff + (selScript ? 20 : 10);
-	for (auto n : nodes) {
-		n->DrawConn();
-	}
-	for (auto n : nodes) {
-		n->Draw();
-	}
-	if (Input::mouse0State == MOUSE_UP && selPreClear) selConnNode = nullptr;
 
-	if (Input::mousePos.x > AnBrowse::expandPos && Input::mousePos.x < Display::width - AnOps::expandPos) {
-		float canScroll = std::max(maxScroll - (Display::width - AnBrowse::expandPos - AnOps::expandPos), 0.f);
-		scrollPos = Clamp(scrollPos - Input::mouseScroll * 1000 * Time::delta, 0.f, canScroll);
-	}
-
-	Input::mouse0State = ms;
-	Input::mouse0 = (Input::mouse0State == 1) || (Input::mouse0State == 2);
-	Engine::EndStencil();
-
-	if (Input::mouse0State == MOUSE_UP) {
+		if (Input::KeyDown(KEY::Escape)) {
+			if (selScript) selScript = nullptr;
+			else {
+				drawFull = false;
+				AnBrowse::expandPos = AnOps::expandPos = 0;
+				ParGraphics::tfboDirty = true;
+			}
+		}
 		if (selScript) {
-			if (iter >= 0) {
-				pAnNode pn;
-				if ((uintptr_t)selScript > 1) {
-					switch (selScript->type) {
-					case AnScript::TYPE::PYTHON:
-						//pn = std::make_shared<PyNode>(dynamic_cast<PyScript*>(selScript));
-						break;
-					case AnScript::TYPE::C:
-						pn = std::make_shared<CNode>(std::dynamic_pointer_cast<CScript_I>(selScript->CreateInstance()));
-						break;
-					case AnScript::TYPE::FORTRAN:
-						//pn = std::make_shared<FNode>(dynamic_cast<FScript*>(selScript));
-						break;
-					default:
-						Debug::Error("AnWeb::Draw", "Unhandled script type: " + std::to_string((int)selScript->type));
-						break;
-					}
-				}
-				else {
-					pn = AnNode_Internal::scrs[selSpNode >> 8][selSpNode & 255].spawner();
-				}
-				if (iterTile) {
-					if (iterTileTop) nodes[iter + 1]->canTile = true;
-					else pn->canTile = true;
-				}
-				else pn->canTile = false;
-				nodes.insert(nodes.begin() + iter + 1, pn);
-				for (size_t a = 0; a < nodes.size(); a++)
-					nodes[a]->id = (uint)a;
-			}
-			selScript = nullptr;
+			Texture icon = Icons::lang_ft;
+			if ((uintptr_t)selScript == 1)
+				icon = Icons::lightning;
+			else if (selScript->type == AnScript::TYPE::C)
+				icon = Icons::lang_c;
+			else if (selScript->type == AnScript::TYPE::PYTHON)
+				icon = Icons::lang_py;
+			UI::Texture(Input::mousePos.x - 16, Input::mousePos.y - 16, 32, 32, icon, white(0.3f));
 		}
-		else {
-			for (auto nn = nodes.begin() + 1; nn != nodes.end(); nn++) {
-				auto& n = *nn;
-				if (n->op == ANNODE_OP::REMOVE) {
-					if ((nn + 1) != nodes.end()) {
-						if (!n->canTile && (*(nn + 1))->canTile)
-							(*(nn + 1))->canTile = false;
-					}
-					n->ClearConn();
-					nodes.erase(nn);
-					break;
-				}
-			}
+
+		if (Engine::Button(Display::width - 71.f, 1.f, 70.f, 16.f, white(1, 0.4f), _("Done"), 12.f, white(), true) == MOUSE_RELEASE) {
+			drawFull = false;
+			AnBrowse::expandPos = AnOps::expandPos = 0;
+			ParGraphics::tfboDirty = true;
+		}
+
+		float wo = 200;
+		bool haf = activeFile != "";
+		if (!executing && Engine::Button(wo, 1, 70, 16, white(1, haf ? 0.4f : 0.2f), _("Save"), 12.f, white(), true) == MOUSE_RELEASE)
+			if (haf) Save(activeFile);
+		wo += 75;
+		if (!executing && Engine::Button(wo, 1, 70, 16, white(1, 0.4f), _("Save As"), 12.f, white(), true) == MOUSE_RELEASE)
+			Save(Dialog::SaveFile(EXT_ANSV));
+		wo += 75;
+		if (!executing && Engine::Button(wo, 1, 70, 16, white(1, 0.4f), _("Open"), 12.f, white(), true) == MOUSE_RELEASE) {
+			auto res = Dialog::OpenFile({ "*" EXT_ANSV });
+			if (!!res.size()) Load(res[0]);
+		}
+		wo += 75;
+		if (!executing && Engine::Button(wo, 1, 70, 16, white(1, 0.4f), _("Clear"), 12, white(), true) == MOUSE_RELEASE) {
+			Clear0();
+		}
+		wo += 75;
+		bool canexec = (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
+		if (Engine::Button(wo, 1, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
+			if (canexec) AnWeb::Execute(false);
+		}
+		UI::Texture(wo, 1, 16, 16, Icons::play);
+		wo += 75;
+		bool canexec2 = (canexec && Particles::anim.frameCount > 1);
+		if (Engine::Button(wo, 1, 107, 16, white(1, canexec2 ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
+			if (canexec2) AnWeb::Execute(true);
+		}
+		UI::Texture(wo, 1, 16, 16, Icons::playall);
+		if (drawLerp < 1) {
+			drawLerp = std::min(drawLerp + 10 * Time::delta, 1.f);
+			ParGraphics::tfboDirty = true;
 		}
 	}
 
 	AnBrowse::Draw();
 	AnOps::Draw();
 
-	if (Input::KeyDown(KEY::Escape)) {
-		if (selScript) selScript = nullptr;
-		else {
-			drawFull = false;
-			AnBrowse::expandPos = AnOps::expandPos = 0;
-			ParGraphics::tfboDirty = true;
-		}
-	}
-	if (selScript) {
-		Texture icon = Icons::lang_ft;
-		if ((uintptr_t)selScript == 1)
-			icon = Icons::lightning;
-		else if (selScript->type == AnScript::TYPE::C)
-			icon = Icons::lang_c;
-		else if (selScript->type == AnScript::TYPE::PYTHON)
-			icon = Icons::lang_py;
-		UI::Texture(Input::mousePos.x - 16, Input::mousePos.y - 16, 32, 32, icon, white(0.3f));
-	}
-
-	if (Engine::Button(Display::width - 71.f, 1.f, 70.f, 16.f, white(1, 0.4f), _("Done"), 12.f, white(), true) == MOUSE_RELEASE) {
-		drawFull = false;
-		AnBrowse::expandPos = AnOps::expandPos = 0;
-		ParGraphics::tfboDirty = true;
-	}
-	
-	float wo = 200;
-	bool haf = activeFile != "";
-	if (!executing && Engine::Button(wo, 1, 70, 16, white(1, haf? 0.4f : 0.2f), _("Save"), 12.f, white(), true) == MOUSE_RELEASE)
-		if (haf) Save(activeFile);
-	wo += 75;
-	if (!executing && Engine::Button(wo, 1, 70, 16, white(1, 0.4f), _("Save As"), 12.f, white(), true) == MOUSE_RELEASE)
-		Save(Dialog::SaveFile(EXT_ANSV));
-	wo += 75;
-	if (!executing && Engine::Button(wo, 1, 70, 16, white(1, 0.4f), _("Open"), 12.f, white(), true) == MOUSE_RELEASE) {
-		auto res = Dialog::OpenFile({"*" EXT_ANSV});
-		if (!!res.size()) Load(res[0]);
-	}
-	wo += 75;
-	if (!executing && Engine::Button(wo, 1, 70, 16, white(1, 0.4f), _("Clear"), 12, white(), true) == MOUSE_RELEASE) {
-		Clear0();
-	}
-	wo += 75;
-	bool canexec = (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
-	if (Engine::Button(wo, 1, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
-		if (canexec) AnWeb::Execute(false);
-	}
-	UI::Texture(wo, 1, 16, 16, Icons::play);
-	wo += 75;
-	bool canexec2 = (canexec && Particles::anim.frameCount > 1);
-	if (Engine::Button(wo, 1, 107, 16, white(1, canexec2 ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
-		if (canexec2) AnWeb::Execute(true);
-	}
-	UI::Texture(wo, 1, 16, 16, Icons::playall);
-	if (drawLerp < 1) {
-		drawLerp = std::min(drawLerp + 10 * Time::delta, 1.f);
-		ParGraphics::tfboDirty = true;
+	if (waitBrowse) {
+		UI::IncLayer();
+		UI::Quad(0, 0, Display::width, Display::height, black(0.5f));
+		UI::font->Align(ALIGN_MIDCENTER);
+		UI::Label(Display::width * 0.5f, Display::height * 0.5f, 12, AnBrowse::busyMsg, white(0.8f));
+		UI::font->Align(ALIGN_TOPLEFT);
 	}
 #endif
 }
@@ -311,39 +333,41 @@ void AnWeb::DrawSide() {
 			drawFull = true;
 		}
 
-		bool canexec = !!Particles::particleSz &&(!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
-		if (Engine::Button(expos + 1, 38, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
-			if (canexec) AnWeb::Execute(false);
-		}
-		UI::Texture(expos + 1, 38, 16, 16, Icons::play);
-		bool canexec2 = (canexec && Particles::anim.frameCount > 1);
-		if (!execFrame) {
-			if (Engine::Button(expos + 72, 38, 107, 16, white(1, canexec2 ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
-				if (canexec2) AnWeb::Execute(true);
+		if (!waitBrowse) {
+			bool canexec = !!Particles::particleSz && (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
+			if (Engine::Button(expos + 1, 38, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
+				if (canexec) AnWeb::Execute(false);
 			}
-		}
-		else {
-			UI::Quad(expos + 72, 38, 107, 16, white(1, 0.2f));
-			UI::font->Align(ALIGN_TOPCENTER);
-			UI::Label(expos + 72 + 54, 39, 12, std::to_string(execFrame), white(0.8f));
-			UI::font->Align(ALIGN_TOPLEFT);
-		}
-		if (invertRun)
-			UI::Texture(expos + 178, 38, -16, 16, Icons::playall);
-		else
-			UI::Texture(expos + 72, 38, 16, 16, Icons::playall);
+			UI::Texture(expos + 1, 38, 16, 16, Icons::play);
+			bool canexec2 = (canexec && Particles::anim.frameCount > 1);
+			if (!execFrame) {
+				if (Engine::Button(expos + 72, 38, 107, 16, white(1, canexec2 ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
+					if (canexec2) AnWeb::Execute(true);
+				}
+			}
+			else {
+				UI::Quad(expos + 72, 38, 107, 16, white(1, 0.2f));
+				UI::font->Align(ALIGN_TOPCENTER);
+				UI::Label(expos + 72 + 54, 39, 12, std::to_string(execFrame), white(0.8f));
+				UI::font->Align(ALIGN_TOPLEFT);
+			}
+			if (invertRun)
+				UI::Texture(expos + 178, 38, -16, 16, Icons::playall);
+			else
+				UI::Texture(expos + 72, 38, 16, 16, Icons::playall);
 
-		float off = UI::BeginScroll(expos, 17*3+4, 180, Display::height - 17*3-23);
-		Vec2 poss(expos + 1, off);
-		for (auto n : nodes) {
-			n->pos = poss;
-			poss.y += n->DrawSide() + 1;
+			float off = UI::BeginScroll(expos, 17 * 3 + 4, 180, Display::height - 17 * 3 - 23);
+			Vec2 poss(expos + 1, off);
+			for (auto n : nodes) {
+				n->pos = poss;
+				poss.y += n->DrawSide() + 1;
+			}
+			UI::EndScroll(poss.y);
+			UI2::BackQuad(expos - 16.f, Display::height - 34.f, 16, 16);
+			if ((!UI::editingText && Input::KeyUp(KEY::A)) || Engine::Button(expos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse) == MOUSE_RELEASE)
+				expanded = false;
+			expandPos = Clamp(expandPos + 1500 * Time::delta, 0.f, 180.f);
 		}
-		UI::EndScroll(poss.y);
-		UI2::BackQuad(expos - 16.f, Display::height - 34.f, 16, 16);
-		if ((!UI::editingText && Input::KeyUp(KEY::A)) || Engine::Button(expos - 16.f, Display::height - 34.f, 16.f, 16.f, Icons::collapse) == MOUSE_RELEASE)
-			expanded = false;
-		expandPos = Clamp(expandPos + 1500 * Time::delta, 0.f, 180.f);
 	}
 	else {
 		if ((!UI::editingText && Input::KeyUp(KEY::A)) || Engine::Button(expos - 110.f, Display::height - 34.f, 110, 16, white(alpha, 0.15f), white(alpha * 2, 0.15f), white(alpha / 2, 0.05f)) == MOUSE_RELEASE)
@@ -358,7 +382,9 @@ void AnWeb::DrawSide() {
 
 void AnWeb::DrawScene() {
 #ifndef IS_ANSERVER
-	for (auto& n : nodes) n->DrawScene();
+	if (!waitBrowse) {
+		for (auto& n : nodes) n->DrawScene();
+	}
 #endif
 }
 
@@ -790,9 +816,8 @@ void AnWeb::LoadOut() {
 
 void AnWeb::CheckChanges() {
 	SaveConn();
+	waitBrowse = true;
 	AnBrowse::Refresh();
-	ClearConn();
-	Reconn();
 }
 
 void AnWeb::SaveConn() {

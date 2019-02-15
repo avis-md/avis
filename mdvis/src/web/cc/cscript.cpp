@@ -5,6 +5,12 @@ std::unordered_map<std::string, std::weak_ptr<CScript>> CScript::allScrs;
 CScript::CScript() : AnScript(TYPE::C), progress(0), stdioClr(nullptr),
 	stdioLock(nullptr), stdioPtr(nullptr), stdioCnt(nullptr), stdioI(0) {}
 
+void CScript::Clear() {
+	AnScript::Clear();
+	_inputs.clear();
+	_outputs.clear();
+}
+
 pAnScript_I CScript::CreateInstance() {
 	auto res = std::make_shared<CScript_I>();
 	res->Init(this);
