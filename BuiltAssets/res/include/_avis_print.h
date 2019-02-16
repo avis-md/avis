@@ -3,6 +3,14 @@
 #include <vector>
 #include <mutex>
 
+#if _WIN_
+#define __EXPORT__ __declspec(dllexport)
+#elif _UNIX_
+#define __EXPORT__ __attribute__((visibility("default")))
+#else
+#error platform not specified!
+#endif
+
 std::vector<void*> __stdio_buf;
 std::mutex __stdio_lock;
 extern "C" __EXPORT__ std::mutex* __stdio_plock = &__stdio_lock;

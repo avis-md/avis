@@ -96,11 +96,7 @@ bool CReader::Read(CScript* scr) {
 		if (mt > ot) {
 			remove((fp2 + nm + ".so").c_str());
 
-#ifdef PLATFORM_WIN
-			#define EXTERN "extern \"C\" __declspec(dllexport) "
-#else
-			#define EXTERN "extern \"C\" __attribute__((visibility(\"default\"))) "
-#endif
+			#define EXTERN "extern \"C\" __EXPORT__ "
 			const std::string tmpPath = fp2 + nm + "_temp__" EXT_CS;
 			{
 				std::ifstream strm(fp + EXT_CS);
@@ -178,7 +174,7 @@ bool CReader::Read(CScript* scr) {
 				}
 				ostrm << "\n\n//___magic below___\n\n";
 				for (auto& v : vrNms) {
-					ostrm << "//__in__\n" << EXTERN "void* __var_" + v.name
+					ostrm << "//__in__\n" EXTERN "void* __var_" + v.name
 						+ " = &((" + nm + "*)nullptr)->" + v.name + ";\n";
 				}
 				if (progrsNm != "") {
@@ -200,7 +196,7 @@ bool CReader::Read(CScript* scr) {
 #ifdef PLATFORM_WIN
 			if (useMsvc) {
 				std::string cl = "cl /nologo /c /Zi /Od /I " + incfd + 
-					" /D__EXPORT__=__declspec(dllexport) /FI _avis_print.h";
+					" /D_WIN_ /FI _avis_print.h";
 				if (useOMP) {
 					cl += " /openmp";
 				}
@@ -220,7 +216,7 @@ bool CReader::Read(CScript* scr) {
 				scr->errorCount = ErrorView::Parse_GCC(fp2 + nm + "_log.txt", tmpPath, nm + ".cpp", scr->compileLog);
 			}
 #else
-			std::string cmd = gpp + " -std=c++11 -shared -fPIC -I\"" + fd + "\" -fvisibility=hidden "
+			std::string cmd = gpp + " -std=c++11 -shared -fPIC -I\"" + fd + "\" -I\"" + incfd + "\" -D_UNIX_ -include _avis_print.h -fvisibility=hidden "
 #ifdef PLATFORM_LNX
 				"-fno-gnu-unique "
 #endif
@@ -266,7 +262,12 @@ bool CReader::Read(CScript* scr) {
 		auto prgs = scr->lib.GetSym("__progress");
 		if (prgs) scr->progress = *(uintptr_t*)prgs;
 		scr->stdioClr = (CScript::clearFunc)scr->lib.GetSym("__stdio_clear");
-		scr->stdioLock = *(std::mutex**)scr->lib.GetSym("__stdio_plock");
+		auto pmtx = scr->lib.GetSym("__stdio_plock");
+		if (!pmtx) {\
+			_ER("CReader", "Internal error: failed to register *stdioLock from compiled binary!");\
+			FAIL0;\
+		}
+		scr->stdioLock = *(std::mutex**)pmtx;
 		scr->stdioPtr = (void***)scr->lib.GetSym("__stdio_data");
 		scr->stdioCnt = (int*)scr->lib.GetSym("__stdio_count");
 
@@ -313,7 +314,7 @@ bool CReader::Read(CScript* scr) {
 		}
 		fst = false;
 
-		auto lns = string_split(ln, ' ', true);
+		auto lns = string_split(string_trim(ln), ' ', true);
 		int lnsz = lns.size();
 		if (!lnsz) continue;
 		bool ien = (lnsz > 1)? (lns[1] == "enum") : false; 
@@ -333,7 +334,7 @@ bool CReader::Read(CScript* scr) {
 			std::getline(strm, ln);
 			bool ira = false;
 
-			auto ss = string_split(ln, ' ', true);
+			auto ss = string_split(string_trim(ln), ' ', true);
 			vr.typeName = ss[0];
 			if (vr.typeName.back() == '*') {
 				vr.typeName.pop_back();

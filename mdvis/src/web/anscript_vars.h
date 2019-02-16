@@ -15,7 +15,7 @@ const std::string AN_VARTYPE_STRS[] = {
 	"short",
 	"int",
 	"double",
-	"list(??)",
+	"list(##)",
 	"*"
 };
 
@@ -52,6 +52,7 @@ struct VarVal {
 		if (arr.size() > 0) val.p = arr.data();
 		if (vv.pval == &vv.val) pval = &val;
 		else pval = vv.pval;
+		return *this;
 	}
 };
 
