@@ -298,9 +298,9 @@ void AnWeb::Draw() {
 	if (waitBrowse) {
 		UI::IncLayer();
 		UI::Quad(0, 0, Display::width, Display::height, black(0.5f));
-		UI::font->Align(ALIGN_MIDCENTER);
+		UI::font.Align(ALIGN_MIDCENTER);
 		UI::Label(Display::width * 0.5f, Display::height * 0.5f, 12, AnBrowse::busyMsg, white(0.8f));
-		UI::font->Align(ALIGN_TOPLEFT);
+		UI::font.Align(ALIGN_TOPLEFT);
 	}
 
 	if (Input::KeyDown(KEY::Escape) || (Engine::Button(Display::width - 71.f, 1.f, 70.f, 16.f, white(1, 0.4f), _("Done"), 12.f, white(), true) == MOUSE_RELEASE)) {
@@ -342,9 +342,9 @@ void AnWeb::DrawSide() {
 			}
 			else {
 				UI::Quad(expos + 72, 38, 107, 16, white(1, 0.2f));
-				UI::font->Align(ALIGN_TOPCENTER);
+				UI::font.Align(ALIGN_TOPCENTER);
 				UI::Label(expos + 72 + 54, 39, 12, std::to_string(execFrame), white(0.8f));
-				UI::font->Align(ALIGN_TOPLEFT);
+				UI::font.Align(ALIGN_TOPLEFT);
 			}
 			if (invertRun)
 				UI::Texture(expos + 178, 38, -16, 16, Icons::playall);

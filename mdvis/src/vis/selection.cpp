@@ -122,12 +122,12 @@ void Selection::DrawMenu() {
     UI::Label(ep - 148, off, 12, "Selected: " + std::to_string(count), white());
     off += 20;
     if (count > 1) {
-        UI::font->Align(ALIGN_MIDCENTER);
+        UI::font.Align(ALIGN_MIDCENTER);
         for (size_t a = 0; a < count; ++a) {
             auto& p = spos[a];
             UI::Label(p.x, p.y, 20, std::to_string(a));
         }
-        UI::font->Align(ALIGN_TOPLEFT);
+        UI::font.Align(ALIGN_TOPLEFT);
         if (count > 2) {
             if (Engine::Button(ep - 148, off, 16, 16, expL ? Icons::expand : Icons::collapse) == MOUSE_RELEASE) {
                 expL = !expL;

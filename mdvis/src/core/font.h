@@ -1,15 +1,19 @@
 #pragma once
 #include "Engine.h"
+#include "utils/refcnt.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
 /*! Dynamic fonts constructed with FreeType (.ttf files)
 [av]*/
-class Font {
+class Font : public RefCnt {
 public:
+	Font() : loaded(false), _face(0) {}
 	Font(const std::string& path, ALIGNMENT align = ALIGN_TOPLEFT);
 	~Font();
+
+	operator bool() const { return loaded; }
 
 	static void Init(), Deinit();
 
@@ -17,6 +21,7 @@ public:
 	GLuint glyph(uint size, uint mask);
 	void ClearGlyphs();
 
+	float dpi;
 	ALIGNMENT alignment;
 
 	Font* Align(ALIGNMENT a);
@@ -50,4 +55,9 @@ protected:
 
 	std::unordered_map<uint, std::unordered_map<uint, GLuint>> _glyphs; //each glyph size is fontSize*16
 	GLuint CreateGlyph(uint size, uint mask = 0);
+
+	void DestroyRef() override;
+	
+	static bool waitkill;
+	static int facecnt;
 };

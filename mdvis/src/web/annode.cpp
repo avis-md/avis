@@ -260,7 +260,7 @@ void AnNode::Draw() {
 				}
 
 
-				UI::font->Align(ALIGN_TOPRIGHT);
+				UI::font.Align(ALIGN_TOPRIGHT);
 				auto bt = ho ? Engine::Button(pos.x + width*0.67f - 5, y, width * 0.33f, 16) : MOUSE_NONE;
 				if (!bt) {
 					UI::Label(pos.x + width - 10, y, 12, _script->outputs[i].name, white());
@@ -273,7 +273,7 @@ void AnNode::Draw() {
 						Disconnect(i, true);
 					}
 				}
-				UI::font->Align(ALIGN_TOPLEFT);
+				UI::font.Align(ALIGN_TOPLEFT);
 				UI::Label(pos.x + 2, y, 12, _script->outputs[i].typeName, white(0.3f), width * 0.67f - 6);
 			}
 			auto y1 = y;

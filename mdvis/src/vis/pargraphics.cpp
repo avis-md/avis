@@ -1132,14 +1132,14 @@ void ParGraphics::DrawAxes() {
 
 	const Vec2 center = Vec2(70.f + ParMenu::expandPos, Display::height - 70.f);
 	const float fsz = axesSize * 12.f / 15;
-	UI::font->Align(ALIGN_MIDCENTER);
+	UI::font.Align(ALIGN_MIDCENTER);
 	for (int a = 0; a < 3; a++) {
 		const auto& ax = axis[a];
 		Engine::DrawLine(center, center + Vec2(ax.pos) * axesSize, ax.col, 1);
 		const auto tc = center + Vec2(ax.pos) * axesSize * 1.5f;
 		UI::Label(tc.x, tc.y, fsz, ax.nm, ax.col);
 	}
-	UI::font->Align(ALIGN_TOPLEFT);
+	UI::font.Align(ALIGN_TOPLEFT);
 }
 
 void ParGraphics::DrawOverlay() {

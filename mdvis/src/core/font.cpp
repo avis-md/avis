@@ -9,6 +9,9 @@ GLuint Font::vao = 0;
 GLuint Font::vbos[] = { 0, 0, 0 };
 GLuint Font::idbuf = 0;
 
+bool Font::waitkill = false;
+int Font::facecnt = 0;
+
 void Font::Init() {
 	int err = FT_Init_FreeType(&_ftlib);
 	if (err != FT_Err_Ok) {
@@ -29,7 +32,10 @@ void Font::Init() {
 }
 
 void Font::Deinit() {
-	FT_Done_FreeType(_ftlib);
+	if (!facecnt) {
+		FT_Done_FreeType(_ftlib);
+	}
+	else waitkill = true;
 }
 
 void Font::InitVao(uint sz) {
@@ -67,6 +73,7 @@ void Font::InitVao(uint sz) {
 }
 
 Font::Font(const std::string& path, ALIGNMENT align) : alignment(align), vecSize(0) {
+	assert(!waitkill);
 	auto err = FT_New_Face(_ftlib, path.c_str(), 0, &_face);
 	if (err != FT_Err_Ok) {
 		Debug::Warning("Font", "Failed to load font! " + std::to_string(err));
@@ -78,14 +85,30 @@ Font::Font(const std::string& path, ALIGNMENT align) : alignment(align), vecSize
 	CreateGlyph(12, 0);
 	SizeVec(20);
 	loaded = true;
+	dpi = Display::dpiScl;
+	facecnt++;
 }
 
 Font::~Font() {
-	if (loaded)
+	CheckUniqueRef();
+}
+
+void Font::DestroyRef() {
+	if (loaded) {
 		FT_Done_Face(_face);
+		facecnt--;
+		if (waitkill && !facecnt) {
+			FT_Done_FreeType(_ftlib);
+		}
+	}
 }
 
 GLuint Font::glyph(uint size, uint mask) {
+	if (dpi != Display::dpiScl) {
+		params.clear();
+		_glyphs.clear();
+		dpi = Display::dpiScl;
+	}
 	if (_glyphs.count(size) == 1) {
 		auto& gly = _glyphs[size];
 		if (gly.count(mask) == 1)

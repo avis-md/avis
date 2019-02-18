@@ -106,11 +106,11 @@ void ParMenu::Draw() {
 		}
 
 		UI::Rotate(90, Vec2(expandPos + 16, 18));
-		UI::font->Align(ALIGN_TOPCENTER);
+		UI::font.Align(ALIGN_TOPCENTER);
 		for (uint i = 0; i < 5; ++i) {
 			UI::Label(expandPos + 56 + 81 * i, 18, 12, menuNames[i], (i == activeMenu) ? VisSystem::accentColor : white());
 		}
-		UI::font->Align(ALIGN_TOPLEFT);
+		UI::font.Align(ALIGN_TOPLEFT);
 		UI::ResetMatrix();
 
 		UI2::BackQuad(expandPos, Display::height - 34.f, 16, 16);
@@ -405,10 +405,10 @@ void ParMenu::DrawSplash() {
 	UI::Quad(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), black(0.5f));
 	UI2::BackQuad(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250);
 	UI::Texture(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, ParGraphics::splash);
-	UI::font->Align(ALIGN_TOPRIGHT);
+	UI::font.Align(ALIGN_TOPRIGHT);
 	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 120, 12, VERSIONSTRING, white());
 	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 104, 12, "Build hash: " + VisSystem::version_hash, white());
-	UI::font->Align(ALIGN_TOPLEFT);
+	UI::font.Align(ALIGN_TOPLEFT);
 
 	std::string sub = "";
 

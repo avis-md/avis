@@ -242,9 +242,9 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 					UI::ResetMatrix();
 				}
 				else {
-					UI::font->Align(ALIGN_TOPRIGHT);
+					UI::font.Align(ALIGN_TOPRIGHT);
 					UI::Label(145, off, 12, std::to_string(fs->errorCount), red());
-					UI::font->Align(ALIGN_TOPLEFT);
+					UI::font.Align(ALIGN_TOPLEFT);
 				}
 			}
 			off += 17;
