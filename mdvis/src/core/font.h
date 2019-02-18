@@ -33,8 +33,7 @@ protected:
 	static FT_Library _ftlib;
 	static void InitVao(uint sz);
 	FT_Face _face;
-	static GLuint fontProgram;
-	static GLint fontProgLocs[5];
+	static Shader prog;
 
 	struct _params {
 		float o2s[256];

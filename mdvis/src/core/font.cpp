@@ -2,8 +2,7 @@
 #include "res/shddata.h"
 
 FT_Library Font::_ftlib = nullptr;
-GLuint Font::fontProgram = 0;
-GLint Font::fontProgLocs[] = {};
+Shader Font::prog;
 uint Font::vaoSz = 0;
 GLuint Font::vao = 0;
 GLuint Font::vbos[] = { 0, 0, 0 };
@@ -19,14 +18,8 @@ void Font::Init() {
 		abort();
 	}
 
-	fontProgram = Shader::FromVF(glsl::fontVert, glsl::fontFrag);
-#define LC(nm) fontProgLocs[i++] = glGetUniformLocation(fontProgram, #nm)
-	int i = 0;
-	LC(col);
-	LC(sampler);
-	LC(mask);
-#undef LC
-
+	(prog = Shader::FromVF(glsl::fontVert, glsl::fontFrag))
+		.AddUniforms({ "col", "sampler", "mask" });
 	InitVao(128);
 	Unloader::Reg(Deinit);
 }

@@ -527,20 +527,20 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, usz * 6 * sizeof(uint), &font->ids[0]);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	glUseProgram(Font::fontProgram);
-	glUniform4f(Font::fontProgLocs[0], col.r, col.g, col.b, col.a * alpha);
+	Font::prog.Bind();
+	glUniform4f(Font::prog.Loc(0), col.r, col.g, col.b, col.a * alpha);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBindVertexArray(Font::vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Font::idbuf);
 
-	glUniform1i(Font::fontProgLocs[1], 0);
+	glUniform1i(Font::prog.Loc(1), 0);
 
-	for (auto m : mks) {
+	for (auto& m : mks) {
 		GLuint tex = (!m) ? font->glyph(si, 0) : font2.glyph(si, m);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, tex);
-		glUniform1i(Font::fontProgLocs[2], m);
+		glUniform1i(Font::prog.Loc(2), m);
 
 		glDrawElements(GL_TRIANGLES, 6 * usz, GL_UNSIGNED_INT, 0);
 	}
