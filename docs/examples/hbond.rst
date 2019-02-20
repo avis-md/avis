@@ -68,6 +68,7 @@ Source code (Error checking omitted)::
             }
         }
         bonds = &vcons[0];
+        ccnt = vcons.size() / 2;
     }
 
 .. raw:: latex

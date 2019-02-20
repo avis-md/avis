@@ -1,15 +1,16 @@
 Foreword
 ========
 
-AViS (pronounced ayy-vis) is an analysis and visualization application for Molecular Dynamics Simulations.
-It is written by me (Pua Kai). The program is written under the C++11 and OpenGL3.3 standard.
+AViS is an Analysis and Visualization Software for Molecular Dynamics Simulations.
+AViS is written under the C++11 and OpenGL3.3 standard.
+The software and this documentation is written by me.
 
 AViS is based on a fork of ChokoLait C++ game engine library, also written by me.
 
 AViS (and ChokoLait) uses the following open-source libraries, in no particular order.
 
-* GLEW
 * GLFW
+* GLEW
 * GLM
 * LodePNG
 * JPEGlib
@@ -19,3 +20,7 @@ AViS (and ChokoLait) uses the following open-source libraries, in no particular 
 * Freetype
 * LibSSH2
 * RadeonRays
+
+
+
+*Pua Kai, 2019*
