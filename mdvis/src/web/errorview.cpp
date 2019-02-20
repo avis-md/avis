@@ -149,11 +149,11 @@ void ErrorView::Draw() {
 		float y = Display::height - 18.f - windowSize;
 		UI::Quad(0, y, static_cast<float>(Display::width), static_cast<float>(windowSize), white(0.95f, 0.1f));
 		y++;
-		if (Engine::Button(2, y, 80, 16, white(0), white(0.2f), black(0.2f), "Compile Log", 12, UI::font, showExec ? white(0.8f) : VisSystem::accentColor) == MOUSE_RELEASE) {
+		if (Engine::Button(2, y, 80, 16, white(0), white(0.2f), black(0.2f), "Compile Log", 12, &UI::font, showExec ? white(0.8f) : VisSystem::accentColor) == MOUSE_RELEASE) {
 			showExec = false;
 			descId = -1;
 		}
-		if (Engine::Button(85, y, 80, 16, white(0), white(0.2f), black(0.2f), "Exec Log", 12, UI::font, showExec ? VisSystem::accentColor : white(0.8f)) == MOUSE_RELEASE) {
+		if (Engine::Button(85, y, 80, 16, white(0), white(0.2f), black(0.2f), "Exec Log", 12, &UI::font, showExec ? VisSystem::accentColor : white(0.8f)) == MOUSE_RELEASE) {
 			showExec = true;
 			descId = -1;
 		}

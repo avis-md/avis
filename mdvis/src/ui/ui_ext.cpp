@@ -126,9 +126,9 @@ void UI2::File(float x, float y, float w, const std::string& title, const std::s
 MOUSE_STATUS UI2::Button2(float x, float y, float w, const std::string& s, const Texture& tex, Vec4 col, Vec4 col2) {
 	auto ret = Engine::Button(x, y, w, 16, col);
 	UI::Texture(x + 1, y, 16, 16, tex, col2);
-	UI::font->alignment = ALIGN_TOPCENTER;
+	UI::font.Align(ALIGN_TOPCENTER);
 	UI::Label(x + 9 + w/2, y, 12, s, col2);
-	UI::font->alignment = ALIGN_TOPLEFT;
+	UI::font.Align(ALIGN_TOPLEFT);
 	return ret;
 }
 

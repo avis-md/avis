@@ -12,7 +12,7 @@ bool UI::_isDrawingLoop = false;
 
 UniqueCallerList UI::_editTextCallee;
 
-Font* UI::font, *UI::font2;
+Font UI::font, UI::font2;
 
 bool UI::focused = true, UI::editingText = false;
 uint UI::_editTextCursorPos = 0;
@@ -63,14 +63,14 @@ void UI::Init() {
 
 	InitVao();
 
-	font = new Font(IO::path + "res/font.ttf");
-	font2 = new Font(IO::path + "res/font2.ttf");
-	if (!font->loaded) {
+	font = Font(IO::path + "res/font.ttf");
+	font2 = Font(IO::path + "res/font2.ttf");
+	if (!font) {
 		Debug::Error("UI", "failed to open default font (/res/font.ttf)!");
-		if (font2->loaded) font = font2;
+		if (font2) font = font2;
 		else Debug::Warning("UI", "failed to open alternate font (/res/font2.ttf)! Non-ascii text will not work!");
 	}
-	else if (!font2->loaded) font2 = font;
+	else if (!font2) font2 = font;
 }
 
 void UI::IncLayer() {
@@ -433,7 +433,7 @@ float UI::GetLabelW(float s, std::string str, Font* font) {
 	while(*cc) {
 		auto c = Font::utf2unc(cc);
 		if (c < 0x0100) totalW += font->params[(uint)s][0].o2s[c & 0x00ff];
-		else totalW += font2->params[(uint)s][c & 0xff00].o2s[c & 0x00ff];
+		else totalW += font2.params[(uint)s][c & 0xff00].o2s[c & 0x00ff];
 	}
 	return totalW;
 }
@@ -460,13 +460,13 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 		if (std::find(mks.begin(), mks.end(), mk) == mks.end()) {
 			mks.push_back(mk);
 			if (!mk) font->glyph(si, 0);
-			else font2->glyph(si, mk);
+			else font2.glyph(si, mk);
 		}
 	}
 	for (uint i = 0; i < usz; ++i) {
 		auto& c = ucs[i];
 		if (c < 0x0100) totalW += font->params[(uint)s][0].o2s[c & 0x00ff];
-		else totalW += font2->params[(uint)s][c & 0xff00].o2s[c & 0x00ff];
+		else totalW += font2.params[(uint)s][c & 0xff00].o2s[c & 0x00ff];
 		if (maxw > 0 && totalW > maxw) {
 			usz = i;
 			break;
@@ -486,7 +486,7 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 		auto& c = ucs[i / 4];
 		auto m = c & 0xff00;
 		auto cc = c & 0x00ff;
-		auto& prm = (!m) ? font->params[(uint)s][0] : font2->params[(uint)s][m];
+		auto& prm = (!m) ? font->params[(uint)s][0] : font2.params[(uint)s][m];
 		//if (c == '\n')
 		//	c = ' ';
 
@@ -527,20 +527,20 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, fl
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, usz * 6 * sizeof(uint), &font->ids[0]);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	glUseProgram(Font::fontProgram);
-	glUniform4f(Font::fontProgLocs[0], col.r, col.g, col.b, col.a * alpha);
+	Font::prog.Bind();
+	glUniform4f(Font::prog.Loc(0), col.r, col.g, col.b, col.a * alpha);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glBindVertexArray(Font::vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Font::idbuf);
 
-	glUniform1i(Font::fontProgLocs[1], 0);
+	glUniform1i(Font::prog.Loc(1), 0);
 
-	for (auto m : mks) {
-		GLuint tex = (!m) ? font->glyph(si, 0) : font2->glyph(si, m);
+	for (auto& m : mks) {
+		GLuint tex = (!m) ? font->glyph(si, 0) : font2.glyph(si, m);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, tex);
-		glUniform1i(Font::fontProgLocs[2], m);
+		glUniform1i(Font::prog.Loc(2), m);
 
 		glDrawElements(GL_TRIANGLES, 6 * usz, GL_UNSIGNED_INT, 0);
 	}

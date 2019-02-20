@@ -302,7 +302,7 @@ public:
 	static void DrawLinesW(Vec3* pts, int num, Vec4 col, float width);
 	static MOUSE_STATUS Button(float x, float y, float w, float h);
 	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4);
-	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4, std::string label, float labelSize, Vec4 labelCol, bool labelCenter = false, Font* labelFont = UI::font);
+	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4, std::string label, float labelSize, Vec4 labelCol, bool labelCenter = false, Font* labelFont = &UI::font);
 	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4);
 	static MOUSE_STATUS Button(float x, float y, float w, float h, const Texture& texture, Vec4 normalVec4 = white(0.8f), Vec4 highlightVec4 = white(), Vec4 pressVec4 = white(1, 0.5f), float uvx = 0, float uvy = 0, float uvw = 1, float uvh = 1);
 	static MOUSE_STATUS Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, std::string label, float labelSize, Font* labelFont, Vec4 labelVec4, bool labelCenter = false);

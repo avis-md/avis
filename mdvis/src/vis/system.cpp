@@ -233,9 +233,9 @@ void VisSystem::DrawTitle() {
 		Popups::type = POPUP_TYPE::SYSMSG;
 	}
 
-	UI::font->Align(ALIGN_TOPRIGHT);
+	UI::font.Align(ALIGN_TOPRIGHT);
 	UI::Label(Display::width - 5.f, 3, 10, VERSIONSTRING, white(0.7f));
-	UI::font->Align(ALIGN_TOPLEFT);
+	UI::font.Align(ALIGN_TOPLEFT);
 }
 
 void VisSystem::DrawBar() {

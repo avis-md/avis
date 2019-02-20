@@ -18,13 +18,13 @@ public:
 	static void Texture(float x, float y, float w, float h, const ::Texture& texture, DRAWTEX_SCALING scl = DRAWTEX_STRETCH, float miplevel = 0);
 	static void Texture(float x, float y, float w, float h, const ::Texture& texture, float alpha, DRAWTEX_SCALING scl = DRAWTEX_STRETCH, float miplevel = 0);
 	static void Texture(float x, float y, float w, float h, const ::Texture& texture, Vec4 tint, DRAWTEX_SCALING scl = DRAWTEX_STRETCH, float miplevel = 0);
-	static float GetLabelW(float s, std::string str, Font* f = font);
-	static void Label(float x, float y, float s, std::string str, Vec4 col = black(), float maxw = -1, Font* fnt = font);
-	static void Label(float x, float y, float s, const char* str, uint sz, Vec4 col = black(), float maxw = -1, Font* fnt = font);
+	static float GetLabelW(float s, std::string str, Font* f = &font);
+	static void Label(float x, float y, float s, std::string str, Vec4 col = black(), float maxw = -1, Font* fnt = &font);
+	static void Label(float x, float y, float s, const char* str, uint sz, Vec4 col = black(), float maxw = -1, Font* fnt = &font);
 
 	//Draws an editable text box. EditText does not work on recursive functions.
-	static std::string EditText(float x, float y, float w, float h, float s, Vec4 bcol, const std::string& str, bool delayed = false, Vec4 fcol = black(), bool* changed = nullptr, std::string str2 = "", Font* fnt = font, Vec4 hcol = Vec4(0, 120.f / 255, 215.f / 255, 1), Vec4 acol = white(), bool ser = true);
-	static std::string EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, const std::string& str, char repl, bool delayed = false, Vec4 fcol = black(), bool* changed = nullptr, Font* fnt = font, Vec4 hcol = Vec4(0, 120.f / 255, 215.f / 255, 1), Vec4 acol = white(), bool ser = true);
+	static std::string EditText(float x, float y, float w, float h, float s, Vec4 bcol, const std::string& str, bool delayed = false, Vec4 fcol = black(), bool* changed = nullptr, std::string str2 = "", Font* fnt = &font, Vec4 hcol = Vec4(0, 120.f / 255, 215.f / 255, 1), Vec4 acol = white(), bool ser = true);
+	static std::string EditTextPass(float x, float y, float w, float h, float s, Vec4 bcol, const std::string& str, char repl, bool delayed = false, Vec4 fcol = black(), bool* changed = nullptr, Font* fnt = &font, Vec4 hcol = Vec4(0, 120.f / 255, 215.f / 255, 1), Vec4 acol = white(), bool ser = true);
 
 	static std::unordered_map<size_t, Vec2> scrollWs;
 	static Vec2* currentScroll;
@@ -54,7 +54,7 @@ public:
 	static glm::mat3 matrix;
 	static bool matrixIsI;
 
-	static Font* font, *font2;
+	static Font font, font2;
 
 	static bool focused, editingText;
 	static uint _editTextCursorPos, _editTextCursorPos2;
