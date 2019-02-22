@@ -69,6 +69,7 @@ void main() {
     vec3 fwd = (wPos - wPos2).xyz;
     vec3 cfwd = (v2f_pos - wPos2.xyz);
     
+    /*
     if (oriented) {
         float cp2d = dot(-dir, fwd);
         wPos2.xyz -= dir * cp2d / orienScl;
@@ -77,7 +78,8 @@ void main() {
         fwd = (wPos - wPos2).xyz;
         cfwd = v2fp2 - wPos2.xyz;
     }
-
+    */
+    
     float C2 = length2(cfwd);
     fwd = normalize(fwd);
     cfwd = normalize(cfwd);
@@ -101,12 +103,28 @@ void main() {
         SetColor(v2f_id);
         outId = uvec4(v2f_id, 0, 0, 0);
 
-        vec3 nt = (s - v2f_pos);
+        vec3 nt = normalize(s - v2f_pos);
         if (oriented) {
             float nt2d = dot(nt, dir);
-            outNormal.xyz = normalize(nt - dir * nt2d * (1 - 1.0 / orienScl));
+            //outNormal.xyz = normalize(nt - dir * nt2d * (1 - 1.0 / (orienScl + 1)));
+            outNormal.xyz = nt;
+            
+            float ndo = abs(nt2d);
+            if (ndo > 0.95) outColor.rgb = vec3(1, 1, 1);
+            else if (ndo > 0.9) outColor.rgb = vec3(0, 0, 0);
+            else {
+                vec3 t1 = vec3(1, 0, 0);
+                if (dir.x > 0.9999) t1 = vec3(0, 1, 0);
+                vec3 t2 = normalize(cross(dir, t1));
+                t1 = normalize(cross(dir, t2));
+                float ndt = dot(nt, t1);
+                float ndt2 = dot(nt, t2);
+                if ((ndt < 0) == (ndt2 > 0)) outColor.rgb = vec3(1, 1, 1);
+                ndt = min(abs(ndt), abs(ndt2));
+                if (ndt < 0.1) outColor.rgb = vec3(0, 0, 0);
+            }
         }
         else 
-            outNormal.xyz = normalize(nt);
+            outNormal.xyz = nt;
     }
 }
