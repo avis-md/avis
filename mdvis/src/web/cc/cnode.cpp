@@ -5,10 +5,10 @@
 #include "res/resdata.h"
 #endif
 
-#define _scr ((CScript*)scr->parent)
+#define _scr ((CScript*)script->parent)
 
-CNode::CNode(pCScript_I scr) : AnNode(scr) {
-	if (!scr) return;
+CNode::CNode(pCScript_I script) : AnNode(script) {
+	if (!script) return;
 	title = _scr->name + " (c++)";
 	const auto isz = _scr->inputs.size();
 	const auto osz = _scr->outputs.size();
@@ -23,9 +23,6 @@ CNode::CNode(pCScript_I scr) : AnNode(scr) {
 		conV[i] = _scr->_outputs[i];
 	}
 }
-
-#undef _scr
-#define _scr ((CScript*)script->parent)
 
 void CNode::Update() {
 	//if (executing) {

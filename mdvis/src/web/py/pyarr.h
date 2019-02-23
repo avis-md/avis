@@ -1,13 +1,12 @@
 #pragma once
 #include "Engine.h"
-#include "anweb.h"
+#include "web/anweb.h"
 #include <Python.h>
 
-class AnConv {
+class PyArr {
 public:
 	static int Init();
 	
-	static PyObject* PyArr(char tp, int nd, int* szs, void* data);
 	static void* FromPy(PyObject* obj, int dim, int stride, int** szs, int& tsz);
 	static bool ToPy(void* v, PyObject* obj, int dim, int* szs);
 	

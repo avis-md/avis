@@ -18,6 +18,10 @@ pAnScript_I CScript::CreateInstance() {
 	return res;
 }
 
+CScript_I::~CScript_I() {
+	parent->deleter(instance);
+}
+
 #define CS_SET(t) void CScript_I::SetInput(int i, t val) {\
 	auto scr = ((CScript*)parent);\
 	*(t*)Resolve(scr->_inputs[i].offset) = val;\

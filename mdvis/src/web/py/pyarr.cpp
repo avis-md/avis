@@ -1,39 +1,14 @@
-#include "anconv.h"
+#include "pyarr.h"
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 
-int AnConv::Init() {
+int PyArr::Init() {
+	if (!AnWeb::hasPy) return -1;
 	import_array();
 	return 0;
 }
 
-PyObject* AnConv::PyArr(char tp, int nd, int* szs, void* data) {
-	if (!AnWeb::hasPy) return nullptr;
-	int tn = NPY_FLOAT64;
-	int sz = 8;
-	switch (tp) {
-	case 'd':
-		break;
-	case 'i':
-		tn = NPY_INT32;
-		sz = 4;
-		break;
-	case 's':
-		tn = NPY_INT16;
-		sz = 2;
-		break;
-	default: 
-		Debug::Warning("AnConv", "unknown type " + std::string(&tp, 1) + "!");
-		return nullptr;
-	}
-	std::vector<npy_intp> dims(nd);
-	for (int a = 0; a < nd; a++) dims[a] = (npy_int) szs[a];
-	auto res = PyArray_SimpleNewFromData(nd, dims.data(), tn, data);//PyArray_New(&PyArray_Type, nd, szs, tn, NULL, data, sz, NPY_ARRAY_C_CONTIGUOUS, NULL);
-	//Py_INCREF(res);
-	return res;
-}
-
-void* AnConv::FromPy(PyObject* o, int dim, int stride, int** szs, int& tsz) {
+void* PyArr::FromPy(PyObject* o, int dim, int stride, int** szs, int& tsz) {
 	if (!AnWeb::hasPy) return nullptr;
 	auto ao = (PyArrayObject*)o;
 	auto nd = PyArray_NDIM(ao);
@@ -67,7 +42,7 @@ void* AnConv::FromPy(PyObject* o, int dim, int stride, int** szs, int& tsz) {
 	return PyArray_DATA(ao);
 }
 
-bool AnConv::ToPy(void* v, PyObject* obj, int dim, int* szs) {
+bool PyArr::ToPy(void* v, PyObject* obj, int dim, int* szs) {
 	if (!AnWeb::hasPy) return false;
 	PyArray_Dims dims;
 	dims.ptr = (npy_intp*)szs;
@@ -76,7 +51,7 @@ bool AnConv::ToPy(void* v, PyObject* obj, int dim, int* szs) {
 	return true;
 }
 
-std::string AnConv::GetTypeName(int type) {
+std::string PyArr::GetTypeName(int type) {
 	//https://docs.scipy.org/doc/numpy-1.13.0/reference/c-api.types-and-structures.html#c.PyArray_Descr
 	auto tpn = PyArray_DescrFromType(type);
 	typedef struct {

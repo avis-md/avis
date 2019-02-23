@@ -26,6 +26,8 @@ public:
 
 class CScript_I : public AnScript_I {
 public:
+	~CScript_I();
+
 	void SetInput(int i, short val) override;
 	void SetInput(int i, int val) override;
 	void SetInput(int i, double val) override;

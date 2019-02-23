@@ -1,56 +1,44 @@
-#include "anweb.h"
-#include "anconv.h"
+#include "web/anweb.h"
 #ifndef IS_ANSERVER
 #include "ui/icons.h"
 #include "ui/ui_ext.h"
 #include "res/resdata.h"
 #endif
 
-PyNode::PyNode(PyScript* scr) : AnNode(scr) {
-	if (!scr) return;
-	title = scr->name + " (python)";
-	inputV.resize(scr->invars.size());
-	outputV.resize(scr->outvars.size());
-	outputVC.resize(scr->outvars.size());
-	inputVDef.resize(scr->invars.size());
-	for (uint i = 0; i < scr->invars.size(); ++i) {
-		inputV[i] = scr->_invars[i];
-		if (scr->_invars[i].type == AN_VARTYPE::DOUBLE) inputVDef[i].d = 0;
-		else inputVDef[i].i = 0;
-	}
-	for (uint i = 0; i < scr->outvars.size(); ++i) {
-		auto& ovi = outputV[i] = scr->_outvars[i];
-		conV[i].name = ovi.name;
-		conV[i].type = ovi.type;
-		conV[i].typeName = ovi.typeName;
-		conV[i].stride = ovi.stride;
-		if (ovi.type == AN_VARTYPE::LIST) {
-			conV[i].dimVals.resize(ovi.dim);
-			outputVC[i].dims.resize(ovi.dim);
-		}
-	}
-	RemoveFrames();
+#define _scr ((CScript*)script->parent)
+
+PyNode::PyNode(pPyScript_I script) : AnNode(script) {
+	if (!script) return;
+	title = _scr->name + " (python)";
+}
+
+void PyNode::Update() {
+
+}
+
+void PyNode::PreExecute() {
+	AnNode::PreExecute();
 }
 
 void PyNode::Execute() {
-	auto scr = (PyScript*)script;
-	for (uint i = 0; i < script->invars.size(); ++i) {
-		auto& mv = scr->_invars[i];
+	for (uint i = 0; i < _scr->inputs.size(); ++i) {
+		auto& mv = _scr->inputs[i];
 		if (HasConnI(i)) {
-			auto& cv = inputR[i].getconv();
+			auto v = inputR[i].getval();
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
-				scr->Set(i, *((int*)cv.value));
+				script->SetInput(i, *(int*)v);
 				break;
 			case AN_VARTYPE::DOUBLE:
-				scr->Set(i, *((double*)cv.value));
+				script->SetInput(i, *(double*)v);
 				break;
 			case AN_VARTYPE::LIST: {
-				auto sz = cv.dimVals.size();
-				std::vector<int> dims(sz);
-				for (size_t a = 0; a < sz; a++)
-					dims[a] = *cv.dimVals[a];
-				scr->Set(i, AnConv::PyArr(inputR[i].first->script->outvars[inputR[i].second].second[6], (int)sz, &dims[0], *(void**)cv.value));
+				auto& vr = inputR[i].getvar();
+				std::vector<int> szs(vr.dim);
+				for (uint j = 0; j < vr.dim; ++j) {
+					szs[j] = *inputR[i].getdim(j);
+				}
+				script->SetInput(i, *(void**)v, mv.name[6], szs);
 				break; 
 			}
 			default:
@@ -59,24 +47,24 @@ void PyNode::Execute() {
 			}
 		}
 		else {
+			auto& dv = script->defVals[i];
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
-				scr->Set(i, inputVDef[i].i);
+				script->SetInput(i, dv.i);
 				break;
 			case AN_VARTYPE::DOUBLE:
-				scr->Set(i, inputVDef[i].d);
+				script->SetInput(i, dv.d);
 				break;
 			case AN_VARTYPE::LIST:
-				Debug::Error("PyNode", "Value not handled!\1");
-				throw "";
-				break;
+				throw("Input variable not set!\1");
 			default:
-				OHNO("AnVar", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
+				OHNO("PyNode", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
 				throw "";
 			}
 		}
 	}
-	script->Exec();
+	script->Execute();
+	
 	for (uint i = 0; i < script->outvars.size(); ++i) {
 		auto& mv = outputV[i];
 		mv.value = scr->_outvars[i].value;
@@ -108,62 +96,18 @@ void PyNode::Execute() {
 }
 
 void PyNode::WriteFrame(int f) {
-	for (int a = 0; a < conV.size(); ++a) {
-		conVAll[a][f] = outputVC[a];
-		conVAll[a][f].val.arr.p = &conVAll[a][f].val.arr.data[0];
-	}
+	AnNode::WriteFrame(f);
 }
 
 void PyNode::RemoveFrames() {
 	AnNode::RemoveFrames();
-	auto scr = (PyScript*)script;
-	for (uint i = 0; i < scr->outvars.size(); ++i) {
-		switch (scr->_outvars[i].type) {
-		case AN_VARTYPE::INT:
-			conV[i].value = &outputVC[i].val.i;
-			break;
-		case AN_VARTYPE::DOUBLE:
-			conV[i].value = &outputVC[i].val.d;
-			break;
-		case AN_VARTYPE::LIST:
-			for (int j = 0; j < outputV[i].dim; j++)
-				conV[i].dimVals[j] = &outputVC[i].dims[j];
-			conV[i].value = &outputVC[i].val.arr.p;
-			break;
-		default:
-			OHNO("AnVar", "Unexpected scr_vartype " + std::to_string((int)(scr->_outvars[i].type)));
-			throw "";
-		}
-	}
+	
+}
+
+void PyNode::Reconn() {
+	AnNode::Reconn();
 }
 
 void PyNode::CatchExp(char* c) {
-	if (!c[0]) return;
-	auto ss = string_split(c, '\n');
-	if (ss.size() == 1 && ss[0] == "") return;
-
-	size_t i = 0;
-	for (auto& s : ss) {
-		if (s == "Traceback (most recent call last):") {
-			break;
-		}
-		else {
-			log.push_back(std::pair<byte, std::string>(0, s));
-			i++;
-		}
-	}
-	auto n = ss.size() - 1;
-	log.push_back(std::pair<byte, std::string>(2, ss[n-1]));
-	ErrorView::Message msg{};
-	msg.name = script->name;
-	msg.path = script->path;
-	msg.severe = true;
-	msg.msg.resize(n - i - 1);
-	msg.msg[0] = ss[n-1];
-	for (size_t a = i + 1; a < n - 1; ++a) {
-		msg.msg[a - i] = ss[a];
-	}
-	auto loc = string_find(ss[n - 3], ", line ");
-	msg.linenum = atoi(&ss[n - 3][loc + 7]);
-	ErrorView::execMsgs.push_back(msg);
+	
 }

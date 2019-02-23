@@ -37,6 +37,7 @@ public:
 
 	typedef void* (*spawnerFunc)(void);
 	typedef void (*callerFunc)(void*);
+	typedef void (*deleterFunc)(void*);
 
 	AnScript(TYPE t) : type(t) {}
 
@@ -56,6 +57,7 @@ public:
 	
 	spawnerFunc spawner;
 	callerFunc caller;
+	deleterFunc deleter;
 
 	virtual void Clear();
 	virtual pAnScript_I CreateInstance() = 0;
@@ -93,3 +95,4 @@ public:
 
 #include "dmscript.h"
 #include "cc/cscript.h"
+#include "py/pyscript.h"

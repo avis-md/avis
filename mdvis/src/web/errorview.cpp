@@ -147,7 +147,7 @@ void ErrorView::Draw() {
 
 	if (show) {
 		float y = Display::height - 18.f - windowSize;
-		UI::Quad(0, y, static_cast<float>(Display::width), static_cast<float>(windowSize), white(0.95f, 0.1f));
+		UI2::BackQuad(0, y, (float)Display::width, (float)windowSize, white(1, 0.5f));
 		y++;
 		if (Engine::Button(2, y, 80, 16, white(0), white(0.2f), black(0.2f), "Compile Log", 12, &UI::font, showExec ? white(0.8f) : VisSystem::accentColor) == MOUSE_RELEASE) {
 			showExec = false;
@@ -161,10 +161,12 @@ void ErrorView::Draw() {
 			show = false;
 		}
 		y += 19;
+		Engine::BeginStencil(0, y, (float)Display::width, windowSize - 37.f);
+		float off = UI::BeginScroll(0, y, (float)Display::width, windowSize - 37.f);
 		std::vector<Message>& msgs = showExec ? execMsgs : compileMsgs;
 		for (size_t a = 0; a < msgs.size(); ++a) {
 			auto& err = msgs[a];
-			if (Engine::Button(0, y + a * 17, static_cast<float>(Display::width), 17, white((a == descId) ? 0.1f : 0), white(0.2f), black(0.1f)) == MOUSE_RELEASE) {
+			if (Engine::Button(0, off, static_cast<float>(Display::width), 17, white((a == descId) ? 0.1f : 0), white(0.2f), black(0.1f)) == MOUSE_RELEASE) {
 				if (Input::dbclick) {
 #ifdef PLATFORM_WIN
 					RunCmd::Run("\"" + err.path + "\"");
@@ -176,11 +178,15 @@ void ErrorView::Draw() {
 				else descId = a;
 			}
 			if (err.severe) {
-				UI::Texture(5, y + a * 17 + 1, 14, 14, Icons::cross, red());
+				UI::Texture(5, off + 1, 14, 14, Icons::cross, red());
 			}
-			UI::Label(25, y + a * 17, 12, err.name, white());
-			UI::Label(Display::width * 0.15f, y + a * 17, 12, "(" + std::to_string(err.linenum) + ":" + std::to_string(err.charnum) + ") " + err.msg[0], white());
+			UI::Label(25, off, 12, err.name, white());
+			UI::Label(Display::width * 0.15f, off, 12, "(" + std::to_string(err.linenum) + ":" + std::to_string(err.charnum) + ") " + err.msg[0], white());
+			off += 17;
 		}
+
+		UI::EndScroll(off);
+		Engine::EndStencil();
 
 		if (descId > -1) {
 			y = Display::height - 18.f - descSize;

@@ -56,29 +56,6 @@ struct VarVal {
 	}
 };
 
-/*
-struct CVar {
-public:
-	CVar() : value(0) {}
-	CVar(std::string nm, AN_VARTYPE tp);
-	CVar(std::string nm, char tp, int dim, std::initializer_list<int*> szs, std::initializer_list<int> defszs = {});
-	CVar(const CVar&);
-	CVar& operator= (const CVar&);
-
-	std::string name, typeName;
-	AN_VARTYPE type;
-
-	VarVal data;
-	void* value;
-	std::vector<std::string> dimNames;
-	std::vector<int*> dimVals;
-	int stride;
-
-	void Write(std::ofstream& strm);
-	void Read(std::ifstream& strm);
-};
-*/
-
 struct CVar {
 	struct szItem {
 		bool useOffset;
@@ -93,4 +70,9 @@ struct CVar {
 
 	uintptr_t offset;
 	std::vector<szItem> szOffsets;
+};
+
+struct PyVar {
+	std::string name;
+	std::vector<int> szs;
 };
