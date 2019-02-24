@@ -28,6 +28,9 @@ class CScript_I : public AnScript_I {
 public:
 	~CScript_I();
 
+	void* Resolve(uintptr_t offset) override;
+	int* GetDimValue(const CVar::szItem& i) override;
+
 	void SetInput(int i, short val) override;
 	void SetInput(int i, int val) override;
 	void SetInput(int i, double val) override;

@@ -22,6 +22,14 @@ CScript_I::~CScript_I() {
 	parent->deleter(instance);
 }
 
+void* CScript_I::Resolve(uintptr_t o) {
+	return (void*)((uintptr_t)instance + o);
+}
+
+int* CScript_I::GetDimValue(const CVar::szItem& i) {
+	return i.useOffset ? (int*)Resolve(i.offset) : (int*)&i.size;
+}
+
 #define CS_SET(t) void CScript_I::SetInput(int i, t val) {\
 	auto scr = ((CScript*)parent);\
 	*(t*)Resolve(scr->_inputs[i].offset) = val;\

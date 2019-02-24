@@ -24,7 +24,9 @@ public:
 	~PyScript_I();
 
 	PyObject* func;
-	std::vector<PyObject*> outputs;
+
+	void* Resolve(uintptr_t offset) override;
+	int* GetDimValue(const CVar::szItem& i) override;
 
 	void SetInput(int i, short val) override;
 	void SetInput(int i, int val) override;
@@ -34,6 +36,16 @@ public:
 
 	void Execute() override;
 	float GetProgress() override;
+
+	void GetOutputVs();
+
+	struct OutVal {
+		VarVal val;
+		std::vector<int> dims;
+	};
+
+	std::vector<PyObject*> outputs;
+	std::vector<OutVal> outputVs;
 };
 
 typedef std::shared_ptr<PyScript_I> pPyScript_I;

@@ -25,14 +25,6 @@ void AnScript_I::Init(AnScript* pr) {
 	defVals.resize(pr->inputs.size());
 }
 
-void* AnScript_I::Resolve(uintptr_t o) {
-	return (void*)((uintptr_t)instance + o);
-}
-
-int* AnScript_I::GetDimValue(const CVar::szItem& i) {
-	return i.useOffset ? (int*)Resolve(i.offset) : (int*)&i.size;
-}
-
 void AnScript_I::Execute() {
 	parent->caller(instance);
 }

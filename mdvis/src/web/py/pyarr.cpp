@@ -8,7 +8,7 @@ int PyArr::Init() {
 	return 0;
 }
 
-void* PyArr::FromPy(PyObject* o, int dim, int stride, int** szs, int& tsz) {
+void* PyArr::FromPy(PyObject* o, int dim, int stride, int* szs, int& tsz) {
 	if (!AnWeb::hasPy) return nullptr;
 	auto ao = (PyArrayObject*)o;
 	auto nd = PyArray_NDIM(ao);
@@ -38,7 +38,7 @@ void* PyArr::FromPy(PyObject* o, int dim, int stride, int** szs, int& tsz) {
 	auto shp = PyArray_SHAPE(ao);
 	tsz = 1;
 	for (int a = 0; a < nd; a++)
-		tsz *= (*(szs[a]) = (int)shp[a]);
+		tsz *= (szs[a] = (int)shp[a]);
 	return PyArray_DATA(ao);
 }
 

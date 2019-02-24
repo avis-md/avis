@@ -12,14 +12,7 @@ CNode::CNode(pCScript_I script) : AnNode(script) {
 	title = _scr->name + " (c++)";
 	const auto isz = _scr->inputs.size();
 	const auto osz = _scr->outputs.size();
-	inputV.resize(isz);
-	outputV.resize(osz);
-	for (size_t i = 0; i < isz; ++i) {
-		inputV[i] = script->Resolve(_scr->_inputs[i].offset);
-		script->defVals[i].data = 0;
-	}
-	for (uint i = 0; i < _scr->outputs.size(); ++i) {
-		outputV[i] = script->Resolve(_scr->_outputs[i].offset);
+	for (uint i = 0; i < osz; ++i) {
 		conV[i] = _scr->_outputs[i];
 	}
 }

@@ -80,8 +80,8 @@ public:
 
 	virtual void Init(AnScript* pr);
 
-	virtual void* Resolve(uintptr_t offset);
-	virtual int* GetDimValue(const CVar::szItem& i);
+	virtual void* Resolve(uintptr_t offset) = 0;
+	virtual int* GetDimValue(const CVar::szItem& i) = 0;
 
 	virtual void SetInput(int i, short val) = 0;
 	virtual void SetInput(int i, int val) = 0;

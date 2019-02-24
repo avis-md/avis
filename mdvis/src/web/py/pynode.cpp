@@ -5,11 +5,21 @@
 #include "res/resdata.h"
 #endif
 
-#define _scr ((CScript*)script->parent)
+#define _scr ((PyScript*)script->parent)
 
 PyNode::PyNode(pPyScript_I script) : AnNode(script) {
 	if (!script) return;
 	title = _scr->name + " (python)";
+	const auto osz = _scr->outputs.size();
+	for (uint i = 0; i < osz; ++i) {
+		auto& cv = conV[i];
+		cv.offset = i;
+		auto d = _scr->outputs[i].dim;
+		cv.szOffsets.resize(d);
+		for (int j = 0; j < d; j++) {
+			cv.szOffsets[j].offset = (i << 16) | j;
+		}
+	}
 }
 
 void PyNode::Update() {
@@ -39,7 +49,7 @@ void PyNode::Execute() {
 					szs[j] = *inputR[i].getdim(j);
 				}
 				script->SetInput(i, *(void**)v, mv.name[6], szs);
-				break; 
+				break;
 			}
 			default:
 				OHNO("AnVar", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
@@ -64,35 +74,7 @@ void PyNode::Execute() {
 		}
 	}
 	script->Execute();
-	
-	for (uint i = 0; i < script->outvars.size(); ++i) {
-		auto& mv = outputV[i];
-		mv.value = scr->_outvars[i].value;
-		Py_INCREF(mv.value);
-		switch (mv.type) {
-		case AN_VARTYPE::DOUBLE:
-			outputVC[i].val.d = PyFloat_AsDouble(mv.value);
-			break;
-		case AN_VARTYPE::INT:
-			outputVC[i].val.i = (int)PyLong_AsLong(mv.value);
-			break;
-		case AN_VARTYPE::LIST:
-		{
-			auto& ar = outputVC[i].val.arr;
-			int n;
-			ar.p = AnConv::FromPy(mv.value, (int)conV[i].dimVals.size(), scr->_outvars[i].stride, &conV[i].dimVals[0], n);
-			if (!ar.p) throw "";
-			n *= scr->_outvars[i].stride;
-			ar.data.resize(n);
-			memcpy(&ar.data[0], ar.p, n);
-			ar.p = &ar.data[0];
-			break;
-		}
-		default:
-			OHNO("AnVar", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
-			throw "";
-		}
-	}
+	((PyScript_I*)script.get())->GetOutputVs();
 }
 
 void PyNode::WriteFrame(int f) {
