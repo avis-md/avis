@@ -368,7 +368,7 @@ The hash for this program is )" << VisSystem::version_hash
 		INIT(UI3);
 		INIT(Browse);
 		INIT(CReader);
-		//LINIT(PyReader);
+		LINIT(PyReader);
 		//INIT(FReader);
 		LINIT(RayTracer);
 		INIT(Color);

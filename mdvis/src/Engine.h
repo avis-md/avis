@@ -341,6 +341,17 @@ public:
 	static void AcquireLock(int i);
 	static void ReleaseLock();
 	static void WaitForLockValue();
+
+	struct Locker {
+		Locker(int i) {
+			AcquireLock(i);
+		}
+		Locker(const Locker&) = delete;
+		~Locker() {
+			ReleaseLock();
+		}
+		Locker& operator= (const Locker&) = delete;
+	};
 };
 
 #include "SceneObjects.h"

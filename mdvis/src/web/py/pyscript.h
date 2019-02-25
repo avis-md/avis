@@ -23,7 +23,7 @@ class PyScript_I : public AnScript_I {
 public:
 	~PyScript_I();
 
-	PyObject* func;
+	PyObject* dict, *func;
 
 	void* Resolve(uintptr_t offset) override;
 	int* GetDimValue(const CVar::szItem& i) override;

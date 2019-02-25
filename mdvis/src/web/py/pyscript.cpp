@@ -5,6 +5,8 @@
 
 std::unordered_map<std::string, std::weak_ptr<PyScript>> PyScript::allScrs;
 
+PyScript::PyScript() : AnScript(TYPE::PYTHON), scrpath(""), lib(nullptr), spawner(nullptr), funcNm("") {}
+
 void PyScript::Clear() {
 
 }
@@ -14,14 +16,19 @@ pAnScript_I PyScript::CreateInstance() {
 	res->Init(this);
 	auto i = PyObject_CallObject(spawner, 0);
 	res->instance = i;
+	res->dict = PyObject_GetAttrString(i, "__dict__");
 	res->func = PyObject_GetAttrString(i, funcNm.c_str());
 	auto osz = outputs.size();
 	res->outputs.resize(osz);
 	res->outputVs.resize(osz);
+	for (size_t a = 0; a < outputs.size(); a++) {
+		res->outputVs[a].dims.resize(outputs[a].dim);
+	}
 	return res;
 }
 
 #define _instance ((PyObject*)instance)
+#define _parent ((PyScript*)parent)
 
 PyScript_I::~PyScript_I() {
 	for (uint i = 0; i < outputs.size(); ++i) {
@@ -35,13 +42,39 @@ void* PyScript_I::Resolve(uintptr_t i) {
 }
 
 int* PyScript_I::GetDimValue(const CVar::szItem& i) {
-	return i.useOffset ?
-		&outputVs[i.offset >> 16].dims[i.offset & 0xffff]
-		: (int*)&i.size;
+	return &outputVs[i.offset >> 16].dims[i.offset & 0xffff];
+}
+
+void PyScript_I::SetInput(int i, short v) {
+	auto o = PyLong_FromLong(v);
+	PyDict_SetItemString(dict, _parent->_inputs[i].name.c_str(), o);
+	Py_DECREF(o);
+}
+
+void PyScript_I::SetInput(int i, int v) {
+	auto o = PyLong_FromLong(v);
+	PyDict_SetItemString(dict, _parent->_inputs[i].name.c_str(), o);
+	Py_DECREF(o);
+}
+
+void PyScript_I::SetInput(int i, double v) {
+	auto o = PyFloat_FromDouble(v);
+	PyDict_SetItemString(dict, _parent->_inputs[i].name.c_str(), o);
+	Py_DECREF(o);
+}
+
+void PyScript_I::SetInput(int i, void* val, char tp, std::vector<int> szs) {
+	auto o = PyArr::ToPy(val, (int)szs.size(), tp, szs.data());
+	PyDict_SetItemString(dict, _parent->_inputs[i].name.c_str(), o);
+	Py_DECREF(o);
+}
+
+void PyScript_I::GetOutput(int i, int* val) {
+	;
 }
 
 void PyScript_I::Execute() {
-	auto res = PyObject_CallObject(func, 0);
+	auto res = PyObject_CallMethod(_instance, _parent->funcNm.c_str(), 0);
 	if (res) Py_DECREF(res);
 	else {
 		PyErr_Print();
@@ -53,37 +86,18 @@ void PyScript_I::Execute() {
 	}
 }
 
-void PyScript_I::SetInput(int i, short v) {
-	auto o = PyLong_FromLong(v);
-	auto res = PyObject_SetAttrString(_instance, parent->inputs[i].name.c_str(), o);
-	Py_DECREF(o);
+float PyScript_I::GetProgress() {
+	return 0.1;
 }
-
-void PyScript_I::SetInput(int i, int v) {
-	auto o = PyLong_FromLong(v);
-	auto res = PyObject_SetAttrString(_instance, parent->inputs[i].name.c_str(), o);
-	Py_DECREF(o);
-}
-
-void PyScript_I::SetInput(int i, double v) {
-	auto o = PyFloat_FromDouble(v);
-	auto res = PyObject_SetAttrString(_instance, parent->inputs[i].name.c_str(), o);
-	Py_DECREF(o);
-}
-
-void PyScript_I::SetInput(int i, void* val, char tp, std::vector<int> szs) {
-	auto o = PyObject_GetAttrString(_instance, parent->inputs[i].name.c_str());
-	PyArr::ToPy(val, o, (int)szs.size(), szs.data());
-}
-
-#define _parent ((PyScript*)parent)
 
 void PyScript_I::GetOutputVs() {
 	for (uint i = 0; i < outputs.size(); ++i) {
 		auto& mv = outputs[i];
 		auto& v = outputVs[i];
 		if (mv) Py_DECREF(mv);
-		mv = PyObject_GetAttrString(_instance, _parent->_outputs[i].name.c_str());
+		//mv = PyObject_GetAttrString(_instance, _parent->_outputs[i].name.c_str());
+		auto& nm = _parent->_outputs[i].name;
+		mv = PyDict_GetItemString(dict, nm.c_str());
 		Py_INCREF(mv);
 		auto& ot = _parent->outputs[i];
 		switch (ot.type) {
@@ -97,12 +111,12 @@ void PyScript_I::GetOutputVs() {
 			break;
 		case AN_VARTYPE::LIST: {
 			int n;
+			//void* p;
 			if (!(v.val.val.p = PyArr::FromPy(mv, ot.dim, ot.stride, v.dims.data(), n)))
 				throw "";
 			//n *= ot.stride;
-			//ar.data.resize(n);
-			//memcpy(&ar.data[0], ar.p, n);
-			//ar.p = &ar.data[0];
+			//v.val.arr.resize(n);
+			//memcpy((v.val.val.p = v.val.arr.data()), p, n);
 			v.val.pval = &v.val.val.p;
 			break;
 		}

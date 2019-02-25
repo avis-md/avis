@@ -48,7 +48,7 @@ void PyNode::Execute() {
 				for (uint j = 0; j < vr.dim; ++j) {
 					szs[j] = *inputR[i].getdim(j);
 				}
-				script->SetInput(i, *(void**)v, mv.name[6], szs);
+				script->SetInput(i, *(void**)v, mv.typeName[6], szs);
 				break;
 			}
 			default:

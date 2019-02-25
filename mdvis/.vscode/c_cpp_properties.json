@@ -9,12 +9,11 @@
                 "${workspaceFolder}/../radeonrays/RadeonRays/include",
                 "${workspaceFolder}/../libgwavi/inc",
                 "/usr/local/include/freetype2",
-                "/Library/Frameworks/Python.framework/Versions/3.6/include/python3.6m",
-                "/usr/local/lib/python3.6/site-packages/numpy/core/include"
+                "/usr/local/opt/python/Frameworks/Python.framework/Versions/3.7/include/python3.7m",
+                "/Users/chokopan/Library/Python/3.7/lib/python/site-packages/numpy/core/include"
             ],
             "defines": [
-                "PLATFORM_OSX",
-                "USE_OPENCL"
+                "PLATFORM_OSX"
             ],
             "macFrameworkPath": [
                 "/System/Library/Frameworks",
@@ -30,7 +29,9 @@
             "includePath": [
                 "${workspaceFolder}/src"
             ],
-            "defines": [],
+            "defines":  [
+                "PLATFORM_WIN"
+            ],
             "compilerPath": "D:/MinGW/bin/gcc.exe",
             "cStandard": "c11",
             "cppStandard": "c++17",
@@ -45,12 +46,11 @@
                 "${workspaceFolder}/../radeonrays/RadeonRays/include",
                 "usr/include/freetype2/",
                 "/usr/local/include/freetype2/",
-                "/usr/include/python3.6/",
-                "/usr/local/include/python3.6/"
+                "/usr/include/python3.7/",
+                "/usr/local/include/python3.7/"
             ],
             "defines": [
-                "PLATFORM_LNX",
-                "USE_OPENCL"
+                "PLATFORM_LNX"
             ],
             "compilerPath": "/usr/bin/g++",
             "cStandard": "c11",

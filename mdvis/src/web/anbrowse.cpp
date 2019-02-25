@@ -2,6 +2,7 @@
 #include "ui/localizer.h"
 #include "ui/popups.h"
 #include "cc/creader.h"
+#include "py/pyreader.h"
 #ifndef IS_ANSERVER
 #include "ui/icons.h"
 #include "ui/help.h"
@@ -48,11 +49,13 @@ void AnBrowse::DoScan(Folder* fo, const std::string& path, const std::string& in
 		}\
 	}
 
-	//READ(EXT_PS, EXT_PS_SZ, f.substr(0, 2) != "__", Py, if (!PyReader::initd) {
-	//	Debug::Message("System", "Initializing PyReader");
-	//	PyReader::Init();
-	//});
 	READ(EXT_CS, EXT_CS_SZ, 1, C,);
+	READ(EXT_PS, EXT_PS_SZ, f.substr(0, 2) != "__", Py,
+		if (!PyReader::initd) {
+			Debug::Message("System", "Initializing PyReader");
+			PyReader::Init();
+		}
+	);
 	//READ(EXT_FS, EXT_FS_SZ, 1, F,);
 
 	std::vector<std::string> fd;
@@ -99,7 +102,7 @@ void AnBrowse::DoRefresh(Folder* fd) {
 			CReader::Refresh((CScript*)s.get());
 			break;
 		case AnScript::TYPE::PYTHON:
-			//PyReader::Refresh((PyScript*)s);
+			PyReader::Refresh((PyScript*)s.get());
 			break;
 		case AnScript::TYPE::FORTRAN:
 			//FReader::Refresh((FScript*)s);
@@ -211,11 +214,11 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 					AnWeb::selScript = nullptr;
 					pAnNode pn;
 					switch (fs->type) {
-					case AnScript::TYPE::PYTHON:
-						//pn = std::make_shared<PyNode>(dynamic_cast<PyScript*>(fs));
-						break;
 					case AnScript::TYPE::C:
 						pn = std::make_shared<CNode>(std::static_pointer_cast<CScript_I>(fs->CreateInstance()));
+						break;
+					case AnScript::TYPE::PYTHON:
+						pn = std::make_shared<PyNode>(std::static_pointer_cast<PyScript_I>(fs->CreateInstance()));
 						break;
 					case AnScript::TYPE::FORTRAN:
 						//pn = std::make_shared<FNode>(dynamic_cast<FScript*>(fs));

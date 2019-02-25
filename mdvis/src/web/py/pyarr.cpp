@@ -3,7 +3,6 @@
 #include <numpy/arrayobject.h>
 
 int PyArr::Init() {
-	if (!AnWeb::hasPy) return -1;
 	import_array();
 	return 0;
 }
@@ -42,13 +41,29 @@ void* PyArr::FromPy(PyObject* o, int dim, int stride, int* szs, int& tsz) {
 	return PyArray_DATA(ao);
 }
 
-bool PyArr::ToPy(void* v, PyObject* obj, int dim, int* szs) {
-	if (!AnWeb::hasPy) return false;
-	PyArray_Dims dims;
-	dims.ptr = (npy_intp*)szs;
-	dims.len = dim;
-	PyArray_Resize((PyArrayObject*)obj, &dims, 1, NPY_CORDER);
-	return true;
+PyObject* PyArr::ToPy(void* data, int dim, char tp, int* szs) {
+	if (!AnWeb::hasPy) return nullptr;
+	int tn = NPY_FLOAT64;
+	int sz = 8;
+	switch (tp) {
+	case 's':
+		tn = NPY_INT16;
+		sz = 2;
+		break;
+	case 'i':
+		tn = NPY_INT32;
+		sz = 4;
+		break;
+	case 'd':
+		break;
+	default: 
+		Debug::Warning("AnConv", "unknown type " + std::string(&tp, 1) + "!");
+		return nullptr;
+	}
+	std::vector<npy_intp> dims(dim);
+	for (int a = 0; a < dim; a++) dims[a] = (npy_intp)szs[a];
+	auto dd = (double*)data;
+	return PyArray_SimpleNewFromData(dim, dims.data(), tn, data);
 }
 
 std::string PyArr::GetTypeName(int type) {

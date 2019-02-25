@@ -1,5 +1,6 @@
 #include "anweb.h"
 #include "cc/creader.h"
+#include "py/pyreader.h"
 #include "nodes/get/node_inputs.h"
 #include "nodes/get/node_info.h"
 #ifndef IS_ANSERVER
@@ -116,7 +117,6 @@ void AnWeb::Update() {
 		}
 	}
 #endif
-
 	AnBrowse::Update();
 }
 
@@ -203,11 +203,11 @@ void AnWeb::Draw() {
 					pAnNode pn;
 					if ((uintptr_t)selScript > 1) {
 						switch (selScript->type) {
-						case AnScript::TYPE::PYTHON:
-							//pn = std::make_shared<PyNode>(dynamic_cast<PyScript*>(selScript));
-							break;
 						case AnScript::TYPE::C:
 							pn = std::make_shared<CNode>(std::dynamic_pointer_cast<CScript_I>(selScript->CreateInstance()));
+							break;
+						case AnScript::TYPE::PYTHON:
+							pn = std::make_shared<PyNode>(std::dynamic_pointer_cast<PyScript_I>(selScript->CreateInstance()));
 							break;
 						case AnScript::TYPE::FORTRAN:
 							//pn = std::make_shared<FNode>(dynamic_cast<FScript*>(selScript));
@@ -883,6 +883,7 @@ void AnWeb::OnAnimFrame() {
 }
 
 std::string AnWeb::ConvertName(const std::string& name) {
+	if (!name.size()) return "";
 	char c = name[0];
 	std::string res(1, c);
 	res.reserve(name.size());
@@ -895,4 +896,5 @@ std::string AnWeb::ConvertName(const std::string& name) {
 		}
 		res.push_back(c);
 	}
+	return res;
 }

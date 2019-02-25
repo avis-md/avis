@@ -1,5 +1,4 @@
 #include "anweb.h"
-#include "anconv.h"
 #ifndef IS_ANSERVER
 #include "ui/icons.h"
 #include "ui/ui_ext.h"
@@ -231,6 +230,9 @@ void AnNode::Draw() {
 									}
 								}
 								break;
+							default:
+								OHNO("AnNode::Draw", "Unexpected VARTYPE " + std::to_string((int)ov.type));
+								return;
 							}
 						}
 						UI2::Tooltip(cirbt, pos.x + width - connrad, y + 8 - connrad, str);
@@ -495,12 +497,12 @@ void AnNode::AddOutput(const CVar& cv) {
 	if (!(flags & AN_FLAG_NOSAVECONV)) conVAll.push_back(std::vector<VarVal>());
 }
 
-AnNode::AnNode(pAnScript_I scr) : script(scr), canTile(false), flags(0) {
+AnNode::AnNode(pAnScript_I scr) : script(scr), flags(0), canTile(false) {
 	if (!scr) return;
 	ResizeIO(scr->parent);
 }
 
-AnNode::AnNode(pAnScript_I scr, ANNODE_FLAGS flags) : script(scr), canTile(false), flags(flags) {}
+AnNode::AnNode(pAnScript_I scr, ANNODE_FLAGS flags) : script(scr), flags(flags), canTile(false) {}
 
 void AnNode::ResizeIO(AnScript* scr) {
 	inputR.resize(scr->inputs.size());
@@ -664,9 +666,9 @@ void AnNode::SaveOut(const std::string& path) {
 	if (strm.is_open()) {
 		auto cs = conV.size();
 		_StreamWrite(&cs, &strm, 1);
-		for (auto& c : conV) {
+		//for (auto& c : conV) {
 			//c.Write(strm);
-		}
+		//}
 		strm.close();
 	}
 }
@@ -681,9 +683,9 @@ void AnNode::LoadOut(const std::string& path) {
 			Debug::Warning("Node", "output data corrupted!");
 			return;
 		}
-		for (auto& c : conV) {
+		//for (auto& c : conV) {
 			//c.Read(strm);
-		}
+		//}
 	}
 }
 
@@ -807,14 +809,14 @@ void AnNode::CatchExp(char* c) {
 }
 
 void AnNode::OnAnimFrame() {
-	if (flags && AN_FLAG_RUNONSEEK) {
+	if (!!(flags & AN_FLAG_RUNONSEEK)) {
 		//Debug::Message("AnNode", "autorun " + title);
 		Execute();
 	}
 }
 
 void AnNode::OnValChange(int i) {
-	if (flags && AN_FLAG_RUNONVALCHG) {
+	if (!!(flags & AN_FLAG_RUNONVALCHG)) {
 		Execute();
 	}
 }

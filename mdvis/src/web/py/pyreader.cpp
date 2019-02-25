@@ -58,7 +58,7 @@ void PyReader::Init() {
 	}
 #ifndef PLATFORM_WIN
 	} else {
-		Debug::Warning("Python", "Python3.6 framework not loaded!");
+		Debug::Warning("Python", "Python" PY_VERSION " framework not loaded!");
 	}
 #endif
 }
@@ -78,8 +78,7 @@ size_t find_first_not_name_char (const char* c) {
 }
 
 bool PyReader::Read(PyScript* scr) {
-	Engine::AcquireLock(6);
-	//Py_BEGIN_ALLOW_THREADS
+	Engine::Locker _lock(6);
 
 	//PyScript::ClearLog();
 	std::string& path = scr->path;
@@ -95,13 +94,13 @@ bool PyReader::Read(PyScript* scr) {
 		if (!scr->lib) {
 			Debug::Warning("PyReader", "Failed to read python file " + path + EXT_PS "!");
 			PyErr_Print();
-			goto FAIL;
+			return false;
 		}
 		scr->spawner = PyObject_GetAttrString(scr->lib, scr->name.c_str());
-		if (!scr->lib) {
+		if (!scr->spawner) {
 			Debug::Warning("PyReader", "Python file" + path + EXT_PS " does not have a \"" + scr->name + "\" class!");
 			PyErr_Print();
-			goto FAIL;
+			return false;
 		}
 	}
 	//extract io variables
@@ -115,26 +114,28 @@ bool PyReader::Read(PyScript* scr) {
 
 		ln = string_trim(ln);
 
-		if (ln.substr(0, 6) == "#entry") {
+		if (ln[0] != '#') continue;
+		if (ln.substr(1) == "entry") {
 			std::getline(strm, ln);
+			ln = string_trim(ln);
 			if (ln.substr(0, 4) != "def ") {
 				Debug::Warning("PyReader::ParseType", "#entry expects a function definition!");
-				goto FAIL;
+				return false;
 			}
 			auto c1 = ln.find_first_of('(');
 			if (c1 == std::string::npos) {
 				Debug::Warning("PyReader::ParseType", "Braces for main function not found!");
-				goto FAIL;
+				return false;
 			}
-			if (ln[c1+1] != ')') {
-				Debug::Warning("PyReader::ParseType", "Main function must have no arguments!");
-				goto FAIL;
+			if (ln.substr(c1 + 1, 5) != "self)") {
+				Debug::Warning("PyReader::ParseType", "Main function must have a single \'self\' argument!");
+				return false;
 			}
 			if (AnWeb::hasPy) {
 				scr->funcNm = ln.substr(4, c1 - 4);
 			}
 		}
-		else if (ln.substr(0, 4) == "#in ") {
+		else if (ln.substr(1, 3) == "in ") {
 			scr->inputs.push_back(AnScript::Var());
 			scr->_inputs.push_back(PyVar());
 			auto& in = scr->inputs.back();
@@ -142,44 +143,41 @@ bool PyReader::Read(PyScript* scr) {
 			in.typeName = ln.substr(4);
 			if (!ParseType(in)) {
 				Debug::Warning("PyReader::ParseType", "input arg type \"" + in.typeName + "\" not recognized!");
-				goto FAIL;
+				return false;
 			}
 			std::getline(strm, ln);
-			in.name = AnWeb::ConvertName(
-				(_in.name = ln.substr(0, find_first_not_name_char(ln.c_str()))));
+			ln = string_trim(ln);
+			if (ln.substr(0, 5) != "self.") {
+				Debug::Warning("PyReader::ParseType", "`self.` expected before input variable!");
+				return false;
+			}
+			in.name = AnWeb::ConvertName((_in.name
+				= ln.substr(5, find_first_not_name_char(ln.c_str() + 5))));
 			_in.szs.resize(in.dim, -1);
 		}
-		else if (ln.substr(0, 5) == "#out ") {
+		else if (ln.substr(1, 4) == "out ") {
 			scr->outputs.push_back(AnScript::Var());
 			scr->_outputs.push_back(PyVar());
 			auto& out = scr->outputs.back();
 			auto& _out = scr->_outputs.back();
-			out.typeName = ln.substr(4);
+			out.typeName = ln.substr(5);
 			if (!ParseType(out)) {
-				Debug::Warning("PyReader::ParseType", "input arg type \"" + out.typeName + "\" not recognized!");
-				goto FAIL;
+				Debug::Warning("PyReader::ParseType", "output arg type \"" + out.typeName + "\" not recognized!");
+				return false;
 			}
 			std::getline(strm, ln);
-			out.name = AnWeb::ConvertName(
-				(_out.name = ln.substr(0, find_first_not_name_char(ln.c_str()))));
+			ln = string_trim(ln);
+			if (ln.substr(0, 5) != "self.") {
+				Debug::Warning("PyReader::ParseType", "`self.` expected before output variable!");
+				return false;
+			}
+			out.name = AnWeb::ConvertName((_out.name
+				= ln.substr(5, find_first_not_name_char(ln.c_str() + 5))));
 			_out.szs.resize(out.dim, -1);
 		}
 	}
 
-	//if (!scr->invars.size()) {
-	//	Debug::Warning("PyReader", "Script has no input parameters!");
-	//}
-	if (!scr->outputs.size()) {
-		Debug::Warning("PyReader", "Script has no output parameters!");
-	}
-
-	//PyEval_RestoreThread(_save);
-	Engine::ReleaseLock();
 	return true;
-FAIL:
-	//PyEval_RestoreThread(_save);
-	Engine::ReleaseLock();
-	return false;
 }
 
 void PyReader::Refresh(PyScript* scr) {

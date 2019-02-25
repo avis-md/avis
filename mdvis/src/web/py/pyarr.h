@@ -8,7 +8,7 @@ public:
 	static int Init();
 	
 	static void* FromPy(PyObject* obj, int dim, int stride, int* szs, int& tsz);
-	static bool ToPy(void* v, PyObject* obj, int dim, int* szs);
+	static PyObject* ToPy(void* data, int dim, char tp, int* szs);
 	
 	static std::string GetTypeName(int type);
 };

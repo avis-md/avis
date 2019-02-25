@@ -183,6 +183,7 @@ bool CReader::Read(CScript* scr) {
 				}
 				ostrm << "\n";
 				ostrm << EXTERN + nm + "* __func_spawn() { return new " + nm + "(); }\n"
+					EXTERN "void __func_delete(void* t) { delete (" + nm + "*)t; }\n"
 					EXTERN "void __func_call(void* t) { ((" + nm + "*)t)->" + funcNm + "(); }";
 			}
 
@@ -241,8 +242,11 @@ bool CReader::Read(CScript* scr) {
 		}
 	
 #endif
+	}
 
-		Engine::AcquireLock(5);
+	Engine::Locker _lock(5);
+
+	if (AnWeb::hasC) {
 #define FAIL0 Engine::ReleaseLock(); return false
 		scr->libpath = fp2 + nm + ".so";
 		scr->lib = DyLib(scr->libpath);
@@ -258,6 +262,7 @@ bool CReader::Read(CScript* scr) {
 		}
 
 		scr->spawner = (AnScript::spawnerFunc)scr->lib.GetSym("__func_spawn");
+		scr->deleter = (AnScript::deleterFunc)scr->lib.GetSym("__func_delete");
 		scr->caller = (AnScript::callerFunc)scr->lib.GetSym("__func_call");
 		auto prgs = scr->lib.GetSym("__progress");
 		if (prgs) scr->progress = *(uintptr_t*)prgs;
@@ -299,7 +304,6 @@ bool CReader::Read(CScript* scr) {
 	}
 	else {
 		scr->chgtime = scr->badtime;
-		Engine::AcquireLock(5);
 	}
 
 	std::ifstream strm(fp + EXT_CS);
@@ -347,32 +351,32 @@ bool CReader::Read(CScript* scr) {
 
 			if (ira && lnsz == 1) {
 				_ER("CReader", "Plain " + ios + " must be of non-pointer type!");
-				goto FAIL;
+				return false;
 			}
 			else if (ien && (vr.typeName != "int" || ira)) {
 				_ER("CReader", "" + ios + " enum must be of int type!");
-				goto FAIL;
+				return false;
 			}
 			else if (ien && lnsz < 3) {
 				_ER("CReader", "" + ios + " enum has no options!");
-				goto FAIL;
+				return false;
 			}
 			else if (irg && lnsz != 4) {
 				_ER("CReader", "" + ios + " range must have 2 parameters!");
-				goto FAIL;
+				return false;
 			}
 			if (!ira) {
 				if (lnsz > 1 && !ien && !irg) {
 					_ER("CReader", "" + ios + " with specified size must be of pointer type!");
-					goto FAIL;
+					return false;
 				}
 				else if (ien && iso) {
 					_ER("CReader", "" + ios + " cannot be an enum!");
-					goto FAIL;
+					return false;
 				}
 				else if (irg && iso) {
 					_ER("CReader", "" + ios + " cannot be ranged!");
-					goto FAIL;
+					return false;
 				}
 			}
 			if (ira) vr.type = AN_VARTYPE::LIST;
@@ -382,7 +386,7 @@ bool CReader::Read(CScript* scr) {
 				std::string add = "";
 				if (vr.typeName == "float") add = " Did you mean \"double\"?";
 				_ER("CReader", "variable of type \"" + vr.typeName + "\" not supported!" + add);
-				goto FAIL;
+				return false;
 			}
 			if (ira) vr.typeName = "list(" + std::to_string(lnsz - 1) + vr.typeName.substr(0, 1) + ")";
 			vr.name = ss[1];
@@ -399,7 +403,7 @@ bool CReader::Read(CScript* scr) {
 				bk->stride = AnScript::StrideOf(bk->typeName[0]);
 				if (!bk->stride) {
 					_ER("CReader", "unsupported type \"" + bk->typeName + "\" for list!");
-					goto FAIL;
+					return false;
 				}
 				bk->typeName = "list(" + std::to_string(lnsz-1) + bk->typeName[0] + ")";
 			}
@@ -424,7 +428,7 @@ bool CReader::Read(CScript* scr) {
 				auto sym = scr->lib.GetSym("__var_" + vr.name);
 				if (!sym) {
 					_ER("CReader", "cannot find \"" + vr.name + "\" from memory!");
-					goto FAIL;
+					return false;
 				}
 				else cvr.offset = *(uintptr_t*)sym;
 				if (ira) {
@@ -443,7 +447,7 @@ bool CReader::Read(CScript* scr) {
 							auto sym = scr->lib.GetSym("__var_" + ln);
 							if (!sym) {
 								_ER("CReader", "cannot find \"" + ln + "\" from memory!");
-								goto FAIL;
+								return false;
 							}
 							else of.offset = *(uintptr_t*)sym;
 						}
@@ -454,15 +458,7 @@ bool CReader::Read(CScript* scr) {
 		}
 	}
 
-	//if (!scr->outvars.size()) {
-	//	Debug::Warning("CReader", "Script has no output parameters!");
-	//}
-
-	Engine::ReleaseLock();
 	return true;
-FAIL:
-	Engine::ReleaseLock();
-	return false;
 }
 
 void CReader::Refresh(CScript* scr) {
