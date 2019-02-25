@@ -77,10 +77,6 @@ void PyScript_I::Execute() {
 		PyErr_Print();
 		throw "\x01";
 	}
-	for (uint i = 0; i < outputs.size(); ++i) {
-		if (outputs[i]) Py_DECREF(outputs[i]);
-		outputs[i] = PyObject_GetAttrString(_instance, parent->outputs[i].name.c_str());
-	}
 }
 
 float PyScript_I::GetProgress() {
@@ -91,10 +87,8 @@ void PyScript_I::GetOutputVs() {
 	for (uint i = 0; i < outputs.size(); ++i) {
 		auto& mv = outputs[i];
 		auto& v = outputVs[i];
-		//mv = PyObject_GetAttrString(_instance, _parent->_outputs[i].name.c_str());
 		auto& nm = _parent->_outputs[i].name;
 		mv = PyDict_GetItemString(dict, nm.c_str());
-		continue;
 		auto& ot = _parent->outputs[i];
 		switch (ot.type) {
 		case AN_VARTYPE::INT:

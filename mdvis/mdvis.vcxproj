@@ -319,7 +319,6 @@
     <ClCompile Include="src\vis\selection.cpp" />
     <ClCompile Include="src\vis\shadows.cpp" />
     <ClCompile Include="src\web\anbrowse.cpp" />
-    <ClCompile Include="src\web\anconv.cpp" />
     <ClCompile Include="src\web\annode.cpp" />
     <ClCompile Include="src\web\anscript.cpp" />
     <ClCompile Include="src\web\anops.cpp" />
@@ -340,6 +339,10 @@
     <ClCompile Include="src\web\nodes\set\node_setattribute.cpp" />
     <ClCompile Include="src\web\nodes\set\node_setradscl.cpp" />
     <ClCompile Include="src\web\nodes\set\node_showrange.cpp" />
+    <ClCompile Include="src\web\py\pyarr.cpp" />
+    <ClCompile Include="src\web\py\pynode.cpp" />
+    <ClCompile Include="src\web\py\pyreader.cpp" />
+    <ClCompile Include="src\web\py\pyscript.cpp" />
     <ClCompile Include="src\xdrfile\xdrfile.c" />
     <ClCompile Include="src\xdrfile\xdrfile_trr.c" />
     <ClCompile Include="src\xdrfile\xdrfile_xtc.c" />
@@ -450,7 +453,6 @@
     <ClInclude Include="src\vis\selection.h" />
     <ClInclude Include="src\vis\shadows.h" />
     <ClInclude Include="src\web\anbrowse.h" />
-    <ClInclude Include="src\web\anconv.h" />
     <ClInclude Include="src\web\annode.h" />
     <ClInclude Include="src\web\anscript.h" />
     <ClInclude Include="src\web\anops.h" />
@@ -472,6 +474,10 @@
     <ClInclude Include="src\web\nodes\set\node_setattribute.h" />
     <ClInclude Include="src\web\nodes\set\node_setradscl.h" />
     <ClInclude Include="src\web\nodes\set\node_showrange.h" />
+    <ClInclude Include="src\web\py\pyarr.h" />
+    <ClInclude Include="src\web\py\pynode.h" />
+    <ClInclude Include="src\web\py\pyreader.h" />
+    <ClInclude Include="src\web\py\pyscript.h" />
     <ClInclude Include="src\xdrfile\xdrfile.h" />
     <ClInclude Include="src\xdrfile\xdrfile_trr.h" />
     <ClInclude Include="src\xdrfile\xdrfile_xtc.h" />
