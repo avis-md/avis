@@ -31,9 +31,6 @@ pAnScript_I PyScript::CreateInstance() {
 #define _parent ((PyScript*)parent)
 
 PyScript_I::~PyScript_I() {
-	for (uint i = 0; i < outputs.size(); ++i) {
-		if (outputs[i]) Py_DECREF(outputs[i]);
-	}
 	Py_DECREF(_instance);
 }
 
@@ -94,11 +91,10 @@ void PyScript_I::GetOutputVs() {
 	for (uint i = 0; i < outputs.size(); ++i) {
 		auto& mv = outputs[i];
 		auto& v = outputVs[i];
-		if (mv) Py_DECREF(mv);
 		//mv = PyObject_GetAttrString(_instance, _parent->_outputs[i].name.c_str());
 		auto& nm = _parent->_outputs[i].name;
 		mv = PyDict_GetItemString(dict, nm.c_str());
-		Py_INCREF(mv);
+		continue;
 		auto& ot = _parent->outputs[i];
 		switch (ot.type) {
 		case AN_VARTYPE::INT:
@@ -111,12 +107,12 @@ void PyScript_I::GetOutputVs() {
 			break;
 		case AN_VARTYPE::LIST: {
 			int n;
-			//void* p;
-			if (!(v.val.val.p = PyArr::FromPy(mv, ot.dim, ot.stride, v.dims.data(), n)))
+			void* p;
+			if (!(p = PyArr::FromPy(mv, ot.dim, ot.stride, v.dims.data(), n)))
 				throw "";
-			//n *= ot.stride;
-			//v.val.arr.resize(n);
-			//memcpy((v.val.val.p = v.val.arr.data()), p, n);
+			n *= ot.stride;
+			v.val.arr.resize(n);
+			memcpy((v.val.val.p = v.val.arr.data()), p, n);
 			v.val.pval = &v.val.val.p;
 			break;
 		}
