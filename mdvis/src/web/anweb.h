@@ -63,6 +63,8 @@ public:
 
 	static void OnSceneUpdate();
 	static void OnAnimFrame();
+
+	static std::string ConvertName(const std::string& name);
 };
 
 #include "annode_internal.h"

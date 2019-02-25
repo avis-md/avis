@@ -1,6 +1,5 @@
-#include "anweb.h"
-#include "anscript.h"
-#include "anconv.h"
+#include "pyreader.h"
+#include "pyarr.h"
 #include "vis/system.h"
 #include "vis/preferences.h"
 #ifndef PLATFORM_WIN
@@ -12,13 +11,7 @@ bool PyReader::initd = false;
 void PyReader::Init() {
 	initd = true;
 #ifndef PLATFORM_WIN
-#ifdef PLATFORM_LNX
-	//auto lib = dlopen("libpython3.6m.so", RTLD_LAZY | RTLD_GLOBAL);
-#else
-	//auto lib = dlopen("/Library/Frameworks/Python.framework/Versions/3.6/Python", RTLD_NOW | RTLD_GLOBAL);
-#endif
 	if (dlsym(RTLD_DEFAULT, "Py_Initialize")) {
-
 #else
 	static std::string pyenv;
 	Preferences::LinkEnv("PYENV", &pyenv);
@@ -42,11 +35,11 @@ void PyReader::Init() {
 		PyList_Insert(sys_path, 0, ps);
 		Py_DecRef(ps);
 
-		if (!!AnConv::Init())
+		if (!!PyArr::Init())
 			return;
 
 		AnWeb::hasPy = true;
-		PyScript::InitLog();
+		//PyScript::InitLog();
 		Unloader::Reg(Deinit);
 	} catch (char*) {
 		std::string env = "";
@@ -88,7 +81,7 @@ bool PyReader::Read(PyScript* scr) {
 	Engine::AcquireLock(6);
 	//Py_BEGIN_ALLOW_THREADS
 
-	PyScript::ClearLog();
+	//PyScript::ClearLog();
 	std::string& path = scr->path;
 	std::string mdn = path;
 	std::replace(mdn.begin(), mdn.end(), '/', '.');
@@ -97,14 +90,19 @@ bool PyReader::Read(PyScript* scr) {
 	std::ifstream strm(spath);
 	std::string ln;
 	if (AnWeb::hasPy) {
-		auto mdl = scr->pModule ? PyImport_ReloadModule(scr->pModule) : PyImport_ImportModule(mdn.c_str());
+		scr->lib = scr->lib ? PyImport_ReloadModule(scr->lib) : PyImport_ImportModule(mdn.c_str());
 		//Py_DECREF(pName);
-		if (!mdl) {
+		if (!scr->lib) {
 			Debug::Warning("PyReader", "Failed to read python file " + path + EXT_PS "!");
 			PyErr_Print();
 			goto FAIL;
 		}
-		scr->pModule = mdl;
+		scr->spawner = PyObject_GetAttrString(scr->lib, scr->name.c_str());
+		if (!scr->lib) {
+			Debug::Warning("PyReader", "Python file" + path + EXT_PS " does not have a \"" + scr->name + "\" class!");
+			PyErr_Print();
+			goto FAIL;
+		}
 	}
 	//extract io variables
 	while (!strm.eof()) {
@@ -114,6 +112,8 @@ bool PyReader::Read(PyScript* scr) {
 			scr->descLines++;
 			std::getline(strm, ln);
 		}
+
+		ln = string_trim(ln);
 
 		if (ln.substr(0, 6) == "#entry") {
 			std::getline(strm, ln);
@@ -131,48 +131,45 @@ bool PyReader::Read(PyScript* scr) {
 				goto FAIL;
 			}
 			if (AnWeb::hasPy) {
-				auto funcNm = ln.substr(4, c1 - 4);
-				scr->pFunc = PyObject_GetAttrString(scr->pModule, funcNm.c_str());
-				if (!scr->pFunc || !PyCallable_Check(scr->pFunc)) {
-					Debug::Warning("PyReader", "Failed to find \"" + funcNm + "\" function in " + path + EXT_PS "!");
-					Py_XDECREF(scr->pFunc);
-					Py_DECREF(scr->pModule);
-					goto FAIL;
-				}
-				Py_INCREF(scr->pFunc);
+				scr->funcNm = ln.substr(4, c1 - 4);
 			}
 		}
 		else if (ln.substr(0, 4) == "#in ") {
-			scr->_invars.push_back(PyVar());
-			auto& bk = scr->_invars.back();
-			bk.typeName = ln.substr(4);
-			if (!ParseType(bk.typeName, &bk)) {
-				Debug::Warning("PyReader::ParseType", "input arg type \"" + bk.typeName + "\" not recognized!");
+			scr->inputs.push_back(AnScript::Var());
+			scr->_inputs.push_back(PyVar());
+			auto& in = scr->inputs.back();
+			auto& _in = scr->_inputs.back();
+			in.typeName = ln.substr(4);
+			if (!ParseType(in)) {
+				Debug::Warning("PyReader::ParseType", "input arg type \"" + in.typeName + "\" not recognized!");
 				goto FAIL;
 			}
 			std::getline(strm, ln);
-			bk.name = ln.substr(0, find_first_not_name_char(ln.c_str()));
-			scr->invars.push_back(std::pair<std::string, std::string>(bk.name, bk.typeName));
-			scr->invaropts.push_back(VarOpt());
+			in.name = AnWeb::ConvertName(
+				(_in.name = ln.substr(0, find_first_not_name_char(ln.c_str()))));
+			_in.szs.resize(in.dim, -1);
 		}
 		else if (ln.substr(0, 5) == "#out ") {
-			scr->_outvars.push_back(PyVar());
-			auto& bk = scr->_outvars.back();
-			bk.typeName = ln.substr(5);
-			if (!ParseType(bk.typeName, &bk)) {
-				Debug::Warning("PyReader::ParseType", "output arg type \"" + bk.typeName + "\" not recognized!");
+			scr->outputs.push_back(AnScript::Var());
+			scr->_outputs.push_back(PyVar());
+			auto& out = scr->outputs.back();
+			auto& _out = scr->_outputs.back();
+			out.typeName = ln.substr(4);
+			if (!ParseType(out)) {
+				Debug::Warning("PyReader::ParseType", "input arg type \"" + out.typeName + "\" not recognized!");
 				goto FAIL;
 			}
 			std::getline(strm, ln);
-			bk.name = ln.substr(0, find_first_not_name_char(ln.c_str()));
-			scr->outvars.push_back(std::pair<std::string, std::string>(bk.name, bk.typeName));
+			out.name = AnWeb::ConvertName(
+				(_out.name = ln.substr(0, find_first_not_name_char(ln.c_str()))));
+			_out.szs.resize(out.dim, -1);
 		}
 	}
 
 	//if (!scr->invars.size()) {
 	//	Debug::Warning("PyReader", "Script has no input parameters!");
 	//}
-	if (!scr->outvars.size()) {
+	if (!scr->outputs.size()) {
 		Debug::Warning("PyReader", "Script has no output parameters!");
 	}
 
@@ -195,13 +192,26 @@ void PyReader::Refresh(PyScript* scr) {
 	}
 }
 
-bool PyReader::ParseType(std::string s, PyVar* var) {
-	if (s.substr(0, 3) == "int") var->type = AN_VARTYPE::INT;
-	else if (s.substr(0, 6) == "double") var->type = AN_VARTYPE::DOUBLE;
-	else if (s.substr(0, 4) == "list") {
-		var->type = AN_VARTYPE::LIST;
-		var->dim = s[5] - '1' + 1;
-		var->stride = AnScript::StrideOf(s[6]);
+bool PyReader::ParseType(AnScript::Var& var) {
+	const auto& s = var.typeName;
+	if (s.substr(0, 3) == "int") var.type = AN_VARTYPE::INT;
+	else if (s.substr(0, 6) == "double") var.type= AN_VARTYPE::DOUBLE;
+	else if (s.substr(0, 5) == "list("
+			&& s[7] == ')') {
+		var.type = AN_VARTYPE::LIST;
+		switch (s[6]) {
+		case 'i':
+			var.itemType = AN_VARTYPE::INT;
+			var.stride = 4;
+			break;
+		case 'd':
+			var.itemType = AN_VARTYPE::DOUBLE;
+			var.stride = 8;
+			break;
+		default:
+			return false;
+		}
+		var.dim = s[5] - '1' + 1;
 	}
 	else return false;
 	return true;

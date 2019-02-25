@@ -1,6 +1,5 @@
 #pragma once
-#include "Engine.h"
-#include "anweb.h"
+#include "web/anweb.h"
 
 class PyReader {
 public:
@@ -13,5 +12,5 @@ public:
 	static void Refresh(PyScript* scr);
 
 protected:
-	static bool ParseType(std::string s, PyVar* var);
+	static bool ParseType(AnScript::Var& var);
 };

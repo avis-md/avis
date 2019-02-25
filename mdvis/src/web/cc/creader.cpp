@@ -450,6 +450,7 @@ bool CReader::Read(CScript* scr) {
 					}
 				}
 			}
+			vr.name = AnWeb::ConvertName(vr.name);
 		}
 	}
 

@@ -881,3 +881,18 @@ void AnWeb::OnAnimFrame() {
 		}
 	}
 }
+
+std::string AnWeb::ConvertName(const std::string& name) {
+	char c = name[0];
+	std::string res(1, c);
+	res.reserve(name.size());
+	if (c >= 'a' && c <= 'z')
+		res[0] = c - 'a' + 'A';
+	int i = 1;
+	while (!!(c = name[i++])) {
+		if (c >= 'A' && c <= 'Z') {
+			res.push_back(' ');
+		}
+		res.push_back(c);
+	}
+}
