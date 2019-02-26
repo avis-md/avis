@@ -17,9 +17,7 @@ pAnScript_I PyScript::CreateInstance() {
 	auto i = PyObject_CallObject(spawner, 0);
 	res->instance = i;
 	res->dict = PyObject_GetAttrString(i, "__dict__");
-	res->func = PyObject_GetAttrString(i, funcNm.c_str());
 	auto osz = outputs.size();
-	res->outputs.resize(osz);
 	res->outputVs.resize(osz);
 	for (size_t a = 0; a < outputs.size(); a++) {
 		res->outputVs[a].dims.resize(outputs[a].dim);
@@ -84,11 +82,10 @@ float PyScript_I::GetProgress() {
 }
 
 void PyScript_I::GetOutputVs() {
-	for (uint i = 0; i < outputs.size(); ++i) {
-		auto& mv = outputs[i];
+	for (uint i = 0; i < outputVs.size(); ++i) {
 		auto& v = outputVs[i];
 		auto& nm = _parent->_outputs[i].name;
-		mv = PyDict_GetItemString(dict, nm.c_str());
+		auto mv = PyDict_GetItemString(dict, nm.c_str());
 		auto& ot = _parent->outputs[i];
 		switch (ot.type) {
 		case AN_VARTYPE::INT:

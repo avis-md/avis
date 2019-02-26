@@ -23,7 +23,7 @@ class PyScript_I : public AnScript_I {
 public:
 	~PyScript_I();
 
-	PyObject* dict, *func;
+	PyObject* dict;
 
 	void* Resolve(uintptr_t offset) override;
 	int* GetDimValue(const CVar::szItem& i) override;
@@ -44,7 +44,6 @@ public:
 		std::vector<int> dims;
 	};
 
-	std::vector<PyObject*> outputs;
 	std::vector<OutVal> outputVs;
 };
 

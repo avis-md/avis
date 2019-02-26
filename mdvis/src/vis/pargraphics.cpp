@@ -980,6 +980,11 @@ void ParGraphics::Reblit() {
 				float zero[4] = {};
 				glClearBufferfv(GL_COLOR, 0, zero);
 				BlitSky();
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				if (showAxes) {
+					DrawAxes();
+				}
 			}
 		}
 		//*
@@ -1008,10 +1013,6 @@ void ParGraphics::Reblit() {
 		Shadows::Reblit();
 	if (!!hlIds.size() || !!Selection::atoms.size())
 		BlitHl();
-	
-	if (showAxes) {
-		DrawAxes();
-	}
 }
 
 void ParGraphics::BlitSky() {

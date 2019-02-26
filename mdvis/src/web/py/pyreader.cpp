@@ -104,6 +104,8 @@ bool PyReader::Read(PyScript* scr) {
 		}
 	}
 	//extract io variables
+	int checkinit = 2;
+	bool candecl = true;
 	while (!strm.eof()) {
 		std::getline(strm, ln);
 		while (ln[0] == '#' && ln[1] == '#' && ln[2] == ' ') {
@@ -112,69 +114,106 @@ bool PyReader::Read(PyScript* scr) {
 			std::getline(strm, ln);
 		}
 
-		ln = string_trim(ln);
+		if (checkinit > 0) {
+			ln = rm_spaces(ln);
+			if (checkinit == 2) {
+				if (ln == "class" + scr->name + ":")
+					checkinit--;
+			}
+			else {
+				if (ln == "def__init__(self):") {
+					checkinit--;
+					candecl = true;
+				}
+			}
+		}
+		else {
+			ln = string_trim(ln);
 
-		if (ln[0] != '#') continue;
-		if (ln.substr(1) == "entry") {
-			std::getline(strm, ln);
-			ln = string_trim(ln);
-			if (ln.substr(0, 4) != "def ") {
-				Debug::Warning("PyReader::ParseType", "#entry expects a function definition!");
-				return false;
+			if (ln[0] != '#') {
+				if (candecl && ln.substr(0, 4) == "def ") {
+					candecl = false;
+				}
+				else continue;
 			}
-			auto c1 = ln.find_first_of('(');
-			if (c1 == std::string::npos) {
-				Debug::Warning("PyReader::ParseType", "Braces for main function not found!");
-				return false;
+			if (ln.substr(1) == "entry") {
+				std::getline(strm, ln);
+				ln = string_trim(ln);
+				if (ln.substr(0, 4) != "def ") {
+					Debug::Warning("PyReader::Parse", "#entry expects a function definition!");
+					return false;
+				}
+				auto c1 = ln.find_first_of('(');
+				if (c1 == std::string::npos) {
+					Debug::Warning("PyReader::Parse", "Braces for main function not found!");
+					return false;
+				}
+				if (ln.substr(c1 + 1, 5) != "self)") {
+					Debug::Warning("PyReader::Parse", "Main function must have a single \'self\' argument!");
+					return false;
+				}
+				if (AnWeb::hasPy) {
+					scr->funcNm = ln.substr(4, c1 - 4);
+				}
 			}
-			if (ln.substr(c1 + 1, 5) != "self)") {
-				Debug::Warning("PyReader::ParseType", "Main function must have a single \'self\' argument!");
-				return false;
+			else if (ln.substr(1, 3) == "in ") {
+				if (!candecl) {
+					Debug::Warning("PyReader::Parse", "Input variable must be defined inside the __init__ function!");
+					continue;
+				}
+				scr->inputs.push_back(AnScript::Var());
+				scr->_inputs.push_back(PyVar());
+				auto& in = scr->inputs.back();
+				auto& _in = scr->_inputs.back();
+				in.typeName = ln.substr(4);
+				if (!ParseType(in)) {
+					Debug::Warning("PyReader::ParseType", "Input arg type \"" + in.typeName + "\" not recognized!");
+					return false;
+				}
+				std::getline(strm, ln);
+				ln = string_trim(ln);
+				if (ln.substr(0, 5) != "self.") {
+					Debug::Warning("PyReader::ParseType", "`self.` expected before input variable!");
+					return false;
+				}
+				in.name = AnWeb::ConvertName((_in.name
+					= ln.substr(5, find_first_not_name_char(ln.c_str() + 5))));
+				_in.szs.resize(in.dim, -1);
 			}
-			if (AnWeb::hasPy) {
-				scr->funcNm = ln.substr(4, c1 - 4);
+			else if (ln.substr(1, 4) == "out ") {
+				if (!candecl) {
+					Debug::Warning("PyReader::Parse", "Output variable must be defined inside the __init__ function!");
+					continue;
+				}
+				scr->outputs.push_back(AnScript::Var());
+				scr->_outputs.push_back(PyVar());
+				auto& out = scr->outputs.back();
+				auto& _out = scr->_outputs.back();
+				out.typeName = ln.substr(5);
+				if (!ParseType(out)) {
+					Debug::Warning("PyReader::ParseType", "Output arg type \"" + out.typeName + "\" not recognized!");
+					return false;
+				}
+				std::getline(strm, ln);
+				ln = string_trim(ln);
+				if (ln.substr(0, 5) != "self.") {
+					Debug::Warning("PyReader::ParseType", "`self.` expected before output variable!");
+					return false;
+				}
+				out.name = AnWeb::ConvertName((_out.name
+					= ln.substr(5, find_first_not_name_char(ln.c_str() + 5))));
+				_out.szs.resize(out.dim, -1);
 			}
 		}
-		else if (ln.substr(1, 3) == "in ") {
-			scr->inputs.push_back(AnScript::Var());
-			scr->_inputs.push_back(PyVar());
-			auto& in = scr->inputs.back();
-			auto& _in = scr->_inputs.back();
-			in.typeName = ln.substr(4);
-			if (!ParseType(in)) {
-				Debug::Warning("PyReader::ParseType", "input arg type \"" + in.typeName + "\" not recognized!");
-				return false;
-			}
-			std::getline(strm, ln);
-			ln = string_trim(ln);
-			if (ln.substr(0, 5) != "self.") {
-				Debug::Warning("PyReader::ParseType", "`self.` expected before input variable!");
-				return false;
-			}
-			in.name = AnWeb::ConvertName((_in.name
-				= ln.substr(5, find_first_not_name_char(ln.c_str() + 5))));
-			_in.szs.resize(in.dim, -1);
-		}
-		else if (ln.substr(1, 4) == "out ") {
-			scr->outputs.push_back(AnScript::Var());
-			scr->_outputs.push_back(PyVar());
-			auto& out = scr->outputs.back();
-			auto& _out = scr->_outputs.back();
-			out.typeName = ln.substr(5);
-			if (!ParseType(out)) {
-				Debug::Warning("PyReader::ParseType", "output arg type \"" + out.typeName + "\" not recognized!");
-				return false;
-			}
-			std::getline(strm, ln);
-			ln = string_trim(ln);
-			if (ln.substr(0, 5) != "self.") {
-				Debug::Warning("PyReader::ParseType", "`self.` expected before output variable!");
-				return false;
-			}
-			out.name = AnWeb::ConvertName((_out.name
-				= ln.substr(5, find_first_not_name_char(ln.c_str() + 5))));
-			_out.szs.resize(out.dim, -1);
-		}
+	}
+
+	if (checkinit == 2) {
+		Debug::Warning("PyReader::Parse", "Cannot find '" + scr->name + "' class!");
+		return false;
+	}
+	else if (checkinit == 1) {
+		Debug::Warning("PyReader::Parse", "Cannot find __init__ function!");
+		return false;
 	}
 
 	return true;
