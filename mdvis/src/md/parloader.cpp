@@ -42,7 +42,7 @@ float ParLoader::_impPos = 0, ParLoader::_impScr = 0;
 void ParLoader::Init() {
 	ChokoLait::dropFuncs.push_back(OnDropFile);
 
-	std::ifstream strm(VisSystem::localFd +".srvinfo");
+	std::ifstream strm(VisSystem::localFd + "lastssh");
 	if (strm) strm >> srvusepass >> srvuser >> srvhost >> srvport >> srvkey;
 	else {
 		srvusepass = false;
@@ -242,7 +242,7 @@ void ParLoader::SrvDisconnect() {
 }
 
 void ParLoader::SaveSrvInfo() {
-	std::ofstream strm(VisSystem::localFd + ".srvinfo");
+	std::ofstream strm(VisSystem::localFd + "lastssh");
 	strm << srvusepass << "\n"
 	<< srvuser << "\n"
 	<< srvhost << "\n"
@@ -442,7 +442,7 @@ void ParLoader::DoOpen() {
 		else loadName = "Finding bonds";
 	}
 	else loadName = "Post processing";
-	std::unordered_map<ushort, int> cnms;
+	std::unordered_map<ushort, int> id2colid;
 	for (uint i = 0; i < info.num; ++i) {
 		info.progress = i * 1.f / info.num;
 		auto id1 = info.type[i];//info.name[i * PAR_MAX_NAME_LEN];
@@ -506,28 +506,15 @@ void ParLoader::DoOpen() {
 				}
 			}
 		}
-		for (auto& dp : Particles::defColors) {
-			if (id1 == dp.type) {
-				if (dp.id == -1) {
-					dp.id = Particles::colorPallete.size();
-					Particles::colorPallete.push_back(std::pair<ushort, Vec3>(dp.type, dp.col));
-					Particles::_colorPallete[dp.id] = Vec4(dp.col, 1);
-				}
-				Particles::colors[i] = dp.id;
-				goto found;
-			}
+		auto& c = id2colid[id1];
+		if (!c) {
+			auto cpsz = Particles::colorPallete.size();
+			const auto col = Preferences::GetCol(id1);
+			Particles::colorPallete.push_back(std::pair<ushort, Vec3>(id1, col));
+			Particles::_colorPallete[cpsz] = Vec4(col, 1);
+			c = cpsz + 1;
 		}
-		{
-			auto& c = cnms[id1];
-			if (!c) {
-				auto cpsz = Particles::colorPallete.size();
-				Particles::colorPallete.push_back(std::pair<ushort, Vec3>(id1, Vec3(1, 1, 1)));
-				Particles::_colorPallete[cpsz] = Vec4(1, 1, 1, 1);
-				c = cpsz + 1;
-			}
-			Particles::colors[i] = c-1;
-		}
-		found:;
+		Particles::colors[i] = c-1;
 
 		VisSystem::radii[id1] = Particles::radii[i] = Preferences::GetRad(id1);
 		Particles::ress[i] = Int2(Particles::residueListSz - 1, trs->residueSz - 1);

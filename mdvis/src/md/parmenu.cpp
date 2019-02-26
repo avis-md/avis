@@ -642,7 +642,7 @@ loopout:
 void ParMenu::LoadRecents() {
 	recentFiles.clear();
 	recentFilesN.clear();
-	std::ifstream strm(VisSystem::localFd + ".recentfiles");
+	std::ifstream strm(VisSystem::localFd + "recentfiles");
 	if (strm.is_open()) {
 		std::string s;
 		while (std::getline(strm, s, '\n')) {
@@ -678,7 +678,7 @@ void ParMenu::RemoveRecent(uint i) {
 }
 
 void ParMenu::WriteRecents() {
-	std::ofstream strm(VisSystem::localFd + ".recentfiles");
+	std::ofstream strm(VisSystem::localFd + "recentfiles");
 	for (auto& s : recentFiles) {
 		strm << s << "\n";
 	}

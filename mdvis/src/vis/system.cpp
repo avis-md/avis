@@ -63,33 +63,11 @@ VIS_MOUSE_MODE VisSystem::mouseMode = VIS_MOUSE_MODE::ROTATE;
 
 float VisSystem::_defBondLength = 0.0225f; // 0.15
 std::unordered_map<uint, float> VisSystem::_bondLengths;
-std::unordered_map<ushort, Vec3> VisSystem::_type2Col;
 std::unordered_map<ushort, float> VisSystem::radii;
 
 void VisSystem::Init() {
 	message = _("Hello!");
 	radii.clear();
-	std::ifstream strm(IO::path + "config/colors.txt");
-	_type2Col.clear();
-	if (strm.is_open()) {
-		std::string s;
-		Vec3 col;
-		while (!strm.eof()) {
-			std::getline(strm, s);
-			auto p = string_split(s, ' ', true);
-			if (p.size() != 4) continue;
-			auto i = *(ushort*)(&p[0][0]);
-			col.x = std::stof(p[1]);
-			col.y = std::stof(p[2]);
-			col.z = std::stof(p[3]);
-			_type2Col.emplace(i, col);
-			Particles::defColors.push_back(Particles::DefColor());
-			auto& dc = Particles::defColors.back();
-			dc.type = i;
-			dc.col = col;
-		}
-		strm.close();
-	}
 
 	auto& mi = menuItems[0];
 	mi.resize(7);

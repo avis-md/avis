@@ -6,9 +6,9 @@ bool ChangeLog::show;
 std::vector<std::string> ChangeLog::logs;
 
 void ChangeLog::Init() {
-	auto txt = IO::GetText(VisSystem::localFd + "lastversion.txt");
+	auto txt = IO::GetText(VisSystem::localFd + "lastversion");
 	if (txt != APPVERSION) {
-		IO::WriteFile(VisSystem::localFd + "lastversion.txt", APPVERSION);
+		IO::WriteFile(VisSystem::localFd + "lastversion", APPVERSION);
 		show = true;
 	}
 	else show = false;

@@ -458,7 +458,7 @@ void Preferences::LoadAttrs() {
 		bondlengths.push_back(Bondlen());
 		auto& len = bondlengths.back();
 		len.sig1 = l.children[0].value;
-		len.sig1 = l.children[1].value;
+		len.sig2 = l.children[1].value;
 		len.len = (float)std::stof(l.children[2].value);
 	}
 
