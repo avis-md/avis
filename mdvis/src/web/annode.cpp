@@ -4,6 +4,10 @@
 #include "ui/ui_ext.h"
 #include "res/resdata.h"
 #endif
+#include "vis/preferences.h"
+
+Vec4 AnCol::conn_scalar = {};
+Vec4 AnCol::conn_vector = {};
 
 #define _script script->parent
 
@@ -29,6 +33,9 @@ void AnNode::Init() {
 	tex_circle_open = Texture(res::node_open_png, res::node_open_png_sz);
 	tex_circle_conn = Texture(res::node_conn_png, res::node_conn_png_sz);
 #endif
+
+	Preferences::Link("AVCS", &AnCol::conn_scalar);
+	Preferences::Link("AVCV", &AnCol::conn_vector);
 }
 
 short& AnNode::getval_s(const uint i) {
@@ -77,14 +84,15 @@ Vec2 AnNode::DrawConn() {
 				Vec2 p2 = Vec2(pos.x, expanded ? y + 8 : pos.y + 8);
 				Vec2 p1 = Vec2(ri.first->pos.x + ri.first->width, ri.first->expanded ? ri.first->pos.y + 28 + ri.first->hdrSz + (ri.second + ri.first->inputR.size()) * 17 : ri.first->pos.y + 8);
 				Vec2 hx = Vec2((p2.x > p1.x) ? (p2.x - p1.x) / 2 : (p1.x - p2.x) / 3, 0);
-				auto col = AnWeb::highContrast? white(1, 0.5f) : white();
+				auto col = AnWeb::highContrast? white(1, 0.5f) :
+					Lerp(((ri.getvar().dim > 0) ? AnCol::conn_vector : AnCol::conn_scalar), black(), 0.3f);
 				if (!AnWeb::selConnNode) {
 					if (ri.hoverdel) {
 						col = red();
 					}
 					else if (Rect(p1.x - connrad, p1.y - connrad, connrad * 2, connrad * 2).Inside(Input::mousePos)
 						|| Rect(p2.x - connrad, p2.y - connrad, connrad * 2, connrad * 2).Inside(Input::mousePos)) {
-						col = Vec4(1, 0.7f, 0, 1);
+						col = VisSystem::accentColor;
 					}
 				}
 				UI2::Bezier(p1, p1 + hx, p2 - hx, p2, col, 5, 30);
@@ -102,7 +110,7 @@ Vec2 AnNode::DrawConn() {
 
 void AnNode::Draw() {
 #ifndef IS_ANSERVER
-	const float connrad = 6;
+	const float connrad = 5;
 
 	auto cnt = _script->outputs.size();
 	for (auto& i : inputR) {
@@ -136,8 +144,10 @@ void AnNode::Draw() {
 					if (hi) Disconnect(i, false);
 					continue;
 				}
+				auto cl0 = hi ? ((inputR[i].getvar().dim > 0) ? AnCol::conn_vector : AnCol::conn_scalar) : white();
 				if (!AnWeb::selConnNode || (AnWeb::selConnIdIsOut && AnWeb::selConnNode != this)) {
-					if (Engine::Button(pos.x - connrad, y + 8 - connrad, connrad * 2, connrad * 2, hi ? tex_circle_conn : tex_circle_open, white(), Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f)) == MOUSE_RELEASE) {
+					if (Engine::Button(pos.x - connrad, y + 8 - connrad, connrad * 2, connrad * 2, Icons::circle, 
+							cl0, Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f)) == MOUSE_RELEASE) {
 						if (!AnWeb::selConnNode) {
 							AnWeb::selConnNode = this;
 							AnWeb::selConnId = i;
@@ -154,11 +164,11 @@ void AnNode::Draw() {
 					Vec2 p2(pos.x, y + 8);
 					Vec2 p1 = Input::mousePos;
 					Vec2 hx = Vec2((p2.x > p1.x) ? (p2.x - p1.x) / 2 : (p1.x - p2.x) / 3, 0);
-					UI2::Bezier(p1, p1 + hx, p2 - hx, p2, yellow(), 5, 30);
-					UI::Texture(pos.x - connrad, y + 8 - connrad, connrad * 2, connrad * 2, hi ? tex_circle_conn : tex_circle_open);
+					UI2::Bezier(p1, p1 + hx, p2 - hx, p2, VisSystem::accentColor, cl0, 5, 30);
+					UI::Texture(pos.x - connrad, y + 8 - connrad, connrad * 2, connrad * 2, Icons::circle, cl0);
 				}
 				else {
-					UI::Texture(pos.x - connrad, y + 8 - connrad, connrad * 2, connrad * 2, hi ? tex_circle_conn : tex_circle_open, red(0.3f));
+					UI::Texture(pos.x - connrad, y + 8 - connrad, connrad * 2, connrad * 2, Icons::circle, red(0.3f));
 				}
 				UI::Label(pos.x + 10, y, 12, _script->inputs[i].name, white());
 				if (!HasConnI(i)) {
@@ -189,8 +199,10 @@ void AnNode::Draw() {
 
 			for (uint i = 0; i < _script->outputs.size(); i++, y += 17) {
 				bool ho = HasConnO(i);
+				auto cl0 = ho ? ((_script->outputs[i].dim > 0) ? AnCol::conn_vector : AnCol::conn_scalar) : white();
 				if (!AnWeb::selConnNode || ((!AnWeb::selConnIdIsOut) && (AnWeb::selConnNode != this))) {
-					const auto cirbt = Engine::Button(pos.x + width - connrad, y + 8 - connrad, connrad * 2, connrad * 2, ho ? tex_circle_conn : tex_circle_open, white(), Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f));
+					const auto cirbt = Engine::Button(pos.x + width - connrad, y + 8 - connrad, connrad * 2, connrad * 2, 
+						Icons::circle, cl0, Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f));
 					if ((cirbt & MOUSE_HOVER_FLAG) > 0) {
 						std::string str = "";
 						const auto& ov = script->parent->outputs[i];
@@ -254,11 +266,11 @@ void AnNode::Draw() {
 					Vec2 p2 = Input::mousePos;
 					Vec2 p1(pos.x + width, y + 8);
 					Vec2 hx = Vec2((p2.x > p1.x) ? (p2.x - p1.x) / 2 : (p1.x - p2.x) / 3, 0);
-					UI2::Bezier(p1, p1 + hx, p2 - hx, p2, yellow(), 5, 30);
-					UI::Texture(pos.x + width - connrad, y + 8 - connrad, connrad * 2, connrad * 2, ho ? tex_circle_conn : tex_circle_open);
+					UI2::Bezier(p1, p1 + hx, p2 - hx, p2, cl0, VisSystem::accentColor, 5, 30);
+					UI::Texture(pos.x + width - connrad, y + 8 - connrad, connrad * 2, connrad * 2, Icons::circle, cl0);
 				}
 				else {
-					UI::Texture(pos.x + width - connrad, y + 8 - connrad, connrad * 2, connrad * 2, ho ? tex_circle_conn : tex_circle_open, red(0.3f));
+					UI::Texture(pos.x + width - connrad, y + 8 - connrad, connrad * 2, connrad * 2, Icons::circle, red(0.3f));
 				}
 
 

@@ -40,7 +40,7 @@ public:
 
 	AnScript(TYPE t) : type(t) {}
 
-	std::string name, path;
+	std::string name, path, scrPath;
 	const TYPE type;
 	bool isSingleton;
 

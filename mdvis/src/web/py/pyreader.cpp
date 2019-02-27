@@ -84,7 +84,6 @@ bool PyReader::Read(PyScript* scr) {
 	std::string spath = AnWeb::nodesPath + scr->path + EXT_PS;
 	scr->chgtime = IO::ModTime(spath);
 	if (AnWeb::hasPy) {
-		scr->UnregInstances();
 		scr->lib = scr->lib ? PyImport_ReloadModule(scr->lib) : PyImport_ImportModule(mdn.c_str());
 		if (!scr->lib) {
 			Debug::Warning("PyReader", "Failed to import python module " + scr->path + EXT_PS "!");
@@ -93,18 +92,10 @@ bool PyReader::Read(PyScript* scr) {
 		}
 	}
 	auto res = PyReader::ReadClassed(scr, spath);
-	if (res > 0) return false;
-	else if (!res) {
-		scr->RegInstances();
-		return true;
-	}
+	if (res >= 0) return !res;
 	else {
 		Debug::Message("PyReader", "Attempting to read static version of python module");
-		if (!PyReader::ReadStatic(scr, spath)) {
-			scr->RegInstances();
-			return true;
-		}
-		else return false;
+		return (!PyReader::ReadStatic(scr, spath));
 	}
 }
 
@@ -248,8 +239,10 @@ void PyReader::Refresh(PyScript* scr) {
 	if ((mt > scr->chgtime) || (!scr->ok && mt > scr->badtime)) {
 		AnBrowse::busyMsg = "Reloading " + scr->path + EXT_PS;
 		Debug::Message("PyReader", AnBrowse::busyMsg);
+		if (scr->ok) scr->UnregInstances();
 		scr->Clear();
 		scr->ok = Read(scr);
+		if (scr->ok) scr->RegInstances();
 	}
 }
 

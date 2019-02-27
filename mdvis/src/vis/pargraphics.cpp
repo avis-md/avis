@@ -371,8 +371,12 @@ void ParGraphics::Init() {
 
 	InitClippingMesh();
 
-	Preferences::Link("VAX", &showAxes);
-	Preferences::Link("VAS", &axesSize);
+	Preferences::Link("VAX", &showAxes, []() {
+		tfboDirty = true;
+	});
+	Preferences::Link("VAS", &axesSize, []() {
+		tfboDirty = true;
+	});
 	Preferences::Link("VCX", &axesCols[0]);
 	Preferences::Link("VCY", &axesCols[1]);
 	Preferences::Link("VCZ", &axesCols[2]);

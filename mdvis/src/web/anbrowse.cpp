@@ -43,6 +43,7 @@ void AnBrowse::DoScan(Folder* fo, const std::string& path, const std::string& in
 				fo->scripts.push_back(scr);\
 				scr->name = f;\
 				scr->path = incPath + scr->name;\
+				scr->scrPath = AnWeb::nodesPath + scr->path + ext;\
 				scr->ok = false;\
 				hd##Script::allScrs.emplace(f, scr);\
 			}\
@@ -209,7 +210,8 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 			off += 17;
 		}
 		for (auto& fs : f->scripts) {
-			if (Engine::Button(2.f + 5 * layer, off, 150.f, 16.f, white(1, 0.35f)) == MOUSE_RELEASE) {
+			if (UI2::Tooltip(Engine::Button(2.f + 5 * layer, off, 150.f, 16.f, white(1, 0.35f))
+					, 5.f + 5 * layer, off, fs->scrPath) == MOUSE_RELEASE) {
 				if (Input::dbclick) {
 					AnWeb::selScript = nullptr;
 					pAnNode pn;

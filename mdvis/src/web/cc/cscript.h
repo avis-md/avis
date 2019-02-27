@@ -1,6 +1,9 @@
 #include "web/anscript.h"
 #include "utils/dylib.h"
 
+class CScript_I;
+typedef std::shared_ptr<CScript_I> pCScript_I;
+
 class CScript : public AnScript {
 public:
 	CScript();
@@ -21,7 +24,10 @@ public:
 	void Clear() override;
 	pAnScript_I CreateInstance() override;
 
+	void RegInstances(), UnregInstances();
+
 	static std::unordered_map<std::string, std::weak_ptr<CScript>> allScrs;
+	std::vector<CScript_I*> instances;
 };
 
 class CScript_I : public AnScript_I {
@@ -39,5 +45,3 @@ public:
 
 	float GetProgress() override;
 };
-
-typedef std::shared_ptr<CScript_I> pCScript_I;

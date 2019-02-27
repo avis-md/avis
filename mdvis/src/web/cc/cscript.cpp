@@ -18,6 +18,18 @@ pAnScript_I CScript::CreateInstance() {
 	return res;
 }
 
+void CScript::RegInstances() {
+	for (auto i : instances) {
+		i->instance = spawner();
+	}
+}
+
+void CScript::UnregInstances() {
+	for (auto i : instances) {
+		deleter(i->instance);
+	}
+}
+
 CScript_I::~CScript_I() {
 	parent->deleter(instance);
 }

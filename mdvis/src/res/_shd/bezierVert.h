@@ -5,6 +5,8 @@ uniform vec2 pts[4];
 uniform int count;
 uniform vec2 thick;
 
+out float t;
+
 vec2 ptat(float t) {
 	float i = 1 - t;
 	return i*i*i*pts[0] + 3*i*i*t*pts[1] + 3*i*t*t*pts[2] + t*t*t*pts[3];
@@ -14,7 +16,7 @@ void main(){
 	int i = int(mod(gl_VertexID, 6));
 	int ti = int(floor(gl_VertexID * 0.16667f)) + int(mod(i, 2));
 	float dt = 1.0 / count;
-	float t = ti * dt;
+	t = ti * dt;
 	
 	vec2 here = ptat(t);
 	vec2 dir = ptat(t + dt) - ptat(t - dt);

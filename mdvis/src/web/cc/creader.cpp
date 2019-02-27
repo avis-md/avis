@@ -468,9 +468,11 @@ void CReader::Refresh(CScript* scr) {
 	if ((mt > scr->chgtime) || (!scr->ok && mt > scr->badtime)) {
 		AnBrowse::busyMsg = "Reloading " + scr->path + EXT_CS;
 		Debug::Message("CReader", AnBrowse::busyMsg);
+		if (scr->ok) scr->UnregInstances();
 		scr->Clear();
 		scr->badtime = mt;
 		scr->ok = Read(scr);
+		if (scr->ok) scr->RegInstances();
 		AnBrowse::changed = true;
 	}
 }

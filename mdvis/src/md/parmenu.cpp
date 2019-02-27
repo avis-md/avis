@@ -468,7 +468,7 @@ void ParMenu::DrawSplash() {
 			showSplash = false;
 	}
 	if (sub.size()) {
-		UI::Label(Display::width*0.5f - 190, pos.y + pos.w + 1, 12, sub, white(0.7f));
+		UI::Label(Display::width*0.5f - 190, pos.y + pos.w + 3, 12, sub, white(0.8f));
 	}
  	if ((UI::_layer == UI::_layerMax) && (Input::KeyDown(KEY::Escape) || (Input::mouse0State == 1 && !Rect(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250).Inside(Input::mousePos)))) {
 		showSplash = false;

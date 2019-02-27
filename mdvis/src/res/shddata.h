@@ -1,6 +1,7 @@
 #pragma once
 
 #include "_shd/bezierVert.h"
+#include "_shd/bezierFrag.h"
 #include "_shd/blurFrag.h"
 #include "_shd/dofFrag.h"
 #include "_shd/colorerFrag.h"

@@ -31,6 +31,7 @@ public:
 	static void Toggle(float x, float y, float w, const std::string& title, bool& val);
 	static void Switch(float x, float y, float w, const std::string& title, int c, std::string* nms, int& i);
 	static void Bezier(Vec2 p1, Vec2 t1, Vec2 t2, Vec2 p2, Vec4 col, float thick = 1, int reso = 20);
+	static void Bezier(Vec2 p1, Vec2 t1, Vec2 t2, Vec2 p2, Vec4 col1, Vec4 col2, float thick = 1, int reso = 20);
 	static float Scroll(float x, float y, float h, float t, float tot, float fill);
 
 	static void BlurQuad(float x, float y, float w, float h, Vec4 tint = white());

@@ -9,6 +9,11 @@ const Vec3 NODE_COL_MOD = Vec3(0.3f, 0.5f, 0.3f);
 const Vec3 NODE_COL_SPC = Vec3(0.5f, 0.3f, 0.3f);
 const Vec3 NODE_COL_CTRL = Vec3(0.3f, 0.45f, 0.45f);
 
+struct AnCol {
+	static Vec4 conn_scalar;
+	static Vec4 conn_vector;
+};
+
 enum class ANNODE_OP {
 	NONE,
 	LEFT,

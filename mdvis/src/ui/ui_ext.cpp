@@ -17,7 +17,9 @@ std::string UI2::tooltipStr;
 long long UI2::tooltipTime;
 
 void UI2::Init() {
-	bezierProg = Shader::FromVF(glsl::bezierVert, glsl::coreFrag3);
+	(bezierProg = Shader::FromVF(glsl::bezierVert, glsl::bezierFrag))
+		.AddUniforms({ "pts", "count", "thick", "col1", "col2" });
+
 #define LC(nm) bezierProg.AddUniform(#nm)
 	LC(pts);
 	LC(count);
@@ -192,13 +194,18 @@ void UI2::Switch(float x, float y, float w, const std::string& title, int c, std
 }
 
 void UI2::Bezier(Vec2 p1, Vec2 t1, Vec2 t2, Vec2 p2, Vec4 col, float thick, int reso) {
+	Bezier(p1, t1, t2, p2, col, col, thick, reso);
+}
+
+void UI2::Bezier(Vec2 p1, Vec2 t1, Vec2 t2, Vec2 p2, Vec4 col1, Vec4 col2, float thick, int reso) {
 	thick /= 2;
 	bezierProg.Bind();
 	Vec2 pts[4] = { Ds2(p1), Ds2(t1), Ds2(t2), Ds2(p2) };
 	glUniform2fv(bezierProg.Loc(0), 4, &pts[0][0]);
 	glUniform1i(bezierProg.Loc(1), reso);
 	glUniform2f(bezierProg.Loc(2), thick / Display::width, thick / Display::height);
-	glUniform4f(bezierProg.Loc(3), col.r, col.g, col.b, col.a);
+	glUniform4f(bezierProg.Loc(3), col1.r, col1.g, col1.b, col1.a);
+	glUniform4f(bezierProg.Loc(4), col2.r, col2.g, col2.b, col2.a);
 	glBindVertexArray(Camera::emptyVao);
 	glDrawArrays(GL_TRIANGLES, 0, reso * 6);
 	glUseProgram(0);

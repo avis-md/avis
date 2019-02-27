@@ -53,6 +53,12 @@ namespace config {
 		"AOMPL", "Link OpenMP Libs", "B", "0",
 		"Links against the OpenMP libraries. OpenMP libraries must be separately installed.",
 
+		"AVCS", "Value (scalar)", "C", "1", "0.7", "0", "1",
+		" ",
+
+		"AVCV", "Value (vector)", "C", "0", "0.7", "1", "1",
+		" ",
+
 		"VSS", "Scroll Speed", "F", "1", "0.2", "5", "Y",
 		"Mouse ScrollWheel Sensitivity",
 
