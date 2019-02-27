@@ -73,9 +73,11 @@ bool CReader::Read(CScript* scr) {
 #ifndef IS_ANSERVER
 	if (!IO::HasDirectory(fp2)) IO::MakeDirectory(fp2);
 
+	auto mt = scr->chgtime = IO::ModTime(fp + EXT_CS);
+	if (mt < 0) return false;
+	scr->isSingleton = false;
+
 	if (AnWeb::hasC) {
-		auto mt = scr->chgtime = IO::ModTime(fp + EXT_CS);
-		if (mt < 0) return false;
 		auto ot = IO::ModTime(fp2 + nm + ".so");
 
 		std::vector<VarInfo> vrNms;

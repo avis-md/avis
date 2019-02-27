@@ -1,12 +1,15 @@
 #include "web/anscript.h"
 #include <Python.h>
 
+class PyScript_I;
+typedef std::shared_ptr<PyScript_I> pPyScript_I;
+
 class PyScript : public AnScript {
 public:
 	PyScript();
 
 	std::string scrpath;
-	PyObject* lib;
+	PyObject* lib, *func;
 
 	PyObject* spawner;
 	std::string funcNm;
@@ -16,7 +19,10 @@ public:
 	void Clear() override;
 	pAnScript_I CreateInstance() override;
 
+	void RegInstances(), UnregInstances();
+
 	static std::unordered_map<std::string, std::weak_ptr<PyScript>> allScrs;
+	std::vector<PyScript_I*> instances;
 };
 
 class PyScript_I : public AnScript_I {
@@ -32,6 +38,8 @@ public:
 	void SetInput(int i, int val) override;
 	void SetInput(int i, double val) override;
 	void SetInput(int i, void* val, char tp, std::vector<int> szs) override;
+	void Set(int i, PyObject* o);
+
 	void GetOutput(int i, int* val) override;
 
 	void Execute() override;
@@ -46,5 +54,3 @@ public:
 
 	std::vector<OutVal> outputVs;
 };
-
-typedef std::shared_ptr<PyScript_I> pPyScript_I;

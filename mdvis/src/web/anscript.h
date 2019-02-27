@@ -34,7 +34,6 @@ public:
 		PYTHON,
 		FORTRAN
 	};
-
 	typedef void* (*spawnerFunc)(void);
 	typedef void (*callerFunc)(void*);
 	typedef void (*deleterFunc)(void*);
@@ -43,6 +42,7 @@ public:
 
 	std::string name, path;
 	const TYPE type;
+	bool isSingleton;
 
 	bool ok = false, busy = false;
 	bool allowParallel = true;

@@ -79,40 +79,45 @@ size_t find_first_not_name_char (const char* c) {
 
 bool PyReader::Read(PyScript* scr) {
 	Engine::Locker _lock(6);
-
-	//PyScript::ClearLog();
-	std::string& path = scr->path;
-	std::string mdn = path;
+	std::string mdn = scr->path;
 	std::replace(mdn.begin(), mdn.end(), '/', '.');
-	std::string spath = AnWeb::nodesPath + path + EXT_PS;
+	std::string spath = AnWeb::nodesPath + scr->path + EXT_PS;
 	scr->chgtime = IO::ModTime(spath);
-	std::ifstream strm(spath);
-	std::string ln;
 	if (AnWeb::hasPy) {
+		scr->UnregInstances();
 		scr->lib = scr->lib ? PyImport_ReloadModule(scr->lib) : PyImport_ImportModule(mdn.c_str());
-		//Py_DECREF(pName);
 		if (!scr->lib) {
-			Debug::Warning("PyReader", "Failed to read python file " + path + EXT_PS "!");
-			PyErr_Print();
-			return false;
-		}
-		scr->spawner = PyObject_GetAttrString(scr->lib, scr->name.c_str());
-		if (!scr->spawner) {
-			Debug::Warning("PyReader", "Python file" + path + EXT_PS " does not have a \"" + scr->name + "\" class!");
+			Debug::Warning("PyReader", "Failed to import python module " + scr->path + EXT_PS "!");
 			PyErr_Print();
 			return false;
 		}
 	}
+	auto res = PyReader::ReadClassed(scr, spath);
+	if (res > 0) return false;
+	else if (!res) {
+		scr->RegInstances();
+		return true;
+	}
+	else {
+		Debug::Message("PyReader", "Attempting to read static version of python module");
+		if (!PyReader::ReadStatic(scr, spath)) {
+			scr->RegInstances();
+			return true;
+		}
+		else return false;
+	}
+}
+
+int PyReader::ReadClassed(PyScript* scr, const std::string spath) {
+	//PyScript::ClearLog();
+	scr->isSingleton = false;
+	std::ifstream strm(spath);
+	std::string ln;
 	//extract io variables
 	int checkinit = 2;
 	bool candecl = true;
 	while (!strm.eof()) {
-		std::getline(strm, ln);
-		while (ln[0] == '#' && ln[1] == '#' && ln[2] == ' ') {
-			scr->desc += ln.substr(3) + "\n";
-			scr->descLines++;
-			std::getline(strm, ln);
-		}
+		ParseDesc(strm, ln, scr);
 
 		if (checkinit > 0) {
 			ln = rm_spaces(ln);
@@ -141,16 +146,16 @@ bool PyReader::Read(PyScript* scr) {
 				ln = string_trim(ln);
 				if (ln.substr(0, 4) != "def ") {
 					Debug::Warning("PyReader::Parse", "#entry expects a function definition!");
-					return false;
+					return 11;
 				}
 				auto c1 = ln.find_first_of('(');
 				if (c1 == std::string::npos) {
 					Debug::Warning("PyReader::Parse", "Braces for main function not found!");
-					return false;
+					return 12;
 				}
 				if (ln.substr(c1 + 1, 5) != "self)") {
 					Debug::Warning("PyReader::Parse", "Main function must have a single \'self\' argument!");
-					return false;
+					return 13;
 				}
 				if (AnWeb::hasPy) {
 					scr->funcNm = ln.substr(4, c1 - 4);
@@ -161,72 +166,126 @@ bool PyReader::Read(PyScript* scr) {
 					Debug::Warning("PyReader::Parse", "Input variable must be defined inside the __init__ function!");
 					continue;
 				}
-				scr->inputs.push_back(AnScript::Var());
-				scr->_inputs.push_back(PyVar());
-				auto& in = scr->inputs.back();
-				auto& _in = scr->_inputs.back();
-				in.typeName = ln.substr(4);
-				if (!ParseType(in)) {
-					Debug::Warning("PyReader::ParseType", "Input arg type \"" + in.typeName + "\" not recognized!");
-					return false;
-				}
-				std::getline(strm, ln);
-				ln = string_trim(ln);
-				if (ln.substr(0, 5) != "self.") {
-					Debug::Warning("PyReader::ParseType", "`self.` expected before input variable!");
-					return false;
-				}
-				in.name = AnWeb::ConvertName((_in.name
-					= ln.substr(5, find_first_not_name_char(ln.c_str() + 5))));
-				_in.szs.resize(in.dim, -1);
+				if (!ParseVar(strm, ln, scr, true, true))
+					return 20;
 			}
 			else if (ln.substr(1, 4) == "out ") {
 				if (!candecl) {
 					Debug::Warning("PyReader::Parse", "Output variable must be defined inside the __init__ function!");
 					continue;
 				}
-				scr->outputs.push_back(AnScript::Var());
-				scr->_outputs.push_back(PyVar());
-				auto& out = scr->outputs.back();
-				auto& _out = scr->_outputs.back();
-				out.typeName = ln.substr(5);
-				if (!ParseType(out)) {
-					Debug::Warning("PyReader::ParseType", "Output arg type \"" + out.typeName + "\" not recognized!");
-					return false;
-				}
+				if (!ParseVar(strm, ln, scr, false, true))
+					return 30;
+			}
+		}
+	}
+	if (checkinit == 2) {
+		Debug::Warning("PyReader::Parse", "Cannot find '" + scr->name + "' class!");
+		return -1;
+	}
+	else if (checkinit == 1) {
+		Debug::Warning("PyReader::Parse", "Cannot find __init__ function!");
+		return 1;
+	}
+	if (AnWeb::hasPy) {
+		scr->spawner = PyObject_GetAttrString(scr->lib, scr->name.c_str());
+		if (!scr->spawner) {
+			Debug::Warning("PyReader", "Failed to load '" + scr->name + "' class attribute!");
+			PyErr_Print();
+			return 5;
+		}
+	}
+
+	return 0;
+}
+
+int PyReader::ReadStatic(PyScript* scr, const std::string spath) {
+	//PyScript::ClearLog();
+	scr->isSingleton = true;
+	std::ifstream strm(spath);
+	std::string ln;
+	
+	while (!strm.eof()) {
+		ParseDesc(strm, ln, scr);
+
+		if (ln[0] == '#') {
+			if (ln.substr(1) == "entry") {
 				std::getline(strm, ln);
 				ln = string_trim(ln);
-				if (ln.substr(0, 5) != "self.") {
-					Debug::Warning("PyReader::ParseType", "`self.` expected before output variable!");
-					return false;
+				if (ln.substr(0, 4) != "def ") {
+					Debug::Warning("PyReader::Parse", "#entry expects a function definition!");
+					return 11;
 				}
-				out.name = AnWeb::ConvertName((_out.name
-					= ln.substr(5, find_first_not_name_char(ln.c_str() + 5))));
-				_out.szs.resize(out.dim, -1);
+				auto c1 = ln.find_first_of('(');
+				if (c1 == std::string::npos) {
+					Debug::Warning("PyReader::Parse", "Braces for main function not found!");
+					return 12;
+				}
+				if (ln[c1 + 1] != ')') {
+					Debug::Warning("PyReader::Parse", "Main function must have no arguments!");
+					return 13;
+				}
+				if (AnWeb::hasPy) {
+					scr->funcNm = ln.substr(4, c1 - 4);
+				}
+			}
+			else if (ln.substr(1, 3) == "in ") {
+				if (!ParseVar(strm, ln, scr, true, false))
+					return 20;
+			}
+			else if (ln.substr(1, 4) == "out ") {
+				if (!ParseVar(strm, ln, scr, false, false))
+					return 30;
 			}
 		}
 	}
 
-	if (checkinit == 2) {
-		Debug::Warning("PyReader::Parse", "Cannot find '" + scr->name + "' class!");
-		return false;
-	}
-	else if (checkinit == 1) {
-		Debug::Warning("PyReader::Parse", "Cannot find __init__ function!");
-		return false;
-	}
-
-	return true;
+	return 0;
 }
 
 void PyReader::Refresh(PyScript* scr) {
 	auto mt = IO::ModTime(AnWeb::nodesPath + scr->path + EXT_PS);
-	if (mt > scr->chgtime || !scr->ok) {
+	if ((mt > scr->chgtime) || (!scr->ok && mt > scr->badtime)) {
 		AnBrowse::busyMsg = "Reloading " + scr->path + EXT_PS;
 		Debug::Message("PyReader", AnBrowse::busyMsg);
 		scr->Clear();
 		scr->ok = Read(scr);
 	}
+}
+
+void PyReader::ParseDesc(std::istream& strm, std::string& ln, PyScript* scr) {
+	scr->desc = "";
+	scr->descLines = 0;
+	std::getline(strm, ln);
+	while (ln[0] == '#' && ln[1] == '#' && ln[2] == ' ') {
+		scr->desc += ln.substr(3) + "\n";
+		scr->descLines++;
+		std::getline(strm, ln);
+	}
+}
+
+bool PyReader::ParseVar(std::istream& strm, std::string& ln, PyScript* scr, bool in, bool self) {
+	auto& vs = in? scr->inputs : scr->outputs;
+	auto& _vs = in? scr->_inputs : scr->_outputs;
+	vs.push_back(AnScript::Var());
+	_vs.push_back(PyVar());
+	auto& v = vs.back();
+	auto& _v = _vs.back();
+	v.typeName = in? ln.substr(4) : ln.substr(5);
+	if (!ParseType(v)) {
+		Debug::Warning("PyReader::ParseType", "Arg type \"" + v.typeName + "\" not recognized!");
+		return false;
+	}
+	std::getline(strm, ln);
+	ln = string_trim(ln);
+	if (self && ln.substr(0, 5) != "self.") {
+		Debug::Warning("PyReader::ParseType", "`self.` expected before variable!");
+		return false;
+	}
+	v.name = AnWeb::ConvertName((_v.name
+		= ln.substr(5, find_first_not_name_char(ln.c_str() + 5))));
+	_v.szs.resize(v.dim, -1);
+	return true;
 }
 
 bool PyReader::ParseType(AnScript::Var& var) {

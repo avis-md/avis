@@ -14,22 +14,53 @@ void PyScript::Clear() {
 pAnScript_I PyScript::CreateInstance() {
 	auto res = std::make_shared<PyScript_I>();
 	res->Init(this);
-	auto i = PyObject_CallObject(spawner, 0);
-	res->instance = i;
-	res->dict = PyObject_GetAttrString(i, "__dict__");
+	if (!isSingleton) {
+		auto i = PyObject_CallObject(spawner, 0);
+		res->instance = i;
+		res->dict = PyObject_GetAttrString(i, "__dict__");
+	}
+	else {
+		res->instance = (void*)1;
+	}
 	auto osz = outputs.size();
 	res->outputVs.resize(osz);
 	for (size_t a = 0; a < outputs.size(); a++) {
 		res->outputVs[a].dims.resize(outputs[a].dim);
 	}
+	instances.push_back(res.get());
 	return res;
+}
+
+void PyScript::RegInstances() {
+	for (auto i : instances) {
+		if (!isSingleton) {
+			auto o = PyObject_CallObject(spawner, 0);
+			i->instance = o;
+			i->dict = PyObject_GetAttrString(o, "__dict__");
+		}
+		else {
+			i->instance = (void*)1;
+			i->dict = nullptr;
+		}
+	}
+}
+
+void PyScript::UnregInstances() {
+	for (auto i : instances) {
+		if (i->dict) {
+			Py_DECREF(i->instance);
+		}
+	}
 }
 
 #define _instance ((PyObject*)instance)
 #define _parent ((PyScript*)parent)
 
 PyScript_I::~PyScript_I() {
-	Py_DECREF(_instance);
+	if (!parent->isSingleton) {
+		Py_DECREF(_instance);
+		_parent->instances.erase(std::find(_parent->instances.begin(), _parent->instances.end(), this));
+	}
 }
 
 void* PyScript_I::Resolve(uintptr_t i) {
@@ -42,26 +73,35 @@ int* PyScript_I::GetDimValue(const CVar::szItem& i) {
 
 void PyScript_I::SetInput(int i, short v) {
 	auto o = PyLong_FromLong(v);
-	PyDict_SetItemString(dict, _parent->_inputs[i].name.c_str(), o);
+	Set(i, o);
 	Py_DECREF(o);
 }
 
 void PyScript_I::SetInput(int i, int v) {
 	auto o = PyLong_FromLong(v);
-	PyDict_SetItemString(dict, _parent->_inputs[i].name.c_str(), o);
+	Set(i, o);
 	Py_DECREF(o);
 }
 
 void PyScript_I::SetInput(int i, double v) {
 	auto o = PyFloat_FromDouble(v);
-	PyDict_SetItemString(dict, _parent->_inputs[i].name.c_str(), o);
+	Set(i, o);
 	Py_DECREF(o);
 }
 
 void PyScript_I::SetInput(int i, void* val, char tp, std::vector<int> szs) {
 	auto o = PyArr::ToPy(val, (int)szs.size(), tp, szs.data());
-	PyDict_SetItemString(dict, _parent->_inputs[i].name.c_str(), o);
+	Set(i, o);
 	Py_DECREF(o);
+}
+
+void PyScript_I::Set(int i, PyObject* o) {
+	if (parent->isSingleton) {
+		PyObject_SetAttrString(_parent->lib, _parent->_inputs[i].name.c_str(), o);
+	}
+	else {
+		PyDict_SetItemString(dict, _parent->_inputs[i].name.c_str(), o);
+	}
 }
 
 void PyScript_I::GetOutput(int i, int* val) {
@@ -69,7 +109,9 @@ void PyScript_I::GetOutput(int i, int* val) {
 }
 
 void PyScript_I::Execute() {
-	auto res = PyObject_CallMethod(_instance, _parent->funcNm.c_str(), 0);
+	auto res = parent->isSingleton ?
+		PyObject_CallObject(_parent->func, nullptr) :
+		PyObject_CallMethod(_instance, _parent->funcNm.c_str(), 0);
 	if (res) Py_DECREF(res);
 	else {
 		PyErr_Print();
