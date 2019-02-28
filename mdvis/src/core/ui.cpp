@@ -87,7 +87,9 @@ void UI::PreLoop() {
 
 void UI::Rotate(float aa, Vec2 point) {
 	float a = -aa * deg2rad;
-	matrix = glm::mat3(1, 0, 0, 0, 1, 0, point.x, point.y, 1)*glm::mat3(cos(a), -sin(a), 0, sin(a), cos(a), 0, 0, 0, 1)*glm::mat3(1, 0, 0, 0, 1, 0, -point.x, -point.y, 1) * matrix;
+	matrix *= glm::mat3(1, 0, 0, 0, 1, 0, point.x, point.y, 1)
+		* glm::mat3(cos(a), -sin(a), 0, sin(a), cos(a), 0, 0, 0, 1)
+		* glm::mat3(1, 0, 0, 0, 1, 0, -point.x, -point.y, 1);
 	matrixIsI = false;
 }
 void UI::ResetMatrix() {

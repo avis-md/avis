@@ -46,8 +46,18 @@ void plt::plot(float x, float y, float w, float h, float* dx, float** dy, uint c
 	}
 	for (uint j = 0; j < cnt2; ++j) {
 		for (uint i = 0; i < cnt; ++i) {
-			poss[i].x = ((x + ((dx[i] - x1) / (x2 - x1)) * w) / Display::width) * 2 - 1;
-			poss[i].y = 1 - ((y + (1 - (dy[j][i] - y1) / (y2 - y1)) * h) / Display::height) * 2;
+			poss[i].x = (x + ((dx[i] - x1) / (x2 - x1)) * w);
+			poss[i].y = (y + (1 - (dy[j][i] - y1) / (y2 - y1)) * h);
+		}
+		if (!UI::matrixIsI) {
+			for (uint i = 0; i < cnt; ++i) {
+				poss[i].z = 1;
+				poss[i] = UI::matrix * poss[i];
+			}
+		}
+		for (uint i = 0; i < cnt; ++i) {
+			poss[i].x = (poss[i].x / Display::width) * 2 - 1;
+			poss[i].y = 1 - (poss[i].y / Display::height) * 2;
 		}
 		UI::SetVao(cnt, poss);
 
@@ -66,12 +76,14 @@ void plt::plot(float x, float y, float w, float h, float* dx, float** dy, uint c
 		UI::Label(x, y + h + 2, (float)sz, to_string_scientific(x1), col);
 		font->Align(ALIGN_TOPRIGHT);
 		UI::Label(x + w, y + h + 2, (float)sz, to_string_scientific(x2), col);
+		bool ii = UI::matrixIsI;
 		UI::Rotate(-90.f, Vec2(x, y + w));
 		font->Align(ALIGN_TOPLEFT);
 		UI::Label(x, y + h - 4 - sz, (float)sz, to_string_scientific(y1), col);
 		font->Align(ALIGN_TOPRIGHT);
 		UI::Label(x + w, y + h - 4 - sz, (float)sz, to_string_scientific(y2), col);
-		UI::ResetMatrix();
+		if (ii) UI::ResetMatrix();
+		else UI::Rotate(90.f, Vec2(x, y + w));
 		font->Align(ALIGN_TOPLEFT);
 	}
 }

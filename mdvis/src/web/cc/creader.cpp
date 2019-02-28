@@ -233,7 +233,7 @@ bool CReader::Read(CScript* scr) {
 				scr->errorCount = ErrorView::Parse_MSVC(fp2 + nm + "_log.txt", tmpPath, nm + ".cpp", scr->compileLog);
 			}
 			else {
-				std::string cmd = "g++ -std=c++11 -static-libstdc++ -shared -fPIC " + flags1;
+				std::string cmd = "g++ -std=c++11 -static-libstdc++ -shared -fPIC -D_WIN_ -I" + incfd + " -include _avis_print.h " + flags1;
 				if (useOMP) {
 					cmd += " -fopenmp";
 					if (useOMP2) cmd += " -lomp";

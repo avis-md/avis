@@ -23,16 +23,10 @@ int* AnNode::nodecon::getdim(int i) {
 	return first->script->GetDimValue(getconv().szOffsets[i]);
 }
 
-
-Texture AnNode::tex_circle_open, AnNode::tex_circle_conn;
 float AnNode::width = 220;
 
 void AnNode::Init() {
 	AnNode_Internal::Init();
-#ifndef IS_ANSERVER
-	tex_circle_open = Texture(res::node_open_png, res::node_open_png_sz);
-	tex_circle_conn = Texture(res::node_conn_png, res::node_conn_png_sz);
-#endif
 
 	Preferences::Link("AVCS", &AnCol::conn_scalar);
 	Preferences::Link("AVCV", &AnCol::conn_vector);

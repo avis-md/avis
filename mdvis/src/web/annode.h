@@ -151,8 +151,6 @@ protected:
 	AnNode(pAnScript_I scr); //for user scripts
 	AnNode(pAnScript_I scr, ANNODE_FLAGS flags); //for internal scripts
 
-	static Texture tex_circle_open, tex_circle_conn;
-
 	static void _Execute(AnNode* n);
 
 	void IAddConV(void*);
