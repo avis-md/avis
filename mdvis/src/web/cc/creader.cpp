@@ -102,14 +102,25 @@ bool CReader::Read(CScript* scr) {
 			const std::string tmpPath = fp2 + nm + "_temp__" EXT_CS;
 			{
 				std::ifstream strm(fp + EXT_CS);
-				std::ofstream ostrm(tmpPath);
 				std::string s;
+				const auto classsig = "class" + nm;
+				while (std::getline(strm, s)) {
+					s = rm_spaces(s);
+					if (s.back() == '{') s.pop_back();
+					if (s == classsig) goto foundclass;
+				}
+				scr->isSingleton = true;
+			foundclass:
+				strm.clear();
+				strm.seekg(0);
+				std::ofstream ostrm(tmpPath);
 				while (std::getline(strm, s)) {
 					const auto sc = string_trim(s);
 					if (sc[0] == '/' && sc[1] == '/') {
 						auto ss = string_split(sc, ' ', true);
 						if (ss[0] == "//in" || ss[0] == "//out") {
 							std::getline(strm, s);
+							if (scr->isSingleton) ostrm << EXTERN;
 							ostrm << "\n" << s << '\n';
 							auto vr = ParseVar(s);
 							if (!vr.name[0]) {
@@ -121,6 +132,7 @@ bool CReader::Read(CScript* scr) {
 						}
 						else if (ss[0] == "//var") {
 							std::getline(strm, s);
+							if (scr->isSingleton) ostrm << EXTERN;
 							ostrm << "\n" << s << '\n';
 							auto vr = ParseVar(s);
 							if (!vr.name[0]) {
@@ -137,6 +149,7 @@ bool CReader::Read(CScript* scr) {
 						}
 						else if (ss[0] == "//entry") {
 							std::getline(strm, s);
+							if (scr->isSingleton) ostrm << EXTERN;
 							ostrm << "\n" << s << '\n';
 							s = rm_spaces(s);
 							int bo = s.find('(');
@@ -153,6 +166,7 @@ bool CReader::Read(CScript* scr) {
 						}
 						else if (ss[0] == "//progress") {
 							std::getline(strm, s);
+							if (scr->isSingleton) ostrm << EXTERN;
 							ostrm << "\n" << s << '\n';
 							s = rm_spaces(s);
 							int eq = s.find('=');
@@ -174,19 +188,29 @@ bool CReader::Read(CScript* scr) {
 					_ER("CReader", "Script has no entry point!");
 					fail = true;
 				}
+
 				ostrm << "\n\n//___magic below___\n\n";
-				for (auto& v : vrNms) {
-					ostrm << "//__in__\n" EXTERN "void* __var_" + v.name
-						+ " = &((" + nm + "*)nullptr)->" + v.name + ";\n";
+				if (scr->isSingleton) {
+					if (progrsNm != "") {
+						ostrm << EXTERN "double* __progress"
+							" = &" + progrsNm + ";\n\n";
+					}
+					ostrm << EXTERN "void __func_call(void*) { " + funcNm + "(); }";
 				}
-				if (progrsNm != "") {
-					ostrm << EXTERN "void* __progress"
-						" = &((" + nm + "*)nullptr)->" + progrsNm + ";\n";
+				else {
+					for (auto& v : vrNms) {
+						ostrm << EXTERN "void* __var_" + v.name
+							+ " = &((" + nm + "*)nullptr)->" + v.name + ";\n";
+					}
+					if (progrsNm != "") {
+						ostrm << EXTERN "void* __progress"
+							" = &((" + nm + "*)nullptr)->" + progrsNm + ";\n";
+					}
+					ostrm << "\n";
+					ostrm << EXTERN + nm + "* __func_spawn() { return new " + nm + "(); }\n"
+						EXTERN "void __func_delete(void* t) { delete (" + nm + "*)t; }\n"
+						EXTERN "void __func_call(void* t) { ((" + nm + "*)t)->" + funcNm + "(); }";
 				}
-				ostrm << "\n";
-				ostrm << EXTERN + nm + "* __func_spawn() { return new " + nm + "(); }\n"
-					EXTERN "void __func_delete(void* t) { delete (" + nm + "*)t; }\n"
-					EXTERN "void __func_call(void* t) { ((" + nm + "*)t)->" + funcNm + "(); }";
 			}
 
 			if (fail) {
@@ -263,27 +287,33 @@ bool CReader::Read(CScript* scr) {
 			FAIL0;
 		}
 
-		scr->spawner = (AnScript::spawnerFunc)scr->lib.GetSym("__func_spawn");
-		scr->deleter = (AnScript::deleterFunc)scr->lib.GetSym("__func_delete");
-		scr->caller = (AnScript::callerFunc)scr->lib.GetSym("__func_call");
-		auto prgs = scr->lib.GetSym("__progress");
-		if (prgs) scr->progress = *(uintptr_t*)prgs;
-		scr->stdioClr = (CScript::clearFunc)scr->lib.GetSym("__stdio_clear");
-		auto pmtx = scr->lib.GetSym("__stdio_plock");
-		if (!pmtx) {\
-			_ER("CReader", "Internal error: failed to register *stdioLock from compiled binary!");\
-			FAIL0;\
-		}
-		scr->stdioLock = *(std::mutex**)pmtx;
-		scr->stdioPtr = (void***)scr->lib.GetSym("__stdio_data");
-		scr->stdioCnt = (int*)scr->lib.GetSym("__stdio_count");
-
 #define CHKPTR(vr) if (!scr->vr) {\
-			_ER("CReader", "Internal error: failed to register " #vr " from compiled binary!");\
-			FAIL0;\
-		}
+				_ER("CReader", "Internal error: failed to register " #vr " from compiled binary!");\
+				FAIL0;\
+			}
 
-		CHKPTR(spawner) CHKPTR(caller) CHKPTR(stdioClr) CHKPTR(stdioPtr) CHKPTR(stdioCnt);
+			scr->caller = (AnScript::callerFunc)scr->lib.GetSym("__func_call");
+			auto prgs = scr->lib.GetSym("__progress");
+			if (prgs) scr->progress = *(uintptr_t*)prgs;
+			scr->stdioClr = (CScript::clearFunc)scr->lib.GetSym("__stdio_clear");
+			auto pmtx = scr->lib.GetSym("__stdio_plock");
+			if (!pmtx) {\
+				_ER("CReader", "Internal error: failed to register *stdioLock from compiled binary!");\
+				FAIL0;\
+			}
+			scr->stdioLock = *(std::mutex**)pmtx;
+			scr->stdioPtr = (void***)scr->lib.GetSym("__stdio_data");
+			scr->stdioCnt = (int*)scr->lib.GetSym("__stdio_count");
+
+			CHKPTR(caller) CHKPTR(stdioClr) CHKPTR(stdioPtr) CHKPTR(stdioCnt);
+
+		if (!scr->isSingleton) {
+			scr->spawner = (AnScript::spawnerFunc)scr->lib.GetSym("__func_spawn");
+			scr->deleter = (AnScript::deleterFunc)scr->lib.GetSym("__func_delete");
+
+
+			CHKPTR(spawner) CHKPTR(deleter)
+		}
 
 		/*
 #ifdef PLATFORM_WIN
@@ -429,8 +459,9 @@ bool CReader::Read(CScript* scr) {
 				}
 			}
 
+			const auto _vr = (scr->isSingleton ? "" : "__var_");
 			if (AnWeb::hasC) {
-				auto sym = scr->lib.GetSym("__var_" + vr.name);
+				auto sym = scr->lib.GetSym(_vr + vr.name);
 				if (!sym) {
 					_ER("CReader", "cannot find \"" + vr.name + "\" from memory!");
 					return false;
@@ -449,7 +480,7 @@ bool CReader::Read(CScript* scr) {
 						}
 						else {
 							of.useOffset = true;
-							auto sym = scr->lib.GetSym("__var_" + ln);
+							auto sym = scr->lib.GetSym(_vr + ln);
 							if (!sym) {
 								_ER("CReader", "cannot find \"" + ln + "\" from memory!");
 								return false;

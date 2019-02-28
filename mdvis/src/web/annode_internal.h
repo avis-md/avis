@@ -2,20 +2,24 @@
 #include "web/anweb.h"
 #include "ui/localizer.h"
 
-#define INODE_DEF_H \
+#define INODE_DEF_NOREG_H \
 	static const std::string sig;\
 	static const char* _name;\
 	static std::unique_ptr<DmScript> scr;\
-	static AnNode_Internal_Reg _reg;\
 	static std::shared_ptr<AnNode> _Spawn();
 
-#define INODE_DEF(tt, nm, gp) \
+#define INODE_DEF_H INODE_DEF_NOREG_H\
+	static AnNode_Internal_Reg _reg;
+
+#define INODE_DEF_NOREG(tt, nm) \
 	const std::string Node_ ## nm::sig = "." #nm;\
 	const char* Node_ ## nm::_name = tt;\
 	std::unique_ptr<DmScript> Node_ ## nm::scr = std::unique_ptr<DmScript>(new DmScript(sig));\
-	AnNode_Internal_Reg Node_ ## nm::_reg = AnNode_Internal_Reg(\
-		Node_ ## nm::sig, Node_ ## nm::_name, ANNODE_GROUP::gp, &Node_ ## nm::_Spawn);\
 	std::shared_ptr<AnNode> Node_ ## nm::_Spawn() { return std::make_shared<Node_ ## nm>(); } 
+
+#define INODE_DEF(tt, nm, gp) INODE_DEF_NOREG(tt, nm) \
+	AnNode_Internal_Reg Node_ ## nm::_reg = AnNode_Internal_Reg(\
+		Node_ ## nm::sig, Node_ ## nm::_name, ANNODE_GROUP::gp, &Node_ ## nm::_Spawn);
 
 #define INODE_INIT AnNode(scr->CreateInstance(), 0)
 #define INODE_INITF(f) AnNode(scr->CreateInstance(), f)

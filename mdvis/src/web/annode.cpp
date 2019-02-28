@@ -113,6 +113,7 @@ void AnNode::DrawMouseConn() {
 		const float connrad = 5;
 		Vec2 p1 = Input::mousePos;
 		Vec2 p2 = AnWeb::selConnPos;
+		p2.x = AnWeb::selConnNode->pos.x + (AnWeb::selConnIdIsOut ? AnWeb::selConnNode->width : 0);
 		Vec2 hx = Vec2((p2.x - p1.x) / 2, 0);
 		if (AnWeb::selConnIdIsOut == (p1.x < p2.x)) hx *= -2.f/3;
 		UI2::Bezier(p1, p1 + hx, p2 - hx, p2, VisSystem::accentColor, AnWeb::selConnCol, 5, 30);
@@ -517,12 +518,12 @@ void AnNode::AddOutput(const CVar& cv) {
 	if (!(flags & AN_FLAG_NOSAVECONV)) conVAll.push_back(std::vector<VarVal>());
 }
 
-AnNode::AnNode(pAnScript_I scr) : script(scr), flags(0), canTile(false) {
+AnNode::AnNode(pAnScript_I scr) : flags(0), script(scr), canTile(false) {
 	if (!scr) return;
 	ResizeIO(scr->parent);
 }
 
-AnNode::AnNode(pAnScript_I scr, ANNODE_FLAGS flags) : script(scr), flags(flags), canTile(false) {}
+AnNode::AnNode(pAnScript_I scr, ANNODE_FLAGS flags) : flags(flags), script(scr), canTile(false) {}
 
 void AnNode::ResizeIO(AnScript* scr) {
 	inputR.resize(scr->inputs.size());

@@ -14,28 +14,35 @@ void CScript::Clear() {
 pAnScript_I CScript::CreateInstance() {
 	auto res = std::make_shared<CScript_I>();
 	res->Init(this);
-	res->instance = spawner();
+	res->instance = isSingleton ? nullptr : spawner();
 	return res;
 }
 
 void CScript::RegInstances() {
-	for (auto i : instances) {
-		i->instance = spawner();
+	if (!isSingleton) {
+		for (auto i : instances) {
+			i->instance = spawner();
+		}
+	}
+	else {
+		for (auto i : instances) {
+			i->instance = nullptr;
+		}
 	}
 }
 
 void CScript::UnregInstances() {
 	for (auto i : instances) {
-		deleter(i->instance);
+		if (i->instance) deleter(i->instance);
 	}
 }
 
 CScript_I::~CScript_I() {
-	parent->deleter(instance);
+	if (!parent->isSingleton) parent->deleter(instance);
 }
 
 void* CScript_I::Resolve(uintptr_t o) {
-	return (void*)((uintptr_t)instance + o);
+	return parent->isSingleton ? (void*)o : (void*)((uintptr_t)instance + o);
 }
 
 int* CScript_I::GetDimValue(const CVar::szItem& i) {

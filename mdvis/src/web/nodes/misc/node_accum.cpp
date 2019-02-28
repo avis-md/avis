@@ -5,7 +5,7 @@
 
 INODE_DEF(__("Accumulate"), Accum, MISC)
 
-Node_Accum::Node_Accum() : INODE_INIT{
+Node_Accum::Node_Accum() : INODE_INIT {
 	INODE_TITLE(NODE_COL_SPC)
 	INODE_SINIT(
 		scr->AddInput(_("value"), AN_VARTYPE::ANY);
