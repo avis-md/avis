@@ -390,7 +390,10 @@ bool CReader::Read(CScript* scr) {
 				_ER("CReader", "variable of type \"" + vr.typeName + "\" not supported!" + add);
 				return false;
 			}
-			if (ira) vr.typeName = "list(" + std::to_string(lnsz - 1) + vr.typeName.substr(0, 1) + ")";
+			if (ira) {
+				vr.dim = lnsz - 1;
+				vr.typeName = "list(" + std::to_string(vr.dim) + vr.typeName.substr(0, 1) + ")";
+			}
 			vr.name = ss[1];
 			std::string::iterator eps;
 			if ((eps = std::find(vr.name.begin(), vr.name.end(), '=')) != vr.name.end()) {

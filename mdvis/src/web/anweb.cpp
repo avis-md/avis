@@ -127,8 +127,10 @@ void AnWeb::Update() {
 
 void AnWeb::Draw() {
 #ifndef IS_ANSERVER
-		const float alpha = VisSystem::opacity;
-		UI::Quad(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f, highContrast ? white() : white(alpha * drawLerp, 0.05f));
+	const float alpha = VisSystem::opacity;
+	const float maxwidth = Display::width - AnBrowse::expandPos - AnOps::expandPos;
+	UI::Quad(AnBrowse::expandPos, 0.f, maxwidth, Display::height - 18.f, highContrast ? white() : white(alpha * drawLerp, 0.05f));
+	static float scrollFade = 3;
 	if (!waitBrowse) {
 		Engine::BeginStencil(AnBrowse::expandPos, 0.f, Lerp(Display::width - AnBrowse::expandPos - AnOps::expandPos, maxScroll, zoomOut), Display::height - 18.f);
 		byte ms = Input::mouse0State;
@@ -138,16 +140,21 @@ void AnWeb::Draw() {
 			Input::mouse0State = 0;
 		}
 		AnWeb::selPreClear = true;
+		
+		Vec2 poss(AnBrowse::expandPos + 10 - scrollPos * (1 - zoomOut), 100);
 
 		if (zoomOut > 0) {
 			const float r = Lerp(1.f, zoomRatio, zoomOut);
-			UI::matrix = glm::mat3(1, 0, 0, 0, 1, 0, 200, 100, 1)
+			UI::matrix = glm::mat3(1, 0, 0, 0, 1, 0, poss.x, poss.y, 1)
 				* glm::mat3(r, 0, 0, 0, r, 0, 0, 0, 1)
-				* glm::mat3(1, 0, 0, 0, 1, 0, -200, -100, 1);
+				* glm::mat3(1, 0, 0, 0, 1, 0, -poss.x, -poss.y, 1);
 			UI::matrixIsI = false;
+
+			UI::Quad(poss.x - 10 + scrollPos, poss.y - 50, maxwidth, Display::height - poss.y, white(0.1f * zoomOut * std::min(scrollFade, 1.f)));
+			if (!Input::mouseScroll) scrollFade = std::max(scrollFade - 2 * Time::delta, 0.f);
+			else scrollFade = 3;
 		}
 
-		Vec2 poss(AnBrowse::expandPos + 10 - scrollPos * (1 - zoomOut), 100);
 		float maxoff = 220, offy = -5;
 		maxScroll = 10;
 		int ns = (int)nodes.size(), i = 0, iter = -1;
@@ -313,6 +320,7 @@ void AnWeb::Draw() {
 		if (!zoomOut) {
 			if (Engine::Button(Display::width - AnOps::expandPos - 30, 5, 16, 16, Icons::zoomOut) == MOUSE_RELEASE) {
 				zoomOut = 0.001f;
+				scrollFade = 3;
 			}
 		}
 		else {

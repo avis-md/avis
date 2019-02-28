@@ -193,6 +193,20 @@ void UI2::Switch(float x, float y, float w, const std::string& title, int c, std
 	}
 }
 
+Vec2 UI2_DS(float x, float y) {
+	const float dw = 1.f / Display::width;
+	const float dh = 1.f / Display::height;
+	auto res = (UI::matrixIsI? Vec2(x, y) : Vec2(UI::matrix * Vec3(x, y, 1.f)));
+	return Vec2(res.x * dw, 1 - res.y * dh);
+}
+
+Vec2 UI2_DS(Vec2 v) {
+	const float dw = 1.f / Display::width;
+	const float dh = 1.f / Display::height;
+	auto res = (UI::matrixIsI? v : Vec2(UI::matrix * Vec3(v, 1.f)));
+	return Vec2(res.x * dw, 1 - res.y * dh);
+}
+
 void UI2::Bezier(Vec2 p1, Vec2 t1, Vec2 t2, Vec2 p2, Vec4 col, float thick, int reso) {
 	Bezier(p1, t1, t2, p2, col, col, thick, reso);
 }
@@ -200,10 +214,12 @@ void UI2::Bezier(Vec2 p1, Vec2 t1, Vec2 t2, Vec2 p2, Vec4 col, float thick, int 
 void UI2::Bezier(Vec2 p1, Vec2 t1, Vec2 t2, Vec2 p2, Vec4 col1, Vec4 col2, float thick, int reso) {
 	thick /= 2;
 	bezierProg.Bind();
-	Vec2 pts[4] = { Ds2(p1), Ds2(t1), Ds2(t2), Ds2(p2) };
+	Vec2 pts[4] = { UI2_DS(p1) * 2.f - 1.f, UI2_DS(t1) * 2.f - 1.f, 
+					UI2_DS(t2) * 2.f - 1.f, UI2_DS(p2) * 2.f - 1.f };
+	Vec2 tt = (UI::matrixIsI? Vec2(thick, thick) : Vec2(UI::matrix * Vec3(thick, thick, 0.f)));
 	glUniform2fv(bezierProg.Loc(0), 4, &pts[0][0]);
 	glUniform1i(bezierProg.Loc(1), reso);
-	glUniform2f(bezierProg.Loc(2), thick / Display::width, thick / Display::height);
+	glUniform2f(bezierProg.Loc(2), tt.x / Display::width, tt.y / Display::height);
 	glUniform4f(bezierProg.Loc(3), col1.r, col1.g, col1.b, col1.a);
 	glUniform4f(bezierProg.Loc(4), col2.r, col2.g, col2.b, col2.a);
 	glBindVertexArray(Camera::emptyVao);
@@ -233,11 +249,11 @@ float UI2::Scroll(float x, float y, float h, float t, float tot, float fill) {
 }
 
 void UI2::BlurQuad(float x, float y, float w, float h, Vec4 tint) {
-	const float dw = 1.f / Display::width;
-	const float dh = 1.f / Display::height;
-#define H(v) (Display::height - (v)) * dh
 	UI::Quad(x, y, w, h, ChokoLait::mainCamera->blitTexs[1], tint, 0,
-		Vec2(x*dw, H(y)), Vec2((x + w)*dw, H(y)), Vec2(x*dw, H(y + h)), Vec2((x + w)*dw, H(y + h)));
+		UI2_DS(x, y), 
+		UI2_DS(x + w, y), 
+		UI2_DS(x, y + h), 
+		UI2_DS(x + w, y + h));
 }
 
 void UI2::BackQuad(float x, float y, float w, float h, Vec4 col) {
