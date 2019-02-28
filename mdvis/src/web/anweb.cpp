@@ -46,6 +46,9 @@ float AnWeb::drawLerp;
 bool AnWeb::invertRun = false, AnWeb::runOnFrame = false;
 bool AnWeb::highContrast = false;
 
+float AnWeb::zoomOut = 0;
+float AnWeb::zoomRatio;
+
 std::thread* AnWeb::execThread = nullptr;
 AnNode* AnWeb::execNode = nullptr;
 uint AnWeb::currNode = 0, AnWeb::nextNode = 0;
@@ -127,7 +130,7 @@ void AnWeb::Draw() {
 		const float alpha = VisSystem::opacity;
 		UI::Quad(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f, highContrast ? white() : white(alpha * drawLerp, 0.05f));
 	if (!waitBrowse) {
-		Engine::BeginStencil(AnBrowse::expandPos, 0.f, Display::width - AnBrowse::expandPos - AnOps::expandPos, Display::height - 18.f);
+		Engine::BeginStencil(AnBrowse::expandPos, 0.f, Lerp(Display::width - AnBrowse::expandPos - AnOps::expandPos, maxScroll, zoomOut), Display::height - 18.f);
 		byte ms = Input::mouse0State;
 		AnNode::width = 220;
 		if (executing) {
@@ -135,7 +138,16 @@ void AnWeb::Draw() {
 			Input::mouse0State = 0;
 		}
 		AnWeb::selPreClear = true;
-		Vec2 poss(AnBrowse::expandPos + 10 - scrollPos, 100);
+
+		if (zoomOut > 0) {
+			const float r = Lerp(1.f, zoomRatio, zoomOut);
+			UI::matrix = glm::mat3(1, 0, 0, 0, 1, 0, 200, 100, 1)
+				* glm::mat3(r, 0, 0, 0, r, 0, 0, 0, 1)
+				* glm::mat3(1, 0, 0, 0, 1, 0, -200, -100, 1);
+			UI::matrixIsI = false;
+		}
+
+		Vec2 poss(AnBrowse::expandPos + 10 - scrollPos * (1 - zoomOut), 100);
 		float maxoff = 220, offy = -5;
 		maxScroll = 10;
 		int ns = (int)nodes.size(), i = 0, iter = -1;
@@ -189,6 +201,7 @@ void AnWeb::Draw() {
 			n->Draw();
 		}
 		AnNode::DrawMouseConn();
+		if (zoomOut > 0) UI::ResetMatrix();
 		if (Input::mouse0State == MOUSE_UP && selPreClear) selConnNode = nullptr;
 
 		if (Input::mousePos.x > AnBrowse::expandPos && Input::mousePos.x < Display::width - AnOps::expandPos) {
@@ -292,6 +305,22 @@ void AnWeb::Draw() {
 		if (drawLerp < 1) {
 			drawLerp = std::min(drawLerp + 10 * Time::delta, 1.f);
 			ParGraphics::tfboDirty = true;
+		}
+	}
+
+	zoomRatio = (Display::width - 350.f) / maxScroll;
+	if (zoomRatio < 1) {
+		if (!zoomOut) {
+			if (Engine::Button(Display::width - AnOps::expandPos - 30, 5, 16, 16, Icons::zoomOut) == MOUSE_RELEASE) {
+				zoomOut = 0.001f;
+			}
+		}
+		else {
+			zoomOut = Lerp(zoomOut, 1.f, 20 * Time::delta);
+			if (Engine::Button(Display::width - AnOps::expandPos - 30, 5, 16, 16, Icons::zoomIn) == MOUSE_RELEASE
+					|| selScript) {
+				zoomOut = 0;
+			}
 		}
 	}
 

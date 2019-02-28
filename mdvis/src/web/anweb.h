@@ -39,6 +39,9 @@ public:
 	static float drawLerp;
 	static bool invertRun, runOnFrame;
 	static bool highContrast;
+	
+	static float zoomOut;
+	static float zoomRatio;
 
 	static std::thread* execThread;
 	static AnNode* execNode;
