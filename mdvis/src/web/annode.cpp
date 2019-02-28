@@ -75,7 +75,7 @@ void AnNode::DrawBack() {
 Vec2 AnNode::DrawConn() {
 #ifndef IS_ANSERVER
 	if (_script->ok) {
-		const float connrad = 6;
+		const float connrad = 5;
 		auto cnt = (_script->inputs.size() + _script->outputs.size());
 		float y = pos.y + 18 + hdrSz;
 		for (uint i = 0; i < _script->inputs.size(); i++, y += 17) {
@@ -106,6 +106,18 @@ Vec2 AnNode::DrawConn() {
 #else
 	return Vec2();
 #endif
+}
+
+void AnNode::DrawMouseConn() {
+	if (AnWeb::selConnNode) {
+		const float connrad = 5;
+		Vec2 p1 = Input::mousePos;
+		Vec2 p2 = AnWeb::selConnPos;
+		Vec2 hx = Vec2((p2.x - p1.x) / 2, 0);
+		if (AnWeb::selConnIdIsOut == (p1.x < p2.x)) hx *= -2.f/3;
+		UI2::Bezier(p1, p1 + hx, p2 - hx, p2, VisSystem::accentColor, AnWeb::selConnCol, 5, 30);
+		UI::Texture(p2.x - connrad, p2.y - connrad, connrad * 2, connrad * 2, Icons::circle, AnWeb::selConnCol);
+	}
 }
 
 void AnNode::Draw() {
@@ -153,6 +165,8 @@ void AnNode::Draw() {
 							AnWeb::selConnId = i;
 							AnWeb::selConnIdIsOut = false;
 							AnWeb::selPreClear = false;
+							AnWeb::selConnPos = Vec2(pos.x, y + 8);
+							AnWeb::selConnCol = cl0;
 						}
 						else {
 							AnWeb::selConnNode->ConnectTo(AnWeb::selConnId, this, i);
@@ -161,11 +175,7 @@ void AnNode::Draw() {
 					}
 				}
 				else if (AnWeb::selConnNode == this && AnWeb::selConnId == i && !AnWeb::selConnIdIsOut) {
-					Vec2 p2(pos.x, y + 8);
-					Vec2 p1 = Input::mousePos;
-					Vec2 hx = Vec2((p2.x > p1.x) ? (p2.x - p1.x) / 2 : (p1.x - p2.x) / 3, 0);
-					UI2::Bezier(p1, p1 + hx, p2 - hx, p2, VisSystem::accentColor, cl0, 5, 30);
-					UI::Texture(pos.x - connrad, y + 8 - connrad, connrad * 2, connrad * 2, Icons::circle, cl0);
+					
 				}
 				else {
 					UI::Texture(pos.x - connrad, y + 8 - connrad, connrad * 2, connrad * 2, Icons::circle, red(0.3f));
@@ -254,6 +264,8 @@ void AnNode::Draw() {
 								AnWeb::selConnId = i;
 								AnWeb::selConnIdIsOut = true;
 								AnWeb::selPreClear = false;
+								AnWeb::selConnPos = Vec2(pos.x + width, y + 8);
+								AnWeb::selConnCol = cl0;
 							}
 							else {
 								ConnectTo(i, AnWeb::selConnNode, AnWeb::selConnId);
@@ -263,11 +275,7 @@ void AnNode::Draw() {
 					}
 				}
 				else if (AnWeb::selConnNode == this && AnWeb::selConnId == i && AnWeb::selConnIdIsOut) {
-					Vec2 p2 = Input::mousePos;
-					Vec2 p1(pos.x + width, y + 8);
-					Vec2 hx = Vec2((p2.x > p1.x) ? (p2.x - p1.x) / 2 : (p1.x - p2.x) / 3, 0);
-					UI2::Bezier(p1, p1 + hx, p2 - hx, p2, cl0, VisSystem::accentColor, 5, 30);
-					UI::Texture(pos.x + width - connrad, y + 8 - connrad, connrad * 2, connrad * 2, Icons::circle, cl0);
+				
 				}
 				else {
 					UI::Texture(pos.x + width - connrad, y + 8 - connrad, connrad * 2, connrad * 2, Icons::circle, red(0.3f));

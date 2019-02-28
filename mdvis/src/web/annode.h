@@ -99,6 +99,7 @@ public:
 	virtual void Update() {}
 	void DrawBack();
 	Vec2 DrawConn();
+	static void DrawMouseConn();
 	virtual void Draw();
 	virtual float DrawSide();
 	void DrawDefVal(int i, float y);

@@ -26,6 +26,8 @@ std::string AnWeb::nodesPath = "";
 AnNode* AnWeb::selConnNode = nullptr;
 uint AnWeb::selConnId = 0;
 bool AnWeb::selConnIdIsOut = false, AnWeb::selPreClear = false;
+Vec2 AnWeb::selConnPos;
+Vec4 AnWeb::selConnCol;
 AnScript* AnWeb::selScript = nullptr;
 uint AnWeb::selSpNode = 0;
 
@@ -186,6 +188,7 @@ void AnWeb::Draw() {
 		for (auto n : nodes) {
 			n->Draw();
 		}
+		AnNode::DrawMouseConn();
 		if (Input::mouse0State == MOUSE_UP && selPreClear) selConnNode = nullptr;
 
 		if (Input::mousePos.x > AnBrowse::expandPos && Input::mousePos.x < Display::width - AnOps::expandPos) {

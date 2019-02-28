@@ -23,6 +23,8 @@ public:
 	static AnNode* selConnNode;
 	static uint selConnId;
 	static bool selConnIdIsOut, selPreClear;
+	static Vec2 selConnPos;
+	static Vec4 selConnCol;
 	static AnScript* selScript;
 	static uint selSpNode;
 
