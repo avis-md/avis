@@ -160,3 +160,4 @@ typedef std::shared_ptr<AnNode> pAnNode;
 
 #include "cc/cnode.h"
 #include "py/pynode.h"
+#include "ft/fnode.h"

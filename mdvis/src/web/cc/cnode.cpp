@@ -19,19 +19,18 @@ CNode::CNode(pCScript_I script) : AnNode(script) {
 
 void CNode::Update() {
 	//if (executing) {
-		auto scr = _scr;
-		volatile int cnt = *scr->stdioCnt;
-		while (scr->stdioI < cnt) {
-			std::lock_guard<std::mutex> lock(*scr->stdioLock);
-			auto pptr = *scr->stdioPtr;
-			auto ptr = pptr[scr->stdioI * 2];
+		volatile int cnt = *_scr->stdioCnt;
+		while (_scr->stdioI < cnt) {
+			std::lock_guard<std::mutex> lock(*_scr->stdioLock);
+			auto pptr = *_scr->stdioPtr;
+			auto ptr = pptr[_scr->stdioI * 2];
 			for (auto& n : AnWeb::nodes) {
 //				if (((CScript*)n->script->parent) == scr) {
 					if (ptr == n->script->instance) {
-						auto msg = (char*)pptr[scr->stdioI * 2 + 1];
+						auto msg = (char*)pptr[_scr->stdioI * 2 + 1];
 						std::cout << "Node " + std::to_string(n->id) + " says: "
 							+ std::string(msg) << std::endl;
-						scr->stdioI++;
+						_scr->stdioI++;
 					}
 //				}
 			}
@@ -80,8 +79,11 @@ void CNode::Execute() {
 			case AN_VARTYPE::DOUBLE:
 				script->SetInput(i, dv.d);
 				break;
-			case AN_VARTYPE::LIST:
-				throw("Input variable not set!\1");
+			case AN_VARTYPE::LIST: {
+				std::vector<int> szs(_scr->inputs[i].dim, 0);
+				script->SetInput(i, (void*)1, mv.name[6], szs);
+				break;
+			}
 			default:
 				OHNO("CNode", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
 				throw "";

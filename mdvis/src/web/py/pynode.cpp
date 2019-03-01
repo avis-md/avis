@@ -65,8 +65,11 @@ void PyNode::Execute() {
 			case AN_VARTYPE::DOUBLE:
 				script->SetInput(i, dv.d);
 				break;
-			case AN_VARTYPE::LIST:
-				throw("Input variable not set!\1");
+			case AN_VARTYPE::LIST: {
+				std::vector<int> szs(_scr->inputs[i].dim, 0);
+				script->SetInput(i, nullptr, mv.typeName[6], szs);
+				break;
+			}
 			default:
 				OHNO("PyNode", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
 				throw "";

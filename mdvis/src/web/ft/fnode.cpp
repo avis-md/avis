@@ -1,50 +1,43 @@
-#include "anweb.h"
-#include "anconv.h"
+#include "web/anweb.h"
 #ifndef IS_ANSERVER
 #include "ui/icons.h"
 #include "ui/ui_ext.h"
 #include "res/resdata.h"
 #endif
 
-FNode::FNode(FScript* scr) : AnNode(scr) {
+#define _scr ((FScript*)script->parent)
+
+FNode::FNode(pCScript_I scr) : AnNode(scr) {
 	if (!scr) return;
-	title = scr->name + " (fortran)";
-	inputV.resize(scr->invars.size());
-	outputV.resize(scr->outvars.size());
-	inputVDef.resize(scr->invars.size());
-	for (uint i = 0; i < scr->invars.size(); ++i) {
-		inputV[i] = scr->_invars[i].value;
-		if (scr->_invars[i].type == AN_VARTYPE::DOUBLE) inputVDef[i].d = 0;
-		else inputVDef[i].i = 0;
-	}
-	for (uint i = 0; i < scr->outvars.size(); ++i) {
-		outputV[i] = scr->_outvars[i].value;
-		conV[i] = scr->_outvars[i];
+	title = _scr->name + " (fortran)";
+	const auto isz = _scr->inputs.size();
+	const auto osz = _scr->outputs.size();
+	for (uint i = 0; i < osz; ++i) {
+		conV[i] = _scr->_outputs[i];
 	}
 }
 
 void FNode::Execute() {
-	auto scr = (FScript*)script;
-	for (uint i = 0; i < scr->invars.size(); ++i) {
-		scr->pre = i;
-		auto& mv = scr->_invars[i];
+	for (uint i = 0; i < _scr->inputs.size(); ++i) {
+		_scr->pre = i;
+		auto& mv = _scr->inputs[i];
 		if (HasConnI(i)) {
-			auto& cv = inputR[i].getconv();
+			auto v = inputR[i].getval();
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
-				scr->Set(i, *(int*)cv.value);
+				script->SetInput(i, *(int*)v);
 				break;
 			case AN_VARTYPE::DOUBLE:
-				scr->Set(i, *(double*)cv.value);
+				script->SetInput(i, *(double*)v);
 				break;
 			case AN_VARTYPE::LIST:
 			{
-				auto nd = cv.dimVals.size();
-				std::vector<int32_t> dims(nd);
-				for (size_t a = 0; a < nd; a++) dims[nd - a - 1] = *cv.dimVals[a];
-				*scr->arr_in_shapeloc = dims.data();
-				*scr->arr_in_dataloc = *(void**)cv.value;
-				scr->_inarr_pre[i]();
+				auto& vr = inputR[i].getvar();
+				std::vector<int> szs(vr.dim);
+				for (uint j = 0; j < vr.dim; ++j) {
+					szs[j] = *inputR[i].getdim(j);
+				}
+				script->SetInput(i, *(void**)v, mv.name[6], szs);
 				break;
 			}
 			default:
@@ -53,46 +46,31 @@ void FNode::Execute() {
 			}
 		}
 		else {
+			auto& dv = script->defVals[i];
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
-				scr->Set(i, inputVDef[i].i);
+				script->SetInput(i, dv.i);
 				break;
 			case AN_VARTYPE::DOUBLE:
-				scr->Set(i, inputVDef[i].d);
+				script->SetInput(i, dv.d);
 				break;
-			case AN_VARTYPE::LIST:
-				throw("Input variable not set!\1");
+			case AN_VARTYPE::LIST: {
+				std::vector<int> szs(_scr->inputs[i].dim, 0);
+				script->SetInput(i, (void*)1, mv.name[6], szs);
+				break;
+			}
 			default:
 				OHNO("CNode", "Unexpected scr_vartype " + std::to_string((int)(mv.type)));
 				throw "";
 			}
 		}
 	}
-	scr->pre = -1;
-	scr->post = -1;
+	_scr->pre = -1;
+	_scr->post = -1;
 	
-	scr->Exec();
+	script->Execute();
 
-	for (uint i = 0; i < scr->outvars.size(); ++i) {
-		scr->post = i;
-		if (scr->_outvars[i].type == AN_VARTYPE::LIST) {
-			scr->_outarr_post[i]();
-			auto& cv = conV[i];
-			size_t dn = cv.dimVals.size();
-			cv.data.dims.resize(dn);
-			int sz = 1;
-			for (size_t a = 0; a < dn; ++a) {
-				cv.data.dims[a] = (*scr->arr_out_shapeloc)[a];
-				cv.dimVals[a] = &cv.data.dims[a];
-				sz *= cv.data.dims[a];
-			}
-			cv.data.val.arr.data.resize(cv.stride * sz);
-			cv.data.val.arr.p = &cv.data.val.arr.data[0];
-			memcpy(cv.data.val.arr.p, *scr->arr_out_dataloc, cv.stride * sz);
-			cv.value = &cv.data.val.arr.p;
-		}
-	}
-	scr->post = -1;
+	((FScript_I*)script.get())->GetOutputArrs();
 }
 
 void FNode::WriteFrame(int f) {
@@ -100,11 +78,7 @@ void FNode::WriteFrame(int f) {
 }
 
 void FNode::RemoveFrames() {
-	AnNode::RemoveFrames();
-	auto scr = (FScript*)script;
-	for (uint i = 0; i < scr->outvars.size(); ++i) {
-		conV[i] = scr->_outvars[i];
-	}
+	
 }
 
 void FNode::CatchExp(char* c) {
@@ -114,8 +88,8 @@ void FNode::CatchExp(char* c) {
 		return;
 	}
 	ErrorView::Message msg{};
-	msg.name = script->name;
-	msg.path = script->path;
+	msg.name = _scr->name;
+	msg.path = _scr->path;
 	msg.severe = true;
 	if (string_find(s, "At line ") == 0) {
 		if ((msg.linenum = atoi(c + 8)) > 0) {
@@ -132,12 +106,12 @@ void FNode::CatchExp(char* c) {
 		s.pop_back();
 		log.push_back(std::pair<byte, std::string>(2, s));
 		msg.msg.resize(1, s);
-		auto scr = (FScript*)script;
-		if (scr->pre > -1) {
-			msg.msg.push_back("While handling input variable " + scr->invars[scr->pre].first);
+		auto scr = (FScript_I*)script.get();
+		if (_scr->pre > -1) {
+			msg.msg.push_back("While handling input variable " + _scr->inputs[_scr->pre].name);
 		}
-		else if (scr->post > -1) {
-			msg.msg.push_back("While handling output variable " + scr->outvars[scr->post].first);
+		else if (_scr->post > -1) {
+			msg.msg.push_back("While handling output variable " + _scr->outputs[_scr->post].name);
 		}
 		ErrorView::execMsgs.push_back(msg);
 		return;

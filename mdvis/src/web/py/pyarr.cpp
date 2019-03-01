@@ -64,6 +64,7 @@ PyObject* PyArr::ToPy(void* data, int dim, char tp, int* szs) {
 	for (int a = 0; a < dim; a++) dims[a] = (npy_intp)szs[a];
 	auto dd = (double*)data;
 	return PyArray_SimpleNewFromData(dim, dims.data(), tn, data);
+	
 }
 
 std::string PyArr::GetTypeName(int type) {

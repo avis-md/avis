@@ -96,3 +96,4 @@ public:
 #include "dmscript.h"
 #include "cc/cscript.h"
 #include "py/pyscript.h"
+#include "ft/fscript.h"
