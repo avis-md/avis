@@ -233,7 +233,7 @@ void AnWeb::Draw() {
 							pn = std::make_shared<PyNode>(std::dynamic_pointer_cast<PyScript_I>(selScript->CreateInstance()));
 							break;
 						case AnScript::TYPE::FORTRAN:
-							//pn = std::make_shared<FNode>(dynamic_cast<FScript*>(selScript));
+							pn = std::make_shared<FNode>(std::dynamic_pointer_cast<FScript_I>(selScript->CreateInstance()));
 							break;
 						default:
 							Debug::Error("AnWeb::Draw", "Unhandled script type: " + std::to_string((int)selScript->type));

@@ -7,14 +7,33 @@
 
 #define _scr ((FScript*)script->parent)
 
-FNode::FNode(pCScript_I scr) : AnNode(scr) {
+FNode::FNode(pFScript_I scr) : AnNode(scr) {
 	if (!scr) return;
 	title = _scr->name + " (fortran)";
 	const auto isz = _scr->inputs.size();
 	const auto osz = _scr->outputs.size();
 	for (uint i = 0; i < osz; ++i) {
-		conV[i] = _scr->_outputs[i];
 	}
+	for (uint i = 0; i < osz; ++i) {
+		auto& cv = conV[i];
+		if (_scr->outputs[i].type == AN_VARTYPE::LIST) {
+			cv.offset = i;
+			auto d = _scr->outputs[i].dim;
+			cv.szOffsets.resize(d);
+			for (int j = 0; j < d; j++) {
+				cv.szOffsets[j].offset = (i << 16) | j;
+			}
+		}
+		else {
+			cv = _scr->_outputs[i];
+		}
+	}
+}
+
+void FNode::Update() {}
+
+void FNode::PreExecute() {
+	AnNode::PreExecute();
 }
 
 void FNode::Execute() {
@@ -80,6 +99,8 @@ void FNode::WriteFrame(int f) {
 void FNode::RemoveFrames() {
 	
 }
+
+void FNode::Reconn() {}
 
 void FNode::CatchExp(char* c) {
 	std::string s = c;

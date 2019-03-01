@@ -2,7 +2,7 @@
 
 class FNode : public AnNode {
 public:
-	FNode(pCScript_I);
+	FNode(pFScript_I);
 
 	void Update() override;
 

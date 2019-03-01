@@ -3,6 +3,7 @@
 #include "ui/popups.h"
 #include "cc/creader.h"
 #include "py/pyreader.h"
+#include "ft/freader.h"
 #ifndef IS_ANSERVER
 #include "ui/icons.h"
 #include "ui/help.h"
@@ -57,7 +58,7 @@ void AnBrowse::DoScan(Folder* fo, const std::string& path, const std::string& in
 			PyReader::Init();
 		}
 	);
-	//READ(EXT_FS, EXT_FS_SZ, 1, F,);
+	READ(EXT_FS, EXT_FS_SZ, 1, F,);
 
 	std::vector<std::string> fd;
 	IO::GetFolders(path, &fd);
@@ -106,7 +107,7 @@ void AnBrowse::DoRefresh(Folder* fd) {
 			PyReader::Refresh((PyScript*)s.get());
 			break;
 		case AnScript::TYPE::FORTRAN:
-			//FReader::Refresh((FScript*)s);
+			FReader::Refresh((FScript*)s.get());
 			break;
 		default:
 			OHNO("AnBrowse::DoRefresh", "Invalid script type " + std::to_string((int)s->type));
@@ -223,7 +224,7 @@ void AnBrowse::DoDraw(Folder* f, float& off, uint layer) {
 						pn = std::make_shared<PyNode>(std::static_pointer_cast<PyScript_I>(fs->CreateInstance()));
 						break;
 					case AnScript::TYPE::FORTRAN:
-						//pn = std::make_shared<FNode>(dynamic_cast<FScript*>(fs));
+						pn = std::make_shared<FNode>(std::static_pointer_cast<FScript_I>(fs->CreateInstance()));
 						break;
 					}
 					pn->canTile = true;

@@ -1,4 +1,5 @@
-#include "anweb.h"
+#include "freader.h"
+#include "web/cc/creader.h"
 #include "vis/system.h"
 #ifndef IS_ANSERVER
 #include "utils/runcmd.h"
@@ -13,6 +14,10 @@
 //#define _GEN_DEBUG
 
 void FReader::Init() {
+
+}
+
+void FReader::LoadReader() {
 #ifdef PLATFORM_WIN
 	if (IO::HasFile(CReader::mingwPath + "/gfortran.exe") && IO::HasFile(CReader::mingwPath + "/g++.exe")) {
 		AnWeb::hasFt = true;
@@ -33,17 +38,18 @@ bool FReader::Read(FScript* scr) {
 	std::string& nm = scr->name;
 	std::string fp2 = fp.substr(0, ls + 1) + "__fcache__/";
 
+	auto mt = scr->chgtime = IO::ModTime(fp + EXT_FS);
+	if (mt < 0) return false;
 
 #ifndef IS_ANSERVER
 	if (!IO::HasDirectory(fp2)) IO::MakeDirectory(fp2);
 
+	std::string funcNm = "";
 	if (AnWeb::hasFt) {
-		auto mt = scr->chgtime = IO::ModTime(fp + EXT_FS);
-		if (mt < 0) return false;
 		auto ot = IO::ModTime(fp2 + nm + ".so");
 
 		bool fail = false;
-	#define _ER(a, b)\
+#define _ER(a, b)\
 				scr->compileLog.push_back(ErrorView::Message());\
 				auto& msgg = scr->compileLog.back();\
 				msgg.name = path;\
@@ -52,8 +58,6 @@ bool FReader::Read(FScript* scr) {
 				msgg.severe = true;\
 				scr->errorCount = 1;\
 				Debug::Warning(a "(" + scr->name + ")", b);
-
-		std::string funcNm = "";
 
 		if (mt >= ot) {
 			std::string lp(fp2 + nm + ".so");
@@ -140,11 +144,11 @@ bool FReader::Read(FScript* scr) {
 
 
 			std::string cmd = CReader::gpp + " -shared "
-			#ifdef PLATFORM_WIN
+#ifdef PLATFORM_WIN
 				"-static-libstdc++ -static-libgcc -Wl,--export-all-symbols "
-			#else
+#else
 				"-fvisibility=hidden "
-			#endif
+#endif
 				"-fPIC \"" + IO::path + "res/noterminate.o\" -I\"" + fp2 + "\" -J\"" + fp2 + "\" -o \""
 				+ fp2 + nm + ".so\" \"" + tmpPath + "\" -lgfortran 2> \"" + fp2 + nm + "_log.txt\"";
 			RunCmd::Run(SETPATH cmd);
@@ -155,22 +159,22 @@ bool FReader::Read(FScript* scr) {
 
 			remove(tmpPath.c_str());
 		}
-
+	}
 #endif
 
-		Engine::AcquireLock(7);
-#define FAIL0 Engine::ReleaseLock(); return false
+	Engine::Locker locker(7);
+	if (AnWeb::hasFt) {
 		scr->libpath = fp2 + nm + ".so";
 		scr->lib = DyLib(scr->libpath);
 		if (!scr->lib.is_open()) {
 			_ER("FReader", "Failed to load script into memory!");
-			FAIL0;
+			return false;
 		}
 		{
 			std::ifstream ets(fp2 + nm + ".entry");
 			ets >> funcNm;
 		}
-		auto acf = (emptyFunc)scr->lib.GetSym(funcNm);
+		auto acf = (FScript::emptyFunc)scr->lib.GetSym(funcNm);
 		if (!acf) {
 			std::string err = 
 #ifdef PLATFORM_WIN
@@ -179,47 +183,46 @@ bool FReader::Read(FScript* scr) {
 				"";//dlerror();
 #endif
 			_ER("FReader", "Failed to load function \"" + funcNm + "\" into memory! " + err);
-			FAIL0;
+			return false;
 		}
 
 #define _ER2(info) _ER("FReader", "Failed to register " info "! Please tell the monkey!");
 
-		auto fhlc = (emptyFunc*)scr->lib.GetSym("__noterm_ftFunc");
+		auto fhlc = (FScript::emptyFunc*)scr->lib.GetSym("__noterm_ftFunc");
 		if (!fhlc) {
 			_ER2("function pointer");
-			FAIL0;
+			return false;
 		}
 		*fhlc = acf;
 		
-		scr->funcLoc = (wrapFunc)scr->lib.GetSym("_Z5ExecFv");
+		scr->funcLoc = (FScript::wrapFunc)scr->lib.GetSym("_Z5ExecFv");
 		if (!scr->funcLoc) {
 			_ER2("entry function");
-			FAIL0;
+			return false;
 		}
 
 		scr->arr_in_shapeloc = (int32_t**)scr->lib.GetSym("imp_arr_shp");
 		if (!scr->arr_in_shapeloc) {
 			_ER2("input array shape pointer");
-			FAIL0;
+			return false;
 		}
 		scr->arr_in_dataloc = (void**)scr->lib.GetSym("imp_arr_ptr");
 		if (!scr->arr_in_dataloc) {
 			_ER2("input array data pointer");
-			FAIL0;
+			return false;
 		}
 
 		scr->arr_out_shapeloc = (int32_t**)scr->lib.GetSym("__mod_exp_MOD_exp_arr_shp");
 		if (!scr->arr_out_shapeloc) {
 			_ER2("output array shape pointer");
-			FAIL0;
+			return false;
 		}
 		scr->arr_out_dataloc = (void**)scr->lib.GetSym("exp_arr_ptr");
 		if (!scr->arr_out_dataloc) {
 			_ER2("output array data pointer");
-			FAIL0;
+			return false;
 		}
 	}
-	else Engine::AcquireLock(7);
 
 	std::ifstream strm(fp + EXT_FS);
 	std::string ln;
@@ -235,16 +238,14 @@ bool FReader::Read(FScript* scr) {
 
 		bool iso = ln == "!out";
 		if (iso || ln == "!in") {
-			std::vector<std::pair<std::string, std::string>>& cv = iso ? scr->outvars : scr->invars;
-			std::vector<CVar>& _cv = iso ? scr->_outvars : scr->_invars;
-			std::vector<emptyFunc>& _fc = iso? scr->_outarr_post : scr->_inarr_pre;
-			_cv.push_back(CVar());
-			auto bk = &_cv.back();
-			_fc.push_back(emptyFunc());
+			auto& vr = iso ? scr->outputs : scr->inputs;
+			auto& _vr = iso ? scr->_outputs : scr->_inputs;
+			std::vector<FScript::emptyFunc>& _fc = iso? scr->_outarr_post : scr->_inarr_pre;
+			vr.push_back(AnScript::Var());
+			_vr.push_back(CVar());
+			auto& bk = vr.back();
+			_fc.push_back(FScript::emptyFunc());
 			auto fk = &_fc.back();
-			if (!iso) {
-				scr->invaropts.push_back(VarOpt());
-			}
 
 			const std::string ios = iso ? "output " : "input ";
 
@@ -259,62 +260,61 @@ bool FReader::Read(FScript* scr) {
 			int ssp = 0;
 			while (ss[0][ssp] < 65) ssp++;
 			if (ssp > 0) ss[0] = ss[0].substr(ssp);
-			bk->typeName = ss[0];
-			if (!ParseType(bk->typeName, bk)) {
-				_ER("FReader", "arg type \"" + bk->typeName + "\" not recognized!");
-				goto FAIL;
+			bk.typeName = ss[0];
+			if (!ParseType(bk.typeName, bk)) {
+				_ER("FReader", "arg type \"" + bk.typeName + "\" not recognized!");
+				return false;
 			}
-			bk->stride = AnScript::StrideOf(bk->typeName[0]);
 			if (sss < atn + 2) {
 				_ER("FReader", "variable name not found!");
-				goto FAIL;
+				return false;
 			}
-			bk->name = to_lowercase(ss[atn + 2]);
+			bk.name = to_lowercase(ss[atn + 2]);
 			bool isa = false;
 			if (sss > atn + 3) {
 				auto sa = ss[atn + 3];
 				auto sas = sa.size();
 				if (sa.substr(0, 2) == "(:" && sa.substr(sas-2) == ":)") {
-					bk->dimVals.push_back(new int());
+					bk.dim++;
 					for (auto c : sa) {
-						if (c == ',') bk->dimVals.push_back(new int());
+						if (c == ',')
+							bk.dim++;
 					}
 					isa = true;
 				}
 			}
 			
 			if (isa) {
-				bk->type = AN_VARTYPE::LIST;
-				bk->typeName = "list(" + std::to_string(bk->dimVals.size()) + bk->typeName[0] + ")";
+				bk.itemType = bk.type;
+				bk.type = AN_VARTYPE::LIST;
+				bk.InitName();
 			}
-			cv.push_back(std::pair<std::string, std::string>(bk->name, bk->typeName));
 			
 			if (AnWeb::hasFt) {
-				auto nml = to_lowercase(bk->name);
+				auto& _bk = _vr.back();
+				auto nml = to_lowercase(bk.name);
 				if (!isa)
-					bk->value = scr->lib.GetSym(nml);
+					_bk.offset = (uintptr_t)scr->lib.GetSym(nml);
 				else {
-					bk->value = scr->lib.GetSym("__" + to_lowercase(scr->name) + "_MOD_" + nml);
-					if (iso) *fk = (emptyFunc)scr->lib.GetSym("exp_get_" + nml);
-					else *fk = (emptyFunc)scr->lib.GetSym("imp_set_" + nml);
+					_bk.offset = (uintptr_t)scr->lib.GetSym("__" + to_lowercase(scr->name) + "_MOD_" + nml);
+					if (iso) {
+						*fk = (FScript::emptyFunc)scr->lib.GetSym("exp_get_" + nml);
+						_bk.szOffsets.resize(bk.dim);
+					}
+					else *fk = (FScript::emptyFunc)scr->lib.GetSym("imp_set_" + nml);
 					if (!fk) {
-						_ER2("array convert function")
-						goto FAIL;
+						_ER2("array convert function");
+						return false;
 					}
 				}
-				if (!bk->value) {
-					Debug::Warning("FReader", "cannot find \"" + bk->name + "\" from memory!");
-					goto FAIL;
+				if (!_bk.offset) {
+					Debug::Warning("FReader", "cannot find \"" + bk.name + "\" from memory!");
+					return false;
 				}
 			}
 		}
 	}
-
-	Engine::ReleaseLock();
 	return true;
-FAIL:
-	Engine::ReleaseLock();
-	return false;
 }
 
 void FReader::Refresh(FScript* scr) {
@@ -327,18 +327,21 @@ void FReader::Refresh(FScript* scr) {
 	}
 }
 
-bool FReader::ParseType(std::string& s, CVar* var) {
+bool FReader::ParseType(std::string& s, AnScript::Var& var) {
 	s = to_lowercase(s);
 	if (s == "integer*2") {
-		var->type = AN_VARTYPE::SHORT;
+		var.type = AN_VARTYPE::SHORT;
+		var.stride = 2;
 		s = "short";
 	}
 	if (s == "integer") {
-		var->type = AN_VARTYPE::INT;
+		var.type = AN_VARTYPE::INT;
+		var.stride = 4;
 		s = "int";
 	}
 	else if (s == "real*8") {
-		var->type = AN_VARTYPE::DOUBLE;
+		var.type = AN_VARTYPE::DOUBLE;
+		var.stride = 8;
 		s = "double";
 	}
 	else return false;

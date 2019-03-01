@@ -1,18 +1,17 @@
 #pragma once
-#include "Engine.h"
-#include "anweb.h"
+#include "web/anweb.h"
 
 class FReader {
 public:
 	static void Init();
+	static void LoadReader();
 	
 	static bool Read(FScript* scr);
-
 	static void Refresh(FScript* scr);
 
 protected:
-	static bool ParseType(std::string& s, CVar* var);
-
+	static bool ParseType(std::string& s, AnScript::Var& var);
+	
 	struct typestring {
 		std::string type, name, dims;
 

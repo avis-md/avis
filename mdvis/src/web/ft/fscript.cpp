@@ -2,8 +2,8 @@
 
 std::unordered_map<std::string, std::weak_ptr<FScript>> FScript::allScrs;
 
-FScript::FScript() : AnScript(TYPE::FORTRAN), lib(nullptr), funcLoc(nullptr), pre(-1), post(-1), 
-	arr_in_shapeloc(nullptr), arr_in_dataloc(nullptr), arr_out_shapeloc(nullptr), arr_out_dataloc(nullptr){}
+FScript::FScript() : AnScript(TYPE::FORTRAN), funcLoc(nullptr), pre(-1), post(-1), 
+	arr_in_shapeloc(nullptr), arr_in_dataloc(nullptr), arr_out_shapeloc(nullptr), arr_out_dataloc(nullptr) {}
 
 void FScript::Clear() {
 	AnScript::Clear();
@@ -16,17 +16,22 @@ void FScript::Clear() {
 pAnScript_I FScript::CreateInstance() {
 	auto res = std::make_shared<FScript_I>();
 	res->Init(this);
+	const auto osz = outputs.size();
+	res->outputArrs.resize(osz);
+	for (size_t a = 0; a < osz; a++) {
+		res->outputArrs[a].dims.resize(outputs[a].dim);
+	}
 	return res;
 }
 
 FScript_I::~FScript_I() {}
 
 void* FScript_I::Resolve(uintptr_t o) {
-	return (void*)o;
+	return (o < 0xff) ? outputArrs[o].val.pval : (void*)o;
 }
 
 int* FScript_I::GetDimValue(const CVar::szItem& i) {
-	return i.useOffset ? (int*)Resolve(i.offset) : (int*)&i.size;
+	return &outputArrs[i.offset >> 16].dims[i.offset & 0xffff];
 }
 
 #define CS_SET(t) void FScript_I::SetInput(int i, t val) {\
@@ -66,11 +71,16 @@ void FScript_I::GetOutputArrs() {
 				sz *= (or.dims[a] = (*scr->arr_out_shapeloc)[a]);
 			}
 			or.val.arr.resize(sz);
-			or.val.pval = or.val.arr.data();
-			memcpy(or.val.pval, *scr->arr_out_dataloc, sz);
+			or.val.val.p = or.val.arr.data();
+			memcpy(or.val.val.p, *scr->arr_out_dataloc, sz);
+			or.val.pval = &or.val.val.p;
 		}
 	}
 	scr->post = -1;
+}
+
+void FScript_I::Execute() {
+	((FScript*)parent)->funcLoc();
 }
 
 float FScript_I::GetProgress() {

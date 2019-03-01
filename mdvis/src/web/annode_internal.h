@@ -1,5 +1,5 @@
 #pragma once
-#include "web/anweb.h"
+#include "anweb.h"
 #include "ui/localizer.h"
 
 #define INODE_DEF_NOREG_H \

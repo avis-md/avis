@@ -14,6 +14,7 @@
 #include "ui/popups.h"
 #include "web/anweb.h"
 #include "web/cc/creader.h"
+#include "web/ft/freader.h"
 #include "md/parmenu.h"
 #include "md/Protein.h"
 #include "md/parloader.h"
@@ -391,6 +392,7 @@ The hash for this program is )" << VisSystem::version_hash
 
 		Preferences::Load();
 		CReader::LoadReader();
+		FReader::LoadReader();
 		AnBrowse::Scan();
 		//AnBrowse::Refresh();
 

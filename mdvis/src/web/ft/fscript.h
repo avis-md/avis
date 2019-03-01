@@ -2,15 +2,16 @@
 #include "utils/dylib.h"
 
 class FScript_I;
-typedef std::shared_ptr<FScript_I> pCScript_I;
+typedef std::shared_ptr<FScript_I> pFScript_I;
 
 class FScript : public AnScript {
 public:
 	typedef void(*emptyFunc)();
-	typedef char* (*wrapFunc)();
-
+	typedef char*(*wrapFunc)();
+	
 	FScript();
 
+	std::string libpath;
 	DyLib lib;
 	wrapFunc funcLoc;
 
@@ -51,5 +52,6 @@ public:
 
 	std::vector<OutVal> outputArrs;
 
+	void Execute() override;
 	float GetProgress() override;
 };
