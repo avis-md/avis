@@ -95,6 +95,22 @@ bool CReader::Read(CScript* scr) {
 			ErrorView::compileMsgs.push_back(msgg);\
 			Debug::Warning(a "(" + scr->name + ")", b);
 
+		{
+			std::ifstream strm(fp + EXT_CS);
+			std::string s;
+			const auto classsig = "class" + nm;
+			while (std::getline(strm, s)) {
+				s = rm_spaces(s);
+				if (s.back() == '{') s.pop_back();
+				if (s == classsig) {
+					scr->isSingleton = false;
+					goto foundclass;
+				}
+			}
+			scr->isSingleton = true;
+		foundclass:;
+		}
+
 		if (mt > ot) {
 			remove((fp2 + nm + ".so").c_str());
 
@@ -102,18 +118,8 @@ bool CReader::Read(CScript* scr) {
 			const std::string tmpPath = fp2 + nm + "_temp__" EXT_CS;
 			{
 				std::ifstream strm(fp + EXT_CS);
-				std::string s;
-				const auto classsig = "class" + nm;
-				while (std::getline(strm, s)) {
-					s = rm_spaces(s);
-					if (s.back() == '{') s.pop_back();
-					if (s == classsig) goto foundclass;
-				}
-				scr->isSingleton = true;
-			foundclass:
-				strm.clear();
-				strm.seekg(0);
 				std::ofstream ostrm(tmpPath);
+				std::string s;
 				while (std::getline(strm, s)) {
 					const auto sc = string_trim(s);
 					if (sc[0] == '/' && sc[1] == '/') {
@@ -222,7 +228,7 @@ bool CReader::Read(CScript* scr) {
 			
 #ifdef PLATFORM_WIN
 			if (useMsvc) {
-				std::string cl = "cl /nologo /c /Zi /Od /I " + incfd + 
+				std::string cl = "cl /nologo /c /Zi /Od /I \"" + fd + "\" /I " + incfd +
 					" /D_WIN_ /FI _avis_print.h";
 				if (useOMP) {
 					cl += " /openmp";
@@ -233,7 +239,7 @@ bool CReader::Read(CScript* scr) {
 				scr->errorCount = ErrorView::Parse_MSVC(fp2 + nm + "_log.txt", tmpPath, nm + ".cpp", scr->compileLog);
 			}
 			else {
-				std::string cmd = "g++ -std=c++11 -static-libstdc++ -shared -fPIC -D_WIN_ -I" + incfd + " -include _avis_print.h " + flags1;
+				std::string cmd = "g++ -std=c++11 -static-libstdc++ -shared -fPIC -D_WIN_ -I\"" + fd + "\" -I" + incfd + " -include _avis_print.h " + flags1;
 				if (useOMP) {
 					cmd += " -fopenmp";
 					if (useOMP2) cmd += " -lomp";
@@ -466,7 +472,8 @@ bool CReader::Read(CScript* scr) {
 					_ER("CReader", "cannot find \"" + vr.name + "\" from memory!");
 					return false;
 				}
-				else cvr.offset = *(uintptr_t*)sym;
+				else
+					cvr.offset = scr->isSingleton ? (uintptr_t)sym : *(uintptr_t*)sym;
 				if (ira) {
 					auto sz = lns.size() - 1;
 					cvr.szOffsets.resize(sz);
@@ -485,7 +492,7 @@ bool CReader::Read(CScript* scr) {
 								_ER("CReader", "cannot find \"" + ln + "\" from memory!");
 								return false;
 							}
-							else of.offset = *(uintptr_t*)sym;
+							else of.offset = scr->isSingleton ? (uintptr_t)sym : *(uintptr_t*)sym;
 						}
 					}
 				}

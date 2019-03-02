@@ -79,7 +79,10 @@ bool PDB::Read(ParInfo* info) {
 		info->pos[i * 3] = atof(NSP(ln + 30, ln + 37)) * 0.1f;
 		info->pos[i * 3 + 1] = atof(NSP(ln + 38, ln + 45)) * 0.1f;
 		info->pos[i * 3 + 2] = atof(NSP(ln + 46, ln + 53)) * 0.1f;
-		if (*(ln + 76) == ' ') info->type[i] = (uint16_t)(*(ln + 77));
+		if (*(ln + 76) == ' ') {
+			if (*(ln + 77) == ' ') info->type[i] = (uint16_t)(info->name[i * info->nameSz] & 0xff);
+			else info->type[i] = (uint16_t)(*(ln + 77));
+		}
 		else info->type[i] = *((uint16_t*)(ln + 76));
 		info->type[i] &= 0x00ff;
 		delete[](ln);

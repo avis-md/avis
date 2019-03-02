@@ -57,6 +57,7 @@ void Node_AdjList::Execute() {
 
 	auto& ov = ((DmScript_I*)script.get())->outputVs;
 	ov[0].val.p = conns.data();
+	ov[0].pval = &ov[0].val.p;
 }
 
 
@@ -100,4 +101,5 @@ void Node_AdjListI::Execute() {
 	}
 	auto& ov = ((DmScript_I*)script.get())->outputVs;
 	ov[0].val.p = conns.data();
+	ov[0].pval = &ov[0].val.p;
 }
