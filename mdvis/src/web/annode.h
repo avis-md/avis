@@ -52,7 +52,7 @@ public:
 	bool canTile = false;
 	bool executing = false;
 	bool showDesc = false, showSett = false;
-	ANNODE_OP op;
+	ANNODE_OP op = ANNODE_OP::NONE;
 
 	bool logExpanded = true;
 	byte logMask = 7;

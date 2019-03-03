@@ -1,11 +1,12 @@
 #include "node_addmesh.h"
 #include "web/anweb.h"
+#include "ui/ui_ext.h"
 
 Shader Node_AddMesh::shad;
 
 INODE_DEF(__("Draw Mesh"), AddMesh, GEN);
 
-Node_AddMesh::Node_AddMesh() : INODE_INIT, dirty(false), tsz(0), vao(0), vbos() {
+Node_AddMesh::Node_AddMesh() : INODE_INIT, dirty(false), tsz(0), vao(0), vbos(), col(white()) {
 	INODE_TITLE(NODE_COL_MOD)
 	INODE_SINIT(
 		scr->AddInput(_("vertices"), AN_VARTYPE::DOUBLE, 2);
@@ -43,7 +44,7 @@ void Node_AddMesh::Execute() {
 	if (sz != *ir1.getdim(0)) RETERR("Vertex and normal array lengths are different!");
 	if (*ir0.getdim(1) != 3) RETERR("Dimension 1 of vertex array must be 3!");
 	if (*ir1.getdim(1) != 3) RETERR("Dimension 1 of normal array must be 3!");
-	tsz = sz / 3;
+	tsz = sz;
 	poss.resize(sz * 3);
 	nrms.resize(sz * 3);
 	auto ps = *(double**)ir0.getval();
@@ -67,13 +68,18 @@ void Node_AddMesh::Update() {
 	}
 }
 
+void Node_AddMesh::DrawHeader(float& off) {
+	UI2::Color(pos.x + 2, off, width - 4, "Color", col);
+	off += 17;
+}
+
 void Node_AddMesh::DrawScene() {
 	if (!tsz) return;
 
 	shad.Bind();
 	glUniformMatrix4fv(shad.Loc(0), 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
 	glUniformMatrix4fv(shad.Loc(1), 1, GL_FALSE, glm::value_ptr(MVP::projection()));
-	glUniform3f(shad.Loc(2), 0.4f, 0.4f, 1);
+	glUniform4f(shad.Loc(2), col.r, col.g, col.b, 1);
 	glBindVertexArray(vao);
 	glDrawArrays(GL_TRIANGLES, 0, tsz * 3);
 	glBindVertexArray(0);

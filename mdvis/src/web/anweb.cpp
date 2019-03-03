@@ -686,6 +686,12 @@ void AnWeb::Save(const std::string& s) {
 				//auto& tp = nd->script->invars[a].second;
 				//if (tp == "int") SV(value, nd->inputVDef[a].i);
 				//else if (tp == "double") SV(value, nd->inputVDef[a].d);
+				auto k = nd->_connInfo.size();
+				auto& vd = nd->script->defVals[k];
+				if (nd->script->parent->inputs[k].type == AN_VARTYPE::INT)
+					SV(value, vd.i);
+				else
+					SV(value, vd.d);
 			}
 		}
 	}
@@ -768,15 +774,17 @@ void AnWeb::Load(const std::string& s) {
 					return;
 					ifound:
 					break;
-				case AnScript::TYPE::PYTHON:
-					//n = std::make_shared<PyNode>(PyScript::allScrs[nm]);
+#define SCRCASE(tp, pre)\
+				case AnScript::TYPE::tp:\
+					n = std::make_shared<pre##Node>(std::dynamic_pointer_cast<pre##Script_I>\
+						(pre##Script::allScrs[nm].lock()->CreateInstance()));\
 					break;
-				case AnScript::TYPE::C:
-					//n = std::make_shared<CNode>(CScript::allScrs[nm]);
-					break;
-				case AnScript::TYPE::FORTRAN:
-					//n = std::make_shared<FNode>(FScript::allScrs[nm]);
-					break;
+
+					SCRCASE(PYTHON, Py);
+					SCRCASE(C, C);
+					SCRCASE(FORTRAN, F);
+
+#undef SCRCASE
 				default:
 					Debug::Warning("AnWeb::Load", "Unknown node type: " + std::to_string((byte)tp));
 					return;

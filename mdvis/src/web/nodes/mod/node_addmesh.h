@@ -10,11 +10,13 @@ public:
 	void Execute() override;
 
 	void Update() override;
+	void DrawHeader(float& off) override;
 	void DrawScene() override;
 protected:
 	bool dirty;
 	int tsz;
 	GLuint vao, vbos[2];
 	static Shader shad;
+	Vec4 col;
 	std::vector<float> poss, nrms;
 };
