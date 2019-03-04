@@ -44,7 +44,10 @@ public:
 		TexGroup() : fbo(0), colTex(0), idTex(0), normTex(0), depthTex(0) {}
 		void Clear();
 	} texs = {}, texs2 = {}, _texs = {}, trTexs = {};
+	
 	GLuint blitFbos[NUM_EXTRA_TEXS], blitTexs[NUM_EXTRA_TEXS];
+	void SwapBlitBuffers();
+
 	uint d_w, d_h, d_w2, d_h2, _d_w, _d_h, _w, _h;
 	bool useGBuffer2, applyGBuffer2;
 	void GenGBuffer2();

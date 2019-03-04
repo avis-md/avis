@@ -1,6 +1,7 @@
 #include "node_addmesh.h"
 #include "web/anweb.h"
 #include "ui/ui_ext.h"
+#include "vis/pargraphics.h"
 
 Shader Node_AddMesh::shad;
 
@@ -70,6 +71,10 @@ void Node_AddMesh::Update() {
 
 void Node_AddMesh::DrawHeader(float& off) {
 	UI2::Color(pos.x + 2, off, width - 4, "Color", col);
+	if (_col != col) {
+		_col = col;
+		Scene::dirty = true;
+	}
 	off += 17;
 }
 
@@ -83,7 +88,7 @@ void Node_AddMesh::DrawScene(const RENDER_PASS pass) {
 		glBindVertexArray(vao);
 		glUniform4f(shad.Loc(2), col.r, col.g, col.b, 0.f);
 		glDrawArrays(GL_TRIANGLES, 0, tsz * 3);
-		glUniform4f(shad.Loc(2), col.r, col.g, col.b, 0.6f);
+		glUniform4f(shad.Loc(2), col.r, col.g, col.b, 0.8f);
 		glDrawArrays(GL_TRIANGLES, 0, tsz * 3);
 		glBindVertexArray(0);
 		glUseProgram(0);

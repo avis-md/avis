@@ -17,6 +17,6 @@ protected:
 	int tsz;
 	GLuint vao, vbos[2];
 	static Shader shad;
-	Vec4 col;
+	Vec4 col, _col;
 	std::vector<float> poss, nrms;
 };

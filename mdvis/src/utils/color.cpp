@@ -87,8 +87,12 @@ void Color::DrawPicker(bool hasA) {
 
 	Vec3 hsv = Rgb2Hsv(cl);
 
-	Popups::pos.x = std::min(Popups::pos.x, Display::width - 155.f);
-	Popups::pos.y = std::min(Popups::pos.y, Display::width - 155.f);
+	if (Popups::pos.x > Display::width - 150) {
+		Popups::pos.x = Popups::pos2.x - 150;
+	}
+	if (Popups::pos.y > Display::height - 150) {
+		Popups::pos.y = Popups::pos2.y - 150;
+	}
 
 	UI::Quad(Popups::pos.x, Popups::pos.y, 150, 150, black(0.7f));
 	Color::DrawSV(Popups::pos.x + 5, Popups::pos.y + 5, 120, 120, hsv.r);

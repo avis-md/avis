@@ -103,6 +103,7 @@ void UI2::Color(float x, float y, float w, Vec4& col) {
 	if (Engine::Button(x, y, w, 16, col) == MOUSE_RELEASE) {
 		Popups::type = POPUP_TYPE::COLORPICK;
 		Popups::pos = Vec2(x + w*sepw, y + 16);
+		Popups::pos2 = Vec2(x + w, y);
 		Popups::data = &col;
 	}
 	UI::Texture(x + w - 18, y, 16, 16, Icons::colorwheel);

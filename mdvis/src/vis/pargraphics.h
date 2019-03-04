@@ -43,13 +43,14 @@ public:
 	static float orientStr;
 	static uint orientParam[3];
 	
-	static Shader reflProg;;
-	static Shader reflCProg;;
-	static Shader parProg;;
-	static Shader parConProg;;
-	static Shader parConLineProg;;
-	static Shader selHlProg;;
-	static Shader colProg;;
+	static Shader reflProg;
+	static Shader reflCProg;
+	static Shader reflTrProg;
+	static Shader parProg;
+	static Shader parConProg;
+	static Shader parConLineProg;
+	static Shader selHlProg;
+	static Shader colProg;
 
 	static std::vector<uint> hlIds;
 	static std::vector<std::pair<uint, std::pair<uint, byte>>> drawLists, drawListsB;
@@ -155,6 +156,6 @@ public:
 	static void DeserializeCol(XmlNode* nd);
 
 protected:
-	static void BlitSky();
+	static void BlitSky(), BlitSkyTr();
 	static void BlitHl();
 };
