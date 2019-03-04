@@ -415,10 +415,18 @@ void AnWeb::DrawSide() {
 #endif
 }
 
-void AnWeb::DrawScene() {
+void AnWeb::DrawScene(const RENDER_PASS pass) {
 #ifndef IS_ANSERVER
 	if (!waitBrowse) {
-		for (auto& n : nodes) n->DrawScene();
+		for (auto& n : nodes) n->DrawScene(pass);
+	}
+#endif
+}
+
+void AnWeb::DrawOverlay() {
+#ifndef IS_ANSERVER
+	if (!waitBrowse) {
+		for (auto& n : nodes) n->DrawOverlay();
 	}
 #endif
 }

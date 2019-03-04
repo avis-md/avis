@@ -164,7 +164,6 @@ void ParGraphics::Eff::Apply() {
 			std::swap(cam->blitFbos[0], cam->blitFbos[1]);
 		}
 	}
-	VisSystem::BlurBack();
 }
 
 float ParGraphics::Eff::DrawMenu(float off) {
@@ -960,13 +959,56 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		Protein::Draw();
-		AnWeb::DrawScene();
+		AnWeb::DrawScene(RENDER_PASS::SOLID);
 	}
 
 	if (showbbox) {
 #define bb(i) static_cast<float>(Particles::boundingBox[i])
 		UI3::Cube(bb(0), bb(1), bb(2), bb(3), bb(4), bb(5), black());
 	}
+}
+
+void ParGraphics::RerenderTr(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
+	if (!Particles::particleSz) return;
+	
+	auto _mv = MVP::modelview();
+	auto _p = MVP::projection();
+
+	auto ql = ChokoLait::mainCamera->quality;
+
+	float osz = -1;
+	if (ChokoLait::mainCamera->ortographic) {
+		Vec4 p1 = _p * Vec4(-1, 1, -1, 1);
+		p1 /= p1.w;
+		Vec4 p2 = _p * Vec4(1, 1, -1, 1);
+		p2 /= p2.w;
+		osz = glm::length(p2 - p1) / 2;
+		if (VisRenderer::status == VisRenderer::STATUS::BUSY) {
+			osz /= VisRenderer::imgSlices;
+		}
+	}
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, ChokoLait::mainCamera->_texs.fbo);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ChokoLait::mainCamera->trTexs.fbo);
+
+	glReadBuffer(GL_DEPTH_ATTACHMENT);
+	glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::width, Display::height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+
+	float zero[4] = {};
+	float one = 1;
+	glClearBufferfv(GL_COLOR, 0, zero);
+	glClearBufferfv(GL_DEPTH, 0, &one);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glDepthMask(true);
+
+	AnWeb::DrawScene(RENDER_PASS::TRANS);
+
+	glDisable(GL_DEPTH_TEST);
+	glDepthMask(false);
 }
 
 void ParGraphics::Reblit() {
@@ -986,9 +1028,13 @@ void ParGraphics::Reblit() {
 				BlitSky();
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				if (showAxes) {
-					DrawAxes();
+				auto& cm = ChokoLait::mainCameraObj->transform;
+				if (Scene::dirty) {
+					ParGraphics::RerenderTr(cm.position(), cm.forward(), (float)Display::width, (float)Display::height);
+					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[0]);
 				}
+
+				UI::Quad(0, 0, Display::width, Display::height, cam->trTexs.colTex);
 			}
 		}
 		//*
@@ -997,6 +1043,13 @@ void ParGraphics::Reblit() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		
 		Eff::Apply();
+		AnWeb::DrawOverlay();
+		if (showAxes) {
+			glEnable(GL_BLEND);
+			DrawAxes();
+			glDisable(GL_BLEND);
+		}
+		VisSystem::BlurBack();
 		tfboDirty = false;
 	}
 
@@ -1007,7 +1060,6 @@ void ParGraphics::Reblit() {
 
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
 	glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::frameWidth, Display::frameHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glEnable(GL_BLEND);

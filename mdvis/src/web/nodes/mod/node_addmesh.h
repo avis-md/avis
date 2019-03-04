@@ -11,7 +11,7 @@ public:
 
 	void Update() override;
 	void DrawHeader(float& off) override;
-	void DrawScene() override;
+	void DrawScene(const RENDER_PASS pass) override;
 protected:
 	bool dirty;
 	int tsz;

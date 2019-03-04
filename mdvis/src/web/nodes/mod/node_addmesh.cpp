@@ -73,15 +73,19 @@ void Node_AddMesh::DrawHeader(float& off) {
 	off += 17;
 }
 
-void Node_AddMesh::DrawScene() {
+void Node_AddMesh::DrawScene(const RENDER_PASS pass) {
 	if (!tsz) return;
 
-	shad.Bind();
-	glUniformMatrix4fv(shad.Loc(0), 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
-	glUniformMatrix4fv(shad.Loc(1), 1, GL_FALSE, glm::value_ptr(MVP::projection()));
-	glUniform4f(shad.Loc(2), col.r, col.g, col.b, 1);
-	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, tsz * 3);
-	glBindVertexArray(0);
-	glUseProgram(0);
+	if (pass == RENDER_PASS::TRANS) {
+		shad.Bind();
+		glUniformMatrix4fv(shad.Loc(0), 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
+		glUniformMatrix4fv(shad.Loc(1), 1, GL_FALSE, glm::value_ptr(MVP::projection()));
+		glBindVertexArray(vao);
+		glUniform4f(shad.Loc(2), col.r, col.g, col.b, 0.f);
+		glDrawArrays(GL_TRIANGLES, 0, tsz * 3);
+		glUniform4f(shad.Loc(2), col.r, col.g, col.b, 0.6f);
+		glDrawArrays(GL_TRIANGLES, 0, tsz * 3);
+		glBindVertexArray(0);
+		glUseProgram(0);
+	}
 }

@@ -112,7 +112,8 @@ public:
 	float setSz;
 	virtual void DrawSettings(float& off) {}
 	float DrawLog(float off);
-	virtual void DrawScene() {}
+	virtual void DrawScene(const RENDER_PASS pass) {}
+	virtual void DrawOverlay() {}
 	void DrawToolbar();
 
 	virtual void AddInput();
