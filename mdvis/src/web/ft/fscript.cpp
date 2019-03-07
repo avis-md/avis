@@ -63,17 +63,17 @@ void FScript_I::GetOutputArrs() {
 	for (uint i = 0; i < scr->outputs.size(); ++i) {
 		scr->post = i;
 		auto& vr = scr->outputs[i];
-		auto& or = outputArrs[i];
+		auto& ar = outputArrs[i];
 		if (vr.type == AN_VARTYPE::LIST) {
 			scr->_outarr_post[i]();
 			int sz = vr.stride;
 			for (size_t a = 0; a < vr.dim; ++a) {
-				sz *= (or.dims[a] = (*scr->arr_out_shapeloc)[a]);
+				sz *= (ar.dims[a] = (*scr->arr_out_shapeloc)[a]);
 			}
-			or.val.arr.resize(sz);
-			or.val.val.p = or.val.arr.data();
-			memcpy(or.val.val.p, *scr->arr_out_dataloc, sz);
-			or.val.pval = &or.val.val.p;
+			ar.val.arr.resize(sz);
+			ar.val.val.p = ar.val.arr.data();
+			memcpy(ar.val.val.p, *scr->arr_out_dataloc, sz);
+			ar.val.pval = &ar.val.val.p;
 		}
 	}
 	scr->post = -1;
