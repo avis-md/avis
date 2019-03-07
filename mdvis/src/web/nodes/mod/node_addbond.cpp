@@ -12,9 +12,10 @@
 INODE_DEF(__("Extra Bonds"), AddBond, GEN)
 
 Node_AddBond::Node_AddBond() : INODE_INIT {
-	INODE_TITLE(NODE_COL_MOD);
-	inputR.resize(1);
-	script->invars.push_back(std::pair<std::string, std::string>("bonds", "list(2i)"));
+	INODE_TITLE(NODE_COL_MOD)
+	INODE_SINIT(
+		scr->AddInput(_("bonds"), AN_VARTYPE::INT, 2);
+	);
 
 	Particles::anim.conns2.resize(1);
 	Particles::particles_Conn2.resize(1);
@@ -39,15 +40,15 @@ void Node_AddBond::Execute() {
 	}
 
 	if (!inputR[0].first) return;
-	CVar& cv = inputR[0].getconv();
-	auto d1 = *cv.dimVals[1];
+	auto& ir = inputR[0];
+	auto d1 = *ir.getdim(1);
 	if (d1 != 2) RETERR("dimension 1 is " + std::to_string(d1) + ", expected 2!");
 	auto& c = Particles::anim.conns2[animId];
 	c.resize(Particles::anim.frameCount);
 	auto& c2 = c[AnWeb::realExecFrame];
-	c2.count = *cv.dimVals[0];
+	c2.count = *ir.getdim(0);
 	c2.ids.resize(c2.count);
-	memcpy(&c2.ids[0], *((Int2**)cv.value), c2.count * sizeof(Int2));
+	memcpy(&c2.ids[0], *((Int2**)ir.getval()), c2.count * sizeof(Int2));
 }
 
 void Node_AddBond::DrawSettings(float& off) {

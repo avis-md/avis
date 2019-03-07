@@ -4,7 +4,6 @@
 class Node_AddBond : public AnNode {
 public:
 	INODE_DEF_H
-
 	Node_AddBond();
 	~Node_AddBond();
 	

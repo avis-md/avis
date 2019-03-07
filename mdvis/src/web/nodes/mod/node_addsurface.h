@@ -10,7 +10,7 @@ public:
 	
 	void Execute() override;
 	void Update() override;
-	void DrawScene() override;
+	void DrawScene(const RENDER_PASS pass) override;
 protected:
 	static bool initd;
 	PROGDEF_H(marcherProg, 10);

@@ -17,10 +17,11 @@
 #include "shadows.h"
 #include "hdr.h"
 #include "ocl/raytracer.h"
-#include "res/shddata.h"
 #include "utils/dialog.h"
 #include "utils/tinyfiledialogs.h"
 #include "vis/preferences.h"
+#include "res/shddata.h"
+#include "res/shd/reflTrFrag.h"
 
 #define SCL_MIN -7.f
 #define SCL_MAX 2.f
@@ -63,6 +64,7 @@ uint ParGraphics::orientParam[] = {};
 
 Shader ParGraphics::reflProg;
 Shader ParGraphics::reflCProg;
+Shader ParGraphics::reflTrProg;
 Shader ParGraphics::parProg;
 Shader ParGraphics::parConProg;
 Shader ParGraphics::parConLineProg;
@@ -127,44 +129,36 @@ void ParGraphics::Eff::Apply() {
 	auto& cam = ChokoLait::mainCamera;
 	byte cnt = 0;
 	if (useGlow) {
-		cnt += Effects::Glow(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[2], cam->blitTexs[0], cam->blitTexs[1], cam->blitTexs[2],
+		cnt = Effects::Glow(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[2], cam->blitTexs[0], cam->blitTexs[1], cam->blitTexs[2],
 			glowThres, glowRad, glowStr, Display::width, Display::height);
 		if ((cnt % 2) == 1) {
-			std::swap(cam->blitFbos[0], cam->blitFbos[1]);
-			std::swap(cam->blitTexs[0], cam->blitTexs[1]);
-			cnt = 0;
+			cam->SwapBlitBuffers();
 		}
 	}
 
 	if (useSSAO) {
-		cnt += Effects::SSAO(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[2], cam->blitTexs[0], cam->blitTexs[1], cam->blitTexs[2],
+		cnt = Effects::SSAO(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[2], cam->blitTexs[0], cam->blitTexs[1], cam->blitTexs[2],
 			cam->texs.normTex, cam->texs.depthTex, ssaoStr, ssaoSamples, ssaoRad, ssaoBlur, Display::width, Display::height);
 		if ((cnt % 2) == 1) {
-			std::swap(cam->blitFbos[0], cam->blitFbos[1]);
-			std::swap(cam->blitTexs[0], cam->blitTexs[1]);
-			cnt = 0;
+			cam->SwapBlitBuffers();
 		}
 	}
 
 	if (useDof) {
-		cnt += Effects::Dof(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1],
+		cnt = Effects::Dof(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1],
 			cam->texs.depthTex, dofDepth / 500, dofFocal, dofAper, dofIter, Display::width, Display::height);
 		if ((cnt % 2) == 1) {
-			std::swap(cam->blitFbos[0], cam->blitFbos[1]);
-			std::swap(cam->blitTexs[0], cam->blitTexs[1]);
-			cnt = 0;
+			cam->SwapBlitBuffers();
 		}
 	}
 
 	if (AnWeb::drawFull) {
-		cnt += Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[0], cam->blitTexs[0], cam->blitTexs[1],
+		cnt = Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[0], cam->blitTexs[0], cam->blitTexs[1],
 		AnWeb::drawLerp, Display::width, Display::height);
-		if (cnt%2 != 0) {
-			std::swap(cam->blitTexs[0], cam->blitTexs[1]);
-			std::swap(cam->blitFbos[0], cam->blitFbos[1]);
+		if ((cnt % 2) == 1) {
+			cam->SwapBlitBuffers();
 		}
 	}
-	VisSystem::BlurBack();
 }
 
 float ParGraphics::Eff::DrawMenu(float off) {
@@ -298,6 +292,12 @@ void ParGraphics::Init() {
 	LC(inNormal); LC(inDepth); LC(skyStrength);
 	LC(skyStrDecay); LC(specStr); LC(bgCol);
 #undef LC
+	
+	(reflTrProg = Shader::FromF(mv, glsl::reflTrFrag))
+		.AddUniforms({ "_IP", "screenSize", "inColor", "inNormal"
+			, "inDepth" , "inSky" , "inSkyE" , "skyStrength" 
+			, "skyStrDecay" , "skyStrDecayOff" , "specStr" , "fogCol" 
+			, "isOrtho", "inOpaque" });
 	
 	parProg = Shader::FromVF(IO::GetText(IO::path + "parV.glsl"), IO::GetText(IO::path + "parF.glsl"));
 #define LC(nm) parProg.AddUniform(#nm)
@@ -960,13 +960,57 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		Protein::Draw();
-		AnWeb::DrawScene();
+		AnWeb::DrawScene(RENDER_PASS::SOLID);
 	}
 
 	if (showbbox) {
 #define bb(i) static_cast<float>(Particles::boundingBox[i])
 		UI3::Cube(bb(0), bb(1), bb(2), bb(3), bb(4), bb(5), black());
 	}
+}
+
+void ParGraphics::RerenderTr(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
+	if (!Particles::particleSz) return;
+	
+	auto _mv = MVP::modelview();
+	auto _p = MVP::projection();
+
+	auto ql = ChokoLait::mainCamera->quality;
+
+	float osz = -1;
+	if (ChokoLait::mainCamera->ortographic) {
+		Vec4 p1 = _p * Vec4(-1, 1, -1, 1);
+		p1 /= p1.w;
+		Vec4 p2 = _p * Vec4(1, 1, -1, 1);
+		p2 /= p2.w;
+		osz = glm::length(p2 - p1) / 2;
+		if (VisRenderer::status == VisRenderer::STATUS::BUSY) {
+			osz /= VisRenderer::imgSlices;
+		}
+	}
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, ChokoLait::mainCamera->_texs.fbo);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ChokoLait::mainCamera->trTexs.fbo);
+
+	glReadBuffer(GL_DEPTH_ATTACHMENT);
+	glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::width, Display::height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+
+	float zero[4] = {};
+	float one = 1;
+	glClearBufferfv(GL_COLOR, 0, zero);
+	glClearBufferfv(GL_COLOR, 2, zero);
+	glClearBufferfv(GL_DEPTH, 0, &one);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glDepthMask(true);
+
+	AnWeb::DrawScene(RENDER_PASS::TRANS);
+
+	glDisable(GL_DEPTH_TEST);
+	glDepthMask(false);
 }
 
 void ParGraphics::Reblit() {
@@ -986,9 +1030,16 @@ void ParGraphics::Reblit() {
 				BlitSky();
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				if (showAxes) {
-					DrawAxes();
+
+				auto& cm = ChokoLait::mainCameraObj->transform;
+				if (Scene::dirty) {
+					ParGraphics::RerenderTr(cm.position(), cm.forward(), (float)Display::width, (float)Display::height);
 				}
+
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[1]);
+				BlitSkyTr();
+				cam->SwapBlitBuffers();
+				//UI::Quad(0, 0, Display::width, Display::height, cam->trTexs.normTex);
 			}
 		}
 		//*
@@ -997,6 +1048,13 @@ void ParGraphics::Reblit() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		
 		Eff::Apply();
+		AnWeb::DrawOverlay();
+		if (showAxes) {
+			glEnable(GL_BLEND);
+			DrawAxes();
+			glDisable(GL_BLEND);
+		}
+		VisSystem::BlurBack();
 		tfboDirty = false;
 	}
 
@@ -1007,7 +1065,6 @@ void ParGraphics::Reblit() {
 
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
 	glBlitFramebuffer(0, 0, Display::width, Display::height, 0, 0, Display::frameWidth, Display::frameHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glEnable(GL_BLEND);
@@ -1079,6 +1136,50 @@ void ParGraphics::BlitSky() {
 	glBindTexture(GL_TEXTURE_2D, cam->texs.normTex);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, cam->texs.depthTex);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	glBindVertexArray(Camera::emptyVao);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
+void ParGraphics::BlitSkyTr() {
+	auto _p = MVP::projection();
+	auto& cam = ChokoLait::mainCamera;
+
+	if (!usePBR) {
+
+	}
+	else {
+		glUseProgram(reflTrProg);
+		glUniformMatrix4fv(reflTrProg.Loc(0), 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
+		glUniform2f(reflTrProg.Loc(1), static_cast<float>(Display::width), static_cast<float>(Display::height));
+		glUniform1i(reflTrProg.Loc(2), 0);
+		glUniform1i(reflTrProg.Loc(3), 1);
+		glUniform1i(reflTrProg.Loc(4), 3);
+		glUniform1i(reflTrProg.Loc(5), 4);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, refl);
+		glUniform1i(reflTrProg.Loc(6), 5);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, reflE);
+		glUniform1f(reflTrProg.Loc(7), reflStr);
+		glUniform1f(reflTrProg.Loc(8), reflStrDecay);
+		glUniform1f(reflTrProg.Loc(9), reflStrDecayOff);
+		glUniform1f(reflTrProg.Loc(10), 1); //specStr
+		glUniform4f(reflTrProg.Loc(11), fogCol.r, fogCol.g, fogCol.b, 1);
+		glUniform1i(reflTrProg.Loc(12), cam->ortographic ? 1 : 0);
+		glUniform1i(reflTrProg.Loc(13), 6);
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, cam->blitTexs[0]);
+	}
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, cam->trTexs.colTex);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, cam->trTexs.normTex);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, cam->trTexs.depthTex);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glBindVertexArray(Camera::emptyVao);

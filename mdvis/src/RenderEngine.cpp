@@ -48,6 +48,11 @@ void Camera::TexGroup::Clear() {
 	glDeleteTextures(1, &depthTex);
 }
 
+void Camera::SwapBlitBuffers() {
+	std::swap(blitFbos[0], blitFbos[1]);
+	std::swap(blitTexs[0], blitTexs[1]);
+}
+
 void Camera::GenGBuffer2() {
 	useGBuffer2 = true;
 	uint dw2 = uint(d_w * quality2);
@@ -67,7 +72,7 @@ void Camera::InitGBuffer(uint w, uint h) {
 	glGenFramebuffers(NUM_EXTRA_TEXS, blitFbos);
 	glGenTextures(NUM_EXTRA_TEXS, blitTexs);
 
-	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
 	for (byte i = 0; i < NUM_EXTRA_TEXS; ++i) {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, blitFbos[i]);
 		glBindTexture(GL_TEXTURE_2D, blitTexs[i]);
@@ -80,6 +85,41 @@ void Camera::InitGBuffer(uint w, uint h) {
 		if (Status != GL_FRAMEBUFFER_COMPLETE) {
 			Debug::Error("Camera", "FB error " + std::to_string(i) + ":" + std::to_string(Status));
 		}
+	}
+
+
+	glGenFramebuffers(1, &trTexs.fbo);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, trTexs.fbo);
+
+	glGenTextures(1, &trTexs.colTex);
+	glGenTextures(1, &trTexs.idTex);
+	glGenTextures(1, &trTexs.normTex);
+	glGenTextures(1, &trTexs.depthTex);
+
+	glBindTexture(GL_TEXTURE_2D, trTexs.colTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, (int)w, (int)h, 0, GL_RGBA, GL_FLOAT, NULL);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, trTexs.colTex, 0);
+	SetTexParams<>(0, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST);
+
+	glBindTexture(GL_TEXTURE_2D, trTexs.idTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32UI, (int)w, (int)h, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GBUFFER_ID, GL_TEXTURE_2D, trTexs.idTex, 0);
+	SetTexParams<>(0, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST);
+
+	glBindTexture(GL_TEXTURE_2D, trTexs.normTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, (int)w, (int)h, 0, GL_RGBA, GL_FLOAT, NULL);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GBUFFER_NORMAL, GL_TEXTURE_2D, trTexs.normTex, 0);
+	SetTexParams<>(0, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST);
+
+	glBindTexture(GL_TEXTURE_2D, trTexs.depthTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, (int)w, (int)h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, trTexs.depthTex, 0);
+	SetTexParams<>(0, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_NEAREST, GL_NEAREST);
+
+	glDrawBuffers(3, DrawBuffers);
+	GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (Status != GL_FRAMEBUFFER_COMPLETE) {
+		Debug::Error("Camera", "Overlay FB error");
 	}
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -113,6 +153,7 @@ void Camera::Render(onBlitFunc func) {
 			texs.Clear();
 			glDeleteFramebuffers(NUM_EXTRA_TEXS, blitFbos);
 			glDeleteTextures(NUM_EXTRA_TEXS, blitTexs);
+			trTexs.Clear();
 		}
 		InitGBuffer(t_w, t_h);
 		_texs = texs;
@@ -168,11 +209,6 @@ void Camera::Render(onBlitFunc func) {
 		Display::width = _w;
 		Display::height = _h;
 	}
-
-	//DumpBuffers();
-	//return;
-
-	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, texs.fbo);
 
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);

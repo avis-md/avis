@@ -339,6 +339,8 @@
     <ClCompile Include="src\web\nodes\get\node_inputs.cpp" />
     <ClCompile Include="src\web\nodes\misc\node_accum.cpp" />
     <ClCompile Include="src\web\nodes\misc\node_plot.cpp" />
+    <ClCompile Include="src\web\nodes\mod\node_addbond.cpp" />
+    <ClCompile Include="src\web\nodes\mod\node_addmesh.cpp" />
     <ClCompile Include="src\web\nodes\set\node_setattribute.cpp" />
     <ClCompile Include="src\web\nodes\set\node_setradscl.cpp" />
     <ClCompile Include="src\web\nodes\set\node_showrange.cpp" />
@@ -477,6 +479,8 @@
     <ClInclude Include="src\web\nodes\get\node_inputs.h" />
     <ClInclude Include="src\web\nodes\misc\node_accum.h" />
     <ClInclude Include="src\web\nodes\misc\node_plot.h" />
+    <ClInclude Include="src\web\nodes\mod\node_addbond.h" />
+    <ClInclude Include="src\web\nodes\mod\node_addmesh.h" />
     <ClInclude Include="src\web\nodes\set\node_setattribute.h" />
     <ClInclude Include="src\web\nodes\set\node_setradscl.h" />
     <ClInclude Include="src\web\nodes\set\node_showrange.h" />

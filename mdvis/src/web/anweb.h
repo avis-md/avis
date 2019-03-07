@@ -54,7 +54,7 @@ public:
 
 	static void Clear(), Clear0();
 	static void Insert(const pAnNode& node, Vec2 pos = Vec2(100, 100));
-	static void Init(), Update(), Draw(), DrawSide(), DrawScene();
+	static void Init(), Update(), Draw(), DrawSide(), DrawScene(const RENDER_PASS), DrawOverlay();
 	static void Execute(bool all), DoExecute(bool all), _DoExecute(), DoExecute_Srv();
 	static void ApplyFrameCount(int f), WriteFrame(uint f), ReadFrame(uint f), RemoveFrames();
 	static void Save(const std::string& s), SaveIn(), SaveOut();

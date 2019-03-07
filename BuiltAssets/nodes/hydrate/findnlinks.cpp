@@ -30,34 +30,34 @@ bool connd(int i, int j) {
 	return false;
 }
 
-std::vector<int> list;
+std::vector<std::vector<int>> lists;
+std::vector<int> _list;
 
-bool checkvert(int dim, int parent) {
+void checkvert(int a0, int dim, int parent) {
 	for (int a = 0; a < lcnt; a++) {
 		int me = adjlist[parent*lcnt + a]; //for each vertex connected to parent
-		if (me == -1) return false;
-		if (dim >= 2 && me == list[dim-2]) //ignore the backward vertex
+		if (me == -1) return;
+        if (me < a0 + dim || me > pcnt - n + dim) //ignore inverse loops
+			continue;
+		if (dim >= 2 && me == _list[dim-2]) //ignore the backward vertex
 			continue;
 		for (int i = 1; i < dim-1; i++) { //for each backward vertex except -1
-			if (connd(me, list[i])) continue; //cannot be connected
+			if (connd(me, _list[i])) continue; //cannot be connected
 		}
 		if (dim == n-1) { //if is last vertex
-			if (connd(me, list[0])) { //connected to first vertex, done!
-				list[dim] = me;
-				return true;
+			if (connd(me, _list[0])) { //connected to first vertex, done!
+				_list[dim] = me;
+                lists.push_back(_list); //register as list
 			}
 		}
 		else { //if is not last vertex
-			if (dim > 1 && connd(me, list[0])) continue; //vertex 2+ cannot be connected to first vertex
+			if (dim > 1 && connd(me, _list[0])) continue; //vertex 2+ cannot be connected to first vertex
 			else { //possible vertex, change children
-				list[dim] = me;
-				if (checkvert(dim+1, me))
-					return true; //answer! return now
-				//else: no good child, next
+				_list[dim] = me;
+				checkvert(a0, dim+1, me);
 			}
 		}
 	}
-	return false;
 }
 
 //entry
@@ -68,18 +68,16 @@ void Do() {
 	isshape = &_isshape[0];
 	_rings.clear();
 
-	list.resize(n);
+    lists.clear();
+	_list.resize(n);
 
 	for (int p0 = 0; p0 < pcnt; p0++) { //for each particle (vertex 0)
-		if (isshape[p0]>0) continue; //we only want yes or no
-		list[0] = p0;
-		if (checkvert(1, p0)) {
-			for (auto& v : list) {
-				isshape[v] = 1;
-				_rings.push_back(v);
-			}
-			rcnt++;
-		}
+		_list[0] = p0;
+		checkvert(p0, 1, p0);
 	}
+    rcnt = lists.size();
+    for (auto& l : lists) {
+        _rings.insert(_rings.end(), l.begin(), l.end());
+    }
 	rings = &_rings[0];
 }
