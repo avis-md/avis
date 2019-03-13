@@ -20,7 +20,7 @@ void Node_SetAttribute::Execute() {
 	if (!Particles::attrs.size()) {
 		RETERR("No attribute available!");
 	}
-	auto sz = *ir.getdim(0);
+	auto sz = ir.getdim(0);
 	if (sz != Particles::particleSz)
 		RETERR("Attribute must be for each atom!");
 	auto src = *((void**)ir.getval());

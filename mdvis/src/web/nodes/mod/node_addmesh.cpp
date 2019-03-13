@@ -41,10 +41,10 @@ void Node_AddMesh::Execute() {
 	auto& ir0 = inputR[0];
 	auto& ir1 = inputR[1];
 	if (!ir0.first || !ir1.first) return;
-	auto sz = *ir0.getdim(0);
-	if (sz != *ir1.getdim(0)) RETERR("Vertex and normal array lengths are different!");
-	if (*ir0.getdim(1) != 3) RETERR("Dimension 1 of vertex array must be 3!");
-	if (*ir1.getdim(1) != 3) RETERR("Dimension 1 of normal array must be 3!");
+	auto sz = ir0.getdim(0);
+	if (sz != ir1.getdim(0)) RETERR("Vertex and normal array lengths are different!");
+	if (ir0.getdim(1) != 3) RETERR("Dimension 1 of vertex array must be 3!");
+	if (ir1.getdim(1) != 3) RETERR("Dimension 1 of normal array must be 3!");
 	tsz = sz;
 	poss.resize(sz * 3);
 	nrms.resize(sz * 3);

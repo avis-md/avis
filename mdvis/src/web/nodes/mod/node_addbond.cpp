@@ -41,12 +41,12 @@ void Node_AddBond::Execute() {
 
 	if (!inputR[0].first) return;
 	auto& ir = inputR[0];
-	auto d1 = *ir.getdim(1);
+	auto d1 = ir.getdim(1);
 	if (d1 != 2) RETERR("dimension 1 is " + std::to_string(d1) + ", expected 2!");
 	auto& c = Particles::anim.conns2[animId];
 	c.resize(Particles::anim.frameCount);
 	auto& c2 = c[AnWeb::realExecFrame];
-	c2.count = *ir.getdim(0);
+	c2.count = ir.getdim(0);
 	c2.ids.resize(c2.count);
 	memcpy(&c2.ids[0], *((Int2**)ir.getval()), c2.count * sizeof(Int2));
 }

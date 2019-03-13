@@ -70,7 +70,7 @@ public:
 		CVar& getconv() { return first->conV[second]; }
 		void* getval();
 		AnScript::Var& getvar();
-		int* getdim(int i); //shorthand
+		int getdim(int i); //shorthand
 	};
 	std::vector<nodecon> inputR;
 	std::vector<std::vector<nodecon>> outputR;
@@ -148,6 +148,9 @@ public:
 	virtual void OnAnimFrame();
 	virtual void OnConn(bool o, int i) {}
 	virtual void OnValChange(int i);
+
+	void* GetOutVal(int i);
+	int GetOutDim(int i, int d);
 protected:
 	AnNode(pAnScript_I scr); //for user scripts
 	AnNode(pAnScript_I scr, ANNODE_FLAGS flags); //for internal scripts

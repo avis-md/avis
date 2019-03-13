@@ -13,8 +13,7 @@ Node_SetRadScl::Node_SetRadScl() : INODE_INITF(AN_FLAG_RUNONSEEK) {
 void Node_SetRadScl::Execute() {
     if (!inputR[0].first) return;
 	auto& ir = inputR[0];
-	auto& sz = *ir.getdim(0);
-	if (sz != Particles::particleSz) return;
+	if (ir.getdim(0) != Particles::particleSz) return;
 
 	double* vals = *(double**)ir.getval();
 

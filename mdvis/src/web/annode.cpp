@@ -1,5 +1,6 @@
 #include "anweb.h"
 #ifndef IS_ANSERVER
+#include "md/particles.h"
 #include "ui/icons.h"
 #include "ui/ui_ext.h"
 #include "res/resdata.h"
@@ -12,15 +13,15 @@ Vec4 AnCol::conn_vector = {};
 #define _script script->parent
 
 void* AnNode::nodecon::getval() {
-	return first->script->Resolve(getconv().offset);
+	return first->GetOutVal(second);
 }
 
 AnScript::Var& AnNode::nodecon::getvar() {
 	return first->script->parent->outputs[second];
 }
 
-int* AnNode::nodecon::getdim(int i) {
-	return first->script->GetDimValue(getconv().szOffsets[i]);
+int AnNode::nodecon::getdim(int i) {
+	return first->GetOutDim(second, i);
 }
 
 float AnNode::width = 220;
@@ -536,6 +537,7 @@ void AnNode::PreExecute() {
 
 bool AnNode::TryExecute() {
 	std::lock_guard<std::mutex> lock(execMutex);
+	if (execd) return false;
 	if (!executing) {
 		for (auto& i : inputR) {
 			if (!i.execd) return false;
@@ -608,37 +610,37 @@ void AnNode::ApplyFrameCount(int f) {
 }
 
 void AnNode::WriteFrame(int f) {
-	/*
 	if (!(flags & AN_FLAG_NOSAVECONV)) return;
 	for (int a = 0; a < conV.size(); ++a) {
+		auto& iv = script->parent->outputs[a];
 		auto& c = conV[a];
+		auto val = script->Resolve(c.offset);
 		auto& ca = conVAll[a][f];
-		switch (c.type) {
+		switch (iv.type) {
 		case AN_VARTYPE::SHORT:
-			ca.val.i = *(short*)c.value;
+			ca.val.i = *(short*)val;
 			break;
 		case AN_VARTYPE::INT:
-			ca.val.i = *(int*)c.value;
+			ca.val.i = *(int*)val;
 			break;
 		case AN_VARTYPE::DOUBLE:
-			ca.val.d = *(double*)c.value;
+			ca.val.d = *(double*)val;
 			break;
 		case AN_VARTYPE::LIST: {
 			int n = 1;
-			auto ds = c.dimVals.size();
-			ca.dims.resize(ds);
-			for (size_t d = 0; d < ds; ++d) {
-				n *= ca.dims[d] = *c.dimVals[d];
+			ca.dims.resize(iv.dim);
+			for (size_t d = 0; d < iv.dim; ++d) {
+				n *= ca.dims[d] = *script->GetDimValue(c.szOffsets[d]);
 			}
-			n *= c.stride;
-			ca.val.arr.data.resize(n);
-			memcpy(&ca.val.arr.data[0], *(char**)c.value, n);
-			ca.val.arr.p = &ca.val.arr.data[0];
+			n *= iv.stride;
+			ca.arr.resize(n);
+			ca.val.p = ca.arr.data();
+			memcpy(ca.val.p, *(char**)val, n);
+			ca.pval = &ca.val.p;
 			break;
 		}
 		}
 	}
-	*/
 }
 
 bool AnNode::ReadFrame(int f) {
@@ -834,4 +836,18 @@ void AnNode::OnValChange(int i) {
 	if (!!(flags & AN_FLAG_RUNONVALCHG)) {
 		Execute();
 	}
+}
+
+void* AnNode::GetOutVal(int i) {
+	if (!AnWeb::executing && conVAll[i].size() > Particles::anim.currentFrame)
+		return conVAll[i][Particles::anim.currentFrame].pval;
+	else 
+		return script->Resolve(conV[i].offset);
+}
+
+int AnNode::GetOutDim(int i, int d) {
+	if (!AnWeb::executing && conVAll[i].size() > Particles::anim.currentFrame)
+		return conVAll[i][Particles::anim.currentFrame].dims[d];
+	else
+		return *script->GetDimValue(conV[i].szOffsets[d]);
 }

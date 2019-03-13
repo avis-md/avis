@@ -25,10 +25,10 @@ an adjacency list)";
 
 void Node_AdjList::Execute() {
 	if (!inputR[0].first) return;
-	if (*inputR[0].getdim(1) != 2)
+	if (inputR[0].getdim(1) != 2)
 		RETERR("input list dim 2 size is not 2!");
 	auto data = *(int**)inputR[0].getval();
-	auto ccnt = *inputR[0].getdim(0);
+	auto ccnt = inputR[0].getdim(0);
 	count = getval_i(1);
 	listsize = getval_i(2);
 	if (listsize <= 0) RETERR("list size must be positive!");
@@ -83,8 +83,8 @@ void Node_AdjListI::Execute() {
 	if (!inputR[0].first) return;
 	auto& ir = inputR[0];
 	auto data = *(int**)ir.getval();
-	auto cnt = *ir.getdim(0);
-	auto lsz = *ir.getdim(1);
+	auto cnt = ir.getdim(0);
+	auto lsz = ir.getdim(1);
 	if (!cnt || !lsz) return;
 	conns.clear();
 	conns.reserve(cnt*lsz/2);

@@ -37,11 +37,13 @@ struct VarVal {
 	} val;
 	void* pval;
 	std::vector<char> arr;
+	std::vector<int> dims;
 	
 	VarVal() = default;
 	VarVal(const VarVal& vv) {
 		val = vv.val;
 		arr = vv.arr;
+		dims = vv.dims;
 		if (arr.size() > 0) val.p = arr.data();
 		if (vv.pval == &vv.val) pval = &val;
 		else pval = vv.pval;
@@ -49,6 +51,7 @@ struct VarVal {
 	VarVal& operator= (const VarVal& vv) {
 		val = vv.val;
 		arr = vv.arr;
+		dims = vv.dims;
 		if (arr.size() > 0) val.p = arr.data();
 		if (vv.pval == &vv.val) pval = &val;
 		else pval = vv.pval;

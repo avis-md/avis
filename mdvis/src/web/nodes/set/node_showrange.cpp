@@ -15,7 +15,7 @@ Node_ShowRange::Node_ShowRange() : INODE_INIT, invert(false), rMin(0), rMax(1) {
 void Node_ShowRange::Execute() {
     if (!inputR[0].first) return;
 	auto& ir = inputR[0];
-	if (*ir.getdim(0) != Particles::particleSz) return;
+	if (ir.getdim(0) != Particles::particleSz) return;
 
     double* vals = *((double**)ir.getval());
 

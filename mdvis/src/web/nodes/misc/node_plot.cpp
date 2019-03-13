@@ -129,14 +129,14 @@ void Node_Plot::Execute() {
 	int sz2;
 	if (type == TYPE::ALINES) {
 		sz = (int)Particles::anim.frameCount;
-		sz2 = (vr.type == AN_VARTYPE::LIST)? *ir.getdim(0) : 1;
+		sz2 = (vr.type == AN_VARTYPE::LIST)? ir.getdim(0) : 1;
 		if (sz <= 1) {
 			RETERR("Accumulate can only be used when animation data is loaded!");
 		}
 	}
 	else {
-		sz = *ir.getdim(0);
-		sz2 = (cv.szOffsets.size() > 1)? *ir.getdim(1) : 1;
+		sz = ir.getdim(0);
+		sz2 = (cv.szOffsets.size() > 1)? ir.getdim(1) : 1;
 	}
 	if (!sz || !sz2) {
 		RETERR("Size is empty!");
@@ -145,7 +145,7 @@ void Node_Plot::Execute() {
 		if (type == TYPE::ALINES) {
 			xid = -1;
 			yid = (vr.type == AN_VARTYPE::LIST)?
-				Clamp(yid, -1, *ir.getdim(1) - 1) : -1;
+				Clamp(yid, -1, ir.getdim(1) - 1) : -1;
 		}
 		else {
 			xid = Clamp(xid, -1, sz2 - 1);
@@ -332,7 +332,7 @@ void Node_Plot::OnConn(bool o, int i) {
 		}
 		else if (sz == 1) useids = false;
 		else if (sz == 2) {
-			auto v = *ir.getdim(0);
+			auto v = ir.getdim(0);
 			useids = (v > 1);
 		}
 		else {
