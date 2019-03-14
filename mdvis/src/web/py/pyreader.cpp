@@ -276,7 +276,7 @@ bool PyReader::ParseVar(std::istream& strm, std::string& ln, PyScript* scr, bool
 		return false;
 	}
 	v.name = AnWeb::ConvertName((_v.name
-		= ln.substr(5, find_first_not_name_char(ln.c_str() + 5))));
+		= ln.substr(0, find_first_not_name_char(ln.c_str()))));
 	_v.szs.resize(v.dim, -1);
 	return true;
 }

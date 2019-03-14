@@ -1,6 +1,4 @@
 #include "anweb.h"
-#include "cc/creader.h"
-#include "py/pyreader.h"
 #include "nodes/get/node_inputs.h"
 #include "nodes/get/node_info.h"
 #ifndef IS_ANSERVER
