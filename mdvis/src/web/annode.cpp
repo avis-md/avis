@@ -548,6 +548,7 @@ bool AnNode::TryExecute() {
 }
 
 void AnNode::_Execute(AnNode* n) {
+	std::lock_guard<std::mutex> _lock(n->execMutex);
 	auto lock = n->script->parent->allowParallel ? nullptr : &n->script->parent->parallelLock;
 	if (lock) lock->lock();
 	Debug::Message("AnNode", "Executing " + std::to_string(n->id) + n->title);
@@ -610,7 +611,7 @@ void AnNode::ApplyFrameCount(int f) {
 }
 
 void AnNode::WriteFrame(int f) {
-	if (!(flags & AN_FLAG_NOSAVECONV)) return;
+	if (!!(flags & AN_FLAG_NOSAVECONV)) return;
 	for (int a = 0; a < conV.size(); ++a) {
 		auto& iv = script->parent->outputs[a];
 		auto& c = conV[a];
@@ -841,7 +842,7 @@ void AnNode::OnValChange(int i) {
 void* AnNode::GetOutVal(int i) {
 	if (!AnWeb::executing && conVAll[i].size() > Particles::anim.currentFrame)
 		return conVAll[i][Particles::anim.currentFrame].pval;
-	else 
+	else
 		return script->Resolve(conV[i].offset);
 }
 

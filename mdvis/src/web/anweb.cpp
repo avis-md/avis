@@ -306,8 +306,8 @@ void AnWeb::Draw() {
 		bool canexec2 = (canexec && Particles::anim.frameCount > 1);
 		if (Engine::Button(wo, 1, 107, 16, white(1, canexec2 ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
 			if (canexec2) {
-				//AnWeb::Execute(true);
-				tinyfd_messageBox("Warning", "Please do not press that button again.", "ok", "warning", 1);
+				AnWeb::Execute(true);
+				//tinyfd_messageBox("Warning", "Please do not press that button again.", "ok", "warning", 1);
 			}
 		}
 		UI::Texture(wo, 1, 16, 16, Icons::playall);
@@ -380,8 +380,8 @@ void AnWeb::DrawSide() {
 			if (!execFrame) {
 				if (Engine::Button(expos + 72, 38, 107, 16, white(1, canexec2 ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
 					if (canexec2) {
-						//AnWeb::Execute(true);
-						tinyfd_messageBox("Warning", "Please do not press that button again.", "ok", "warning", 1);
+						AnWeb::Execute(true);
+						//tinyfd_messageBox("Warning", "Please do not press that button again.", "ok", "warning", 1);
 					}
 				}
 			}
