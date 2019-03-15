@@ -7,7 +7,7 @@ std::vector<std::string> Dialog::OpenFile(std::vector<std::string> pattern, bool
 	for (size_t a = 0; a < ps; ++a) {
 		pts[a] = pattern[a].c_str();
 	}
-	auto cres = tinyfd_openFileDialog("Open", nullptr, ps, &pts[0], nullptr, mul);
+	auto cres = tinyfd_openFileDialog("Open", nullptr, (int)ps, &pts[0], nullptr, mul);
 	if (cres) {
 		auto s = std::string(cres);
 #ifdef PLATFORM_WIN

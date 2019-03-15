@@ -40,7 +40,7 @@ void ArrayView::Draw() {
 				UI::Label(5, y, 12, "Array is empty", white(0.8f));
 			}
 			else {
-				Engine::BeginStencil(0, y, Display::width, Display::height - y - 18.f);
+				Engine::BeginStencil(0, y, (float)Display::width, Display::height - y - 18.f);
 				int dw = 71;
 				int nw = (int)std::floor((Display::width - 10) / dw);
 				dw = (Display::width - 10) / nw;
@@ -62,8 +62,8 @@ void ArrayView::Draw() {
 						OHNO("ArrayView", "Unexpected type: " + std::string(1, type) + "!");
 						return;
 					}
-					const int x = 5 + ix * dw;
-					UI::Quad(x, y, dw-1, 16, white(0.9f, sw? 0.2f : 0.3f));
+					const float x = 5.f + ix * dw;
+					UI::Quad(x, y, dw-1.f, 16, white(0.9f, sw? 0.2f : 0.3f));
 					UI::Label(x + 2, y, 12, vl, white(0.9f));
 					if (++ix == nw) {
 						ix = 0;

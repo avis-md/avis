@@ -43,10 +43,10 @@ int ErrorView::Parse_GCC(const std::string& path, const std::string& sig, const 
 				msgs.push_back(Message());
 				msg = &msgs.back();
 				msg->name = nm; msg->path = sig;
-				int i = str.find_first_of(':', sz + 2);
+				auto i = str.find_first_of(':', sz + 2);
 				msg->linenum = TryParse(str.substr(sz + 1, i - sz - 1), -1);
 				if (msg->linenum > -1) {
-					int j = str.find_first_of(':', i + 2);
+					auto j = str.find_first_of(':', i + 2);
 					msg->charnum = TryParse(str.substr(i + 1, j - i - 1), -1);
 					if (str.size() > j + 7) {
 						str = str.substr(j + 2);
@@ -99,7 +99,7 @@ int ErrorView::Parse_MSVC(const std::string& path, const std::string& sig, const
 			msgs.push_back(Message());
 			msg = &msgs.back();
 			msg->name = nm; msg->path = sig;
-			int i = str.find_first_of(')', sz + 2);
+			auto i = str.find_first_of(')', sz + 2);
 			msg->linenum = TryParse(str.substr(sz + 1, i - sz - 1), -1);
 			str = str.substr(i + 4);
 			if (str.substr(0, 5) == "error") {
@@ -175,7 +175,7 @@ void ErrorView::Draw() {
 #endif
 				}
 				else if (descId == a) descId = -1;
-				else descId = a;
+				else descId = (int)a;
 			}
 			if (err.severe) {
 				UI::Texture(5, off + 1, 14, 14, Icons::cross, red());

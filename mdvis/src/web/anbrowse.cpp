@@ -267,7 +267,7 @@ void AnBrowse::Draw() {
 		UI::Label(5, 3, 12.f, "Scripts", white());
 		HelpMenu::Link(expandPos - 16, 3, "anl/index.html");
 
-		float f = UI::BeginScroll(0, 19, expandPos, Display::height - 38);
+		float f = UI::BeginScroll(0, 19, expandPos, Display::height - 38.f);
 		for (int n = 0; n < ANNODE_GROUP_COUNT; ++n) {
 			UI::Quad(2, f, 150.f, 16.f, white(1, 0.3f));
 			if (Engine::Button(2, f, 16.f, 16.f, mscFdExpanded[n] ? Icons::expand : Icons::collapse) == MOUSE_RELEASE)
@@ -280,7 +280,7 @@ void AnBrowse::Draw() {
 				for (size_t a = 0; a < sz; a++) {
 					if (Engine::Button(7, f, 150.f, 16.f, white(1, 0.35f)) == MOUSE_RELEASE) {
 						AnWeb::selScript = (AnScript*)1;
-						AnWeb::selSpNode = (n << 8) | a;
+						AnWeb::selSpNode = (uint)((n << 8) | a);
 					}
 					UI::Texture(7, f, 16.f, 16.f, Icons::lightning);
 					UI::Label(27, f, 12.f, lst[a].name, white());

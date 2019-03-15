@@ -321,7 +321,7 @@ float AnNode::DrawSide() {
 		UI::Quad(pos.x, pos.y + 16, width, 2, white(0.7f, 0.25f));
 		UI::Quad(pos.x, pos.y + 16, 2 + (width - 2) * script->GetProgress(), 2, red());
 	}
-	float dy = (executing ? 18 : 16), y = pos.y + dy;
+	float dy = (executing ? 18.f : 16.f), y = pos.y + dy;
 	if (expanded) {
 		UI::Quad(pos.x, y, width, height - dy, white(1, 0.2f));
 		y += 2;

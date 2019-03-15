@@ -339,7 +339,7 @@ void AnWeb::Draw() {
 
 	if (waitBrowse) {
 		UI::IncLayer();
-		UI::Quad(0, 0, Display::width, Display::height, black(0.5f));
+		UI::Quad(0, 0, (float)Display::width, (float)Display::height, black(0.5f));
 		UI::font.Align(ALIGN_MIDCENTER);
 		UI::Label(Display::width * 0.5f, Display::height * 0.5f, 12, AnBrowse::busyMsg, white(0.8f));
 		UI::font.Align(ALIGN_TOPLEFT);
@@ -396,7 +396,7 @@ void AnWeb::DrawSide() {
 			else
 				UI::Texture(expos + 72, 38, 16, 16, Icons::playall);
 
-			float off = UI::BeginScroll(expos, 17 * 3 + 4, 180, Display::height - 17 * 3 - 23);
+			float off = UI::BeginScroll(expos, 17 * 3 + 4, 180, Display::height - 17.f * 3 - 23.f);
 			Vec2 poss(expos + 1, off);
 			for (auto n : nodes) {
 				n->pos = poss;
@@ -509,7 +509,7 @@ void AnWeb::_DoExecute() {
 	char* err = 0;
 	static std::string pylog;
 	nextNode = ~0U;
-	execN = nodes.size();
+	execN = (int)nodes.size();
 	for (auto& n : nodes) {
 		n->PreExecute();
 	}

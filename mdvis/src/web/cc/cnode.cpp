@@ -59,7 +59,7 @@ void CNode::Execute() {
 			case AN_VARTYPE::LIST: {
 				auto& vr = inputR[i].getvar();
 				std::vector<int> szs(vr.dim);
-				for (uint j = 0; j < vr.dim; ++j) {
+				for (int j = 0; j < vr.dim; ++j) {
 					szs[j] = inputR[i].getdim(j);
 				}
 				script->SetInput(i, *(void**)v, mv.name[6], szs);

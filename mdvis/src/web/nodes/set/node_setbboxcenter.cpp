@@ -4,21 +4,22 @@
 
 INODE_DEF(__("Set Bounding Box Center"), SetBBoxCenter, SET)
 
-Node_SetBBoxCenter::Node_SetBBoxCenter() : INODE_INIT {
-	INODE_TITLE(NODE_COL_IO);
-	
-	AddInput();
-	script->AddInput("center", "list(1d)");
+Node_SetBBoxCenter::Node_SetBBoxCenter() : INODE_INIT{
+	INODE_TITLE(NODE_COL_IO)
+	INODE_SINIT(
+		scr->AddInput(_("center"), AN_VARTYPE::DOUBLE, 1);
+	);
 }
 
 void Node_SetBBoxCenter::Execute() {
-	if (!inputR[0].first) return;
-	if (*inputR[0].getconv().dimVals[0] != 3) {
+	auto& ir = inputR[0];
+	if (!ir.first) return;
+	if (ir.getdim(0) != 3) {
 		std::cerr << "vector must be of length 3!" << std::endl;
 		return;
 	}
 	if (!AnWeb::execFrame)
-		Particles::Rebound(**(glm::dvec3**)inputR[0].getval());
+		Particles::Rebound(**(glm::dvec3**)ir.getval());
 	else
-		Particles::ReboundF(**(glm::dvec3**)inputR[0].getval(), AnWeb::execFrame-1);
+		Particles::ReboundF(**(glm::dvec3**)ir.getval(), AnWeb::execFrame - 1);
 }

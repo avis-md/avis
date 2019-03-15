@@ -5,9 +5,8 @@
 
 INODE_DEF(__("Draw Surface"), AddSurface, GEN);
 
-bool Node_AddSurface::initd = false;
-PROGDEF(Node_AddSurface::marcherProg);
-PROGDEF(Node_AddSurface::drawProg);
+Shader Node_AddSurface::marchProg;
+Shader Node_AddSurface::drawProg;
 
 size_t Node_AddSurface::bufSz = 0, Node_AddSurface::outSz = 0;
 uint Node_AddSurface::genSz = 0;
@@ -16,14 +15,13 @@ GLuint Node_AddSurface::inBuf, Node_AddSurface::inBufT, Node_AddSurface::query;
 std::mutex Node_AddSurface::lock;
 
 Node_AddSurface::Node_AddSurface() : INODE_INITF(AN_FLAG_RUNONSEEK | AN_FLAG_RUNONVALCHG) {
-	if (!initd) Init();
+	INODE_TITLE(NODE_COL_MOD)
+	INODE_SINIT(
+		Init();
 
-	INODE_TITLE(NODE_COL_MOD);
-
-	AddInput();
-	scr.AddInput("density", "list(3d)");
-	AddInput();
-	scr.AddInput("value", "double");
+		scr->AddInput(_("density"), AN_VARTYPE::DOUBLE, 3);
+		scr->AddInput(_("value"), AN_VARTYPE::DOUBLE);
+	);
 
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &outPos);
@@ -38,12 +36,13 @@ Node_AddSurface::~Node_AddSurface() {
 
 void Node_AddSurface::Execute() {
 	genSz = 0;
-	if (!inputR[0].first) return;
-	auto& cv = inputR[0].getconv();
-	auto& vl = *(double**)cv.value;
-	shape[0] = *cv.dimVals[0];
-	shape[1] = *cv.dimVals[1];
-	shape[2] = *cv.dimVals[2];
+	auto& ir = inputR[0];
+	if (!ir.first) return;
+	auto& cv = ir.getconv();
+	auto& vl = *(double**)ir.getval();
+	shape[0] = ir.getdim(0);
+	shape[1] = ir.getdim(1);
+	shape[2] = ir.getdim(2);
 	const int sz = shape[0] * shape[1] * shape[2];
 	if (!sz) return;
 	std::lock_guard<std::mutex> locker(lock);
@@ -66,16 +65,16 @@ void Node_AddSurface::Update() {
 	}
 }
 
-void Node_AddSurface::DrawScene() {
+void Node_AddSurface::DrawScene(RENDER_PASS pass) {
 	if (!genSz) return;
 
 	auto e = glGetError();
 	glUseProgram(drawProg);
-	glUniformMatrix4fv(drawProgLocs[0], 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
-	glUniformMatrix4fv(drawProgLocs[1], 1, GL_FALSE, glm::value_ptr(MVP::projection() * MVP::modelview()));
+	glUniformMatrix4fv(drawProg.Loc(0), 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
+	glUniformMatrix4fv(drawProg.Loc(1), 1, GL_FALSE, glm::value_ptr(MVP::projection() * MVP::modelview()));
 	auto& bboxs = Particles::boundingBox;
-	glUniform3f(drawProgLocs[2], bboxs[0], bboxs[2], bboxs[4]);
-	glUniform3f(drawProgLocs[3], bboxs[1], bboxs[3], bboxs[5]);
+	glUniform3f(drawProg.Loc(2), bboxs[0], bboxs[2], bboxs[4]);
+	glUniform3f(drawProg.Loc(3), bboxs[1], bboxs[3], bboxs[5]);
 	glBindVertexArray(vao);
 	glDrawArrays(GL_TRIANGLES, 0, genSz*3);
 	e = glGetError();
@@ -95,47 +94,34 @@ void Node_AddSurface::Init() {
 		return;
 	}
 
-	marcherProg = glCreateProgram();
-	glAttachShader(marcherProg, vs);
-	glAttachShader(marcherProg, gs);
+	marchProg = glCreateProgram();
+	glAttachShader(marchProg, vs);
+	glAttachShader(marchProg, gs);
 	const char* fb[] = { "outPos", "outNrm" };
-	glTransformFeedbackVaryings(marcherProg, 2, fb, GL_SEPARATE_ATTRIBS);
+	glTransformFeedbackVaryings(marchProg, 2, fb, GL_SEPARATE_ATTRIBS);
 	int link_result = 0;
-	glLinkProgram(marcherProg);
-	glGetProgramiv(marcherProg, GL_LINK_STATUS, &link_result);
+	glLinkProgram(marchProg);
+	glGetProgramiv(marchProg, GL_LINK_STATUS, &link_result);
 	if (!link_result)
 	{
 		int info_log_length = 0;
-		glGetProgramiv(marcherProg, GL_INFO_LOG_LENGTH, &info_log_length);
+		glGetProgramiv(marchProg, GL_INFO_LOG_LENGTH, &info_log_length);
 		std::vector<char> program_log(info_log_length);
-		glGetProgramInfoLog(marcherProg, info_log_length, NULL, &program_log[0]);
+		glGetProgramInfoLog(marchProg, info_log_length, NULL, &program_log[0]);
 		Debug::Error("AddSurface::Init", "Link error: " + std::string(program_log.data(), info_log_length));
-		glDeleteProgram(marcherProg);
-		marcherProg = 0;
+		marchProg = 0;
 		return;
 	}
 
-	glDetachShader(marcherProg, vs);
-	glDetachShader(marcherProg, gs);
+	glDetachShader(marchProg, vs);
+	glDetachShader(marchProg, gs);
 	glDeleteShader(vs);
 	glDeleteShader(gs);
 
-	int i = 0;
-#define LOC(nm) marcherProgLocs[i++] = glGetUniformLocation(marcherProg, #nm)
-	LOC(data);
-	LOC(val);
-	LOC(shp);
-	LOC(triBuf);
-#undef LOC
+	marchProg.AddUniforms({ "data", "val", "shp", "triBuf" });
 
-	drawProg = Shader::FromVF(IO::GetText(IO::path + "surfDVert.glsl"), IO::GetText(IO::path + "surfDFrag.glsl"));
-	i = 0;
-#define LOC(nm) drawProgLocs[i++] = glGetUniformLocation(drawProg, #nm)
-	LOC(_MV);
-	LOC(_MVP);
-	LOC(bbox1);
-	LOC(bbox2);
-#undef LOC
+	(drawProg = Shader::FromVF(IO::GetText(IO::path + "shaders/surfDVert.glsl"), IO::GetText(IO::path + "shaders/surfDFrag.glsl")))
+		.AddUniforms({ "_MV", "_MVP", "bbox1", "bbox2" });
 
 	glGenBuffers(1, &inBuf);
 	glGenTextures(1, &inBufT);
@@ -149,8 +135,6 @@ void Node_AddSurface::Init() {
 	glBindTexture(GL_TEXTURE_BUFFER, triBufT);
 	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, triBuf);
 	glBindTexture(GL_TEXTURE_BUFFER, 0);
-
-	initd = true;
 }
 
 void Node_AddSurface::Set() {
@@ -186,17 +170,17 @@ void Node_AddSurface::Set() {
 }
 
 void Node_AddSurface::ExecMC() {
-	glUseProgram(marcherProg);
+	glUseProgram(marchProg);
 	glBindVertexArray(Camera::emptyVao);
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, outPos);
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, outNrm);
 
-	glUniform1i(marcherProgLocs[0], 1);
+	glUniform1i(marchProg.Loc(0), 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_BUFFER, inBufT);
-	glUniform1f(marcherProgLocs[1], cutoff);
-	glUniform3i(marcherProgLocs[2], shape[0], shape[1], shape[2]);
-	glUniform1i(marcherProgLocs[3], 2);
+	glUniform1f(marchProg.Loc(1), cutoff);
+	glUniform3i(marchProg.Loc(2), shape[0], shape[1], shape[2]);
+	glUniform1i(marchProg.Loc(3), 2);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_BUFFER, triBufT);
 

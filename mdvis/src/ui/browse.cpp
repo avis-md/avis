@@ -17,7 +17,7 @@ void Browse::Draw() {
 	if (mode == MODE::NONE) return;
 	UI::IncLayer();
 
-	UI2::BackQuad(0, 0, Display::width, Display::height);
+	UI2::BackQuad(0, 0, (float)Display::width, (float)Display::height);
 
 	if (Engine::Button(10, 2, 100, 16, Vec4(0.4f, 0.4f, 0.2f, 1), "Cancel", 12, white(), true) == MOUSE_RELEASE) {
 		mode = MODE::NONE;
@@ -89,11 +89,11 @@ void Browse::Draw() {
 			system->Seek(system->path, true);
 			selId = -1;
 		}
-		Engine::Button(115, 20, Display::width - 226, 16, white(1, 0.2f), 
+		Engine::Button(115, 20, Display::width - 226.f, 16, white(1, 0.2f), 
 			(selId > -1)? system->path + system->files[selId] : system->path, 12, white());
 
 		if (selId > -1) {
-			if (Engine::Button(Display::width - 110, 20, 100, 16, Vec4(0.2f, 0.4f, 0.2f, 1), "Open", 12, white(), true) == MOUSE_RELEASE) {
+			if (Engine::Button(Display::width - 110.f, 20, 100, 16, Vec4(0.2f, 0.4f, 0.2f, 1), "Open", 12, white(), true) == MOUSE_RELEASE) {
 				mode = MODE::NONE;
 				if (callback) callback(system->path + system->files[selId]);
 				selId = -1;
@@ -103,7 +103,7 @@ void Browse::Draw() {
 			}
 		}
 
-		float off = UI::BeginScroll(10, 60, 100, Display::height - 80);
+		float off = UI::BeginScroll(10, 60, 100, Display::height - 80.f);
 		for (auto& fd : system->fds) {
 			if (Engine::Button(10, off, 100, 16, white(1, 0.2f), fd, 12, white()) == MOUSE_RELEASE) {
 				system->Seek(fd, false);
@@ -113,9 +113,9 @@ void Browse::Draw() {
 		}
 		UI::EndScroll(off);
 
-		off = UI::BeginScroll(115, 60, Display::width - 120, Display::height - 65);
-		int wn = (int)std::floor((Display::width - 120) / 160);
-		float ws = (Display::width - 120) / wn;
+		off = UI::BeginScroll(115, 60, Display::width - 120.f, Display::height - 65.f);
+		int wn = (int)std::floor((Display::width - 120.f) / 160);
+		float ws = (Display::width - 120.f) / wn;
 		int wi = 0;
 		float woff = 115;
 		off -= 17;

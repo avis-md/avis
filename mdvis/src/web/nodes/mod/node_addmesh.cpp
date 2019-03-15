@@ -3,9 +3,9 @@
 #include "ui/ui_ext.h"
 #include "vis/pargraphics.h"
 
-Shader Node_AddMesh::shad;
-
 INODE_DEF(__("Draw Mesh"), AddMesh, GEN);
+
+Shader Node_AddMesh::shad;
 
 Node_AddMesh::Node_AddMesh() : INODE_INIT, dirty(false), tsz(0), vao(0), vbos(), col(white()) {
 	INODE_TITLE(NODE_COL_MOD)
@@ -13,7 +13,7 @@ Node_AddMesh::Node_AddMesh() : INODE_INIT, dirty(false), tsz(0), vao(0), vbos(),
 		scr->AddInput(_("vertices"), AN_VARTYPE::DOUBLE, 2);
 		scr->AddInput(_("normals"), AN_VARTYPE::DOUBLE, 2);
 
-		(shad = Shader::FromVF(IO::GetText(IO::path + "meshV.glsl"), IO::GetText(IO::path + "meshF.glsl")))
+		(shad = Shader::FromVF(IO::GetText(IO::path + "shaders/meshV.glsl"), IO::GetText(IO::path + "shaders/meshF.glsl")))
 			.AddUniforms({ "_MV", "_P", "color" });
 	);
 
@@ -81,7 +81,7 @@ void Node_AddMesh::DrawHeader(float& off) {
 void Node_AddMesh::DrawScene(const RENDER_PASS pass) {
 	if (!tsz) return;
 
-	if (pass == RENDER_PASS::TRANS) {
+	if (pass == RENDER_PASS::SOLID) {
 		shad.Bind();
 		glUniformMatrix4fv(shad.Loc(0), 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
 		glUniformMatrix4fv(shad.Loc(1), 1, GL_FALSE, glm::value_ptr(MVP::projection()));
