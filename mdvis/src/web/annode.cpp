@@ -420,9 +420,9 @@ void AnNode::DrawDefVal(int i, float y) {
 		break;
 	}
 	case  AnScript::Var::UI_TYPE::RANGE: {
-		float res = (float)(isi ? dr.i : dr.d);
+		float res = (isi ? (float)dr.i : (float)dr.d);
 		res = UI2::Slider(pos.x + width*0.33f, y, width*0.67f - 6, vr.range.x, vr.range.y, res);
-		if (isi) dr.i = (int)std::roundf(res);
+		if (isi) dr.i = (int)std::round(res);
 		else dr.d = res;
 		break;
 	}
