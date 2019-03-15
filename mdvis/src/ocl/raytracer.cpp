@@ -1,16 +1,12 @@
 #include "raytracer.h"
 #include "hdr.h"
 #include "kernel.h"
-#include "tmp/tiny_obj_loader.h"
 #include "vis/pargraphics.h"
 
 RadeonRays::matrix RadeonRays::MatFunc::Glm2RR(const glm::mat4& mat) {
 	auto m = glm::transpose(mat);
 	return *(RadeonRays::matrix*)&m;
 }
-
-
-namespace TO = tinyobj;
 
 int RayTracer::maxRefl = 3;
 
@@ -80,8 +76,8 @@ bool RayTracer::Init() {
 	return true;
 }
 
-std::vector<TO::shape_t> g_objshapes;
-std::vector<TO::material_t> g_objmaterials;
+std::vector<shape_t> g_objshapes;
+std::vector<material_t> g_objmaterials;
 
 CLWBuffer<float> bg_buf;
 CLWBuffer<float> g_positions;
@@ -250,7 +246,7 @@ void RayTracer::SetObjs() {
 		tet.Subdivide();
 	tet.ToSphere(0.02f);
 
-	g_objshapes.push_back(TO::shape_t());
+	g_objshapes.push_back(shape_t());
 	auto& m = g_objshapes.back().mesh;
 	auto& v = m.positions;
 	v.resize(tet.verts.size() * 3);
@@ -261,7 +257,7 @@ void RayTracer::SetObjs() {
 	memcpy(&m.normals[0], &tet.norms[0], tet.norms.size() * sizeof(Vec3));
 	const uint mp = std::min(Particles::particleSz, 5000U);
 	g_objshapes.resize(mp, g_objshapes[0]);
-	g_objmaterials.resize(mp, TO::material_t());
+	g_objmaterials.resize(mp, material_t());
 	std::vector<double>* attr = 0;
 	if (ParGraphics::useGradCol) {
 		attr = &Particles::attrs[ParGraphics::gradColParam]->Get(Particles::anim.currentFrame);
@@ -291,13 +287,13 @@ void RayTracer::SetObjs() {
 	int indent = 0;
 	for (int id = 0; id < g_objshapes.size(); ++id)
 	{
-		const TO::mesh_t& mesh = g_objshapes[id].mesh;
+		const mesh_t& mesh = g_objshapes[id].mesh;
 		verts.insert(verts.end(), mesh.positions.begin(), mesh.positions.end());
 		normals.insert(normals.end(), mesh.normals.begin(), mesh.normals.end());
 		inds.insert(inds.end(), mesh.indices.begin(), mesh.indices.end());
 		for (int mat_id : mesh.material_ids)
 		{
-			const TO::material_t& mat = g_objmaterials[mat_id];
+			const material_t& mat = g_objmaterials[mat_id];
 			colors.push_back(mat.diffuse[0]);
 			colors.push_back(mat.diffuse[1]);
 			colors.push_back(mat.diffuse[2]);

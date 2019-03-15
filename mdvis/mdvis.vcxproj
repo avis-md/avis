@@ -269,7 +269,6 @@
     <ClCompile Include="src\md\particles_animdata.cpp" />
     <ClCompile Include="src\md\particles_attrdata.cpp" />
     <ClCompile Include="src\md\pdb.cpp" />
-    <ClCompile Include="src\tmp\tiny_obj_loader.cpp" />
     <ClCompile Include="src\ui\browse.cpp" />
     <ClCompile Include="src\ui\localbrowsetarget.cpp" />
     <ClCompile Include="src\vis\preferences.cpp" />
@@ -341,7 +340,9 @@
     <ClCompile Include="src\web\nodes\misc\node_plot.cpp" />
     <ClCompile Include="src\web\nodes\mod\node_addbond.cpp" />
     <ClCompile Include="src\web\nodes\mod\node_addmesh.cpp" />
+    <ClCompile Include="src\web\nodes\mod\node_addsurface.cpp" />
     <ClCompile Include="src\web\nodes\set\node_setattribute.cpp" />
+    <ClCompile Include="src\web\nodes\set\node_setbboxcenter.cpp" />
     <ClCompile Include="src\web\nodes\set\node_setradscl.cpp" />
     <ClCompile Include="src\web\nodes\set\node_showrange.cpp" />
     <ClCompile Include="src\web\py\pyarr.cpp" />
@@ -398,7 +399,6 @@
     <ClInclude Include="src\res\envdata.h" />
     <ClInclude Include="src\res\prefdata.h" />
     <ClInclude Include="src\res\raddata.h" />
-    <ClInclude Include="src\tmp\tiny_obj_loader.h" />
     <ClInclude Include="src\ui\browse.h" />
     <ClInclude Include="src\ui\browsetarget.h" />
     <ClInclude Include="src\vis\preferences.h" />
@@ -481,7 +481,9 @@
     <ClInclude Include="src\web\nodes\misc\node_plot.h" />
     <ClInclude Include="src\web\nodes\mod\node_addbond.h" />
     <ClInclude Include="src\web\nodes\mod\node_addmesh.h" />
+    <ClInclude Include="src\web\nodes\mod\node_addsurface.h" />
     <ClInclude Include="src\web\nodes\set\node_setattribute.h" />
+    <ClInclude Include="src\web\nodes\set\node_setbboxcenter.h" />
     <ClInclude Include="src\web\nodes\set\node_setradscl.h" />
     <ClInclude Include="src\web\nodes\set\node_showrange.h" />
     <ClInclude Include="src\web\py\pyarr.h" />

@@ -292,16 +292,15 @@ bool FReader::Read(FScript* scr) {
 			
 			if (AnWeb::hasFt) {
 				auto& _bk = _vr.back();
-				auto nml = to_lowercase(bk.name);
 				if (!isa)
-					_bk.offset = (uintptr_t)scr->lib.GetSym(nml);
+					_bk.offset = (uintptr_t)scr->lib.GetSym(bk.name);
 				else {
-					_bk.offset = (uintptr_t)scr->lib.GetSym("__" + to_lowercase(scr->name) + "_MOD_" + nml);
+					_bk.offset = (uintptr_t)scr->lib.GetSym("__" + to_lowercase(scr->name) + "_MOD_" + bk.name);
 					if (iso) {
-						*fk = (FScript::emptyFunc)scr->lib.GetSym("exp_get_" + nml);
+						*fk = (FScript::emptyFunc)scr->lib.GetSym("exp_get_" + bk.name);
 						_bk.szOffsets.resize(bk.dim);
 					}
-					else *fk = (FScript::emptyFunc)scr->lib.GetSym("imp_set_" + nml);
+					else *fk = (FScript::emptyFunc)scr->lib.GetSym("imp_set_" + bk.name);
 					if (!fk) {
 						_ER2("array convert function");
 						return false;
@@ -312,6 +311,8 @@ bool FReader::Read(FScript* scr) {
 					return false;
 				}
 			}
+
+			bk.name = AnWeb::ConvertName(bk.name);
 		}
 	}
 	return true;

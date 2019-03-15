@@ -4,7 +4,6 @@
 class Node_SetBBoxCenter : public AnNode {
 public:
 	INODE_DEF_H
-
 	Node_SetBBoxCenter();
     
 	void Execute() override;

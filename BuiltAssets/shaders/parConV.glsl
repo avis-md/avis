@@ -18,7 +18,7 @@ layout (std140) uniform clipping {
     vec4 clip_planes[6];
 };
 bool clipped(vec3 pos) {
-    for (int a = 0; a < 6; ++a) {
+    for (int a = 0; a < 6; ++a)  {
         if (dot(pos, clip_planes[a].xyz) > clip_planes[a].w)
             return true;
     }

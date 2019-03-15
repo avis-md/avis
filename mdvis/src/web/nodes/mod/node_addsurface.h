@@ -4,17 +4,15 @@
 class Node_AddSurface : public AnNode {
 public:
 	INODE_DEF_H
-
 	Node_AddSurface();
 	~Node_AddSurface();
 	
 	void Execute() override;
+
 	void Update() override;
 	void DrawScene(const RENDER_PASS pass) override;
 protected:
-	static bool initd;
-	PROGDEF_H(marcherProg, 10);
-	PROGDEF_H(drawProg, 10);
+	static Shader marchProg, drawProg;
 
 	std::vector<float> data;
 	int shape[3];

@@ -299,7 +299,7 @@ void ParGraphics::Init() {
 			, "skyStrDecay" , "skyStrDecayOff" , "specStr" , "fogCol" 
 			, "isOrtho", "inOpaque" });
 	
-	parProg = Shader::FromVF(IO::GetText(IO::path + "parV.glsl"), IO::GetText(IO::path + "parF.glsl"));
+	parProg = Shader::FromVF(IO::GetText(IO::path + "shaders/parV.glsl"), IO::GetText(IO::path + "shaders/parF.glsl"));
 #define LC(nm) parProg.AddUniform(#nm)
 	i = 0;
 	LC(_MV); LC(_P); LC(camPos);
@@ -312,7 +312,7 @@ void ParGraphics::Init() {
 	glUniformBlockBinding(parProg, bid, _clipBindId);
 #undef LC
 
-	parConProg = Shader::FromVF(IO::GetText(IO::path + "parConV.glsl"), IO::GetText(IO::path + "parConF.glsl"));
+	parConProg = Shader::FromVF(IO::GetText(IO::path + "shaders/parConV.glsl"), IO::GetText(IO::path + "shaders/parConF.glsl"));
 #define LC(nm) parConProg.AddUniform(#nm)
 	i = 0;
 	LC(_MV); LC(_P); LC(camPos); LC(camFwd);
@@ -326,7 +326,7 @@ void ParGraphics::Init() {
 	glUniformBlockBinding(parConProg, bid, _clipBindId);
 #undef LC
 
-	parConLineProg = Shader::FromVF(IO::GetText(IO::path + "parConV_line.txt"), IO::GetText(IO::path + "parConF_line.txt"));
+	parConLineProg = Shader::FromVF(IO::GetText(IO::path + "shaders/parConV_line.glsl"), IO::GetText(IO::path + "shaders/parConF_line.glsl"));
 #define LC(nm) parConLineProg.AddUniform(#nm)
 	i = 0;
 	LC(_MV); LC(_P); LC(posTex);

@@ -306,8 +306,8 @@ void AnWeb::Draw() {
 		bool canexec2 = (canexec && Particles::anim.frameCount > 1);
 		if (Engine::Button(wo, 1, 107, 16, white(1, canexec2 ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
 			if (canexec2) {
-				//AnWeb::Execute(true);
-				tinyfd_messageBox("Warning", "Please do not press that button again.", "ok", "warning", 1);
+				AnWeb::Execute(true);
+				//tinyfd_messageBox("Warning", "Please do not press that button again.", "ok", "warning", 1);
 			}
 		}
 		UI::Texture(wo, 1, 16, 16, Icons::playall);
@@ -339,7 +339,7 @@ void AnWeb::Draw() {
 
 	if (waitBrowse) {
 		UI::IncLayer();
-		UI::Quad(0, 0, Display::width, Display::height, black(0.5f));
+		UI::Quad(0, 0, (float)Display::width, (float)Display::height, black(0.5f));
 		UI::font.Align(ALIGN_MIDCENTER);
 		UI::Label(Display::width * 0.5f, Display::height * 0.5f, 12, AnBrowse::busyMsg, white(0.8f));
 		UI::font.Align(ALIGN_TOPLEFT);
@@ -380,8 +380,8 @@ void AnWeb::DrawSide() {
 			if (!execFrame) {
 				if (Engine::Button(expos + 72, 38, 107, 16, white(1, canexec2 ? 0.4f : 0.2f), _("Run All"), 12, white(), true) == MOUSE_RELEASE) {
 					if (canexec2) {
-						//AnWeb::Execute(true);
-						tinyfd_messageBox("Warning", "Please do not press that button again.", "ok", "warning", 1);
+						AnWeb::Execute(true);
+						//tinyfd_messageBox("Warning", "Please do not press that button again.", "ok", "warning", 1);
 					}
 				}
 			}
@@ -396,7 +396,7 @@ void AnWeb::DrawSide() {
 			else
 				UI::Texture(expos + 72, 38, 16, 16, Icons::playall);
 
-			float off = UI::BeginScroll(expos, 17 * 3 + 4, 180, Display::height - 17 * 3 - 23);
+			float off = UI::BeginScroll(expos, 17 * 3 + 4, 180, Display::height - 17.f * 3 - 23.f);
 			Vec2 poss(expos + 1, off);
 			for (auto n : nodes) {
 				n->pos = poss;
@@ -509,7 +509,7 @@ void AnWeb::_DoExecute() {
 	char* err = 0;
 	static std::string pylog;
 	nextNode = ~0U;
-	execN = nodes.size();
+	execN = (int)nodes.size();
 	for (auto& n : nodes) {
 		n->PreExecute();
 	}

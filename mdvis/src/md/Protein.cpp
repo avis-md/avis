@@ -58,7 +58,7 @@ byte _CntOf(const std::vector<uint>& c, char _c) {
 }
 
 void Protein::Init() {
-	shad = Shader::FromVF(IO::GetText(IO::path + "prochainV.txt"), IO::GetText(IO::path + "prochainF.txt"));
+	shad = Shader::FromVF(IO::GetText(IO::path + "shaders/prochainV.glsl"), IO::GetText(IO::path + "shaders/prochainF.glsl"));
 #define LC(nm) shad.AddUniform(#nm)
 	int i = 0;
 	LC(_MV);

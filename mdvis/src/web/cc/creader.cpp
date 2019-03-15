@@ -84,7 +84,7 @@ bool CReader::Read(CScript* scr) {
 		std::string funcNm, progrsNm;
 
 		bool fail = false;
-#define _ER(a, b)\
+#define _ER(b)\
 			scr->compileLog.push_back(ErrorView::Message());\
 			auto& msgg = scr->compileLog.back();\
 			msgg.name = path;\
@@ -93,7 +93,7 @@ bool CReader::Read(CScript* scr) {
 			msgg.severe = true;\
 			scr->errorCount = 1;\
 			ErrorView::compileMsgs.push_back(msgg);\
-			Debug::Warning(a "(" + scr->name + ")", b);
+			Debug::Warning("CReader(" + scr->name + ")", b);
 
 		{
 			std::ifstream strm(fp + EXT_CS);
@@ -158,14 +158,14 @@ bool CReader::Read(CScript* scr) {
 							if (scr->isSingleton) ostrm << EXTERN;
 							ostrm << "\n" << s << '\n';
 							s = rm_spaces(s);
-							int bo = s.find('(');
-							int bc = s.find(')');
+							auto bo = s.find('(');
+							auto bc = s.find(')');
 							std::string ib = s.substr(bo + 1, bc - bo - 1);
 							if ((*(int32_t*)&s[0] == *(int32_t*)"void") && (ib == "" || ib == "void")) {
 								funcNm = s.substr(4, bo - 4);
 							}
 							else {
-								_ER("CReader", "//entry must precede a void function with no arguments!");
+								_ER("//entry must precede a void function with no arguments!");
 								fail = true;
 								break;
 							}
@@ -175,12 +175,12 @@ bool CReader::Read(CScript* scr) {
 							if (scr->isSingleton) ostrm << EXTERN;
 							ostrm << "\n" << s << '\n';
 							s = rm_spaces(s);
-							int eq = s.find('=');
-							if (s.substr(0, 6) == "double" && eq > -1) {
+							auto eq = s.find('=');
+							if (s.substr(0, 6) == "double" && eq != std::string::npos) {
 								progrsNm = s.substr(6, eq - 6);
 							}
 							else {
-								_ER("CReader", "//progress must precede a variable of type double!");
+								_ER("//progress must precede a variable of type double!");
 								fail = true;
 								break;
 							}
@@ -191,7 +191,7 @@ bool CReader::Read(CScript* scr) {
 				}
 
 				if (funcNm == "") {
-					_ER("CReader", "Script has no entry point!");
+					_ER("Script has no entry point!");
 					fail = true;
 				}
 
@@ -239,7 +239,7 @@ bool CReader::Read(CScript* scr) {
 				scr->errorCount = ErrorView::Parse_MSVC(fp2 + nm + "_log.txt", tmpPath, nm + ".cpp", scr->compileLog);
 			}
 			else {
-				std::string cmd = "g++ -std=c++11 -static-libstdc++ -shared -fPIC -D_WIN_ -I\"" + fd + "\" -I" + incfd + " -include _avis_print.h " + flags1;
+				std::string cmd = "g++ -g -std=c++11 -static-libstdc++ -shared -fPIC -D_WIN_ -I\"" + fd + "\" -I" + incfd + " -include _avis_print.h " + flags1;
 				if (useOMP) {
 					cmd += " -fopenmp";
 					if (useOMP2) cmd += " -lomp";
@@ -289,12 +289,12 @@ bool CReader::Read(CScript* scr) {
 #else
 				"";//dlerror();
 #endif
-			_ER("CReader", "Failed to load script into memory! " + err);
+			_ER("Failed to load script into memory! " + err);
 			FAIL0;
 		}
 
 #define CHKPTR(vr) if (!scr->vr) {\
-				_ER("CReader", "Internal error: failed to register " #vr " from compiled binary!");\
+				_ER("Internal error: failed to register " #vr " from compiled binary!");\
 				FAIL0;\
 			}
 
@@ -304,7 +304,7 @@ bool CReader::Read(CScript* scr) {
 			scr->stdioClr = (CScript::clearFunc)scr->lib.GetSym("__stdio_clear");
 			auto pmtx = scr->lib.GetSym("__stdio_plock");
 			if (!pmtx) {\
-				_ER("CReader", "Internal error: failed to register *stdioLock from compiled binary!");\
+				_ER("Internal error: failed to register *stdioLock from compiled binary!");\
 				FAIL0;\
 			}
 			scr->stdioLock = *(std::mutex**)pmtx;
@@ -326,14 +326,14 @@ bool CReader::Read(CScript* scr) {
 		if (!useMsvc) {
 			auto fhlc = (emptyFunc*)scr->lib.GetSym("__noterm_cFunc");
 			if (!fhlc) {
-				_ER("CReader", "Failed to register function pointer! Please tell the monkey!");
+				_ER("Failed to register function pointer! Please tell the monkey!");
 				FAIL0;
 			}
 			*fhlc = scr->funcLoc;
 
 			scr->wFuncLoc = (wrapFunc)scr->lib.GetSym("_Z5ExecCv");
 			if (!scr->funcLoc) {
-				_ER("CReader", "Failed to register entry function! Please tell the monkey!");
+				_ER("Failed to register entry function! Please tell the monkey!");
 				FAIL0;
 			}
 		}
@@ -357,9 +357,9 @@ bool CReader::Read(CScript* scr) {
 		fst = false;
 
 		auto lns = string_split(string_trim(ln), ' ', true);
-		int lnsz = lns.size();
+		auto lnsz = lns.size();
 		if (!lnsz) continue;
-		bool ien = (lnsz > 1)? (lns[1] == "enum") : false; 
+		bool ien = (lnsz > 1)? (lns[1] == "enum") : false;
 		bool irg = (lnsz > 1)? (lns[1] == "range") : false;
 		bool iso = (lns[0] == "//out");
 		if (lns[0] == "//in" || iso) {
@@ -388,32 +388,32 @@ bool CReader::Read(CScript* scr) {
 			}
 
 			if (ira && lnsz == 1) {
-				_ER("CReader", "Plain " + ios + " must be of non-pointer type!");
+				_ER("Plain " + ios + " must be of non-pointer type!");
 				return false;
 			}
 			else if (ien && (vr.typeName != "int" || ira)) {
-				_ER("CReader", "" + ios + " enum must be of int type!");
+				_ER("" + ios + " enum must be of int type!");
 				return false;
 			}
 			else if (ien && lnsz < 3) {
-				_ER("CReader", "" + ios + " enum has no options!");
+				_ER("" + ios + " enum has no options!");
 				return false;
 			}
 			else if (irg && lnsz != 4) {
-				_ER("CReader", "" + ios + " range must have 2 parameters!");
+				_ER("" + ios + " range must have 2 parameters!");
 				return false;
 			}
 			if (!ira) {
 				if (lnsz > 1 && !ien && !irg) {
-					_ER("CReader", "" + ios + " with specified size must be of pointer type!");
+					_ER("" + ios + " with specified size must be of pointer type!");
 					return false;
 				}
 				else if (ien && iso) {
-					_ER("CReader", "" + ios + " cannot be an enum!");
+					_ER("" + ios + " cannot be an enum!");
 					return false;
 				}
 				else if (irg && iso) {
-					_ER("CReader", "" + ios + " cannot be ranged!");
+					_ER("" + ios + " cannot be ranged!");
 					return false;
 				}
 			}
@@ -423,7 +423,7 @@ bool CReader::Read(CScript* scr) {
 			if (te == AN_VARTYPE::NONE) {
 				std::string add = "";
 				if (vr.typeName == "float") add = " Did you mean \"double\"?";
-				_ER("CReader", "variable of type \"" + vr.typeName + "\" not supported!" + add);
+				_ER("variable of type \"" + vr.typeName + "\" not supported!" + add);
 				return false;
 			}
 			if (ira) {
@@ -443,7 +443,7 @@ bool CReader::Read(CScript* scr) {
 				bk->type = AN_VARTYPE::LIST;
 				bk->stride = AnScript::StrideOf(bk->typeName[0]);
 				if (!bk->stride) {
-					_ER("CReader", "unsupported type \"" + bk->typeName + "\" for list!");
+					_ER("unsupported type \"" + bk->typeName + "\" for list!");
 					return false;
 				}
 				bk->typeName = "list(" + std::to_string(lnsz-1) + bk->typeName[0] + ")";
@@ -469,7 +469,7 @@ bool CReader::Read(CScript* scr) {
 			if (AnWeb::hasC) {
 				auto sym = scr->lib.GetSym(_vr + vr.name);
 				if (!sym) {
-					_ER("CReader", "cannot find \"" + vr.name + "\" from memory!");
+					_ER("cannot find \"" + vr.name + "\" from memory!");
 					return false;
 				}
 				else
@@ -489,7 +489,7 @@ bool CReader::Read(CScript* scr) {
 							of.useOffset = true;
 							auto sym = scr->lib.GetSym(_vr + ln);
 							if (!sym) {
-								_ER("CReader", "cannot find \"" + ln + "\" from memory!");
+								_ER("cannot find \"" + ln + "\" from memory!");
 								return false;
 							}
 							else of.offset = scr->isSingleton ? (uintptr_t)sym : *(uintptr_t*)sym;
