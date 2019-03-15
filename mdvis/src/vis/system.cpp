@@ -75,17 +75,13 @@ void VisSystem::Init() {
 		Particles::Clear();
 		AnWeb::Clear0();
 	});
-	mi[1].Set(Icons::openfile, _("Open"), []() {
+	mi[1].Set(Icons::openfile, _("Restore"), []() {
 		auto res = Dialog::OpenFile({ "*" EXT_SVFL });
 		if (!!res.size()) {
 			VisSystem::Load(res[0].substr(0, res[0].find_last_of('.')));
 		}
 	});
-	mi[2].Set(0, _("Open Recent"), 0);
-	auto& mic = mi[2].child;
-	mic.resize(2);
-	mic[0].Set(0, "boo", 0);
-	mic[1].Set(0, "foo", 0);
+	mi[2].Set(0, _("Restore..."), 0);
 	mi[3].Set(0, _("Save"), []() {
 		auto path = Dialog::SaveFile(EXT_SVFL);
 		if (!!path.size()) VisSystem::Save(path.substr(0, path.size() - strlen_c(EXT_SVFL)));
@@ -115,25 +111,25 @@ void VisSystem::Init() {
 	});
 
 	auto& mi1 = menuItems[2];
-	mi1.resize(3);
+	mi1.resize(2);
 	mi1[0].Set(0, "Autorotate", []() {
 		ParGraphics::autoRot = true;
 	});
-	mi1[2].Set(0, "Preferences", []() {
+	mi1[1].Set(0, "Preferences", []() {
 		Preferences::show = true;
 	});
 
 	auto& mi2 = menuItems[3];
-	mi2.resize(5);
+	mi2.resize(3);
 	mi2[0].Set(0, "Image (GLSL)", []() {
 		VisRenderer::ToImage();
 	});
-	mi2[1].Set(0, "Image (Raytraced)", 0);
-	mi2[2].Set(0, "Movie (GLSL)", []() {
+	//mi2[1].Set(0, "Image (Raytraced)", 0);
+	mi2[1].Set(0, "Movie (GLSL)", []() {
 		VisRenderer::ToVid();
 	});
-	mi2[3].Set(0, "Movie (Raytraced)", 0);
-	mi2[4].Set(0, "Options", []() {
+	//mi2[3].Set(0, "Movie (Raytraced)", 0);
+	mi2[2].Set(0, "Options", []() {
 		ParMenu::expanded = true;
 		ParMenu::activeMenu = 3;
 	});
@@ -294,12 +290,14 @@ void VisSystem::DrawBar() {
 	else
 		UI::Label(172, Display::height - 16.f, 12, _("No Animation Data"), white(0.5f));
 
+	/*
 	byte sel = (byte)mouseMode;
 	for (byte b = 0; b < 3; ++b) {
 		if (Engine::Button(Display::width - 60.f + 17 * b, Display::height - 17.f, 16, 16, (&Icons::toolRot)[b], (sel == b) ? Vec4(1, 0.7f, 0.4f, 1) : white(0.7f), white(), white(0.5f)) == MOUSE_RELEASE) {
 			mouseMode = (VIS_MOUSE_MODE)b;
 		}
 	}
+	*/
 }
 
 void VisSystem::DrawMsgPopup() {
