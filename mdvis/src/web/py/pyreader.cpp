@@ -4,6 +4,7 @@
 #include "vis/preferences.h"
 #ifndef PLATFORM_WIN
 #include <dlfcn.h>
+#include "utils/runcmd.h"
 #endif
 
 bool PyReader::initd = false;
@@ -59,6 +60,14 @@ void PyReader::Init() {
 #ifndef PLATFORM_WIN
 	} else {
 		Debug::Warning("Python", "Python" PY_VERSION " framework not loaded!");
+#ifdef PLATFORM_OSX
+		remove((IO::path + "/Python").c_str());
+		RunCmd::Run("test -e $(python3.7-config --exec)/Python && "
+			"ln -s $(python3.7-config --exec)/Python \"" + IO::path + "/Python\"");
+		if (IO::HasFile(IO::path + "/Python")) {
+			Debug::Warning("Python", "Python link (re)created. Restarting the app may fix the problem.");
+		}
+#endif
 	}
 #endif
 }

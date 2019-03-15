@@ -68,18 +68,21 @@ void Node_AddSurface::Update() {
 void Node_AddSurface::DrawScene(RENDER_PASS pass) {
 	if (!genSz) return;
 
-	auto e = glGetError();
-	glUseProgram(drawProg);
-	glUniformMatrix4fv(drawProg.Loc(0), 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
-	glUniformMatrix4fv(drawProg.Loc(1), 1, GL_FALSE, glm::value_ptr(MVP::projection() * MVP::modelview()));
-	auto& bboxs = Particles::boundingBox;
-	glUniform3f(drawProg.Loc(2), bboxs[0], bboxs[2], bboxs[4]);
-	glUniform3f(drawProg.Loc(3), bboxs[1], bboxs[3], bboxs[5]);
-	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, genSz*3);
-	e = glGetError();
-	glBindVertexArray(0);
-	glUseProgram(0);
+	if (pass == RENDER_PASS::SOLID) {
+
+		auto e = glGetError();
+		glUseProgram(drawProg);
+		glUniformMatrix4fv(drawProg.Loc(0), 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
+		glUniformMatrix4fv(drawProg.Loc(1), 1, GL_FALSE, glm::value_ptr(MVP::projection() * MVP::modelview()));
+		auto& bboxs = Particles::boundingBox;
+		glUniform3f(drawProg.Loc(2), bboxs[0], bboxs[2], bboxs[4]);
+		glUniform3f(drawProg.Loc(3), bboxs[1], bboxs[3], bboxs[5]);
+		glBindVertexArray(vao);
+		glDrawArrays(GL_TRIANGLES, 0, genSz*3);
+		e = glGetError();
+		glBindVertexArray(0);
+		glUseProgram(0);
+	}
 }
 
 void Node_AddSurface::Init() {

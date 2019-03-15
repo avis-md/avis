@@ -57,8 +57,8 @@ HEADERS += web/py/pyreader.h web/py/pynode.h web/py/pyscript.h web/py/pyarr.h
 HEADERS += web/ft/freader.h web/ft/fnode.h web/ft/fscript.h
 #HEADERS += web/nodes/node_tracetrj.h
 HEADERS += web/nodes/get/node_inputs.h web/nodes/get/node_info.h web/nodes/get/node_getattribute.h
-HEADERS += web/nodes/set/node_setradscl.h web/nodes/set/node_showrange.h web/nodes/set/node_setattribute.h #web/nodes/set/node_setbboxcenter.h web/nodes/set/node_setcamera.h
-#HEADERS += web/nodes/mod/node_addbond.h web/nodes/mod/node_addsurface.h
+HEADERS += web/nodes/set/node_setradscl.h web/nodes/set/node_showrange.h web/nodes/set/node_setattribute.h web/nodes/set/node_setbboxcenter.h #web/nodes/set/node_setcamera.h
+HEADERS += web/nodes/mod/node_addbond.h web/nodes/mod/node_addmesh.h web/nodes/mod/node_addsurface.h
 HEADERS += web/nodes/conv/node_adjlist.h #web/nodes/conv/node_remap.h web/nodes/conv/node_vector.h
 #HEADERS += web/nodes/ctrl/node_dowhile.h web/nodes/ctrl/node_dofor.h
 HEADERS += web/nodes/misc/node_plot.h web/nodes/misc/node_accum.h
@@ -82,8 +82,8 @@ OBJS += obj/web/py/pyreader.o obj/web/py/pynode.o obj/web/py/pyscript.o obj/web/
 OBJS += obj/web/ft/freader.o obj/web/ft/fnode.o obj/web/ft/fscript.o
 #OBJS += obj/web/nodes/node_tracetrj.o
 OBJS += obj/web/nodes/get/node_inputs.o obj/web/nodes/get/node_info.o obj/web/nodes/get/node_getattribute.o
-OBJS += obj/web/nodes/set/node_setradscl.o obj/web/nodes/set/node_showrange.o obj/web/nodes/set/node_setattribute.o #obj/web/nodes/set/node_setbboxcenter.o obj/web/nodes/set/node_setcamera.o
-#OBJS += obj/web/nodes/mod/node_addbond.o obj/web/nodes/mod/node_addsurface.o
+OBJS += obj/web/nodes/set/node_setradscl.o obj/web/nodes/set/node_showrange.o obj/web/nodes/set/node_setattribute.o obj/web/nodes/set/node_setbboxcenter.o #obj/web/nodes/set/node_setcamera.o
+OBJS += obj/web/nodes/mod/node_addbond.o obj/web/nodes/mod/node_addmesh.o obj/web/nodes/mod/node_addsurface.o
 OBJS += obj/web/nodes/conv/node_adjlist.o #obj/web/nodes/conv/node_remap.o obj/web/nodes/conv/node_vector.o
 #OBJS += obj/web/nodes/ctrl/node_dowhile.o obj/web/nodes/ctrl/node_dofor.o
 OBJS += obj/web/nodes/misc/node_plot.o obj/web/nodes/misc/node_accum.o
@@ -94,7 +94,6 @@ OBJS += obj/vis/pargraphics.o obj/vis/system.o obj/vis/shadows.o obj/vis/rendere
 OBJS += obj/live/livesyncer.o live/lj256.o
 OBJS += obj/ocl/raytracer.o
 OBJSX = obj/xdrfile/xdrfile.o obj/xdrfile/xdrfile_trr.o obj/xdrfile/xdrfile_xtc.o
-OBJS += obj/tinyobj.o
 
 PCH = precompile.h
 PCH_OUT = precompile.h.gch
@@ -112,9 +111,9 @@ endif
 	@$(CXX) -o $@ $(OBJS) $(OBJSX) $(LDFLAGS) $(LIBS)
 ifeq ($(UNAME_S),Darwin)
 	install_name_tool -add_rpath "@executable_path" ../build/avis
-	install_name_tool -change $(shell $(PYTHON)-config --exec)/Python /tmpp/Python ../build/avis
-	cp ../build/avis ../build/avis_clean
-	cd ../build && rm .pyregfin && ./regpython.sh
+	install_name_tool -change $(shell $(PYTHON)-config --exec)/Python @rpath/Python ../build/avis
+	#cp ../build/avis ../build/avis_clean
+	#cd ../build && rm -f .pyregfin && ./regpython.sh
 endif
 
 $(PCH_OUT): $(PCH) $(HEADERS)
@@ -138,10 +137,6 @@ obj/vis/system.o: vis/system.cpp $(PCH_OUT)
 	echo "\""$(shell git rev-parse --short HEAD)"\"" > ../../githash.h
 	@echo "Compiling" $<
 	@$(CXX) $(CXXFLAGS) -include precompile.h -c $< -o $@
-
-obj/tinyobj.o : tmp/tiny_obj_loader.cpp
-	@echo "Compiling" $<
-	@$(CXX) $(CXXFLAGS) -g -c $< -o $@
 
 clean:
 	find ./obj -name '*.o' -exec rm {} \;
