@@ -55,6 +55,11 @@ int ErrorView::Parse_GCC(const std::string& path, const std::string& sig, const 
 							msg->msg.resize(1, str.substr(7));
 							n++;
 						}
+						else if (str.substr(0, 11) == "fatal error") {
+							msg->severe = true;
+							msg->msg.resize(1, str.substr(13));
+							n++;
+						}
 						else if (str.substr(0, 7) == "warning") {
 							msg->msg.resize(1, str.substr(9));
 						}

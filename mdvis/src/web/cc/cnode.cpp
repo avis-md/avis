@@ -28,8 +28,7 @@ void CNode::Update() {
 //				if (((CScript*)n->script->parent) == scr) {
 					if (ptr == n->script->instance) {
 						auto msg = (char*)pptr[_scr->stdioI * 2 + 1];
-						std::cout << "Node " + std::to_string(n->id) + " says: "
-							+ std::string(msg) << std::endl;
+						log.push_back(std::pair<byte, std::string>(0, msg));
 						_scr->stdioI++;
 					}
 //				}
@@ -97,34 +96,6 @@ void CNode::Execute() {
 void CNode::WriteFrame(int f) {
 	AnNode::WriteFrame(f);
 	return;
-	/*
-	auto scr = (CScript*)script;
-	for (int a = 0; a < conV.size(); ++a) {
-		auto& c = conV[a];
-		auto& ca = conVAll[a][f];
-		switch (c.type) {
-		case AN_VARTYPE::INT:
-			ca.val.i = *(int*)_scr->_outvars[a].value;
-			break;
-		case AN_VARTYPE::DOUBLE:
-			ca.val.d = *(double*)_scr->_outvars[a].value;
-			break;
-		case AN_VARTYPE::LIST: {
-			int n = 1;
-			auto ds = conV[a].dimVals.size();
-			ca.dims.resize(ds);
-			for (size_t d = 0; d < ds; ++d) {
-				n *= ca.dims[d] = *conV[a].dimVals[d];
-			}
-			n *= _scr->_outvars[a].stride;
-			ca.val.arr.data.resize(n);
-			memcpy(&ca.val.arr.data[0], *(char**)_scr->_outvars[a].value, n);
-			ca.val.arr.p = &ca.val.arr.data[0];
-			break;
-		}
-		}
-	}
-	*/
 }
 
 void CNode::RemoveFrames() {

@@ -533,6 +533,7 @@ void AnNode::PreExecute() {
 	for (auto& i : inputR) {
 		i.execd = !i.first;
 	}
+	log.clear();
 }
 
 bool AnNode::TryExecute() {

@@ -19,7 +19,7 @@ void FReader::Init() {
 
 void FReader::LoadReader() {
 #ifdef PLATFORM_WIN
-	if (IO::HasFile(CReader::mingwPath + "/gfortran.exe") && IO::HasFile(CReader::mingwPath + "/g++.exe")) {
+	if (!CReader::useMsvc && IO::HasFile(CReader::mingwPath + "/gfortran.exe") && IO::HasFile(CReader::mingwPath + "/g++.exe")) {
 		AnWeb::hasFt = true;
 	}
 #else
