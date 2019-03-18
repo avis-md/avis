@@ -32,6 +32,7 @@ public:
 	static std::vector<pAnNode> nodes;
 	static std::mutex execNLock;
 	static int execN;
+	static bool abortExec;
 
 	static bool drawFull, expanded, executing, apply;
 	static float maxScroll, scrollPos, expandPos;

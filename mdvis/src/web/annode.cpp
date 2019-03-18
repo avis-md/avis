@@ -544,6 +544,10 @@ bool AnNode::TryExecute() {
 			if (!i.execd) return false;
 		}
 	}
+	{
+		std::lock_guard<std::mutex> _lock(AnWeb::execNLock);
+		AnWeb::execN++;
+	}
 	std::thread(_Execute, this).detach();
 	return true;
 }
@@ -557,13 +561,22 @@ void AnNode::_Execute(AnNode* n) {
 	n->Execute();
 	n->executing = false;
 	n->execd = true;
-	{
-		std::lock_guard<std::mutex> lock(AnWeb::execNLock);
-		AnWeb::execN--;
-	}
 	if (lock) lock->unlock();
 	Debug::Message("AnNode", "Executed " + std::to_string(n->id) + n->title);
-	n->ExecuteNext();
+	for (size_t a = 0; a < n->outputR.size(); a++) {
+		if (n->script->parent->outputs[a].type == AN_VARTYPE::LIST && n->outputR[a].size() > 0) {
+			if (!*(void**)n->GetOutVal(a)) {
+				Debug::Warning("AnNode", "Output " + std::to_string(a) + " of node " + n->title + " is (list)nullptr!");
+				AnWeb::abortExec = true;
+			}
+		}
+	}
+	if (!AnWeb::abortExec)
+		n->ExecuteNext();
+	{
+		std::lock_guard<std::mutex> _lock(AnWeb::execNLock);
+		AnWeb::execN--;
+	}
 }
 
 void AnNode::IAddConV(void* p) {

@@ -35,6 +35,7 @@ std::vector<pAnNode> AnWeb::nodes;
 
 std::mutex AnWeb::execNLock;
 int AnWeb::execN;
+bool AnWeb::abortExec;
 
 bool AnWeb::drawFull = false, AnWeb::expanded = true;
 bool AnWeb::executing = false;
@@ -444,6 +445,7 @@ void AnWeb::Execute(bool all) {
 		delete(execThread);
 	}
 	executing = true;
+	abortExec = false;
 	execFrame = all? 1 : 0;
 #ifndef IS_ANSERVER
 	if (AnOps::remote) {
@@ -509,7 +511,7 @@ void AnWeb::_DoExecute() {
 	char* err = 0;
 	static std::string pylog;
 	nextNode = ~0U;
-	execN = (int)nodes.size();
+	execN = 0;
 	for (auto& n : nodes) {
 		n->PreExecute();
 	}
@@ -699,9 +701,8 @@ void AnWeb::Save(const std::string& s) {
 				//auto& tp = nd->script->invars[a].second;
 				//if (tp == "int") SV(value, nd->inputVDef[a].i);
 				//else if (tp == "double") SV(value, nd->inputVDef[a].d);
-				auto k = nd->_connInfo.size();
-				auto& vd = nd->script->defVals[k];
-				if (nd->script->parent->inputs[k].type == AN_VARTYPE::INT)
+				auto& vd = nd->script->defVals[a];
+				if (nd->script->parent->inputs[a].type == AN_VARTYPE::INT)
 					SV(value, vd.i);
 				else
 					SV(value, vd.d);

@@ -4,4 +4,5 @@
 class PDB {
 public:
 	static bool Read(ParInfo* info);
+	static bool ReadFrm(FrmInfo* info);
 };

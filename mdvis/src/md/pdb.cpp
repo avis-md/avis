@@ -7,7 +7,7 @@
 #include <algorithm>
 #include "pdb.h"
 
-bool OFST(char* c, const char* const c2) {
+bool OFST(const char* c, const char* const c2) {
 	for (byte a = 0; a < 6; a++)
 		if (c[a] != c2[a]) return false;
 	return true;
@@ -116,6 +116,36 @@ bool PDB::Read(ParInfo* info) {
 		bnd[3] = std::max(bnd[3], info->pos[i * 3 + 1]);
 		bnd[4] = std::min(bnd[4], info->pos[i * 3 + 2]);
 		bnd[5] = std::max(bnd[5], info->pos[i * 3 + 2]);
+	}
+	return true;
+}
+
+bool PDB::ReadFrm(FrmInfo* info) {
+	char buf[100]{};
+	std::ifstream strm(info->path);
+	if (!strm.is_open()) {
+		SETERR("Cannot open file!");
+		return false;
+	}
+
+	std::vector<std::string> lines;
+	std::string s;
+	while (std::getline(strm, s)) {
+		if ((ATM(s.c_str()) || HTM(s.c_str()))) {
+			lines.push_back(s);
+		}
+	}
+
+	if (info->parNum != lines.size()) {
+		SETERR("Atom count is different!");
+		return false;
+	}
+	
+	for (uint32_t i = 0; i < info->parNum; ++i) {
+		char* ln = (char*)lines[i].c_str();
+		info->pos[i * 3] = atof(NSP(ln + 30, ln + 37)) * 0.1f;
+		info->pos[i * 3 + 1] = atof(NSP(ln + 38, ln + 45)) * 0.1f;
+		info->pos[i * 3 + 2] = atof(NSP(ln + 46, ln + 53)) * 0.1f;
 	}
 	return true;
 }
