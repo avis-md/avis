@@ -3,6 +3,7 @@
 #include <vector>
 #include "xdrfile/xdrfile.h"
 #include "xdrfile/xdrfile_trr.h"
+#include "xdrfile/xdrfile_xtc.h"
 
 size_t _find_char_not_of(char* first, char* last, char c) {
 	for (char* f = first; first < last; ++first) {
@@ -143,7 +144,7 @@ bool Gromacs::ReadGro2(ParInfo* info, std::ifstream& strm, size_t isz) {
 	return true;
 }
 
-bool Gromacs::ReadTrj(TrjInfo* info) {
+bool Gromacs::ReadTrr(TrjInfo* info) {
 	int natoms = 0;
 	size_t fsz;
 	{
@@ -173,6 +174,58 @@ bool Gromacs::ReadTrj(TrjInfo* info) {
 		if (!!ok) {
 			delete[](_ps);
 			break;
+		}
+		info->progress = ftell((FILE*)xdrfile_ptr(file)) / (float)fsz;
+		poss.push_back(_ps);
+		info->frames++;
+	} while (info->frames != info->maxFrames);
+	xdrfile_close(file);
+
+	if (!info->frames) {
+		SETERR("No frames contained in file!");
+		return false;
+	}
+	info->poss = new double*[info->frames];
+	memcpy(info->poss, &poss[0], info->frames * sizeof(uintptr_t));
+	return true;
+}
+
+bool Gromacs::ReadXtc(TrjInfo* info) {
+	int natoms = 0;
+	size_t fsz;
+	{
+		std::ifstream strm(info->first, std::ios::binary | std::ios::ate);
+		fsz = strm.tellg();
+	}
+	read_xtc_natoms((char*)info->first, &natoms);
+	if (natoms != info->parNum) {
+		SETERR("Atom count is different!");
+		return false;
+	}
+
+	auto file = xdrfile_open(info->first, "rb");
+	if (!file) {
+		SETERR("Cannot open file!");
+		return false;
+	}
+
+	int step;
+	float t, lambda;
+	double* _ps;
+	std::vector<double*> poss;
+	bool ok;
+	do {
+		_ps = new double[info->parNum * 3];
+		std::vector<float> tmp(info->parNum * 3);
+		matrix box;
+		float prec;
+		ok = read_xtc(file, natoms, &step, &t, box, (rvec*)tmp.data(), &prec);
+		if (!!ok) {
+			delete[](_ps);
+			break;
+		}
+		for (int a = 0; a < info->parNum * 3; a++) {
+			_ps[a] = tmp[a];
 		}
 		info->progress = ftell((FILE*)xdrfile_ptr(file)) / (float)fsz;
 		poss.push_back(_ps);

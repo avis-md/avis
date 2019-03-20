@@ -429,7 +429,8 @@ The hash for this program is )" << VisSystem::version_hash
 		PUSHIMP
 		NEWIMP("Gromacs", gro, .gro, Gromacs::Read)
 		SETFRM(.gro, Gromacs::ReadFrm)
-		SETTRJ(.trr, Gromacs::ReadTrj)
+		SETTRJ(.trr, Gromacs::ReadTrr)
+		SETTRJ(.xtc, Gromacs::ReadXtc)
 		PUSHIMP
 		NEWIMP("Protein DataBank", pdb, .pdb, PDB::Read)
 		SETFRM(.pdb, PDB::ReadFrm)

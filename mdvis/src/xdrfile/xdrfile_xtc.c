@@ -73,13 +73,13 @@ static int xtc_coord(XDRFILE *xd,int *natoms,matrix box,rvec *x,float *prec,
 		{
 			if (bRead)
 				{
-					result = xdrfile_decompress_coord_float(x[0],natoms,prec,xd); 
+					result = xdrfile_decompress_coord_float(x,natoms,prec,xd); 
 					if (result != *natoms)
 						return exdr3DX;
 				}
 			else
 				{
-					result = xdrfile_compress_coord_float(x[0],*natoms,*prec,xd); 
+					result = xdrfile_compress_coord_float(x,*natoms,*prec,xd); 
 					if (result != *natoms)
 						return exdr3DX;
 				}

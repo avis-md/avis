@@ -8,7 +8,8 @@ class Gromacs {
 public:
 	static bool Read(ParInfo* info);
 	static bool ReadFrm(FrmInfo* info);
-	static bool ReadTrj(TrjInfo* info);
+	static bool ReadTrr(TrjInfo* info);
+	static bool ReadXtc(TrjInfo* info);
 private:
 	static bool ReadGro2(ParInfo* info, std::ifstream& strm, size_t isz);
 };
