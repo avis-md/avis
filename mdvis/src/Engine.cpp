@@ -182,8 +182,8 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h) {
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4) {
 	return Button(x, y, w, h, normalVec4, Lerp(normalVec4, white(), 0.5f), Lerp(normalVec4, black(), 0.5f));
 }
-MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, std::string label, float labelSize, Vec4 labelVec4, bool labelCenter, Font* labelFont) {
-	return Button(x, y, w, h, normalVec4, Lerp(normalVec4, white(), 0.5f), Lerp(normalVec4, black(), 0.5f), label, labelSize, labelFont, labelVec4, labelCenter);
+MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, std::string label, float labelSize, Vec4 labelVec4, bool labelCenter, bool shad, Font* labelFont) {
+	return Button(x, y, w, h, normalVec4, Lerp(normalVec4, white(), 0.5f), Lerp(normalVec4, black(), 0.5f), label, labelSize, labelFont, labelVec4, labelCenter, shad);
 }
 MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4) {
 	if (!UI::focused || (UI::_layer < UI::_layerMax && !UI::ignoreLayers) ||(Input::mouse0State != 0 && !Rect(x, y, w, h).Inside(Input::mouseDownPos))) {
@@ -230,11 +230,11 @@ MOUSE_STATUS Engine::Button(float x, float y, float w, float h, const Texture& t
 	}
 	return (inside && (UI::_layer == UI::_layerMax || UI::ignoreLayers)) ? MOUSE_STATUS(MOUSE_HOVER_FLAG | Input::mouse0State) : MOUSE_NONE;
 }
-MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, std::string label, float labelSize, Font* labelFont, Vec4 labelVec4, bool labelCenter) {
+MOUSE_STATUS Engine::Button(float x, float y, float w, float h, Vec4 normalVec4, Vec4 highlightVec4, Vec4 pressVec4, std::string label, float labelSize, Font* labelFont, Vec4 labelVec4, bool labelCenter, bool shad) {
 	MOUSE_STATUS b = Button(x, y, w, h, normalVec4, highlightVec4, pressVec4);
 	ALIGNMENT al = labelFont->alignment;
 	labelFont->alignment = labelCenter? ALIGN_MIDCENTER : ALIGN_MIDLEFT;
-	UI::Label(std::roundf(x + (labelCenter? w*0.5f : 2)), std::roundf(y + 0.4f*h), labelSize, label, labelVec4, -1.f, labelFont);
+	UI::Label(std::roundf(x + (labelCenter? w*0.5f : 2)), std::roundf(y + 0.4f*h), labelSize, label, labelVec4, shad, -1.f, labelFont);
 	labelFont->alignment = al;
 	return b;
 }

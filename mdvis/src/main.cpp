@@ -233,9 +233,6 @@ void paintfunc() {
 	UI2::DrawTooltip();
 
 	UI::Quad(0, 0, Display::width, Display::height, RayTracer::resTex);
-
-	UI::Quad(100, 50, 256, 256, UI::font.glyph(12, 0));
-	UI::Quad(400, 50, 320, 320, UI::font.sglyph(12, 0));
 }
 
 #ifdef MAKE_RES

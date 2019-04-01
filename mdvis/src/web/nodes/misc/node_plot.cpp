@@ -86,7 +86,7 @@ void Node_Plot::DrawFooter(float& y) {
 		case TYPE::LINES:
 		case TYPE::ALINES:
 			if (valXs.size()) {
-				plt::plot(pos.x + 12, y + 2, width - 14, width - 14, &valXs[0], &_valYs[0], valXs.size(), _valYs.size(), &UI::font, 10, white(1, 0.8f));
+				plt::plot(pos.x + 14, y + 4, width - 18, width - 18, &valXs[0], &_valYs[0], valXs.size(), _valYs.size(), &UI::font, 10, white(1, 0.8f));
 			}
 			break;
 		case TYPE::DENSITY:

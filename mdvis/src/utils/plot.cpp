@@ -19,7 +19,7 @@ void plt::plot(float x, float y, float w, float h, float* dx, float* dy, uint cn
 
 void plt::plot(float x, float y, float w, float h, float* dx, float** dy, uint cnt, uint cnt2, Font* font, uint sz, Vec4 col) {
 	const float cols[] = {
-		0, 0, 0,
+		1, 1, 1,
 		1, 0, 0,
 		0, 1, 0,
 		0, 0, 1,
@@ -27,12 +27,12 @@ void plt::plot(float x, float y, float w, float h, float* dx, float** dy, uint c
 		0, 1, 1
 	};
 	
-	UI::Quad(x, y, w, h, black());
-	x += 2;
-	y += 2;
-	w -= 4;
-	h -= 4;
-	UI::Quad(x, y, w, h, white());
+	//UI::Quad(x, y, w, h, black());
+	//x += 2;
+	//y += 2;
+	//w -= 4;
+	//h -= 4;
+	//UI::Quad(x, y, w, h, white());
 
 	Vec3* poss = new Vec3[cnt];
 	float x1 = *dx, x2 = *dx, y1 = **dy, y2 = **dy;

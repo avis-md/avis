@@ -8,7 +8,7 @@ int RunCmd::Run(std::string cmd) {
 	PROCESS_INFORMATION pi;
 	si.cb = sizeof(si);
 	cmd = "cmd /C \"" + cmd + "\"";
-	if (!CreateProcess("C:\\Windows\\System32\\cmd.exe", &cmd[0], NULL, NULL, FALSE, 0, 0, 0, &si, &pi)) {
+	if (!CreateProcess("C:\\Windows\\System32\\cmd.exe", &cmd[0], NULL, NULL, FALSE, CREATE_NO_WINDOW, 0, 0, &si, &pi)) {
 		Debug::Warning("Cmd", "Could not create Windows process!");
 		return -1;
 	}

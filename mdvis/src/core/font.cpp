@@ -23,7 +23,7 @@ void Font::Init() {
 	}
 
 	(prog = Shader::FromVF(glsl::fontVert, glsl::fontFrag))
-		.AddUniforms({ "col", "sampler", "mask" });
+		.AddUniforms({ "col", "sampler", "off", "mask" });
 	(blurProg = Shader::FromVF(glsl::minVert, glsl::fontBlurFrag))
 		.AddUniforms({ "tex", "size", "rad", "isY" });
 	InitVao(128);
@@ -118,6 +118,7 @@ GLuint Font::glyph(uint size, uint mask) {
 }
 
 GLuint Font::sglyph(uint size, uint mask) {
+	volatile GLuint _ = glyph(size, mask);
 	if (dpi != Display::dpiScl) {
 		params.clear();
 		_glyphs.clear();
@@ -162,7 +163,7 @@ GLuint Font::CreateGlyph(uint sz, uint mask) {
 	_glyphs.emplace(sz, 0);
 	glGenTextures(1, &_glyphs[sz][mask]);
 	glBindTexture(GL_TEXTURE_2D, _glyphs[sz][mask]);
-	glTexStorage2D(GL_TEXTURE_2D, 1, GL_R8, (szd + 2) * 16, (szd + 2) * 16);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_R8, (szd + 8) * 16, (szd + 8) * 16);
 	SetTexParams<>();
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	bool recalc = (params.count(sz) == 0) || (params[sz].count(mask) == 0);
@@ -171,7 +172,7 @@ GLuint Font::CreateGlyph(uint sz, uint mask) {
 		if (FT_Load_Char(_face, mask + a, FT_LOAD_RENDER) != FT_Err_Ok) continue;
 		byte x = a % 16, y = a / 16;
 		FT_Bitmap bmp = _face->glyph->bitmap;
-		glTexSubImage2D(GL_TEXTURE_2D, 0, (szd + 2) * x + 1, (szd + 2) * y + 1, bmp.width, bmp.rows, GL_RED, GL_UNSIGNED_BYTE, bmp.buffer);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, (szd + 8) * x + 4, (szd + 8) * y + 4, bmp.width, bmp.rows, GL_RED, GL_UNSIGNED_BYTE, bmp.buffer);
 		if (recalc) {
 			if (bmp.width == 0) {
 				pr.o2s[a] = 0;
@@ -218,11 +219,11 @@ GLuint Font::CreateSGlyph(uint sz, uint mask) {
 	glUniform1i(blurProg.Loc(0), 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, _glyphs[sz][mask]);
-	glUniform1i(blurProg.Loc(1), (int)szd * 16);
+	glUniform1i(blurProg.Loc(1), (int)sz2);
 	glUniform1i(blurProg.Loc(2), 4);
 	glUniform1i(blurProg.Loc(3), 0);
+	
 	glViewport(0, 0, sz2, sz2);
-
 	glBindVertexArray(Camera::emptyVao);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbos[0]);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -233,12 +234,13 @@ GLuint Font::CreateSGlyph(uint sz, uint mask) {
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	
 	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 	glViewport(0, 0, Display::frameWidth, Display::frameHeight);
 	blurProg.Unbind();
 
 	glDeleteFramebuffers(2, fbos);
 	glDeleteTextures(1, &texs[0]);
-	_glyphShads.emplace(sz, texs[1]);
+	_glyphShads[sz][mask] = texs[1];
 	return texs[1];
 }
 

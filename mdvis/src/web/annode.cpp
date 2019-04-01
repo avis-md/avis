@@ -176,7 +176,7 @@ void AnNode::Draw() {
 				else {
 					UI::Texture(pos.x - connrad, y + 8 - connrad, connrad * 2, connrad * 2, Icons::circle, red(0.3f));
 				}
-				UI::Label(pos.x + 10, y, 12, _script->inputs[i].name, white());
+				UI::Label(pos.x + 10, y, 12, _script->inputs[i].name, white(), true);
 				if (!HasConnI(i)) {
 					auto& vr = _script->inputs[i].type;
 					auto isi = (vr == AN_VARTYPE::INT);
@@ -184,7 +184,7 @@ void AnNode::Draw() {
 						DrawDefVal(i, y);
 					}
 					else {
-						UI::Label(pos.x + width*0.33f, y, 12, _script->inputs[i].typeName, white(0.3f));
+						UI::Label(pos.x + width*0.33f, y, 12, _script->inputs[i].typeName, white(0.3f), true);
 					}
 				}
 				else {
@@ -281,7 +281,7 @@ void AnNode::Draw() {
 				UI::font.Align(ALIGN_TOPRIGHT);
 				auto bt = ho ? Engine::Button(pos.x + width*0.67f - 5, y, width * 0.33f, 16) : MOUSE_NONE;
 				if (!bt) {
-					UI::Label(pos.x + width - 10, y, 12, _script->outputs[i].name, white());
+					UI::Label(pos.x + width - 10, y, 12, _script->outputs[i].name, white(), true);
 				}
 				else {
 					auto& ors = outputR[i];
@@ -292,7 +292,7 @@ void AnNode::Draw() {
 					}
 				}
 				UI::font.Align(ALIGN_TOPLEFT);
-				UI::Label(pos.x + 2, y, 12, _script->outputs[i].typeName, white(0.3f), width * 0.67f - 6);
+				UI::Label(pos.x + 2, y, 12, _script->outputs[i].typeName, white(0.3f), true);
 			}
 			auto y1 = y;
 			DrawFooter(y);
@@ -323,7 +323,7 @@ float AnNode::DrawSide() {
 	}
 	float dy = (executing ? 18.f : 16.f), y = pos.y + dy;
 	if (expanded) {
-		UI::Quad(pos.x, y, width, height - dy, white(1, 0.2f));
+		UI::Quad(pos.x, y, width, height - dy, black(0.3f));
 		y += 2;
 		DrawHeader(y);
 		if (cnt > 0) {

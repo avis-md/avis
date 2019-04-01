@@ -406,27 +406,27 @@ void ParMenu::DrawSplash() {
 	UI2::BackQuad(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250);
 	UI::Texture(Display::width*0.5f - 200, Display::height*0.5f - 125, 400, 250, ParGraphics::splash);
 	UI::font.Align(ALIGN_TOPRIGHT);
-	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 120, 12, VERSIONSTRING, white());
-	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 104, 12, "Build hash: " + VisSystem::version_hash, white());
+	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 120, 12, VERSIONSTRING, white(), true);
+	UI::Label(Display::width * 0.5f + 190, Display::height * 0.5f - 104, 12, "Build hash: " + VisSystem::version_hash, white(), true);
 	UI::font.Align(ALIGN_TOPLEFT);
 
 	std::string sub = "";
 
-	auto ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63, 140, 54, white(0.3f), _("User Manual"), 12, white(), true);
+	auto ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63, 140, 54, white(0.3f), _("User Manual"), 12, white(), true, true);
 	if (ms & MOUSE_HOVER_FLAG) {
 		sub = "Displays the user manual in the browser";
 		if (ms == MOUSE_RELEASE) {
 			IO::OpenEx(IO::path + "docs/index.html");
 		}
 	}
-	ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63 + 56, 140, 54, white(0.3f), _("Report A Problem"), 12, white(), true);
+	ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63 + 56, 140, 54, white(0.3f), _("Report A Problem"), 12, white(), true, true);
 	if (ms & MOUSE_HOVER_FLAG) {
 		sub = "Opens the problem reporter form (Google Forms)";
 		if (ms == MOUSE_RELEASE) {
 			IO::OpenEx("https://goo.gl/forms/U1hhBUHuo2CyiDEn1");
 		}
 	}
-	ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63 + 112, 140, 54, white(0.3f), _("Request A Feature"), 12, white(), true);
+	ms = Engine::Button(Display::width*0.5f - 180, Display::height*0.5f - 63 + 112, 140, 54, white(0.3f), _("Request A Feature"), 12, white(), true, true);
 	if (ms & MOUSE_HOVER_FLAG) {
 		sub = "Opens the feature request form (Google Forms)";
 		if (ms == MOUSE_RELEASE) {
