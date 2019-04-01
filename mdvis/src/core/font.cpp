@@ -1,8 +1,12 @@
 #include "Engine.h"
-#include "res/shddata.h"
+#include "utils/effects.h"
+#include "res/shd/minVert.h"
+#include "res/shd/fontVert.h"
+#include "res/shd/fontFrag.h"
+#include "res/shd/fontBlurFrag.h"
 
 FT_Library Font::_ftlib = nullptr;
-Shader Font::prog;
+Shader Font::prog, Font::blurProg;
 uint Font::vaoSz = 0;
 GLuint Font::vao = 0;
 GLuint Font::vbos[] = { 0, 0, 0 };
@@ -20,6 +24,8 @@ void Font::Init() {
 
 	(prog = Shader::FromVF(glsl::fontVert, glsl::fontFrag))
 		.AddUniforms({ "col", "sampler", "mask" });
+	(blurProg = Shader::FromVF(glsl::minVert, glsl::fontBlurFrag))
+		.AddUniforms({ "tex", "size", "rad", "isY" });
 	InitVao(128);
 	Unloader::Reg(Deinit);
 }
@@ -100,6 +106,7 @@ GLuint Font::glyph(uint size, uint mask) {
 	if (dpi != Display::dpiScl) {
 		params.clear();
 		_glyphs.clear();
+		_glyphShads.clear();
 		dpi = Display::dpiScl;
 	}
 	if (_glyphs.count(size) == 1) {
@@ -108,6 +115,21 @@ GLuint Font::glyph(uint size, uint mask) {
 			return gly[mask];
 	}
 	return CreateGlyph(size, mask);
+}
+
+GLuint Font::sglyph(uint size, uint mask) {
+	if (dpi != Display::dpiScl) {
+		params.clear();
+		_glyphs.clear();
+		_glyphShads.clear();
+		dpi = Display::dpiScl;
+	}
+	if (_glyphShads.count(size) == 1) {
+		auto& gly = _glyphShads[size];
+		if (gly.count(mask) == 1)
+			return gly[mask];
+	}
+	return CreateSGlyph(size, mask);
 }
 
 void Font::ClearGlyphs() {
@@ -166,6 +188,58 @@ GLuint Font::CreateGlyph(uint sz, uint mask) {
 		pr.o2s[(uint)'\t'] = sz * 0.9f;
 	}
 	return _glyphs[sz][mask];
+}
+
+GLuint Font::CreateSGlyph(uint sz, uint mask) {
+	uint szd = (uint)(sz * Display::dpiScl);
+	uint sz2 = (szd + 8) * 16;
+	GLuint texs[2];
+	GLuint fbos[2];
+	glGenTextures(2, texs);
+	glGenFramebuffers(2, fbos);
+	GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+	for (int a = 0; a < 2; a++) {
+		glBindTexture(GL_TEXTURE_2D, texs[a]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, sz2, sz2, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
+		SetTexParams<>();
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbos[a]);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texs[a], 0);
+		glDrawBuffers(3, DrawBuffers);
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (status != GL_FRAMEBUFFER_COMPLETE) {
+			Debug::Error("Font::CreateSGlyph", "FB error:" + std::to_string(status));
+		}
+	}
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	
+	blurProg.Bind();
+	glUniform1i(blurProg.Loc(0), 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, _glyphs[sz][mask]);
+	glUniform1i(blurProg.Loc(1), (int)szd * 16);
+	glUniform1i(blurProg.Loc(2), 4);
+	glUniform1i(blurProg.Loc(3), 0);
+	glViewport(0, 0, sz2, sz2);
+
+	glBindVertexArray(Camera::emptyVao);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbos[0]);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	
+	glBindTexture(GL_TEXTURE_2D, texs[0]);
+	glUniform1i(blurProg.Loc(3), 1);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbos[1]);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	
+	glBindVertexArray(0);
+	glViewport(0, 0, Display::frameWidth, Display::frameHeight);
+	blurProg.Unbind();
+
+	glDeleteFramebuffers(2, fbos);
+	glDeleteTextures(1, &texs[0]);
+	_glyphShads.emplace(sz, texs[1]);
+	return texs[1];
 }
 
 Font* Font::Align(ALIGNMENT a) {

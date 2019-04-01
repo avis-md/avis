@@ -22,7 +22,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2D5660BE-613F-4BAA-9DE4-D0373AB81D84}</ProjectGuid>
     <RootNamespace>OpenGl1</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -160,7 +160,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include;C:\Intel\OpenCL\sdk\include;C:\Python37\include;C:\Python37\Lib\site-packages\numpy\core\include;../radeonrays/RadeonRays/include/;../radeonrays/CLW/;./src;./src/winonly;./src/libjpeg/;../libgwavi/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include;C:\Intel\OpenCL\sdk\include;C:\Python37\include;C:\Python37\Lib\site-packages\numpy\core\include;../radeonrays/RadeonRays/include/;../radeonrays/CLW/;./src;./src/winonly;../libgwavi/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;PLATFORM_WIN;GLEW_STATIC;USE_OPENCL;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -174,10 +174,12 @@
       </ForcedIncludeFiles>
       <UseFullPaths>true</UseFullPaths>
       <ShowIncludes>false</ShowIncludes>
+      <LanguageStandard>
+      </LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libssh2.lib;libjpeg.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libssh2.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\lib\x64;C:\Intel\OpenCL\sdk\lib\x64;C:\Python37\libs;.\lib\x64</AdditionalLibraryDirectories>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <SubSystem>Console</SubSystem>

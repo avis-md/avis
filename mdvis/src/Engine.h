@@ -33,7 +33,7 @@ forked from ChokoEngine -- Chokomancarr 2018
 #endif
 #endif
 
-#include <signal.h>
+#include <csignal>
 #ifndef PLATFORM_WIN
 #define __debugbreak() raise(SIGTRAP)
 #endif

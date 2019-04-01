@@ -19,9 +19,11 @@ public:
 
 	bool loaded = false;
 	GLuint glyph(uint size, uint mask);
+	GLuint sglyph(uint size, uint mask);
 	void ClearGlyphs();
 
 	float dpi;
+	bool shadow;
 	ALIGNMENT alignment;
 
 	Font* Align(ALIGNMENT a);
@@ -33,7 +35,7 @@ protected:
 	static FT_Library _ftlib;
 	static void InitVao(uint sz);
 	FT_Face _face;
-	static Shader prog;
+	static Shader prog, blurProg;
 
 	struct _params {
 		float o2s[256];
@@ -52,8 +54,11 @@ protected:
 	static uint vaoSz;
 	static GLuint vao, vbos[3], idbuf;
 
-	std::unordered_map<uint, std::unordered_map<uint, GLuint>> _glyphs; //each glyph size is fontSize*16
+	std::unordered_map<uint, std::unordered_map<uint, GLuint>>
+		_glyphs, //each glyph size is fontSize*16
+		_glyphShads; //shadow size is (fontSize + 6)*16
 	GLuint CreateGlyph(uint size, uint mask = 0);
+	GLuint CreateSGlyph(uint size, uint mask = 0);
 
 	void DestroyRef() override;
 	
