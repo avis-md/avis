@@ -1,10 +1,12 @@
 #include "node_plot.h"
+#include <iomanip>
 #ifndef IS_ANSERVER
 #include "utils/plot.h"
 #include "ui/ui_ext.h"
 #include "ui/icons.h"
 #include "md/particles.h"
 #endif
+#include "utils/dialog.h"
 
 INODE_DEF(__("Plot Data"), Plot, MISC)
 
@@ -87,6 +89,13 @@ void Node_Plot::DrawFooter(float& y) {
 		case TYPE::ALINES:
 			if (valXs.size()) {
 				plt::plot(pos.x + 14, y + 4, width - 18, width - 18, &valXs[0], &_valYs[0], valXs.size(), _valYs.size(), &UI::font, 10, white(1, 0.8f));
+				if (Engine::Button(pos.x + 2, y + width + 2, 100, 16, white(1, 0.4f), "Export", 12, white(), true) == MOUSE_RELEASE) {
+					auto s = Dialog::SaveFile(".csv");
+					if (s != "") {
+						ExportCSV(s);
+					}
+				}
+				y += 19;
 			}
 			break;
 		case TYPE::DENSITY:
@@ -354,5 +363,16 @@ void Node_Plot::Load(XmlNode* n2) {
 			ip.type = (type == TYPE::ALINES) ? AN_VARTYPE::ANY : AN_VARTYPE::LIST;
 			ip.InitName();
 		}
+	}
+}
+
+void Node_Plot::ExportCSV(const std::string& path) {
+	std::ofstream strm(path);
+	for (int a = 0; a < valXs.size(); a++) {
+		if (!getval_i(1)) strm << std::scientific << std::setprecision(10) << valXs[a] << ", ";
+		for (auto& y : valYs) {
+			strm << std::scientific << std::setprecision(10) << y[a] << ", ";
+		}
+		strm << "\n";
 	}
 }

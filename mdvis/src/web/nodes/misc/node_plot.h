@@ -44,4 +44,5 @@ protected:
 	Popups::DropdownItem _di;
 
 	void SetTex();
+	void ExportCSV(const std::string& path);
 };
