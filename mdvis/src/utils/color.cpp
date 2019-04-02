@@ -1,7 +1,10 @@
 #include "Engine.h"
 #include "ui/popups.h"
 #include "ui/icons.h"
-#include "res/shddata.h"
+#include "res/shd/colorPickerVert.h"
+#include "res/shd/colorPickerH.h"
+#include "res/shd/colorPickerH2.h"
+#include "res/shd/colorPickerSV.h"
 
 Vec4 black(float f) { return Vec4(0, 0, 0, f); }
 Vec4 red(float f, float i) { return Vec4(i, 0, 0, f); }

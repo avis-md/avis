@@ -1,3 +1,4 @@
+#pragma once
 namespace glsl {
 	const char fontBlurFrag[] = R"(
 #version 330

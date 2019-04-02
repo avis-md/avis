@@ -3,7 +3,8 @@
 #include "icons.h"
 #include "popups.h"
 #include "utils/dialog.h"
-#include "res/shddata.h"
+#include "res/shd/bezierVert.h"
+#include "res/shd/bezierFrag.h"
 #include "vis/system.h"
 
 float UI2::sepw = 0.5f;

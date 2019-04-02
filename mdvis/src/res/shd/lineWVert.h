@@ -1,3 +1,4 @@
+#pragma once
 namespace glsl {
     const char lineWVert[] = R"(
 #version 330

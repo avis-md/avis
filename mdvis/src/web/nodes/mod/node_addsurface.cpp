@@ -1,7 +1,8 @@
 #include "node_addsurface.h"
 #include "vis/pargraphics.h"
 #include "md/particles.h"
-#include "res/shddata.h"
+#include "res/shd/marchVert.h"
+#include "res/shd/marchGeom.h"
 
 INODE_DEF(__("Draw Surface"), AddSurface, GEN);
 

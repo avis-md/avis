@@ -1,3 +1,4 @@
+#pragma once
 namespace glsl {
     const char coreFrag2[] = R"(
 #version 330 core

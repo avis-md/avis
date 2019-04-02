@@ -9,7 +9,7 @@ FT_Library Font::_ftlib = nullptr;
 Shader Font::prog, Font::blurProg;
 uint Font::vaoSz = 0;
 GLuint Font::vao = 0;
-GLuint Font::vbos[] = { 0, 0, 0 };
+GLuint Font::vbos[] = { 0, 0 };
 GLuint Font::idbuf = 0;
 
 bool Font::waitkill = false;
@@ -41,28 +41,23 @@ void Font::InitVao(uint sz) {
 	vaoSz = sz;
 	if (!!vao) {
 		glDeleteVertexArrays(1, &vao);
-		glDeleteBuffers(3, vbos);
+		glDeleteBuffers(2, vbos);
 		glDeleteBuffers(1, &idbuf); 
 	}
 	glGenVertexArrays(1, &vao);
-	glGenBuffers(3, vbos);
+	glGenBuffers(2, vbos);
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[0]);
 	glBufferData(GL_ARRAY_BUFFER, vaoSz * sizeof(Vec3), nullptr, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[1]);
-	glBufferData(GL_ARRAY_BUFFER, vaoSz * sizeof(Vec2), nullptr, GL_DYNAMIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[2]);
 	glBufferData(GL_ARRAY_BUFFER, vaoSz * sizeof(int), nullptr, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(vao);
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[0]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	glBindBuffer(GL_ARRAY_BUFFER, vbos[1]);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[2]);
-	glVertexAttribIPointer(2, 1, GL_INT, 0, NULL);
+	glVertexAttribIPointer(1, 1, GL_INT, 0, NULL);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glGenBuffers(1, &idbuf);
@@ -109,10 +104,12 @@ GLuint Font::glyph(uint size, uint mask) {
 		_glyphShads.clear();
 		dpi = Display::dpiScl;
 	}
-	if (_glyphs.count(size) == 1) {
-		auto& gly = _glyphs[size];
-		if (gly.count(mask) == 1)
-			return gly[mask];
+	auto it = _glyphs.find(size);
+	if (it != _glyphs.end()) {
+		auto& gly = it->second;
+		auto it2 = gly.find(mask);
+		if (it2 != gly.end())
+			return it2->second;
 	}
 	return CreateGlyph(size, mask);
 }
@@ -125,10 +122,12 @@ GLuint Font::sglyph(uint size, uint mask) {
 		_glyphShads.clear();
 		dpi = Display::dpiScl;
 	}
-	if (_glyphShads.count(size) == 1) {
-		auto& gly = _glyphShads[size];
-		if (gly.count(mask) == 1)
-			return gly[mask];
+	auto it = _glyphShads.find(size);
+	if (it != _glyphShads.end()) {
+		auto& gly = it->second;
+		auto it2 = gly.find(mask);
+		if (it2 != gly.end())
+			return it2->second;
 	}
 	return CreateSGlyph(size, mask);
 }
@@ -141,13 +140,8 @@ void Font::SizeVec(uint sz) {
 	if (vecSize >= sz) return;
 	poss.resize(sz * 4 + 1);
 	cs.resize(sz * 4);
-	uvs.resize(sz * 4);
 	ids.resize(sz * 6);
 	for (; vecSize < sz; ++vecSize) {
-		uvs[vecSize * 4] = Vec2(0, 1);
-		uvs[vecSize * 4 + 1] = Vec2(1, 1);
-		uvs[vecSize * 4 + 2] = Vec2(0, 0);
-		uvs[vecSize * 4 + 3] = Vec2(1, 0);
 		ids[vecSize * 6] = 4 * vecSize;
 		ids[vecSize * 6 + 1] = 4 * vecSize + 1;
 		ids[vecSize * 6 + 2] = 4 * vecSize + 2;
@@ -155,6 +149,16 @@ void Font::SizeVec(uint sz) {
 		ids[vecSize * 6 + 4] = 4 * vecSize + 3;
 		ids[vecSize * 6 + 5] = 4 * vecSize + 2;
 	}
+
+	vaoSz = sz * 4;
+	glBindBuffer(GL_ARRAY_BUFFER, Font::vbos[0]);
+	glBufferData(GL_ARRAY_BUFFER, sz * 4 * sizeof(Vec3), 0, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, Font::vbos[1]);
+	glBufferData(GL_ARRAY_BUFFER, sz * 4 * sizeof(int), 0, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idbuf);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sz * 6 * sizeof(uint), &ids[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 GLuint Font::CreateGlyph(uint sz, uint mask) {

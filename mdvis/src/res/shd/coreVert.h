@@ -1,3 +1,4 @@
+#pragma once
 namespace glsl {
     const char coreVert[] = R"(
 #version 330 core

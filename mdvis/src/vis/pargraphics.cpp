@@ -20,7 +20,11 @@
 #include "utils/dialog.h"
 #include "utils/tinyfiledialogs.h"
 #include "vis/preferences.h"
-#include "res/shddata.h"
+#include "res/shd/minVert.h"
+#include "res/shd/reflFrag.h"
+#include "res/shd/reflFragC.h"
+#include "res/shd/colorerFrag.h"
+#include "res/shd/selectorFrag.h"
 #include "res/shd/reflTrFrag.h"
 
 #define SCL_MIN -7.f

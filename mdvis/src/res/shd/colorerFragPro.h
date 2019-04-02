@@ -1,3 +1,4 @@
+#pragma once
 namespace glsl {
 	const char colererFragPro[] = R"(
 #version 330

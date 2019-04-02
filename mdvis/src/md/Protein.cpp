@@ -6,7 +6,6 @@
 #include "vis/pargraphics.h"
 #include "ui/icons.h"
 #include "ui/ui_ext.h"
-#include "res/shddata.h"
 #include "utils/glext.h"
 
 //const byte signature[] = { 2, 'H', 0, 'C', 2, 'H', 0, 'C', 1, 'O', 0 };

@@ -1,5 +1,5 @@
 #include "Engine.h"
-#include "res/shddata.h"
+#include "res/shd/minVert.h"
 
 Camera* Camera::active;
 

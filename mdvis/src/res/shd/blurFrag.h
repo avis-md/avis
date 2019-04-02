@@ -1,3 +1,4 @@
+#pragma once
 namespace glsl {
     const char blurFrag[] = R"(
 #version 330

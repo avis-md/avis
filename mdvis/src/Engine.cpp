@@ -5,7 +5,11 @@
 #include <climits>
 #include <ctime>
 #include <cstdarg>
-#include "res/shddata.h"
+#include "res/shd/coreVert.h"
+#include "res/shd/coreVertW.h"
+#include "res/shd/coreFrag2.h"
+#include "res/shd/coreFrag3.h"
+#include "res/shd/lineWVert.h"
 
 #ifdef PLATFORM_WIN
 #include <shellapi.h>

@@ -1,3 +1,4 @@
+#pragma once
 namespace glsl {
 	const char voxelVert[] = R"(
 #version 330

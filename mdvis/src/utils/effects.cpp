@@ -1,6 +1,12 @@
 #include "ChokoLait.h"
 #include "effects.h"
-#include "res/shddata.h"
+#include "res/shd/minVert.h"
+#include "res/shd/blurFrag.h"
+#include "res/shd/glowFrag.h"
+#include "res/shd/glowFrag2.h"
+#include "res/shd/ssaoFrag.h"
+#include "res/shd/ssaoFrag2.h"
+#include "res/shd/dofFrag.h"
 
 Shader Effects::blurProg;
 Shader Effects::ssaoProg;

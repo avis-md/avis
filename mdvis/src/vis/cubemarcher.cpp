@@ -1,6 +1,5 @@
 #include "ChokoLait.h"
 #include "cubemarcher.h"
-#include "res/shddata.h"
 
 GLuint CubeMarcher::lookupBuf, CubeMarcher::lookupTex;
 GLuint CubeMarcher::prog = 0;

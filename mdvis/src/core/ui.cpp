@@ -1,5 +1,7 @@
 #include "Engine.h"
-#include "res/shddata.h"
+#include "res/shd/coreVert.h"
+#include "res/shd/coreFrag.h"
+#include "res/shd/coreFrag3.h"
 
 glm::mat3 UI::matrix;
 bool UI::matrixIsI;
@@ -440,7 +442,7 @@ float UI::GetLabelW(float s, std::string str, Font* font) {
 	return totalW;
 }
 
-void UI::Label(float x, float y, float s, std::string st, Vec4 col, bool shad, float maxw, Font* font) {
+void UI::Label(float x, float y, float s, const std::string& st, Vec4 col, bool shad, float maxw, Font* font) {
 	Label(x, y, s, &st[0], st.size(), col, shad, maxw, font);
 }
 
@@ -449,14 +451,13 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, bo
 	x = std::round(x);
 	y = std::round(y);
 	uint si = (uint)std::round(s);
-	sz = std::min(sz, (uint)strlen(str));
 	font->SizeVec(sz);
 	byte align = (byte)font->alignment;
 	float totalW = 0;
 	std::vector<uint> ucs(sz), mks;
 	uint usz = 0;
 	char* cc = (char*)str;
-	while (!!*cc) {
+	for (uint a = 0; *cc > 0 && a < sz; a++) {
 		auto mk = ucs[usz++] = Font::utf2unc(cc);
 		mk &= 0xff00;
 		if (std::find(mks.begin(), mks.end(), mk) == mks.end()) {
@@ -465,10 +466,12 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, bo
 			else font2.glyph(si, mk);
 		}
 	}
+	auto& prm = font->params[(uint)s][0];
+	auto& uprm2 = font2.params[(uint)s];
 	for (uint i = 0; i < usz; ++i) {
 		auto& c = ucs[i];
-		if (c < 0x0100) totalW += font->params[(uint)s][0].o2s[c & 0x00ff];
-		else totalW += font2.params[(uint)s][c & 0xff00].o2s[c & 0x00ff];
+		if (c < 0x0100) totalW += prm.o2s[c & 0x00ff];
+		else totalW += uprm2[c & 0xff00].o2s[c & 0x00ff];
 		if (maxw > 0 && totalW > maxw) {
 			usz = i;
 			break;
@@ -488,11 +491,9 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, bo
 		auto& c = ucs[i / 4];
 		auto m = c & 0xff00;
 		auto cc = c & 0x00ff;
-		auto& prm = (!m) ? font->params[(uint)s][0] : font2.params[(uint)s][m];
-		//if (c == '\n')
-		//	c = ' ';
+		auto& p = (!m) ? prm : uprm2[m];
 
-		Vec3 off = Vec3(prm.off[cc].x, -prm.off[cc].y, 0);
+		Vec3 off = Vec3(p.off[cc].x, -p.off[cc].y, 0);
 
 		if (c == '\n') {
 			font->poss[i] = font->poss[i + 1] =
@@ -507,27 +508,18 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, bo
 			font->poss[i + 2] = AU(Vec3(x - 4, y + 4, 1) + off)*ds;
 			font->poss[i + 3] = AU(Vec3(x + s + 4, y + 4, 1) + off)*ds;
 			font->cs[i] = font->cs[i + 1] = font->cs[i + 2] = font->cs[i + 3] = c;
-			x += prm.o2s[cc];
+			x += p.o2s[cc];
 			if (c == ' ' || c == '\t')
 				x = std::roundf(x);
 		}
 	}
 	font->poss[usz * 4] = Vec3(x, 0, 0)*ds;
 
-	if (usz * 4 > Font::vaoSz) {
-		Font::InitVao(usz * 4);
-	}
 	glBindBuffer(GL_ARRAY_BUFFER, Font::vbos[0]);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, usz * 4 * sizeof(Vec3), &font->poss[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, Font::vbos[1]);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, usz * 4 * sizeof(Vec2), &font->uvs[0]);
-	glBindBuffer(GL_ARRAY_BUFFER, Font::vbos[2]);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, usz * 4 * sizeof(int), &font->cs[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Font::idbuf);
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, usz * 6 * sizeof(uint), &font->ids[0]);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	Font::prog.Bind();
 	

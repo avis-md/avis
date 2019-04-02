@@ -1,3 +1,4 @@
+#pragma once
 namespace glsl {
 	const char marchVert[] = R"(#version 330 core
 uniform ivec3 shp;

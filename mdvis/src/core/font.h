@@ -46,13 +46,12 @@ protected:
 
 	uint vecSize;
 	std::vector<Vec3> poss;
-	std::vector<Vec2> uvs;
 	std::vector<uint> ids;
 	std::vector<uint> cs;
 	void SizeVec(uint sz);
 
 	static uint vaoSz;
-	static GLuint vao, vbos[3], idbuf;
+	static GLuint vao, vbos[2], idbuf;
 
 	std::unordered_map<uint, std::unordered_map<uint, GLuint>>
 		_glyphs, //each glyph size is fontSize*16

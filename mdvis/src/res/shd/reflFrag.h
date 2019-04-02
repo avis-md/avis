@@ -1,3 +1,4 @@
+#pragma once
 namespace glsl {
 	const char reflFrag[] = R"(
 #version 330

@@ -1,3 +1,4 @@
+#pragma once
 namespace glsl {
     const char minVert[] = R"(
 #version 330

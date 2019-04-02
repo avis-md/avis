@@ -3,7 +3,7 @@
 #include "md/parmenu.h"
 #include "ui/icons.h"
 #include "ui/ui_ext.h"
-#include "res/shddata.h"
+#include "res/shd/minVert.h"
 
 pCamera Shadows::cam;
 
