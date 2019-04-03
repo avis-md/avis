@@ -7,6 +7,7 @@
 #include "res/shd/ssaoFrag.h"
 #include "res/shd/ssaoFrag2.h"
 #include "res/shd/dofFrag.h"
+#include "res/shd/fxaaFrag.h"
 
 Shader Effects::blurProg;
 Shader Effects::ssaoProg;
@@ -14,6 +15,7 @@ Shader Effects::ssaoProg2;
 Shader Effects::glowProg;
 Shader Effects::glowProg2;
 Shader Effects::dofProg;
+Shader Effects::fxaaProg;
 
 GLuint Effects::noiseTex;
 
@@ -24,11 +26,13 @@ void Effects::Init(EFF_ENABLE_MASK mask) {
 		_InitBlur(vs);
 	if (!!(mask & EFF_ENABLE_GLOW))
 		_InitGlow(vs);
-	//if ((mask & EFF_ENABLE_FXAA) > 0x00ff)
+	if ((mask & EFF_ENABLE_FXAA) > 0x00ff)
+		_InitFXAA(vs);
 	if ((mask & EFF_ENABLE_SSAO) > 0x00ff)
 		_InitSSAO(vs);
 	if (!!(mask & EFF_ENABLE_DOF))
 		_InitDof(vs);
+
 }
 
 byte Effects::Blur(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, float rad, int w, int h) {
@@ -158,6 +162,18 @@ byte Effects::Dof(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, GLuint dph, floa
 	return n;
 }
 
+byte Effects::FXAA(GLuint t2, GLuint tx1, int w, int h) {
+	glUseProgram(fxaaProg);
+	glBindVertexArray(Camera::emptyVao);
+	glUniform1i(fxaaProg.Loc(0), 1);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, tx1);
+	glUniform2f(fxaaProg.Loc(1), (float)w, (float)h);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, t2);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	return 1;
+}
+
 void Effects::_InitBlur(const std::string& vs) {
 	(blurProg = Shader::FromVF(vs, glsl::blurFrag))
 		.AddUniform("mainTex")
@@ -220,4 +236,10 @@ void Effects::_InitDof(const std::string& vs) {
 		.AddUniform("aperture")
 		.AddUniform("screenSize")
 		.AddUniform("isOrtho");
+}
+
+void Effects::_InitFXAA(const std::string& vs) {
+	(fxaaProg = Shader::FromVF(vs, glsl::fxaaFrag))
+		.AddUniform("tex")
+		.AddUniform("screenSize");
 }

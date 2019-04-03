@@ -421,6 +421,7 @@
     <ClInclude Include="src\res\shd\fontBlurFrag.h" />
     <ClInclude Include="src\res\shd\fontFrag.h" />
     <ClInclude Include="src\res\shd\fontVert.h" />
+    <ClInclude Include="src\res\shd\fxaaFrag.h" />
     <ClInclude Include="src\res\shd\glowFrag.h" />
     <ClInclude Include="src\res\shd\glowFrag2.h" />
     <ClInclude Include="src\res\shd\lineWVert.h" />

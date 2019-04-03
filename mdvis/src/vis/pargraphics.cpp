@@ -163,6 +163,9 @@ void ParGraphics::Eff::Apply() {
 			cam->SwapBlitBuffers();
 		}
 	}
+
+	Effects::FXAA(cam->blitFbos[1], cam->blitTexs[0], Display::width, Display::height);
+	cam->SwapBlitBuffers();
 }
 
 float ParGraphics::Eff::DrawMenu(float off) {

@@ -23,6 +23,7 @@ public:
 	static byte Glow(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLuint tx3, float off, float rad, float str, int w, int h);
 	static byte SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLuint tx3, GLuint nrm, GLuint dph, float str, int cnt, float rad, float blr, int w, int h);
 	static byte Dof(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, GLuint dph, float z, float f, float a, int n, int w, int h);
+	static byte FXAA(GLuint t2, GLuint tx1, int w, int h);
 protected:
 	static Shader blurProg;
 	static Shader ssaoProg;
@@ -30,6 +31,7 @@ protected:
 	static Shader glowProg;
 	static Shader glowProg2;
 	static Shader dofProg;
+	static Shader fxaaProg;
 
 	static GLuint noiseTex;
 
@@ -37,4 +39,5 @@ protected:
 	static void _InitGlow(const std::string& vs);
 	static void _InitSSAO(const std::string& vs);
 	static void _InitDof(const std::string& vs);
+	static void _InitFXAA(const std::string& vs);
 };
