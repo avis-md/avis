@@ -288,80 +288,59 @@ void ParGraphics::Init() {
 	logo = Texture(IO::path + "res/bg_logo.png", false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
 	GLuint mv;
 	Shader::LoadShader(GL_VERTEX_SHADER, glsl::minVert, mv);
-	reflProg = Shader::FromF(mv, glsl::reflFrag);
-#define LC(nm) reflProg.AddUniform(#nm)
-	uint i = 0;
-	LC(_IP); LC(screenSize); LC(inColor); LC(inNormal);
-	LC(inEmit); LC(inDepth); LC(inSky); LC(inSkyE);
-	LC(skyStrength); LC(skyStrDecay); LC(skyStrDecayOff);
-	LC(specStr); LC(glass), LC(ior), LC(bgType),
-	LC(bgCol); LC(fogCol); LC(isOrtho);
-#undef LC
-	
-	reflCProg = Shader::FromF(mv, glsl::reflFragC);
-#define LC(nm) reflCProg.AddUniform(#nm)
-	i = 0;
-	LC(_IP); LC(screenSize); LC(inColor);
-	LC(inNormal); LC(inDepth); LC(skyStrength);
-	LC(skyStrDecay); LC(specStr); LC(bgCol);
-#undef LC
-	
-	(reflTrProg = Shader::FromF(mv, glsl::reflTrFrag))
-		.AddUniforms({ "_IP", "screenSize", "inColor", "inNormal"
-			, "inDepth" , "inSky" , "inSkyE" , "skyStrength" 
-			, "skyStrDecay" , "skyStrDecayOff" , "specStr" , "fogCol" 
-			, "isOrtho", "inOpaque" });
-	
-	parProg = Shader::FromVF(IO::GetText(IO::path + "shaders/parV.glsl"), IO::GetText(IO::path + "shaders/parF.glsl"));
-#define LC(nm) parProg.AddUniform(#nm)
-	i = 0;
-	LC(_MV); LC(_P); LC(camPos);
-	LC(camFwd); LC(orthoSz); LC(screenSize);
-	LC(radTex); LC(radScl); LC(id2col); LC(colList);
-	LC(gradCols); LC(colUseGrad); LC(spriteScl);
-	LC(oriented); LC(orienScl); LC(orienX); LC(orienY); LC(orienZ);
-	LC(tubesize); LC(bbox); LC(imgCnt); LC(imgOff);
+	(reflProg = Shader::FromF(mv, glsl::reflFrag)).AddUniforms({
+		"_IP", "screenSize", "inColor", "inNormal",
+		"inEmit", "inDepth", "inSky", "inSkyE",
+		"skyStrength", "skyStrDecay", "skyStrDecayOff",
+		"specStr", "glass", "ior", "bgType",
+		"bgCol", "fogCol", "isOrtho" });
+
+	(reflCProg = Shader::FromF(mv, glsl::reflFragC)).AddUniforms({
+		"_IP", "screenSize", "inColor",
+		"inNormal", "inDepth", "skyStrength",
+		"skyStrDecay", "specStr", "bgCol" });
+
+	(reflTrProg = Shader::FromF(mv, glsl::reflTrFrag)).AddUniforms({
+		"_IP", "screenSize", "inColor", "inNormal",
+		"inDepth" , "inSky" , "inSkyE" , "skyStrength",
+		"skyStrDecay" , "skyStrDecayOff" , "specStr",
+		"fogCol", "isOrtho", "inOpaque" });
+
+	(parProg = Shader::FromVF(IO::GetText(IO::path + "shaders/parV.glsl"), IO::GetText(IO::path + "shaders/parF.glsl"))).AddUniforms({
+		"_MV", "_P", "camPos",
+		"camFwd", "orthoSz", "screenSize",
+		"radTex", "radScl", "id2col", "colList",
+		"gradCols", "colUseGrad", "spriteScl",
+		"oriented", "orienScl", "orienX", "orienY", "orienZ",
+		"tubesize", "bbox", "imgCnt", "imgOff" });
 	auto bid = glGetUniformBlockIndex(parProg, "clipping");
 	glUniformBlockBinding(parProg, bid, _clipBindId);
-#undef LC
 
-	parConProg = Shader::FromVF(IO::GetText(IO::path + "shaders/parConV.glsl"), IO::GetText(IO::path + "shaders/parConF.glsl"));
-#define LC(nm) parConProg.AddUniform(#nm)
-	i = 0;
-	LC(_MV); LC(_P); LC(camPos); LC(camFwd);
-	LC(screenSize); LC(posTex); LC(connTex);
-	LC(radTex); LC(id2); LC(radScl); 
-	LC(orthoSz); LC(id2col); LC(colList);
-	LC(gradCols); LC(colUseGrad);
-	LC(usegrad); LC(onecol); LC(spriteScl);
-	LC(tubesize);
+	(parConProg = Shader::FromVF(IO::GetText(IO::path + "shaders/parConV.glsl"), IO::GetText(IO::path + "shaders/parConF.glsl"))).AddUniforms({
+		"_MV", "_P", "camPos", "camFwd",
+		"screenSize", "posTex", "connTex",
+		"radTex", "id2", "radScl",
+		"orthoSz", "id2col", "colList",
+		"gradCols", "colUseGrad",
+		"usegrad", "onecol", "spriteScl",
+		"tubesize" });
 	bid = glGetUniformBlockIndex(parConProg, "clipping");
 	glUniformBlockBinding(parConProg, bid, _clipBindId);
-#undef LC
 
-	parConLineProg = Shader::FromVF(IO::GetText(IO::path + "shaders/parConV_line.glsl"), IO::GetText(IO::path + "shaders/parConF_line.glsl"));
-#define LC(nm) parConLineProg.AddUniform(#nm)
-	i = 0;
-	LC(_MV); LC(_P); LC(posTex);
-	LC(connTex), LC(rad); LC(id2); LC(radScl); 
-	LC(orthoSz); LC(id2col); LC(colList);
-	LC(gradCols); LC(colUseGrad);
-	LC(usegrad); LC(onecol); 
-#undef LC
+	(parConLineProg = Shader::FromVF(IO::GetText(IO::path + "shaders/parConV_line.glsl"), IO::GetText(IO::path + "shaders/parConF_line.glsl"))).AddUniforms({
+		"_MV", "_P", "posTex",
+		"connTex", "rad", "id2", "radScl",
+		"orthoSz", "id2col", "colList",
+		"gradCols", "colUseGrad",
+		"usegrad", "onecol" });
 
-	selHlProg = Shader::FromF(mv, glsl::selectorFrag);
-#define LC(nm) selHlProg.AddUniform(#nm)
-	i = 0;
-	LC(screenSize); LC(myId); LC(idTex); LC(hlCol);
-#undef LC
+	(selHlProg = Shader::FromF(mv, glsl::selectorFrag)).AddUniforms({
+		"screenSize", "myId", "idTex", "hlCol" });
 
-	colProg = Shader::FromF(mv, glsl::colererFrag);
-#define LC(nm) colProg.AddUniform(#nm)
-	i = 0;
-	LC(idTex); LC(spTex); LC(screenSize);
-	LC(id2col); LC(colList); LC(usegrad);
-	LC(gradcols); LC(doid); LC(tint);
-#undef LC
+	(colProg = Shader::FromF(mv, glsl::colererFrag)).AddUniforms({
+		"idTex", "spTex", "screenSize",
+		"id2col", "colList", "usegrad",
+		"gradcols", "doid", "tint" });
 
 	glDeleteShader(mv);
 

@@ -43,7 +43,7 @@ void main(){
         int iz = int(mod(gl_InstanceID, imgCnt.z));
         int gi2 = int(gl_InstanceID / imgCnt.z);
         int iy = int(mod(gi2, imgCnt.y));
-        int ix = int(gi2 / imgCnt.x);
+        int ix = int(gi2 / imgCnt.y);
         ppos += bbox * (vec3(ix, iy, iz) - imgOff);
     }
 	vec4 wpos = _MV*vec4(ppos, 1);
