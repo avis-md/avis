@@ -45,6 +45,7 @@ Vec4 ParGraphics::bgCol = Vec4(1, 1, 1, 1), ParGraphics::fogCol = Vec4(0, 0, 0, 
 float ParGraphics::bgMul = 1;
 
 bool ParGraphics::showbbox = true;
+int ParGraphics::periodicImgs[] = {};
 
 bool ParGraphics::showAxes = true;
 float ParGraphics::axesSize = 15;
@@ -133,42 +134,33 @@ float ParGraphics::Eff::fxaaSpanMax = 8, ParGraphics::Eff::fxaaRedMul = 1.f/8, P
 
 void ParGraphics::Eff::Apply() {
 	auto& cam = ChokoLait::mainCamera;
-	byte cnt = 0;
 	if (useGlow) {
-		cnt = Effects::Glow(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[2], cam->blitTexs[0], cam->blitTexs[1], cam->blitTexs[2],
-			glowThres, glowRad, glowStr, Display::width, Display::height);
-		if ((cnt % 2) == 1) {
+		if (Effects::Glow(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[2], cam->blitTexs[0], cam->blitTexs[1], cam->blitTexs[2],
+			glowThres, glowRad, glowStr, Display::width, Display::height))
 			cam->SwapBlitBuffers();
-		}
 	}
 
 	if (useSSAO) {
-		cnt = Effects::SSAO(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[2], cam->blitTexs[0], cam->blitTexs[1], cam->blitTexs[2],
-			cam->texs.normTex, cam->texs.depthTex, ssaoStr, ssaoSamples, ssaoRad, ssaoBlur, Display::width, Display::height);
-		if ((cnt % 2) == 1) {
+		if (Effects::SSAO(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[2], cam->blitTexs[0], cam->blitTexs[1], cam->blitTexs[2],
+			cam->texs.normTex, cam->texs.depthTex, ssaoStr, ssaoSamples, ssaoRad, ssaoBlur, Display::width, Display::height))
 			cam->SwapBlitBuffers();
-		}
 	}
 
 	if (useDof) {
-		cnt = Effects::Dof(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1],
-			cam->texs.depthTex, dofDepth / 500, dofFocal, dofAper, dofIter, Display::width, Display::height);
-		if ((cnt % 2) == 1) {
+		if (Effects::Dof(cam->blitFbos[0], cam->blitFbos[1], cam->blitTexs[0], cam->blitTexs[1],
+			cam->texs.depthTex, dofDepth / 500, dofFocal, dofAper, dofIter, Display::width, Display::height))
 			cam->SwapBlitBuffers();
-		}
 	}
 
 	if (AnWeb::drawFull) {
-		cnt = Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[0], cam->blitTexs[0], cam->blitTexs[1],
-			AnWeb::drawLerp, Display::width, Display::height);
-		if ((cnt % 2) == 1) {
+		if (Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[0], cam->blitTexs[0], cam->blitTexs[1],
+			AnWeb::drawLerp, Display::width, Display::height))
 			cam->SwapBlitBuffers();
-		}
 	}
 
 	if (useFXAA) {
-		Effects::FXAA(cam->blitFbos[1], cam->blitTexs[0], fxaaSpanMax, fxaaRedMul, fxaaRedCut, Display::width, Display::height);
-		cam->SwapBlitBuffers();
+		if (Effects::FXAA(cam->blitFbos[1], cam->blitTexs[0], fxaaSpanMax, fxaaRedMul, fxaaRedCut, Display::width, Display::height))
+			cam->SwapBlitBuffers();
 	}
 }
 
@@ -328,7 +320,7 @@ void ParGraphics::Init() {
 	LC(radTex); LC(radScl); LC(id2col); LC(colList);
 	LC(gradCols); LC(colUseGrad); LC(spriteScl);
 	LC(oriented); LC(orienScl); LC(orienX); LC(orienY); LC(orienZ);
-	LC(tubesize);
+	LC(tubesize); LC(bbox); LC(imgCnt); LC(imgOff);
 	auto bid = glGetUniformBlockIndex(parProg, "clipping");
 	glUniformBlockBinding(parProg, bid, _clipBindId);
 #undef LC
@@ -413,8 +405,8 @@ void ParGraphics::InitClippingMesh() {
 	}
 	pts[13] = Vec3(0, 0, 0.6f);
 	int ids[36] = {
-		0,4,1,4,5,1,	1,5,2,5,6,2,
-		2,6,3,6,7,3,	3,7,0,7,4,0,
+		0,4,1,4,5,1,	 1,5,2,5,6,2,
+		2,6,3,6,7,3,	 3,7,0,7,4,0,
 		8,12,9, 9,12,10, 10,12,11, 11,12,9
 	};
 	arrowMesh = new Mesh(13, pts, 0, 36, ids);
@@ -838,13 +830,28 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		}
 		glUniform1f(parProg.Loc(18), TUBESIZE);
 
+		glUniform3f(parProg.Loc(19), Particles::boundingBox[1] - Particles::boundingBox[0]
+			, Particles::boundingBox[3] - Particles::boundingBox[2]
+			, Particles::boundingBox[5] - Particles::boundingBox[4]);
+		
+		int pix = periodicImgs[1] + periodicImgs[0] + 1;
+		int piy = periodicImgs[3] + periodicImgs[2] + 1;
+		int piz = periodicImgs[5] + periodicImgs[4] + 1;
+		if (pix + piy + piz == 3) pix = 0;
+		glUniform3i(parProg.Loc(20), pix, piy, piz);
+		glUniform3i(parProg.Loc(21), periodicImgs[0], periodicImgs[2], periodicImgs[4]);
+
 		glBindVertexArray(Particles::posVao);
 		for (auto& p : drawLists) {
 			if (p.second.second == 1) glUniform1f(parProg.Loc(7), -1);
 			else if (p.second.second == 0x0f) glUniform1f(parProg.Loc(7), 0);
 			else if (p.second.second == 2) glUniform1f(parProg.Loc(7), 0.2f * radScl);
 			else glUniform1f(parProg.Loc(7), radScl);
-			glDrawArrays(GL_POINTS, p.first, p.second.first);
+			
+			if (!pix)
+				glDrawArrays(GL_POINTS, p.first, p.second.first);
+			else
+				glDrawArraysInstanced(GL_POINTS, p.first, p.second.first, pix * piy * piz);
 		}
 
 		auto& con = Particles::conns;
@@ -1588,6 +1595,25 @@ void ParGraphics::DrawMenu() {
 		}
 		off += 17;
 	}
+
+	UI::Label(expandPos - 148, off, 12, _("Periodic Images"), white());
+	off += 17;
+	std::string tmp;
+#define _per(i, x, ax, r, g, b)\
+	tmp = std::to_string(periodicImgs[i]);\
+	if ((periodicImgs[i] = Clamp(TryParse(UI::EditText(expandPos - 148 + 49 * x, off, 48, 16, 12, Vec4(r, g, b, 1), tmp, true, white(), 0, ax + tmp), 0), 0, 20))\
+			!= periodicImgs[i + 6])\
+		periodicImgs[i + 6] = periodicImgs[i];\
+		Scene::dirty = true
+	
+	_per(0, 0, "-X:", 0.6f, 0.4f, 0.4f);
+	_per(2, 1, "-Y:", 0.4f, 0.6f, 0.4f);
+	_per(4, 2, "-Z:", 0.4f, 0.4f, 0.6f);
+	off += 17;
+	_per(1, 0, "+X:", 0.6f, 0.4f, 0.4f);
+	_per(3, 1, "+Y:", 0.4f, 0.6f, 0.4f);
+	_per(5, 2, "+Z:", 0.4f, 0.4f, 0.6f);
+	off += 17;
 
 	const int ns[] = { 1, 8, 7 };
 	UI::Label(expandPos - 148, off, 12, _("Clipping"), white());

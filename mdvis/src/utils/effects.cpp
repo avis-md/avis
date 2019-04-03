@@ -35,7 +35,7 @@ void Effects::Init(EFF_ENABLE_MASK mask) {
 
 }
 
-byte Effects::Blur(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, float rad, int w, int h) {
+bool Effects::Blur(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, float rad, int w, int h) {
 	glUseProgram(blurProg);
 	glBindVertexArray(Camera::emptyVao);
 	glUniform1i(blurProg.Loc(0), 0);
@@ -54,10 +54,10 @@ byte Effects::Blur(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, floa
 	
 	glBindVertexArray(0);
 	glUseProgram(0);
-	return 2;
+	return false;
 }
 
-byte Effects::Glow(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLuint tx3, float off, float rad, float str, int w, int h) {
+bool Effects::Glow(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLuint tx3, float off, float rad, float str, int w, int h) {
 	glUseProgram(glowProg);
 	glBindVertexArray(Camera::emptyVao);
 	glUniform1i(glowProg.Loc(0), 0);
@@ -91,10 +91,10 @@ byte Effects::Glow(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLui
 
 	glBindVertexArray(0);
 	glUseProgram(0);
-	return 1;
+	return true;
 }
 
-byte Effects::SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLuint tx3, GLuint nrm, GLuint dph, float str, int cnt, float rad, float blr, int w, int h) {
+bool Effects::SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLuint tx3, GLuint nrm, GLuint dph, float str, int cnt, float rad, float blr, int w, int h) {
 	glUseProgram(ssaoProg);
 	glUniform1i(ssaoProg.Loc(0), 0);
 	glActiveTexture(GL_TEXTURE0);
@@ -136,10 +136,10 @@ byte Effects::SSAO(GLuint t1, GLuint t2, GLuint t3, GLuint tx1, GLuint tx2, GLui
 	
 	glBindVertexArray(0);
 	glUseProgram(0);
-	return 1;
+	return true;
 }
 
-byte Effects::Dof(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, GLuint dph, float z, float f, float a, int n, int w, int h) {
+bool Effects::Dof(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, GLuint dph, float z, float f, float a, int n, int w, int h) {
 	glUseProgram(dofProg);
 	glBindVertexArray(Camera::emptyVao);
 	glUniform1i(dofProg.Loc(1), 1);
@@ -150,7 +150,7 @@ byte Effects::Dof(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, GLuint dph, floa
 	glUniform2f(dofProg.Loc(5), (float)w, (float)h);
 	glUniform1i(dofProg.Loc(6), ChokoLait::mainCamera->ortographic);
 
-	for (int i = 0; i < n; i++, a*=0.5) {
+	for (int i = 0; i < n && a > 1; i++, a*=0.5) {
 		glUniform1i(dofProg.Loc(0), 0);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, !(i%2)? tx1 : tx2);
@@ -159,10 +159,10 @@ byte Effects::Dof(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, GLuint dph, floa
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 
-	return n;
+	return (n % 2 == 1);
 }
 
-byte Effects::FXAA(GLuint t2, GLuint tx1, float spn, float max, float cut, int w, int h) {
+bool Effects::FXAA(GLuint t2, GLuint tx1, float spn, float max, float cut, int w, int h) {
 	glUseProgram(fxaaProg);
 	glBindVertexArray(Camera::emptyVao);
 	glUniform1i(fxaaProg.Loc(0), 1);
@@ -174,7 +174,7 @@ byte Effects::FXAA(GLuint t2, GLuint tx1, float spn, float max, float cut, int w
 	glUniform1f(fxaaProg.Loc(4), cut);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, t2);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	return 1;
+	return true;
 }
 
 void Effects::_InitBlur(const std::string& vs) {

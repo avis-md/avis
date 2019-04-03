@@ -17,6 +17,10 @@ uniform float orienScl;
 
 uniform float tubesize;
 
+uniform vec3 bbox;
+uniform ivec3 imgCnt;
+uniform ivec3 imgOff;
+
 layout (std140) uniform clipping {
     vec4 clip_planes[6];
 };
@@ -34,7 +38,15 @@ out float v2f_scl;
 out float v2f_rad;
 
 void main(){
-	vec4 wpos = _MV*vec4(pos, 1);
+    vec3 ppos = pos;
+    if (imgCnt.x > 0) {
+        int iz = int(mod(gl_InstanceID, imgCnt.z));
+        int gi2 = int(gl_InstanceID / imgCnt.z);
+        int iy = int(mod(gi2, imgCnt.y));
+        int ix = int(gi2 / imgCnt.x);
+        ppos += bbox * (vec3(ix, iy, iz) - imgOff);
+    }
+	vec4 wpos = _MV*vec4(ppos, 1);
 	wpos /= wpos.w;
 	if (clipped(wpos.xyz)) {
 		gl_PointSize = 0;

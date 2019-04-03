@@ -18,6 +18,8 @@ public:
 
 	static bool showbbox;
 
+	static int periodicImgs[12];
+
 	static bool showAxes;
 	static float axesSize;
 	static Vec4 axesCols[3];
