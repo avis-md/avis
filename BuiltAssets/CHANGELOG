@@ -1,19 +1,33 @@
 #General
-- Exposed more config options in Preferences
-- Lost track of number of bug fixes
+- Improved UI drawing
+  - UI text now uses much less memory when drawing
+  - UI text now supports shadows
+  - UI shapes now render slightly faster
 
 #Analysis
+- Removed plotter node background
+- Plotter node output can now be exported as csv files
+
+#Visualization
+- Periodic images can now be visualized
+- New effects:
+  - FXAA: Smoothes edges without supersampling
+- SSAO samples are now jittered (better result)
+
+#----Previous changes----
+
+#Version 0.1
+
+- Exposed more config options in Preferences
+
 - Analysis framework is reworked.
 - Analysis nodes now run in parallel when possible
 - Nodes now have classed in addition to the global format
 - New nodes:
   - Draw Mesh: draw arbitrary triangles
 
-#Visualization
 - Added axis
 - Support for multi-layer transparency
-
-#----Previous changes----
 
 #Version 0.04
 
