@@ -6,14 +6,14 @@ namespace glsl {
 uniform sampler2D tex;
 uniform vec2 screenSize;
 
+uniform float spanMax;
+uniform float reduceMul;
+uniform float reduceCutoff;
+
 out vec4 fragCol;
 
 void main () {
 	vec2 uv = gl_FragCoord.xy / screenSize;
-
-    float FXAA_SPAN_MAX = 8.0;
-    float FXAA_REDUCE_MUL = 1.0/8.0;
-    float FXAA_REDUCE_MIN = 1.0/128.0;
 
     vec3 rgbNW=texture(tex,uv+(vec2(-1.0,-1.0)/screenSize)).xyz;
     vec3 rgbNE=texture(tex,uv+(vec2(1.0,-1.0)/screenSize)).xyz;
@@ -36,13 +36,13 @@ void main () {
     dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));
 
     float dirReduce = max(
-        (lumaNW + lumaNE + lumaSW + lumaSE) * (0.25 * FXAA_REDUCE_MUL),
-        FXAA_REDUCE_MIN);
+        (lumaNW + lumaNE + lumaSW + lumaSE) * (0.25 * reduceMul),
+        reduceCutoff);
 
     float rcpDirMin = 1.0/(min(abs(dir.x), abs(dir.y)) + dirReduce);
 
-    dir = min(vec2( FXAA_SPAN_MAX,  FXAA_SPAN_MAX),
-          max(vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX),
+    dir = min(vec2( spanMax,  spanMax),
+          max(vec2(-spanMax, -spanMax),
           dir * rcpDirMin)) / screenSize;
 
     vec3 rgbA = (1.0/2.0) * (

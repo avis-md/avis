@@ -118,8 +118,8 @@ Mat4x4 ParGraphics::lastMV, ParGraphics::lastP, ParGraphics::lastMVP;
 //---------------- effects vars -------------------
 
 bool ParGraphics::Eff::expanded;
-bool ParGraphics::Eff::showSSAO, ParGraphics::Eff::showGlow, ParGraphics::Eff::showDof;
-bool ParGraphics::Eff::useSSAO, ParGraphics::Eff::useGlow, ParGraphics::Eff::useDof;
+bool ParGraphics::Eff::showSSAO, ParGraphics::Eff::showGlow, ParGraphics::Eff::showDof, ParGraphics::Eff::showFXAA;
+bool ParGraphics::Eff::useSSAO, ParGraphics::Eff::useGlow, ParGraphics::Eff::useDof, ParGraphics::Eff::useFXAA = true;
 
 float ParGraphics::Eff::glowThres = 0.7f, ParGraphics::Eff::glowRad = 1, ParGraphics::Eff::glowStr = 1;
 
@@ -128,6 +128,8 @@ int ParGraphics::Eff::ssaoSamples;
 
 float ParGraphics::Eff::dofDepth = 0, ParGraphics::Eff::dofFocal = 1, ParGraphics::Eff::dofAper = 1;
 int ParGraphics::Eff::dofIter = 1;
+
+float ParGraphics::Eff::fxaaSpanMax = 8, ParGraphics::Eff::fxaaRedMul = 1.f/8, ParGraphics::Eff::fxaaRedCut = 1.f/128;
 
 void ParGraphics::Eff::Apply() {
 	auto& cam = ChokoLait::mainCamera;
@@ -158,22 +160,36 @@ void ParGraphics::Eff::Apply() {
 
 	if (AnWeb::drawFull) {
 		cnt = Effects::Blur(cam->blitFbos[0], cam->blitFbos[1], cam->blitFbos[0], cam->blitTexs[0], cam->blitTexs[1],
-		AnWeb::drawLerp, Display::width, Display::height);
+			AnWeb::drawLerp, Display::width, Display::height);
 		if ((cnt % 2) == 1) {
 			cam->SwapBlitBuffers();
 		}
 	}
 
-	Effects::FXAA(cam->blitFbos[1], cam->blitTexs[0], Display::width, Display::height);
-	cam->SwapBlitBuffers();
+	if (useFXAA) {
+		Effects::FXAA(cam->blitFbos[1], cam->blitTexs[0], fxaaSpanMax, fxaaRedMul, fxaaRedCut, Display::width, Display::height);
+		cam->SwapBlitBuffers();
+	}
 }
 
 float ParGraphics::Eff::DrawMenu(float off) {
 	auto& expandPos = ParMenu::expandPos;
 	
 	UI::Label(expandPos - 148, off, 12, _("Effects"), white());
-
 	off += 17;
+
+	UI2::Toggle(expandPos - 147, off, 145, _("Anti-Aliasing"), useFXAA);
+	if (useFXAA) {
+		fxaaSpanMax = UI2::Slider(expandPos - 147, off + 17, 146, _("Range"), 0, 15, fxaaSpanMax);
+		fxaaRedMul = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Edge"), 0, 0.5, fxaaRedMul);
+		fxaaRedCut = UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Cutoff"), 0.001, 0.05, fxaaRedCut);
+
+		CHKT(fxaaSpanMax) CHKT(fxaaRedMul) CHKT(fxaaRedCut)
+		off += 17 * 4 + 1;
+	}
+	else off += 18;
+	CHKT(useFXAA)
+
 	UI2::Toggle(expandPos - 147, off, 145, _("Glow"), useGlow);
 	if (useGlow) {
 		glowThres = UI2::Slider(expandPos - 147, off + 17, 146, _("Threshold"), 0, 2, glowThres);
@@ -188,8 +204,7 @@ float ParGraphics::Eff::DrawMenu(float off) {
 
 	UI2::Toggle(expandPos - 147, off, 145, _("Ambient Occlusion"), useSSAO);
 	if (useSSAO) {
-		ssaoSamples = UI2::SliderI(expandPos - 147, off + 17, 146, _("Samples"), 5, 100, ssaoSamples);
-		ssaoSamples = Clamp(ssaoSamples, 10, 100);
+		ssaoSamples = UI2::SliderI(expandPos - 147, off + 17, 146, _("Samples"), 5, 256, ssaoSamples);
 		ssaoRad = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Radius"), 0.001f, 0.05f, ssaoRad);
 		ssaoStr = UI2::Slider(expandPos - 147, off + 17 * 3, 146, _("Strength"), 0, 3, ssaoStr);
 		ssaoBlur = UI2::Slider(expandPos - 147, off + 17 * 4, 146, _("Blur"), 0, 40, ssaoBlur);
@@ -203,7 +218,6 @@ float ParGraphics::Eff::DrawMenu(float off) {
 	UI2::Toggle(expandPos - 147, off, 145, _("Depth Of Field"), useDof);
 	if (useDof) {
 		dofDepth = UI2::Slider(expandPos - 147, off + 17, 146, _("Distance"), 0, 5, dofDepth);
-		//dofFocal = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Focal"), 0.001f, 1, dofFocal);
 		dofAper = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Aperture"), 0, 10, dofAper);
 		dofIter = UI2::SliderI(expandPos - 147, off + 17 * 3, 146, _("Iterations"), 1, 10, dofIter);
 

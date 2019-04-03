@@ -23,7 +23,7 @@ void main () {
 	float z = texture(depthTex, uv).x;
 
 	if (z >= 1) {
-		fragCol = vec4(0, 0, 0, 0);
+		fragCol = vec4(1, 1, 1, 0);
 		return;
 	}
 
@@ -32,8 +32,10 @@ void main () {
 	wPos *= ceil(1-z) / wPos.w; //world position
 
 	float str = 0;
+	float io = texture(noiseTex, uv * screenSize / 16.0).y * (screenSize.x + screenSize.y);
 	for (int i = 0; i < samples; ++i) {
-		vec3 dw = texture(noiseTex, vec2(i / 16, mod(i, 16)) / 16.0).xyz;
+		float j = i + io;
+		vec3 dw = texture(noiseTex, vec2(j / 16, mod(j, 16)) / 16.0).xyz;
 		dw = (dw*2.0) - vec3(1,1,1);
 		vec3 wpos2 = wPos.xyz + (nrm*dw.x + tan*dw.y + bitan*dw.z)*radius;
 		vec4 spos2 = _P * vec4(wpos2, 1);

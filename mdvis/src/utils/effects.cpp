@@ -162,13 +162,16 @@ byte Effects::Dof(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, GLuint dph, floa
 	return n;
 }
 
-byte Effects::FXAA(GLuint t2, GLuint tx1, int w, int h) {
+byte Effects::FXAA(GLuint t2, GLuint tx1, float spn, float max, float cut, int w, int h) {
 	glUseProgram(fxaaProg);
 	glBindVertexArray(Camera::emptyVao);
 	glUniform1i(fxaaProg.Loc(0), 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, tx1);
 	glUniform2f(fxaaProg.Loc(1), (float)w, (float)h);
+	glUniform1f(fxaaProg.Loc(2), spn);
+	glUniform1f(fxaaProg.Loc(3), max);
+	glUniform1f(fxaaProg.Loc(4), cut);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, t2);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	return 1;
@@ -222,7 +225,7 @@ void Effects::_InitSSAO(const std::string& vs) {
 	}
 	glGenTextures(1, &noiseTex);
 	glBindTexture(GL_TEXTURE_2D, noiseTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 16, 16, 0, GL_RGB, GL_FLOAT, noise);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 16, 16, 0, GL_RGB, GL_FLOAT, noise);
 	SetTexParams<>(0, GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -241,5 +244,8 @@ void Effects::_InitDof(const std::string& vs) {
 void Effects::_InitFXAA(const std::string& vs) {
 	(fxaaProg = Shader::FromVF(vs, glsl::fxaaFrag))
 		.AddUniform("tex")
-		.AddUniform("screenSize");
+		.AddUniform("screenSize")
+		.AddUniform("spanMax")
+		.AddUniform("reduceMul")
+		.AddUniform("reduceCutoff");
 }

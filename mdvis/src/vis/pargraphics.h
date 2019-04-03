@@ -109,8 +109,8 @@ public:
 	class Eff {
 	public:
 		static bool expanded;
-		static bool showSSAO, showGlow, showDof;
-		static bool useSSAO, useGlow, useDof;
+		static bool showSSAO, showGlow, showDof, showFXAA;
+		static bool useSSAO, useGlow, useDof, useFXAA;
 
 		static float glowThres, glowRad, glowStr;
 
@@ -119,6 +119,8 @@ public:
 
 		static float dofDepth, dofFocal, dofAper;
 		static int dofIter;
+
+		static float fxaaSpanMax, fxaaRedMul, fxaaRedCut;
 
 		static void Apply();
 		static float DrawMenu(float off);
