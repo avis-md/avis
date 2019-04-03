@@ -172,7 +172,7 @@ void Transform::_W2LQuat() {
 
 void Transform::_UpdateLMatrix() {
 	_localMatrix = MatFunc::FromTRS(_localPosition, _localRotation, _localScale);
-	_UpdateWMatrix(object->parent ? object->parent->transform._worldMatrix : Mat4x4());
+	_UpdateWMatrix(object->parent ? object->parent->transform._worldMatrix : glm::identity<Mat4x4>());
 }
 
 void Transform::_UpdateWMatrix(const Mat4x4& mat) {

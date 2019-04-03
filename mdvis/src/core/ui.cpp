@@ -95,7 +95,7 @@ void UI::Rotate(float aa, Vec2 point) {
 	matrixIsI = false;
 }
 void UI::ResetMatrix() {
-	matrix = glm::mat3();
+	matrix = glm::identity<glm::mat3>();
 	matrixIsI = true;
 }
 
@@ -112,7 +112,7 @@ void UI::Quad(float x, float y, float w, float h, Vec4 col) {
 	quadPoss[3].y = y + h;
 	for (int y = 0; y < 4; ++y) {
 		quadPoss[y].z = 1;
-		quadPoss[y] = Ds(UI::matrix*quadPoss[y]);
+		quadPoss[y] = Ds(UI::matrixIsI ? quadPoss[y] : UI::matrix*quadPoss[y]);
 	}
 
 	UI::SetVao(4, quadPoss);
@@ -136,7 +136,7 @@ void UI::Quad(float x, float y, float w, float h, GLuint tex, Vec4 col, int mip,
 	quadPoss[3].x = x + w;	quadPoss[3].y = y + h;
 	for (int y = 0; y < 4; ++y) {
 		quadPoss[y].z = 1;
-		quadPoss[y] = Ds(UI::matrix*quadPoss[y]);
+		quadPoss[y] = Ds(UI::matrixIsI ? quadPoss[y] : UI::matrix*quadPoss[y]);
 	}
 	Vec2 quadUvs[4]{ uv0, uv1, uv2, uv3 };
 

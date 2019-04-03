@@ -4,7 +4,7 @@ MVP::stack MVP::MV = MVP::stack();
 MVP::stack MVP::P = MVP::stack();
 Mat4x4 MVP::_mv, MVP::_p;
 bool MVP::changedMv = true, MVP::changedP = true;
-Mat4x4 MVP::identity = Mat4x4();
+Mat4x4 MVP::identity = glm::identity<Mat4x4>();
 bool MVP::isProj = false;
 
 void MVP::Reset() {

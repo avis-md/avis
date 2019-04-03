@@ -18,6 +18,22 @@ forked from ChokoEngine -- Chokomancarr 2018
 #define OHNO(nm, msg) Debug::Error(#nm, "Something happened that should not! Please contact the monkey!\n  Information the monkey needs: " msg)
 
 #pragma region includes
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <complex>
+#include <condition_variable>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <thread>
+#include <unordered_map>
+#include <vector>
+
 /* OS-specific headers */
 #if defined(PLATFORM_WIN)
 #include "minimalwin.h"
@@ -52,26 +68,12 @@ typedef GLFWwindow NativeWindow;
 #include <GLFW/glfw3native.h>
 #endif
 
-#include <complex>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <algorithm>
-#include <stack>
-#include <map>
-#include <unordered_map>
-#include <array>
-#include <memory>
-#include <thread>
-#include <cmath>
-#include <condition_variable>
+#define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm.hpp"
-#include "glm/gtx/quaternion.hpp"
-#include "glm/gtx/transform.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "glm/gtx/transform.hpp"
+#include "glm/gtx/quaternion.hpp"
 
 #pragma region Type Extensions
 
