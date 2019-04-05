@@ -27,7 +27,7 @@ void Node_AdjList::Execute() {
 	if (!inputR[0].first) return;
 	if (inputR[0].getdim(1) != 2)
 		RETERR("input list dim 2 size is not 2!");
-	auto data = *(int**)inputR[0].getval();
+	auto data = *(int**)inputR[0].getval(ANVAR_ORDER::C);
 	auto ccnt = inputR[0].getdim(0);
 	count = getval_i(1);
 	listsize = getval_i(2);
@@ -82,7 +82,7 @@ void Node_AdjListI::Execute() {
 	count = 0;
 	if (!inputR[0].first) return;
 	auto& ir = inputR[0];
-	auto data = *(int**)ir.getval();
+	auto data = *(int**)ir.getval(ANVAR_ORDER::C);
 	auto cnt = ir.getdim(0);
 	auto lsz = ir.getdim(1);
 	if (!cnt || !lsz) return;

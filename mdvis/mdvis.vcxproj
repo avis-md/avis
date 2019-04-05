@@ -439,6 +439,7 @@
     <ClInclude Include="src\res\shd\voxelVert.h" />
     <ClInclude Include="src\ui\browse.h" />
     <ClInclude Include="src\ui\browsetarget.h" />
+    <ClInclude Include="src\ui\ui_layout.h" />
     <ClInclude Include="src\vis\preferences.h" />
     <ClInclude Include="src\unloader.h" />
     <ClInclude Include="src\utils\refcnt.h" />

@@ -12,8 +12,8 @@ Vec4 AnCol::conn_vector = {};
 
 #define _script script->parent
 
-void* AnNode::nodecon::getval() {
-	return first->GetOutVal(second);
+void* AnNode::nodecon::getval(ANVAR_ORDER order) {
+	return first->GetOutVal(second, order);
 }
 
 AnScript::Var& AnNode::nodecon::getvar() {
@@ -34,13 +34,13 @@ void AnNode::Init() {
 }
 
 short& AnNode::getval_s(const uint i) {
-	return inputR[i].first ? *(short*)inputR[i].getval() : script->defVals[i].s;
+	return inputR[i].first ? *(short*)inputR[i].getval(ANVAR_ORDER::DEFAULT) : script->defVals[i].s;
 }
 int& AnNode::getval_i(const uint i) {
-	return inputR[i].first ? *(int*)inputR[i].getval() : script->defVals[i].i;
+	return inputR[i].first ? *(int*)inputR[i].getval(ANVAR_ORDER::DEFAULT) : script->defVals[i].i;
 }
 double& AnNode::getval_d(const uint i) {
-	return inputR[i].first ? *(double*)inputR[i].getval() : script->defVals[i].d;
+	return inputR[i].first ? *(double*)inputR[i].getval(ANVAR_ORDER::DEFAULT) : script->defVals[i].d;
 }
 
 bool AnNode::Select() {
@@ -213,7 +213,7 @@ void AnNode::Draw() {
 						std::string str = "";
 						const auto& ov = script->parent->outputs[i];
 						const auto& cv = conV[i];
-						auto ptr = script->Resolve(cv.offset);
+						const auto ptr = GetOutVal(i, ANVAR_ORDER::C);
 						if (!ptr) str = "failed to read variable";
 						else {
 							switch (ov.type) {
@@ -525,7 +525,12 @@ void AnNode::ResizeIO(AnScript* scr) {
 	auto osz = scr->outputs.size();
 	outputR.resize(osz);
 	conV.resize(osz);
+	conV_t.resize(osz);
 	conVAll.resize(osz);
+
+	for (auto& c : conV_t) {
+		c.pval = &c.val.p;
+	}
 }
 
 void AnNode::PreExecute() {
@@ -534,6 +539,9 @@ void AnNode::PreExecute() {
 		i.execd = !i.first;
 	}
 	log.clear();
+	for (auto& c : conV_t) {
+		c.val.p = nullptr;
+	}
 }
 
 bool AnNode::TryExecute() {
@@ -565,7 +573,7 @@ void AnNode::_Execute(AnNode* n) {
 	Debug::Message("AnNode", "Executed " + std::to_string(n->id) + n->title);
 	for (size_t a = 0; a < n->outputR.size(); a++) {
 		if (n->script->parent->outputs[a].type == AN_VARTYPE::LIST && n->outputR[a].size() > 0) {
-			if (!*(void**)n->GetOutVal(a)) {
+			if (n->outputR[a].size() > 0 && !*(void**)n->GetOutVal(a, ANVAR_ORDER::DEFAULT)) {
 				Debug::Warning("AnNode", "Output " + std::to_string(a) + " of node " + n->title + " is (list)nullptr!");
 				AnWeb::abortExec = true;
 			}
@@ -845,6 +853,9 @@ void AnNode::OnAnimFrame() {
 		//Debug::Message("AnNode", "autorun " + title);
 		Execute();
 	}
+	for (auto& c : conV_t) {
+		c.val.p = nullptr;
+	}
 }
 
 void AnNode::OnValChange(int i) {
@@ -853,11 +864,16 @@ void AnNode::OnValChange(int i) {
 	}
 }
 
-void* AnNode::GetOutVal(int i) {
+void* AnNode::GetOutVal(int i, ANVAR_ORDER order) {
+	bool uset = (order != ANVAR_ORDER::DEFAULT)
+		&& (script->parent->outputs[i].type == AN_VARTYPE::LIST)
+		&& ((order == ANVAR_ORDER::FT) != (script->parent->type == AnScript::TYPE::FORTRAN));
+	void* res = 0;
 	if (!AnWeb::executing && conVAll[i].size() > Particles::anim.currentFrame)
-		return conVAll[i][Particles::anim.currentFrame].pval;
+		res = conVAll[i][Particles::anim.currentFrame].pval;
 	else
-		return script->Resolve(conV[i].offset);
+		res = script->Resolve(conV[i].offset);
+	return uset ? GetTranspose(i, res) : res;
 }
 
 int AnNode::GetOutDim(int i, int d) {
@@ -865,4 +881,38 @@ int AnNode::GetOutDim(int i, int d) {
 		return conVAll[i][Particles::anim.currentFrame].dims[d];
 	else
 		return *script->GetDimValue(conV[i].szOffsets[d]);
+}
+
+void* AnNode::GetTranspose(int i, void* val) {
+	auto& cvt = conV_t[i];
+	if (!cvt.val.p) {
+		auto& oi = script->parent->outputs[i];
+		auto sz = 1;
+		std::vector<int> dims(oi.dim);
+		for (int a = 0; a < oi.dim; a++) {
+			sz *= (dims[a] = GetOutDim(i, a));
+		}
+		cvt.arr.resize(sz * oi.stride);
+
+		std::vector<int> md(oi.dim);
+		for (int a = 0; a < sz; a++) { //for each element
+			int aa = a;
+			for (int d = 0; d < oi.dim; d++) { //get each dim index
+				md[d] = aa % dims[d];
+				aa /= dims[d];
+			}
+			int off = 0;
+			for (int d = 0; d < oi.dim; d++) { //get offset
+				int mul = 1;
+				for (int m = 0; m < d; m++) {
+					mul *= dims[oi.dim - m - 1];
+				}
+				off += mul * md[d];
+			}
+			const auto tar = &cvt.arr[0];
+			std::memcpy(tar + off * oi.stride, (char*)val + a * oi.stride, oi.stride);
+		}
+		cvt.val.p = cvt.arr.data();
+	}
+	return cvt.pval;
 }

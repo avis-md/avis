@@ -48,7 +48,7 @@ void Node_AddBond::Execute() {
 	auto& c2 = c[AnWeb::realExecFrame];
 	c2.count = ir.getdim(0);
 	c2.ids.resize(c2.count);
-	memcpy(&c2.ids[0], *((Int2**)ir.getval()), c2.count * sizeof(Int2));
+	memcpy(&c2.ids[0], *((Int2**)ir.getval(ANVAR_ORDER::C)), c2.count * sizeof(Int2));
 }
 
 void Node_AddBond::DrawSettings(float& off) {

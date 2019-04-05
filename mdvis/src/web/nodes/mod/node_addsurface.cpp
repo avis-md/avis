@@ -40,7 +40,7 @@ void Node_AddSurface::Execute() {
 	auto& ir = inputR[0];
 	if (!ir.first) return;
 	auto& cv = ir.getconv();
-	auto& vl = *(double**)ir.getval();
+	auto& vl = *(double**)ir.getval(ANVAR_ORDER::C);
 	shape[0] = ir.getdim(0);
 	shape[1] = ir.getdim(1);
 	shape[2] = ir.getdim(2);

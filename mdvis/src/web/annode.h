@@ -21,6 +21,12 @@ enum class ANNODE_OP {
 	REMOVE
 };
 
+enum class ANVAR_ORDER {
+	DEFAULT,
+	C,
+	FT
+};
+
 typedef uint ANNODE_FLAGS;
 #define AN_FLAG_NOSAVECONV 1
 #define AN_FLAG_RUNONSEEK 2
@@ -68,13 +74,14 @@ public:
 		nodecon(AnNode* f = 0, uint i = 0, bool use = true)
 			: first(f), second(i), use(true), hoverdel(false) {}
 		CVar& getconv() { return first->conV[second]; }
-		void* getval();
+		void* getval(ANVAR_ORDER order);
 		AnScript::Var& getvar();
 		int getdim(int i); //shorthand
 	};
 	std::vector<nodecon> inputR;
 	std::vector<std::vector<nodecon>> outputR;
 	std::vector<CVar> conV;
+	std::vector<VarVal> conV_t;
 	short&  getval_s(const uint i);
 	int&    getval_i(const uint i);
 	double& getval_d(const uint i);
@@ -149,13 +156,14 @@ public:
 	virtual void OnConn(bool o, int i) {}
 	virtual void OnValChange(int i);
 
-	void* GetOutVal(int i);
+	void* GetOutVal(int i, ANVAR_ORDER order);
 	int GetOutDim(int i, int d);
 protected:
 	AnNode(pAnScript_I scr); //for user scripts
 	AnNode(pAnScript_I scr, ANNODE_FLAGS flags); //for internal scripts
 
 	static void _Execute(AnNode* n);
+	void* GetTranspose(int i, void* val);
 
 	void IAddConV(void*);
 	void IAddConV(void*, std::initializer_list<int*>, std::initializer_list<int>);

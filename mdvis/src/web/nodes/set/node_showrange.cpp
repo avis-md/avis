@@ -17,7 +17,7 @@ void Node_ShowRange::Execute() {
 	auto& ir = inputR[0];
 	if (ir.getdim(0) != Particles::particleSz) return;
 
-    double* vals = *((double**)ir.getval());
+    double* vals = *(double**)ir.getval(ANVAR_ORDER::C);
 
 #pragma omp parallel for
     for (int a = 0; a < Particles::particleSz; ++a) {

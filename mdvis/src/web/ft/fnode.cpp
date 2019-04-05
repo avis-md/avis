@@ -41,7 +41,7 @@ void FNode::Execute() {
 		_scr->pre = i;
 		auto& mv = _scr->inputs[i];
 		if (HasConnI(i)) {
-			auto v = inputR[i].getval();
+			auto v = inputR[i].getval(ANVAR_ORDER::FT);
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
 				script->SetInput(i, *(int*)v);

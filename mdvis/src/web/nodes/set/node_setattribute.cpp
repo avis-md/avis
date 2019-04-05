@@ -23,7 +23,7 @@ void Node_SetAttribute::Execute() {
 	auto sz = ir.getdim(0);
 	if (sz != Particles::particleSz)
 		RETERR("Attribute must be for each atom!");
-	auto src = *((void**)ir.getval());
+	auto src = *((void**)ir.getval(ANVAR_ORDER::C));
 	auto prm = Particles::attrs[attrId + Particles::readonlyAttrCnt];
 	prm->timed = (AnWeb::execFrame > 0 && timed);
 	auto& tar = prm->Get(AnWeb::realExecFrame);

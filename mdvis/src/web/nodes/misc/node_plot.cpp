@@ -122,7 +122,7 @@ void Node_Plot::Execute() {
 	auto yid = getval_i(2);
 	auto& cv = ir.getconv();
 	auto& vr = ir.getvar();
-	auto vl = ir.getval();
+	auto vl = ir.getval(ANVAR_ORDER::C);
 	if (!vl) {
 		RETERR("Value pointer is empty!");
 	}

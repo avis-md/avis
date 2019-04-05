@@ -19,7 +19,7 @@ void Node_SetBBoxCenter::Execute() {
 		return;
 	}
 	if (!AnWeb::execFrame)
-		Particles::Rebound(**(glm::dvec3**)ir.getval());
+		Particles::Rebound(**(glm::dvec3**)ir.getval(ANVAR_ORDER::C));
 	else
-		Particles::ReboundF(**(glm::dvec3**)ir.getval(), AnWeb::execFrame - 1);
+		Particles::ReboundF(**(glm::dvec3**)ir.getval(ANVAR_ORDER::C), AnWeb::execFrame - 1);
 }

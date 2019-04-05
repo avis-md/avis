@@ -26,7 +26,7 @@ void Node_Accum::Execute() {
 		throw "Accumulate does not support lists yet!";
 		return;
 	}
-	std::memcpy(&vals[AnWeb::realExecFrame*vr.stride], *(void**)inputR[0].getval(), vr.stride);
+	std::memcpy(&vals[AnWeb::realExecFrame*vr.stride], *(void**)inputR[0].getval(ANVAR_ORDER::C), vr.stride);
 }
 
 void Node_Accum::OnConn(bool o, int i) {

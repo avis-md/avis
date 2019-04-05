@@ -185,16 +185,16 @@ void paintfunc() {
 					Scene::dirty = true;
 				}
 				if (Input::KeyHold(KEY::LeftShift)) {
-					auto f = std::find(Selection::atoms.begin(), Selection::atoms.end(), id-1);
-					if (f == Selection::atoms.end()) Selection::atoms.push_back(id-1);
+					auto f = std::find(Selection::atoms.begin(), Selection::atoms.end(), id - 1);
+					if (f == Selection::atoms.end()) Selection::atoms.push_back(id - 1);
 					else if (!Input::dbclick) Selection::atoms.erase(f);
 					else goto nore;
 					Selection::Recalc();
-					nore:;
+				nore:;
 				}
 				else {
 					Selection::atoms.resize(1);
-					Selection::atoms[0] = id-1;
+					Selection::atoms[0] = id - 1;
 					Selection::Recalc();
 				}
 				//auto& rl = Particles::ress[id-1];
@@ -228,11 +228,9 @@ void paintfunc() {
 	Browse::Draw();
 	Preferences::Draw();
 	HelpMenu::Draw();
-	
+
 	Popups::Draw();
 	UI2::DrawTooltip();
-
-	UI::Quad(0, 0, Display::width, Display::height, RayTracer::resTex);
 }
 
 #ifdef MAKE_RES

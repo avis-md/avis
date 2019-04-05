@@ -34,7 +34,7 @@ void PyNode::Execute() {
 	for (uint i = 0; i < _scr->inputs.size(); ++i) {
 		auto& mv = _scr->inputs[i];
 		if (HasConnI(i)) {
-			auto v = inputR[i].getval();
+			auto v = inputR[i].getval(ANVAR_ORDER::C);
 			switch (mv.type) {
 			case AN_VARTYPE::INT:
 				script->SetInput(i, *(int*)v);

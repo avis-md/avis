@@ -27,7 +27,11 @@
         {
             "name": "MinGW",
             "includePath": [
-                "${workspaceFolder}/src"
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/src/winonly",
+                "${workspaceFolder}/../radeonrays/Calc/inc",
+                "${workspaceFolder}/../radeonrays/CLW",
+                "${workspaceFolder}/../radeonrays/RadeonRays/include"
             ],
             "defines":  [
                 "PLATFORM_WIN"

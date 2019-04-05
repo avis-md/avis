@@ -48,8 +48,8 @@ void Node_AddMesh::Execute() {
 	tsz = sz;
 	poss.resize(sz * 3);
 	nrms.resize(sz * 3);
-	auto ps = *(double**)ir0.getval();
-	auto nm = *(double**)ir1.getval();
+	auto ps = *(double**)ir0.getval(ANVAR_ORDER::C);
+	auto nm = *(double**)ir1.getval(ANVAR_ORDER::C);
 	for (int a = 0; a < sz * 3; a++) {
 		poss[a] = (float)ps[a];
 		nrms[a] = (float)nm[a];
