@@ -150,7 +150,7 @@ bool Effects::Dof(GLuint t1, GLuint t2, GLuint tx1, GLuint tx2, GLuint dph, floa
 	glUniform2f(dofProg.Loc(5), (float)w, (float)h);
 	glUniform1i(dofProg.Loc(6), ChokoLait::mainCamera->ortographic);
 
-	for (int i = 0; i < n && a > 1; i++, a*=0.5) {
+	for (int i = 0; i < n && a >= 0.5f; i++, a*=0.5) {
 		glUniform1i(dofProg.Loc(0), 0);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, !(i%2)? tx1 : tx2);

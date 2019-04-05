@@ -210,14 +210,14 @@ GLuint Font::CreateSGlyph(uint sz, uint mask) {
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbos[a]);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texs[a], 0);
-		glDrawBuffers(3, DrawBuffers);
+		glDrawBuffers(1, DrawBuffers);
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if (status != GL_FRAMEBUFFER_COMPLETE) {
 			Debug::Error("Font::CreateSGlyph", "FB error:" + std::to_string(status));
 		}
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
 	blurProg.Bind();
 	glUniform1i(blurProg.Loc(0), 0);
@@ -239,6 +239,7 @@ GLuint Font::CreateSGlyph(uint sz, uint mask) {
 	
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glViewport(0, 0, Display::frameWidth, Display::frameHeight);
 	blurProg.Unbind();
 

@@ -2,6 +2,9 @@
 
 void Transform::Init(pSceneObject& sc, Vec3 pos, Quat rot, Vec3 scl) {
 	object(sc);
+	_localPosition = Vec3();
+	_localRotation = glm::identity<Quat>();
+	_localScale = Vec3();
 	_rotation = rot;
 	Translate(pos).Scale(scl);
 	_UpdateWEuler();
