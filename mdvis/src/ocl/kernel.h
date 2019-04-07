@@ -182,7 +182,6 @@ __kernel void Shading(//scene
 		uint rnd = (uint)(k + rng);
 		float4 col = ocol[k];
 	
-		/*
         if (shape_id != -1 && prim_id != -1)// && occl[k] == -1)
         {
             // Calculate position and normal of the intersection point
@@ -208,6 +207,7 @@ __kernel void Shading(//scene
                 frr *= frr;
                 float fres = frr + (1 - frr)*pow(1 - dot(-rd, norm), 5);
                 //if (Randf(&rnd) < (1 - ((1 - fres) * (1 - mat.specular)))) {
+
                 if ((Randf(&rnd) < (1 - ((1 - fres) * 0.9f))) || dif > 0.1f) {
                     //Beckmann(&norm, 1 - mat.gloss, &rnd);
                     if (dif > 0.01f) Beckmann(&norm, 0.15f, &rnd);
@@ -225,6 +225,7 @@ __kernel void Shading(//scene
                     if (dif < 0.01f)
                         diff_col.xyz = (float3)(1, 1, 1);
                 }
+				diff_col.xyz = normalize(norm);
 
                 if (ocol[k].w < 0.5f)
                     ocol[k].xyz = diff_col.xyz;
@@ -250,10 +251,9 @@ __kernel void Shading(//scene
             accum[k * 3 + 2] += std::max(col.z, 0.f);
             ray[k].o = 0;
 		}
-        */
-		out[k * 4] = ray[k].d.x*255;//clamp(accum[k * 3] / smps, 0.f, 1.f) * 255;
-		out[k * 4 + 1] = ray[k].d.y*255;//clamp(accum[k * 3 + 1] / smps, 0.f, 1.f) * 255;
-		out[k * 4 + 2] = 0;//clamp(accum[k * 3 + 2] / smps, 0.f, 1.f) * 255;
+		out[k * 4] = clamp(accum[k * 3] / smps, 0.f, 1.f) * 255;
+		out[k * 4 + 1] = clamp(accum[k * 3 + 1] / smps, 0.f, 1.f) * 255;
+		out[k * 4 + 2] = clamp(accum[k * 3 + 2] / smps, 0.f, 1.f) * 255;
 		out[k * 4 + 3] = 255;
     }
 }

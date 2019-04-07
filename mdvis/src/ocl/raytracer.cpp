@@ -8,6 +8,14 @@ RadeonRays::matrix RadeonRays::MatFunc::Glm2RR(const glm::mat4& mat) {
 	return *(RadeonRays::matrix*)&m;
 }
 
+RR::matrix RR::MatFunc::Translate(const Vec3& v) {
+	return RR::matrix(1, 0, 0, v.x, 0, 1, 0, v.y, 0, 0, 1, v.z, 0, 0, 0, 1);
+}
+
+RR::matrix RR::MatFunc::Scale(const Vec3& v) {
+	return RR::matrix(v.x, 0, 0, 0, 0, v.y, 0, 0, 0, 0, v.z, 0, 0, 0, 0, 1);
+}
+
 int RayTracer::maxRefl = 3;
 
 GLuint RayTracer::resTex = 0;
@@ -82,18 +90,20 @@ std::vector<material_t> g_objmaterials;
 CLWBuffer<float> bg_buf;
 CLWBuffer<float> g_positions;
 CLWBuffer<float> g_normals;
-CLWBuffer<float> g_colors;
+CLWBuffer<Vec4> g_colors;
 CLWBuffer<int> g_indices;
 CLWBuffer<int> g_indent;
+CLWBuffer<RR::matrix> g_matrices;
 
 void RayTracer::Clear() {
 	accum = CLWBuffer<float>();
 	bg_buf = CLWBuffer<float>();
 	g_positions = CLWBuffer<float>();
 	g_normals = CLWBuffer<float>();
-	g_colors = CLWBuffer<float>();
+	g_colors = CLWBuffer<Vec4>();
 	g_indices = CLWBuffer<int>();
 	g_indent = CLWBuffer<int>();
+	g_matrices = CLWBuffer<RR::matrix>();
 	resTex = 0;
 }
 
@@ -165,53 +175,7 @@ void RayTracer::Render() {
 }
 
 void RayTracer::DrawMenu() {
-	/*
-#define SV(vl, b) auto b = vl; vl
 
-	auto& expandPos = ParMenu::expandPos;
-	auto& mt = info.mat;
-
-	if (Engine::Button(expandPos - 148, 20, 146, 16, resTex ? Vec4(0.4f, 0.2f, 0.2f, 1) : Vec4(0.2f, 0.4f, 0.2f, 1), resTex ? "Disable (Shift-X)" : "Enable (Shift-X)", 12, white(), true) == MOUSE_RELEASE) {
-		if (resTex) Clear();
-		else SetScene();
-	}
-
-	float off = 17 * 3 + 1;
-	if (resTex) {
-		UI::Label(expandPos - 148, 17 * 2, 12, "Samples: " + std::to_string(_cntt), white(0.5f));
-		off += 17;
-	}
-
-	UI::Label(expandPos - 148, off, 12, "Preview", white());
-	UI::Quad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
-	off++;
-	prvRes = UI2::Slider(expandPos - 147, off + 17, 147, "Quality", 0.1f, 1, prvRes, std::to_string(int(prvRes * 100)) + "%");
-	prvSmp = TryParse(UI2::EditText(expandPos - 147, off + 17 * 2, 147, "Samples", std::to_string(prvSmp)), 50U);
-
-	off += 17 * 3 * 2;
-
-	UI::Label(expandPos - 148, off, 12, "Background", white());
-	UI::Quad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
-	off++;
-	UI2::File(expandPos - 147, off + 17, 147, "File", bgName, [](std::vector<std::string> res) {
-		SetBg(res[0]);
-		_cntt = 0;
-	});
-	SV(info.str, str) = UI2::Slider(expandPos - 147, off + 17 * 2, 147, "Strength", 0, 5, info.str);
-
-	off += 17 * 3 + 2;
-
-	UI::Label(expandPos - 148, off, 12, "Material", white());
-	UI::Quad(expandPos - 149, off + 17, 148, 17 * 2 + 2, white(0.9f, 0.1f));
-	off++;
-	SV(mt.specular, spc) = UI2::Slider(expandPos - 147, off + 17, 147, "Specular", 0, 1, mt.specular);
-	SV(mt.gloss, gls) = UI2::Slider(expandPos - 147, off + 17 * 2, 147, "Gloss", 0, 1, mt.gloss);
-
-	if ((info.str != str) || (mt.specular != spc) || mt.gloss != gls) {
-		mt.rough = (1-mt.gloss)*0.5f;
-		_cntt = 0;
-	}
-	*/
 }
 
 CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
@@ -244,7 +208,7 @@ void RayTracer::SetObjs() {
 	Tetrahedron tet = Tetrahedron();
 	for (int a = 0; a < 4; a++)
 		tet.Subdivide();
-	tet.ToSphere(0.02f);
+	tet.ToSphere(0.15f);
 
 	g_objshapes.push_back(shape_t());
 	auto& m = g_objshapes.back().mesh;
@@ -255,67 +219,53 @@ void RayTracer::SetObjs() {
 	m.material_ids.resize(tet.tris.size()/3, 0);
 	m.normals.resize(tet.norms.size() * 3);
 	memcpy(&m.normals[0], &tet.norms[0], tet.norms.size() * sizeof(Vec3));
-	const uint mp = std::min(Particles::particleSz, 5000U);
-	g_objshapes.resize(mp, g_objshapes[0]);
-	g_objmaterials.resize(mp, material_t());
+	const uint mp = Particles::particleSz;
+
 	std::vector<double>* attr = 0;
 	if (ParGraphics::useGradCol) {
 		attr = &Particles::attrs[ParGraphics::gradColParam]->Get(Particles::anim.currentFrame);
-	}
-	for (uint a = 0; a < mp; a++) {
-		auto& p = g_objshapes[a].mesh.positions;
-		for (int v = 0; v < p.size()/3; v++) {
-			((Vec3*)p.data())[v] *= Particles::radii[a] * Particles::radiiscl[a] * ParGraphics::radScl * 5;
-			((Vec3*)p.data())[v] += Particles::poss[a];
-		}
-		for (auto& m : g_objshapes[a].mesh.material_ids)
-			m = a;
-		if (!ParGraphics::useGradCol || !attr->size()) {
-			memcpy(g_objmaterials[a].diffuse, &Particles::_colorPallete[Particles::colors[a]], sizeof(Vec3));
-		}
-		else {
-			auto col = Color::HueBaseCol(Clamp((1 - (float)(*attr)[a]), 0.f, 1.f) * 0.6667f);
-			memcpy(g_objmaterials[a].diffuse, &col, sizeof(Vec3));
-		}
 	}
 
 	std::vector<float> verts;
 	std::vector<float> normals;
 	std::vector<int> inds;
-	std::vector<float> colors;
-	std::vector<int> indents;
-	int indent = 0;
-	for (int id = 0; id < g_objshapes.size(); ++id)
+	std::vector<Vec4> colors;
+	std::vector<int> indents(mp, 0);
+	std::vector<RR::matrix> matrices;
+
+	const mesh_t& mesh = g_objshapes[0].mesh;
+	verts.insert(verts.end(), mesh.positions.begin(), mesh.positions.end());
+	normals.insert(normals.end(), mesh.normals.begin(), mesh.normals.end());
+	inds.insert(inds.end(), mesh.indices.begin(), mesh.indices.end());
+
+	if (mesh.positions.size() / 3 < mesh.indices.size())
 	{
-		const mesh_t& mesh = g_objshapes[id].mesh;
-		verts.insert(verts.end(), mesh.positions.begin(), mesh.positions.end());
-		normals.insert(normals.end(), mesh.normals.begin(), mesh.normals.end());
-		inds.insert(inds.end(), mesh.indices.begin(), mesh.indices.end());
-		for (int mat_id : mesh.material_ids)
-		{
-			const material_t& mat = g_objmaterials[mat_id];
-			colors.push_back(mat.diffuse[0]);
-			colors.push_back(mat.diffuse[1]);
-			colors.push_back(mat.diffuse[2]);
+		int count = mesh.indices.size() * 3 - mesh.positions.size();
+		auto sz = verts.size();
+		verts.resize(sz + count, 0.f);
+		normals.resize(sz + count, 0.f);
+	}
+
+	colors.reserve(mp);
+	matrices.reserve(mp);
+	for (int id = 0; id < mp; ++id) {
+		if (!ParGraphics::useGradCol || !attr->size()) {
+			colors.push_back(Particles::_colorPallete[Particles::colors[id]]);
+		}
+		else {
+			auto col = Color::HueBaseCol(Clamp((1 - (float)(*attr)[id]), 0.f, 1.f) * 0.6667f);
+			colors.push_back(col);
 		}
 
-        if (mesh.positions.size() / 3 < mesh.indices.size())
-        {
-            int count = mesh.indices.size() * 3 - mesh.positions.size();
-            auto sz = verts.size();
-            verts.resize(sz + count, 0.f);
-            normals.resize(sz + count, 0.f);
-        }
-
-		indents.push_back(indent);
-		indent += mesh.indices.size();
+		matrices.push_back(RR::MatFunc::Translate(Particles::poss[id]));
 	}
 
 	g_positions = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, verts.size(), verts.data());
 	g_normals = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, normals.size(), normals.data());
 	g_indices = CLWBuffer<int>::Create(context, CL_MEM_READ_ONLY, inds.size(), inds.data());
-	g_colors = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, colors.size(), colors.data());
-	g_indent = CLWBuffer<int>::Create(context, CL_MEM_READ_ONLY, indents.size(), indents.data());
+	g_colors = CLWBuffer<Vec4>::Create(context, CL_MEM_READ_ONLY, mp, colors.data());
+	g_indent = CLWBuffer<int>::Create(context, CL_MEM_READ_ONLY, mp, indents.data());
+	g_matrices = CLWBuffer<RR::matrix>::Create(context, CL_MEM_READ_ONLY, mp, matrices.data());
 
 	unsigned int _w, _h;
 	auto d = hdr::read_hdr((IO::path + "res/refl.hdr").c_str(), &_w, &_h);
@@ -324,17 +274,17 @@ void RayTracer::SetObjs() {
 	bg_buf = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, 3 * _w * _h, dv.data());
 	delete[](d);
 
-	for (int id = 0; id < g_objshapes.size(); ++id)
-	{
-		auto& objshape = g_objshapes[id];
-		float* vertdata = objshape.mesh.positions.data();
-		int nvert = objshape.mesh.positions.size() / 3;
-		int* indices = objshape.mesh.indices.data();
-		int nfaces = objshape.mesh.indices.size() / 3;
-		RR::Shape* shape = api->CreateMesh(vertdata, nvert, 3 * sizeof(float), indices, 0, nullptr, nfaces);
-		assert(shape != nullptr);
-		shape->SetId(id);
-		api->AttachShape(shape);
+	auto& objshape = g_objshapes[0];
+	float* vertdata = objshape.mesh.positions.data();
+	int nvert = objshape.mesh.positions.size() / 3;
+	int* indices = objshape.mesh.indices.data();
+	int nfaces = objshape.mesh.indices.size() / 3;
+	RR::Shape* shape0 = api->CreateMesh(vertdata, nvert, 3 * sizeof(float), indices, 0, nullptr, nfaces);
+	for (int id = 0; id < mp; ++id) {
+		auto shp = (!id) ? shape0 : api->CreateInstance(shape0);
+		shp->SetTransform(matrices[id], RR::inverse(matrices[id]));
+		shp->SetId(id);
+		api->AttachShape(shp);
 	}
 
 	api->Commit();
@@ -344,22 +294,26 @@ void RayTracer::ShadeKernel(CLWBuffer<byte> out_buff, const CLWBuffer<RR::Inters
 {
 	//run kernel
 	CLWKernel kernel = program.GetKernel("Shading");
-	kernel.SetArg(0, g_positions);
-	kernel.SetArg(1, g_normals);
-	kernel.SetArg(2, g_indices);
-	kernel.SetArg(3, g_colors);
-	kernel.SetArg(4, g_indent);
-	kernel.SetArg(5, isect);
-	kernel.SetArg(6, isprim? 1 : 0);
-	kernel.SetArg(7, Display::width);
-	kernel.SetArg(8, Display::height);
-	kernel.SetArg(9, out_buff);
-	kernel.SetArg(10, col_buff);
-	kernel.SetArg(11, ray_buff);
-	kernel.SetArg(12, cl_int(rand() % RAND_MAX));
-	kernel.SetArg(13, accum);
-	kernel.SetArg(14, smps);
-	kernel.SetArg(15, bg_buf);
+	int i = 0;
+#define karg(var) kernel.SetArg(i++, var)
+	karg(g_positions);
+	karg(g_normals);
+	karg(g_indices);
+	karg(g_colors);
+	karg(g_indent);
+	karg(g_matrices);
+	karg(isect);
+	karg(isprim? 1 : 0);
+	karg(Display::width);
+	karg(Display::height);
+	karg(out_buff);
+	karg(col_buff);
+	karg(ray_buff);
+	karg(cl_int(rand() % RAND_MAX));
+	karg(accum);
+	karg(smps);
+	karg(bg_buf);
+	karg(2.0f);
 
 	// Run generation kernel
 	size_t gs[] = { static_cast<size_t>((Display::width + 7) / 8 * 8), static_cast<size_t>((Display::height + 7) / 8 * 8) };

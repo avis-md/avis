@@ -135,11 +135,6 @@ void updateFunc() {
 	if (RayTracer::resTex) {
 		RayTracer::Refine();
 	}
-
-
-	//if (Input::KeyDown(KEY::X) && Input::KeyHold(KEY::LeftShift))
-	//	if (!RayTracer::resTex)
-	//		RayTracer::SetScene();
 }
 
 void paintfunc() {
@@ -231,6 +226,8 @@ void paintfunc() {
 
 	Popups::Draw();
 	UI2::DrawTooltip();
+
+	UI::Quad(0, 0, Display::width, Display::height, RayTracer::resTex);
 }
 
 #ifdef MAKE_RES

@@ -159,7 +159,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include;C:\Intel\OpenCL\sdk\include;C:\Python37\include;C:\Python37\Lib\site-packages\numpy\core\include;../radeonrays/RadeonRays/include/;../radeonrays/CLW/;./src;./src/winonly;../libgwavi/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include;C:\Intel\OpenCL\sdk\include;C:\Python37\include;C:\Python37\Lib\site-packages\numpy\core\include;../radeonrays/RadeonRays/include/;../radeonRays/Calc/inc/;../radeonrays/CLW/;./src;./src/winonly;../libgwavi/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;PLATFORM_WIN;USE_OPENCL;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>

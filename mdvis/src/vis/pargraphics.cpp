@@ -1581,9 +1581,10 @@ void ParGraphics::DrawMenu() {
 #define _per(i, x, ax, r, g, b)\
 	tmp = std::to_string(periodicImgs[i]);\
 	if ((periodicImgs[i] = Clamp(TryParse(UI::EditText(expandPos - 148 + 49 * x, off, 48, 16, 12, Vec4(r, g, b, 1), tmp, true, white(), 0, ax + tmp), 0), 0, 20))\
-			!= periodicImgs[i + 6])\
+			!= periodicImgs[i + 6]) {\
 		periodicImgs[i + 6] = periodicImgs[i];\
-		Scene::dirty = true
+		Scene::dirty = true;\
+	}
 	
 	_per(0, 0, "-X:", 0.6f, 0.4f, 0.4f);
 	_per(2, 1, "-Y:", 0.4f, 0.6f, 0.4f);
@@ -1643,7 +1644,8 @@ void ParGraphics::DrawMenu() {
 
 	UI::EndScroll(off);
 
-	if (s0 != rotScale || rz0 != rotZ || rw0 != rotW || center0 != rotCenter) Scene::dirty = true;
+	if (s0 != rotScale || rz0 != rotZ || rw0 != rotW || center0 != rotCenter)
+		Scene::dirty = true;
 }
 
 void ParGraphics::DrawPopupDM() {
