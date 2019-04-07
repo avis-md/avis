@@ -16,7 +16,7 @@ RR::matrix RR::MatFunc::Scale(const Vec3& v) {
 	return RR::matrix(v.x, 0, 0, 0, 0, v.y, 0, 0, 0, 0, v.z, 0, 0, 0, 0, 1);
 }
 
-int RayTracer::maxRefl = 3;
+int RayTracer::maxRefl = 2;
 
 GLuint RayTracer::resTex = 0;
 CLWBuffer<float> RayTracer::accum;
@@ -313,7 +313,7 @@ void RayTracer::ShadeKernel(CLWBuffer<byte> out_buff, const CLWBuffer<RR::Inters
 	karg(accum);
 	karg(smps);
 	karg(bg_buf);
-	karg(2.0f);
+	karg(ParGraphics::reflStr);
 
 	// Run generation kernel
 	size_t gs[] = { static_cast<size_t>((Display::width + 7) / 8 * 8), static_cast<size_t>((Display::height + 7) / 8 * 8) };

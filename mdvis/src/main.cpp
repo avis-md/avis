@@ -134,6 +134,7 @@ void updateFunc() {
 	}
 	if (RayTracer::resTex) {
 		RayTracer::Refine();
+		ParGraphics::tfboDirty = true;
 	}
 }
 
@@ -226,8 +227,6 @@ void paintfunc() {
 
 	Popups::Draw();
 	UI2::DrawTooltip();
-
-	UI::Quad(0, 0, Display::width, Display::height, RayTracer::resTex);
 }
 
 #ifdef MAKE_RES
