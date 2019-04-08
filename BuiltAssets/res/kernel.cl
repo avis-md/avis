@@ -159,26 +159,27 @@ static float3 SkyAt(float3 dir, __global float* bg) {
 
 
 __kernel void Shading(//scene
-	__global float* positions,
-	__global float* normals,
-	__global int* ids,
-	__global float4* colors,
-	__global int* indents,
-	__global Mat* matrices,
-	__global Intersection* isect,
-	int weight,
-	int width,
-	int height,
-	__global unsigned char* out, //actual color
-	__global float4* ocol, //ray color
-	__global Ray* ray,
-	int rng,
-	__global float* accum,
-	int smps,
-	float specular,
-	__global float* bg,
-	float bgMul,
-	float bgMul2) {
+        __global float* positions,
+        __global float* normals,
+        __global int* ids,
+        __global float4* colors,
+        __global int* indents,
+        __global Mat* matrices,
+        __global Intersection* isect,
+        int weight,
+        int width,
+        int height,
+        __global float* out, //actual color
+        __global float4* ocol, //ray color
+        __global Ray* ray,
+        int rng,
+        __global float* accum,
+        int smps,
+        float specular,
+        __global float* bg,
+        float bgMul,
+        float bgMul2) {
+    
 	int2 globalid;
 	globalid.x = get_global_id(0);
 	globalid.y = get_global_id(1);
@@ -269,9 +270,9 @@ __kernel void Shading(//scene
 				ocol[k].w = -1;
 			}
 		}
-		out[k * 4] = clamp(accum[k * 3] / smps, 0.0f, 1.0f) * 255;
-		out[k * 4 + 1] = clamp(accum[k * 3 + 1] / smps, 0.0f, 1.0f) * 255;
-		out[k * 4 + 2] = clamp(accum[k * 3 + 2] / smps, 0.0f, 1.0f) * 255;
-		out[k * 4 + 3] = 255;
+		out[k * 4] = accum[k * 3] / smps;
+		out[k * 4 + 1] = accum[k * 3 + 1] / smps;
+		out[k * 4 + 2] = accum[k * 3 + 2] / smps;
+		out[k * 4 + 3] = 1;
 	}
 }
