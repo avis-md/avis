@@ -8,7 +8,7 @@
 std::string _mac_debug_base_address = "";
 #endif
 
-#define USE_DEBUG_CONTEXT
+//#define USE_DEBUG_CONTEXT
 //#define SIMULATE_FRAMESCALE 2
 
 void glDebugOutput(GLenum source,

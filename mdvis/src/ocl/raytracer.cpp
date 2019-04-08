@@ -21,7 +21,7 @@ int RayTracer::maxRefl = 2;
 
 GLuint RayTracer::resTex = 0;
 CLWBuffer<float> RayTracer::accum;
-int RayTracer::samples = 0, RayTracer::maxSamples = 256;
+int RayTracer::samples = 0, RayTracer::maxSamples = 512;
 
 CLWContext RayTracer::context;
 CLWProgram RayTracer::program;
@@ -166,7 +166,7 @@ void RayTracer::Refine() {
 	ShadeKernel(out_buff, isect_buffer_cl, col_buff, ray_buffer_cl, ++samples, false);
 	delete(ray_buffer);
 
-	void* pixels = clEnqueueMapBuffer(queue, (cl_mem)out_buff, true, CL_MAP_READ, 0, 4 * wh, 0, NULL, NULL, NULL);
+	void* pixels = clEnqueueMapBuffer(queue, (cl_mem)out_buff, true, CL_MAP_READ, 0, 4 * wh * sizeof(float), 0, NULL, NULL, NULL);
 
 	// Update texture data
 	glBindTexture(GL_TEXTURE_2D, resTex);
@@ -189,7 +189,7 @@ void RayTracer::Denoise() {
 	std::vector<float> src(3 * wh), dst(3 * wh);
 	std::vector<float> out(4 * wh);
 
-	auto pixels = (float*)clEnqueueMapBuffer(queue, (cl_mem)out_buff, true, CL_MAP_READ, 0, 4 * wh, 0, NULL, NULL, NULL);
+	auto pixels = (float*)clEnqueueMapBuffer(queue, (cl_mem)out_buff, true, CL_MAP_READ, 0, 4 * wh * sizeof(float), 0, NULL, NULL, NULL);
 	for (int a = 0; a < wh; a++) {
 		std::memcpy(&src[a * 3], pixels + a * 4, sizeof(Vec3));
 		out[a * 4 + 3] = pixels[a * 4 + 3];
