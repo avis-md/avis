@@ -133,6 +133,9 @@ void updateFunc() {
 		}
 	}
 	if (RayTracer::resTex) {
+		if (ParGraphics::tfboDirty) {
+			Scene::dirty = true;
+		}
 		RayTracer::Refine();
 		ParGraphics::tfboDirty = true;
 	}

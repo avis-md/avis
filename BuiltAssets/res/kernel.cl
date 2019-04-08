@@ -175,8 +175,10 @@ __kernel void Shading(//scene
 	int rng,
 	__global float* accum,
 	int smps,
+	float specular,
 	__global float* bg,
-	float bgMul) {
+	float bgMul,
+	float bgMul2) {
 	int2 globalid;
 	globalid.x = get_global_id(0);
 	globalid.y = get_global_id(1);
@@ -205,9 +207,9 @@ __kernel void Shading(//scene
 
 				Mat mv = matrices[shape_id];
 
-				float4 pos = ConvertFromBarycentric(positions + ind * 3, ids + ind, prim_id, &isect[k].uvwt);
+				float4 pos = ConvertFromBarycentric(positions + ind, ids + ind, prim_id, &isect[k].uvwt);
 				pos.w = 1;
-				float4 _norm = ConvertFromBarycentric(normals + ind * 3, ids + ind, prim_id, &isect[k].uvwt);
+				float4 _norm = ConvertFromBarycentric(normals + ind, ids + ind, prim_id, &isect[k].uvwt);
 				_norm.w = 0;
 				pos = MatVec(mv, pos);
 				pos /= pos.w;
@@ -224,7 +226,7 @@ __kernel void Shading(//scene
 					frr *= frr;
 					float fres = frr + (1 - frr)*pow(1 - dot(-rd, norm), 5);
 					//if (Randf(&rnd) < (1 - ((1 - fres) * (1 - mat.specular)))) {
-					if (Randf(&rnd) < (1 - ((1 - fres) * 0.5f))) {
+					if (Randf(&rnd) < (1 - ((1 - fres) * (1 - specular)))) {
 						//Beckmann(&norm, 1 - mat.gloss, &rnd);
 						Beckmann(&norm, 0.005f, &rnd, rng);
 						norm = rd - 2 * dot(rd, norm.xyz) / (norm.x*norm.x + norm.y*norm.y + norm.z*norm.z) * norm;
@@ -254,7 +256,7 @@ __kernel void Shading(//scene
 				float3 bgc = SkyAt(normalize(ray[k].d.xyz), bg) * bgMul;
 
 				if (col.w < 0.5f) {
-					col.xyz = bgc;
+					col.xyz = bgc * bgMul * bgMul2;
 					//col.xyz = (float3)(1, 1, 1);
 				}
 				else

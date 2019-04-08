@@ -1,8 +1,12 @@
 #include "Engine.h"
 
-Mesh::Mesh() : vertCount(~0U) {}
+Mesh::Mesh() {
+	vertCount = ~0U;
+}
 
-Mesh::Mesh(int vsz, Vec3* pos, Vec3* norm, int tsz, int* tri, bool sv) : vertCount(vsz), triCount(tsz) {
+Mesh::Mesh(int vsz, Vec3* pos, Vec3* norm, int tsz, int* tri, bool sv) {
+	vertCount = vsz;
+	triCount = tsz;
 	if (sv) {
 		vertices.resize(vsz);
 		normals.resize(vsz);

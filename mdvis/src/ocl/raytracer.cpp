@@ -85,9 +85,6 @@ bool RayTracer::Init() {
 	return true;
 }
 
-std::vector<shape_t> g_objshapes;
-std::vector<material_t> g_objmaterials;
-
 CLWBuffer<float> bg_buf;
 CLWBuffer<float> g_positions;
 CLWBuffer<float> g_normals;
@@ -159,7 +156,7 @@ void RayTracer::Refine() {
 	// Shading
 	RR::Event* e = nullptr;
 
-	for (int a = 0; a < maxRefl-1; ++a) {
+	for (int a = 0; a < maxRefl; ++a) {
 		ShadeKernel(out_buff, isect_buffer_cl, col_buff, ray_buffer_cl, 1 + samples, a==0);
 		delete(ray_buffer);
 		ray_buffer = CreateFromOpenClBuffer(api, ray_buffer_cl);
@@ -239,23 +236,20 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 }
 
 #include "asset/tetrahedron.h"
+#include "asset/tube.h"
 
 void RayTracer::SetObjs() {
+	const uint mp = Particles::particleSz;
+
 	Tetrahedron tet = Tetrahedron();
 	for (int a = 0; a < 4; a++)
 		tet.Subdivide();
 	tet.ToSphere(0.15f);
 
-	g_objshapes.push_back(shape_t());
-	auto& m = g_objshapes.back().mesh;
-	auto& v = m.positions;
-	v.resize(tet.verts.size() * 3);
-	memcpy(&v[0], &tet.verts[0], tet.verts.size() * sizeof(Vec3));
-	m.indices = tet.tris;
-	m.material_ids.resize(tet.tris.size()/3, 0);
-	m.normals.resize(tet.norms.size() * 3);
-	memcpy(&m.normals[0], &tet.norms[0], tet.norms.size() * sizeof(Vec3));
-	const uint mp = Particles::particleSz;
+	Tube tub = Tube(16, 10, 50);
+
+	std::vector<_Mesh*> shapes = { &tet, &tub };
+	std::vector<int> _indents;
 
 	std::vector<double>* attr = 0;
 	if (ParGraphics::useGradCol) {
@@ -269,20 +263,23 @@ void RayTracer::SetObjs() {
 	std::vector<int> indents(mp, 0);
 	std::vector<RR::matrix> matrices;
 
-	const mesh_t& mesh = g_objshapes[0].mesh;
-	verts.insert(verts.end(), mesh.positions.begin(), mesh.positions.end());
-	normals.insert(normals.end(), mesh.normals.begin(), mesh.normals.end());
-	inds.insert(inds.end(), mesh.indices.begin(), mesh.indices.end());
+	int vsz = 0;
+	for (auto shp : shapes) {
+		_indents.push_back(vsz);
+		verts.resize(vsz + shp->vertCount * 3);
+		std::memcpy(&verts[vsz], shp->vertices.data(), shp->vertCount * sizeof(Vec3));
+		normals.resize(vsz + shp->vertCount * 3);
+		std::memcpy(&normals[vsz], shp->normals.data(), shp->vertCount * sizeof(Vec3));
+		inds.insert(inds.end(), shp->triangles.begin(), shp->triangles.end());
 
-	if (mesh.positions.size() / 3 < mesh.indices.size())
-	{
-		int count = mesh.indices.size() * 3 - mesh.positions.size();
-		auto sz = verts.size();
-		verts.resize(sz + count, 0.f);
-		normals.resize(sz + count, 0.f);
+		vsz = std::max(verts.size(), inds.size());
+		verts.resize(vsz);
+		normals.resize(vsz);
+		inds.resize(vsz);
 	}
 
 	colors.reserve(mp);
+	indents.push_back(_indents[1]);
 	matrices.reserve(mp);
 	for (int id = 0; id < mp; ++id) {
 		if (!ParGraphics::useGradCol || !attr->size()) {
@@ -296,12 +293,8 @@ void RayTracer::SetObjs() {
 		matrices.push_back(RR::MatFunc::Translate(Particles::poss[id]));
 	}
 
-	g_positions = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, verts.size(), verts.data());
-	g_normals = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, normals.size(), normals.data());
-	g_indices = CLWBuffer<int>::Create(context, CL_MEM_READ_ONLY, inds.size(), inds.data());
-	g_colors = CLWBuffer<Vec4>::Create(context, CL_MEM_READ_ONLY, mp, colors.data());
-	g_indent = CLWBuffer<int>::Create(context, CL_MEM_READ_ONLY, mp, indents.data());
-	g_matrices = CLWBuffer<RR::matrix>::Create(context, CL_MEM_READ_ONLY, mp, matrices.data());
+	colors.push_back(white());
+	matrices.push_back(RR::matrix());
 
 	unsigned int _w, _h;
 	auto d = hdr::read_hdr((IO::path + "res/refl.hdr").c_str(), &_w, &_h);
@@ -310,12 +303,8 @@ void RayTracer::SetObjs() {
 	bg_buf = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, 3 * _w * _h, dv.data());
 	delete[](d);
 
-	auto& objshape = g_objshapes[0];
-	float* vertdata = objshape.mesh.positions.data();
-	int nvert = objshape.mesh.positions.size() / 3;
-	int* indices = objshape.mesh.indices.data();
-	int nfaces = objshape.mesh.indices.size() / 3;
-	RR::Shape* shape0 = api->CreateMesh(vertdata, nvert, 3 * sizeof(float), indices, 0, nullptr, nfaces);
+	auto _shp = shapes[0];
+	RR::Shape* shape0 = api->CreateMesh((float*)_shp->vertices.data(), _shp->vertCount * 3, sizeof(Vec3), _shp->triangles.data(), 0, nullptr, _shp->triCount);
 	for (int id = 0; id < mp; ++id) {
 		auto shp = (!id) ? shape0 : api->CreateInstance(shape0);
 		shp->SetTransform(matrices[id], RR::inverse(matrices[id]));
@@ -323,7 +312,20 @@ void RayTracer::SetObjs() {
 		api->AttachShape(shp);
 	}
 
+	/*_shp = shapes[1];
+	shape0 = api->CreateMesh((float*)_shp->vertices.data(), _shp->vertCount * 3, sizeof(Vec3), _shp->triangles.data(), 0, nullptr, _shp->triCount);
+	shape0->SetId(mp);
+	api->AttachShape(shape0);*/
+
 	api->Commit();
+
+
+	g_positions = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, verts.size(), verts.data());
+	g_normals = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, normals.size(), normals.data());
+	g_indices = CLWBuffer<int>::Create(context, CL_MEM_READ_ONLY, inds.size(), inds.data());
+	g_colors = CLWBuffer<Vec4>::Create(context, CL_MEM_READ_ONLY, mp + 1, colors.data());
+	g_indent = CLWBuffer<int>::Create(context, CL_MEM_READ_ONLY, mp + 1, indents.data());
+	g_matrices = CLWBuffer<RR::matrix>::Create(context, CL_MEM_READ_ONLY, mp + 1, matrices.data());
 }
 
 void RayTracer::ShadeKernel(CLWBuffer<float> out_buff, const CLWBuffer<RR::Intersection>& isect, CLWBuffer<float>& col_buff, CLWBuffer<RR::ray>& ray_buff, const int smps, const bool isprim)
@@ -348,8 +350,10 @@ void RayTracer::ShadeKernel(CLWBuffer<float> out_buff, const CLWBuffer<RR::Inter
 	karg(cl_int(rand() % RAND_MAX));
 	karg(accum);
 	karg(smps);
+	karg(ParGraphics::specStr);
 	karg(bg_buf);
 	karg(ParGraphics::reflStr);
+	karg(ParGraphics::bgMul);
 
 	// Run generation kernel
 	size_t gs[] = { static_cast<size_t>((Display::width + 7) / 8 * 8), static_cast<size_t>((Display::height + 7) / 8 * 8) };
