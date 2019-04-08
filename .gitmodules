@@ -7,3 +7,6 @@
 [submodule "libgwavi"]
 	path = libgwavi
 	url = https://github.com/Rolinh/libgwavi.git
+[submodule "oidn"]
+	path = oidn
+	url = https://github.com/OpenImageDenoise/oidn.git

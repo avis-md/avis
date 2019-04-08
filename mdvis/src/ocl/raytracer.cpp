@@ -2,6 +2,7 @@
 #include "hdr.h"
 #include "kernel.h"
 #include "vis/pargraphics.h"
+#include "denoise.h"
 
 RadeonRays::matrix RadeonRays::MatFunc::Glm2RR(const glm::mat4& mat) {
 	auto m = glm::transpose(mat);
@@ -20,7 +21,7 @@ int RayTracer::maxRefl = 2;
 
 GLuint RayTracer::resTex = 0;
 CLWBuffer<float> RayTracer::accum;
-int RayTracer::samples = 0;
+int RayTracer::samples = 0, RayTracer::maxSamples = 256;
 
 CLWContext RayTracer::context;
 CLWProgram RayTracer::program;
@@ -95,6 +96,8 @@ CLWBuffer<int> g_indices;
 CLWBuffer<int> g_indent;
 CLWBuffer<RR::matrix> g_matrices;
 
+CLWBuffer<float> out_buff;
+
 void RayTracer::Clear() {
 	accum = CLWBuffer<float>();
 	bg_buf = CLWBuffer<float>();
@@ -130,6 +133,16 @@ void RayTracer::Refine() {
 	if (Scene::dirty) {
 		samples = 0;
 	}
+	else if (samples >= maxSamples) {
+		if (samples == maxSamples) {
+			Denoise();
+			samples++;
+			VisSystem::SetMsg("RayTracing Complete.");
+		}
+		return;
+	}
+
+	VisSystem::SetMsg("Tracing sample " + std::to_string(samples + 1));
 
 	CLWBuffer<RR::ray> ray_buffer_cl = GeneratePrimaryRays();
 	RR::Buffer* ray_buffer = CreateFromOpenClBuffer(api, ray_buffer_cl);
@@ -140,7 +153,7 @@ void RayTracer::Refine() {
 	// Intersection
 	api->QueryIntersection(ray_buffer, wh, isect_buffer, nullptr, nullptr);
 
-	auto out_buff = CLWBuffer<byte>::Create(context, CL_MEM_WRITE_ONLY, 4 * wh);
+	out_buff = CLWBuffer<float>::Create(context, CL_MEM_WRITE_ONLY, 4 * wh);
 	auto col_buff = CLWBuffer<float>::Create(context, CL_MEM_READ_WRITE, 4 * wh);
 
 	// Shading
@@ -160,18 +173,41 @@ void RayTracer::Refine() {
 
 	// Update texture data
 	glBindTexture(GL_TEXTURE_2D, resTex);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Display::width, Display::height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Display::width, Display::height, GL_RGBA, GL_FLOAT, pixels);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	clEnqueueUnmapMemObject(queue, (cl_mem)out_buff, pixels, 0, NULL, NULL);
 
 	delete(isect_buffer);
 
-	std::cout << samples << std::endl;
+	if (samples == maxSamples) VisSystem::SetMsg("Denoising...");
 }
 
 void RayTracer::Render() {
 	
+}
+
+void RayTracer::Denoise() {
+	const int wh = Display::width * Display::height;
+	std::vector<float> src(3 * wh), dst(3 * wh);
+	std::vector<float> out(4 * wh);
+
+	auto pixels = (float*)clEnqueueMapBuffer(queue, (cl_mem)out_buff, true, CL_MAP_READ, 0, 4 * wh, 0, NULL, NULL, NULL);
+	for (int a = 0; a < wh; a++) {
+		std::memcpy(&src[a * 3], pixels + a * 4, sizeof(Vec3));
+		out[a * 4 + 3] = pixels[a * 4 + 3];
+	}
+	clEnqueueUnmapMemObject(queue, (cl_mem)out_buff, pixels, 0, NULL, NULL);
+	
+	Denoise::Apply(src.data(), Display::width, Display::height, dst.data());
+
+	for (int a = 0; a < wh; a++) {
+		std::memcpy(&out[a * 4], &dst[a * 3], sizeof(Vec3));
+	}
+
+	glBindTexture(GL_TEXTURE_2D, resTex);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Display::width, Display::height, GL_RGBA, GL_FLOAT, out.data());
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void RayTracer::DrawMenu() {
@@ -290,7 +326,7 @@ void RayTracer::SetObjs() {
 	api->Commit();
 }
 
-void RayTracer::ShadeKernel(CLWBuffer<byte> out_buff, const CLWBuffer<RR::Intersection>& isect, CLWBuffer<float>& col_buff, CLWBuffer<RR::ray>& ray_buff, const int smps, const bool isprim)
+void RayTracer::ShadeKernel(CLWBuffer<float> out_buff, const CLWBuffer<RR::Intersection>& isect, CLWBuffer<float>& col_buff, CLWBuffer<RR::ray>& ray_buff, const int smps, const bool isprim)
 {
 	//run kernel
 	CLWKernel kernel = program.GetKernel("Shading");

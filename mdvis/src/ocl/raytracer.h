@@ -31,6 +31,7 @@ public:
 
 	static void Refine();
 	static void Render();
+	static void Denoise();
 
 	static void DrawMenu();
 
@@ -38,7 +39,7 @@ public:
 
 	static GLuint resTex;
 	static CLWBuffer<float> accum;
-	static int samples;
+	static int samples, maxSamples;
 private:
 	static CLWContext context;
 	static CLWProgram program;
@@ -47,7 +48,7 @@ private:
 
 	static CLWBuffer<RR::ray> GeneratePrimaryRays();
 	static void SetObjs();
-	static void ShadeKernel(CLWBuffer<byte> out_buff, const CLWBuffer<RR::Intersection>& isect, CLWBuffer<float>& col_buff, CLWBuffer<RR::ray>& ray_buff, const int smps, const bool isprim);
+	static void ShadeKernel(CLWBuffer<float> out_buff, const CLWBuffer<RR::Intersection>& isect, CLWBuffer<float>& col_buff, CLWBuffer<RR::ray>& ray_buff, const int smps, const bool isprim);
 };
 
 typedef struct
