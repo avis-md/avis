@@ -167,7 +167,8 @@ GLuint Font::CreateGlyph(uint sz, uint mask) {
 	_glyphs.emplace(sz, 0);
 	glGenTextures(1, &_glyphs[sz][mask]);
 	glBindTexture(GL_TEXTURE_2D, _glyphs[sz][mask]);
-	glTexStorage2D(GL_TEXTURE_2D, 1, GL_R8, (szd + 8) * 16, (szd + 8) * 16);
+	std::vector<byte> _(std::pow((szd + 8) * 16, 2));
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (szd + 8) * 16, (szd + 8) * 16, 0, GL_RED, GL_UNSIGNED_BYTE, _.data());
 	SetTexParams<>();
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	bool recalc = (params.count(sz) == 0) || (params[sz].count(mask) == 0);

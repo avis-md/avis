@@ -8,7 +8,7 @@
 std::string _mac_debug_base_address = "";
 #endif
 
-//#define USE_DEBUG_CONTEXT
+#define USE_DEBUG_CONTEXT
 //#define SIMULATE_FRAMESCALE 2
 
 void glDebugOutput(GLenum source,
@@ -17,7 +17,7 @@ void glDebugOutput(GLenum source,
 	GLenum severity,
 	GLsizei length,
 	const GLchar *message,
-	void *userParam);
+	const void *userParam);
 
 int ChokoLait::initd = 0;
 pSceneObject ChokoLait::mainCameraObj;
@@ -300,7 +300,7 @@ void glDebugOutput(GLenum source,
 	GLenum severity,
 	GLsizei length,
 	const GLchar *message,
-	void *userParam)
+	const void *userParam)
 {
 	// ignore non-significant error/warning codes
 	if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;

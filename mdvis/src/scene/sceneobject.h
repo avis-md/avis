@@ -4,12 +4,12 @@
 class SceneObject : public Object {
 public:
 	~SceneObject();
-	static pSceneObject New(Vec3 pos, Quat rot = glm::identity<Quat>(), Vec3 scale = Vec3(1, 1, 1)) {
+	static pSceneObject New(Vec3 pos, Quat rot = Quat(1, 0, 0, 0), Vec3 scale = Vec3(1, 1, 1)) {
 		auto p = pSceneObject(new SceneObject(pos, rot, scale));
 		p->transform.Init(p, pos, rot, scale);
 		return p;
 	}
-	static pSceneObject New(std::string s = "New Object", Vec3 pos = Vec3(), Quat rot = glm::identity<Quat>(), Vec3 scale = Vec3(1, 1, 1)) {
+	static pSceneObject New(std::string s = "New Object", Vec3 pos = Vec3(), Quat rot = Quat(1, 0, 0, 0), Vec3 scale = Vec3(1, 1, 1)) {
 		auto p = pSceneObject(new SceneObject(s, pos, rot, scale));
 		p->transform.Init(p, pos, rot, scale);
 		return p;
@@ -61,8 +61,8 @@ public:
 	friend class MeshFilter;
 	friend class Scene;
 protected:
-	SceneObject(Vec3 pos, Quat rot = glm::identity<Quat>(), Vec3 scale = Vec3(1, 1, 1));
-	SceneObject(std::string s = "New Object", Vec3 pos = Vec3(), Quat rot = glm::identity<Quat>(), Vec3 scale = Vec3(1, 1, 1));
+	SceneObject(Vec3 pos, Quat rot = Quat(1, 0, 0, 0), Vec3 scale = Vec3(1, 1, 1));
+	SceneObject(std::string s = "New Object", Vec3 pos = Vec3(), Quat rot = Quat(1, 0, 0, 0), Vec3 scale = Vec3(1, 1, 1));
 	SceneObject(byte* data);
 
 	static pSceneObject _FromId(const std::vector<pSceneObject>& objs, ulong id);

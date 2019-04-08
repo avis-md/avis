@@ -14,8 +14,13 @@ UNAME_S := $(shell uname -s)
 
 RRAYPRE := ../../radeonrays
 RRAY := -DUSE_OPENCL -DRR_EMBED_KERNELS -I$(RRAYPRE)/Calc/inc -I$(RRAYPRE)/CLW/ -I$(RRAYPRE)/RadeonRays/include
-RRAYL := -L$(RRAYPRE)/build/Calc -L$(RRAYPRE)/build/CLW -lCalc -lCLW -lRadeonRays
+RRAYL := -L$(RRAYPRE)/build/Calc -L$(RRAYPRE)/build/CLW -L$(RRAYPRE)/build/bin -lCalc -lCLW -lRadeonRays
 RRAYBIN :=
+
+OIDNPRE := ../../oidn
+OIDN := -I$(OIDNPRE)/include
+OIDNL := -L$(OIDNPRE)/build/ -lOpenImageDenoise
+OIDNBIN :=
 
 AVIPRE := ../../libgwavi
 AVI := -I$(AVIPRE)/inc/
@@ -28,7 +33,8 @@ ifeq ($(UNAME_S),Linux)
 	LDFLAGS2 += -Wl,-rpath='$$ORIGIN' -static-libstdc++ -lgomp
 	GLLIB += -lOpenCL `pkg-config --libs gl glew`
 	PYLIB += -L$(shell $(PYTHON)-config --configdir) $(shell $(PYTHON)-config --libs)
-	RRAYBIN += libRadeonRays.so.2.0
+	RRAYBIN = libRadeonRays.so.2.0
+	OIDNBIN = libOpenImageDenoise.so.0
 endif
 ifeq ($(UNAME_S),Darwin)
 	OSFLAG += -D PLATFORM_OSX
@@ -36,18 +42,19 @@ ifeq ($(UNAME_S),Darwin)
 	GLLIB += -framework OpenGL -framework OpenCL -framework Cocoa -framework IOKit -framework CoreVideo
 	WEAK_LIB += -weak_library
 	PYLIB += $(shell $(PYTHON)-config --configdir)/lib$(PYTHON)m.a
-	RRAYBIN += libRadeonRays.dylib
+	RRAYBIN +=libRadeonRays.dylib
+	OIDNBIN +=libOpenImageDenoise.dylib
 endif
-LIBS2 += -L../build $(RRAYL) $(AVIL)
+LIBS2 += -L../build $(RRAYL) $(OIDNL) $(AVIL)
 
 C = gcc
 CXX = g++
-CXXFLAGS = -O0 -g -Wall -std=c++11 -fvisibility=hidden -I../src/ $(CXXFLAGS2) $(NUMPY) -I$(shell $(PYTHON)-config --prefix)/include/$(PYTHON)m $(RRAY) $(AVI) $(OSFLAG) $(CFLAGS2)
+CXXFLAGS = -O0 -g -Wall -std=c++11 -fvisibility=hidden -I../src/ $(CXXFLAGS2) $(NUMPY) -I$(shell $(PYTHON)-config --prefix)/include/$(PYTHON)m $(RRAY) $(OIDN) $(AVI) $(OSFLAG) $(CFLAGS2)
 LDFLAGS = -L/usr/lib -L/usr/local/lib $(LDFLAGS2)
 LIBS = $(WEAK_LIB) $(PYLIB) -lpthread -lm $(GLLIB) $(LIBS2) -lz
 
 HEADERS = hdr.h lodepng.h AssetObjects.h ChokoLait.h Engine.h SceneObjects.h unloader.h
-HEADERS += asset/mesh.h asset/tetrahedron.h asset/texture.h asset/texture3d.h
+HEADERS += asset/mesh.h asset/tetrahedron.h asset/tube.h asset/texture.h asset/texture3d.h
 HEADERS += core/bbox.h core/debug.h core/display.h core/font.h core/input.h core/io.h core/math.h core/mvp.h core/time.h core/ui.h core/ui3.h
 HEADERS += md/Protein.h md/GenericSSV.h md/Gromacs.h md/CDV.h md/parmenu.h md/particles.h md/parloader.h md/XYZ.h md/pdb.h md/lammps.h md/dlpoly.h md/CDV.h
 HEADERS += web/anbrowse.h web/annode.h web/annode_internal.h web/anscript.h web/anscript_vars.h web/anops.h web/anweb.h web/errorview.h web/arrayview.h
@@ -67,12 +74,12 @@ HEADERS += ui/popups.h ui/icons.h ui/help.h ui/ui_ext.h ui/localizer.h ui/browse
 HEADERS += vis/pargraphics.h vis/system.h vis/shadows.h vis/renderer.h vis/cubemarcher.h vis/selection.h vis/changelog.h vis/preferences.h
 HEADERS += utils/avi.h utils/color.h utils/effects.h utils/fft.h utils/ifaddrs.h utils/net.h utils/plot.h utils/ptrext.h utils/random.h utils/rect.h utils/spline.h utils/stream.h utils/strext.h utils/xml.h utils/dialog.h utils/dylib.h utils/runcmd.h utils/ssh.h utils/tinyfiledialogs.h utils/shader.h utils/glmext.h utils/refcnt.h utils/uniquecaller.h
 #HEADERS += live/livesyncer.h live/lj256.h
-HEADERS += ocl/raytracer.h
-HEADERS += res/resdata.h res/shddata.h ocl/kernel.h
+HEADERS += ocl/kernel.h ocl/raytracer.h ocl/denoise.h
+HEADERS += res/resdata.h
 HEADERSX = xdrfile/xdrfile.h xdrfile/xdrfile_trr.h xdrfile/xdrfile_xtc.h
 
 OBJS = obj/hdr.o obj/lodepng.o obj/ChokoLait.o obj/Engine.o obj/main.o obj/RenderEngine.o obj/unloader.o
-OBJS += obj/asset/mesh.o obj/asset/tetrahedron.o obj/asset/texture.o obj/asset/texture3d.o
+OBJS += obj/asset/mesh.o obj/asset/tetrahedron.o obj/asset/tube.o obj/asset/texture.o obj/asset/texture3d.o
 OBJS += obj/core/bbox.o obj/core/debug.o obj/core/display.o obj/core/font.o obj/core/input.o obj/core/io.o obj/core/math.o obj/core/mvp.o obj/core/time.o obj/core/ui.o obj/core/ui3.o
 OBJS += obj/md/Protein.o obj/md/GenericSSV.o obj/md/Gromacs.o obj/md/parmenu.o obj/md/particles.o obj/md/particles_animdata.o obj/md/particles_attrdata.o obj/md/parloader.o obj/md/pdb.o obj/md/lammps.o obj/md/CDV.o obj/md/dlpoly.o #obj/md/XYZ.o
 OBJS += obj/web/anbrowse.o obj/web/annode.o obj/web/annode_internal.o obj/web/anops.o obj/web/anscript.o obj/web/anweb.o obj/web/errorview.o obj/web/arrayview.o
@@ -92,7 +99,7 @@ OBJS += obj/utils/avi.o obj/utils/ssh.o obj/utils/color.o obj/utils/effects.o ob
 OBJS += obj/ui/popups.o obj/ui/icons.o obj/ui/help.o obj/ui/ui_ext.o obj/ui/localizer.o obj/ui/browse.o obj/ui/localbrowsetarget.o obj/ui/remotebrowsetarget.o
 OBJS += obj/vis/pargraphics.o obj/vis/system.o obj/vis/shadows.o obj/vis/renderer.o obj/vis/cubemarcher.o obj/vis/selection.o obj/vis/changelog.o obj/vis/preferences.o
 OBJS += obj/live/livesyncer.o live/lj256.o
-OBJS += obj/ocl/raytracer.o
+OBJS += obj/ocl/raytracer.o obj/ocl/denoise.o
 OBJSX = obj/xdrfile/xdrfile.o obj/xdrfile/xdrfile_trr.o obj/xdrfile/xdrfile_xtc.o
 
 PCH = precompile.h
@@ -100,12 +107,8 @@ PCH_OUT = precompile.h.gch
 
 ../build/avis: $(OBJS) $(OBJSX)
 	@echo "Copying libraries..."
-ifeq ($(UNAME_S),Darwin)
-	@cp $(RRAYPRE)/build/bin/libRadeonRays.dylib ../build/libRadeonRays.dylib
-endif
-ifeq ($(UNAME_S),Linux)
-	@cp $(RRAYPRE)/build/bin/libRadeonRays.so.2.0 ../build/libRadeonRays.so.2.0
-endif
+	@cp $(RRAYPRE)/build/bin/$(RRAYBIN) ../build/$(RRAYBIN)
+	@cp $(OIDNPRE)/build/$(OIDNBIN) ../build/$(OIDNBIN)
 	@ar rvs obj/libgwavi.a $(AVIPRE)/obj/*.o > /dev/null
 	@echo "Linking..."
 	@$(CXX) -o $@ $(OBJS) $(OBJSX) $(LDFLAGS) $(LIBS)
@@ -134,7 +137,7 @@ obj/utils/tinyfiledialogs.o: utils/tinyfiledialogs.c
 	@$(C) -g -c $< -o $@
 
 obj/vis/system.o: vis/system.cpp $(PCH_OUT)
-	echo "\""$(shell git rev-parse --short HEAD)"\"" > ../../githash.h
+	@echo "\""$(shell git rev-parse --short HEAD)"\"" > ../../githash.h
 	@echo "Compiling" $<
 	@$(CXX) $(CXXFLAGS) -include precompile.h -c $< -o $@
 

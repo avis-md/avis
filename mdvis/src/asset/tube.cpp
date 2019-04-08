@@ -9,8 +9,8 @@ Tube::Tube(int div, float r, float h) {
 
 	const float mul = 2 * PI / div;
 	for (int a = 0; a < div; a++) {
-		float x = std::cosf(a * mul);
-		float y = std::sinf(a * mul);
+		float x = std::cos(a * mul);
+		float y = std::sin(a * mul);
 		vertices.push_back(Vec3(x * r, y * r, -h / 2));
 		vertices.push_back(Vec3(x * r, y * r, h / 2));
 		normals.push_back(Vec3(x, y, 0));

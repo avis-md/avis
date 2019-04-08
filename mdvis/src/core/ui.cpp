@@ -95,7 +95,7 @@ void UI::Rotate(float aa, Vec2 point) {
 	matrixIsI = false;
 }
 void UI::ResetMatrix() {
-	matrix = glm::identity<glm::mat3>();
+	matrix = glm::mat3(1.f);
 	matrixIsI = true;
 }
 
@@ -522,15 +522,15 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, bo
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	Font::prog.Bind();
-
-	glUniform1i(Font::prog.Loc(1), 0);
 	
 	if (shad) {
+		Font::prog.Bind();
 		glUniform4f(Font::prog.Loc(0), 0, 0, 0, col.a * alpha);
 		glUniform2f(Font::prog.Loc(2), 1.f / Display::width, -1.f / Display::height);
 		for (auto& m : mks) {
 			GLuint tex = (!m) ? font->sglyph(si, 0) : font2.sglyph(si, m);
+			Font::prog.Bind();
+			glUniform1i(Font::prog.Loc(1), 0);
 			glBindVertexArray(Font::vao);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Font::idbuf);
 			glActiveTexture(GL_TEXTURE0);
@@ -541,10 +541,13 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, bo
 		}
 	}
 
+	Font::prog.Bind();
 	glUniform4f(Font::prog.Loc(0), col.r, col.g, col.b, col.a * alpha);
 	glUniform2f(Font::prog.Loc(2), 0, 0);
 	for (auto& m : mks) {
 		GLuint tex = (!m) ? font->glyph(si, 0) : font2.glyph(si, m);
+		Font::prog.Bind();
+		glUniform1i(Font::prog.Loc(1), 0);
 		glBindVertexArray(Font::vao);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Font::idbuf);
 		glActiveTexture(GL_TEXTURE0);

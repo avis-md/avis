@@ -3,7 +3,7 @@
 void Transform::Init(pSceneObject& sc, Vec3 pos, Quat rot, Vec3 scl) {
 	object(sc);
 	_localPosition = Vec3();
-	_localRotation = glm::identity<Quat>();
+	_localRotation = Quat(1, 0, 0, 0);
 	_localScale = Vec3();
 	_rotation = rot;
 	Translate(pos).Scale(scl);
@@ -175,7 +175,7 @@ void Transform::_W2LQuat() {
 
 void Transform::_UpdateLMatrix() {
 	_localMatrix = MatFunc::FromTRS(_localPosition, _localRotation, _localScale);
-	_UpdateWMatrix(object->parent ? object->parent->transform._worldMatrix : glm::identity<Mat4x4>());
+	_UpdateWMatrix(object->parent ? object->parent->transform._worldMatrix : Mat4x4(1.f));
 }
 
 void Transform::_UpdateWMatrix(const Mat4x4& mat) {
