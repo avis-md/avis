@@ -261,6 +261,7 @@
     <ClCompile Include="..\libgwavi\src\gwavi.c" />
     <ClCompile Include="src\asset\mesh.cpp" />
     <ClCompile Include="src\asset\tetrahedron.cpp" />
+    <ClCompile Include="src\asset\tube.cpp" />
     <ClCompile Include="src\core\math.cpp" />
     <ClCompile Include="src\core\ui3.cpp" />
     <ClCompile Include="src\md\CDV.cpp" />
@@ -381,6 +382,7 @@
     <ClInclude Include="..\libgwavi\src\fileio.h" />
     <ClInclude Include="src\asset\mesh.h" />
     <ClInclude Include="src\asset\tetrahedron.h" />
+    <ClInclude Include="src\asset\tube.h" />
     <ClInclude Include="src\core\math.h" />
     <ClInclude Include="src\core\ui3.h" />
     <ClInclude Include="src\libjpeg\jchuff.h" />
