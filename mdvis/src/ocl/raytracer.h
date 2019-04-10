@@ -35,6 +35,7 @@ public:
 
 	static void DrawMenu();
 
+	static uint bgw, bgh;
 	static int maxRefl;
 
 	static GLuint resTex;

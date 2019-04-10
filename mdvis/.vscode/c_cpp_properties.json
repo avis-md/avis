@@ -48,6 +48,7 @@
                 "${workspaceFolder}/../radeonrays/Calc/inc",
                 "${workspaceFolder}/../radeonrays/CLW",
                 "${workspaceFolder}/../radeonrays/RadeonRays/include",
+                "${workspaceFolder}/../oidn/include",
                 "/usr/include/freetype2/",
                 "/usr/local/include/freetype2/",
                 "/usr/include/python3.7/",

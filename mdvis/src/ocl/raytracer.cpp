@@ -17,6 +17,7 @@ RR::matrix RR::MatFunc::Scale(const Vec3& v) {
 	return RR::matrix(v.x, 0, 0, 0, 0, v.y, 0, 0, 0, 0, v.z, 0, 0, 0, 0, 1);
 }
 
+uint RayTracer::bgw, RayTracer::bgh;
 int RayTracer::maxRefl = 2;
 
 GLuint RayTracer::resTex = 0;
@@ -64,8 +65,7 @@ bool RayTracer::Init() {
 	const char* kBuildopts(" -cl-mad-enable -cl-fast-relaxed-math -cl-std=CL1.2 -I.");
 
 	try {
-		auto kernel = IO::GetText(IO::path + "res/kernel.cl");
-		program = CLWProgram::CreateFromSource(kernel.c_str(), kernel.size(), kBuildopts, context);
+		program = CLWProgram::CreateFromSource(ocl::raykernel, ocl::raykernel_sz, kBuildopts, context);
 	}
 	catch (CLWException& e) {
 		FAIL(e.what());
@@ -296,11 +296,10 @@ void RayTracer::SetObjs() {
 	colors.push_back(white());
 	matrices.push_back(RR::matrix());
 
-	unsigned int _w, _h;
-	auto d = hdr::read_hdr((IO::path + "res/refl.hdr").c_str(), &_w, &_h);
-	std::vector<float> dv(_w*_h*3);
-	hdr::to_float(d, _w, _h, dv.data());
-	bg_buf = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, 3 * _w * _h, dv.data());
+	auto d = hdr::read_hdr((IO::path + "backgrounds/" + ParGraphics::reflNms[ParGraphics::reflId] + "/specular.hdr").c_str(), &bgw, &bgh);
+	std::vector<float> dv(bgw * bgh * 3);
+	hdr::to_float(d, bgw, bgh, dv.data());
+	bg_buf = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, 3 * bgw * bgh, dv.data());
 	delete[](d);
 
 	auto _shp = shapes[0];
@@ -351,7 +350,10 @@ void RayTracer::ShadeKernel(CLWBuffer<float> out_buff, const CLWBuffer<RR::Inter
 	karg(accum);
 	karg(smps);
 	karg(ParGraphics::specStr);
+	karg(0.05f);
 	karg(bg_buf);
+	karg(bgw);
+	karg(bgh);
 	karg(ParGraphics::reflStr);
 	karg(ParGraphics::bgMul);
 
