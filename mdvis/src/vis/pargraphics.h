@@ -106,7 +106,7 @@ public:
 	static int animTarFps;
 	static bool tfboDirty;
 
-	static Mat4x4 lastMV, lastP, lastMVP;
+	static Mat4x4 lastMV, lastP, lastP1, lastP2, lastMVP;
 
 	class Eff {
 	public:

@@ -88,3 +88,7 @@ Mat4x4 MVP::projection() {
 	}
 	return _p;
 }
+
+Mat4x4 MVP::top_p() {
+	return P.top();
+}

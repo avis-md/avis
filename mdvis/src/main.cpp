@@ -131,7 +131,7 @@ void updateFunc() {
 		if (Input::KeyDown(KEY::F5)) {
 			VisRenderer::ToImage();
 		}
-	}
+	}Quat() * Vec3();
 	if (RayTracer::resTex) {
 		if (ParGraphics::tfboDirty) {
 			Scene::dirty = true;

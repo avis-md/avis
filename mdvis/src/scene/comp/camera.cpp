@@ -22,13 +22,15 @@ Camera::Camera(std::ifstream& stream, SceneObject* o, long pos) : Camera() {
 }
 
 void Camera::ApplyGL() {
-	Quat q = glm::inverse(object->transform.rotation());
 	if (ortographic) {
 		float hw = Display::height * 1.f / Display::width;
 		MVP::Mul(glm::ortho(-1.f, 1.f, -hw, hw, 0.01f, 500.f));
-	} else {
+	}
+	else {
 		MVP::Mul(glm::perspectiveFov(fov * deg2rad, static_cast<float>(Display::width), static_cast<float>(Display::height), 0.01f, 500.f));
 	}
+	MVP::Push();
+	Quat q = glm::inverse(object->transform.rotation());
 	MVP::Scale(1, 1, -1);
 	MVP::Mul(QuatFunc::ToMatrix(q));
 	Vec3 pos = -object->transform.position();

@@ -6,6 +6,32 @@ namespace ocl {
 #define PI 3.14159f
 #define STRAN 4
 
+
+static uint Rand(uint rnd) {
+	rnd ^= rnd << 13;
+	rnd ^= rnd >> 17;
+	rnd ^= rnd << 5;
+	return rnd;
+}
+
+static float Randf(uint* r) {
+	*r = Rand(*r);
+	return 0.0001f*(*r % 10000);
+}
+
+static float RandfStra(uint* r, int i, int n) {
+	float rnd = Randf(r);
+	i %= n;
+	return (i + rnd) / n;
+}
+
+static float3 RandHemi(uint* r, int s) {
+	float r1 = sqrt(RandfStra(r, s, STRAN));
+	float r2 = RandfStra(r, s, STRAN + 1) * 2 * PI;
+	return (float3)(r1 * cos(r2), r1 * sin(r2), sqrt(max(1 - r1, 0.0f)));
+}
+
+
 typedef struct _Ray {
 	/// xyz - origin, w - max range
 	float4 o;
@@ -24,13 +50,52 @@ typedef struct _Mat {
 	float4 d;
 } Mat;
 
+typedef float4 Quat;
+
+static Mat IMat() {
+	Mat res;
+	res.a = (float4)(1, 0, 0, 0);
+	res.b = (float4)(0, 1, 0, 0);
+	res.c = (float4)(0, 0, 1, 0);
+	res.d = (float4)(0, 0, 0, 1);
+	return res;
+}
+
+static Mat TMat(float3 v) {
+	Mat res = IMat();
+	res.d.xyz = v;
+	return res;
+}
+
 static float4 MatVec(const Mat m, const float4 v) {
-	return (float4)(
+	float4 vec = (float4)(
 		dot(m.a, v),
 		dot(m.b, v),
 		dot(m.c, v),
 		dot(m.d, v)
 	);
+	return vec;
+}
+
+
+static Quat IQuat() {
+	return (Quat)(0, 0, 0, 1);
+}
+
+static Quat AAQuat(float3 axis, float a) {
+	float factor = sin(a / 2.0f);
+	float x = axis.x * factor;
+	float y = axis.y * factor;
+	float z = axis.z * factor;
+	float w = (float)cos(a / 2.0f);
+	return normalize((Quat)(x, y, z, w));
+}
+
+static float3 QuatVec(Quat q, float3 v) {
+	float3 uv = cross(q.xyz, v);
+	float3 uuv = cross(q.xyz, uv);
+
+	return v + ((uv * q.w) + uuv) * 2.0f;
 }
 
 typedef struct _Camera {
@@ -53,10 +118,12 @@ typedef struct _Intersection {
 } Intersection;
 
 
-__kernel void GenerateCameraRays(__global Ray* rays,
-	__global const Camera* cam,
-	int width,
-	int height) {
+__kernel void GenRays_Pin(
+		__global Ray* rays,
+		__global const Camera* cam,
+		int width,
+		int height
+	) {
 	int2 globalid;
 	globalid.x = get_global_id(0);
 	globalid.y = get_global_id(1);
@@ -75,6 +142,101 @@ __kernel void GenerateCameraRays(__global Ray* rays,
 		cf.xyz /= cf.w;
 		rays[k].d.xyz = normalize(cf.xyz - cn.xyz);
 		rays[k].o.w = cam->zcap.y;
+
+		rays[k].extra.x = 0xFFFFFFFF;
+		rays[k].extra.y = 0xFFFFFFFF;
+	}
+}
+
+__kernel void GenRays_Dof(
+		__global Ray* rays,
+		__global Mat* IPs,
+		float4 camPos,
+		int width,
+		int height,
+		float plane,
+		float tmax,
+		int rng
+	) {
+	int2 globalid;
+	globalid.x = get_global_id(0);
+	globalid.y = get_global_id(1);
+
+	// Check borders
+	if (globalid.x < width && globalid.y < height) {
+		float x = -1.f + 2.f * (float)globalid.x / (float)width;
+		float y = -1.f + 2.f * (float)globalid.y / (float)height;
+
+		int k = globalid.y * width + globalid.x;
+
+		float4 cn = MatVec(IPs[0], MatVec(IPs[1], (float4)(x, y, -1, 1)));
+		cn.xyz /= cn.w;
+		rays[k].o.xyz = cn.xyz;
+		float4 cf = MatVec(IPs[0], MatVec(IPs[1], (float4)(x, y, 1, 1)));
+		cf.xyz /= cf.w;
+		rays[k].d.xyz = normalize(cf.xyz - cn.xyz);
+		rays[k].o.w = 1000;
+
+		rays[k].extra.x = 0xFFFFFFFF;
+		rays[k].extra.y = 0xFFFFFFFF;
+	}
+}
+
+__kernel void GenRays_Dof2(
+		__global Ray* rays,
+		__global Mat* IPs,
+		float4 camPos,
+		int width,
+		int height,
+		float plane,
+		float tmax,
+		int rng
+	) {
+	int2 globalid;
+	globalid.x = get_global_id(0);
+	globalid.y = get_global_id(1);
+
+	// Check borders
+	if (globalid.x < width && globalid.y < height) {
+		float x = -1.f + 2.f * (float)globalid.x / (float)width;
+		float y = -1.f + 2.f * (float)globalid.y / (float)height;
+
+		int k = globalid.y * width + globalid.x;
+
+		float4 cf = MatVec(IPs[1], (float4)(x, y, 1, 1));
+		cf.xyz /= cf.w;
+
+		float3 rc = (float3)(0, 0, plane);
+
+		float3 cv = -rc;
+		float3 cd = normalize(cf.xyz);
+
+		/*
+		uint rnd = Rand((uint)(k + rng));
+		
+		float th = Randf(&rnd) * 2 * PI;
+		float2 rot = (float2)(cos(th), sin(th)) * Randf(&rnd) * tmax;
+
+		Quat rotx = AAQuat((float3)(1, 0, 0), rot.x);
+		Quat roty = AAQuat((float3)(0, 1, 0), rot.y);
+
+		cv = QuatVec(rotx, QuatVec(roty, cv));
+		cd = QuatVec(rotx, QuatVec(roty, cd));
+		*/
+		float4 co;
+		co.xyz = rc + cv;
+		co.w = 1;
+
+		float4 cd4;
+		cd4.xyz = cd;
+		cd4.w = 0;
+
+		co = MatVec(IPs[0], co);
+		cd4 = MatVec(IPs[0], cd4);
+
+		rays[k].o.xyz = co.xyz / co.w;
+		rays[k].d.xyz = normalize(cd4.xyz);
+		rays[k].o.w = 1000;
 
 		rays[k].extra.x = 0xFFFFFFFF;
 		rays[k].extra.y = 0xFFFFFFFF;
@@ -100,30 +262,6 @@ static float4 ConvertFromBarycentric(__global const float* vec,
 	return a * (1 - uvwt->x - uvwt->y) + b * uvwt->x + c * uvwt->y;
 }
 
-
-static uint Rand(uint rnd) {
-	rnd ^= rnd << 13;
-	rnd ^= rnd >> 17;
-	rnd ^= rnd << 5;
-	return rnd;
-}
-
-static float Randf(uint* r) {
-	*r = Rand(*r);
-	return 0.0001f*(*r % 10000);
-}
-
-static float RandfStra(uint* r, int i, int n) {
-	float rnd = Randf(r);
-	i %= n;
-	return (i + rnd) / n;
-}
-
-static float3 RandHemi(uint* r, int s) {
-	float r1 = sqrt(RandfStra(r, s, STRAN));
-	float r2 = RandfStra(r, s, STRAN + 1) * 2 * PI;
-	return (float3)(r1 * cos(r2), r1 * sin(r2), sqrt(max(1 - r1, 0.0f)));
-}
 
 static void GetTans(float3 n, float3* t1, float3* t2) {
 	*t1 = normalize(cross(n, (fabs(n.x) > 0.9999f) ? (float3)(0, 0, 1) : (float3)(1, 0, 0)));

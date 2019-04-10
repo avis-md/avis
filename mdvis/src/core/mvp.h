@@ -12,6 +12,7 @@ public:
 
 	static Mat4x4 modelview(), projection();
 
+	static Mat4x4 top_p();
 protected:
 	class stack : public std::stack<Mat4x4> {
 	public:

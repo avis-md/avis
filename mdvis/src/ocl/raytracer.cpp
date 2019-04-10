@@ -212,20 +212,28 @@ void RayTracer::DrawMenu() {
 }
 
 CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
-	struct Cam
-	{
-		Mat4x4 ip = glm::transpose(glm::inverse(ParGraphics::lastMVP));
-		Vec2 zcap = Vec2(1, 1000);
-	} cam = Cam();
-	CLWBuffer<Cam> cam_buf = CLWBuffer<Cam>::Create(context, CL_MEM_READ_ONLY, 1, &cam);
-
-	//run kernel
+	Mat4x4 ips[] = {
+		glm::transpose(glm::inverse(ParGraphics::lastP2 * ParGraphics::lastMV)),
+		glm::transpose(glm::inverse(ParGraphics::lastP1))
+	};
+	CLWBuffer<Mat4x4> ips_buf = CLWBuffer<Mat4x4>::Create(context, CL_MEM_READ_ONLY, 2, &ips);
 	CLWBuffer<RR::ray> ray_buf = CLWBuffer<RR::ray>::Create(context, CL_MEM_READ_WRITE, Display::width * Display::height);
-	CLWKernel kernel = program.GetKernel("GenerateCameraRays");
-	kernel.SetArg(0, ray_buf);
-	kernel.SetArg(1, cam_buf);
-	kernel.SetArg(2, Display::width);
-	kernel.SetArg(3, Display::height);
+	cl_float4 cpos;
+	std::memcpy(&cpos, &ChokoLait::mainCameraObj->transform.position(), sizeof(Vec3));
+	
+	CLWKernel kernel = program.GetKernel("GenRays_Dof");
+	
+	int i = 0;
+#define karg(var) kernel.SetArg(i++, var)
+	karg(ray_buf);
+	karg(ips_buf);
+	karg(cpos);
+	karg(Display::width);
+	karg(Display::height);
+	karg(10.f);
+	karg(0.f);
+	karg((cl_int)milliseconds());
+#undef karg
 	// Run generation kernel
 	size_t gs[] = { static_cast<size_t>((Display::width + 7) / 8 * 8), static_cast<size_t>((Display::height + 7) / 8 * 8) };
 	size_t ls[] = { 8, 8 };
@@ -356,6 +364,7 @@ void RayTracer::ShadeKernel(CLWBuffer<float> out_buff, const CLWBuffer<RR::Inter
 	karg(bgh);
 	karg(ParGraphics::reflStr);
 	karg(ParGraphics::bgMul);
+#undef karg
 
 	// Run generation kernel
 	size_t gs[] = { static_cast<size_t>((Display::width + 7) / 8 * 8), static_cast<size_t>((Display::height + 7) / 8 * 8) };
