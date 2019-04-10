@@ -746,8 +746,8 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 	if (!Shadows::isPass) {
 		lastMV = _mv;
 		lastP = _p;
-		lastP1 = MVP::top_p();
-		lastP2 = lastP / lastP2;
+		//lastP1 = MVP::top_p();
+		//lastP2 = lastP / lastP2;
 		lastMVP = _p * _mv;
 		auto imvp = glm::inverse(lastMVP);
 		scrX = Vec3(imvp * Vec4(1, 0, 0, 0));

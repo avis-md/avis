@@ -22,7 +22,7 @@ int RayTracer::maxRefl = 2;
 
 GLuint RayTracer::resTex = 0;
 CLWBuffer<float> RayTracer::accum;
-int RayTracer::samples = 0, RayTracer::maxSamples = 512;
+int RayTracer::samples = 0, RayTracer::maxSamples = 2000;
 
 CLWContext RayTracer::context;
 CLWProgram RayTracer::program;
@@ -212,26 +212,34 @@ void RayTracer::DrawMenu() {
 }
 
 CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
-	Mat4x4 ips[] = {
-		glm::transpose(glm::inverse(ParGraphics::lastP2 * ParGraphics::lastMV)),
-		glm::transpose(glm::inverse(ParGraphics::lastP1))
-	};
-	CLWBuffer<Mat4x4> ips_buf = CLWBuffer<Mat4x4>::Create(context, CL_MEM_READ_ONLY, 2, &ips);
-	CLWBuffer<RR::ray> ray_buf = CLWBuffer<RR::ray>::Create(context, CL_MEM_READ_WRITE, Display::width * Display::height);
-	cl_float4 cpos;
-	std::memcpy(&cpos, &ChokoLait::mainCameraObj->transform.position(), sizeof(Vec3));
+	struct Camera {
+		Mat4x4 ip = glm::inverse(ParGraphics::lastMVP);
+		Vec4 pos;
+		Vec4 fwd;
+		Vec2 zcap = Vec2(0.001f, 1000.f);
+	} cam;
+	cam.pos = cam.ip * Vec4(0, 0, -1, 1);
+	cam.pos /= cam.pos.w;
+	cam.fwd = cam.ip * Vec4(0, 0, 1, 1);
+	cam.fwd /= cam.fwd.w;
+	cam.fwd -= cam.pos;
+	cam.fwd.w = 0;
+	cam.fwd = glm::normalize(cam.fwd);
+	cam.ip = glm::transpose(cam.ip);
 	
+	CLWBuffer<Camera> cam_buf = CLWBuffer<Camera>::Create(context, CL_MEM_READ_ONLY, 1, &cam);
+	CLWBuffer<RR::ray> ray_buf = CLWBuffer<RR::ray>::Create(context, CL_MEM_READ_WRITE, Display::width * Display::height);
+
 	CLWKernel kernel = program.GetKernel("GenRays_Dof");
 	
 	int i = 0;
 #define karg(var) kernel.SetArg(i++, var)
 	karg(ray_buf);
-	karg(ips_buf);
-	karg(cpos);
+	karg(cam_buf);
 	karg(Display::width);
 	karg(Display::height);
-	karg(10.f);
-	karg(0.f);
+	karg(ParGraphics::Eff::dofDepth);
+	karg(ParGraphics::Eff::dofAper / 20);
 	karg((cl_int)milliseconds());
 #undef karg
 	// Run generation kernel
@@ -252,7 +260,7 @@ void RayTracer::SetObjs() {
 	Tetrahedron tet = Tetrahedron();
 	for (int a = 0; a < 4; a++)
 		tet.Subdivide();
-	tet.ToSphere(0.15f);
+	tet.ToSphere(0.03f);
 
 	Tube tub = Tube(16, 10, 50);
 

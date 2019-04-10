@@ -98,12 +98,6 @@ static float3 QuatVec(Quat q, float3 v) {
 	return v + ((uv * q.w) + uuv) * 2.0f;
 }
 
-typedef struct _Camera {
-	Mat ip;
-	// Near and far Z
-	float2 zcap;
-} Camera;
-
 typedef struct _Intersection {
 	// id of a shape
 	int shapeid;
@@ -117,6 +111,19 @@ typedef struct _Intersection {
 	float4 uvwt;
 } Intersection;
 
+
+typedef struct _Camera {
+	Mat ip;
+	// Near and far Z
+	float2 zcap;
+} Camera;
+
+typedef struct _Camera2 {
+	Mat ip;
+	float4 pos;
+	float4 fwd;
+	float2 zcap;
+} Camera2;
 
 __kernel void GenRays_Pin(
 		__global Ray* rays,
@@ -150,8 +157,7 @@ __kernel void GenRays_Pin(
 
 __kernel void GenRays_Dof(
 		__global Ray* rays,
-		__global Mat* IPs,
-		float4 camPos,
+		__global const Camera2* cam,
 		int width,
 		int height,
 		float plane,
@@ -169,74 +175,28 @@ __kernel void GenRays_Dof(
 
 		int k = globalid.y * width + globalid.x;
 
-		float4 cn = MatVec(IPs[0], MatVec(IPs[1], (float4)(x, y, -1, 1)));
-		cn.xyz /= cn.w;
-		rays[k].o.xyz = cn.xyz;
-		float4 cf = MatVec(IPs[0], MatVec(IPs[1], (float4)(x, y, 1, 1)));
-		cf.xyz /= cf.w;
-		rays[k].d.xyz = normalize(cf.xyz - cn.xyz);
-		rays[k].o.w = 1000;
-
-		rays[k].extra.x = 0xFFFFFFFF;
-		rays[k].extra.y = 0xFFFFFFFF;
-	}
-}
-
-__kernel void GenRays_Dof2(
-		__global Ray* rays,
-		__global Mat* IPs,
-		float4 camPos,
-		int width,
-		int height,
-		float plane,
-		float tmax,
-		int rng
-	) {
-	int2 globalid;
-	globalid.x = get_global_id(0);
-	globalid.y = get_global_id(1);
-
-	// Check borders
-	if (globalid.x < width && globalid.y < height) {
-		float x = -1.f + 2.f * (float)globalid.x / (float)width;
-		float y = -1.f + 2.f * (float)globalid.y / (float)height;
-
-		int k = globalid.y * width + globalid.x;
-
-		float4 cf = MatVec(IPs[1], (float4)(x, y, 1, 1));
+		float4 cn = cam->pos;
+		float4 cf = MatVec(cam->ip, (float4)(x, y, 1, 1));
 		cf.xyz /= cf.w;
 
-		float3 rc = (float3)(0, 0, plane);
+		float3 rd = normalize(cf.xyz - cn.xyz);
+		float3 rp = cn.xyz + rd * plane / cos(dot(rd, cam->fwd.xyz));
 
-		float3 cv = -rc;
-		float3 cd = normalize(cf.xyz);
+		float3 t1 = (float3)(0, 0, 1);
+		if (fabs(cam->fwd.z) > 0.99999f) t1 = (float3)(1, 0, 0);
+		float3 t2 = cross(cam->fwd.xyz, t1);
+		t1 = cross(cam->fwd.xyz, t2);
 
-		/*
 		uint rnd = Rand((uint)(k + rng));
 		
 		float th = Randf(&rnd) * 2 * PI;
 		float2 rot = (float2)(cos(th), sin(th)) * Randf(&rnd) * tmax;
 
-		Quat rotx = AAQuat((float3)(1, 0, 0), rot.x);
-		Quat roty = AAQuat((float3)(0, 1, 0), rot.y);
+		cn.xyz += t1 * rot.x + t2 * rot.y;
 
-		cv = QuatVec(rotx, QuatVec(roty, cv));
-		cd = QuatVec(rotx, QuatVec(roty, cd));
-		*/
-		float4 co;
-		co.xyz = rc + cv;
-		co.w = 1;
-
-		float4 cd4;
-		cd4.xyz = cd;
-		cd4.w = 0;
-
-		co = MatVec(IPs[0], co);
-		cd4 = MatVec(IPs[0], cd4);
-
-		rays[k].o.xyz = co.xyz / co.w;
-		rays[k].d.xyz = normalize(cd4.xyz);
-		rays[k].o.w = 1000;
+		rays[k].o.xyz = cn.xyz;
+		rays[k].d.xyz = normalize(rp - cn.xyz);
+		rays[k].o.w = cam->zcap.y;
 
 		rays[k].extra.x = 0xFFFFFFFF;
 		rays[k].extra.y = 0xFFFFFFFF;

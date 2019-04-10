@@ -399,6 +399,7 @@
     <ClInclude Include="src\libjpeg\jversion.h" />
     <ClInclude Include="src\md\GenericSSV.h" />
     <ClInclude Include="src\ocl\denoise.h" />
+    <ClInclude Include="src\precompile.h" />
     <ClInclude Include="src\res\bnddata.h" />
     <ClInclude Include="src\res\coldata.h" />
     <ClInclude Include="src\res\envdata.h" />
