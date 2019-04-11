@@ -168,13 +168,13 @@ void RayTracer::Refine() {
 
 			// Intersection
 			api->QueryIntersection(ray_buffer, wh, isect_buffer, nullptr, &rendEvent);
-
+			context.Flush(0);
 			rendStep = REND_STEP::WAIT_INTERSECT;
 			break;
 		}
 		case REND_STEP::WAIT_INTERSECT: {
-			if (!rendEvent->Complete()) return;
-			delete(rendEvent);
+			//if (!rendEvent->Complete()) return;
+			//delete(rendEvent);
 			if (!rendBounce) {
 				out_buff = CLWBuffer<float>::Create(context, CL_MEM_WRITE_ONLY, 4 * wh);
 				col_buff = CLWBuffer<float>::Create(context, CL_MEM_READ_WRITE, 4 * wh);

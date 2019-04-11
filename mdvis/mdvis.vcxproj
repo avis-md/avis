@@ -190,8 +190,7 @@
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>cp "$(SolutionDir)radeonrays\bin\Release\RadeonRays.dll" "$(SolutionDir)\x64\Debug\"</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>"C:\Program Files\Git\git-cmd.exe" "cd $(SolutionDir) &amp;&amp; githash.bat"</Command>
@@ -271,6 +270,7 @@
     <ClCompile Include="src\md\particles_animdata.cpp" />
     <ClCompile Include="src\md\particles_attrdata.cpp" />
     <ClCompile Include="src\md\pdb.cpp" />
+    <ClCompile Include="src\md\pdbx.cpp" />
     <ClCompile Include="src\ocl\denoise.cpp" />
     <ClCompile Include="src\ui\browse.cpp" />
     <ClCompile Include="src\ui\localbrowsetarget.cpp" />
@@ -398,6 +398,7 @@
     <ClInclude Include="src\libjpeg\jpeglib.h" />
     <ClInclude Include="src\libjpeg\jversion.h" />
     <ClInclude Include="src\md\GenericSSV.h" />
+    <ClInclude Include="src\md\pdbx.h" />
     <ClInclude Include="src\ocl\denoise.h" />
     <ClInclude Include="src\precompile.h" />
     <ClInclude Include="src\res\bnddata.h" />

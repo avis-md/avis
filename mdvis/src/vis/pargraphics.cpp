@@ -1485,7 +1485,7 @@ void ParGraphics::DrawMenu() {
 	}
 	off += 17;
 	UI::Quad(expandPos - 149, off - 1, 148, 17 * (fogUseBgCol? 5 : 6) + 3, white(0.9f, 0.1f));
-	reflStr = UI2::Slider(expandPos - 147, off, 146, _("Strength"), 0, 5, reflStr, "Illumination brightness"); off += 17;
+	reflStr = UI2::Slider(expandPos - 147, off, 146, _("Strength"), 0, 10, reflStr, "Illumination brightness"); off += 17;
 	reflStrDecay = UI2::Slider(expandPos - 147, off, 146, _("Falloff"), 0, 500, reflStrDecay, "Exponential fade over distance"); off += 17;
 	reflStrDecayOff = UI2::Slider(expandPos - 147, off, 146, _(" Offset"), 0, 0.005, reflStrDecayOff, "Exponential fade offset"); off += 17;
 	UI2::Toggle(expandPos - 147, off, 146, _("Inherit Color"), fogUseBgCol); off += 17;
