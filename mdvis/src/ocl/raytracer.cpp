@@ -278,6 +278,7 @@ void RayTracer::SetObjs() {
 	std::vector<Vec4> colors;
 	std::vector<int> indents(mp, 0);
 	std::vector<RR::matrix> matrices;
+	std::vector<RR::matrix> imatrices;
 
 	int vsz = 0;
 	for (auto shp : shapes) {
@@ -297,6 +298,7 @@ void RayTracer::SetObjs() {
 	colors.reserve(mp);
 	indents.push_back(_indents[1]);
 	matrices.reserve(mp);
+	imatrices.reserve(mp);
 	for (int id = 0; id < mp; ++id) {
 		if (!ParGraphics::useGradCol || !attr->size()) {
 			colors.push_back(Particles::_colorPallete[Particles::colors[id]]);
@@ -307,6 +309,7 @@ void RayTracer::SetObjs() {
 		}
 
 		matrices.push_back(RR::MatFunc::Translate(Particles::poss[id]));
+		imatrices.push_back(RR::MatFunc::Translate(-Particles::poss[id]));
 	}
 
 	colors.push_back(white());
@@ -322,7 +325,8 @@ void RayTracer::SetObjs() {
 	RR::Shape* shape0 = api->CreateMesh((float*)_shp->vertices.data(), _shp->vertCount * 3, sizeof(Vec3), _shp->triangles.data(), 0, nullptr, _shp->triCount);
 	for (int id = 0; id < mp; ++id) {
 		auto shp = (!id) ? shape0 : api->CreateInstance(shape0);
-		shp->SetTransform(matrices[id], RR::inverse(matrices[id]));
+		//shp->SetTransform(matrices[id], RR::inverse(matrices[id]));
+		shp->SetTransform(matrices[id], imatrices[id]);
 		shp->SetId(id);
 		api->AttachShape(shp);
 	}
