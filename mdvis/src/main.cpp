@@ -21,6 +21,7 @@
 #include "md/GenericSSV.h"
 #include "md/Gromacs.h"
 #include "md/pdb.h"
+#include "md/pdbx.h"
 #include "md/CDV.h"
 #include "md/lammps.h"
 #include "md/dlpoly.h"
@@ -431,6 +432,8 @@ The hash for this program is )" << VisSystem::version_hash
 		PUSHIMP
 		NEWIMP("Protein DataBank", pdb, .pdb, PDB::Read)
 		SETFRM(.pdb, PDB::ReadFrm)
+		PUSHIMP
+		NEWIMP("Protein DataBank X", pdbx, .cif, PDBx::Read)
 		PUSHIMP
 		NEWIMP("CDView", cdv, .cdv, CDV::Read)
 		SETFRM(.cdv, CDV::ReadFrame)

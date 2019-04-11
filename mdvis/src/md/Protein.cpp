@@ -82,6 +82,8 @@ void Protein::Clear() {
 
 bool Protein::Refresh() {
 	Clear();
+	//if (!ParLoader::useConn)
+		return true;
 	Protein* p = 0;
 	uint* ch = 0;
 	bool isn = false;
@@ -312,16 +314,16 @@ void Protein::DrawMenu(float off) {
 			p.visible = !p.visible;
 			Scene::dirty = true;
 		}
-		static bool _drawGrad;
-		if (_drawGrad != p.drawGrad) {
-			_drawGrad = p.drawGrad;
-			Scene::dirty = true;
-		}
-		static Vec4 _tint;
-		if (_tint != p.tint) {
-			_tint = p.tint;
-			Scene::dirty = true;
-		}
+		// static bool _drawGrad;
+		// if (_drawGrad != p.drawGrad) {
+		// 	_drawGrad = p.drawGrad;
+		// 	Scene::dirty = true;
+		// }
+		// static Vec4 _tint;
+		// if (_tint != p.tint) {
+		// 	_tint = p.tint;
+		// 	Scene::dirty = true;
+		// }
 		off += 17;
 		if (p.expanded) {
 			uint f2 = (uint)p.first.y;

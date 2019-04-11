@@ -401,6 +401,11 @@ void ParLoader::DoOpen() {
 	Particles::Resize(info.num);
 	Particles::particleSz = 0;
 	Engine::ReleaseLock();
+	if (!info.num) {
+		busy = false;
+		return;
+	}
+
 	memcpy(&Particles::names[0], info.name, info.num * PAR_MAX_NAME_LEN);
 	memcpy(&Particles::resNames[0], info.resname, info.num * PAR_MAX_NAME_LEN);
 	Particles::poss = (glm::dvec3*)info.pos;
