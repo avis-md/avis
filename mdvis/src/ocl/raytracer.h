@@ -22,8 +22,13 @@ namespace RadeonRays {
 }
 
 class RayTracer {
+	enum class REND_STEP {
+		IDLE,
+		WAIT_PRIMARY,
+		WAIT_INTERSECT,
+		WAIT_BOUNCE
+	};
 public:
-
 	static bool Init();
 	
 	static void Clear();
@@ -47,7 +52,13 @@ private:
 	static CLWCommandQueue queue;
 	static RR::IntersectionApi* api;
 
+	static REND_STEP rendStep;
+	static int rendBounce;
+	static RR::Event* rendEvent;
+	static CLWEvent rendEvent2;
+
 	static CLWBuffer<RR::ray> GeneratePrimaryRays();
 	static void SetObjs();
+	static void SetSky();
 	static void ShadeKernel(CLWBuffer<float> out_buff, const CLWBuffer<RR::Intersection>& isect, CLWBuffer<float>& col_buff, CLWBuffer<RR::ray>& ray_buff, const int smps, const bool isprim);
 };
