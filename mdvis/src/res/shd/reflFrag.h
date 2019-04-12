@@ -33,7 +33,7 @@ vec3 refract2(vec3 i, vec3 n, float ior) {
     float ni = dot(n, i);
     float k = 1 - ior*ior*(1 - ni*ni);
     if (k < 0) return vec3(0, 0, 0);
-    else return ior*i - (ior*ni + sqrt(k))*n;
+    else return ior*i - (ior*ni - sqrt(k))*n;
 }
 
 vec4 skyColAt(sampler2D sky, vec3 dir) {

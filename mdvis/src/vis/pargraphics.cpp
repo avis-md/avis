@@ -1492,7 +1492,7 @@ void ParGraphics::DrawMenu() {
 	if (!fogUseBgCol) { UI2::Color(expandPos - 147, off, 146, _("Color"), fogCol); off += 17; }
 	specStr = UI2::Slider(expandPos - 147, off, 146, _("Specular"), 0, 1, specStr, "Reflection ratio"); off += 17;
 	reflTr = UI2::Slider(expandPos - 147, off, 146, _("Transparency"), 0, 1, reflTr, "Refraction ratio"); off += 17;
-	if (reflTr > 0) { reflIor = UI2::Slider(expandPos - 147, off, 146, _("IOR"), 0.5f, 5.f, reflIor, "Index of refraction"); off += 17; }
+	if (reflTr > 0) { reflIor = UI2::Slider(expandPos - 147, off, 146, _("IOR"), 0.5f, 2.f, reflIor, "Index of refraction"); off += 17; }
 	static std::string bgTypeNms[] = { "Color", "Ambient", "Sky", "" };
 	static Popups::DropdownItem bgTypeDi(&bgType, bgTypeNms);
 	UI2::Dropdown(expandPos - 148, off, 146, _("Background"), bgTypeDi); off += 17;

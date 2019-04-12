@@ -39,9 +39,22 @@ typedef struct _Ray {
 	float4 d;
 	/// x - ray mask, y - activity flag
 	int2 extra;
-	/// Padding
-	float2 padding;
+	float ior;
+	int trc;
 } Ray;
+
+typedef struct _Intersection {
+	// id of a shape
+	int shapeid;
+	// Primitive index
+	int primid;
+	// Padding elements
+	int padding0;
+	int padding1;
+
+	// uv - hit barycentrics, w - ray distance
+	float4 uvwt;
+} Intersection;
 
 typedef struct _Mat {
 	float4 a;
@@ -49,6 +62,19 @@ typedef struct _Mat {
 	float4 c;
 	float4 d;
 } Mat;
+
+typedef struct _Camera {
+	Mat ip;
+	// Near and far Z
+	float2 zcap;
+} Camera;
+
+typedef struct _Camera2 {
+	Mat ip;
+	float4 pos;
+	float4 fwd;
+	float2 zcap;
+} Camera2;
 
 typedef float4 Quat;
 
@@ -98,33 +124,6 @@ static float3 QuatVec(Quat q, float3 v) {
 	return v + ((uv * q.w) + uuv) * 2.0f;
 }
 
-typedef struct _Intersection {
-	// id of a shape
-	int shapeid;
-	// Primitive index
-	int primid;
-	// Padding elements
-	int padding0;
-	int padding1;
-
-	// uv - hit barycentrics, w - ray distance
-	float4 uvwt;
-} Intersection;
-
-
-typedef struct _Camera {
-	Mat ip;
-	// Near and far Z
-	float2 zcap;
-} Camera;
-
-typedef struct _Camera2 {
-	Mat ip;
-	float4 pos;
-	float4 fwd;
-	float2 zcap;
-} Camera2;
-
 __kernel void GenRays_Pin(
 		__global Ray* rays,
 		__global const Camera* cam,
@@ -155,6 +154,9 @@ __kernel void GenRays_Pin(
 
 		rays[k].extra.x = 0xFFFFFFFF;
 		rays[k].extra.y = 0xFFFFFFFF;
+
+		rays[k].ior = 1;
+		rays[k].trc = 0;
 	}
 }
 
@@ -203,6 +205,9 @@ __kernel void GenRays_Dof(
 
 		rays[k].extra.x = 0xFFFFFFFF;
 		rays[k].extra.y = 0xFFFFFFFF;
+
+		rays[k].ior = 1;
+		rays[k].trc = 0;
 	}
 }
 
@@ -231,6 +236,43 @@ static void GetTans(float3 n, float3* t1, float3* t2) {
 	*t2 = normalize(cross(n, *t1));
 }
 
+static float3 Reflect(float3 dir, float3 nrm) {
+	return dir - 2 * dot(dir, nrm) * nrm;
+}
+
+static float3 Refract(float3 i, float3 n, int* trc, float dt, uint* rnd) {
+    float ni = dot(n, i);
+    float ior = 1 / dt;
+	if (ni < 0) { //going into surface
+		*trc += 1;
+		if (*trc > 1) //ignore rays from inside
+			return i;
+		ni = -ni;
+	}
+	else { //going out of surface
+		*trc -= 1;
+		if (*trc > 0) //ignore rays still inside
+			return i;
+		ior = dt;
+		n = -n;
+	}
+
+    float k = 1 - ior*ior*(1 - ni*ni);
+	float3 rl = Reflect(i, n);
+    if (k < 0)
+		return rl;
+
+	float ca = PI/2;
+	float refl = 0;
+	if (ior > 1) {
+		ca = asin(1/ior);
+		refl = pow((1 - ni) / (1 - cos(ca)), 5);
+	}
+	float3 rr = ior*i - (ior*ni - sqrt(k))*n;
+    if (Randf(rnd) < refl) return rl;
+	else return rr;
+}
+
 static void Beckmann(float3* nrm, float rough, uint* rnd, int s) {
 	if (rough == 0) return;
 	float a = rough * rough;
@@ -238,7 +280,7 @@ static void Beckmann(float3* nrm, float rough, uint* rnd, int s) {
 	float t2 = RandfStra(rnd, s, STRAN + 1) * 2 * PI;
 	float3 n1, n2;
 	GetTans(*nrm, &n1, &n2);
-	*nrm = *nrm * cos(t1) + (n1 * cos(t2) + n2 * sin(t2)) * sin(t1);
+	*nrm = normalize(*nrm * cos(t1) + (n1 * cos(t2) + n2 * sin(t2)) * sin(t1));
 }
 
 static float3 SkyAt(float3 dir, __global float* bg, int bgw, int bgh) {
@@ -277,6 +319,7 @@ __kernel void Shading(//scene
         __global float* accum,
         int smps,
         float specular, float roughness,
+		float transp, float ior,
         __global float* bg,
 		int bgw, int bgh,
         float bgMul, float bgMul2
@@ -320,6 +363,7 @@ __kernel void Shading(//scene
 				norm = normalize(norm);
 
 				float3 diff_col = colors[shape_id].xyz;
+				diff_col = (float3)(1, 1, 1);
 
 				if (ray[k].o.w > 0.01f) {
 					float3 ro = ray[k].o.xyz;
@@ -328,19 +372,25 @@ __kernel void Shading(//scene
 					float frr = 0;//(1 - mat.ior) / (1 + mat.ior);
 					frr *= frr;
 					float fres = frr + (1 - frr)*pow(1 - dot(-rd, norm), 5);
-					//if (Randf(&rnd) < (1 - ((1 - fres) * (1 - mat.specular)))) {
-					if (Randf(&rnd) < (1 - ((1 - fres) * (1 - specular)))) {
+
+					if (transp > 0 && Randf(&rnd) < transp){
+						int trc = ray[k].trc;
+						if (trc > 0)
+							diff_col = (float3)(1, 1, 1);
+						rd = Refract(rd, norm, &trc, ior, &rnd);
+						
+						ray[k].trc = trc;
+					}
+					else if (Randf(&rnd) < (1 - ((1 - fres) * (1 - specular)))) {
 						Beckmann(&norm, roughness, &rnd, rng);
-						//Beckmann(&norm, 0.005f, &rnd, rng);
-						norm = rd - 2 * dot(rd, norm.xyz) / (norm.x*norm.x + norm.y*norm.y + norm.z*norm.z) * norm;
+						rd = Reflect(rd, norm);
 					}
 					else {
 						float3 t1, t2;
 						GetTans(norm, &t1, &t2);
 						float3 rh = RandHemi(&rnd, rng);
-						float3 nrm = t1 * rh.x + t2 * rh.y + norm * rh.z;
+						rd = t1 * rh.x + t2 * rh.y + norm * rh.z;
 						//ocol[k].xyz *= dot(nrm, norm);
-						norm = nrm;
 						//diff_col = (float3)(1, 1, 1);
 					}
 
@@ -351,15 +401,15 @@ __kernel void Shading(//scene
 					ocol[k].w = 1;
 
 
-					ray[k].d.xyz = norm;
-					ray[k].o.xyz = pos.xyz + norm * EPSILON;
+					ray[k].d.xyz = rd;
+					ray[k].o.xyz = pos.xyz + rd * EPSILON;
 				}
 			}
 			else {
 				float3 bgc = SkyAt(normalize(ray[k].d.xyz), bg, bgw, bgh) * bgMul;
 
 				if (col.w < 0.5f) {
-					col.xyz = bgc * bgMul * bgMul2;
+					col.xyz = bgc * bgMul2;
 					//col.xyz = (float3)(1, 1, 1);
 				}
 				else

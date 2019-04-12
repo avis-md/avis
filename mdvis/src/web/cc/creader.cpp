@@ -142,12 +142,12 @@ bool CReader::Read(CScript* scr) {
 							ostrm << "\n" << s << '\n';
 							auto vr = ParseVar(s);
 							if (!vr.name[0]) {
-								Debug::Warning("CReader", "ParseVar error: " + vr.error);
+								_ER("ParseVar error: " + vr.error);
 								fail = true;
 								break;
 							}
 							else if (vr.type != AN_VARTYPE::INT) {
-								Debug::Warning("CReader", "var variable must be of type int!");
+								_ER("var variable must be of type int!");
 								fail = true;
 								break;
 							}

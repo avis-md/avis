@@ -21,7 +21,7 @@ Int2 patchPos = { 0, 0 };
 Int2 patchSize;
 
 uint RayTracer::bgw, RayTracer::bgh;
-int RayTracer::maxRefl = 3;
+int RayTracer::maxRefl = 5;
 
 GLuint RayTracer::resTex = 0;
 CLWBuffer<float> RayTracer::accum;
@@ -371,7 +371,7 @@ void RayTracer::SetObjs() {
 	Tetrahedron tet = Tetrahedron();
 	for (int a = 0; a < 4; a++)
 		tet.Subdivide();
-	tet.ToSphere(0.15f);
+	tet.ToSphere(0.05f);
 
 	Tube tub = Tube(16, 10, 50);
 
@@ -428,7 +428,7 @@ void RayTracer::SetObjs() {
 	matrices.push_back(RR::matrix());
 
 	auto _shp = shapes[0];
-	RR::Shape* shape0 = api->CreateMesh((float*)_shp->vertices.data(), _shp->vertCount * 3, sizeof(Vec3), _shp->triangles.data(), 0, nullptr, _shp->triCount);
+	RR::Shape* shape0 = api->CreateMesh((float*)_shp->vertices.data(), _shp->vertCount, sizeof(Vec3), _shp->triangles.data(), 0, nullptr, _shp->triCount);
 	for (int id = 0; id < mp; ++id) {
 		auto shp = (!id) ? shape0 : api->CreateInstance(shape0);
 		//shp->SetTransform(matrices[id], RR::inverse(matrices[id]));
@@ -485,7 +485,9 @@ void RayTracer::ShadeKernel(CLWBuffer<float> out_buff, const CLWBuffer<RR::Inter
 	karg(accum);
 	karg(smps);
 	karg(ParGraphics::specStr);
-	karg(0.05f);
+	karg(0.f);
+	karg(ParGraphics::reflTr);
+	karg(ParGraphics::reflIor);
 	karg(bg_buf);
 	karg(bgw);
 	karg(bgh);
