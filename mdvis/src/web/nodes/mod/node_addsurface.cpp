@@ -35,26 +35,6 @@ Node_AddSurface::~Node_AddSurface() {
 	glDeleteBuffers(1, &outNrm);
 }
 
-void Node_AddSurface::Execute() {
-	genSz = 0;
-	auto& ir = inputR[0];
-	if (!ir.first) return;
-	auto& cv = ir.getconv();
-	auto& vl = *(double**)ir.getval(ANVAR_ORDER::C);
-	shape[0] = ir.getdim(0);
-	shape[1] = ir.getdim(1);
-	shape[2] = ir.getdim(2);
-	const int sz = shape[0] * shape[1] * shape[2];
-	if (!sz) return;
-	std::lock_guard<std::mutex> locker(lock);
-	data.resize(sz);
-#pragma omp parallel for
-	for (int a = 0; a < sz; a++) {
-		data[a] = (float)vl[a];
-	}
-	cutoff = (float)getval_d(1);
-}
-
 void Node_AddSurface::Update() {
 	if (!!data.size()) {
 		std::lock_guard<std::mutex> locker(lock);
@@ -84,6 +64,50 @@ void Node_AddSurface::DrawScene(RENDER_PASS pass) {
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}
+}
+
+void Node_AddSurface::RayTraceMesh(_Mesh& mesh) {
+	if (!genSz) return;
+	mesh.vertCount = (mesh.triCount = genSz) * 3;
+	mesh.vertices.resize(mesh.vertCount);
+	mesh.normals.resize(mesh.vertCount);
+	mesh.triangles.resize(mesh.vertCount);
+	glBindBuffer(GL_ARRAY_BUFFER, outPos);
+	auto pos = (Vec4*)glMapBufferRange(GL_ARRAY_BUFFER, 0, genSz * sizeof(Vec4), GL_MAP_READ_BIT);
+	for (uint a = 0; a < mesh.vertCount; a++) {
+		mesh.vertices[a] = pos[a] * 5.f;
+	}
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+	glBindBuffer(GL_ARRAY_BUFFER, outNrm);
+	auto nrm = (Vec4*)glMapBufferRange(GL_ARRAY_BUFFER, 0, genSz * sizeof(Vec4), GL_MAP_READ_BIT);
+	for (uint a = 0; a < mesh.vertCount; a++) {
+		mesh.normals[a] = -nrm[a];
+	}
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	for (uint a = 0; a < mesh.vertCount; a++) {
+		mesh.triangles[a] = a;
+	}
+}
+
+void Node_AddSurface::Execute() {
+	genSz = 0;
+	auto& ir = inputR[0];
+	if (!ir.first) return;
+	auto& cv = ir.getconv();
+	auto& vl = *(double**)ir.getval(ANVAR_ORDER::C);
+	shape[0] = ir.getdim(0);
+	shape[1] = ir.getdim(1);
+	shape[2] = ir.getdim(2);
+	const int sz = shape[0] * shape[1] * shape[2];
+	if (!sz) return;
+	std::lock_guard<std::mutex> locker(lock);
+	data.resize(sz);
+#pragma omp parallel for
+	for (int a = 0; a < sz; a++) {
+		data[a] = (float)vl[a];
+	}
+	cutoff = (float)getval_d(1);
 }
 
 void Node_AddSurface::Init() {

@@ -6,11 +6,13 @@ public:
 	INODE_DEF_H
 	Node_AddSurface();
 	~Node_AddSurface();
-	
-	void Execute() override;
 
 	void Update() override;
 	void DrawScene(const RENDER_PASS pass) override;
+
+	void RayTraceMesh(_Mesh& mesh) override;
+	
+	void Execute() override;
 protected:
 	static Shader marchProg, drawProg;
 

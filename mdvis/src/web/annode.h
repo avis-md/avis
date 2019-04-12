@@ -123,6 +123,8 @@ public:
 	virtual void DrawOverlay() {}
 	void DrawToolbar();
 
+	virtual void RayTraceMesh(_Mesh& mesh) {}
+
 	virtual void AddInput();
 	virtual void AddOutput(const CVar& cv = CVar());
 
