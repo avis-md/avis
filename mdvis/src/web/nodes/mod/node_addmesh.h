@@ -6,12 +6,13 @@ public:
 	INODE_DEF_H
 	Node_AddMesh();
 	~Node_AddMesh();
-	
-	void Execute() override;
 
 	void Update() override;
 	void DrawHeader(float& off) override;
 	void DrawScene(const RENDER_PASS pass) override;
+	void RayTraceMesh(_Mesh& mesh) override;
+
+	void Execute() override;
 protected:
 	bool dirty;
 	int tsz;

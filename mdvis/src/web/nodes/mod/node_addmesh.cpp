@@ -35,36 +35,14 @@ Node_AddMesh::~Node_AddMesh() {
 	glDeleteBuffers(2, vbos);
 }
 
-#define RETERR(msg) { std::cerr << msg << std::endl; return; }
-
-void Node_AddMesh::Execute() {
-	auto& ir0 = inputR[0];
-	auto& ir1 = inputR[1];
-	if (!ir0.first || !ir1.first) return;
-	auto sz = ir0.getdim(0);
-	if (sz != ir1.getdim(0)) RETERR("Vertex and normal array lengths are different!");
-	if (ir0.getdim(1) != 3) RETERR("Dimension 1 of vertex array must be 3!");
-	if (ir1.getdim(1) != 3) RETERR("Dimension 1 of normal array must be 3!");
-	tsz = sz;
-	poss.resize(sz * 3);
-	nrms.resize(sz * 3);
-	auto ps = *(double**)ir0.getval(ANVAR_ORDER::C);
-	auto nm = *(double**)ir1.getval(ANVAR_ORDER::C);
-	for (int a = 0; a < sz * 3; a++) {
-		poss[a] = (float)ps[a];
-		nrms[a] = (float)nm[a];
-	}
-	dirty = true;
-}
-
 void Node_AddMesh::Update() {
 	if (dirty) {
 		dirty = false;
 		if (!tsz) return;
 		glBindBuffer(GL_ARRAY_BUFFER, vbos[0]);
-		glBufferData(GL_ARRAY_BUFFER, tsz * sizeof(Vec3), poss.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, tsz * 3 * sizeof(Vec3), poss.data(), GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, vbos[1]);
-		glBufferData(GL_ARRAY_BUFFER, tsz * sizeof(Vec3), nrms.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, tsz * 3 * sizeof(Vec3), nrms.data(), GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 }
@@ -86,11 +64,46 @@ void Node_AddMesh::DrawScene(const RENDER_PASS pass) {
 		glUniformMatrix4fv(shad.Loc(0), 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
 		glUniformMatrix4fv(shad.Loc(1), 1, GL_FALSE, glm::value_ptr(MVP::projection()));
 		glBindVertexArray(vao);
-		glUniform4f(shad.Loc(2), col.r, col.g, col.b, 0.f);
-		glDrawArrays(GL_TRIANGLES, 0, tsz * 3);
+		//glUniform4f(shad.Loc(2), col.r, col.g, col.b, 0.f);
+		//glDrawArrays(GL_TRIANGLES, 0, tsz * 3);
 		glUniform4f(shad.Loc(2), col.r, col.g, col.b, 0.8f);
 		glDrawArrays(GL_TRIANGLES, 0, tsz * 3);
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}
+}
+
+void Node_AddMesh::RayTraceMesh(_Mesh& mesh) {
+	if (!tsz) return;
+	mesh.vertCount = (mesh.triCount = tsz) * 3;
+	mesh.vertices.resize(mesh.vertCount);
+	mesh.normals.resize(mesh.vertCount);
+	mesh.triangles.resize(mesh.vertCount);
+	std::memcpy(mesh.vertices.data(), poss.data(), tsz * 3 * sizeof(Vec3));
+	std::memcpy(mesh.normals.data(), nrms.data(), tsz * 3 * sizeof(Vec3));
+	for (uint a = 0; a < mesh.vertCount; a++) {
+		mesh.triangles[a] = a;
+	}
+}
+
+#define RETERR(msg) { std::cerr << msg << std::endl; return; }
+
+void Node_AddMesh::Execute() {
+	auto& ir0 = inputR[0];
+	auto& ir1 = inputR[1];
+	if (!ir0.first || !ir1.first) return;
+	auto sz = ir0.getdim(0);
+	if (sz != ir1.getdim(0)) RETERR("Vertex and normal array lengths are different!");
+	if (ir0.getdim(1) != 3) RETERR("Dimension 1 of vertex array must be 3!");
+	if (ir1.getdim(1) != 3) RETERR("Dimension 1 of normal array must be 3!");
+	tsz = sz / 3;
+	poss.resize(sz * 3);
+	nrms.resize(sz * 3);
+	auto ps = *(double**)ir0.getval(ANVAR_ORDER::C);
+	auto nm = *(double**)ir1.getval(ANVAR_ORDER::C);
+	for (int a = 0; a < sz * 3; a++) {
+		poss[a] = (float)ps[a];
+		nrms[a] = (float)nm[a];
+	}
+	dirty = true;
 }
