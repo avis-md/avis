@@ -39,9 +39,15 @@ bool PDBx::Read(ParInfo* info) {
 		return false;
 	}
 
+	strm.ignore(std::numeric_limits<std::streamsize>::max());
+	std::streamsize length = strm.gcount();
+	strm.clear();
+	strm.seekg(0, std::ios_base::beg);
+
 	std::vector<std::string> lines;
 	std::string cc;
 	while (std::getline(strm, cc)) {
+		info->progress = ((float)strm.tellg() / length);
 		if (ATM(cc.data())) {
 			lines.push_back(cc);
 		}

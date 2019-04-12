@@ -35,6 +35,7 @@ public:
 	static void SetScene();
 
 	static void Refine();
+	static void RefineAsync();
 	static void Render();
 	static void Denoise();
 
