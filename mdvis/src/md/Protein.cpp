@@ -1,6 +1,6 @@
 #include "Protein.h"
+#include "imp/parloader.h"
 #include "md/parmenu.h"
-#include "md/parloader.h"
 #include "utils/spline.h"
 #include "utils/solidify.h"
 #include "vis/pargraphics.h"

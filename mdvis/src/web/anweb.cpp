@@ -8,7 +8,7 @@
 #include "ui/icons.h"
 #include "ui/ui_ext.h"
 #include "md/particles.h"
-#include "md/parloader.h"
+#include "imp/parloader.h"
 #include "vis/pargraphics.h"
 #include "vis/system.h"
 #include "utils/dialog.h"

@@ -91,6 +91,8 @@ bool RayTracer::Init() {
 		 return false;
 	}
 
+	api->SetOption("bvh.force2level", 1);
+
 	return true;
 }
 
@@ -367,13 +369,20 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 
 void RayTracer::SetObjs() {
 	Debug::Message("RayTracer", "Loading Meshes");
-	const uint mp = Particles::particleSz;
-	const size_t mp2 = Particles::conns.cnt * 2;
+	uint mp = 0;
+	size_t mp2 = 0;
+	for (auto& dl : ParGraphics::drawLists) {
+		mp += dl.second.first;
+	}
+	for (auto& dl : ParGraphics::drawListsB) {
+		mp2 += dl.second.first;
+	}
+	mp2 *= 2;
 
 	Tetrahedron tet = Tetrahedron();
 	for (int a = 0; a < 4; a++)
 		tet.Subdivide();
-	tet.ToSphere(0.03f);
+	tet.ToSphere(1.f);
 
 	Tube tub = Tube(16, 0.015f);
 
@@ -428,33 +437,45 @@ void RayTracer::SetObjs() {
 	matrices.reserve(mpt);
 	imatrices.reserve(mpt);
 	indents.reserve(mpt);
-	for (int id = 0; id < mp; ++id) {
-		if (!ParGraphics::useGradCol || !attr->size()) {
-			colors.push_back(Particles::_colorPallete[Particles::colors[id]]);
+	for (auto& dl : ParGraphics::drawLists) {
+		float scl;
+		if (dl.second.second == 1) scl = 0.00f;
+		else if (dl.second.second == 0x0f) scl = 0.008f;
+		else if (dl.second.second == 2) scl = 0.02f * ParGraphics::radScl;
+		else scl = 0.17f * ParGraphics::radScl;
+
+		for (uint i = 0; i < dl.second.first; i++) {
+			const uint id = dl.first + i;
+			if (!ParGraphics::useGradCol || !attr->size()) {
+				colors.push_back(Particles::_colorPallete[Particles::colors[id]]);
+			}
+			else {
+				auto col = Color::HueBaseCol(Clamp((1 - (float)(*attr)[id]), 0.f, 1.f) * 0.6667f);
+				colors.push_back(col);
+			}
+			matrices.push_back(RR::MatFunc::Translate(Particles::poss[id]) * RR::scale(RR::float3(scl, scl, scl)));
+			imatrices.push_back(RR::scale(RR::float3(1/scl, 1/scl, 1/scl)) * RR::MatFunc::Translate(-Particles::poss[id]));
 		}
-		else {
-			auto col = Color::HueBaseCol(Clamp((1 - (float)(*attr)[id]), 0.f, 1.f) * 0.6667f);
-			colors.push_back(col);
-		}
-		matrices.push_back(RR::MatFunc::Translate(Particles::poss[id]));
-		imatrices.push_back(RR::MatFunc::Translate(-Particles::poss[id]));
 	}
 	indents.resize(mp, 0);
 
-	for (int id = 0; id < Particles::conns.cnt; ++id) {
-		auto ii = Particles::conns.ids[id];
-		auto p0 = (Vec3)Particles::poss[ii.x];
-		auto p1 = (Vec3)Particles::poss[ii.y];
-		auto dp = p1 - p0;
-		auto len = glm::length(dp) / 2;
-		Mat4x4 mat2 = QuatFunc::ToMatrix(QuatFunc::LookAt(dp)) * glm::scale(Vec3(1, 1, len));
+	for (auto& dl : ParGraphics::drawListsB) {
+		for (uint i = 0; i < dl.second.first; i++) {
+			const uint id = dl.first + i;
+			auto ii = Particles::conns.ids[id];
+			auto p0 = (Vec3)Particles::poss[ii.x];
+			auto p1 = (Vec3)Particles::poss[ii.y];
+			auto dp = p1 - p0;
+			auto len = glm::length(dp) / 2;
+			Mat4x4 mat2 = QuatFunc::ToMatrix(QuatFunc::LookAt(dp)) * glm::scale(Vec3(1, 1, len));
 
-		colors.push_back(colors[ii.x]);
-		matrices.push_back(RR::MatFunc::Glm2RR(glm::translate(p0) * mat2));
-		imatrices.push_back(RR::inverse(matrices.back()));
-		colors.push_back(colors[ii.y]);
-		matrices.push_back(RR::MatFunc::Glm2RR(glm::translate((p0 + p1) * 0.5f) * mat2));
-		imatrices.push_back(RR::inverse(matrices.back()));
+			colors.push_back(colors[ii.x]);
+			matrices.push_back(RR::MatFunc::Glm2RR(glm::translate(p0) * mat2));
+			imatrices.push_back(RR::inverse(matrices.back()));
+			colors.push_back(colors[ii.y]);
+			matrices.push_back(RR::MatFunc::Glm2RR(glm::translate((p0 + p1) * 0.5f) * mat2));
+			imatrices.push_back(RR::inverse(matrices.back()));
+		}
 	}
 	indents.resize(mp + mp2, _indents[1]);
 

@@ -75,6 +75,8 @@ struct ParInfo {
 	}* secStructs; //OPT
 	uint16_t secStructNum;
 	double bounds[6];
+	int densityNum[3]; //OPT
+	double* density; //OPT
 	TrjInfo trajectory; //OPT
 	char error[100]; //OPT
 };

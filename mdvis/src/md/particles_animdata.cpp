@@ -1,5 +1,5 @@
 #include "particles.h"
-#include "parloader.h"
+#include "imp/parloader.h"
 #include "web/anweb.h"
 
 uint Particles::animdata::maxFramesInMem = 20;

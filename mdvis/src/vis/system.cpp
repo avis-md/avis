@@ -4,7 +4,7 @@
 #include "changelog.h"
 #include "preferences.h"
 #include "md/parmenu.h"
-#include "md/parloader.h"
+#include "imp/parloader.h"
 #include "web/anweb.h"
 #include "ui/icons.h"
 #include "ui/help.h"

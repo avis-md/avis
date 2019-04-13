@@ -2,7 +2,7 @@
 #include "md/particles.h"
 #include "vis/pargraphics.h"
 #include "lj256.h"
-#include "md/parloader.h"
+#include "imp/parloader.h"
 #include "ui/icons.h"
 
 LiveSyncer::LIVE_STATUS LiveSyncer::status = LiveSyncer::MENU;

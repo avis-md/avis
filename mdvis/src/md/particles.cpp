@@ -1,6 +1,6 @@
 #include "particles.h"
-#include "parloader.h"
-#include "GenericSSV.h"
+#include "imp/parloader.h"
+#include "imp/GenericSSV.h"
 #include "Protein.h"
 #include "web/anweb.h"
 #include "utils/glext.h"

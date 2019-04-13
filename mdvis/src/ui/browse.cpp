@@ -1,7 +1,7 @@
 #include "browse.h"
 #include "ui/ui_ext.h"
 #include "ui/icons.h"
-#include "md/parloader.h"
+#include "imp/parloader.h"
 
 Browse::MODE Browse::mode = Browse::MODE::NONE;
 BrowseTarget* Browse::system;

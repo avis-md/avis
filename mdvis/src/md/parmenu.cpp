@@ -1,6 +1,6 @@
 #include "parmenu.h"
 #include "md/Protein.h"
-#include "md/parloader.h"
+#include "imp/parloader.h"
 #include "ocl/raytracer.h"
 #include "ui/help.h"
 #include "ui/icons.h"

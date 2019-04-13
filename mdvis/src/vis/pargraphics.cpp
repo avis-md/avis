@@ -3,7 +3,7 @@
 #include "pargraphics.h"
 #include "md/parmenu.h"
 #include "md/Protein.h"
-#include "md/parloader.h"
+#include "imp/parloader.h"
 #include "vis/system.h"
 #include "vis/selection.h"
 #include "vis/renderer.h"
