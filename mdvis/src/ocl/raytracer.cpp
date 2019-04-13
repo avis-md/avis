@@ -368,13 +368,14 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 void RayTracer::SetObjs() {
 	Debug::Message("RayTracer", "Loading Meshes");
 	const uint mp = Particles::particleSz;
+	const size_t mp2 = Particles::conns.cnt * 2;
 
 	Tetrahedron tet = Tetrahedron();
 	for (int a = 0; a < 4; a++)
 		tet.Subdivide();
-	tet.ToSphere(0.05f);
+	tet.ToSphere(0.03f);
 
-	Tube tub = Tube(16, 10, 50);
+	Tube tub = Tube(16, 0.015f);
 
 	std::vector<_Mesh*> shapes = { &tet, &tub };
 	std::vector<int> _indents;
@@ -392,6 +393,8 @@ void RayTracer::SetObjs() {
 		}
 	}
 
+	size_t mpt = mp + mp2 + s2s;
+
 	std::vector<double>* attr = 0;
 	if (ParGraphics::useGradCol) {
 		attr = &Particles::attrs[ParGraphics::gradColParam]->Get(Particles::anim.currentFrame);
@@ -401,7 +404,7 @@ void RayTracer::SetObjs() {
 	std::vector<float> normals;
 	std::vector<int> inds;
 	std::vector<Vec4> colors;
-	std::vector<int> indents(mp, 0);
+	std::vector<int> indents;
 	std::vector<RR::matrix> matrices;
 	std::vector<RR::matrix> imatrices;
 
@@ -421,9 +424,10 @@ void RayTracer::SetObjs() {
 	}
 
 	Debug::Message("RayTracer", "Loading Atoms");
-	colors.reserve(mp);
-	matrices.reserve(mp);
-	imatrices.reserve(mp);
+	colors.reserve(mpt);
+	matrices.reserve(mpt);
+	imatrices.reserve(mpt);
+	indents.reserve(mpt);
 	for (int id = 0; id < mp; ++id) {
 		if (!ParGraphics::useGradCol || !attr->size()) {
 			colors.push_back(Particles::_colorPallete[Particles::colors[id]]);
@@ -432,14 +436,27 @@ void RayTracer::SetObjs() {
 			auto col = Color::HueBaseCol(Clamp((1 - (float)(*attr)[id]), 0.f, 1.f) * 0.6667f);
 			colors.push_back(col);
 		}
-
 		matrices.push_back(RR::MatFunc::Translate(Particles::poss[id]));
 		imatrices.push_back(RR::MatFunc::Translate(-Particles::poss[id]));
 	}
+	indents.resize(mp, 0);
 
-	colors.push_back(white());
-	indents.push_back(_indents[1]);
-	matrices.push_back(RR::matrix());
+	for (int id = 0; id < Particles::conns.cnt; ++id) {
+		auto ii = Particles::conns.ids[id];
+		auto p0 = (Vec3)Particles::poss[ii.x];
+		auto p1 = (Vec3)Particles::poss[ii.y];
+		auto dp = p1 - p0;
+		auto len = glm::length(dp) / 2;
+		Mat4x4 mat2 = QuatFunc::ToMatrix(QuatFunc::LookAt(dp)) * glm::scale(Vec3(1, 1, len));
+
+		colors.push_back(colors[ii.x]);
+		matrices.push_back(RR::MatFunc::Glm2RR(glm::translate(p0) * mat2));
+		imatrices.push_back(RR::inverse(matrices.back()));
+		colors.push_back(colors[ii.y]);
+		matrices.push_back(RR::MatFunc::Glm2RR(glm::translate((p0 + p1) * 0.5f) * mat2));
+		imatrices.push_back(RR::inverse(matrices.back()));
+	}
+	indents.resize(mp + mp2, _indents[1]);
 
 	for (auto& s : shapes2) {
 		colors.push_back(white());
@@ -448,36 +465,47 @@ void RayTracer::SetObjs() {
 	}
 
 	Debug::Message("RayTracer", "Creating Shapes");
+	
+	size_t shpId = 0;
 	auto _shp = shapes[0];
 	RR::Shape* shape0 = api->CreateMesh((float*)_shp->vertices.data(), _shp->vertCount, sizeof(Vec3), _shp->triangles.data(), 0, nullptr, _shp->triCount);
-	/*for (int id = 0; id < mp; ++id) {
+	for (int id = 0; id < mp; ++id) {
 		auto shp = (!id) ? shape0 : api->CreateInstance(shape0);
-		shp->SetTransform(matrices[id], imatrices[id]);
-		shp->SetId(id);
+		shp->SetTransform(matrices[shpId], imatrices[shpId]);
+		shp->SetId(shpId++);
 		api->AttachShapeUnchecked(shp);
-	}*/
+	}
 
-	/*_shp = shapes[1];
-	shape0 = api->CreateMesh((float*)_shp->vertices.data(), _shp->vertCount * 3, sizeof(Vec3), _shp->triangles.data(), 0, nullptr, _shp->triCount);
-	shape0->SetId(mp);
-	api->AttachShape(shape0);*/
+	_shp = shapes[1];
+	shape0 = api->CreateMesh((float*)_shp->vertices.data(), _shp->vertCount, sizeof(Vec3), _shp->triangles.data(), 0, nullptr, _shp->triCount);
+	for (int id = 0; id < mp2; id++) {
+		auto shp = (!id) ? shape0 : api->CreateInstance(shape0);
+		shp->SetTransform(matrices[shpId], imatrices[shpId]);
+		shp->SetId(shpId++);
+		api->AttachShapeUnchecked(shp);
+	}
 
-	int a = 1;
 	for (auto& s : shapes2) {
 		auto shp = api->CreateMesh((float*)s.vertices.data(), s.vertCount, sizeof(Vec3), s.triangles.data(), 0, nullptr, s.triCount);
-		shp->SetId(mp + (a++));
+		shp->SetId(shpId++);
 		api->AttachShapeUnchecked(shp);
 	}
 
 	Debug::Message("RayTracer", "Generating Structure");
-	api->Commit();
+	try {
+		api->Commit();
+	}
+	catch (std::runtime_error& err) {
+		 Debug::Warning("RayTracer::CommitRR", err.what());
+		 return;
+	}
 
 	g_positions = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, verts.size(), verts.data());
 	g_normals = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, normals.size(), normals.data());
 	g_indices = CLWBuffer<int>::Create(context, CL_MEM_READ_ONLY, inds.size(), inds.data());
-	g_colors = CLWBuffer<Vec4>::Create(context, CL_MEM_READ_ONLY, mp + 1 + s2s, colors.data());
-	g_indent = CLWBuffer<int>::Create(context, CL_MEM_READ_ONLY, mp + 1 + s2s, indents.data());
-	g_matrices = CLWBuffer<RR::matrix>::Create(context, CL_MEM_READ_ONLY, mp + 1 + s2s, matrices.data());
+	g_colors = CLWBuffer<Vec4>::Create(context, CL_MEM_READ_ONLY, mpt, colors.data());
+	g_indent = CLWBuffer<int>::Create(context, CL_MEM_READ_ONLY, mpt, indents.data());
+	g_matrices = CLWBuffer<RR::matrix>::Create(context, CL_MEM_READ_ONLY, mpt, matrices.data());
 }
 
 void RayTracer::SetSky() {

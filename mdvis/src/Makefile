@@ -74,7 +74,7 @@ HEADERS += ui/popups.h ui/icons.h ui/help.h ui/ui_ext.h ui/localizer.h ui/browse
 HEADERS += vis/pargraphics.h vis/system.h vis/shadows.h vis/renderer.h vis/cubemarcher.h vis/selection.h vis/changelog.h vis/preferences.h
 HEADERS += utils/avi.h utils/color.h utils/effects.h utils/fft.h utils/ifaddrs.h utils/net.h utils/plot.h utils/ptrext.h utils/random.h utils/rect.h utils/spline.h utils/stream.h utils/strext.h utils/xml.h utils/dialog.h utils/dylib.h utils/runcmd.h utils/ssh.h utils/tinyfiledialogs.h utils/shader.h utils/glmext.h utils/refcnt.h utils/uniquecaller.h
 #HEADERS += live/livesyncer.h live/lj256.h
-HEADERS += ocl/kernel.h ocl/raytracer.h ocl/denoise.h
+HEADERS += ocl/raytracer.h ocl/denoise.h
 HEADERS += res/resdata.h
 HEADERSX = xdrfile/xdrfile.h xdrfile/xdrfile_trr.h xdrfile/xdrfile_xtc.h
 

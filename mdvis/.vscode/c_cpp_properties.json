@@ -56,7 +56,9 @@
                 "/usr/local/include/python3.7m/"
             ],
             "defines": [
-                "PLATFORM_LNX"
+                "PLATFORM_LNX",
+                "USE_OPENCL",
+                "RR_EMBED_KERNELS"
             ],
             "compilerPath": "/usr/bin/g++",
             "cStandard": "c11",

@@ -11,5 +11,6 @@ public:
 	static Vec3 ToEuler(const Quat&);
 	static Mat4x4 ToMatrix(const Quat&);
 	static Quat FromAxisAngle(Vec3, float);
+	static Quat LookAt(const Vec3&);
 	static Quat LookAt(const Vec3&, const Vec3&);
 };

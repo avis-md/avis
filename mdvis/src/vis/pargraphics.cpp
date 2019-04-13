@@ -209,7 +209,7 @@ float ParGraphics::Eff::DrawMenu(float off) {
 
 	UI2::Toggle(expandPos - 147, off, 145, _("Depth Of Field"), useDof);
 	if (useDof) {
-		dofDepth = UI2::Slider(expandPos - 147, off + 17, 146, _("Distance"), 0.001f, 30, dofDepth);
+		dofDepth = UI2::Slider(expandPos - 147, off + 17, 146, _("Distance"), 0.001f, 5, dofDepth);
 		dofAper = UI2::Slider(expandPos - 147, off + 17 * 2, 146, _("Aperture"), 0.01f, 10, dofAper);
 		dofIter = UI2::SliderI(expandPos - 147, off + 17 * 3, 146, _("Iterations"), 1, 10, dofIter);
 

@@ -49,6 +49,17 @@ Quat QuatFunc::FromAxisAngle(Vec3 axis, float angle) {
 	return glm::normalize(Quat(w, x, y, z));
 }
 
+Quat QuatFunc::LookAt(const Vec3& tarr) {
+	const Vec3 fwd = Vec3(0, 0, 1);
+	Vec3 tar = glm::normalize(tarr);
+	float angle = rad2deg*acos(Clamp(dot(tar, fwd), -1.f, 1.f));
+	if (angle < 0.0001f) return Quat(1, 0, 0, 0);
+	Vec3 axis = cross(tar, fwd);
+	Vec3 tr = cross(axis, fwd);
+	if (dot(tr, tar) < 0) angle *= -1;
+	return FromAxisAngle(axis, angle);
+}
+
 //https://gamedev.stackexchange.com/questions/53129/quaternion-look-at-with-up-vector
 Quat QuatFunc::LookAt(const Vec3& tarr, const Vec3& up) {
 	Vec3 tar = glm::normalize(tarr);

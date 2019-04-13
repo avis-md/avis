@@ -7,7 +7,7 @@ public:
 	std::vector<Vec3> normals;
 	std::vector<int> triangles;
 
-	uint vertCount, triCount;
+	uint vertCount = 0, triCount = 0;
 };
 
 class Mesh : public _Mesh, public RefCnt {

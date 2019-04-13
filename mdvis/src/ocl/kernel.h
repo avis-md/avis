@@ -4,8 +4,6 @@ namespace ocl {
 	const char raykernel[] = R"(
 #define EPSILON 0.0001f
 #define PI 3.14159f
-#define STRAN 4
-
 
 static uint Rand(uint rnd) {
 	rnd ^= rnd << 13;
@@ -21,13 +19,14 @@ static float Randf(uint* r) {
 
 static float RandfStra(uint* r, int i, int n) {
 	float rnd = Randf(r);
+	if (n <= 1) return rnd;
 	i %= n;
 	return (i + rnd) / n;
 }
 
-static float3 RandHemi(uint* r, int s) {
-	float r1 = sqrt(RandfStra(r, s, STRAN));
-	float r2 = RandfStra(r, s, STRAN + 1) * 2 * PI;
+static float3 RandHemi(uint* r, int s, int stran) {
+	float r1 = sqrt(RandfStra(r, s, stran));
+	float r2 = RandfStra(r, s, stran + 1) * 2 * PI;
 	return (float3)(r1 * cos(r2), r1 * sin(r2), sqrt(max(1 - r1, 0.0f)));
 }
 
@@ -268,16 +267,19 @@ static float3 Refract(float3 i, float3 n, int* trc, float dt, uint* rnd) {
 		ca = asin(1/ior);
 		refl = pow((1 - ni) / (1 - cos(ca)), 5);
 	}
+	else {
+		refl = pow(1 - ni, 5);
+	}
 	float3 rr = ior*i - (ior*ni - sqrt(k))*n;
     if (Randf(rnd) < refl) return rl;
 	else return rr;
 }
 
-static void Beckmann(float3* nrm, float rough, uint* rnd, int s) {
+static void Beckmann(float3* nrm, float rough, uint* rnd, int s, int stran) {
 	if (rough == 0) return;
 	float a = rough * rough;
-	float t1 = atan(sqrt(-a * log(1 - RandfStra(rnd, s, STRAN))));
-	float t2 = RandfStra(rnd, s, STRAN + 1) * 2 * PI;
+	float t1 = atan(sqrt(-a * log(1 - RandfStra(rnd, s, stran))));
+	float t2 = RandfStra(rnd, s, stran + 1) * 2 * PI;
 	float3 n1, n2;
 	GetTans(*nrm, &n1, &n2);
 	*nrm = normalize(*nrm * cos(t1) + (n1 * cos(t2) + n2 * sin(t2)) * sin(t1));
@@ -336,6 +338,10 @@ __kernel void Shading(//scene
 		int prim_id = isect[k].primid;
 
 		uint rnd = (uint)(k + rng);
+		int stran = 4;
+		//if (smps <= 1)
+			stran = 0;
+
 		if (weight > 0) {
 			ocol[k].w = 0;
 			if (smps == 1) {
@@ -363,7 +369,6 @@ __kernel void Shading(//scene
 				norm = normalize(norm);
 
 				float3 diff_col = colors[shape_id].xyz;
-				diff_col = (float3)(1, 1, 1);
 
 				if (ray[k].o.w > 0.01f) {
 					float3 ro = ray[k].o.xyz;
@@ -373,7 +378,7 @@ __kernel void Shading(//scene
 					frr *= frr;
 					float fres = frr + (1 - frr)*pow(1 - dot(-rd, norm), 5);
 
-					if (transp > 0 && Randf(&rnd) < transp){
+					if (transp > 0 && Randf(&rnd) < transp) {
 						int trc = ray[k].trc;
 						if (trc > 0)
 							diff_col = (float3)(1, 1, 1);
@@ -382,13 +387,13 @@ __kernel void Shading(//scene
 						ray[k].trc = trc;
 					}
 					else if (Randf(&rnd) < (1 - ((1 - fres) * (1 - specular)))) {
-						Beckmann(&norm, roughness, &rnd, rng);
+						Beckmann(&norm, roughness, &rnd, rng, stran);
 						rd = Reflect(rd, norm);
 					}
 					else {
 						float3 t1, t2;
 						GetTans(norm, &t1, &t2);
-						float3 rh = RandHemi(&rnd, rng);
+						float3 rh = RandHemi(&rnd, rng, stran);
 						rd = t1 * rh.x + t2 * rh.y + norm * rh.z;
 						//ocol[k].xyz *= dot(nrm, norm);
 						//diff_col = (float3)(1, 1, 1);
