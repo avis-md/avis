@@ -23,13 +23,19 @@ Install dependancies:
 
 `pip3.7 install numpy`
 
-Build submodules:
+Build submodules (Please consult their corresponding READMEs for build instructions):
 
 - libgwavi
 - radeonrays
 - oidn
 
-Please consult their corresponding READMEs for build instructions.
+Build AViS
+
+`mkdir mdvis/build`
+
+`cd mdvis/src`
+
+`make`
 
 ### MacOS
 
