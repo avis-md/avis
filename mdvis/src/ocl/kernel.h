@@ -433,6 +433,6 @@ __kernel void Shading(//scene
 		out[k * 4 + 3] = 1;
 	}
 }
-)";
-const int raykernel_sz = sizeof(raykernel);
+	)";
+	const int raykernel_sz = sizeof(raykernel);
 }

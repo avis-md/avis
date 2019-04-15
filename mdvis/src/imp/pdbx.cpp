@@ -33,11 +33,14 @@ _F(FDx, == '.');
 _F(FQx, == '?');
 
 bool PDBx::Read(ParInfo* info) {
-	std::ifstream strm(info->path, std::ios::binary);
-	if (!strm.is_open()) {
+	std::ifstream fstrm(info->path, std::ios::binary);
+
+	if (!fstrm.is_open()) {
 		SETERR("Cannot open file!");
 		return false;
 	}
+
+	std::istream strm(fstrm.rdbuf());
 
 	strm.ignore(std::numeric_limits<std::streamsize>::max());
 	std::streamsize length = strm.gcount();

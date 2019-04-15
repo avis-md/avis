@@ -4,6 +4,7 @@
 #include "vis/pargraphics.h"
 #include "web/anweb.h"
 #include "denoise.h"
+#include "clext.h"
 
 RadeonRays::matrix RadeonRays::MatFunc::Glm2RR(const glm::mat4& mat) {
 	auto m = glm::transpose(mat);
@@ -38,15 +39,23 @@ int RayTracer::rendBounce = 0;
 RR::Event* RayTracer::rendEvent;
 CLWEvent RayTracer::rendEvent2;
 
+cl_ulong rt_maxMem = 0;
+
 #define FAIL(txt) Debug::Warning("RayTracer", txt);\
 return false
+
+#define CLWBuffer_New(tp, sz, vl) CLWBuffer<tp>::Create(context, CL_MEM_READ_ONLY, sz, vl);\
+Debug::Message("RayTracer", "Creating buffer of size " + std::to_string(sz * sizeof(tp)));\
+if (sz * sizeof(tp) > rt_maxMem) Debug::Warning("RayTracer", \
+	"Buffer size is too big! (require " + std::to_string(sz * sizeof(tp)) + ", max is " + std::to_string(rt_maxMem) + ")");
+
 bool RayTracer::Init() {
 	std::vector<CLWPlatform> platforms;
 	try {
 		CLWPlatform::CreateAllPlatforms(platforms);
 	}
 	catch (CLWException& e) {
-		Debug::Warning("RayTracer", e.what());
+		Debug::Warning("RayTracer", e.what() + clErrorString(e.errcode_));
 	}
 
 	if (platforms.size() == 0)
@@ -62,7 +71,7 @@ bool RayTracer::Init() {
 					break;
 				}
 				catch (CLWException& e) {
-					Debug::Warning("RayTracer", e.what());
+					Debug::Warning("RayTracer", e.what() + clErrorString(e.errcode_));
 				}
 			}
 		}
@@ -77,7 +86,7 @@ bool RayTracer::Init() {
 		program = CLWProgram::CreateFromSource(ocl::raykernel, ocl::raykernel_sz, kBuildopts, context);
 	}
 	catch (CLWException& e) {
-		FAIL(e.what());
+		FAIL(e.what() + clErrorString(e.errcode_));
 	}
 
 	auto id = context.GetDevice(0).GetID();
@@ -92,7 +101,11 @@ bool RayTracer::Init() {
 	}
 
 	api->SetOption("bvh.force2level", 1);
-
+	cl_ulong rt_globMem;
+	clGetDeviceInfo(context.GetDevice(0), CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(cl_ulong), &rt_globMem, NULL);
+	Debug::Message("RayTracer", "Global memory size is " + std::to_string(rt_globMem / 1000000) + "M");
+	clGetDeviceInfo(context.GetDevice(0), CL_DEVICE_MAX_MEM_ALLOC_SIZE, sizeof(cl_ulong), &rt_maxMem, NULL);
+	Debug::Message("RayTracer", "Max alloc size is " + std::to_string(rt_maxMem / 1000000) + "M");
 	return true;
 }
 
@@ -129,6 +142,18 @@ void RayTracer::SetScene() {
 		Debug::Message("System", "Initializing RayTracer");
 		Init();
 	}
+	glGenTextures(1, &resTex);
+	glBindTexture(GL_TEXTURE_2D, resTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, Display::width, Display::height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	SetTexParams<>();
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	rendStep = REND_STEP::WAIT_SCENE;
+	std::thread(_SetScene).detach();
+	//_SetScene();
+}
+
+void RayTracer::_SetScene() {
 	patchSize = { Display::width, Display::height };
 
 	const int wh = patchSize.x * patchSize.y;
@@ -136,12 +161,7 @@ void RayTracer::SetScene() {
 
 	SetSky();
 	SetObjs();
-
-	glGenTextures(1, &resTex);
-	glBindTexture(GL_TEXTURE_2D, resTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, Display::width, Display::height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-	SetTexParams<>();
-	glBindTexture(GL_TEXTURE_2D, 0);
+	rendStep = REND_STEP::IDLE;
 }
 
 void RayTracer::Refine() {
@@ -198,6 +218,9 @@ void RayTracer::RefineAsync() {
 	}
 
 	switch (rendStep) {
+		case REND_STEP::WAIT_SCENE: {
+			return;
+		}
 		case REND_STEP::IDLE: {
 			if (samples >= maxSamples) {
 				if (samples == maxSamples) {
@@ -316,6 +339,8 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 
 		CLWBuffer<Camera> cam_buf = CLWBuffer<Camera>::Create(context, CL_MEM_READ_ONLY, 1, &cam);
 		
+		float scl = std::pow(2.f, ParGraphics::rotScale);
+
 		auto kernel = program.GetKernel("GenRays_Dof");
 		
 		int i = 0;
@@ -323,8 +348,8 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 		karg(cam_buf);
 		karg(Display::width);
 		karg(Display::height);
-		karg(ParGraphics::Eff::dofDepth);
-		karg(ParGraphics::Eff::dofAper / 20);
+		karg(ParGraphics::Eff::dofDepth / scl);
+		karg(ParGraphics::Eff::dofAper / 20 / scl);
 		karg((cl_int)milliseconds());
 
 		// Run generation kernel
@@ -354,9 +379,15 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 		karg(patch);
 
 		// Run generation kernel
-		size_t gs[] = { patchSize.x, patchSize.y };
+		size_t gs[] = { (patchSize.x / 8) * 8, (patchSize.y / 8) * 8 };
 		size_t ls[] = { 8, 8 };
-		rendEvent2 = context.Launch2D(0, gs, ls, kernel);
+		try {
+			rendEvent2 = context.Launch2D(0, gs, ls, kernel);
+		}
+		catch (CLWException& e) {
+			Debug::Warning("RayTracer", e.what() + clErrorString(e.errcode_));
+			return ray_buf;
+		}
 		context.Flush(0);
 
 		return ray_buf;
@@ -368,7 +399,7 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 #include "asset/tube.h"
 
 void RayTracer::SetObjs() {
-	Debug::Message("RayTracer", "Loading Meshes");
+	VisSystem::SetMsg("Loading Meshes");
 	uint mp = 0;
 	size_t mp2 = 0;
 	for (auto& dl : ParGraphics::drawLists) {
@@ -432,7 +463,7 @@ void RayTracer::SetObjs() {
 		inds.resize(vsz);
 	}
 
-	Debug::Message("RayTracer", "Loading Atoms");
+	VisSystem::SetMsg("Loading Atoms");
 	colors.reserve(mpt);
 	matrices.reserve(mpt);
 	imatrices.reserve(mpt);
@@ -453,14 +484,19 @@ void RayTracer::SetObjs() {
 				auto col = Color::HueBaseCol(Clamp((1 - (float)(*attr)[id]), 0.f, 1.f) * 0.6667f);
 				colors.push_back(col);
 			}
-			matrices.push_back(RR::MatFunc::Translate(Particles::poss[id]) * RR::scale(RR::float3(scl, scl, scl)));
+			matrices.push_back(RR::MatFunc::Translate(Particles::poss[id]) * RR::scale(RR::float3(scl, scl, scl) * Particles::radii[id]));
 			imatrices.push_back(RR::scale(RR::float3(1/scl, 1/scl, 1/scl)) * RR::MatFunc::Translate(-Particles::poss[id]));
 		}
 	}
 	indents.resize(mp, 0);
 
+	VisSystem::SetMsg("Loading Bonds");
 	for (auto& dl : ParGraphics::drawListsB) {
-		for (uint i = 0; i < dl.second.first; i++) {
+		colors.resize(mp + dl.second.first*2);
+		matrices.resize(mp + dl.second.first*2);
+		imatrices.resize(mp + dl.second.first*2);
+#pragma omp parallel for
+		for (int i = 0; i < (int)dl.second.first; i++) {
 			const uint id = dl.first + i;
 			auto ii = Particles::conns.ids[id];
 			auto p0 = (Vec3)Particles::poss[ii.x];
@@ -469,12 +505,12 @@ void RayTracer::SetObjs() {
 			auto len = glm::length(dp) / 2;
 			Mat4x4 mat2 = QuatFunc::ToMatrix(QuatFunc::LookAt(dp)) * glm::scale(Vec3(1, 1, len));
 
-			colors.push_back(colors[ii.x]);
-			matrices.push_back(RR::MatFunc::Glm2RR(glm::translate(p0) * mat2));
-			imatrices.push_back(RR::inverse(matrices.back()));
-			colors.push_back(colors[ii.y]);
-			matrices.push_back(RR::MatFunc::Glm2RR(glm::translate((p0 + p1) * 0.5f) * mat2));
-			imatrices.push_back(RR::inverse(matrices.back()));
+			colors[mp + i * 2] = colors[ii.x];
+			matrices[mp + i * 2] = RR::MatFunc::Glm2RR(glm::translate(p0) * mat2);
+			imatrices[mp + i * 2] = RR::inverse(matrices[mp + i * 2]);
+			colors[mp + i * 2 + 1] = colors[ii.y];
+			matrices[mp + i * 2 + 1] = RR::MatFunc::Glm2RR(glm::translate((p0 + p1) * 0.5f) * mat2);
+			imatrices[mp + i * 2 + 1] = RR::inverse(matrices[mp + i * 2 + 1]);
 		}
 	}
 	indents.resize(mp + mp2, _indents[1]);
@@ -485,7 +521,7 @@ void RayTracer::SetObjs() {
 		indents.push_back(_indents[2]);
 	}
 
-	Debug::Message("RayTracer", "Creating Shapes");
+	VisSystem::SetMsg("Creating Shapes");
 	
 	size_t shpId = 0;
 	auto _shp = shapes[0];
@@ -512,7 +548,7 @@ void RayTracer::SetObjs() {
 		api->AttachShapeUnchecked(shp);
 	}
 
-	Debug::Message("RayTracer", "Generating Structure");
+	VisSystem::SetMsg("Generating Ray Structure");
 	try {
 		api->Commit();
 	}
@@ -521,16 +557,16 @@ void RayTracer::SetObjs() {
 		 return;
 	}
 
-	g_positions = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, verts.size(), verts.data());
-	g_normals = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, normals.size(), normals.data());
-	g_indices = CLWBuffer<int>::Create(context, CL_MEM_READ_ONLY, inds.size(), inds.data());
-	g_colors = CLWBuffer<Vec4>::Create(context, CL_MEM_READ_ONLY, mpt, colors.data());
-	g_indent = CLWBuffer<int>::Create(context, CL_MEM_READ_ONLY, mpt, indents.data());
-	g_matrices = CLWBuffer<RR::matrix>::Create(context, CL_MEM_READ_ONLY, mpt, matrices.data());
+	g_positions = CLWBuffer_New(float, verts.size(), verts.data());
+	g_normals = CLWBuffer_New(float, normals.size(), normals.data());
+	g_indices = CLWBuffer_New(int, inds.size(), inds.data());
+	g_colors = CLWBuffer_New(Vec4, mpt, colors.data());
+	g_indent = CLWBuffer_New(int, mpt, indents.data());
+	g_matrices = CLWBuffer_New(RR::matrix, mpt, matrices.data());
 }
 
 void RayTracer::SetSky() {
-	Debug::Message("RayTracer", "Loading HDRI");
+	VisSystem::SetMsg("Loading Background");
 	auto d = hdr::read_hdr((IO::path + "backgrounds/" + ParGraphics::reflNms[ParGraphics::reflId] + "/specular.hdr").c_str(), &bgw, &bgh);
 	std::vector<float> dv(bgw * bgh * 3);
 	hdr::to_float(d, bgw, bgh, dv.data());
@@ -572,8 +608,14 @@ void RayTracer::ShadeKernel(CLWBuffer<float> out_buff, const CLWBuffer<RR::Inter
 #undef karg
 	
 	// Run generation kernel
-	size_t gs[] = { patchSize.x, patchSize.y };
+	size_t gs[] = { (patchSize.x / 8) * 8, (patchSize.y / 8) * 8 };
 	size_t ls[] = { 8, 8 };
-	rendEvent2 = context.Launch2D(0, gs, ls, kernel);
+	try {
+		rendEvent2 = context.Launch2D(0, gs, ls, kernel);
+	}
+	catch (CLWException& e) {
+		Debug::Warning("RayTracer", e.what() + clErrorString(e.errcode_));
+		return;
+	}
 	context.Flush(0);
 }

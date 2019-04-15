@@ -267,6 +267,7 @@
     <ClCompile Include="src\imp\dlpoly.cpp" />
     <ClCompile Include="src\imp\GenericSSV.cpp" />
     <ClCompile Include="src\imp\lammps.cpp" />
+    <ClCompile Include="src\md\density.cpp" />
     <ClCompile Include="src\md\particles_animdata.cpp" />
     <ClCompile Include="src\md\particles_attrdata.cpp" />
     <ClCompile Include="src\imp\pdb.cpp" />
@@ -336,6 +337,7 @@
     <ClCompile Include="src\web\ft\freader.cpp" />
     <ClCompile Include="src\web\ft\fscript.cpp" />
     <ClCompile Include="src\web\nodes\conv\node_adjlist.cpp" />
+    <ClCompile Include="src\web\nodes\get\node_densdata.cpp" />
     <ClCompile Include="src\web\nodes\get\node_getattribute.cpp" />
     <ClCompile Include="src\web\nodes\get\node_info.cpp" />
     <ClCompile Include="src\web\nodes\get\node_inputs.cpp" />
@@ -399,6 +401,8 @@
     <ClInclude Include="src\libjpeg\jversion.h" />
     <ClInclude Include="src\imp\GenericSSV.h" />
     <ClInclude Include="src\imp\pdbx.h" />
+    <ClInclude Include="src\md\density.h" />
+    <ClInclude Include="src\ocl\clext.h" />
     <ClInclude Include="src\ocl\denoise.h" />
     <ClInclude Include="src\precompile.h" />
     <ClInclude Include="src\res\bnddata.h" />
@@ -518,6 +522,7 @@
     <ClInclude Include="src\web\ft\freader.h" />
     <ClInclude Include="src\web\ft\fscript.h" />
     <ClInclude Include="src\web\nodes\conv\node_adjlist.h" />
+    <ClInclude Include="src\web\nodes\get\node_densdata.h" />
     <ClInclude Include="src\web\nodes\get\node_getattribute.h" />
     <ClInclude Include="src\web\nodes\get\node_info.h" />
     <ClInclude Include="src\web\nodes\get\node_inputs.h" />

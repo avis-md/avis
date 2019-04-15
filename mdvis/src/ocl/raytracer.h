@@ -23,6 +23,7 @@ namespace RadeonRays {
 
 class RayTracer {
 	enum class REND_STEP {
+		WAIT_SCENE,
 		IDLE,
 		WAIT_PRIMARY,
 		WAIT_INTERSECT,
@@ -33,6 +34,7 @@ public:
 	
 	static void Clear();
 	static void SetScene();
+	static void _SetScene();
 
 	static void Refine();
 	static void RefineAsync();
