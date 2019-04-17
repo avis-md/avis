@@ -1,0 +1,89 @@
+#General
+- Improved UI drawing
+  - UI text now uses much less memory when drawing
+  - UI text now supports shadows
+  - UI shapes now render slightly faster
+
+#Analysis
+- Removed plotter node background
+- Plotter node output can now be exported as csv files
+
+#Visualization
+- Periodic images can now be visualized
+- New effects:
+  - FXAA: Smoothes edges without supersampling
+- SSAO samples are now jittered (better result)
+
+#----Previous changes----
+
+#Version 0.1
+
+- Exposed more config options in Preferences
+
+- Analysis framework is reworked.
+- Analysis nodes now run in parallel when possible
+- Nodes now have classed in addition to the global format
+- New nodes:
+  - Draw Mesh: draw arbitrary triangles
+
+- Added axis
+- Support for multi-layer transparency
+
+#Version 0.04
+
+- Tooltips are now supported
+- UI background can now be blurred
+- Preferences can now be edited from Options->Preferences
+
+- Bumped the Python version to 3.7
+- Node outputs now show their values as tooltips when hovered
+- New nodes:
+  - Accumulate: combine values over all frames to a list
+- Fixed single digit file names crashing the loader
+
+#Version 0.03
+
+- Significant memory usage improvement for attributes
+- More settings for rendering (transparency etc)
+- Custom loading screens can now be put in the res/bg/ folder
+
+- New nodes:
+  - Draw Surface: equal-value surface from 3d density array
+  - Do while: returns execution to target node until condition
+- New plot option: Density
+- New effects:
+  - Bloom
+  - Depth of Field
+- Bug fixes:
+  - System node -> System node connection crash during Run All
+  - Bounding box visibility not reflected immediately
+  - Gradient color not reflected immediately
+
+#Version 0.02b
+
+- The remote file browser is now faster
+- Garbage collector is improved, now (hopefully) crashes less
+- New plot option: Lines (accumulate)
+- Bug fixes:
+  - Multiple text boxes activating at the same time
+  - Loading bonds not showing the loading screen
+  - Multiple plot nodes with different settings
+  - Crash when mouse-over atoms during Run All
+  - Internal node to internal node connections crash on Run All
+
+#Version 0.02
+
+- Bounding box can now be animated
+- Export to GIF / AVI now supported
+- Information tab now shows info for selected atoms
+- Scripts now load in a separate thread
+- Utility to offset periodic boundary
+- Generic SSV format introduced
+- Attributes can now be saved / loaded
+- Improved control for text box
+- UI is now faster when scene is static
+- Some new command line options
+
+#Version 0.01
+
+- Hello, world!

@@ -1,0 +1,22 @@
+#include <iostream>
+#include <vector>
+
+//in count 3
+double* positions = 0;
+
+//out count
+double* xcoords = 0;
+
+//var
+int count = 0;
+
+std::vector<double> _xcoords;
+
+//entry
+void Execute() {
+	_xcoords.resize(count);
+	for (int a = 0; a < count; a++) {
+		_xcoords[a] = positions[a*3];
+	}
+	xcoords = &_xcoords[0];
+}
