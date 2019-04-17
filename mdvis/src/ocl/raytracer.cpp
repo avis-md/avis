@@ -4,7 +4,9 @@
 #include "vis/pargraphics.h"
 #include "web/anweb.h"
 #include "denoise.h"
-#include "clext.h"
+//#include "clext.h"
+
+#define clErrorString(a) std::string(" ???")
 
 RadeonRays::matrix RadeonRays::MatFunc::Glm2RR(const glm::mat4& mat) {
 	auto m = glm::transpose(mat);
