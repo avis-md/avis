@@ -6,37 +6,51 @@ As AViS uses multiple submodules, please clone with the `--recursive` option.
 
 ## Building from source
 
-### Windows
+###Prerequisites
 
-### Linux
+- CMake
+- Python 3.7 with NumPy
+- Microsoft Visual Studio 2017 (Windows)
+- g++, make (MacOS / Linux)
 
-Requirements:
-
-- apt
-- make
-- pkg-config
-- Python 3.7
-
-Install dependancies:
-
-`sudo apt install libfreetype6-dev libglew-dev libglfw3-dev libglm-dev libjpeg-turbo8-dev libssh2-1-dev`
-
-`pip3.7 install numpy`
-
-Build submodules (Please consult their corresponding READMEs for build instructions):
+### Build submodules
 
 - libgwavi
 - radeonrays
 - oidn
 
+Please consult their corresponding READMEs for build instructions.
+
+### Windows
+
+### Linux
+
+Install dependancies:
+
+`sudo apt install libfreetype6-dev libglew-dev libglfw3-dev libglm-dev libjpeg-turbo8-dev libssh2-1-dev`
+
 Build AViS
 
-`mkdir mdvis/build`
+`mkdir build && cd build`
 
-`cd mdvis/src`
+`cmake ..`
 
 `make`
 
 ### MacOS
 
 
+
+## Building the Documentation
+
+### Prerequisites
+
+- Python with sphinx, sphinx\_rtd\_theme
+
+### HTML
+
+`cd docs`
+
+`make html`
+
+The documentation is in the \_build/html folder.
