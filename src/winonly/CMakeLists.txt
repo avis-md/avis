@@ -1,12 +1,12 @@
-set(DIR src/core)
+set(DIR src/winonly)
 
 set(SOURCES
 	${SOURCES}
-	${DIR}/
 	PARENT_SCOPE
 )
 set(HEADERS
 	${HEADERS}
-	${DIR}/
+	${DIR}/minimalwin.h
+	${DIR}/unistd.h
 	PARENT_SCOPE
 )

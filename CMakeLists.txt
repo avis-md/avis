@@ -14,13 +14,17 @@ find_package(OpenCL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(LibSSH2 REQUIRED)
+if (UNIX)
+    find_package(LibSSH2UNIX REQUIRED)
+else()
+    find_package(Libssh2 REQUIRED)
+endif()
 find_package(JPEG REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(Threads REQUIRED)
 
 if (MSVC)
-	add_definitions(-DPLATFORM_WIN)
+	add_definitions(-DPLATFORM_WIN -DWIN32)
 elseif (LINUX)
 	add_definitions(-DPLATFORM_LNX)
 elseif (APPLE)
@@ -33,8 +37,12 @@ add_definitions(-DUSE_OPENCL -DRR_EMBED_KERNELS)
 
 SET(CMAKE_CXX_FLAGS "-std=c++11")
 
+if (MSVC)
+    SET(CMAKE_CXX_FLAGS "/EHsc")
+endif()
+
 set(INC_DIRS
-	"${PROJECT_SOURCE_DIR}/src"
+	${PROJECT_SOURCE_DIR}/src
 	${PYTHON_INCLUDE_DIR}
 	${PYTHON_NUMPY_INCLUDE_DIR}
 	${GLFW3_INCLUDE_DIR}
@@ -50,37 +58,67 @@ set(INC_DIRS
 	${PROJECT_SOURCE_DIR}/libgwavi/inc
 	${PROJECT_SOURCE_DIR}/oidn/include
 )
-set(LINK_DIRS
-	${PROJECT_SOURCE_DIR}/radeonrays/build/bin
-	${PROJECT_SOURCE_DIR}/radeonrays/build/Calc
-	${PROJECT_SOURCE_DIR}/radeonrays/build/CLW
-	${PROJECT_SOURCE_DIR}/libgwavi/lib
-	${PROJECT_SOURCE_DIR}/oidn/build
-)
+if (MSVC)
+    set(INC_DIRS
+        ${INC_DIRS}
+        ${PROJECT_SOURCE_DIR}/src/winonly
+    )
+endif()
+
+if (MSVC)
+    set(LINK_DIRS
+        ${PROJECT_SOURCE_DIR}/radeonrays/RadeonRays
+        ${PROJECT_SOURCE_DIR}/radeonrays/Calc
+        ${PROJECT_SOURCE_DIR}/radeonrays/CLW
+        ${PROJECT_SOURCE_DIR}/libgwavi/build
+        ${PROJECT_SOURCE_DIR}/oidn/build
+    )
+else()
+    set(LINK_DIRS
+        ${PROJECT_SOURCE_DIR}/radeonrays/build/bin
+        ${PROJECT_SOURCE_DIR}/radeonrays/build/Calc
+        ${PROJECT_SOURCE_DIR}/radeonrays/build/CLW
+        ${PROJECT_SOURCE_DIR}/libgwavi/build/
+        ${PROJECT_SOURCE_DIR}/oidn/build
+    )
+endif()
+
 set(LIBS
 	${PYTHON_LIBRARIES}
 	${OPENGL_gl_LIBRARY}
 	glfw
 	${GLM_LIBRARY}
 	${GLEW_LIBRARY}
-	${LIBSSH2_LIBRARY}
 	${JPEG_LIBRARY}
 	${FREETYPE_LIBRARIES}
 	${OpenCL_LIBRARIES}
-	dl
-	rt
-	pthread
-	util
 	RadeonRays
 	Calc
 	CLW
 	gwavi
 	OpenImageDenoise
 )
+if(MSVC)
+    set(LIBS
+        ${LIBS}
+        Libssh2::libssh2
+    )
+else()
+    set(LIBS
+        ${LIBS}
+        ${LIBSSH2_LIBRARY}
+        dl
+        pthread
+        rt
+        util
+    )
+endif()
 
 if (MSVC)
 	set(DLLS
-		
+        ${PROJECT_SOURCE_DIR}/radeonrays/bin/Release/RadeonRays.dll
+        ${PROJECT_SOURCE_DIR}/oidn/build/Release/OpenImageDenoise.dll
+        ${PROJECT_SOURCE_DIR}/oidn/build/Release/tbb.dll
 	)
 elseif (LINUX)
 	set(DLLS
@@ -123,6 +161,9 @@ add_subdirectory("src/web/nodes/mod")
 add_subdirectory("src/web/nodes/misc")
 add_subdirectory("src/vis")
 add_subdirectory("src/xdrfile")
+if (MSVC)
+    add_subdirectory("src/winonly")
+endif()
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
 
