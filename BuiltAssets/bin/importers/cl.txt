@@ -1,2 +1,0 @@
-cl /nologo /c -Od /EHsc NAME.cpp
-link /nologo /dll NAME.obj
