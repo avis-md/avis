@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
 project (avis)
 
+if (UNIX AND NOT APPLE)
+	set(LINUX TRUE)
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 find_package(PythonLibs 3.7 REQUIRED)
@@ -15,7 +19,17 @@ find_package(JPEG REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(Threads REQUIRED)
 
-add_definitions(-DPLATFORM_LNX -DUSE_OPENCL -DRR_EMBED_KERNELS)
+if (MSVC)
+	add_definitions(-DPLATFORM_WIN)
+elseif (LINUX)
+	add_definitions(-DPLATFORM_LNX)
+elseif (APPLE)
+	add_definitions(-DPLATFORM_OSX)
+else()
+	message(FATAL_ERROR "Platform not supported!")
+endif()
+
+add_definitions(-DUSE_OPENCL -DRR_EMBED_KERNELS)
 
 SET(CMAKE_CXX_FLAGS "-std=c++11")
 
@@ -64,10 +78,20 @@ set(LIBS
 	OpenImageDenoise
 )
 
-set(DLLS
-	"${PROJECT_SOURCE_DIR}/radeonrays/build/bin/libRadeonRays.so.2.0"
-	"${PROJECT_SOURCE_DIR}/oidn/build/libOpenImageDenoise.so.0"
-)
+if (MSVC)
+	set(DLLS
+		
+	)
+elseif (LINUX)
+	set(DLLS
+		"${PROJECT_SOURCE_DIR}/radeonrays/build/bin/libRadeonRays.so.2.0"
+		"${PROJECT_SOURCE_DIR}/oidn/build/libOpenImageDenoise.so.0"
+	)
+else()
+	set(DLLS
+		
+	)
+endif()
 
 set(SOURCES)
 set(HEADERS)
