@@ -124,7 +124,8 @@ public:
 	};
 
 	static uint residueListSz;
-	static uint particleSz, _particleSz;
+	static uint particleSz;
+	static uint maxParticleSz;
 
 	static std::string cfgFile, trjFile;
 

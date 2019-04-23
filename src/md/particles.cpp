@@ -61,7 +61,8 @@ void Particles::SpecificColor::Revert() {
 
 
 uint Particles::residueListSz;
-uint Particles::particleSz, Particles::_particleSz;
+uint Particles::particleSz;
+uint Particles::maxParticleSz;
 
 std::string Particles::cfgFile, Particles::trjFile;
 
@@ -225,8 +226,8 @@ void Particles::UpdateBufs() {
 		ps[a] = (Vec3)poss[a];
 	}
 
-	if (_particleSz != particleSz) {
-		_particleSz = particleSz;
+	if (maxParticleSz < particleSz) {
+		maxParticleSz = particleSz;
 		SetGLBuf(posBuffer, &ps[0], particleSz, GL_DYNAMIC_DRAW);
 		SetGLBuf(colIdBuffer, &colors[0], particleSz);
 		SetGLBuf(radBuffer, &radii[0], particleSz);
@@ -327,7 +328,9 @@ void Particles::SetFrame(uint frm) {
 		if (anim.currentFrame != ~0U) {
 			anim.Seek(frm);
 			if (anim.status[frm] != animdata::FRAME_STATUS::LOADED) return;
-			poss = &anim.poss[anim.currentFrame][0];
+			auto& aps = anim.poss[anim.currentFrame];
+			particleSz = aps.size();
+			poss = &aps[0];
 			SetGLSubBuf(posBuffer, (double*)&poss[0], particleSz * 3);
 			for (auto& a : attrs) {
 				if (a->timed) {
