@@ -8,6 +8,7 @@
 #endif
 
 bool PyReader::initd = false;
+PyObject* PyReader::mainModule;
 
 void PyReader::Init() {
 	initd = true;
@@ -30,6 +31,9 @@ void PyReader::Init() {
 #endif
 	try {
 		Py_Initialize();
+		wchar_t arg = 0;
+		wchar_t* args[] = { &arg };
+		PySys_SetArgvEx(1, args, 0);
 		PyObject *sys_path = PySys_GetObject("path");
 		auto path = AnWeb::nodesPath;
 		auto ps = PyUnicode_FromString(path.c_str());
@@ -38,6 +42,27 @@ void PyReader::Init() {
 
 		if (!!PyArr::Init())
 			return;
+
+		auto plt = PyImport_ImportModule("matplotlib.pyplot");
+		if (plt) {
+			Debug::Message("PyReader", "Redirecting pyplot output...");
+			PyRun_SimpleString(R"(
+import matplotlib.pyplot as plt
+
+__cpath_prefix__ = ""
+__plt_figcount__ = 0
+
+def __myshowplot__():
+	global __cpath_prefix__, __plt_figcount__
+	p = (str(__cpath_prefix__, 'utf-8') + "_figure_{}.png").format(plt.gcf().number)
+	print("saving figure to: " + p)
+	plt.savefig(p, bbox_inches='tight', pad_inches=0)
+	__plt_figcount__ += 1;
+
+plt.show = __myshowplot__
+)");
+		}
+		mainModule = PyImport_AddModule("__main__");
 
 		AnWeb::hasPy = true;
 		//PyScript::InitLog();
@@ -280,9 +305,12 @@ bool PyReader::ParseVar(std::istream& strm, std::string& ln, PyScript* scr, bool
 	}
 	std::getline(strm, ln);
 	ln = string_trim(ln);
-	if (self && ln.substr(0, 5) != "self.") {
-		Debug::Warning("PyReader::ParseType", "`self.` expected before variable!");
-		return false;
+	if (self){
+		if (ln.substr(0, 5) != "self.") {
+			Debug::Warning("PyReader::ParseType", "`self.` expected before variable!");
+			return false;
+		}
+		ln = ln.substr(5);
 	}
 	v.name = AnWeb::ConvertName((_v.name
 		= ln.substr(0, find_first_not_name_char(ln.c_str()))));

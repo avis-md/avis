@@ -23,7 +23,17 @@ PyNode::PyNode(pPyScript_I script) : AnNode(script) {
 }
 
 void PyNode::Update() {
-
+	auto scr = (PyScript_I*)script.get();
+	if (scr->figCount < 0) {
+		scr->figCount *= -1;
+		scr->figures.resize(scr->figCount);
+		showFigs.resize(scr->figCount, 0);
+		auto p = AnWeb::nodesPath + _scr->path;
+		auto cpath = p.substr(0, p.find_last_of('/') + 1) + "__pycache__/" + _scr->name;
+		for (long i = 0; i < scr->figCount; i++) {
+			scr->figures[i] = Texture(cpath + "_figure_" + std::to_string(i+1) + ".png");
+		}
+	}
 }
 
 void PyNode::PreExecute() {
@@ -86,7 +96,22 @@ void PyNode::WriteFrame(int f) {
 
 void PyNode::RemoveFrames() {
 	AnNode::RemoveFrames();
-	
+}
+
+void PyNode::DrawFooter(float& off) {
+	int i = 0;
+	for (auto& fig : ((PyScript_I*)script.get())->figures) {
+		auto& sf = showFigs[i];
+		if (Engine::Button(pos.x + 2, off, 16, 16, (!!sf) ? Icons::expand : Icons::collapse, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE)
+			sf = !sf;
+		UI::Label(pos.x + 20, off, 12, "Figure " + std::to_string(++i), white());
+		off += 17;
+		if (!!sf) {
+			auto h = ((width - 4) * fig.height) / fig.width;
+			UI::Texture(pos.x + 2, off, width - 4, h, fig, white());
+			off += h + 2;
+		}
+	}
 }
 
 void PyNode::Reconn() {

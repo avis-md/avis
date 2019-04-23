@@ -53,4 +53,7 @@ public:
 	};
 
 	std::vector<OutVal> outputVs;
+
+	std::vector<Texture> figures;
+	int figCount;
 };

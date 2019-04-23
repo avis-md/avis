@@ -1,4 +1,5 @@
 #include "web/anweb.h"
+#include "web/py/pyreader.h"
 #include "pyarr.h"
 
 #define NO_PYLOG
@@ -109,6 +110,10 @@ void PyScript_I::GetOutput(int i, int* val) {
 }
 
 void PyScript_I::Execute() {
+	auto p = AnWeb::nodesPath + parent->path;
+	auto cpath = p.substr(0, p.find_last_of('/') + 1) + "__pycache__/" + parent->name;
+	PyObject_SetAttrString(PyReader::mainModule, "__cpath_prefix__", PyBytes_FromString(cpath.c_str()));
+	PyObject_SetAttrString(PyReader::mainModule, "__plt_figcount__", PyLong_FromLong(0));
 	auto res = parent->isSingleton ?
 		PyObject_CallObject(_parent->func, nullptr) :
 		PyObject_CallMethod(_instance, _parent->funcNm.c_str(), 0);
@@ -117,6 +122,8 @@ void PyScript_I::Execute() {
 		PyErr_Print();
 		throw "\x01";
 	}
+
+	figCount = -PyLong_AsLong(PyObject_GetAttrString(PyReader::mainModule, "__plt_figcount__"));
 }
 
 float PyScript_I::GetProgress() {
