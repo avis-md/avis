@@ -46,5 +46,7 @@ set(HEADERS
 	${DIR}/shader.h
 	${DIR}/glmext.h
 	${DIR}/uniquecaller.h
+	${DIR}/linkedlist.h
+	${DIR}/linkedlist.inl
 	PARENT_SCOPE
 )

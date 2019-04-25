@@ -246,6 +246,7 @@ int main(int argc, char **argv) {
 #ifndef NOCATCH
 	try {
 #endif
+
 		Time::startMillis = milliseconds();
 		Debug::suppress = 1;
 		for (auto a = 1; a < argc; ++a) {

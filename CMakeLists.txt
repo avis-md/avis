@@ -35,7 +35,7 @@ endif()
 
 add_definitions(-DUSE_OPENCL -DRR_EMBED_KERNELS)
 
-SET(CMAKE_CXX_FLAGS "-std=c++11")
+SET(CMAKE_CXX_FLAGS "-std=c++11 -g")
 
 if (MSVC)
     SET(CMAKE_CXX_FLAGS "/EHsc")
