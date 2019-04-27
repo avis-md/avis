@@ -31,9 +31,11 @@ class RayTracer {
 	};
 public:
 	static bool Init();
+	static void Cleanup();
 	
 	static void Clear();
 	static void SetScene();
+	static void UnsetScene();
 	static void _SetScene();
 
 	static void Refine();
@@ -50,6 +52,9 @@ public:
 	static CLWBuffer<float> accum;
 	static int samples, maxSamples;
 private:
+	static std::thread renderThread;
+	static bool kill;
+
 	static CLWContext context;
 	static CLWProgram program;
 	static CLWCommandQueue queue;
@@ -60,8 +65,11 @@ private:
 	static RR::Event* rendEvent;
 	static CLWEvent rendEvent2;
 
-	static CLWBuffer<RR::ray> GeneratePrimaryRays();
+	static std::vector<Vec4> pixels;
+
 	static void SetObjs();
 	static void SetSky();
+	static void _Refine();
+	static CLWBuffer<RR::ray> GeneratePrimaryRays();
 	static void ShadeKernel(CLWBuffer<float> out_buff, const CLWBuffer<RR::Intersection>& isect, CLWBuffer<float>& col_buff, CLWBuffer<RR::ray>& ray_buff, const int smps, const bool isprim);
 };

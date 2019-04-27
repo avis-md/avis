@@ -4,6 +4,7 @@
 #include "vis/pargraphics.h"
 #include "web/anweb.h"
 #include "denoise.h"
+#include "unloader.h"
 //#include "clext.h"
 
 #define clErrorString(a) std::string(" ???")
@@ -31,6 +32,9 @@ GLuint RayTracer::resTex = 0;
 CLWBuffer<float> RayTracer::accum;
 int RayTracer::samples = 0, RayTracer::maxSamples = 2000;
 
+std::thread RayTracer::renderThread;
+bool RayTracer::kill;
+
 CLWContext RayTracer::context;
 CLWProgram RayTracer::program;
 CLWCommandQueue RayTracer::queue;
@@ -40,6 +44,8 @@ RayTracer::REND_STEP RayTracer::rendStep = RayTracer::REND_STEP::IDLE;
 int RayTracer::rendBounce = 0;
 RR::Event* RayTracer::rendEvent;
 CLWEvent RayTracer::rendEvent2;
+
+std::vector<Vec4> RayTracer::pixels;
 
 cl_ulong rt_maxMem = 0;
 
@@ -108,7 +114,13 @@ bool RayTracer::Init() {
 	Debug::Message("RayTracer", "Global memory size is " + std::to_string(rt_globMem / 1000000) + "M");
 	clGetDeviceInfo(context.GetDevice(0), CL_DEVICE_MAX_MEM_ALLOC_SIZE, sizeof(cl_ulong), &rt_maxMem, NULL);
 	Debug::Message("RayTracer", "Max alloc size is " + std::to_string(rt_maxMem / 1000000) + "M");
+	
+	Unloader::Reg(&Cleanup);
 	return true;
+}
+
+void RayTracer::Cleanup() {
+	UnsetScene();
 }
 
 CLWBuffer<float> bg_buf;
@@ -144,27 +156,26 @@ void RayTracer::SetScene() {
 		Debug::Message("System", "Initializing RayTracer");
 		Init();
 	}
+	pixels.resize(Display::width * Display::height * 4);
 	glGenTextures(1, &resTex);
 	glBindTexture(GL_TEXTURE_2D, resTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, Display::width, Display::height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, Display::width, Display::height, 0, GL_RGBA, GL_FLOAT, pixels.data());
 	SetTexParams<>();
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	rendStep = REND_STEP::WAIT_SCENE;
-	std::thread(_SetScene).detach();
-	//_SetScene();
+	
+	renderThread = std::thread(_Refine);
 }
 
-void RayTracer::_SetScene() {
-	patchSize = { Display::width, Display::height };
-
-	const int wh = patchSize.x * patchSize.y;
-	accum = CLWBuffer<float>::Create(context, CL_MEM_READ_WRITE, 3 * wh);
-
-	SetSky();
-	SetObjs();
-	rendStep = REND_STEP::IDLE;
+void RayTracer::UnsetScene() {
+	kill = true;
+	if (renderThread.joinable()) {
+		renderThread.join();
+	}
 }
+
+void RayTracer::_SetScene() {}
 
 void RayTracer::Refine() {
 	const int wh = patchSize.x * patchSize.y;//Display::width * Display::height;
@@ -317,84 +328,6 @@ void RayTracer::Denoise() {
 
 void RayTracer::DrawMenu() {
 
-}
-
-CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
-#define karg(var) kernel.SetArg(i++, var)
-	CLWBuffer<RR::ray> ray_buf = CLWBuffer<RR::ray>::Create(context, CL_MEM_READ_WRITE, Display::width * Display::height);
-
-	if (ParGraphics::Eff::useDof) {
-		struct Camera {
-			Mat4x4 ip = glm::inverse(ParGraphics::lastMVP);
-			Vec4 pos;
-			Vec4 fwd;
-			Vec2 zcap = Vec2(0.001f, 1000.f);
-		} cam;
-		cam.pos = cam.ip * Vec4(0, 0, -1, 1);
-		cam.pos /= cam.pos.w;
-		cam.fwd = cam.ip * Vec4(0, 0, 1, 1);
-		cam.fwd /= cam.fwd.w;
-		cam.fwd -= cam.pos;
-		cam.fwd.w = 0;
-		cam.fwd = glm::normalize(cam.fwd);
-		cam.ip = glm::transpose(cam.ip);
-
-		CLWBuffer<Camera> cam_buf = CLWBuffer<Camera>::Create(context, CL_MEM_READ_ONLY, 1, &cam);
-		
-		float scl = std::pow(2.f, ParGraphics::rotScale);
-
-		auto kernel = program.GetKernel("GenRays_Dof");
-		
-		int i = 0;
-		karg(ray_buf);
-		karg(cam_buf);
-		karg(Display::width);
-		karg(Display::height);
-		karg(ParGraphics::Eff::dofDepth / scl);
-		karg(ParGraphics::Eff::dofAper / 20 / scl);
-		karg((cl_int)milliseconds());
-
-		// Run generation kernel
-		size_t gs[] = { static_cast<size_t>((Display::width + 7) / 8 * 8), static_cast<size_t>((Display::height + 7) / 8 * 8) };
-		size_t ls[] = { 8, 8 };
-		rendEvent2 = context.Launch2D(0, gs, ls, kernel);
-		context.Flush(0);
-
-		return ray_buf;
-	}
-	else {
-		struct Camera {
-			Mat4x4 ip = glm::transpose(glm::inverse(ParGraphics::lastMVP));
-			Vec2 zcap = Vec2(0.001f, 1000.f);
-		} cam;
-		cl_float4 patch = { patchPos.x, patchPos.y, patchSize.x, patchSize.y };
-		
-		CLWBuffer<Camera> cam_buf = CLWBuffer<Camera>::Create(context, CL_MEM_READ_ONLY, 1, &cam);
-		
-		auto kernel = program.GetKernel("GenRays_Pin");
-		
-		int i = 0;
-		karg(ray_buf);
-		karg(cam_buf);
-		karg(Display::width);
-		karg(Display::height);
-		karg(patch);
-
-		// Run generation kernel
-		size_t gs[] = { (patchSize.x / 8) * 8, (patchSize.y / 8) * 8 };
-		size_t ls[] = { 8, 8 };
-		try {
-			rendEvent2 = context.Launch2D(0, gs, ls, kernel);
-		}
-		catch (CLWException& e) {
-			Debug::Warning("RayTracer", e.what() + clErrorString(e.errcode_));
-			return ray_buf;
-		}
-		context.Flush(0);
-
-		return ray_buf;
-	}
-#undef karg
 }
 
 #include "asset/tetrahedron.h"
@@ -574,6 +507,137 @@ void RayTracer::SetSky() {
 	hdr::to_float(d, bgw, bgh, dv.data());
 	bg_buf = CLWBuffer<float>::Create(context, CL_MEM_READ_ONLY, 3 * bgw * bgh, dv.data());
 	delete[](d);
+}
+
+CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
+#define karg(var) kernel.SetArg(i++, var)
+	CLWBuffer<RR::ray> ray_buf = CLWBuffer<RR::ray>::Create(context, CL_MEM_READ_WRITE, Display::width * Display::height);
+
+	if (ParGraphics::Eff::useDof) {
+		struct Camera {
+			Mat4x4 ip = glm::inverse(ParGraphics::lastMVP);
+			Vec4 pos;
+			Vec4 fwd;
+			Vec2 zcap = Vec2(0.001f, 1000.f);
+		} cam;
+		cam.pos = cam.ip * Vec4(0, 0, -1, 1);
+		cam.pos /= cam.pos.w;
+		cam.fwd = cam.ip * Vec4(0, 0, 1, 1);
+		cam.fwd /= cam.fwd.w;
+		cam.fwd -= cam.pos;
+		cam.fwd.w = 0;
+		cam.fwd = glm::normalize(cam.fwd);
+		cam.ip = glm::transpose(cam.ip);
+
+		CLWBuffer<Camera> cam_buf = CLWBuffer<Camera>::Create(context, CL_MEM_READ_ONLY, 1, &cam);
+		
+		float scl = std::pow(2.f, ParGraphics::rotScale);
+
+		auto kernel = program.GetKernel("GenRays_Dof");
+		
+		int i = 0;
+		karg(ray_buf);
+		karg(cam_buf);
+		karg(Display::width);
+		karg(Display::height);
+		karg(ParGraphics::Eff::dofDepth / scl);
+		karg(ParGraphics::Eff::dofAper / 20 / scl);
+		karg((cl_int)milliseconds());
+
+		// Run generation kernel
+		size_t gs[] = { static_cast<size_t>((Display::width + 7) / 8 * 8), static_cast<size_t>((Display::height + 7) / 8 * 8) };
+		size_t ls[] = { 8, 8 };
+		rendEvent2 = context.Launch2D(0, gs, ls, kernel);
+		context.Flush(0);
+
+		return ray_buf;
+	}
+	else {
+		struct Camera {
+			Mat4x4 ip = glm::transpose(glm::inverse(ParGraphics::lastMVP));
+			Vec2 zcap = Vec2(0.001f, 1000.f);
+		} cam;
+		cl_float4 patch = { patchPos.x, patchPos.y, patchSize.x, patchSize.y };
+		
+		CLWBuffer<Camera> cam_buf = CLWBuffer<Camera>::Create(context, CL_MEM_READ_ONLY, 1, &cam);
+		
+		auto kernel = program.GetKernel("GenRays_Pin");
+		
+		int i = 0;
+		karg(ray_buf);
+		karg(cam_buf);
+		karg(Display::width);
+		karg(Display::height);
+		karg(patch);
+
+		// Run generation kernel
+		size_t gs[] = { (patchSize.x / 8) * 8, (patchSize.y / 8) * 8 };
+		size_t ls[] = { 8, 8 };
+		try {
+			rendEvent2 = context.Launch2D(0, gs, ls, kernel);
+		}
+		catch (CLWException& e) {
+			Debug::Warning("RayTracer", e.what() + clErrorString(e.errcode_));
+			return ray_buf;
+		}
+		context.Flush(0);
+
+		return ray_buf;
+	}
+#undef karg
+}
+
+void RayTracer::_Refine() {
+	patchSize = { Display::width, Display::height };
+
+	const int wh = patchSize.x * patchSize.y;
+	accum = CLWBuffer<float>::Create(context, CL_MEM_READ_WRITE, 3 * wh);
+
+	SetSky();
+	SetObjs();
+	rendStep = REND_STEP::IDLE;
+
+	const int wh = patchSize.x * patchSize.y;//Display::width * Display::height;
+	const int dwh = Display::width * Display::height;
+	while (!kill) {
+		if (Scene::dirty) {
+			samples = 0;
+		}
+		else if (samples >= maxSamples) {
+			if (samples == maxSamples) {
+				Denoise();
+				samples++;
+				//VisSystem::SetMsg("RayTracing Complete.");
+			}
+			return;
+		}
+		//VisSystem::SetMsg("Tracing sample " + std::to_string(samples));
+		ray_buffer_cl = GeneratePrimaryRays();
+		rendEvent2.Wait();
+		isect_buffer_cl = CLWBuffer<RR::Intersection>::Create(context, CL_MEM_READ_WRITE, wh);
+		isect_buffer = CreateFromOpenClBuffer(api, isect_buffer_cl);
+		for (rendBounce = 0; rendBounce < maxRefl; rendBounce++) {
+			ray_buffer = CreateFromOpenClBuffer(api, ray_buffer_cl);
+			api->QueryIntersection(ray_buffer, wh, isect_buffer, nullptr, &rendEvent);
+			rendEvent->Wait();
+			if (!rendBounce) {
+				out_buff = CLWBuffer<float>::Create(context, CL_MEM_WRITE_ONLY, 4 * wh);
+				col_buff = CLWBuffer<float>::Create(context, CL_MEM_READ_WRITE, 4 * wh);
+			}
+			ShadeKernel(out_buff, isect_buffer_cl, col_buff, ray_buffer_cl, std::max(samples, 1), !rendBounce);
+			rendEvent2.Wait();
+			delete(ray_buffer);
+		}
+
+		++samples;
+		void* ps = clEnqueueMapBuffer(queue, (cl_mem)out_buff, true, CL_MAP_READ, 0, 4 * wh * sizeof(float), 0, NULL, NULL, NULL);
+		
+		std::memcpy(pixels.data(), ps, 4 * wh * sizeof(float));
+		
+		clEnqueueUnmapMemObject(queue, (cl_mem)out_buff, ps, 0, NULL, NULL);
+		delete(isect_buffer);
+		//if (samples == maxSamples) VisSystem::SetMsg("Denoising...");
+	}
 }
 
 void RayTracer::ShadeKernel(CLWBuffer<float> out_buff, const CLWBuffer<RR::Intersection>& isect, CLWBuffer<float>& col_buff, CLWBuffer<RR::ray>& ray_buff, const int smps, const bool isprim)
