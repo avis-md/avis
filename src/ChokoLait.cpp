@@ -179,7 +179,7 @@ void ChokoLait::Init(int scrW, int scrH) {
 
 		glFrontFace(GL_CW);
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		glEnable(GL_PROGRAM_POINT_SIZE);
+		//glEnable(GL_PROGRAM_POINT_SIZE);
 		glClearColor(0, 0, 0, 1.f);
 
 		glfwSetWindowSize(window, scrW, scrH);

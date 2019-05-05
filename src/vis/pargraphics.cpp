@@ -312,7 +312,7 @@ void ParGraphics::Init() {
 		"radTex", "radScl", "id2col", "colList",
 		"gradCols", "colUseGrad", "spriteScl",
 		"oriented", "orienScl", "orienX", "orienY", "orienZ",
-		"tubesize", "bbox", "imgCnt", "imgOff" });
+		"tubesize", "bbox", "imgCnt", "imgOff", "posTex" });
 	auto bid = glGetUniformBlockIndex(parProg, "clipping");
 	glUniformBlockBinding(parProg, bid, _clipBindId);
 
@@ -821,8 +821,12 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		if (pix + piy + piz == 3) pix = 0;
 		glUniform3i(parProg.Loc(20), pix, piy, piz);
 		glUniform3i(parProg.Loc(21), periodicImgs[0], periodicImgs[2], periodicImgs[4]);
+		
+		glUniform1i(parProg.Loc(22), 9);
+		glActiveTexture(GL_TEXTURE9);
+		glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
 
-		glBindVertexArray(Particles::posVao);
+		glBindVertexArray(Camera::emptyVao);
 		for (auto& p : drawLists) {
 			if (p.second.second == 1) glUniform1f(parProg.Loc(7), -1);
 			else if (p.second.second == 0x0f) glUniform1f(parProg.Loc(7), 0);
@@ -830,9 +834,9 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 			else glUniform1f(parProg.Loc(7), radScl);
 			
 			if (!pix)
-				glDrawArrays(GL_POINTS, p.first, p.second.first);
+				glDrawArrays(GL_TRIANGLES, p.first * 6, p.second.first * 6);
 			else
-				glDrawArraysInstanced(GL_POINTS, p.first, p.second.first, pix * piy * piz);
+				glDrawArraysInstanced(GL_TRIANGLES, p.first * 6, p.second.first * 6, pix * piy * piz);
 		}
 
 		auto& con = Particles::conns;
