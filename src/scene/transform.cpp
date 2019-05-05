@@ -66,15 +66,15 @@ void Transform::localEulerRotation(const Vec3& r) {
 
 Vec3 Transform::forward() {
 	auto v = _worldMatrix*Vec4(0, 0, 1, 0);
-	return Vec3(v);
+	return glm::normalize(Vec3(v));
 }
 Vec3 Transform::right() {
 	auto v = _worldMatrix*Vec4(1, 0, 0, 0);
-	return Vec3(v);
+	return glm::normalize(Vec3(v));
 }
 Vec3 Transform::up() {
 	auto v = _worldMatrix*Vec4(0, 1, 0, 0);
-	return Vec3(v);
+	return glm::normalize(Vec3(v));
 }
 
 Vec3 Transform::Local2World(Vec3 vec) {

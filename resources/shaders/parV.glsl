@@ -79,7 +79,7 @@ void main(){
 		if (orthoSz < 0) {
 			vec3 wdir = wpos.xyz - camPos;
 			float d = length(wdir);
-			float ca = dot(wdir / d, normalize(camFwd));
+			float ca = dot(wdir / d, camFwd);
 			float z = d * ca;
 			if (z < 0.1) gl_PointSize = 0;
 
@@ -93,9 +93,11 @@ void main(){
 
 			float rl = tan(th1 + th2) * z;
 			rl = rl - sqrt(d * d - z * z);
-			float rlx = rl * abs(dot(wdir / d, normalize(camRht)));
+			vec3 xd = normalize(wpos.xyz - (camPos + z * camFwd));
+			float rlx = rl * abs(dot(xd, camRht));
+			float rly = rl * abs(dot(xd, camUp));
 
-			gl_PointSize = spriteScl * screenSize.x * rl / xm;
+			gl_PointSize = spriteScl * rl * min(screenSize.x / xm, screenSize.y / ym);
 		}
 		else {
 			gl_PointSize = spriteScl * screenSize.x * rad / orthoSz;
