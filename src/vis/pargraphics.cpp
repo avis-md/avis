@@ -312,7 +312,7 @@ void ParGraphics::Init() {
 		"radTex", "radScl", "id2col", "colList",
 		"gradCols", "colUseGrad", "spriteScl",
 		"oriented", "orienScl", "orienX", "orienY", "orienZ",
-		"tubesize", "bbox", "imgCnt", "imgOff" });
+		"tubesize", "bbox", "imgCnt", "imgOff", "camRht", "camUp" });
 	auto bid = glGetUniformBlockIndex(parProg, "clipping");
 	glUniformBlockBinding(parProg, bid, _clipBindId);
 
@@ -713,7 +713,7 @@ void ParGraphics::UpdateClipping() {
 	Scene::dirty = true;
 }
 
-void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
+void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, Vec3 _crht, Vec3 _cup, float _w, float _h) {
 	if (!Particles::particleSz) return;
 	float csz = cos(-rotZ*deg2rad);
 	float snz = sin(-rotZ*deg2rad);
@@ -776,6 +776,8 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		glUniformMatrix4fv(parProg.Loc(1), 1, GL_FALSE, glm::value_ptr(_p));
 		glUniform3f(parProg.Loc(2), _cpos.x, _cpos.y, _cpos.z);
 		glUniform3f(parProg.Loc(3), _cfwd.x, _cfwd.y, _cfwd.z);
+		glUniform3f(parProg.Loc(22), _crht.x, _crht.y, _crht.z);
+		glUniform3f(parProg.Loc(23), _cup.x, _cup.y, _cup.z);
 		glUniform1f(parProg.Loc(4), osz);
 		glUniform2f(parProg.Loc(5), _w * ql, _h * ql);
 		glUniform1i(parProg.Loc(6), 1);

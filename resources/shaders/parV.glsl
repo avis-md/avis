@@ -3,9 +3,14 @@
 layout(location=0) in vec3 pos;
 layout(location=1) in vec3 col;
 
+const float PI = 3.14159;
+const float fov = 60 * PI / 180;
+
 uniform mat4 _MV, _P;
 uniform vec3 camPos;
 uniform vec3 camFwd;
+uniform vec3 camRht;
+uniform vec3 camUp;
 
 uniform float orthoSz;
 uniform vec2 screenSize;
@@ -70,16 +75,30 @@ void main(){
 
 	if (radScl == 0) gl_PointSize = 1;
 	else {
+		float rad = v2f_rad * v2f_scl;
 		if (orthoSz < 0) {
 			vec3 wdir = wpos.xyz - camPos;
-			float z = length(wdir);
-			float ca = dot(normalize(wpos.xyz - camPos), camFwd);
-			float z2 = z * ca;
-			if (z2 < 0.1) gl_PointSize = 0;
-			else gl_PointSize = spriteScl * v2f_scl * v2f_rad * 2 * screenSize.y / z2;
+			float d = length(wdir);
+			float ca = dot(wdir / d, normalize(camFwd));
+			float z = d * ca;
+			if (z < 0.1) gl_PointSize = 0;
+
+			//float x = d * dot(wdir / d, camRht);
+			
+			float ym = z * tan(fov/2);
+			float xm = ym * screenSize.x / screenSize.y;
+
+			float th1 = acos(ca);
+			float th2 = asin(rad / d);
+
+			float rl = tan(th1 + th2) * z;
+			rl = rl - sqrt(d * d - z * z);
+			float rlx = rl * abs(dot(wdir / d, normalize(camRht)));
+
+			gl_PointSize = spriteScl * screenSize.x * rl / xm;
 		}
 		else {
-			gl_PointSize = spriteScl * screenSize.y * v2f_scl * v2f_rad * 2 / orthoSz;
+			gl_PointSize = spriteScl * screenSize.x * rad / orthoSz;
 		}
 		if (oriented) {
 			gl_PointSize *= orienScl;

@@ -5,6 +5,7 @@
 #define NOCATCH
 #define DELAYLOAD
 //#define AUTOSAVE
+#define DEBUG_CG
 
 #include "ui/ui_ext.h"
 #include "ui/browse.h"
@@ -49,9 +50,19 @@ std::vector<std::string> main_openimpsigs;
 bool option_silent = false, nologo = false;
 bool option_min = false;
 
+#ifdef DEBUG_CG
+long long rendMs;
+#endif
+
 void rendFunc() {
 	auto& cm = ChokoLait::mainCameraObj->transform;
-	ParGraphics::Rerender(cm.position(), cm.forward(), (float)Display::width, (float)Display::height);
+#ifdef DEBUG_CG
+	const auto lms = milliseconds();
+#endif
+	ParGraphics::Rerender(cm.position(), cm.forward(), cm.right(), cm.up(), (float)Display::width, (float)Display::height);
+#ifdef DEBUG_CG
+	rendMs = milliseconds() - lms;
+#endif
 	if (!!Particles::particleSz && Shadows::show) {
 		Shadows::UpdateBox();
 		Mat4x4 _p = MVP::projection();
@@ -231,6 +242,10 @@ void paintfunc() {
 
 	Popups::Draw();
 	UI2::DrawTooltip();
+	
+#ifdef DEBUG_CG
+	UI::Label(10, 10, 12, "Render: " + std::to_string(rendMs) + "ms", white(), true);
+#endif
 }
 
 #ifdef MAKE_RES

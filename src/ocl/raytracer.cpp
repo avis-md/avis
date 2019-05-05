@@ -597,7 +597,6 @@ void RayTracer::_Refine() {
 	SetObjs();
 	rendStep = REND_STEP::IDLE;
 
-	const int wh = patchSize.x * patchSize.y;//Display::width * Display::height;
 	const int dwh = Display::width * Display::height;
 	while (!kill) {
 		if (Scene::dirty) {

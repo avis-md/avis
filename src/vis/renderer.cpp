@@ -182,7 +182,7 @@ void VisRenderer::ToImage() {
 					cam->offset = Vec2(a, b) + Vec2(smps[c]);
 					cam->Render([]() {
 						auto& cam = ChokoLait::mainCameraObj->transform;
-						ParGraphics::Rerender(cam.position(), cam.forward(), (float)imgW / imgSlices, (float)imgH / imgSlices);
+						ParGraphics::Rerender(cam.position(), cam.forward(), cam.right(), cam.up(), (float)imgW / imgSlices, (float)imgH / imgSlices);
 					});
 					MVP::Switch(false);
 					MVP::Clear();
@@ -201,7 +201,7 @@ void VisRenderer::ToImage() {
 				cam->offset = Vec2(a, b);
 				cam->Render([]() {
 					auto& cam = ChokoLait::mainCameraObj->transform;
-					ParGraphics::Rerender(cam.position(), cam.forward(), (float)imgW / imgSlices, (float)imgH / imgSlices);
+					ParGraphics::Rerender(cam.position(), cam.forward(), cam.right(), cam.up(), (float)imgW / imgSlices, (float)imgH / imgSlices);
 				});
 				if (imgSlices > 1) {
 					MVP::Switch(false);
@@ -304,7 +304,7 @@ void VisRenderer::ToVid() {
 				cam->offset = Vec2(smps[c]);
 				cam->Render([]() {
 					auto& cam = ChokoLait::mainCameraObj->transform;
-					ParGraphics::Rerender(cam.position(), cam.forward(), vidW, vidH);
+					ParGraphics::Rerender(cam.position(), cam.forward(), cam.right(), cam.up(), vidW, vidH);
 				});
 				MVP::Switch(false);
 				MVP::Clear();
@@ -320,7 +320,7 @@ void VisRenderer::ToVid() {
 			Scene::dirty = true;
 			cam->Render([]() {
 				auto& cam = ChokoLait::mainCameraObj->transform;
-				ParGraphics::Rerender(cam.position(), cam.forward(), vidW, vidH);
+				ParGraphics::Rerender(cam.position(), cam.forward(), cam.right(), cam.up(), vidW, vidH);
 			});
 		}
 		
