@@ -59,7 +59,7 @@ void rendFunc() {
 #ifdef DEBUG_CG
 	const auto lms = milliseconds();
 #endif
-	ParGraphics::Rerender(cm.position(), cm.forward(), cm.right(), cm.up(), (float)Display::width, (float)Display::height);
+	ParGraphics::Rerender(cm.position(), cm.forward(), (float)Display::width, (float)Display::height);
 #ifdef DEBUG_CG
 	rendMs = milliseconds() - lms;
 #endif

@@ -141,7 +141,7 @@ public:
 	static void Update();
 	static void UpdateClipping();
 
-	static void Rerender(Vec3 _cpos, Vec3 _cfwd, Vec3 _crht, Vec3 _cup, float _w, float _h);
+	static void Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h);
 	static void RerenderTr(Vec3 _cpos, Vec3 _cfwd, float _w, float _h);
 
 	static void Reblit();
