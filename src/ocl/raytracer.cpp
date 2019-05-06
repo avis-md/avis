@@ -30,7 +30,7 @@ int RayTracer::maxRefl = 5;
 
 GLuint RayTracer::resTex = 0;
 CLWBuffer<float> RayTracer::accum;
-int RayTracer::samples = 0, RayTracer::maxSamples = 2000;
+int RayTracer::samples = 0, RayTracer::maxSamples = 32;
 
 std::thread RayTracer::renderThread;
 bool RayTracer::kill;
@@ -588,7 +588,7 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 		karg(patch);
 
 		// Run generation kernel
-		size_t gs[] = { (patchSize.x / 8) * 8, (patchSize.y / 8) * 8 };
+		size_t gs[] = { ((patchSize.x + 7) / 8) * 8, ((patchSize.y + 7) / 8) * 8 };
 		size_t ls[] = { 8, 8 };
 		try {
 			rendEvent2 = context.Launch2D(0, gs, ls, kernel);
@@ -605,30 +605,37 @@ CLWBuffer<RR::ray> RayTracer::GeneratePrimaryRays() {
 }
 
 void RayTracer::_Refine() {
-	patchSize = { Display::width, Display::height };
-
-	const int wh = patchSize.x * patchSize.y;
-	accum = CLWBuffer<float>::Create(context, CL_MEM_READ_WRITE, 3 * wh);
+	//patchSize = { Display::width, Display::height };
+	Int2 _patchSize = patchSize = { 64, 64 };
+	patchPos = Int2();
 
 	SetSky();
 	SetObjs();
-	rendStep = REND_STEP::IDLE;
 
-	const int dwh = Display::width * Display::height;
+	int wh = patchSize.x * patchSize.y;
+	accum = CLWBuffer<float>::Create(context, CL_MEM_READ_WRITE, 3 * wh);
+	
+	int patchi = 0;
+	int patchtotx = (Display::width + _patchSize.x - 1) / _patchSize.x;
+	int patchtoty = (Display::height + _patchSize.y - 1) / _patchSize.y;
+	int patchtot = (patchtotx - 1) * (patchtoty - 1);
+
+	VisSystem::SetMsg("Tracing patch 0");
+
 	while (!kill) {
 		if (scene_dirty) {
 			scene_dirty = false;
 			samples = 0;
+			patchi = 0;
+			patchPos = Int2();
+			patchSize = _patchSize;
+			wh = patchSize.x * patchSize.y;
+			VisSystem::SetMsg("Tracing patch 0");
 		}
-		else if (samples >= maxSamples) {
-			if (samples == maxSamples) {
-				Denoise();
-				samples++;
-				VisSystem::SetMsg("RayTracing Complete.");
-			}
+		else if (samples > maxSamples) {
 			continue;
 		}
-		VisSystem::SetMsg("Tracing sample " + std::to_string(samples));
+		//VisSystem::SetMsg("Tracing sample " + std::to_string(samples));
 		ray_buffer_cl = GeneratePrimaryRays();
 		rendEvent2.Wait();
 		isect_buffer_cl = CLWBuffer<RR::Intersection>::Create(context, CL_MEM_READ_WRITE, wh);
@@ -653,7 +660,25 @@ void RayTracer::_Refine() {
 		
 		clEnqueueUnmapMemObject(queue, (cl_mem)out_buff, ps, 0, NULL, NULL);
 		delete(isect_buffer);
-		//if (samples == maxSamples) VisSystem::SetMsg("Denoising...");
+		
+		if (samples == maxSamples) {
+			if (patchi == patchtot) {
+				VisSystem::SetMsg("Denoising...");
+				Denoise();
+				samples++;
+				VisSystem::SetMsg("RayTracing Complete.");
+			}
+			else {
+				patchi++;
+				patchPos.x = (patchi % patchtotx) * _patchSize.x;
+				patchPos.y = (patchi / patchtotx) * _patchSize.y;
+				patchSize.x = std::min(Display::width - patchPos.x, _patchSize.x);
+				patchSize.y = std::min(Display::height - patchPos.y, _patchSize.y);
+				wh = patchSize.x * patchSize.y;
+				samples = 0;
+				VisSystem::SetMsg("Tracing patch " + std::to_string(patchi));
+			}
+		}
 	}
 }
 
@@ -691,7 +716,7 @@ void RayTracer::ShadeKernel(CLWBuffer<float> out_buff, const CLWBuffer<RR::Inter
 #undef karg
 	
 	// Run generation kernel
-	size_t gs[] = { (patchSize.x / 8) * 8, (patchSize.y / 8) * 8 };
+	size_t gs[] = { ((patchSize.x + 7) / 8) * 8, ((patchSize.y + 7) / 8) * 8 };
 	size_t ls[] = { 8, 8 };
 	try {
 		rendEvent2 = context.Launch2D(0, gs, ls, kernel);
