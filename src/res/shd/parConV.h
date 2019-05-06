@@ -1,4 +1,10 @@
+#pragma once
+namespace glsl {
+    const char parConV[] = R"(
 #version 330 core
+
+const float PI = 3.14159;
+const float fov = 60 * PI / 180;
 
 uniform mat4 _MV, _P;
 uniform vec3 camPos;
@@ -39,6 +45,33 @@ int is_cw(vec2 v1, vec2 v2) {
 	return (v1.x*v2.y-v1.y*v2.x) > 0 ? 1 : 0;
 }
 
+float maxrad(float rad, vec3 wpos) {
+	float psz = 0;
+	if (orthoSz < 0) {
+		vec3 wdir = wpos - camPos;
+		float d = length(wdir);
+		float ca = dot(wdir / d, camFwd);
+		float z = d * ca;
+		
+		float th1 = acos(ca);
+		if (th1 > fov) {		
+			return -1.0;
+		}
+		float ym = z * tan(fov/2);
+		float xm = ym * screenSize.x / screenSize.y;
+
+		float th2 = asin(rad / d);
+
+		float rl = tan(th1 + th2) * z;
+		rl = rl - sqrt(d * d - z * z);
+
+		return spriteScl * rl * min(screenSize.x / xm, screenSize.y / ym);
+	}
+	else {
+		return spriteScl * screenSize.x * rad / orthoSz;
+	}
+}
+
 void main(){
 	float maxDst2 = 3;
 
@@ -59,30 +92,19 @@ void main(){
 		gl_Position = vec4(-1, -1, -1, 1);
 		return;
 	}
-	float r1 = 0, r2 = 0;
-	
 	vec4 unitVec = _MV*vec4(1, 0, 0, 0);
 	v2f_scl = length(unitVec) * radScl;
-
-	float rad = tubesize * radScl;
 	
 	vec4 wpos = _MV*vec4(pos1, 1);
     v2f_wpos1 = wpos.xyz / wpos.w;
     vec4 spos = _P*wpos;
 	vec2 spos1 = spos.xy / spos.w;
-	if (orthoSz < 0) {
-		vec3 wdir = wpos.xyz - camPos;
-		float z = length(wdir);
-		float ca = dot(normalize(wpos.xyz - camPos), camFwd);
-		float z2 = z * ca;
-		if (z2 < 0.1) {
-			gl_Position = vec4(-1, -1, -1, 1);
-			return;
-		}
-		else r1 = v2f_scl * rad * 2 * screenSize.y / z2;
-	}
-	else {
-		r1 = v2f_scl * rad * 2 * screenSize.x / orthoSz;
+	
+	float rad = tubesize * v2f_scl;
+	float r1 = maxrad(rad, v2f_wpos1);
+	if (r1 < 0) {
+		gl_Position = vec4(-1, -1, -1, 1);
+		return;
 	}
 
 	wpos = _MV*vec4(pos2, 1);
@@ -94,21 +116,12 @@ void main(){
 
     spos = _P*wpos;
 	vec2 spos2 = spos.xy / spos.w;
-	if (orthoSz < 0) {
-		vec3 wdir = wpos.xyz - camPos;
-		float z = length(wdir);
-		float ca = dot(normalize(wpos.xyz - camPos), camFwd);
-		float z2 = z * ca;
-		if (z2 < 0.1) {
-			gl_Position = vec4(-1, -1, -1, 1);
-			return;
-		}
-		else r2 = v2f_scl * rad * 2 * screenSize.y / z2;
+	
+	float r2 = maxrad(rad, v2f_wpos2);
+	if (r2 < 0) {
+		gl_Position = vec4(-1, -1, -1, 1);
+		return;
 	}
-	else {
-		r2 = v2f_scl * rad * 2 * screenSize.x / orthoSz;
-	}
-
 
 	vec2 pts[6];
 	int ids[12] = int[]( 0, 1, 5, 0, 5, 2, 0, 2, 3, 0, 3, 4 );
@@ -150,4 +163,6 @@ void main(){
 	gl_Position.xy = pts[ids[vid]];
 	gl_Position.z = 0;
 	gl_Position.w = 1;
+}
+)";
 }

@@ -1,3 +1,6 @@
+#pragma once
+namespace glsl {
+    const char parV[] = R"(
 #version 330 core
 
 const float PI = 3.14159;
@@ -39,6 +42,33 @@ out vec3 v2f_pos;
 out float v2f_scl;
 out float v2f_rad;
 
+float maxrad(float rad, vec3 wpos) {
+	float psz = 0;
+	if (orthoSz < 0) {
+		vec3 wdir = wpos - camPos;
+		float d = length(wdir);
+		float ca = dot(wdir / d, camFwd);
+		float z = d * ca;
+		
+		float th1 = acos(ca);
+		if (th1 > fov) {		
+			return -1.0;
+		}
+		float ym = z * tan(fov/2);
+		float xm = ym * screenSize.x / screenSize.y;
+
+		float th2 = asin(rad / d);
+
+		float rl = tan(th1 + th2) * z;
+		rl = rl - sqrt(d * d - z * z);
+
+		return spriteScl * rl * min(screenSize.x / xm, screenSize.y / ym);
+	}
+	else {
+		return spriteScl * screenSize.x * rad / orthoSz;
+	}
+}
+
 void setsprite(float w, float h, int vid) {
 	//0  1  2  3  2  1
 	w = w / screenSize.x;
@@ -66,12 +96,12 @@ void main(){
 	vec4 wpos = _MV*vec4(ppos, 1);
 	wpos /= wpos.w;
 	if (clipped(wpos.xyz)) {
-		gl_Position = vec4(-2, -2, -2, 0);
+		gl_Position = vec4(-2, -2, -2, 1);
 		return;
 	}
 	float radTexel = texelFetch(radTex,pid).r;
 	if (radTexel < 0) {
-		gl_Position = vec4(-2, -2, -2, 0);
+		gl_Position = vec4(-2, -2, -2, 1);
 		return;
 	}
 
@@ -87,36 +117,16 @@ void main(){
 
 	if (radScl == 0) setsprite(1, 1, vid);
 	else {
-		float rad = v2f_rad * v2f_scl;
-		float psz = 0;
-		if (orthoSz < 0) {
-			vec3 wdir = wpos.xyz - camPos;
-			float d = length(wdir);
-			float ca = dot(wdir / d, camFwd);
-			float z = d * ca;
-			if (z < 0.1) {		
-				gl_Position = vec4(-2, -2, -2, 0);
-				return;
-			}
-			else {
-				float ym = z * tan(fov/2);
-				float xm = ym * screenSize.x / screenSize.y;
-
-				float th1 = acos(ca);
-				float th2 = asin(rad / d);
-
-				float rl = tan(th1 + th2) * z;
-				rl = rl - sqrt(d * d - z * z);
-
-				psz = spriteScl * rl * min(screenSize.x / xm, screenSize.y / ym);
-			}
-		}
-		else {
-			psz = spriteScl * screenSize.x * rad / orthoSz;
+		float psz = maxrad(v2f_rad * v2f_scl, wpos.xyz);
+		if (psz < 0) {
+			gl_Position = vec4(-2, -2, -2, 1);
+			return;
 		}
 		if (oriented) {
 			psz *= orienScl;
 		}
 		setsprite(psz, psz, vid);
 	}
+}
+)";
 }

@@ -1,3 +1,6 @@
+#pragma once
+namespace glsl {
+    const char parConF[] = R"(
 #version 330 core
 
 flat in int v2f_id1;
@@ -136,4 +139,6 @@ void main()
         outId = uvec4(id, id2, 0, 0);
         outNormal.xyz = normalize(pf - cf);
     }
+}
+)";
 }

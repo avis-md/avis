@@ -21,6 +21,10 @@
 #include "utils/tinyfiledialogs.h"
 #include "vis/preferences.h"
 #include "res/shd/minVert.h"
+#include "res/shd/parV.h"
+#include "res/shd/parF.h"
+#include "res/shd/parConV.h"
+#include "res/shd/parConF.h"
 #include "res/shd/reflFrag.h"
 #include "res/shd/reflFragC.h"
 #include "res/shd/colorerFrag.h"
@@ -306,7 +310,7 @@ void ParGraphics::Init() {
 		"skyStrDecay" , "skyStrDecayOff" , "specStr",
 		"fogCol", "isOrtho", "inOpaque" });
 
-	(parProg = Shader::FromVF(IO::GetText(IO::path + "shaders/parV.glsl"), IO::GetText(IO::path + "shaders/parF.glsl"))).AddUniforms({
+	(parProg = Shader::FromVF(glsl::parV, glsl::parF)).AddUniforms({
 		"_MV", "_P", "camPos",
 		"camFwd", "orthoSz", "screenSize",
 		"radTex", "radScl", "id2col", "colList",
@@ -316,7 +320,7 @@ void ParGraphics::Init() {
 	auto bid = glGetUniformBlockIndex(parProg, "clipping");
 	glUniformBlockBinding(parProg, bid, _clipBindId);
 
-	(parConProg = Shader::FromVF(IO::GetText(IO::path + "shaders/parConV.glsl"), IO::GetText(IO::path + "shaders/parConF.glsl"))).AddUniforms({
+	(parConProg = Shader::FromVF(glsl::parConV, glsl::parConF)).AddUniforms({
 		"_MV", "_P", "camPos", "camFwd",
 		"screenSize", "posTex", "connTex",
 		"radTex", "id2", "radScl",

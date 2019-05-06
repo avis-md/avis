@@ -1,3 +1,6 @@
+#pragma once
+namespace glsl {
+    const char parF[] = R"(
 #version 330 core
 
 uniform mat4 _MV, _P;
@@ -109,4 +112,6 @@ void main() {
         else 
             outNormal.xyz = normalize(nt);
     }
+}
+)";
 }

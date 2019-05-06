@@ -100,7 +100,6 @@ Vec4 Particles::_colorPallete[256];
 std::vector<Particles::SpecificColor> Particles::colorOverrides;
 GLuint Particles::colorPalleteTex;
 
-GLuint Particles::posVao;
 GLuint Particles::posBuffer;
 GLuint Particles::connBuffer;
 GLuint Particles::colIdBuffer;
@@ -108,18 +107,10 @@ GLuint Particles::radBuffer;
 GLuint Particles::posTexBuffer, Particles::connTexBuffer, Particles::colorIdTexBuffer, Particles::radTexBuffer;
 
 void Particles::Init() {
-	glGenVertexArrays(1, &posVao);
 	glGenBuffers(1, &posBuffer);
 	glGenBuffers(1, &connBuffer);
 	glGenBuffers(1, &colIdBuffer);
 	glGenBuffers(1, &radBuffer);
-
-	glBindVertexArray(posVao);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
 
 	glGenTextures(1, &colorPalleteTex);
 	glBindTexture(GL_TEXTURE_2D, colorPalleteTex);

@@ -209,7 +209,6 @@ public:
 	static void DeserializeVis(XmlNode* nd);
 	static void DeserializeDM(XmlNode* nd);
 
-	static GLuint posVao;
 	static GLuint posBuffer; //xyz
 	static GLuint connBuffer; //uint uint
 	static GLuint colIdBuffer; //byte
