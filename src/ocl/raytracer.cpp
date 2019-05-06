@@ -46,6 +46,7 @@ RR::Event* RayTracer::rendEvent;
 CLWEvent RayTracer::rendEvent2;
 
 std::vector<Vec4> RayTracer::pixels;
+bool RayTracer::scene_dirty = false;
 
 cl_ulong rt_maxMem = 0;
 
@@ -173,6 +174,7 @@ void RayTracer::UnsetScene() {
 	if (renderThread.joinable()) {
 		renderThread.join();
 	}
+	Clear();
 }
 
 void RayTracer::_SetScene() {}
@@ -324,6 +326,21 @@ void RayTracer::Denoise() {
 	glBindTexture(GL_TEXTURE_2D, resTex);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Display::width, Display::height, GL_RGBA, GL_FLOAT, out.data());
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void RayTracer::Update() {
+	if (Scene::dirty) {
+		scene_dirty = true;
+		return;
+	}
+
+	static int _samples = -1;
+	if (samples > 0 && samples != _samples) {
+		_samples = samples;
+		glBindTexture(GL_TEXTURE_2D, resTex);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, patchPos.x, patchPos.y, patchSize.x, patchSize.y, GL_RGBA, GL_FLOAT, pixels.data());
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 }
 
 void RayTracer::DrawMenu() {
@@ -599,18 +616,19 @@ void RayTracer::_Refine() {
 
 	const int dwh = Display::width * Display::height;
 	while (!kill) {
-		if (Scene::dirty) {
+		if (scene_dirty) {
+			scene_dirty = false;
 			samples = 0;
 		}
 		else if (samples >= maxSamples) {
 			if (samples == maxSamples) {
 				Denoise();
 				samples++;
-				//VisSystem::SetMsg("RayTracing Complete.");
+				VisSystem::SetMsg("RayTracing Complete.");
 			}
-			return;
+			continue;
 		}
-		//VisSystem::SetMsg("Tracing sample " + std::to_string(samples));
+		VisSystem::SetMsg("Tracing sample " + std::to_string(samples));
 		ray_buffer_cl = GeneratePrimaryRays();
 		rendEvent2.Wait();
 		isect_buffer_cl = CLWBuffer<RR::Intersection>::Create(context, CL_MEM_READ_WRITE, wh);

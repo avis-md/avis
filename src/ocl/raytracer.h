@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include "radeon_rays_cl.h"
 #include "CLW.h"
+#include <atomic>
 
 #ifdef PLATFORM_WIN
 #pragma comment(lib, "RadeonRays.lib")
@@ -43,6 +44,7 @@ public:
 	static void Render();
 	static void Denoise();
 
+	static void Update();
 	static void DrawMenu();
 
 	static uint bgw, bgh;
@@ -66,6 +68,7 @@ private:
 	static CLWEvent rendEvent2;
 
 	static std::vector<Vec4> pixels;
+	static bool scene_dirty;
 
 	static void SetObjs();
 	static void SetSky();

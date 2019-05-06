@@ -136,7 +136,7 @@ void updateFunc() {
 				//RayTracer::Render();
 			}
 			else {
-				RayTracer::Clear();
+				RayTracer::UnsetScene();
 				Scene::dirty = true;
 			}
 		}
@@ -148,7 +148,7 @@ void updateFunc() {
 		if (ParGraphics::tfboDirty) {
 			Scene::dirty = true;
 		}
-		RayTracer::RefineAsync();
+		RayTracer::Update();
 		ParGraphics::tfboDirty = true;
 	}
 }
