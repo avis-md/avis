@@ -39,13 +39,11 @@ public:
 	static void UnsetScene();
 	static void _SetScene();
 
-	static void Refine();
-	static void RefineAsync();
 	static void Render();
 	static void Denoise();
 
 	static void Update();
-	static void DrawMenu();
+	static void DrawMenu(float off);
 
 	static uint bgw, bgh;
 	static int maxRefl;
@@ -53,6 +51,10 @@ public:
 	static GLuint resTex;
 	static CLWBuffer<float> accum;
 	static int samples, maxSamples;
+	static int maxSamplesP, maxSamplesR;
+	static bool patched, patchedR;
+	static int patchSz;
+	static bool denoise;
 private:
 	static std::thread renderThread;
 	static bool kill;
@@ -64,8 +66,6 @@ private:
 
 	static REND_STEP rendStep;
 	static int rendBounce;
-	static RR::Event* rendEvent;
-	static CLWEvent rendEvent2;
 
 	static std::vector<Vec4> pixels;
 	static bool scene_dirty;
@@ -74,5 +74,5 @@ private:
 	static void SetSky();
 	static void _Refine();
 	static CLWBuffer<RR::ray> GeneratePrimaryRays();
-	static void ShadeKernel(CLWBuffer<float> out_buff, const CLWBuffer<RR::Intersection>& isect, CLWBuffer<float>& col_buff, CLWBuffer<RR::ray>& ray_buff, const int smps, const bool isprim);
+	static void ShadeKernel(CLWBuffer<float>& out_buff, const CLWBuffer<RR::Intersection>& isect, CLWBuffer<float>& col_buff, CLWBuffer<RR::ray>& ray_buff, const int smps, const bool isprim);
 };

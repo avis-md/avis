@@ -164,6 +164,7 @@ __kernel void GenRays_Dof(
 		__global const Camera2* cam,
 		int width,
 		int height,
+		float4 patchPos,
 		float plane,
 		float tmax,
 		int rng
@@ -171,13 +172,15 @@ __kernel void GenRays_Dof(
 	int2 globalid;
 	globalid.x = get_global_id(0);
 	globalid.y = get_global_id(1);
+	int patchW = (int)patchPos.z;
+	int patchH = (int)patchPos.w;
 
 	// Check borders
-	if (globalid.x < width && globalid.y < height) {
-		float x = -1.f + 2.f * (float)globalid.x / (float)width;
-		float y = -1.f + 2.f * (float)globalid.y / (float)height;
+	if (globalid.x < patchW && globalid.y < patchH) {
+		float x = -1.f + 2.f * (patchPos.x + globalid.x) / (float)width;
+		float y = -1.f + 2.f * (patchPos.y + globalid.y) / (float)height;
 
-		int k = globalid.y * width + globalid.x;
+		int k = globalid.y * patchW + globalid.x;
 
 		float4 cn = cam->pos;
 		float4 cf = MatVec(cam->ip, (float4)(x, y, 1, 1));

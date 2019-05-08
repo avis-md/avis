@@ -1485,14 +1485,13 @@ void ParGraphics::DrawMenu() {
 	auto off = UI::BeginScroll(expandPos - 150, 19, 150, Display::height - 38);
 
 	UI2::Dropdown(expandPos - 148, off, 146, _("Shading"), _usePBRItems); off += 17;
-	CHK(usePBR)
-	UI::Label(expandPos - 148, off, 12, _("Lighting"), white());
+	UI::Label(expandPos - 148, off, 12, _("Lighting"), white()); off += 18;
+	static float _lghth = 0;
+	float lghth = off;
+	UI::Quad(expandPos - 149, off - 1, 148, _lghth, white(0.9f, 0.1f));
 	if (usePBR && !!_usePBRItems.target) {
-		UI::Quad(expandPos - 149, off + 17, 148, 17, white(0.9f, 0.1f)); off += 1;
-		UI2::Dropdown(expandPos - 147, off + 17, 146, _("Sky"), reflItms); off += 17;
+		UI2::Dropdown(expandPos - 147, off, 146, _("Sky"), reflItms); off += 17;
 	}
-	off += 17;
-	UI::Quad(expandPos - 149, off - 1, 148, 17 * (fogUseBgCol? 5 : 6) + 3, white(0.9f, 0.1f));
 	reflStr = UI2::Slider(expandPos - 147, off, 146, _("Strength"), 0, 10, reflStr, "Illumination brightness"); off += 17;
 	reflStrDecay = UI2::Slider(expandPos - 147, off, 146, _("Falloff"), 0, 500, reflStrDecay, "Exponential fade over distance"); off += 17;
 	reflStrDecayOff = UI2::Slider(expandPos - 147, off, 146, _(" Offset"), 0, 0.005, reflStrDecayOff, "Exponential fade offset"); off += 17;
@@ -1507,15 +1506,20 @@ void ParGraphics::DrawMenu() {
 	if (!bgType) { UI2::Color(expandPos - 147, off, 146, _(" Color"), bgCol); off += 17; }
 	else { bgMul = UI2::Slider(expandPos - 147, off, 146, _(" Strength"), 0, 2, bgMul, "Background brightness"); off += 17; }
 
+	_lghth = off - lghth + 1;
+
+	CHKT(usePBR)
 	CHKT(reflStr) CHKT(reflStrDecay) CHKT(reflStrDecayOff)
 	CHKT(fogUseBgCol) CHKT(fogCol) CHKT(specStr)
 	CHKT(reflTr) CHKT(reflIor) CHKT(bgCol) CHKT(bgType) CHKT(bgMul)
 
-	off += 18;
+	off += 3;
 
-	UI::Label(expandPos - 148, off, 12, _("Camera"), white());
-	//UI::Quad(expandPos - 149, off + 17, 148, 17 * 9 + 2, white(0.9f, 0.1f));
-	off += 18;
+	UI::Label(expandPos - 148, off, 12, _("Camera"), white()); off += 18;
+
+	static float _lghth2 = 0;
+	lghth = off;
+	UI::Quad(expandPos - 149, off - 1, 148, _lghth2, white(0.9f, 0.1f));
 	static std::string dinms[] = { "None", "Particle", "Residue", "Residue Group", "Bounding Box", "" };
 	static Popups::DropdownItem di((uint*)&rotCenterTrackType, dinms);
 	UI2::sepw = 0.4f;
@@ -1561,17 +1565,13 @@ void ParGraphics::DrawMenu() {
 	}
 	off += 17;
 	bool a2 = cam->useGBuffer2;
-	UI::Label(expandPos - 147, off, 12, _("Use Dynamic Quality"), white());
-	a2 = Engine::Toggle(expandPos - 19, off, 16, Icons::checkbox, a2, white(), ORIENT_HORIZONTAL);
+	UI2::Toggle(expandPos - 147, off, 145, _("Use Dynamic Quality"), a2); off += 17;
 	if (a2 != cam->useGBuffer2) {
 		cam->useGBuffer2 = a2;
 		if (a2) cam->GenGBuffer2();
 		//Scene::dirty = true;
 	}
-	off += 19;
-
 	if (a2) {
-		UI::Quad(expandPos - 149, off - 2, 148, 18, white(0.9f, 0.1f));
 		ql = cam->quality2;
 		ql = UI2::Slider(expandPos - 147, off - 1, 146, _("Quality") + " 2", 0.25f, 1.f, ql, "Resolution of the 3D view when moving / rotating", std::to_string(int(ql * 100)) + "%");
 		if (ql != cam->quality2) {
@@ -1580,6 +1580,10 @@ void ParGraphics::DrawMenu() {
 		}
 		off += 17;
 	}
+
+	_lghth2 = off - lghth + 1;
+
+	off += 3;
 
 	UI::Label(expandPos - 148, off, 12, _("Periodic Images"), white());
 	off += 17;

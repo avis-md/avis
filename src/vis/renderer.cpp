@@ -7,6 +7,7 @@
 #include "utils/tinyfiledialogs.h"
 #include "utils/avi.h"
 #include "gif/gif.h"
+#include "ocl/raytracer.h"
 
 VisRenderer::IMG_TYPE VisRenderer::imgType;
 VisRenderer::VID_TYPE VisRenderer::vidType;
@@ -137,6 +138,9 @@ void VisRenderer::DrawMenu() {
 	vidMsaa = ms? 4 : 0;
 	off += 17;
 	vidMaxFrames = TryParse(UI2::EditText(ep - 147, off, 146, _("Max Frames"), std::to_string(vidMaxFrames)), 1000U);
+	off += 20;
+
+	RayTracer::DrawMenu(off);
 }
 
 void VisRenderer::ToImage() {
