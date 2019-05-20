@@ -38,7 +38,9 @@ add_definitions(-DUSE_OPENCL -DRR_EMBED_KERNELS)
 SET(CMAKE_CXX_FLAGS "-std=c++11 -g")
 
 if (MSVC)
-    SET(CMAKE_CXX_FLAGS "/EHsc")
+	SET(CMAKE_CXX_FLAGS "/EHsc")
+elseif (LINUX)
+	SET(CMAKE_CXX_FLAGS "-Wl,-rpath='$$ORIGIN' -static-libstdc++")
 endif()
 
 set(INC_DIRS
