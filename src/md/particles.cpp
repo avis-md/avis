@@ -59,6 +59,7 @@ void Particles::SpecificColor::Revert() {
 	mask.clear();
 }
 
+bool Particles::empty;
 
 uint Particles::residueListSz;
 uint Particles::particleSz;
@@ -120,6 +121,8 @@ void Particles::Init() {
 
 	attrNms.reserve(50); //reallocation will break something, temporary for now
 	attrNms.push_back("");
+
+	empty = true;
 }
 
 void Particles::Clear() {
@@ -149,6 +152,7 @@ void Particles::Clear() {
 
 		VisSystem::radii.clear();
 	}
+	empty = true;
 }
 
 void Particles::GenTexBufs() {

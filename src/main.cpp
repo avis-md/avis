@@ -63,7 +63,7 @@ void rendFunc() {
 #ifdef DEBUG_CG
 	rendMs = milliseconds() - lms;
 #endif
-	if (!!Particles::particleSz && Shadows::show) {
+	if (!Particles::empty && Shadows::show) {
 		Shadows::UpdateBox();
 		Mat4x4 _p = MVP::projection();
 		MVP::Switch(true);
@@ -106,7 +106,7 @@ void updateFunc() {
 		}
 	}
 
-	if (!!Particles::particleSz && !ParLoader::busy) {
+	if (!Particles::empty && !ParLoader::busy) {
 		Particles::Update();
 #ifdef AUTOSAVE
 		if ((autoSaveTime > 1) && (Time::time - VisSystem::lastSave > autoSaveTime)
@@ -124,7 +124,7 @@ void updateFunc() {
 
 	AnWeb::Update();
 
-	if (!!Particles::particleSz && !ParLoader::busy && !UI::editingText && !AnWeb::drawFull) {
+	if (!Particles::empty && !ParLoader::busy && !UI::editingText && !AnWeb::drawFull) {
 		if (Input::KeyDown(KEY::F)) {
 			auto& o = ChokoLait::mainCamera->ortographic;
 			o = !o;
@@ -157,7 +157,7 @@ void paintfunc() {
 	bool stealFocus = false;
 	UI2::sepw = 0.5f;
 
-	if (!Particles::particleSz) {
+	if (Particles::empty) {
 		ParMenu::DrawStart();
 	}
 

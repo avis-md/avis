@@ -169,7 +169,7 @@ void VisSystem::InitEnv() {
 
 bool VisSystem::InMainWin(const Vec2& pos) {
 	if (AnWeb::drawFull) return false;
-	else return (pos.x > ParMenu::expandPos + 16) && (pos.x < Display::width - ((!Particles::particleSz || LiveSyncer::activeRunner)? LiveSyncer::expandPos : AnWeb::expandPos)) && (pos.y > 18) && (pos.y < Display::height - 18);
+	else return (pos.x > ParMenu::expandPos + 16) && (pos.x < Display::width - ((Particles::empty || LiveSyncer::activeRunner)? LiveSyncer::expandPos : AnWeb::expandPos)) && (pos.y > 18) && (pos.y < Display::height - 18);
 }
 
 void VisSystem::UpdateTitle() {
@@ -333,7 +333,7 @@ void VisSystem::BlurBack() {
 }
 
 void VisSystem::Save(const std::string& path) {
-	if (!Particles::particleSz) return;
+	if (Particles::empty) return;
 	Debug::Message("System", "Saving...");
 	currentSavePath = path;
 	IO::MakeDirectory(path + "_data/");

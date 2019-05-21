@@ -398,7 +398,7 @@ void ParLoader::DoOpen() {
 
 	Engine::AcquireLock(10);
 	Particles::Resize(info.num);
-	Particles::particleSz = 0;
+	Particles::empty = true;
 	Engine::ReleaseLock();
 	if (!info.num) {
 		busy = false;
@@ -612,7 +612,7 @@ void ParLoader::DoOpen() {
 	}
 
 	Engine::AcquireLock(10);
-	Particles::particleSz = info.num;
+	Particles::empty = false;
 	parDirty = true;
 	busy = false;
 	fault = false;

@@ -58,7 +58,7 @@ void ParMenu::Draw() {
 	const float alpha = VisSystem::opacity;
 	UI2::BackQuad(0, 18, expandPos, Display::height - 36.f);
 	if (expanded) {
-		if (!Particles::particleSz) {
+		if (Particles::empty) {
 			if (Engine::Button(expandPos - 110, Display::height * 0.4f - 40, 80, 80, Icons::openfile, white(0.4f)) == MOUSE_RELEASE) {
 				ParLoader::OnOpenFile(Dialog::OpenFile(ParLoader::exts));
 			}

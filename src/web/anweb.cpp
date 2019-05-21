@@ -298,7 +298,7 @@ void AnWeb::Draw() {
 			Clear0();
 		}
 		wo += 75;
-		bool canexec = !!Particles::particleSz && (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
+		bool canexec = !Particles::empty && (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
 		if (Engine::Button(wo, 1, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
 			if (canexec) AnWeb::Execute(false);
 		}
@@ -372,7 +372,7 @@ void AnWeb::DrawSide() {
 		}
 
 		if (!waitBrowse) {
-			bool canexec = !!Particles::particleSz && (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
+			bool canexec = !Particles::empty && (!AnOps::remote || (AnOps::connectStatus == 255)) && !executing && !ParLoader::busy && !AnBrowse::busy;
 			if (Engine::Button(expos + 1, 38, 70, 16, white(1, canexec ? 0.4f : 0.2f), _("Run"), 12, white(), true) == MOUSE_RELEASE) {
 				if (canexec) AnWeb::Execute(false);
 			}
@@ -438,7 +438,7 @@ void AnWeb::DrawOverlay() {
 }
 
 void AnWeb::Execute(bool all) {
-	if (!Particles::particleSz || executing) return;
+	if (Particles::empty || executing) return;
 	ParGraphics::animate = false;
 	if (execThread) {
 		if (execThread->joinable()) execThread->join();

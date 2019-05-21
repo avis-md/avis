@@ -504,7 +504,7 @@ void ParGraphics::FillRad(byte* rads) {
 }
 
 void ParGraphics::Update() {
-	if (!Particles::particleSz)
+	if (Particles::empty)
 		Scene::dirty = true;
 	else if (animate && !seek) {
 		if (!animTarFps) {
@@ -522,7 +522,7 @@ void ParGraphics::Update() {
 		}
 		Scene::dirty = true;
 	}
-	if (!!Particles::particleSz && !UI::editingText && !UI::_layerMax) {
+	if (!Particles::empty && !UI::editingText && !UI::_layerMax) {
 
 		if (zoomFade > 0) {
 			static bool scrtr = false;
@@ -718,7 +718,7 @@ void ParGraphics::UpdateClipping() {
 }
 
 void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
-	if (!Particles::particleSz) return;
+	if (Particles::empty) return;
 	float csz = cos(-rotZ*deg2rad);
 	float snz = sin(-rotZ*deg2rad);
 	float csw = cos(-rotW*deg2rad);
@@ -987,7 +987,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 }
 
 void ParGraphics::RerenderTr(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
-	if (!Particles::particleSz) return;
+	if (Particles::empty) return;
 	
 	auto _mv = MVP::modelview();
 	auto _p = MVP::projection();
@@ -1035,7 +1035,7 @@ void ParGraphics::Reblit() {
 	//if (!AnWeb::drawFull || Scene::dirty)
 	//	tfboDirty = true;
 	if (tfboDirty || Scene::dirty) {
-		if (!!Particles::particleSz && !RayTracer::resTex) {
+		if (!Particles::empty && !RayTracer::resTex) {
 			//Recolor();
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[0]);
 			float zero[4] = {};

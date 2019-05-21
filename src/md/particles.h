@@ -123,6 +123,8 @@ public:
 		animdata(const animdata&) = delete;
 	};
 
+	static bool empty;
+
 	static uint residueListSz;
 	static uint particleSz;
 	static uint maxParticleSz;
