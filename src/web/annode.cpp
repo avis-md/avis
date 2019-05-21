@@ -121,8 +121,8 @@ void AnNode::Draw() {
 	const float connrad = 5;
 
 	auto cnt = _script->outputs.size();
-	for (auto& i : inputR) {
-		if (i.use) cnt++;
+	for (auto i : useInputs) {
+		if (i) cnt++;
 	}
 	UI::Quad(pos.x, pos.y, width, 16, Vec4(titleCol, selected ? 1.f : 0.7f));
 	if (Engine::Button(pos.x, pos.y, 16, 16, expanded ? Icons::expand : Icons::collapse, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) expanded = !expanded;
@@ -148,7 +148,7 @@ void AnNode::Draw() {
 			y += 1;
 			for (uint i = 0; i < _script->inputs.size(); i++, y += 17) {
 				bool hi = inputR[i].first;
-				if (!inputR[i].use) {
+				if (!useInputs[i]) {
 					if (hi) Disconnect(i, false);
 					continue;
 				}
@@ -521,8 +521,11 @@ AnNode::AnNode(pAnScript_I scr) : flags(0), script(scr), canTile(false) {
 AnNode::AnNode(pAnScript_I scr, ANNODE_FLAGS flags) : flags(flags), script(scr), canTile(false) {}
 
 void AnNode::ResizeIO(AnScript* scr) {
-	inputR.resize(scr->inputs.size());
-	auto osz = scr->outputs.size();
+	const auto isz = scr->inputs.size();
+	useInputs.resize(isz, true);
+	inputR.resize(isz);
+	const auto osz = scr->outputs.size();
+	useOutputs.resize(osz, true);
 	outputR.resize(osz);
 	conV.resize(osz);
 	conV_t.resize(osz);

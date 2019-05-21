@@ -68,16 +68,16 @@ public:
 	struct nodecon {
 		AnNode* first;
 		uint second;
-		bool use;
 		bool hoverdel;
 		bool execd;
 		nodecon(AnNode* f = 0, uint i = 0, bool use = true)
-			: first(f), second(i), use(true), hoverdel(false) {}
+			: first(f), second(i), hoverdel(false) {}
 		CVar& getconv() { return first->conV[second]; }
 		void* getval(ANVAR_ORDER order);
 		AnScript::Var& getvar();
 		int getdim(int i); //shorthand
 	};
+	std::vector<bool> useInputs, useOutputs;
 	std::vector<nodecon> inputR;
 	std::vector<std::vector<nodecon>> outputR;
 	std::vector<CVar> conV;
@@ -153,6 +153,7 @@ public:
 
 	virtual void CatchExp(char* c);
 
+	virtual void OnSceneDataChanged() {}
 	virtual void OnSceneUpdate() {}
 	virtual void OnAnimFrame();
 	virtual void OnConn(bool o, int i) {}

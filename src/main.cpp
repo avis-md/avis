@@ -26,6 +26,7 @@
 #include "imp/CDV.h"
 #include "imp/lammps.h"
 #include "imp/dlpoly.h"
+#include "imp/bdens.h"
 #include "vis/changelog.h"
 #include "vis/cubemarcher.h"
 #include "vis/pargraphics.h"
@@ -457,6 +458,8 @@ The hash for this program is )" << VisSystem::version_hash
 		NEWIMP("Lammps", lmp, .atom, Lammps::Read)
 		PUSHIMP
 		NEWIMP("DLPoly", dlp, .000, DLPoly::Read)
+		PUSHIMP
+		NEWIMP("Binary Density", bds, .dens, BDens::Read)
 		PUSHIMP
 
 		if (!!main_openimpsigs.size()) {

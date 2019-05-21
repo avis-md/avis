@@ -1,4 +1,6 @@
 #include "parloader.h"
+#include "md/particles.h"
+#include "md/volumetric.h"
 #include "GenericSSV.h"
 #include "md/parmenu.h"
 #include "md/Protein.h"
@@ -332,6 +334,14 @@ void ParLoader::DoOpen() {
 	std::replace(droppedFiles[0].begin(), droppedFiles[0].end(), '\\', '/');
 	std::string nm = droppedFiles[0].substr(droppedFiles[0].find_last_of('/') + 1);
 	auto path = droppedFiles[0];
+	
+	if (impId < 0) {
+		Debug::Warning("ParLoader", "No importer set!");
+		if (isSrv) remove(path.c_str());
+		busy = false;
+		fault = true;
+		return;
+	}
 
 	busy = true;
 	ParInfo info = {};
@@ -359,31 +369,22 @@ void ParLoader::DoOpen() {
 	info.trajectory.frameSkip = frameskip;
 
 	try {
-		if (impId > -1) {
-			Debug::Message("ParLoader", "Running importer \"" + importers[impId].name + "\"");
-			if (!importers[impId].funcs[funcId].func(&info)) {
-				if (!info.error[0]) {
-					Debug::Warning("ParLoader", "Unspecified importer error!");
-					VisSystem::SetMsg("Unspecified import error", 2);
-				}
-				else {
-					Debug::Warning("ParLoader", "Importer error: " + std::string(info.error));
-					VisSystem::SetMsg(info.error, 2);
-				}
-				if (isSrv) remove(path.c_str());
-				busy = false;
-				fault = true;
-				return;
+		Debug::Message("ParLoader", "Running importer \"" + importers[impId].name + "\"");
+		if (!importers[impId].funcs[funcId].func(&info)) {
+			if (!info.error[0]) {
+				Debug::Warning("ParLoader", "Unspecified importer error!");
+				VisSystem::SetMsg("Unspecified import error", 2);
 			}
-			Debug::Message("ParLoader", "Running importer: done");
-		}
-		else {
-			Debug::Warning("ParLoader", "No importer set!");
+			else {
+				Debug::Warning("ParLoader", "Importer error: " + std::string(info.error));
+				VisSystem::SetMsg(info.error, 2);
+			}
 			if (isSrv) remove(path.c_str());
 			busy = false;
 			fault = true;
 			return;
 		}
+		Debug::Message("ParLoader", "Running importer: done");
 	}
 	catch (char* c) {
 		Debug::Warning("ParLoader", "Importer exception: " + std::string(c));
@@ -398,195 +399,201 @@ void ParLoader::DoOpen() {
 
 	Engine::AcquireLock(10);
 	Particles::Resize(info.num);
-	Particles::empty = true;
+	Volumetric::Resize(info.densityNum);
 	Engine::ReleaseLock();
-	if (!info.num) {
+	if (!info.num && !Volumetric::currentFrame) {
 		busy = false;
 		return;
 	}
 
-	memcpy(&Particles::names[0], info.name, info.num * PAR_MAX_NAME_LEN);
-	memcpy(&Particles::resNames[0], info.resname, info.num * PAR_MAX_NAME_LEN);
-	Particles::poss = (glm::dvec3*)info.pos;
-	Particles::vels = (glm::dvec3*)info.vel;
-	memcpy(&Particles::types[0], info.type, info.num * sizeof(short));
-	memcpy(Particles::boundingBox, info.bounds, 6 * sizeof(double));
-	if (!VisSystem::currentSavePath.size())
-		ParGraphics::rotCenter = Vec3(info.bounds[0] + info.bounds[1], 
-		info.bounds[2] + info.bounds[3], 
-		info.bounds[4] + info.bounds[5]) * 0.5f;
+	if (info.num > 0) {
+		memcpy(&Particles::names[0], info.name, info.num * PAR_MAX_NAME_LEN);
+		memcpy(&Particles::resNames[0], info.resname, info.num * PAR_MAX_NAME_LEN);
+		Particles::poss = (glm::dvec3*)info.pos;
+		Particles::vels = (glm::dvec3*)info.vel;
+		memcpy(&Particles::types[0], info.type, info.num * sizeof(short));
+		memcpy(Particles::boundingBox, info.bounds, 6 * sizeof(double));
+		if (!VisSystem::currentSavePath.size())
+			ParGraphics::rotCenter = Vec3(info.bounds[0] + info.bounds[1], 
+			info.bounds[2] + info.bounds[3], 
+			info.bounds[4] + info.bounds[5]) * 0.5f;
 
-	auto& conn = Particles::conns;
+		auto& conn = Particles::conns;
 
-	uint64_t currResNm = -1;
-	uint16_t currResId = -1;
-	ResidueList* trs = 0;
-	Residue* tr = 0;
-	Vec3 vec;
+		uint64_t currResNm = -1;
+		uint16_t currResId = -1;
+		ResidueList* trs = 0;
+		Residue* tr = 0;
+		Vec3 vec;
 
-	uint lastOff = 0, lastCnt = 0;
+		uint lastOff = 0, lastCnt = 0;
 
-	std::ifstream* strm = 0;
+		std::ifstream* strm = 0;
 
-	if (useConn) {
-		if (useConnCache && hasConnCache && !ovwConnCache) {
-			strm = new std::ifstream(path + ".conn", std::ios::binary);
-			char buf[100];
-			strm->getline(buf, 100, '\n');
-			strm->read((char*)(&conn.cnt), 4);
-			conn.ids.resize(conn.cnt);
-			strm->read((char*)&conn.ids[0], conn.cnt * sizeof(Int2));
-			strm->read(buf, 2);
-			if (buf[0] != 'X' || buf[1] != 'X') {
-				useConnCache = false;
-				loadName = "Finding bonds";
+		if (useConn) {
+			if (useConnCache && hasConnCache && !ovwConnCache) {
+				strm = new std::ifstream(path + ".conn", std::ios::binary);
+				char buf[100];
+				strm->getline(buf, 100, '\n');
+				strm->read((char*)(&conn.cnt), 4);
+				conn.ids.resize(conn.cnt);
+				strm->read((char*)&conn.ids[0], conn.cnt * sizeof(Int2));
+				strm->read(buf, 2);
+				if (buf[0] != 'X' || buf[1] != 'X') {
+					useConnCache = false;
+					loadName = "Finding bonds";
+				}
+				else loadName = "Reading bonds";
 			}
-			else loadName = "Reading bonds";
+			else loadName = "Finding bonds";
 		}
-		else loadName = "Finding bonds";
-	}
-	else loadName = "Post processing";
-	std::unordered_map<ushort, int> id2colid;
-	for (uint i = 0; i < info.num; ++i) {
-		info.progress = i * 1.f / info.num;
-		auto id1 = info.type[i];//info.name[i * PAR_MAX_NAME_LEN];
-		auto& resId = info.resId[i];
-		uint64_t resNm = *((uint64_t*)(&info.resname[i * PAR_MAX_NAME_LEN])) & 0x000000ffffffffff;
+		else loadName = "Post processing";
+		std::unordered_map<ushort, int> id2colid;
+		for (uint i = 0; i < info.num; ++i) {
+			info.progress = i * 1.f / info.num;
+			auto id1 = info.type[i];//info.name[i * PAR_MAX_NAME_LEN];
+			auto& resId = info.resId[i];
+			uint64_t resNm = *((uint64_t*)(&info.resname[i * PAR_MAX_NAME_LEN])) & 0x000000ffffffffff;
 
-		if (currResNm != resNm) {
-			Particles::residueLists.push_back(ResidueList());
-			Particles::residueListSz++;
-			trs = &Particles::residueLists.back();
-			trs->name = std::string(info.resname + i * PAR_MAX_NAME_LEN, 5);
-			currResNm = resNm;
-			if (std::find(Particles::reslist.begin(), Particles::reslist.end(), trs->name) == Particles::reslist.end()) {
-				Particles::reslist.push_back(trs->name);
+			if (currResNm != resNm) {
+				Particles::residueLists.push_back(ResidueList());
+				Particles::residueListSz++;
+				trs = &Particles::residueLists.back();
+				trs->name = std::string(info.resname + i * PAR_MAX_NAME_LEN, 5);
+				currResNm = resNm;
+				if (std::find(Particles::reslist.begin(), Particles::reslist.end(), trs->name) == Particles::reslist.end()) {
+					Particles::reslist.push_back(trs->name);
+				}
 			}
-		}
 
-		if (currResId != resId) {
-			if (!!i) {
-				if (tr->type != 255) {
-					lastOff = tr->offset;
-					lastCnt = tr->cnt;
+			if (currResId != resId) {
+				if (!!i) {
+					if (tr->type != 255) {
+						lastOff = tr->offset;
+						lastCnt = tr->cnt;
+					}
+					else {
+						lastOff = i;
+						lastCnt = 0;
+					}
+				}
+				trs->residues.push_back(Residue());
+				trs->residueSz++;
+				tr = &trs->residues.back();
+				tr->offset = i;
+				tr->name = std::to_string(resId);
+				tr->type = AminoAcidType((char*)&resNm);
+				tr->cnt = 0;
+				currResId = resId;
+				if (useConnCache && hasConnCache && !ovwConnCache) {
+					_Strm2Val(*strm, tr->offset_b);
+					_Strm2Val(*strm, tr->cnt_b);
 				}
 				else {
-					lastOff = i;
-					lastCnt = 0;
+					tr->offset_b = conn.cnt;
+					tr->cnt_b = 0;
 				}
 			}
-			trs->residues.push_back(Residue());
-			trs->residueSz++;
-			tr = &trs->residues.back();
-			tr->offset = i;
-			tr->name = std::to_string(resId);
-			tr->type = AminoAcidType((char*)&resNm);
-			tr->cnt = 0;
-			currResId = resId;
-			if (useConnCache && hasConnCache && !ovwConnCache) {
-				_Strm2Val(*strm, tr->offset_b);
-				_Strm2Val(*strm, tr->cnt_b);
-			}
-			else {
-				tr->offset_b = conn.cnt;
-				tr->cnt_b = 0;
-			}
-		}
-		auto vec = *((glm::dvec3*)(&info.pos[i * 3]));
-		int cnt = int(lastCnt + tr->cnt);
-		if (useConn && (!useConnCache || !hasConnCache || ovwConnCache)) {
-			for (int j = 0; j < cnt; ++j) {
-				Vec3 dp = Particles::poss[lastOff + j] - vec;
-				if (fabsf(dp.x) < 0.25f && fabsf(dp.y) < 0.25f && fabsf(dp.z) < 0.25f) {
-					auto dst = glm::length2(dp);
-					uint32_t id2 = info.type[lastOff + j];
-					//float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
-					float bst = Preferences::GetLen(id1, id2);
-					if (dst < bst * bst) {
-						conn.ids.push_back(Int2(i, lastOff + j));
-						conn.cnt++;
-						tr->cnt_b++;
+			auto vec = *((glm::dvec3*)(&info.pos[i * 3]));
+			int cnt = int(lastCnt + tr->cnt);
+			if (useConn && (!useConnCache || !hasConnCache || ovwConnCache)) {
+				for (int j = 0; j < cnt; ++j) {
+					Vec3 dp = Particles::poss[lastOff + j] - vec;
+					if (fabsf(dp.x) < 0.25f && fabsf(dp.y) < 0.25f && fabsf(dp.z) < 0.25f) {
+						auto dst = glm::length2(dp);
+						uint32_t id2 = info.type[lastOff + j];
+						//float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
+						float bst = Preferences::GetLen(id1, id2);
+						if (dst < bst * bst) {
+							conn.ids.push_back(Int2(i, lastOff + j));
+							conn.cnt++;
+							tr->cnt_b++;
+						}
 					}
 				}
 			}
+			auto& c = id2colid[id1];
+			if (!c) {
+				auto cpsz = Particles::colorPallete.size();
+				const auto col = Preferences::GetCol(id1);
+				Particles::colorPallete.push_back(std::pair<ushort, Vec3>(id1, col));
+				Particles::_colorPallete[cpsz] = Vec4(col, 1);
+				c = cpsz + 1;
+			}
+			Particles::colors[i] = c-1;
+
+			VisSystem::radii[id1] = Particles::radii[i] = Preferences::GetRad(id1);
+			Particles::ress[i] = Int2(Particles::residueListSz - 1, trs->residueSz - 1);
+
+			tr->cnt++;
 		}
-		auto& c = id2colid[id1];
-		if (!c) {
-			auto cpsz = Particles::colorPallete.size();
-			const auto col = Preferences::GetCol(id1);
-			Particles::colorPallete.push_back(std::pair<ushort, Vec3>(id1, col));
-			Particles::_colorPallete[cpsz] = Vec4(col, 1);
-			c = cpsz + 1;
+		
+		if (std::find(Particles::reslist.begin(), Particles::reslist.end(), trs->name) == Particles::reslist.end()) {
+			Particles::reslist.push_back(trs->name);
 		}
-		Particles::colors[i] = c-1;
+		Particles::reslist.push_back("");
 
-		VisSystem::radii[id1] = Particles::radii[i] = Preferences::GetRad(id1);
-		Particles::ress[i] = Int2(Particles::residueListSz - 1, trs->residueSz - 1);
+		if (strm) delete(strm);
 
-		tr->cnt++;
-	}
-	
-	if (std::find(Particles::reslist.begin(), Particles::reslist.end(), trs->name) == Particles::reslist.end()) {
-		Particles::reslist.push_back(trs->name);
-	}
-	Particles::reslist.push_back("");
-
-	if (strm) delete(strm);
-
-	if (useConnCache && (!hasConnCache || ovwConnCache)) {
-		std::ofstream ostrm(path + ".conn", std::ios::binary);
-		ostrm << __DATE__ << " " << __TIME__ << "\n";
-		_StreamWrite(&conn.cnt, &ostrm, 4);
-		_StreamWrite(&conn.ids[0], &ostrm, conn.cnt * sizeof(Int2));
-		_StreamWrite("XX", &ostrm, 2);
-		for (uint a = 0; a < Particles::residueListSz; ++a) {
-			auto& rsl = Particles::residueLists[a];
-			for (uint b = 0; b < rsl.residueSz; ++b) {
-				_StreamWrite(&rsl.residues[b].offset_b, &ostrm, sizeof(uint));
-				_StreamWrite(&rsl.residues[b].cnt_b, &ostrm, sizeof(ushort));
+		if (useConnCache && (!hasConnCache || ovwConnCache)) {
+			std::ofstream ostrm(path + ".conn", std::ios::binary);
+			ostrm << __DATE__ << " " << __TIME__ << "\n";
+			_StreamWrite(&conn.cnt, &ostrm, 4);
+			_StreamWrite(&conn.ids[0], &ostrm, conn.cnt * sizeof(Int2));
+			_StreamWrite("XX", &ostrm, 2);
+			for (uint a = 0; a < Particles::residueListSz; ++a) {
+				auto& rsl = Particles::residueLists[a];
+				for (uint b = 0; b < rsl.residueSz; ++b) {
+					_StreamWrite(&rsl.residues[b].offset_b, &ostrm, sizeof(uint));
+					_StreamWrite(&rsl.residues[b].cnt_b, &ostrm, sizeof(ushort));
+				}
 			}
 		}
-	}
 
-	delete[](info.name);
-	delete[](info.resname);
-	delete[](info.type);
-	delete[](info.resId);
+		delete[](info.name);
+		delete[](info.resname);
+		delete[](info.type);
+		delete[](info.resId);
 
-	auto& anm = Particles::anim;
-	anm.Clear();
-	if (info.trajectory.frames > 0) {
-		auto& trj = info.trajectory;
-		anm.reading = true;
+		auto& anm = Particles::anim;
+		anm.Clear();
+		if (info.trajectory.frames > 0) {
+			auto& trj = info.trajectory;
+			anm.reading = true;
 
-		anm.AllocFrames(trj.frames);
-		for (uint16_t i = 0; i < trj.frames; ++i) {
-			anm.poss[i].resize(info.num);
-			memcpy(&anm.poss[i][0], trj.poss[i], info.num * sizeof(glm::dvec3));
-			delete[](trj.poss[i]);
-			anm.vels[i].resize(info.num);
-			if (trj.vels) {
-				memcpy(&anm.vels[i][0], trj.vels[i], info.num * sizeof(glm::dvec3));
-				delete[](trj.vels[i]);
-			}
-			anm.status[i] = Particles::animdata::FRAME_STATUS::LOADED;
-		}
-		delete[](trj.poss);
-		if (trj.vels) delete[](trj.vels);
-		if (trj.bounds) {
-			anm.bboxs.resize(trj.frames);
+			anm.AllocFrames(trj.frames);
 			for (uint16_t i = 0; i < trj.frames; ++i) {
-				memcpy(&anm.bboxs[i][0], trj.bounds[i], 6*sizeof(double));
+				anm.poss[i].resize(info.num);
+				memcpy(&anm.poss[i][0], trj.poss[i], info.num * sizeof(glm::dvec3));
+				delete[](trj.poss[i]);
+				anm.vels[i].resize(info.num);
+				if (trj.vels) {
+					memcpy(&anm.vels[i][0], trj.vels[i], info.num * sizeof(glm::dvec3));
+					delete[](trj.vels[i]);
+				}
+				anm.status[i] = Particles::animdata::FRAME_STATUS::LOADED;
 			}
-			anm.bboxState.resize(trj.frames);
-			delete[](trj.bounds);
-		}
-		anm.reading = false;
+			delete[](trj.poss);
+			if (trj.vels) delete[](trj.vels);
+			if (trj.bounds) {
+				anm.bboxs.resize(trj.frames);
+				for (uint16_t i = 0; i < trj.frames; ++i) {
+					memcpy(&anm.bboxs[i][0], trj.bounds[i], 6*sizeof(double));
+				}
+				anm.bboxState.resize(trj.frames);
+				delete[](trj.bounds);
+			}
+			anm.reading = false;
 
-		anm.maxFramesInMem = 10000000;
+			anm.maxFramesInMem = 10000000;
+		}
+		else {
+			anm.frameCount = 1;
+		}
 	}
 	else {
-		anm.frameCount = 1;
+		std::memcpy(Volumetric::currentFrame->data.data(), info.density, info.densityNum[0]*info.densityNum[1]*info.densityNum[2]);
+		delete[](info.density);
 	}
 
 	VisSystem::SetMsg("Loaded file(s) in " + std::to_string((milliseconds() - t)*0.001f).substr(0, 5) + "s");

@@ -10,6 +10,7 @@ Shader Node_AddSurface::marchProg;
 Shader Node_AddSurface::drawProg;
 
 size_t Node_AddSurface::bufSz = 0, Node_AddSurface::outSz = 0;
+int Node_AddSurface::maxBufSz = 0;
 uint Node_AddSurface::genSz = 0;
 GLuint Node_AddSurface::inBuf, Node_AddSurface::inBufT, Node_AddSurface::query;
 
@@ -27,6 +28,8 @@ Node_AddSurface::Node_AddSurface() : INODE_INITF(AN_FLAG_RUNONSEEK | AN_FLAG_RUN
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &outPos);
 	glGenBuffers(1, &outNrm);
+
+	glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &maxBufSz);
 }
 
 Node_AddSurface::~Node_AddSurface() {
@@ -50,7 +53,6 @@ void Node_AddSurface::DrawScene(RENDER_PASS pass) {
 	if (!genSz) return;
 
 	if (pass == RENDER_PASS::SOLID) {
-
 		auto e = glGetError();
 		glUseProgram(drawProg);
 		glUniformMatrix4fv(drawProg.Loc(0), 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
@@ -96,11 +98,17 @@ void Node_AddSurface::Execute() {
 	if (!ir.first) return;
 	auto& cv = ir.getconv();
 	auto& vl = *(double**)ir.getval(ANVAR_ORDER::C);
+	if (!vl) return;
 	shape[0] = ir.getdim(0);
 	shape[1] = ir.getdim(1);
 	shape[2] = ir.getdim(2);
 	const int sz = shape[0] * shape[1] * shape[2];
 	if (!sz) return;
+	if (sz > maxBufSz) {
+		Debug::Warning("AddSurface", "Exceeded maximum allowed texel size! ("
+			+ std::to_string(bufSz) + " required, " + std::to_string(maxBufSz) + " available)");
+		return;
+	}
 	std::lock_guard<std::mutex> locker(lock);
 	data.resize(sz);
 #pragma omp parallel for
@@ -166,35 +174,27 @@ void Node_AddSurface::Init() {
 }
 
 void Node_AddSurface::Set() {
-	const auto sz = data.size();
-	//if (sz != bufSz) {
-		bufSz = sz;
-		outSz = (shape[0]-1)*(shape[1]-1)*(shape[2]-1) * 15;
-		glBindBuffer(GL_ARRAY_BUFFER, inBuf);
-		glBufferData(GL_ARRAY_BUFFER, bufSz * sizeof(float), data.data(), GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, outPos);
-		glBufferData(GL_ARRAY_BUFFER, outSz * sizeof(Vec4), nullptr, GL_STATIC_READ);
-		glBindBuffer(GL_ARRAY_BUFFER, outNrm);
-		glBufferData(GL_ARRAY_BUFFER, outSz * sizeof(Vec4), nullptr, GL_STATIC_READ);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	bufSz = data.size();
+	outSz = (shape[0]-1)*(shape[1]-1)*(shape[2]-1) * 15;
+	glBindBuffer(GL_ARRAY_BUFFER, inBuf);
+	glBufferData(GL_ARRAY_BUFFER, bufSz * sizeof(float), data.data(), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, outPos);
+	glBufferData(GL_ARRAY_BUFFER, outSz * sizeof(Vec4), nullptr, GL_STATIC_READ);
+	glBindBuffer(GL_ARRAY_BUFFER, outNrm);
+	glBufferData(GL_ARRAY_BUFFER, outSz * sizeof(Vec4), nullptr, GL_STATIC_READ);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		glBindTexture(GL_TEXTURE_BUFFER, inBufT);
-		glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, inBuf);
-		glBindTexture(GL_TEXTURE_BUFFER, 0);
-		glBindVertexArray(vao);
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, outPos);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, NULL);
-		glBindBuffer(GL_ARRAY_BUFFER, outNrm);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, NULL);
-		glBindVertexArray(0);
-	//}
-	//else {
-	//	glBindBuffer(GL_ARRAY_BUFFER, inBuf);
-	//	glBufferSubData(GL_ARRAY_BUFFER, 0, bufSz, data.data());
-	//	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	//}
+	glBindTexture(GL_TEXTURE_BUFFER, inBufT);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, inBuf);
+	glBindTexture(GL_TEXTURE_BUFFER, 0);
+	glBindVertexArray(vao);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, outPos);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+	glBindBuffer(GL_ARRAY_BUFFER, outNrm);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+	glBindVertexArray(0);
 }
 
 void Node_AddSurface::ExecMC() {
@@ -213,11 +213,11 @@ void Node_AddSurface::ExecMC() {
 	glBindTexture(GL_TEXTURE_BUFFER, triBufT);
 
 	glEnable(GL_RASTERIZER_DISCARD);
-	glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
+	glBeginQuery(GL_PRIMITIVES_GENERATED, query);
 	glBeginTransformFeedback(GL_TRIANGLES);
 	glDrawArrays(GL_POINTS, 0, (shape[0]-1)*(shape[1]-1)*(shape[2]-1));
 	glEndTransformFeedback();
-	glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+	glEndQuery(GL_PRIMITIVES_GENERATED);
 	glGetQueryObjectuiv(query, GL_QUERY_RESULT, &genSz);
 	glDisable(GL_RASTERIZER_DISCARD);
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, 0);

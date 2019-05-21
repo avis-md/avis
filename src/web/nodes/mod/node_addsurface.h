@@ -21,6 +21,7 @@ protected:
 	float cutoff;
 
 	static size_t bufSz, outSz;
+	static int maxBufSz;
 	static uint genSz;
 	static GLuint inBuf, inBufT, query;
 	GLuint vao, outPos, outNrm;

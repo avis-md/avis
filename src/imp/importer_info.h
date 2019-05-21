@@ -56,27 +56,28 @@ Notes:
   trajectory is for data in the SAME file containing the configuration data.
   DO NOT open other files to load their trajectories. It will be done by the system.
   The waiting screen will not clear until this function returns.
+  Either position data or density data must be provided, otherwise the import will have no effect.
 */
 struct ParInfo {
 	const char* path; //IN
 	byte nameSz; //IN
 	float progress; //OPT
 	uint32_t num;
-	char* resname;
-	char* name;
-	uint16_t* type; //H\0 if hydrogen
-	uint16_t* resId;
-	double* pos;
+	char* resname; //OPT if densityNum > 0
+	char* name; //OPT if densityNum > 0
+	uint16_t* type; //OPT if densityNum > 0, H\0 if hydrogen
+	uint16_t* resId; //OPT if densityNum > 0
+	double* pos; //OPT if densityNum > 0
 	double* vel; //OPT
-	struct ProSec{
+	struct ProSec {
 		enum TYPE { HELIX, SHEET } type;
 		uint16_t resSt, resEd;
 		byte helixPitch;
 	}* secStructs; //OPT
 	uint16_t secStructNum;
 	double bounds[6];
-	int densityNum[3]; //OPT
-	double* density; //OPT
+	uint16_t densityNum[3];
+	double* density; //OPT if num > 0
 	TrjInfo trajectory; //OPT
 	char error[100]; //OPT
 };

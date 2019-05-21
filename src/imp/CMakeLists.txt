@@ -10,6 +10,7 @@ set(SOURCES
 	${DIR}/lammps.cpp
 	${DIR}/CDV.cpp
 	${DIR}/dlpoly.cpp
+	${DIR}/bdens.cpp
 	PARENT_SCOPE
 )
 set(HEADERS
@@ -22,5 +23,6 @@ set(HEADERS
 	${DIR}/lammps.h
 	${DIR}/CDV.h
 	${DIR}/dlpoly.h
+	${DIR}/bdens.h
 	PARENT_SCOPE
 )
