@@ -29,6 +29,8 @@ protected:
 	static std::mutex lock;
 
 	static void Init();
+	void InitBuffers();
+
 	void Set();
 	void ExecMC();
 

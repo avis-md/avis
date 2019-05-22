@@ -25,9 +25,7 @@ Node_AddSurface::Node_AddSurface() : INODE_INITF(AN_FLAG_RUNONSEEK | AN_FLAG_RUN
 		scr->AddInput(_("value"), AN_VARTYPE::DOUBLE);
 	);
 
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &outPos);
-	glGenBuffers(1, &outNrm);
+	InitBuffers();
 
 	glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &maxBufSz);
 }
@@ -42,6 +40,22 @@ void Node_AddSurface::Update() {
 	if (!!data.size()) {
 		std::lock_guard<std::mutex> locker(lock);
 		genSz = 0;
+		int shape2[6];
+		shape2[0] = (int)ceil(shape[0] * 0.5f) + 1;
+		shape2[1] = (int)ceil(shape[1] * 0.5f) + 1;
+		shape2[2] = (int)ceil(shape[2] * 0.5f) + 1;
+		shape2[3] = shape[0] - shape2[0] + 2;
+		shape2[4] = shape[1] - shape2[1] + 2;
+		shape2[5] = shape[2] - shape2[2] + 2;
+		for (int a = 0; a < 2; a++) {
+			for (int b = 0; b < 2; b++) {
+				for (int c = 0; c < 2; c++) {
+					
+				}
+			}
+		}
+		bufSz = data.size();
+		outSz = (shape[0]-1)*(shape[1]-1)*(shape[2]-1) * 15;
 		Set();
 		ExecMC();
 		data.clear();
@@ -102,17 +116,16 @@ void Node_AddSurface::Execute() {
 	shape[0] = ir.getdim(0);
 	shape[1] = ir.getdim(1);
 	shape[2] = ir.getdim(2);
-	const int sz = shape[0] * shape[1] * shape[2];
-	if (!sz) return;
-	if (sz > maxBufSz) {
+	bufSz = shape[0] * shape[1] * shape[2];
+	if (!bufSz) return;
+	if (bufSz > maxBufSz) {
 		Debug::Warning("AddSurface", "Exceeded maximum allowed texel size! ("
 			+ std::to_string(bufSz) + " required, " + std::to_string(maxBufSz) + " available)");
-		return;
 	}
 	std::lock_guard<std::mutex> locker(lock);
-	data.resize(sz);
+	data.resize(bufSz);
 #pragma omp parallel for
-	for (int a = 0; a < sz; a++) {
+	for (int a = 0; a < bufSz; a++) {
 		data[a] = (float)vl[a];
 	}
 	cutoff = (float)getval_d(1);
@@ -161,6 +174,9 @@ void Node_AddSurface::Init() {
 
 	glGenBuffers(1, &inBuf);
 	glGenTextures(1, &inBufT);
+	glBindTexture(GL_TEXTURE_BUFFER, inBufT);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, inBuf);
+	glBindTexture(GL_TEXTURE_BUFFER, 0);
 	glGenQueries(1, &query);
 
 	glGenBuffers(1, &triBuf);
@@ -173,20 +189,11 @@ void Node_AddSurface::Init() {
 	glBindTexture(GL_TEXTURE_BUFFER, 0);
 }
 
-void Node_AddSurface::Set() {
-	bufSz = data.size();
-	outSz = (shape[0]-1)*(shape[1]-1)*(shape[2]-1) * 15;
-	glBindBuffer(GL_ARRAY_BUFFER, inBuf);
-	glBufferData(GL_ARRAY_BUFFER, bufSz * sizeof(float), data.data(), GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, outPos);
-	glBufferData(GL_ARRAY_BUFFER, outSz * sizeof(Vec4), nullptr, GL_STATIC_READ);
-	glBindBuffer(GL_ARRAY_BUFFER, outNrm);
-	glBufferData(GL_ARRAY_BUFFER, outSz * sizeof(Vec4), nullptr, GL_STATIC_READ);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+void Node_AddSurface::InitBuffers() {
+	glGenVertexArrays(1, &vao);
+	glGenBuffers(1, &outPos);
+	glGenBuffers(1, &outNrm);
 
-	glBindTexture(GL_TEXTURE_BUFFER, inBufT);
-	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, inBuf);
-	glBindTexture(GL_TEXTURE_BUFFER, 0);
 	glBindVertexArray(vao);
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -195,6 +202,16 @@ void Node_AddSurface::Set() {
 	glBindBuffer(GL_ARRAY_BUFFER, outNrm);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, NULL);
 	glBindVertexArray(0);
+}
+
+void Node_AddSurface::Set() {
+	glBindBuffer(GL_ARRAY_BUFFER, inBuf);
+	glBufferData(GL_ARRAY_BUFFER, bufSz * sizeof(float), data.data(), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, outPos);
+	glBufferData(GL_ARRAY_BUFFER, outSz * sizeof(Vec4), nullptr, GL_STATIC_READ);
+	glBindBuffer(GL_ARRAY_BUFFER, outNrm);
+	glBufferData(GL_ARRAY_BUFFER, outSz * sizeof(Vec4), nullptr, GL_STATIC_READ);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void Node_AddSurface::ExecMC() {

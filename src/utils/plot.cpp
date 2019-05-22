@@ -34,7 +34,7 @@ void plt::plot(float x, float y, float w, float h, float* dx, float** dy, uint c
 	//h -= 4;
 	//UI::Quad(x, y, w, h, white());
 
-	Vec3* poss = new Vec3[cnt];
+	std::vector<Vec3> poss(cnt);
 	float x1 = *dx, x2 = *dx, y1 = **dy, y2 = **dy;
 	for (uint j = 0; j < cnt2; ++j) {
 		for (uint i = 0; i < cnt; ++i) {
@@ -59,7 +59,7 @@ void plt::plot(float x, float y, float w, float h, float* dx, float** dy, uint c
 			poss[i].x = (poss[i].x / Display::width) * 2 - 1;
 			poss[i].y = 1 - (poss[i].y / Display::height) * 2;
 		}
-		UI::SetVao(cnt, poss);
+		UI::SetVao(cnt, poss.data(), poss.data());
 
 		Engine::defProg.Bind();
 		glUniform4f(Engine::defProg.Loc(0), cols[j*3], cols[j*3+1], cols[j*3+2], 1.f);
@@ -68,8 +68,6 @@ void plt::plot(float x, float y, float w, float h, float* dx, float** dy, uint c
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}
-
-	delete[](poss);
 
 	if (font) {
 		font->Align(ALIGN_TOPLEFT);
