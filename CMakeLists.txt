@@ -28,7 +28,7 @@ if (MSVC)
 elseif (LINUX)
 	add_definitions(-DPLATFORM_LNX)
 elseif (APPLE)
-	add_definitions(-DPLATFORM_OSX)
+	add_definitions(-DPLATFORM_OSX -DGL_SILENCE_DEPRECATION)
 else()
 	message(FATAL_ERROR "Platform not supported!")
 endif()
@@ -38,9 +38,11 @@ add_definitions(-DUSE_OPENCL -DRR_EMBED_KERNELS)
 SET(CMAKE_CXX_FLAGS "-std=c++11 -g")
 
 if (MSVC)
-	SET(CMAKE_CXX_FLAGS "/EHsc")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
 elseif (LINUX)
-	SET(CMAKE_CXX_FLAGS "-Wl,-rpath='$$ORIGIN' -static-libstdc++")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-rpath='$$ORIGIN' -static-libstdc++")
+else()
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing")
 endif()
 
 set(INC_DIRS
@@ -104,6 +106,14 @@ if(MSVC)
     set(LIBS
         ${LIBS}
         Libssh2::libssh2
+    )
+elseif(APPLE)
+    set(LIBS
+        ${LIBS}
+        ${LIBSSH2_LIBRARY}
+        dl
+        pthread
+        util
     )
 else()
     set(LIBS
