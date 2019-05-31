@@ -124,3 +124,5 @@ _pkginfo.txt
 *.[Cc]ache
 # but keep track of directories ending in .cache
 !*.[Cc]ache/
+
+package/mac/AViS.app/Contents/MacOS

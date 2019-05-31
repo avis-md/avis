@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>AViS</string>
+	<key>CFBundleExecutable</key>
+	<string>avis</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.chokopan.avis</string>
+	<key>CFBundleName</key>
+	<string>AViS</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.1</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon.icns</string>
+</dict>
+</plist>
