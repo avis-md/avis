@@ -87,8 +87,14 @@ else()
     )
 endif()
 
+if (APPLE)
+set(WEAK -weak_library)
+else()
+set(WEAK)
+endif()
+
 set(LIBS
-	${PYTHON_LIBRARIES}
+	${WEAK} ${PYTHON_LIBRARIES}
 	${OPENGL_gl_LIBRARY}
 	glfw
 	${GLM_LIBRARY}
