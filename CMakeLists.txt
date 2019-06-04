@@ -28,14 +28,14 @@ if (MSVC)
 elseif (LINUX)
 	add_definitions(-DPLATFORM_LNX)
 elseif (APPLE)
-	add_definitions(-DPLATFORM_OSX -DGL_SILENCE_DEPRECATION)
+	add_definitions(-DPLATFORM_OSX -DGL_SILENCE_DEPRECATION -DCL_SILENCE_DEPRECATION)
 else()
 	message(FATAL_ERROR "Platform not supported!")
 endif()
 
 add_definitions(-DUSE_OPENCL -DRR_EMBED_KERNELS)
 
-SET(CMAKE_CXX_FLAGS "-std=c++11 -g")
+SET(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall")
 
 if (MSVC)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")

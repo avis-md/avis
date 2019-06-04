@@ -3,14 +3,14 @@
 
 class SceneObject : public Object {
 public:
-	~SceneObject();
+	virtual ~SceneObject();
 	static pSceneObject New(Vec3 pos, Quat rot = Quat(1, 0, 0, 0), Vec3 scale = Vec3(1, 1, 1)) {
-		auto p = pSceneObject(new SceneObject(pos, rot, scale));
+		auto p = std::make_shared<SceneObject>(pos, rot, scale);
 		p->transform.Init(p, pos, rot, scale);
 		return p;
 	}
 	static pSceneObject New(std::string s = "New Object", Vec3 pos = Vec3(), Quat rot = Quat(1, 0, 0, 0), Vec3 scale = Vec3(1, 1, 1)) {
-		auto p = pSceneObject(new SceneObject(s, pos, rot, scale));
+		auto p = std::make_shared<SceneObject>(s, pos, rot, scale);
 		p->transform.Init(p, pos, rot, scale);
 		return p;
 	}
@@ -58,9 +58,6 @@ public:
 	int _componentCount;
 	std::vector<pComponent> _components;
 
-	friend class MeshFilter;
-	friend class Scene;
-protected:
 	SceneObject(Vec3 pos, Quat rot = Quat(1, 0, 0, 0), Vec3 scale = Vec3(1, 1, 1));
 	SceneObject(std::string s = "New Object", Vec3 pos = Vec3(), Quat rot = Quat(1, 0, 0, 0), Vec3 scale = Vec3(1, 1, 1));
 	SceneObject(byte* data);

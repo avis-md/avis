@@ -1,7 +1,7 @@
 #pragma once
 namespace glsl {
-    const char parF[] = R"(
-#pragma option oriented
+    const char parFOriented[] = R"(
+#version 330 core
 
 uniform mat4 _MV, _P, _IP;
 

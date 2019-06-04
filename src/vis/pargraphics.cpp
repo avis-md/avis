@@ -311,7 +311,7 @@ void ParGraphics::Init() {
 		"fogCol", "isOrtho", "inOpaque" });
 
 	(parProg = Shader::FromVF(glsl::parV, glsl::parF)).AddUniforms({
-		"_MV", "_P", "camPos",
+		"_MV", "_P", "_IP", "camPos",
 		"camFwd", "orthoSz", "screenSize",
 		"radTex", "radScl", "id2col", "colList",
 		"gradCols", "colUseGrad", "spriteScl",
@@ -778,44 +778,45 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		glUseProgram(parProg);
 		glUniformMatrix4fv(parProg.Loc(0), 1, GL_FALSE, glm::value_ptr(_mv));
 		glUniformMatrix4fv(parProg.Loc(1), 1, GL_FALSE, glm::value_ptr(_p));
-		glUniform3f(parProg.Loc(2), _cpos.x, _cpos.y, _cpos.z);
-		glUniform3f(parProg.Loc(3), _cfwd.x, _cfwd.y, _cfwd.z);
-		glUniform1f(parProg.Loc(4), osz);
-		glUniform2f(parProg.Loc(5), _w * ql, _h * ql);
-		glUniform1i(parProg.Loc(6), 1);
+		glUniformMatrix4fv(parProg.Loc(2), 1, GL_FALSE, glm::value_ptr(glm::inverse(_p)));
+		glUniform3f(parProg.Loc(3), _cpos.x, _cpos.y, _cpos.z);
+		glUniform3f(parProg.Loc(4), _cfwd.x, _cfwd.y, _cfwd.z);
+		glUniform1f(parProg.Loc(5), osz);
+		glUniform2f(parProg.Loc(6), _w * ql, _h * ql);
+		glUniform1i(parProg.Loc(7), 1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
-		glUniform1i(parProg.Loc(9), 3);
+		glUniform1i(parProg.Loc(10), 3);
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
-		glUniform1i(parProg.Loc(8), 2);
+		glUniform1i(parProg.Loc(9), 2);
 		glActiveTexture(GL_TEXTURE2);
 		if (!useGradCol) {
 			glBindTexture(GL_TEXTURE_BUFFER, Particles::colorIdTexBuffer);
 		}
 		else {
 			glBindTexture(GL_TEXTURE_BUFFER, Particles::attrs[gradColParam]->texBuf);
-			glUniform4fv(parProg.Loc(10), 3, &gradCols[0][0]);
+			glUniform4fv(parProg.Loc(11), 3, &gradCols[0][0]);
 		}
-		glUniform1i(parProg.Loc(11), useGradCol);
-		glUniform1f(parProg.Loc(12), spriteScl);
+		glUniform1i(parProg.Loc(12), useGradCol);
+		glUniform1f(parProg.Loc(13), spriteScl);
 		bool useorien = (orientType == ORIENT::STRETCH && orientStr > 0.0001f);
-		glUniform1i(parProg.Loc(13), useorien ? 1 : 0);
+		glUniform1i(parProg.Loc(14), useorien ? 1 : 0);
 		if (useorien) {
-			glUniform1f(parProg.Loc(14), std::pow(2, orientStr));
-			glUniform1i(parProg.Loc(15), 4);
+			glUniform1f(parProg.Loc(15), std::pow(2, orientStr));
+			glUniform1i(parProg.Loc(16), 4);
 			glActiveTexture(GL_TEXTURE4);
 			glBindTexture(GL_TEXTURE_BUFFER, Particles::attrs[orientParam[0]]->texBuf);
-			glUniform1i(parProg.Loc(16), 5);
+			glUniform1i(parProg.Loc(17), 5);
 			glActiveTexture(GL_TEXTURE5);
 			glBindTexture(GL_TEXTURE_BUFFER, Particles::attrs[orientParam[1]]->texBuf);
-			glUniform1i(parProg.Loc(17), 6);
+			glUniform1i(parProg.Loc(18), 6);
 			glActiveTexture(GL_TEXTURE6);
 			glBindTexture(GL_TEXTURE_BUFFER, Particles::attrs[orientParam[2]]->texBuf);
 		}
-		glUniform1f(parProg.Loc(18), TUBESIZE);
+		glUniform1f(parProg.Loc(19), TUBESIZE);
 
-		glUniform3f(parProg.Loc(19), Particles::boundingBox[1] - Particles::boundingBox[0]
+		glUniform3f(parProg.Loc(20), Particles::boundingBox[1] - Particles::boundingBox[0]
 			, Particles::boundingBox[3] - Particles::boundingBox[2]
 			, Particles::boundingBox[5] - Particles::boundingBox[4]);
 		
@@ -823,19 +824,19 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		int piy = periodicImgs[3] + periodicImgs[2] + 1;
 		int piz = periodicImgs[5] + periodicImgs[4] + 1;
 		if (pix + piy + piz == 3) pix = 0;
-		glUniform3i(parProg.Loc(20), pix, piy, piz);
-		glUniform3i(parProg.Loc(21), periodicImgs[0], periodicImgs[2], periodicImgs[4]);
+		glUniform3i(parProg.Loc(21), pix, piy, piz);
+		glUniform3i(parProg.Loc(22), periodicImgs[0], periodicImgs[2], periodicImgs[4]);
 		
-		glUniform1i(parProg.Loc(22), 9);
+		glUniform1i(parProg.Loc(23), 9);
 		glActiveTexture(GL_TEXTURE9);
 		glBindTexture(GL_TEXTURE_BUFFER, Particles::posTexBuffer);
 
 		glBindVertexArray(Camera::emptyVao);
 		for (auto& p : drawLists) {
-			if (p.second.second == 1) glUniform1f(parProg.Loc(7), -1);
-			else if (p.second.second == 0x0f) glUniform1f(parProg.Loc(7), 0);
-			else if (p.second.second == 2) glUniform1f(parProg.Loc(7), 0.2f * radScl);
-			else glUniform1f(parProg.Loc(7), radScl);
+			if (p.second.second == 1) glUniform1f(parProg.Loc(8), -1);
+			else if (p.second.second == 0x0f) glUniform1f(parProg.Loc(8), 0);
+			else if (p.second.second == 2) glUniform1f(parProg.Loc(8), 0.2f * radScl);
+			else glUniform1f(parProg.Loc(8), radScl);
 			
 			if (!pix)
 				glDrawArrays(GL_TRIANGLES, p.first * 6, p.second.first * 6);

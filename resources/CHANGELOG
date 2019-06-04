@@ -7,12 +7,20 @@
 #Analysis
 - Removed plotter node background
 - Plotter node output can now be exported as csv files
+- Output of matplatlib can now be shown in node
+- Analysis on MacOS can now be done using Clang
 
 #Visualization
 - Periodic images can now be visualized
 - New effects:
   - FXAA: Smoothes edges without supersampling
 - SSAO samples are now jittered (better result)
+- Improved performance for ray-traced preview
+
+#Miscellaneous
+- New icon!
+- AViS is now built on CMake using native compilers
+- The Mac version is now built on Mojave
 
 #----Previous changes----
 
