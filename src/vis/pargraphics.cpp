@@ -310,7 +310,7 @@ void ParGraphics::Init() {
 		"skyStrDecay" , "skyStrDecayOff" , "specStr",
 		"fogCol", "isOrtho", "inOpaque" });
 
-	(parProg = Shader::FromVF(glsl::parV, glsl::parF)).AddUniforms({
+	(parProg = Shader(glsl::parV, glsl::parF)).AddUniforms({
 		"_MV", "_P", "_IP", "camPos",
 		"camFwd", "orthoSz", "screenSize",
 		"radTex", "radScl", "id2col", "colList",

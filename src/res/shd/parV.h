@@ -1,8 +1,6 @@
 #pragma once
 namespace glsl {
     const char parV[] = R"(
-#version 330 core
-
 const float PI = 3.14159;
 const float fov = 60 * PI / 180;
 

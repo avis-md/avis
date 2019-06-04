@@ -4,7 +4,8 @@
 
 class Shader : public RefCnt {
 public:
-	Shader(GLuint ptr = 0) : pointer(ptr) {}
+	Shader(GLuint ptr = 0) : pointer(ptr), pointers(1, ptr), options({}) {}
+	Shader(const std::string& vert, const std::string& frag);
 	~Shader() { CheckUniqueRef(); }
 
 	operator bool() const {
@@ -17,6 +18,9 @@ public:
 	Shader& AddUniform(const std::string& s);
 	Shader& AddUniforms(std::initializer_list<const std::string> ss);
 
+	void SetOptions(const std::initializer_list<std::string>& nms);
+	void SetOption(const std::string& nm, bool on);
+
 	void Bind();
 	static void Unbind();
 
@@ -26,11 +30,18 @@ public:
 
 	static GLuint FromVF(const std::string& vert, const std::string& frag);
 	static GLuint FromF(GLuint vert, const std::string& frag);
+	
+	static bool LinkShader(GLuint prog);
 
 protected:
 	GLuint pointer;
 
+	std::vector<GLuint> pointers;
+	std::vector<std::pair<std::string, bool>> options;
+
 	std::vector<GLint> uniforms;
+
+	void UpdatePointer();
 
 	void DestroyRef() override;
 };

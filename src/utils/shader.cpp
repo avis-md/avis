@@ -1,5 +1,33 @@
 #include "shader.h"
 
+
+Shader::Shader(const std::string& vert, const std::string& frag) {
+	uint vers = 1;
+	std::istringstream vstrm(vert);
+	std::string s;
+	while (std::getline(vstrm, s)) {
+		if (s[0] != '#') continue;
+		auto ss = string_split(s, ' ', true);
+		if (ss[0] == "#pragma") {
+			if (ss[1] == "option") {
+				options.push_back(std::make_pair(ss[2], false));
+				vers *= 2;
+			}
+		}
+	}
+
+	for (uint v = 0; v < vers; v++) {
+		std::string prep = "#version 330 core\n";
+		for (int a = 0; a < options.size(); a++) {
+			if (!!(v & (1 << a))) {
+				prep += "#define " + options[a].first + "\n";
+			}
+		}
+		pointers.push_back(FromVF(prep + vert, prep + frag));
+	}
+	pointer = pointers[0];
+}
+
 Shader& Shader::AddUniform(const std::string& s) {
 	uniforms.push_back(glGetUniformLocation(pointer, s.c_str()));
 	return *this;
@@ -9,6 +37,23 @@ Shader& Shader::AddUniforms(std::initializer_list<const std::string> ss) {
 	for (auto& s : ss)
 		AddUniform(s);
 	return *this;
+}
+
+void Shader::SetOptions(const std::initializer_list<std::string>& nms) {
+	for (auto& v : options) {
+		v.second = std::find(nms.begin(), nms.end(), v.first) != nms.end();
+	}
+	UpdatePointer();
+}
+
+void Shader::SetOption(const std::string& nm, bool on) {
+	for (auto& v : options) {
+		if (v.first == nm) {
+			v.second = on;
+			break;
+		}
+	}
+	UpdatePointer();
 }
 
 void Shader::Bind() {
@@ -100,17 +145,7 @@ GLuint Shader::FromF(GLuint vert, const std::string& frag) {
 	glAttachShader(pointer, vertex_shader);
 	glAttachShader(pointer, fragment_shader);
 
-	int link_result = 0;
-
-	glLinkProgram(pointer);
-	glGetProgramiv(pointer, GL_LINK_STATUS, &link_result);
-	if (link_result == GL_FALSE)
-	{
-		int info_log_length = 0;
-		glGetProgramiv(pointer, GL_INFO_LOG_LENGTH, &info_log_length);
-		std::vector<char> program_log(info_log_length);
-		glGetProgramInfoLog(pointer, info_log_length, NULL, &program_log[0]);
-		Debug::Error("Shader", "Link error: " + std::string(&program_log[0]));
+	if (!LinkShader(pointer)) {
 		glDeleteProgram(pointer);
 		return 0;
 	}
@@ -119,6 +154,31 @@ GLuint Shader::FromF(GLuint vert, const std::string& frag) {
 	glDetachShader(pointer, fragment_shader);
 	glDeleteShader(fragment_shader);
 	return pointer;
+}
+
+bool Shader::LinkShader(GLuint pointer) {
+	int link_result = 0;
+	glLinkProgram(pointer);
+	glGetProgramiv(pointer, GL_LINK_STATUS, &link_result);
+	if (link_result == GL_FALSE) {
+		int info_log_length = 0;
+		glGetProgramiv(pointer, GL_INFO_LOG_LENGTH, &info_log_length);
+		std::vector<char> program_log(info_log_length);
+		glGetProgramInfoLog(pointer, info_log_length, NULL, &program_log[0]);
+		Debug::Error("Shader", "Link error: " + std::string(&program_log[0]));
+		return false;
+	}
+	return true;
+}
+
+void Shader::UpdatePointer() {
+	uint i = 0, j = 0;
+	for (auto& v : options) {
+		if (v.second)
+			i |= (1 << j);
+		j++;
+	}
+	pointer = pointers[j];
 }
 
 void Shader::DestroyRef() {
