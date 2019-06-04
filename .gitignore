@@ -14,6 +14,7 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
+CMakeSettings.json
 
 *.o
 *.a
@@ -125,4 +126,5 @@ _pkginfo.txt
 # but keep track of directories ending in .cache
 !*.[Cc]ache/
 
-package/mac/AViS.app/Contents/MacOS
+package/mac/AViS.app/Contents/MacOS/
+package/win/

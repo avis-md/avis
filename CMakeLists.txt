@@ -35,14 +35,16 @@ endif()
 
 add_definitions(-DUSE_OPENCL -DRR_EMBED_KERNELS)
 
-SET(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall")
 
 if (MSVC)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
-elseif (LINUX)
+	SET(CMAKE_CXX_FLAGS "/EHsc /W3")
+else()
+SET(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall")
+if (LINUX)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-rpath='$$ORIGIN' -static-libstdc++")
 else()
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing")
+endif()
 endif()
 
 set(INC_DIRS
@@ -71,11 +73,11 @@ endif()
 
 if (MSVC)
     set(LINK_DIRS
-        ${PROJECT_SOURCE_DIR}/radeonrays/RadeonRays
-        ${PROJECT_SOURCE_DIR}/radeonrays/Calc
-        ${PROJECT_SOURCE_DIR}/radeonrays/CLW
-        ${PROJECT_SOURCE_DIR}/libgwavi/build
-        ${PROJECT_SOURCE_DIR}/oidn/build
+        ${CMAKE_BINARY_DIR}/radeonrays/RadeonRays/
+        ${CMAKE_BINARY_DIR}/radeonrays/Calc/
+        ${CMAKE_BINARY_DIR}/radeonrays/CLW/
+        ${CMAKE_BINARY_DIR}/libgwavi/
+        ${CMAKE_BINARY_DIR}/oidn/
     )
 else()
     set(LINK_DIRS
@@ -134,9 +136,8 @@ endif()
 
 if (MSVC)
 	set(DLLS
-        ${PROJECT_SOURCE_DIR}/radeonrays/bin/Release/RadeonRays.dll
-        ${PROJECT_SOURCE_DIR}/oidn/build/Release/OpenImageDenoise.dll
-        ${PROJECT_SOURCE_DIR}/oidn/build/Release/tbb.dll
+        ${TBB_ROOT}/bin/intel64/vc14/tbb.dll
+        ${CMAKE_BINARY_DIR}/oidn/OpenImageDenoise.dll
 	)
 elseif (LINUX)
 	set(DLLS
@@ -149,8 +150,20 @@ else()
 	)
 endif()
 
+if(MSVC)
+set(SOURCES res.rc)
+else()
 set(SOURCES)
+endif()
 set(HEADERS)
+
+
+set(TBB_ROOT "" CACHE PATH "")
+add_subdirectory("oidn" EXCLUDE_FROM_ALL)
+set(RR_EMBED_KERNELS TRUE CACHE BOOL "" FORCE)
+set(RR_NO_TESTS TRUE CACHE BOOL "" FORCE)
+add_subdirectory("radeonrays" EXCLUDE_FROM_ALL)
+add_subdirectory("libgwavi" EXCLUDE_FROM_ALL)
 
 include_directories(${INC_DIRS})
 link_directories(${LINK_DIRS})
@@ -205,7 +218,40 @@ foreach (file_i ${DLLS})
 	)
 endforeach(file_i)
 
-if (APPLE)
+if (MSVC)
+	set (CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/package/win/)
+	set (CMAKE_INSTALL_LOCAL_ONLY TRUE)
+
+	install(
+		FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/avis.exe
+		PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+		DESTINATION bin
+	)
+	install (DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+		DESTINATION bin
+		PATTERN "avis.exe" EXCLUDE
+		PATTERN "*.ilk" EXCLUDE
+		PATTERN "*.pdb" EXCLUDE
+	)
+	
+    set(CPACK_GENERATOR NSIS)
+    set(CPACK_PACKAGE_NAME "AViS")
+    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Analysis and Visualization Software")
+    set(CPACK_PACKAGE_VERSION "0.11")
+    set(CPACK_PACKAGE_VERSION_MAJOR "0")
+    set(CPACK_PACKAGE_VERSION_MINOR "1")
+    set(CPACK_PACKAGE_VERSION_PATCH "1")
+	set(CPACK_PACKAGE_DIRECTORY ${CMAKE_INSTALL_PREFIX})
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY "avis")
+    set(CPACK_NSIS_MODIFY_PATH ON)
+	set(CPACK_PACKAGE_EXECUTABLES avis;AViS)
+	set(CPACK_CREATE_DESKTOP_LINKS avis)
+	set(CPACK_NSIS_MODIFY_PATH "ON")
+	set(CPACK_COMPONENTS_ALL "")
+	set(CPACK_CMAKE_INSTALL_LOCAL_ONLY ON)
+
+    INCLUDE(CPack)
+elseif (APPLE)
 	SET (CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/package/mac/AViS.app/Contents)
 
 	install(

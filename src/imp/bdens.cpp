@@ -1,5 +1,6 @@
 #include "bdens.h"
 #include <fstream>
+#include <algorithm>
 
 #define CP_BLOCK_SZ 65535
 
