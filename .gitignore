@@ -80,6 +80,7 @@ artifacts/
 *.svclog
 *.scc
 *.zip
+*.deb
 
 # Visual C++ cache files
 ipch/
@@ -128,3 +129,4 @@ _pkginfo.txt
 
 package/mac/AViS.app/Contents/MacOS/
 package/win/
+package/deb/pkg-debian/usr/bin/avis-md/

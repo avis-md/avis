@@ -1,0 +1,9 @@
+Package: avis
+Version: 0.11
+Architecture: amd64
+Essential: no
+Priority: optional
+Maintainer: Pua Kai
+Description: Analysis and Visualization Software
+ asdfasdfasdfafasdfsa
+Depends: libfreetype6, libglew2.0, libglfw3, libjpeg-turbo8, libssh2-1

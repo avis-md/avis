@@ -39,7 +39,7 @@ add_definitions(-DUSE_OPENCL -DRR_EMBED_KERNELS)
 if (MSVC)
 	SET(CMAKE_CXX_FLAGS "/EHsc /W3")
 else()
-SET(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall")
+	SET(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall -fopenmp")
 if (LINUX)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-rpath='$$ORIGIN' -static-libstdc++")
 else()
@@ -165,6 +165,7 @@ set(RR_NO_TESTS TRUE CACHE BOOL "" FORCE)
 add_subdirectory("radeonrays" EXCLUDE_FROM_ALL)
 add_subdirectory("libgwavi" EXCLUDE_FROM_ALL)
 
+
 include_directories(${INC_DIRS})
 link_directories(${LINK_DIRS})
 
@@ -201,6 +202,7 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_executable(avis ${SOURCES} ${HEADERS})
+
 target_link_libraries(avis ${LIBS})
 
 file(
@@ -251,7 +253,34 @@ if (MSVC)
 	set(CPACK_CMAKE_INSTALL_LOCAL_ONLY ON)
 
     INCLUDE(CPack)
-elseif (APPLE)
+elseif (LINUX)
+	SET (CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/package/deb/pkg-debian/usr/bin)
+
+	install(
+		FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/avis
+		PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+		DESTINATION ${CMAKE_INSTALL_PREFIX}/avis-md/
+	)
+	install(
+		FILES ${PROJECT_SOURCE_DIR}/avis.desktop
+		PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+		DESTINATION ${CMAKE_INSTALL_PREFIX}/avis-md/
+	)
+	install (DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+		DESTINATION ${CMAKE_INSTALL_PREFIX}/avis-md/
+		PATTERN "avis" EXCLUDE
+	)
+
+	add_custom_target(
+		debian
+		COMMAND
+		"${CMAKE_COMMAND}" --build . --target install
+		COMMAND
+		cd "${PROJECT_SOURCE_DIR}/package/deb/" && dpkg -b pkg-debian/ avis_0.11_amd64.deb
+		WORKING_DIRECTORY
+		"${CMAKE_BINARY_DIR}"
+	)
+else()
 	SET (CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/package/mac/AViS.app/Contents)
 
 	install(
@@ -273,4 +302,5 @@ elseif (APPLE)
 		WORKING_DIRECTORY
 		"${CMAKE_BINARY_DIR}"
 	)
+
 endif()

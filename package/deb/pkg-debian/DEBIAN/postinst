@@ -1,0 +1,3 @@
+#!/bin/sh
+ln -fs /usr/bin/avis-md/avis /usr/bin/avis
+cp /usr/bin/avis-md/avis.desktop /usr/share/applications/

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=AViS
+Comment=Analyse and Visualize Stuff
+Exec=/usr/bin/avis-md/avis
+Terminal=false
+Icon=/usr/bin/avis-md/appicon.ico
+StartupNotify=true
+Terminal=false
+Type=Application
