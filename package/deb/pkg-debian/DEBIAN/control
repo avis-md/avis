@@ -6,4 +6,4 @@ Priority: optional
 Maintainer: Pua Kai
 Description: Analysis and Visualization Software
  asdfasdfasdfafasdfsa
-Depends: libfreetype6, libglew2.0, libglfw3, libjpeg-turbo8, libssh2-1
+Depends: libfreetype6, libglew2.0, libglfw3, libjpeg-turbo8, libssh2-1, libtbb2
