@@ -11,7 +11,7 @@ in float v2f_scl;
 in float v2f_rad;
 
 uniform vec2 screenSize;
-uniform samplerBuffer id2col;
+uniform usamplerBuffer id2col;
 uniform sampler2D colList;
 uniform vec4 gradCols[3];
 uniform int colUseGrad;
@@ -36,7 +36,7 @@ vec3 gradfill(float f) {
 }
 
 void SetColor(int id) {
-    int cd = int(texelFetch(id2col, id-1).r * 255);
+    int cd = int(texelFetch(id2col, id-1).r);
     if (colUseGrad == 1)
         outColor.rgb = gradfill(cd/255.0f);
     else

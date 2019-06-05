@@ -166,7 +166,7 @@ void Particles::GenTexBufs() {
 
 	glGenTextures(1, &colorIdTexBuffer);
 	glBindTexture(GL_TEXTURE_BUFFER, colorIdTexBuffer);
-	glTexBuffer(GL_TEXTURE_BUFFER, GL_R8, colIdBuffer);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_R8UI, colIdBuffer);
 
 	glGenTextures(1, &radTexBuffer);
 	glBindTexture(GL_TEXTURE_BUFFER, radTexBuffer);

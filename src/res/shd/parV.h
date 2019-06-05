@@ -15,7 +15,7 @@ uniform vec2 screenSize;
 uniform samplerBuffer radTex;
 uniform float radScl;
 uniform float spriteScl;
-uniform bool oriented;
+//uniform bool oriented;
 uniform float orienScl;
 
 uniform float tubesize;
@@ -120,9 +120,9 @@ void main(){
 			gl_Position = vec4(-2, -2, -2, 1);
 			return;
 		}
-		if (oriented) {
+#ifdef oriented
 			psz *= orienScl;
-		}
+#endif
 		setsprite(psz, psz, vid);
 	}
 }
