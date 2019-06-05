@@ -786,9 +786,6 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		glUniform1i(parProg.Loc(7), 1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_BUFFER, Particles::radTexBuffer);
-		glUniform1i(parProg.Loc(10), 3);
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 		glUniform1i(parProg.Loc(9), 2);
 		glActiveTexture(GL_TEXTURE2);
 		if (!useGradCol) {
@@ -798,6 +795,9 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 			glBindTexture(GL_TEXTURE_BUFFER, Particles::attrs[gradColParam]->texBuf);
 			glUniform4fv(parProg.Loc(11), 3, &gradCols[0][0]);
 		}
+		glUniform1i(parProg.Loc(10), 3);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 		glUniform1i(parProg.Loc(12), useGradCol);
 		glUniform1f(parProg.Loc(13), spriteScl);
 		bool useorien = (orientType == ORIENT::STRETCH && orientStr > 0.0001f);
