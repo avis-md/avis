@@ -327,7 +327,7 @@ void ParGraphics::Init() {
 		"orthoSz", "id2col", "colList",
 		"gradCols", "colUseGrad",
 		"usegrad", "onecol", "spriteScl",
-		"tubesize" });
+		"tubesize", "_IP" });
 	bid = glGetUniformBlockIndex(parConProg, "clipping");
 	glUniformBlockBinding(parConProg, bid, _clipBindId);
 
@@ -775,6 +775,8 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 	}
 
 	if (!RayTracer::resTex) {
+		bool useorien = (orientType == ORIENT::STRETCH && orientStr > 0.0001f);
+		parProg.SetOption("oriented", useorien);
 		glUseProgram(parProg);
 		glUniformMatrix4fv(parProg.Loc(0), 1, GL_FALSE, glm::value_ptr(_mv));
 		glUniformMatrix4fv(parProg.Loc(1), 1, GL_FALSE, glm::value_ptr(_p));
@@ -800,8 +802,6 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		glBindTexture(GL_TEXTURE_2D, Particles::colorPalleteTex);
 		glUniform1i(parProg.Loc(12), useGradCol);
 		glUniform1f(parProg.Loc(13), spriteScl);
-		bool useorien = (orientType == ORIENT::STRETCH && orientStr > 0.0001f);
-		glUniform1i(parProg.Loc(14), useorien ? 1 : 0);
 		if (useorien) {
 			glUniform1f(parProg.Loc(15), std::pow(2, orientStr));
 			glUniform1i(parProg.Loc(16), 4);
@@ -916,7 +916,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 				glUniform4f(parConProg.Loc(16), conCol.r, conCol.g, conCol.b, useConCol? 1.f : 0.f);
 				glUniform1f(parConProg.Loc(17), spriteScl);
 				glUniform1f(parConProg.Loc(18), TUBESIZE);
-
+				glUniformMatrix4fv(parConProg.Loc(19), 1, false, glm::value_ptr(glm::inverse(_p)));
 				glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
 			}
 		}
@@ -1038,9 +1038,12 @@ void ParGraphics::Reblit() {
 	if (tfboDirty || Scene::dirty) {
 		if (!Particles::empty && !RayTracer::resTex) {
 			//Recolor();
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[0]);
 			float zero[4] = {};
-			glClearBufferfv(GL_COLOR, 0, zero);
+			for (int a = NUM_EXTRA_TEXS - 1; a >= 0; a--) {
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[a]);
+				glClearBufferfv(GL_COLOR, 0, zero);
+			}
+			glDisable(GL_BLEND);
 			BlitSky();
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

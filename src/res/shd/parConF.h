@@ -10,6 +10,7 @@ in vec3 v2f_wpos2;
 in float v2f_scl;
 
 uniform mat4 _P;
+uniform mat4 _IP;
 uniform vec2 screenSize;
 uniform uint id2;
 uniform isamplerBuffer id2col;
@@ -77,11 +78,11 @@ void main()
         (gl_FragCoord.z - 0.5) * 2.0,
         1.0);
 
-    vec4 wPos = inverse(_P) * ndc;
+    vec4 wPos = _IP * ndc;
     wPos /= wPos.w;
 
     ndc.z = -1;
-    vec4 wPos2 = inverse(_P) * ndc;
+    vec4 wPos2 = _IP * ndc;
     wPos2 /= wPos2.w;
 
     vec3 fwd = normalize((wPos - wPos2).xyz);
@@ -131,6 +132,7 @@ void main()
         
         vec4 ndc2 = _P * vec4(pf, 1);
         ndc2 /= ndc2.w;
+        if (ndc2.z < -1) discard;
         gl_FragDepth = ndc2.z * 0.5 + 0.5;
         
         float et = sqrt(lc2)/lm;

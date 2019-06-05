@@ -20,6 +20,10 @@ uniform float orthoSz;
 uniform float spriteScl;
 uniform float tubesize;
 
+uniform vec3 bbox;
+uniform ivec3 imgCnt;
+uniform ivec3 imgOff;
+
 layout (std140) uniform clipping {
     vec4 clip_planes[6];
 };

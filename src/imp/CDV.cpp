@@ -36,7 +36,7 @@ bool CDV::Read(ParInfo* info) {
 	strm.seekg(pos);
 
 	while (std::getline(strm, s)) {
-		
+		if (s[0] == ' ') s = s.substr(s.find_first_not_of(' '));
 		auto ps = s.find_first_of(' ');
 		if (uid) ps = s.find_first_of(' ', ps + 1);
 		pi = (uint32_t)std::stoi(s.substr(0, ps));
