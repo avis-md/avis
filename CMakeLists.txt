@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.3)
 project (avis)
 
 if (UNIX AND NOT APPLE)
@@ -35,13 +35,13 @@ endif()
 
 add_definitions(-DUSE_OPENCL -DRR_EMBED_KERNELS)
 
-
 if (MSVC)
 	SET(CMAKE_CXX_FLAGS "/EHsc /W3")
 else()
-	SET(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall -fopenmp")
+	SET(CMAKE_CXX_FLAGS "-g -Wall")
+	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++11> $<$<COMPILE_LANGUAGE:C>:-std=c99>)
 if (LINUX)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-rpath='$$ORIGIN' -static-libstdc++")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-rpath='$$ORIGIN' -static-libstdc++ -fopenmp")
 else()
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing")
 endif()
@@ -156,15 +156,6 @@ else()
 set(SOURCES)
 endif()
 set(HEADERS)
-
-
-set(TBB_ROOT "" CACHE PATH "")
-add_subdirectory("oidn" EXCLUDE_FROM_ALL)
-set(RR_EMBED_KERNELS TRUE CACHE BOOL "" FORCE)
-set(RR_NO_TESTS TRUE CACHE BOOL "" FORCE)
-add_subdirectory("radeonrays" EXCLUDE_FROM_ALL)
-add_subdirectory("libgwavi" EXCLUDE_FROM_ALL)
-
 
 include_directories(${INC_DIRS})
 link_directories(${LINK_DIRS})
@@ -294,7 +285,7 @@ else()
 	)
 
 	add_custom_target(
-		package
+		app
 		COMMAND
 		"${CMAKE_COMMAND}" --build . --target install
 		COMMAND
