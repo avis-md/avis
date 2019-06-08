@@ -1,8 +1,6 @@
 #pragma once
 namespace glsl {
     const char parConF[] = R"(
-#version 330 core
-
 flat in int v2f_id1;
 flat in int v2f_id2;
 in vec3 v2f_wpos1;

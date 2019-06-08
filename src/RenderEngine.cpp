@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "md/particles.h"
 #include <random>
 
 void _InitGBuffer(Camera::TexGroup& tg, float w = Display::width, float h = Display::height) {
@@ -178,7 +179,7 @@ void Camera::Render(onBlitFunc func) {
 
 	float zero[4] = {};
 	float one = 1;
-	if (Scene::dirty) {
+	if (Scene::dirty && !Particles::empty) {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, texs.fbo);
 		glClearBufferfv(GL_COLOR, 0, zero);

@@ -73,6 +73,8 @@ void UI::Init() {
 		else Debug::Warning("UI", "failed to open alternate font (/res/font2.ttf)! Non-ascii text will not work!");
 	}
 	else if (!font2) font2 = font;
+
+	ResetMatrix();
 }
 
 void UI::IncLayer() {

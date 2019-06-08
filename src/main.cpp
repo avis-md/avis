@@ -78,6 +78,13 @@ void rendFunc() {
 }
 
 void updateFunc() {
+	if (Particles::empty) {
+		if (!AnWeb::drawFull && !UI::editingText && !UI::_layerMax && Input::KeyDown(KEY::Space) && !!ParGraphics::bgs.size()) {
+			ParGraphics::bgi = (ParGraphics::bgi + 1) % ParGraphics::bgs.size();
+			ParGraphics::bg = Texture(ParGraphics::bgs[ParGraphics::bgi], false, TEX_FILTER_BILINEAR, 1, TEX_WRAP_CLAMP);
+			ParGraphics::tfboDirty = true;
+		}
+	}
 	if (ParLoader::parDirty) {
 		ParLoader::parDirty = false;
 		if (ParLoader::impId == 0) {
@@ -144,7 +151,7 @@ void updateFunc() {
 		if (Input::KeyDown(KEY::F5)) {
 			VisRenderer::ToImage();
 		}
-	}Quat() * Vec3();
+	}
 	if (RayTracer::resTex) {
 		if (ParGraphics::tfboDirty) {
 			Scene::dirty = true;
@@ -158,8 +165,8 @@ void paintfunc() {
 	bool stealFocus = false;
 	UI2::sepw = 0.5f;
 
-	if (Particles::empty) {
-		ParMenu::DrawStart();
+	if (ParLoader::busy) {
+		ParMenu::DrawLoading();
 	}
 
 	if (AnWeb::drawFull) {
@@ -176,7 +183,6 @@ void paintfunc() {
 		ParGraphics::DrawOverlay();
 	}
 	VisSystem::DrawBar();
-
 	ErrorView::Draw();
 	ArrayView::Draw();
 
@@ -245,7 +251,15 @@ void paintfunc() {
 	UI2::DrawTooltip();
 	
 #ifdef DEBUG_CG
-	UI::Label(10, 10, 12, "Render: " + std::to_string(rendMs) + "ms", white(), true);
+	UI::Label(10, 10, 12, "UI: " + std::to_string(VisSystem::uiMs) + "ms", white(), true);
+	UI::Label(10, 25, 12, "Render: " + std::to_string(rendMs) + "ms", white(), true);
+
+	UI::Quad(10, 40, 50, 35, ChokoLait::mainCamera->texs.colTex, white(0.5f));
+	UI::Quad(10, 80, 50, 35, ChokoLait::mainCamera->texs.normTex, white(0.5f));
+	UI::Quad(10, 120, 50, 35, ChokoLait::mainCamera->texs.depthTex, white(0.5f));
+	
+	for (int a = 0; a < NUM_EXTRA_TEXS; a++)
+		UI::Quad(10, 180 + 40 * a, 50, 35, ChokoLait::mainCamera->blitTexs[a], white(0.5f));
 #endif
 }
 

@@ -25,6 +25,8 @@
 #include "res/shd/parF.h"
 #include "res/shd/parConV.h"
 #include "res/shd/parConF.h"
+#include "res/shd/parConLineV.h"
+#include "res/shd/parConLineF.h"
 #include "res/shd/reflFrag.h"
 #include "res/shd/reflFragC.h"
 #include "res/shd/colorerFrag.h"
@@ -320,7 +322,7 @@ void ParGraphics::Init() {
 	auto bid = glGetUniformBlockIndex(parProg, "clipping");
 	glUniformBlockBinding(parProg, bid, _clipBindId);
 
-	(parConProg = Shader::FromVF(glsl::parConV, glsl::parConF)).AddUniforms({
+	(parConProg = Shader(glsl::parConV, glsl::parConF)).AddUniforms({
 		"_MV", "_P", "camPos", "camFwd",
 		"screenSize", "posTex", "connTex",
 		"radTex", "id2", "radScl",
@@ -331,7 +333,7 @@ void ParGraphics::Init() {
 	bid = glGetUniformBlockIndex(parConProg, "clipping");
 	glUniformBlockBinding(parConProg, bid, _clipBindId);
 
-	(parConLineProg = Shader::FromVF(IO::GetText(IO::path + "shaders/parConV_line.glsl"), IO::GetText(IO::path + "shaders/parConF_line.glsl"))).AddUniforms({
+	(parConLineProg = Shader(glsl::parConLineV, glsl::parConLineF)).AddUniforms({
 		"_MV", "_P", "posTex",
 		"connTex", "rad", "id2", "radScl",
 		"orthoSz", "id2col", "colList",
@@ -504,8 +506,9 @@ void ParGraphics::FillRad(byte* rads) {
 }
 
 void ParGraphics::Update() {
-	if (Particles::empty)
-		Scene::dirty = true;
+	if (Particles::empty) {
+//		Scene::dirty = true;
+	}
 	else if (animate && !seek) {
 		if (!animTarFps) {
 			Particles::IncFrame(true);
@@ -1033,48 +1036,58 @@ void ParGraphics::RerenderTr(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 
 void ParGraphics::Reblit() {
 	auto& cam = ChokoLait::mainCamera;
-	//if (!AnWeb::drawFull || Scene::dirty)
-	//	tfboDirty = true;
+	
 	if (tfboDirty || Scene::dirty) {
-		if (!Particles::empty && !RayTracer::resTex) {
-			//Recolor();
-			float zero[4] = {};
-			for (int a = NUM_EXTRA_TEXS - 1; a >= 0; a--) {
-				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[a]);
-				glClearBufferfv(GL_COLOR, 0, zero);
-			}
-			glDisable(GL_BLEND);
-			BlitSky();
+		if (Particles::empty) {
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[0]);
+			float zero[4] = { 1, 0, 0, 1 };
+			glClearBufferfv(GL_COLOR, 0, zero);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			//ParMenu::DrawBg();
+			UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), bg, DRAWTEX_CROP);
+			UI::Texture(0, 0, static_cast<float>(Display::width), static_cast<float>(Display::height), logo, white(0.8f), DRAWTEX_CROP);
+		}
+		else {
+			if (!RayTracer::resTex) {
+				//Recolor();
+				float zero[4] = {};
+				for (int a = NUM_EXTRA_TEXS - 1; a >= 0; a--) {
+					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[a]);
+					glClearBufferfv(GL_COLOR, 0, zero);
+				}
+				glDisable(GL_BLEND);
+				BlitSky();
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			auto& cm = ChokoLait::mainCameraObj->transform;
-			if (Scene::dirty) {
-				ParGraphics::RerenderTr(cm.position(), cm.forward(), (float)Display::width, (float)Display::height);
+				auto& cm = ChokoLait::mainCameraObj->transform;
+				if (Scene::dirty) {
+					ParGraphics::RerenderTr(cm.position(), cm.forward(), (float)Display::width, (float)Display::height);
+				}
+
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[1]);
+				BlitSkyTr();
+				cam->SwapBlitBuffers();
+				//UI::Quad(0, 0, Display::width, Display::height, cam->trTexs.normTex);
 			}
-
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[1]);
-			BlitSkyTr();
-			cam->SwapBlitBuffers();
-			//UI::Quad(0, 0, Display::width, Display::height, cam->trTexs.normTex);
-		}
-		//*
-		//glBlendFunc(GL_ONE, GL_ZERO);
-		glDisable(GL_BLEND);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		
-		Eff::Apply();
-		AnWeb::DrawOverlay();
-		if (showAxes) {
-			glEnable(GL_BLEND);
-			DrawAxes();
+			//*
+			//glBlendFunc(GL_ONE, GL_ZERO);
 			glDisable(GL_BLEND);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			
+			Eff::Apply();
+			AnWeb::DrawOverlay();
+			if (showAxes) {
+				glEnable(GL_BLEND);
+				DrawAxes();
+				glDisable(GL_BLEND);
+			}
+			UI::Quad(0, 0, Display::width, Display::height, RayTracer::resTex);
 		}
-		UI::Quad(0, 0, Display::width, Display::height, RayTracer::resTex);
 		VisSystem::BlurBack();
 		tfboDirty = false;
 	}
-
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->target);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, cam->blitFbos[0]);
 	
@@ -1087,10 +1100,12 @@ void ParGraphics::Reblit() {
 	glEnable(GL_BLEND);
 	//glBlendFunc(GL_ONE, GL_ONE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	if (Shadows::show)
-		Shadows::Reblit();
-	if (!!hlIds.size() || !!Selection::atoms.size())
-		BlitHl();
+	if (!Particles::empty) {
+		if (Shadows::show)
+			Shadows::Reblit();
+		if (!!hlIds.size() || !!Selection::atoms.size())
+			BlitHl();
+	}
 }
 
 void ParGraphics::BlitSky() {

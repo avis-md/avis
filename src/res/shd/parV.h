@@ -84,13 +84,13 @@ void main(){
 	vec3 pos = texelFetch(posTex, pid).xyz;
 
     vec3 ppos = pos;
-    if (imgCnt.x > 0) {
-        int iz = int(mod(gl_InstanceID, imgCnt.z));
-        int gi2 = int(gl_InstanceID / imgCnt.z);
-        int iy = int(mod(gi2, imgCnt.y));
-        int ix = int(gi2 / imgCnt.y);
-        ppos += bbox * (vec3(ix, iy, iz) - imgOff);
-    }
+
+	int iz = int(mod(gl_InstanceID, imgCnt.z));
+	int gi2 = int(gl_InstanceID / imgCnt.z);
+	int iy = int(mod(gi2, imgCnt.y));
+	int ix = int(gi2 / imgCnt.y);
+	ppos += bbox * (vec3(ix, iy, iz) - imgOff);
+	
 	vec4 wpos = _MV*vec4(ppos, 1);
 	wpos /= wpos.w;
 	if (clipped(wpos.xyz)) {
