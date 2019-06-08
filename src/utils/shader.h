@@ -24,7 +24,7 @@ public:
 	void Bind();
 	static void Unbind();
 
-	const GLint Loc(int);
+	GLint Loc(int);
 
 	static bool LoadShader(GLenum shaderType, std::string source, GLuint& shader, std::string* err = nullptr);
 

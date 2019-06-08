@@ -64,7 +64,7 @@ void Shader::Unbind() {
 	glUseProgram(0);
 }
 
-const GLint Shader::Loc(int i) {
+GLint Shader::Loc(int i) {
 	return uniforms[i];
 }
 
