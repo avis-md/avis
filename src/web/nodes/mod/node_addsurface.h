@@ -31,8 +31,9 @@ protected:
 	static void Init();
 	void InitBuffers();
 
-	void Set();
-	void ExecMC();
+	void ResizeInBuf(int), ResizeOutBuf(int);
+	void SetInBuf(void*, int);
+	void ExecMC(int offset[3], int size[3]);
 
 	static const float triTable[256*15];
 	static GLuint triBuf, triBufT;

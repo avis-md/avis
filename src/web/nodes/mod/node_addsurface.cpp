@@ -40,24 +40,25 @@ void Node_AddSurface::Update() {
 	if (!!data.size()) {
 		std::lock_guard<std::mutex> locker(lock);
 		genSz = 0;
-		int shape2[6];
-		shape2[0] = (int)ceil(shape[0] * 0.5f) + 1;
-		shape2[1] = (int)ceil(shape[1] * 0.5f) + 1;
-		shape2[2] = (int)ceil(shape[2] * 0.5f) + 1;
-		shape2[3] = shape[0] - shape2[0] + 2;
-		shape2[4] = shape[1] - shape2[1] + 2;
-		shape2[5] = shape[2] - shape2[2] + 2;
-		for (int a = 0; a < 2; a++) {
-			for (int b = 0; b < 2; b++) {
-				for (int c = 0; c < 2; c++) {
-					
-				}
-			}
+		//assume row-major
+		const int mul = shape[0] * shape[1];
+		const int zmax = maxBufSz / mul / sizeof(float);
+		const int zn = (shape[2] + zmax - 1) / zmax;
+		std::cout << "number of buffer splits: " << zn << " (" << zmax << " " << shape[2] << ")" << std::endl;
+
+		int zs = (shape[2] + zn * 2 - 1) / zn;
+		ResizeInBuf(zs * sizeof(float));
+		
+		int zo = 0;
+		for (int a = 0; a < zn; a++) {
+			if (a == zn - 1)
+				zs = std::min(zs, shape[2] - zo);
+			Debug::Message("Node_AddSurface", "Generating part " + std::to_string(a + 1) + " of " + std::to_string(zn));
+			std::cout << zo << " " << zs << std::endl;
+			SetInBuf(&data[zo], zs * sizeof(float));
+
+			zo += zs - 1;
 		}
-		bufSz = data.size();
-		outSz = (shape[0]-1)*(shape[1]-1)*(shape[2]-1) * 15;
-		Set();
-		ExecMC();
 		data.clear();
 		if (!!genSz) Scene::dirty = true;
 	}
@@ -204,6 +205,7 @@ void Node_AddSurface::InitBuffers() {
 	glBindVertexArray(0);
 }
 
+/*
 void Node_AddSurface::Set() {
 	glBindBuffer(GL_ARRAY_BUFFER, inBuf);
 	glBufferData(GL_ARRAY_BUFFER, bufSz * sizeof(float), data.data(), GL_STATIC_DRAW);
@@ -213,8 +215,29 @@ void Node_AddSurface::Set() {
 	glBufferData(GL_ARRAY_BUFFER, outSz * sizeof(Vec4), nullptr, GL_STATIC_READ);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
+*/
 
-void Node_AddSurface::ExecMC() {
+void Node_AddSurface::ResizeInBuf(int i) {
+	glBindBuffer(GL_ARRAY_BUFFER, inBuf);
+	glBufferData(GL_ARRAY_BUFFER, i, nullptr, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Node_AddSurface::ResizeOutBuf(int i) {
+	glBindBuffer(GL_ARRAY_BUFFER, outPos);
+	glBufferData(GL_ARRAY_BUFFER, i, nullptr, GL_STATIC_READ);
+	glBindBuffer(GL_ARRAY_BUFFER, outNrm);
+	glBufferData(GL_ARRAY_BUFFER, i, nullptr, GL_STATIC_READ);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Node_AddSurface::SetInBuf(void* data, int sz) {
+	glBindBuffer(GL_ARRAY_BUFFER, inBuf);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sz, data);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Node_AddSurface::ExecMC(int offset[3], int size[3]) {
 	glUseProgram(marchProg);
 	glBindVertexArray(Camera::emptyVao);
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, outPos);
@@ -236,6 +259,7 @@ void Node_AddSurface::ExecMC() {
 	glEndTransformFeedback();
 	glEndQuery(GL_PRIMITIVES_GENERATED);
 	glGetQueryObjectuiv(query, GL_QUERY_RESULT, &genSz);
+	Debug::Message("Node_AddSurface", "Generated " + std::to_string(genSz) + " triangles");
 	glDisable(GL_RASTERIZER_DISCARD);
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, 0);
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, 0);
