@@ -40,25 +40,47 @@ void Node_AddSurface::Update() {
 	if (!!data.size()) {
 		std::lock_guard<std::mutex> locker(lock);
 		genSz = 0;
-		//assume row-major
-		const int mul = shape[0] * shape[1];
+		const int mul = shape[1] * shape[2];
 		const int zmax = maxBufSz / mul / sizeof(float);
-		const int zn = (shape[2] + zmax - 1) / zmax;
+		const int zn = (shape[0] + zmax - 1) / zmax;
 		std::cout << "number of buffer splits: " << zn << " (" << zmax << " " << shape[2] << ")" << std::endl;
 
-		int zs = (shape[2] + zn * 2 - 1) / zn;
-		ResizeInBuf(zs * sizeof(float));
+		int _zs = (shape[0] + zn * 2 - 1) / zn;
+		ResizeInBuf(_zs * mul * sizeof(float));
 		
 		int zo = 0;
+		int _outSz = 0;
+		int _mtmpSz = 0;
 		for (int a = 0; a < zn; a++) {
-			if (a == zn - 1)
-				zs = std::min(zs, shape[2] - zo);
+			auto zs = (a == zn - 1) ? std::min(_zs, shape[0] - zo) : _zs;
 			Debug::Message("Node_AddSurface", "Generating part " + std::to_string(a + 1) + " of " + std::to_string(zn));
 			std::cout << zo << " " << zs << std::endl;
-			SetInBuf(&data[zo], zs * sizeof(float));
-
+			SetInBuf(&data[zo * mul], zs * mul * sizeof(float));
+			auto sz = ExecMC(glm::ivec3(zo, 0, 0), glm::ivec3(zs, shape[1], shape[2]));
+			_outSz += sz;
+			_mtmpSz = std::max(_mtmpSz, sz);
 			zo += zs - 1;
 		}
+
+		Debug::Message("Node_AddSurface", "Allocating for " + std::to_string(_outSz) + " triangles with tmp buffer of " + std::to_string(_mtmpSz) + " triangles");
+		ResizeOutBuf(_outSz * sizeof(Vec4));
+		ResizeTmpBuf(_mtmpSz * sizeof(Vec4));
+
+		zo = 0;
+		int ooff = 0;
+		for (int a = 0; a < zn; a++) {
+			auto zs = (a == zn - 1) ? std::min(_zs, shape[0] - zo) : _zs;
+			Debug::Message("Node_AddSurface", "Generating part " + std::to_string(a + 1) + " of " + std::to_string(zn));
+			std::cout << zo << " " << zs << std::endl;
+			SetInBuf(&data[zo * mul], zs * mul * sizeof(float));
+			auto sz = ExecMC(glm::ivec3(zo, 0, 0), glm::ivec3(zs, shape[1], shape[2]));
+			glBindBuffer(GL_COPY_READ_BUFFER, tmpPos);
+			glBindBuffer(GL_COPY_WRITE_BUFFER, outPos);
+			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, ooff * sizeof(Vec4), sz * sizeof(Vec4));
+			zo += zs - 1;
+			ooff += sz;
+		}
+
 		data.clear();
 		if (!!genSz) Scene::dirty = true;
 	}
@@ -125,7 +147,6 @@ void Node_AddSurface::Execute() {
 	}
 	std::lock_guard<std::mutex> locker(lock);
 	data.resize(bufSz);
-#pragma omp parallel for
 	for (int a = 0; a < bufSz; a++) {
 		data[a] = (float)vl[a];
 	}
@@ -159,7 +180,7 @@ void Node_AddSurface::Init() {
 	glDeleteShader(vs);
 	glDeleteShader(gs);
 
-	marchProg.AddUniforms({ "data", "val", "shp", "triBuf" });
+	marchProg.AddUniforms({ "data", "val", "shp", "off", "triBuf" });
 
 	(drawProg = Shader::FromVF(IO::GetText(IO::path + "shaders/surfDVert.glsl"), IO::GetText(IO::path + "shaders/surfDFrag.glsl")))
 		.AddUniforms({ "_MV", "_MVP", "bbox1", "bbox2" });
@@ -185,6 +206,8 @@ void Node_AddSurface::InitBuffers() {
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &outPos);
 	glGenBuffers(1, &outNrm);
+	glGenBuffers(1, &tmpPos);
+	glGenBuffers(1, &tmpNrm);
 
 	glBindVertexArray(vao);
 	glEnableVertexAttribArray(0);
@@ -216,9 +239,17 @@ void Node_AddSurface::ResizeInBuf(int i) {
 
 void Node_AddSurface::ResizeOutBuf(int i) {
 	glBindBuffer(GL_ARRAY_BUFFER, outPos);
-	glBufferData(GL_ARRAY_BUFFER, i, nullptr, GL_STATIC_READ);
+	glBufferData(GL_ARRAY_BUFFER, i, nullptr, GL_STATIC_COPY);
 	glBindBuffer(GL_ARRAY_BUFFER, outNrm);
-	glBufferData(GL_ARRAY_BUFFER, i, nullptr, GL_STATIC_READ);
+	glBufferData(GL_ARRAY_BUFFER, i, nullptr, GL_STATIC_COPY);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Node_AddSurface::ResizeTmpBuf(int i) {
+	glBindBuffer(GL_ARRAY_BUFFER, tmpPos);
+	glBufferData(GL_ARRAY_BUFFER, i, nullptr, GL_STATIC_COPY);
+	glBindBuffer(GL_ARRAY_BUFFER, tmpNrm);
+	glBufferData(GL_ARRAY_BUFFER, i, nullptr, GL_STATIC_COPY);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
@@ -228,34 +259,36 @@ void Node_AddSurface::SetInBuf(void* data, int sz) {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void Node_AddSurface::ExecMC(int offset[3], int size[3]) {
+int Node_AddSurface::ExecMC(glm::ivec3 offset, glm::ivec3 size) {
 	glUseProgram(marchProg);
 	glBindVertexArray(Camera::emptyVao);
-	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, outPos);
-	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, outNrm);
-
+	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tmpPos);
+	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, tmpNrm);
 	glUniform1i(marchProg.Loc(0), 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_BUFFER, inBufT);
 	glUniform1f(marchProg.Loc(1), cutoff);
-	glUniform3i(marchProg.Loc(2), shape[0], shape[1], shape[2]);
-	glUniform1i(marchProg.Loc(3), 2);
+	glUniform3i(marchProg.Loc(2), size[0], size[1], size[2]);
+	glUniform3f(marchProg.Loc(3), offset[0], offset[1], offset[3]);
+	glUniform1i(marchProg.Loc(4), 2);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_BUFFER, triBufT);
 
 	glEnable(GL_RASTERIZER_DISCARD);
 	glBeginQuery(GL_PRIMITIVES_GENERATED, query);
 	glBeginTransformFeedback(GL_TRIANGLES);
-	glDrawArrays(GL_POINTS, 0, (shape[0]-1)*(shape[1]-1)*(shape[2]-1));
+	glDrawArrays(GL_POINTS, 0, (size[0]-1)*(size[1]-1)*(size[2]-1));
 	glEndTransformFeedback();
 	glEndQuery(GL_PRIMITIVES_GENERATED);
-	glGetQueryObjectuiv(query, GL_QUERY_RESULT, &genSz);
-	Debug::Message("Node_AddSurface", "Generated " + std::to_string(genSz) + " triangles");
+	uint gsz;
+	glGetQueryObjectuiv(query, GL_QUERY_RESULT, &gsz);
+	Debug::Message("Node_AddSurface", "Generated " + std::to_string(gsz) + " triangles");
 	glDisable(GL_RASTERIZER_DISCARD);
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, 0);
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
+	return (int)gsz;
 }
 
 const float Node_AddSurface::triTable[] = {

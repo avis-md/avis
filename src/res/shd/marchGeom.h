@@ -1,6 +1,7 @@
 #pragma once
 namespace glsl {
 	const char marchGeom[] = R"(#version 330 core
+
 layout(points) in;
 layout(triangle_strip, max_vertices = 15) out;
 

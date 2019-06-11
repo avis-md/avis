@@ -24,16 +24,16 @@ protected:
 	static int maxBufSz;
 	static uint genSz;
 	static GLuint inBuf, inBufT, query;
-	GLuint vao, outPos, outNrm;
+	GLuint vao, outPos, outNrm, tmpPos, tmpNrm;
 
 	static std::mutex lock;
 
 	static void Init();
 	void InitBuffers();
 
-	void ResizeInBuf(int), ResizeOutBuf(int);
+	void ResizeInBuf(int), ResizeOutBuf(int), ResizeTmpBuf(int);
 	void SetInBuf(void*, int);
-	void ExecMC(int offset[3], int size[3]);
+	int ExecMC(glm::ivec3 offset, glm::ivec3 size);
 
 	static const float triTable[256*15];
 	static GLuint triBuf, triBufT;

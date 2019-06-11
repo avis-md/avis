@@ -592,7 +592,7 @@ void ParLoader::DoOpen() {
 		}
 	}
 	else {
-		std::memcpy(Volumetric::currentFrame->data.data(), info.density, info.densityNum[0]*info.densityNum[1]*info.densityNum[2]);
+		std::memcpy(Volumetric::currentFrame->data.data(), info.density, info.densityNum[0]*info.densityNum[1]*info.densityNum[2] * sizeof(double));
 		delete[](info.density);
 	}
 

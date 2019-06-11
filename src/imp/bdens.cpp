@@ -1,4 +1,5 @@
 #include "bdens.h"
+#include <iostream>
 #include <fstream>
 #include <algorithm>
 
