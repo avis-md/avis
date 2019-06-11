@@ -149,16 +149,7 @@ void Node_AddSurface::Init() {
 	glAttachShader(marchProg, gs);
 	const char* fb[] = { "outPos", "outNrm" };
 	glTransformFeedbackVaryings(marchProg, 2, fb, GL_SEPARATE_ATTRIBS);
-	int link_result = 0;
-	glLinkProgram(marchProg);
-	glGetProgramiv(marchProg, GL_LINK_STATUS, &link_result);
-	if (!link_result)
-	{
-		int info_log_length = 0;
-		glGetProgramiv(marchProg, GL_INFO_LOG_LENGTH, &info_log_length);
-		std::vector<char> program_log(info_log_length);
-		glGetProgramInfoLog(marchProg, info_log_length, NULL, &program_log[0]);
-		Debug::Error("AddSurface::Init", "Link error: " + std::string(program_log.data(), info_log_length));
+	if (!Shader::LinkShader(marchProg)) {
 		marchProg = 0;
 		return;
 	}

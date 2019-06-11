@@ -1,13 +1,13 @@
 #pragma once
 namespace glsl {
 	const char marchGeom[] = R"(#version 330 core
-
 layout(points) in;
 layout(triangle_strip, max_vertices = 15) out;
 
 uniform samplerBuffer data;
 uniform float val;
 uniform ivec3 shp;
+uniform vec3 off;
 
 uniform samplerBuffer triBuf;
 
@@ -36,7 +36,7 @@ vec3 interp(float v1, float v2, vec3 p1, vec3 p2) {
 	if (abs(val - v2) < 0.0001f) return p2;
 	if (abs(v2 - v1) < 0.0001f) return p1;
 	float mul = (val - v1) / (v2 - v1);
-	return mix(p1, p2, mul);
+	return mix(p1, p2, mul) + off;
 }
 
 vec3 _getnrm(ivec3 p, float v) {
