@@ -405,6 +405,12 @@ void ParLoader::DoOpen() {
 		busy = false;
 		return;
 	}
+	
+	memcpy(Particles::boundingBox, info.bounds, 6 * sizeof(double));
+	if (!VisSystem::currentSavePath.size())
+		ParGraphics::rotCenter = Vec3(info.bounds[0] + info.bounds[1], 
+		info.bounds[2] + info.bounds[3], 
+		info.bounds[4] + info.bounds[5]) * 0.5f;
 
 	if (info.num > 0) {
 		memcpy(&Particles::names[0], info.name, info.num * PAR_MAX_NAME_LEN);
@@ -412,11 +418,6 @@ void ParLoader::DoOpen() {
 		Particles::poss = (glm::dvec3*)info.pos;
 		Particles::vels = (glm::dvec3*)info.vel;
 		memcpy(&Particles::types[0], info.type, info.num * sizeof(short));
-		memcpy(Particles::boundingBox, info.bounds, 6 * sizeof(double));
-		if (!VisSystem::currentSavePath.size())
-			ParGraphics::rotCenter = Vec3(info.bounds[0] + info.bounds[1], 
-			info.bounds[2] + info.bounds[3], 
-			info.bounds[4] + info.bounds[5]) * 0.5f;
 
 		auto& conn = Particles::conns;
 

@@ -22,13 +22,9 @@ float get(int x, int y, int z) {
 }
 
 float tget(int x, int y, int z) {
-	if ((x < 0 || x >= shp.x)
-		|| (y < 0 || y >= shp.y)
-		|| (z < 0 || z >= shp.z)) {
-		x = clamp(x, 0, shp.x-1);
-		y = clamp(y, 0, shp.y-1);
-		z = clamp(z, 0, shp.z-1);
-	}
+	x = clamp(x, 0, shp.x-1);
+	y = clamp(y, 0, shp.y-1);
+	z = clamp(z, 0, shp.z-1);
 	return texelFetch(data, x * shp.y * shp.z + y * shp.z + z).x;
 }
 
@@ -41,7 +37,7 @@ vec3 interp(float v1, float v2, vec3 p1, vec3 p2) {
 }
 
 vec3 _getnrm(ivec3 p, float v) {
-	vec3 dif = vec3(tget(p.x-1, p.y, p.z) - v, 0, 0)
+	vec3 dif = vec3(tget(p.x-1, p.y, p.z) - v, 0, 0.01)
 		- vec3(tget(p.x+1, p.y, p.z) - v, 0, 0)
 		+ vec3(0, tget(p.x, p.y-1, p.z) - v, 0)
 		- vec3(0, tget(p.x, p.y+1, p.z) - v, 0)
@@ -75,7 +71,7 @@ void main() {
 		vec3(ii+1,jj+1,kk),
 		vec3(ii,jj+1,kk)
 	);
-
+	
 	float vs[8] = float[8](
 		get(ii,jj,kk+1),
 		get(ii+1,jj,kk+1),

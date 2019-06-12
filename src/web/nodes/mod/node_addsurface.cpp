@@ -3,6 +3,7 @@
 #include "md/particles.h"
 #include "res/shd/marchVert.h"
 #include "res/shd/marchGeom.h"
+#include "res/shd/surfDraw.h"
 
 INODE_DEF(__("Draw Surface"), AddSurface, GEN);
 
@@ -56,6 +57,9 @@ void Node_AddSurface::Update() {
 			Debug::Message("Node_AddSurface", "Generating part " + std::to_string(a + 1) + " of " + std::to_string(zn));
 			std::cout << zo << " " << zs << std::endl;
 			SetInBuf(&data[zo * mul], zs * mul * sizeof(float));
+			for (auto a = 0; a < zs * mul; a++) {
+				std::cout << ": " << data[a] << std::endl;
+			}
 			auto sz = ExecMC(glm::ivec3(zo, 0, 0), glm::ivec3(zs, shape[1], shape[2]));
 			_outSz += sz;
 			_mtmpSz = std::max(_mtmpSz, sz);
@@ -63,11 +67,11 @@ void Node_AddSurface::Update() {
 		}
 
 		Debug::Message("Node_AddSurface", "Allocating for " + std::to_string(_outSz) + " triangles with tmp buffer of " + std::to_string(_mtmpSz) + " triangles");
-		ResizeOutBuf(_outSz * sizeof(Vec4));
-		ResizeTmpBuf(_mtmpSz * sizeof(Vec4));
+		ResizeOutBuf(_outSz * 3 * sizeof(Vec4));
+		ResizeTmpBuf(_mtmpSz * 3 * sizeof(Vec4));
 
 		zo = 0;
-		int ooff = 0;
+		genSz = 0;
 		for (int a = 0; a < zn; a++) {
 			auto zs = (a == zn - 1) ? std::min(_zs, shape[0] - zo) : _zs;
 			Debug::Message("Node_AddSurface", "Generating part " + std::to_string(a + 1) + " of " + std::to_string(zn));
@@ -76,10 +80,23 @@ void Node_AddSurface::Update() {
 			auto sz = ExecMC(glm::ivec3(zo, 0, 0), glm::ivec3(zs, shape[1], shape[2]));
 			glBindBuffer(GL_COPY_READ_BUFFER, tmpPos);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, outPos);
-			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, ooff * sizeof(Vec4), sz * sizeof(Vec4));
+			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, genSz * 3 * sizeof(Vec4), sz * 3 * sizeof(Vec4));
+			glBindBuffer(GL_COPY_READ_BUFFER, tmpNrm);
+			glBindBuffer(GL_COPY_WRITE_BUFFER, outNrm);
+			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, genSz * 3 * sizeof(Vec4), sz * 3 * sizeof(Vec4));
+			glBindBuffer(GL_COPY_READ_BUFFER, 0);
+			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 			zo += zs - 1;
-			ooff += sz;
+			genSz += sz;
 		}
+
+		glBindBuffer(GL_ARRAY_BUFFER, outNrm);
+		auto p = (Vec4*)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
+		for (int a = 0; a < genSz * 3; a++) {
+			std::cout << std::to_string(p[a]) << std::endl;
+		}
+		glUnmapBuffer(GL_ARRAY_BUFFER);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		data.clear();
 		if (!!genSz) Scene::dirty = true;
@@ -182,7 +199,7 @@ void Node_AddSurface::Init() {
 
 	marchProg.AddUniforms({ "data", "val", "shp", "off", "triBuf" });
 
-	(drawProg = Shader::FromVF(IO::GetText(IO::path + "shaders/surfDVert.glsl"), IO::GetText(IO::path + "shaders/surfDFrag.glsl")))
+	(drawProg = Shader::FromVF(glsl::surfDVert, glsl::surfDFrag))
 		.AddUniforms({ "_MV", "_MVP", "bbox1", "bbox2" });
 
 	glGenBuffers(1, &inBuf);
@@ -235,6 +252,9 @@ void Node_AddSurface::ResizeInBuf(int i) {
 	glBindBuffer(GL_ARRAY_BUFFER, inBuf);
 	glBufferData(GL_ARRAY_BUFFER, i, nullptr, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindTexture(GL_TEXTURE_BUFFER, inBufT);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, inBuf);
+	glBindTexture(GL_TEXTURE_BUFFER, 0);
 }
 
 void Node_AddSurface::ResizeOutBuf(int i) {
@@ -269,7 +289,7 @@ int Node_AddSurface::ExecMC(glm::ivec3 offset, glm::ivec3 size) {
 	glBindTexture(GL_TEXTURE_BUFFER, inBufT);
 	glUniform1f(marchProg.Loc(1), cutoff);
 	glUniform3i(marchProg.Loc(2), size[0], size[1], size[2]);
-	glUniform3f(marchProg.Loc(3), offset[0], offset[1], offset[3]);
+	glUniform3f(marchProg.Loc(3), offset[0], offset[1], offset[2]);
 	glUniform1i(marchProg.Loc(4), 2);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_BUFFER, triBufT);
@@ -277,7 +297,8 @@ int Node_AddSurface::ExecMC(glm::ivec3 offset, glm::ivec3 size) {
 	glEnable(GL_RASTERIZER_DISCARD);
 	glBeginQuery(GL_PRIMITIVES_GENERATED, query);
 	glBeginTransformFeedback(GL_TRIANGLES);
-	glDrawArrays(GL_POINTS, 0, (size[0]-1)*(size[1]-1)*(size[2]-1));
+	const auto nv = (size[0]-1)*(size[1]-1)*(size[2]-1);
+	glDrawArrays(GL_POINTS, 0, nv);
 	glEndTransformFeedback();
 	glEndQuery(GL_PRIMITIVES_GENERATED);
 	uint gsz;
