@@ -33,7 +33,7 @@ protected:
 
 	void ResizeInBuf(int), ResizeOutBuf(int), ResizeTmpBuf(int);
 	void SetInBuf(void*, int);
-	int ExecMC(glm::ivec3 offset, glm::ivec3 size);
+	int ExecMC(glm::ivec3 offset, glm::ivec3 size, glm::ivec3 rsize);
 
 	static const float triTable[256*15];
 	static GLuint triBuf, triBufT;

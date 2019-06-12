@@ -57,10 +57,7 @@ void Node_AddSurface::Update() {
 			Debug::Message("Node_AddSurface", "Generating part " + std::to_string(a + 1) + " of " + std::to_string(zn));
 			std::cout << zo << " " << zs << std::endl;
 			SetInBuf(&data[zo * mul], zs * mul * sizeof(float));
-			for (auto a = 0; a < zs * mul; a++) {
-				std::cout << ": " << data[a] << std::endl;
-			}
-			auto sz = ExecMC(glm::ivec3(zo, 0, 0), glm::ivec3(zs, shape[1], shape[2]));
+			auto sz = ExecMC(glm::ivec3(zo, 0, 0), glm::ivec3(zs, shape[1], shape[2]), glm::ivec3(shape[0], shape[1], shape[2]));
 			_outSz += sz;
 			_mtmpSz = std::max(_mtmpSz, sz);
 			zo += zs - 1;
@@ -77,7 +74,7 @@ void Node_AddSurface::Update() {
 			Debug::Message("Node_AddSurface", "Generating part " + std::to_string(a + 1) + " of " + std::to_string(zn));
 			std::cout << zo << " " << zs << std::endl;
 			SetInBuf(&data[zo * mul], zs * mul * sizeof(float));
-			auto sz = ExecMC(glm::ivec3(zo, 0, 0), glm::ivec3(zs, shape[1], shape[2]));
+			auto sz = ExecMC(glm::ivec3(zo, 0, 0), glm::ivec3(zs, shape[1], shape[2]), glm::ivec3(shape[0], shape[1], shape[2]));
 			glBindBuffer(GL_COPY_READ_BUFFER, tmpPos);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, outPos);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, genSz * 3 * sizeof(Vec4), sz * 3 * sizeof(Vec4));
@@ -89,14 +86,6 @@ void Node_AddSurface::Update() {
 			zo += zs - 1;
 			genSz += sz;
 		}
-
-		glBindBuffer(GL_ARRAY_BUFFER, outNrm);
-		auto p = (Vec4*)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
-		for (int a = 0; a < genSz * 3; a++) {
-			std::cout << std::to_string(p[a]) << std::endl;
-		}
-		glUnmapBuffer(GL_ARRAY_BUFFER);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		data.clear();
 		if (!!genSz) Scene::dirty = true;
@@ -197,7 +186,7 @@ void Node_AddSurface::Init() {
 	glDeleteShader(vs);
 	glDeleteShader(gs);
 
-	marchProg.AddUniforms({ "data", "val", "shp", "off", "triBuf" });
+	marchProg.AddUniforms({ "data", "val", "shp", "off", "scl", "triBuf" });
 
 	(drawProg = Shader::FromVF(glsl::surfDVert, glsl::surfDFrag))
 		.AddUniforms({ "_MV", "_MVP", "bbox1", "bbox2" });
@@ -279,7 +268,7 @@ void Node_AddSurface::SetInBuf(void* data, int sz) {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-int Node_AddSurface::ExecMC(glm::ivec3 offset, glm::ivec3 size) {
+int Node_AddSurface::ExecMC(glm::ivec3 offset, glm::ivec3 size, glm::ivec3 rsize) {
 	glUseProgram(marchProg);
 	glBindVertexArray(Camera::emptyVao);
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tmpPos);
@@ -289,8 +278,9 @@ int Node_AddSurface::ExecMC(glm::ivec3 offset, glm::ivec3 size) {
 	glBindTexture(GL_TEXTURE_BUFFER, inBufT);
 	glUniform1f(marchProg.Loc(1), cutoff);
 	glUniform3i(marchProg.Loc(2), size[0], size[1], size[2]);
-	glUniform3f(marchProg.Loc(3), offset[0], offset[1], offset[2]);
-	glUniform1i(marchProg.Loc(4), 2);
+	glUniform3f(marchProg.Loc(3), offset[0] * 1.f / rsize[0], offset[1] * 1.f / rsize[1], offset[2] * 1.f / rsize[2]);
+	glUniform3f(marchProg.Loc(4), size[0] * 1.f / rsize[0], size[1] * 1.f / rsize[1], size[2] * 1.f / rsize[2]);
+	glUniform1i(marchProg.Loc(5), 2);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_BUFFER, triBufT);
 

@@ -33,7 +33,7 @@
 #include "res/shd/selectorFrag.h"
 #include "res/shd/reflTrFrag.h"
 
-#define SCL_MIN -7.f
+#define SCL_MIN -10.f
 #define SCL_MAX 2.f
 
 #define TUBESIZE 0.008
