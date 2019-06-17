@@ -499,6 +499,7 @@ void AnWeb::DoExecute(bool all) {
 	else {
 		realExecFrame = Particles::anim.currentFrame;
 		_DoExecute();
+		execdFrame = (int)Particles::anim.currentFrame;
 	}
 
 	executing = false;
@@ -521,91 +522,6 @@ void AnWeb::_DoExecute() {
 	while (execN > 0) {
 		Engine::Sleep(100);
 	}
-	/*
-	for (size_t a = 0, s = nodes.size(); (a < s) || (nextNode != ~0U); ++a) {
-		if (nextNode != ~0U) {
-			a = (size_t)nextNode;
-			nextNode = ~0U;
-		}
-		currNode = (uint)a;
-		auto& n = nodes[a];
-#ifdef VERBOSE
-		Debug::Message("AnWeb", "Executing " + n->script->parent->name);
-#endif
-#ifndef NO_REDIR_LOG
-		if (n->script->type == AN_SCRTYPE::PYTHON)
-			PyScript::ClearLog();
-		else
-			IO::RedirectStdio2(AnWeb::nodesPath + "__tmpstd");
-#endif
-		execNode = n.get();
-		n->executing = true;
-		std::exception_ptr cxp;
-		try {
-			n->Execute();
-		}
-		catch (const char* e) {
-			err = const_cast<char*>(e);
-		}
-		catch (...) {
-			err = (char*)"Unknown error thrown!";
-			cxp = std::current_exception();
-		}
-		n->executing = false;
-
-		if (cxp) {
-			try {
-				std::rethrow_exception(cxp);
-			}
-			catch (std::exception& e) {
-				static std::string serr = e.what();
-				serr += " thrown!";
-				err = &serr[0];
-			}
-			catch (...) {}
-		}
-
-#ifndef NO_REDIR_LOG
-		if (n->script->type == AN_SCRTYPE::PYTHON) {
-			pylog = PyScript::GetLog();
-		}
-		else {
-			IO::RestoreStdio2();
-			auto f = std::ifstream(AnWeb::nodesPath + "__tmpstd_o");
-			std::string s;
-			while (std::getline(f, s)) {
-				n->log.push_back(std::pair<byte, std::string>(0, s));
-			}
-			f.close();
-			f.open(AnWeb::nodesPath + "__tmpstd_e");
-			while (std::getline(f, s)) {
-				n->log.push_back(std::pair<byte, std::string>(2, s));
-			}
-		}
-#endif
-		if (n->script->parent->type == AnScript::TYPE::PYTHON) {
-			if (err)
-				n->CatchExp(&pylog[0]);
-			else {
-				auto ss = string_split(pylog, '\n');
-				for (auto& s : ss) {
-					n->log.push_back(std::pair<byte, std::string>(0, s));
-				}
-			}
-		}
-		else if (err) {
-			n->CatchExp(err);
-			break;
-		}
-#ifndef NO_REDIR_LOG
-		remove((AnWeb::nodesPath + "__tmpstd_o").c_str());
-		remove((AnWeb::nodesPath + "__tmpstd_e").c_str());
-#endif
-#ifdef VERBOSE
-		Debug::Message("AnWeb", "Executed " + n->script->parent->name);
-#endif
-	}
-	*/
 }
 
 void AnWeb::OnExecLog(std::string s, bool e) {
@@ -934,7 +850,6 @@ void AnWeb::OnAnimFrame() {
 	if (runOnFrame && (execdFrame != (int)Particles::anim.currentFrame)) {
 		DoExecute(false);
 		Scene::dirty = true;
-		execdFrame = (int)Particles::anim.currentFrame;
 	}
 	else {
 		ReadFrame(Particles::anim.currentFrame);

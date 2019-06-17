@@ -852,7 +852,7 @@ void AnNode::CatchExp(char* c) {
 }
 
 void AnNode::OnAnimFrame() {
-	if (!!(flags & AN_FLAG_RUNONSEEK)) {
+	if (!!(flags & AN_FLAG_RUNONSEEK) && (AnWeb::execdFrame != (int)Particles::anim.currentFrame)) {
 		//Debug::Message("AnNode", "autorun " + title);
 		Execute();
 	}

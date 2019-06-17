@@ -42,7 +42,7 @@ vec4 skyColAt(sampler2D sky, vec3 dir) {
     cx = mix(1-cx, cx, sign(refla.y) * 0.5 + 0.5);
     float sy = asin(dir.y)/(3.14159);
 
-    return texture(sky, vec2(cx + 0.125, sy + 0.5));
+    return texture(sky, vec2(cx, sy + 0.5));
 }
 
 void main () {

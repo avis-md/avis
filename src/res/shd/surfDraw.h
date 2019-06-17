@@ -26,16 +26,16 @@ void main(){
 	const char surfDFrag[] = R"(
 #version 330 core
 
+in vec3 v2f_nrm;
+
 layout (location=0) out vec4 outColor;
 layout (location=1) out uvec4 outId;
 layout (location=2) out vec4 outNormal;
 
-in vec3 v2f_nrm;
-
 void main() {
-    outColor = vec4(0, 0.7, 1, 1);
+    outColor = vec4(0.1, 0.7, 1, 1);
     outId = uvec4(0, 0, 0, 0);
-    outNormal.xyz = normalize(v2f_nrm * sign(-v2f_nrm.z));
+    outNormal.xyz = normalize(v2f_nrm);// * sign(-v2f_nrm.z));
     outNormal.w = 0;
 }
 )";

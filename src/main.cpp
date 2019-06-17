@@ -255,8 +255,10 @@ void paintfunc() {
 	UI::Label(10, 25, 12, "Render: " + std::to_string(rendMs) + "ms", white(), true);
 
 	UI::Quad(10, 40, 50, 35, ChokoLait::mainCamera->texs.colTex, white(0.5f));
+	glDisable(GL_BLEND);
 	UI::Quad(10, 80, 50, 35, ChokoLait::mainCamera->texs.normTex, white(0.5f));
 	UI::Quad(10, 120, 50, 35, ChokoLait::mainCamera->texs.depthTex, white(0.5f));
+	glEnable(GL_BLEND);
 	
 	for (int a = 0; a < NUM_EXTRA_TEXS; a++)
 		UI::Quad(10, 180 + 40 * a, 50, 35, ChokoLait::mainCamera->blitTexs[a], white(0.5f));
