@@ -3,13 +3,27 @@
 
 Shader::Shader(const std::string& vert, const std::string& frag) {
 	uint vers = 1;
-	std::istringstream vstrm(vert);
 	std::string s;
+	std::istringstream vstrm(vert);
 	while (std::getline(vstrm, s)) {
 		if (s[0] != '#') continue;
 		auto ss = string_split(s, ' ', true);
 		if (ss[0] == "#pragma") {
 			if (ss[1] == "option") {
+				options.push_back(std::make_pair(ss[2], false));
+				vers *= 2;
+			}
+		}
+	}
+	std::istringstream fstrm(frag);
+	while (std::getline(fstrm, s)) {
+		if (s[0] != '#') continue;
+		auto ss = string_split(s, ' ', true);
+		if (ss[0] == "#pragma") {
+			if (ss[1] == "option") {
+				if (std::find_if(options.begin(), options.end(), [&](const std::pair<std::string, bool>& o) {
+					return o.first == ss[2];
+				}) != options.end()) continue;
 				options.push_back(std::make_pair(ss[2], false));
 				vers *= 2;
 			}

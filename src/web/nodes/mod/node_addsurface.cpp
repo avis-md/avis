@@ -1,6 +1,7 @@
 #include "node_addsurface.h"
 #include "vis/pargraphics.h"
 #include "md/particles.h"
+#include "ui/ui_ext.h"
 #include "res/shd/marchVert.h"
 #include "res/shd/marchGeom.h"
 #include "res/shd/surfDraw.h"
@@ -103,6 +104,7 @@ void Node_AddSurface::DrawScene(RENDER_PASS pass) {
 		auto& bboxs = Particles::boundingBox;
 		glUniform3f(drawProg.Loc(2), bboxs[0], bboxs[2], bboxs[4]);
 		glUniform3f(drawProg.Loc(3), bboxs[1], bboxs[3], bboxs[5]);
+		glUniform1f(drawProg.Loc(4), invert? -1.f : 1.f);
 		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLES, 0, genSz*3);
 		e = glGetError();
@@ -159,7 +161,15 @@ void Node_AddSurface::Execute() {
 	cutoff = (float)getval_d(1);
 }
 
+void Node_AddSurface::DrawHeader(float& off) {
+	AnNode::DrawHeader(off);
+
+	UI2::Toggle(pos.x + 5, off, width - 10, "invert", invert);
+	off += 17;
+}
+
 void Node_AddSurface::Init() {
+	const GLuint _clipBindId = 11;
 	GLuint vs, gs;
 	std::string err;
 	if (!Shader::LoadShader(GL_VERTEX_SHADER, glsl::marchVert, vs, &err)) {
@@ -188,8 +198,10 @@ void Node_AddSurface::Init() {
 
 	marchProg.AddUniforms({ "data", "val", "shp", "off", "scl", "triBuf" });
 
-	(drawProg = Shader::FromVF(glsl::surfDVert, glsl::surfDFrag))
-		.AddUniforms({ "_MV", "_MVP", "bbox1", "bbox2" });
+	(drawProg = Shader(glsl::surfDVert, glsl::surfDFrag))
+		.AddUniforms({ "_MV", "_MVP", "bbox1", "bbox2", "direction" });
+	auto bid = glGetUniformBlockIndex(drawProg, "clipping");
+	glUniformBlockBinding(drawProg, bid, _clipBindId);
 
 	glGenBuffers(1, &inBuf);
 	glGenTextures(1, &inBufT);
@@ -224,18 +236,6 @@ void Node_AddSurface::InitBuffers() {
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, NULL);
 	glBindVertexArray(0);
 }
-
-/*
-void Node_AddSurface::Set() {
-	glBindBuffer(GL_ARRAY_BUFFER, inBuf);
-	glBufferData(GL_ARRAY_BUFFER, bufSz * sizeof(float), data.data(), GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, outPos);
-	glBufferData(GL_ARRAY_BUFFER, outSz * sizeof(Vec4), nullptr, GL_STATIC_READ);
-	glBindBuffer(GL_ARRAY_BUFFER, outNrm);
-	glBufferData(GL_ARRAY_BUFFER, outSz * sizeof(Vec4), nullptr, GL_STATIC_READ);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-*/
 
 void Node_AddSurface::ResizeInBuf(int i) {
 	glBindBuffer(GL_ARRAY_BUFFER, inBuf);

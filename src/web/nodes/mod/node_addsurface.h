@@ -8,6 +8,7 @@ public:
 	~Node_AddSurface();
 
 	void Update() override;
+	void DrawHeader(float& off) override;
 	void DrawScene(const RENDER_PASS pass) override;
 
 	void RayTraceMesh(_Mesh& mesh) override;
@@ -19,6 +20,7 @@ protected:
 	std::vector<float> data;
 	int shape[3];
 	float cutoff;
+	bool invert = false;
 
 	static size_t bufSz, outSz;
 	static int maxBufSz;

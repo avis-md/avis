@@ -51,7 +51,7 @@ void main() {
         texelFetch(orienX, v2f_id-1).x,
         texelFetch(orienY, v2f_id-1).x,
         texelFetch(orienZ, v2f_id-1).x, 0);
-    vec4 dir = normalize(dir4.xyz);
+    vec3 dir = normalize(dir4.xyz);
 #endif
     vec4 ndc = vec4(
         (gl_FragCoord.x / screenSize.x - 0.5) * 2.0,
