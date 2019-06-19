@@ -22,6 +22,8 @@ protected:
 	float cutoff;
 	bool invert = false;
 
+	std::vector<Vec4> resultPos, resultNrm;
+
 	static size_t bufSz, outSz;
 	static int maxBufSz;
 	static uint genSz;

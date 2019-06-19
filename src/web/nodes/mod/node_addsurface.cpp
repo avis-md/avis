@@ -88,8 +88,21 @@ void Node_AddSurface::Update() {
 			genSz += sz;
 		}
 
+		resultPos.resize(genSz);
+		resultNrm.resize(genSz);
+
+		glBindBuffer(GL_ARRAY_BUFFER, outPos);
+		auto pos = (Vec4*)glMapBufferRange(GL_ARRAY_BUFFER, 0, genSz * sizeof(Vec4), GL_MAP_READ_BIT);
+		std::memcpy(resultPos.data(), pos, genSz * sizeof(Vec4));
+		glUnmapBuffer(GL_ARRAY_BUFFER);
+		glBindBuffer(GL_ARRAY_BUFFER, outNrm);
+		auto nrm = (Vec4*)glMapBufferRange(GL_ARRAY_BUFFER, 0, genSz * sizeof(Vec4), GL_MAP_READ_BIT);
+		std::memcpy(resultNrm.data(), nrm, genSz * sizeof(Vec4));
+		glUnmapBuffer(GL_ARRAY_BUFFER);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 		data.clear();
-		if (!!genSz) Scene::dirty = true;
+		Scene::dirty = true;
 	}
 }
 
@@ -119,20 +132,13 @@ void Node_AddSurface::RayTraceMesh(_Mesh& mesh) {
 	mesh.vertices.resize(mesh.vertCount);
 	mesh.normals.resize(mesh.vertCount);
 	mesh.triangles.resize(mesh.vertCount);
-	glBindBuffer(GL_ARRAY_BUFFER, outPos);
-	auto pos = (Vec4*)glMapBufferRange(GL_ARRAY_BUFFER, 0, genSz * sizeof(Vec4), GL_MAP_READ_BIT);
 	for (uint a = 0; a < mesh.vertCount; a++) {
-		mesh.vertices[a] = pos[a] * 5.f;
-	}
-	glUnmapBuffer(GL_ARRAY_BUFFER);
-	glBindBuffer(GL_ARRAY_BUFFER, outNrm);
-	auto nrm = (Vec4*)glMapBufferRange(GL_ARRAY_BUFFER, 0, genSz * sizeof(Vec4), GL_MAP_READ_BIT);
-	for (uint a = 0; a < mesh.vertCount; a++) {
-		mesh.normals[a] = -nrm[a];
-	}
-	glUnmapBuffer(GL_ARRAY_BUFFER);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	for (uint a = 0; a < mesh.vertCount; a++) {
+		mesh.vertices[a] = Vec3(
+			Lerp(Particles::boundingBox[0], Particles::boundingBox[1], resultPos[a].x),
+			Lerp(Particles::boundingBox[2], Particles::boundingBox[3], resultPos[a].y),
+			Lerp(Particles::boundingBox[4], Particles::boundingBox[5], resultPos[a].z)
+		);
+		mesh.normals[a] = resultNrm[a];
 		mesh.triangles[a] = a;
 	}
 }
