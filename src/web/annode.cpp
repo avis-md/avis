@@ -620,6 +620,26 @@ void AnNode::IAddConV(void* p, std::initializer_list<int*> d1, std::initializer_
 	}
 }
 
+void AnNode::IAddConV(void* p, std::vector<int*> d) {
+	auto _scr = (DmScript_I*)script.get();
+	_scr->outputVs.push_back(VarVal());
+	auto& vr = _scr->outputVs.back();
+	vr.val.p = p;
+	vr.pval = &vr.val;
+	conV.push_back(CVar());
+	auto& cv = conV.back();
+	cv.offset = (uintptr_t)(conV.size() - 1);
+	for (auto di : d) {
+		cv.szOffsets.push_back(CVar::szItem(di));
+	}
+}
+
+void AnNode::IClearConV() {
+	auto _scr = (DmScript_I*)script.get();
+	_scr->outputVs.clear();
+	conV.clear();
+}
+
 void AnNode::ExecuteNext() {
 	for (auto& oo : outputR) {
 		for (auto& o : oo) {
