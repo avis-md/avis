@@ -73,11 +73,11 @@ endif()
 
 if (MSVC)
     set(LINK_DIRS
-        ${CMAKE_BINARY_DIR}/radeonrays/RadeonRays/
-        ${CMAKE_BINARY_DIR}/radeonrays/Calc/
-        ${CMAKE_BINARY_DIR}/radeonrays/CLW/
-        ${CMAKE_BINARY_DIR}/libgwavi/
-        ${CMAKE_BINARY_DIR}/oidn/
+        ${PROJECT_SOURCE_DIR}/radeonrays/build/RadeonRays/Release
+        ${PROJECT_SOURCE_DIR}/radeonrays/build/Calc/Release
+        ${PROJECT_SOURCE_DIR}/radeonrays/build/CLW/Release
+        ${PROJECT_SOURCE_DIR}/libgwavi/build/Release
+        ${PROJECT_SOURCE_DIR}/oidn/build/Release
     )
 else()
     set(LINK_DIRS
@@ -137,7 +137,8 @@ endif()
 if (MSVC)
 	set(DLLS
         ${TBB_ROOT}/bin/intel64/vc14/tbb.dll
-        ${CMAKE_BINARY_DIR}/oidn/OpenImageDenoise.dll
+        ${PROJECT_SOURCE_DIR}/radeonrays/build/bin/Release/RadeonRays.dll
+        ${PROJECT_SOURCE_DIR}/oidn/build/Release/OpenImageDenoise.dll
 	)
 elseif (LINUX)
 	set(DLLS

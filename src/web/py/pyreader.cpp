@@ -12,9 +12,14 @@ PyObject* PyReader::mainModule;
 
 void PyReader::Init() {
 	initd = true;
-#ifndef PLATFORM_WIN
-	if (dlsym(RTLD_DEFAULT, "Py_Initialize")) {
-#else
+#ifdef PLATFORM_WIN
+	const auto donotloadpath = VisSystem::localFd + "donotloadpython";
+	if (IO::HasFile(donotloadpath)) {
+		Debug::Warning("PyReader", "Skipping Python initialization because of failure on a previous run.");
+		Debug::Warning("PyReader", "Remove \"" + donotloadpath + "\" to retry.");
+		return;
+	}
+	IO::WriteFile(donotloadpath, "");
 	static std::string pyenv;
 	Preferences::LinkEnv("PYENV", &pyenv);
 	size_t psz;
@@ -28,6 +33,8 @@ void PyReader::Init() {
 	Py_SetPythonHome(&pyenvw[0]);
 	static std::wstring pynmw = IO::_tow(pyenv + "\\python");
 	Py_SetProgramName(&pynmw[0]);
+#else
+	if (dlsym(RTLD_DEFAULT, "Py_Initialize")) {
 #endif
 	try {
 		Py_Initialize();
@@ -39,6 +46,10 @@ void PyReader::Init() {
 		auto ps = PyUnicode_FromString(path.c_str());
 		PyList_Insert(sys_path, 0, ps);
 		Py_DecRef(ps);
+
+#ifdef PLATFORM_WIN
+		remove(donotloadpath.c_str());
+#endif
 
 		if (!!PyArr::Init())
 			return;
