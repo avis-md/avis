@@ -264,7 +264,12 @@ void ParLoader::ScanFrames(const std::string& first) {
 			break;
 		}
 	}
-	if (n1 == -1) return;
+	if (n1 == -1) {
+		if (ISNUM(nm.back()))
+			n1 = nm.size() - 1;
+		else
+			return;
+	}
 	for (int a = n1 - 1; a >= 0; --a) {
 		if (!ISNUM(nm[a])) {
 			n2 = a + 1;
@@ -274,7 +279,7 @@ void ParLoader::ScanFrames(const std::string& first) {
 
 	int st = std::stoi(nm.substr(n2, n1 - n2 + 1));
 	auto nm1 = first.substr(0, ps + 2 + n2);
-	auto nm2 = nm.substr(n1 + 1);
+	auto nm2 = (n1 == nm.size() - 1) ? "" : nm.substr(n1 + 1);
 
 	uint frms = 0;
 	std::vector<std::string> nms;
@@ -1055,7 +1060,7 @@ void ParLoader::FindImpId(bool force) {
 
 uint ParLoader::FindNextOff(std::string path) {
 	auto ld = path.find_last_of('.');
-	std::string ext = path.substr(ld);
+	std::string ext = (ld == std::string::npos) ? "" : path.substr(ld);
 	path = path.substr(0, ld);
 	auto ls = path.find_last_of('/') + 1;
 	std::string nm = path.substr(ls);

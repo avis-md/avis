@@ -139,6 +139,7 @@ bool Gromacs::ReadGro2(ParInfo* info, std::ifstream& strm, size_t isz) {
 		trj->frames++;
 		strm.ignore(100, '\n');
 	}
+	if (!trj->frames) return true;
 	trj->poss = new double*[trj->frames];
 	memcpy(trj->poss, &poss[0], trj->frames * sizeof(uintptr_t));
 	return true;

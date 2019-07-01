@@ -17,15 +17,17 @@ Shader::Shader(const std::string& vert, const std::string& frag) {
 	}
 	std::istringstream fstrm(frag);
 	while (std::getline(fstrm, s)) {
-		if (s[0] != '#') continue;
-		auto ss = string_split(s, ' ', true);
-		if (ss[0] == "#pragma") {
-			if (ss[1] == "option") {
-				if (std::find_if(options.begin(), options.end(), [&](const std::pair<std::string, bool>& o) {
-					return o.first == ss[2];
-				}) != options.end()) continue;
-				options.push_back(std::make_pair(ss[2], false));
-				vers *= 2;
+		if (s[0] == '#') {
+			auto ss = string_split(s, ' ', true);
+			if (ss[0] == "#pragma") {
+				if (ss[1] == "option") {
+					if (std::find_if(options.begin(), options.end(), [&](const std::pair<std::string, bool>& o) {
+						return o.first == ss[2];
+					}) == options.end()) {
+						options.push_back(std::make_pair(ss[2], false));
+						vers *= 2;
+					}
+				}
 			}
 		}
 	}
@@ -192,7 +194,7 @@ void Shader::UpdatePointer() {
 			i |= (1 << j);
 		j++;
 	}
-	pointer = pointers[j];
+	pointer = pointers[i];
 }
 
 void Shader::DestroyRef() {
