@@ -34,7 +34,7 @@ typedef uint ANNODE_FLAGS;
 
 class AnNode {
 public:
-	virtual ~AnNode() {}
+	virtual ~AnNode() = default;
 	
 	static void Init();
 

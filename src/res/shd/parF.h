@@ -38,7 +38,7 @@ vec3 gradfill(float f) {
 void SetColor(int id) {
     int cd = int(texelFetch(id2col, id-1).r);
     if (colUseGrad == 1)
-        outColor.rgb = gradfill(cd/255.0f);
+        outColor.rgb = gradfill(cd/255.0);
     else
         outColor.rgb = texture(colList, vec2((mod(cd, 16) + 0.5) / 16.0, ((cd / 16) + 0.5) / 16.0)).rgb;
     outColor.a = 1;

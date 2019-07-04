@@ -82,7 +82,7 @@ bool FReader::Read(FScript* scr) {
 						case 2:
 							loc = s.find_first_of(':');
 							if (loc < 2) {
-								_ER("FReader", "Variable parse error after \"!in\"!");
+								_ER("FReader", "Variable parse error after \"" + (tp == 1) ? "!@in\"!" : "!@out\"!");
 								break;
 							}
 							if (string_find(to_lowercase(s), ", allocatable") > -1) {
@@ -107,13 +107,13 @@ bool FReader::Read(FScript* scr) {
 						case 3:
 							auto sl = string_find(to_lowercase(s), "subroutine");
 							if (sl == -1) {
-								_ER("FReader", "Subroutine missing after \"!entry\"!");
+								_ER("FReader", "Subroutine missing after \"!@entry\"!");
 								break;
 							}
 							auto p1 = s.find_first_not_of(' ', sl + 11);
 							auto bl = string_find(s, "()", p1 + 1);
 							if (sl == -1) {
-								_ER("FReader", "\"()\" missing after \"!entry\"!");
+								_ER("FReader", "\"()\" missing after \"!@entry\"!");
 								break;
 							}
 							funcNm = s.substr(p1, bl - p1);
@@ -125,9 +125,9 @@ bool FReader::Read(FScript* scr) {
 						tp = 0;
 					}
 					else {
-						if (s == "!in") tp = 1;
-						else if (s == "!out") tp = 2;
-						else if (s == "!entry") tp = 3;
+						if (s == "!@in") tp = 1;
+						else if (s == "!@out") tp = 2;
+						else if (s == "!@entry") tp = 3;
 						ostrm << "\n";
 					}
 				}

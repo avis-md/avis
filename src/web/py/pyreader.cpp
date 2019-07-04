@@ -171,13 +171,13 @@ int PyReader::ReadClassed(PyScript* scr, const std::string spath) {
 		else {
 			ln = string_trim(ln);
 
-			if (ln[0] != '#') {
+			if (ln[0] != '#' || ln[1] != '@') {
 				if (candecl && ln.substr(0, 4) == "def ") {
 					candecl = false;
 				}
 				else continue;
 			}
-			if (ln.substr(1) == "entry") {
+			if (ln.substr(2) == "entry") {
 				std::getline(strm, ln);
 				ln = string_trim(ln);
 				if (ln.substr(0, 4) != "def ") {
@@ -197,7 +197,7 @@ int PyReader::ReadClassed(PyScript* scr, const std::string spath) {
 					scr->funcNm = ln.substr(4, c1 - 4);
 				}
 			}
-			else if (ln.substr(1, 3) == "in ") {
+			else if (ln.substr(2, 3) == "in ") {
 				if (!candecl) {
 					Debug::Warning("PyReader::Parse", "Input variable must be defined inside the __init__ function!");
 					continue;
@@ -205,7 +205,7 @@ int PyReader::ReadClassed(PyScript* scr, const std::string spath) {
 				if (!ParseVar(strm, ln, scr, true, true))
 					return 20;
 			}
-			else if (ln.substr(1, 4) == "out ") {
+			else if (ln.substr(2, 4) == "out ") {
 				if (!candecl) {
 					Debug::Warning("PyReader::Parse", "Output variable must be defined inside the __init__ function!");
 					continue;
@@ -244,8 +244,8 @@ int PyReader::ReadStatic(PyScript* scr, const std::string spath) {
 	while (!strm.eof()) {
 		ParseDesc(strm, ln, scr);
 
-		if (ln[0] == '#') {
-			if (ln.substr(1) == "entry") {
+		if (ln[0] == '#' && ln[1] == '@') {
+			if (ln.substr(2) == "entry") {
 				std::getline(strm, ln);
 				ln = string_trim(ln);
 				if (ln.substr(0, 4) != "def ") {
@@ -265,11 +265,11 @@ int PyReader::ReadStatic(PyScript* scr, const std::string spath) {
 					scr->funcNm = ln.substr(4, c1 - 4);
 				}
 			}
-			else if (ln.substr(1, 3) == "in ") {
+			else if (ln.substr(2, 3) == "in ") {
 				if (!ParseVar(strm, ln, scr, true, false))
 					return 20;
 			}
-			else if (ln.substr(1, 4) == "out ") {
+			else if (ln.substr(2, 4) == "out ") {
 				if (!ParseVar(strm, ln, scr, false, false))
 					return 30;
 			}
@@ -309,7 +309,7 @@ bool PyReader::ParseVar(std::istream& strm, std::string& ln, PyScript* scr, bool
 	_vs.push_back(PyVar());
 	auto& v = vs.back();
 	auto& _v = _vs.back();
-	v.typeName = in? ln.substr(4) : ln.substr(5);
+	v.typeName = in? ln.substr(5) : ln.substr(6);
 	if (!ParseType(v)) {
 		Debug::Warning("PyReader::ParseType", "Arg type \"" + v.typeName + "\" not recognized!");
 		return false;
@@ -331,12 +331,17 @@ bool PyReader::ParseVar(std::istream& strm, std::string& ln, PyScript* scr, bool
 
 bool PyReader::ParseType(AnScript::Var& var) {
 	const auto& s = var.typeName;
+	if (s.substr(0, 3) == "short") var.type = AN_VARTYPE::SHORT;
 	if (s.substr(0, 3) == "int") var.type = AN_VARTYPE::INT;
 	else if (s.substr(0, 6) == "double") var.type= AN_VARTYPE::DOUBLE;
 	else if (s.substr(0, 5) == "list("
 			&& s[7] == ')') {
 		var.type = AN_VARTYPE::LIST;
 		switch (s[6]) {
+		case 's':
+			var.itemType = AN_VARTYPE::SHORT;
+			var.stride = 2;
+			break;
 		case 'i':
 			var.itemType = AN_VARTYPE::INT;
 			var.stride = 4;

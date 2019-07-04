@@ -124,7 +124,7 @@ bool CReader::Read(CScript* scr) {
 					const auto sc = string_trim(s);
 					if (sc[0] == '/' && sc[1] == '/') {
 						auto ss = string_split(sc, ' ', true);
-						if (ss[0] == "//in" || ss[0] == "//out") {
+						if (ss[0] == "//@in" || ss[0] == "//@out") {
 							std::getline(strm, s);
 							if (scr->isSingleton) ostrm << EXTERN;
 							ostrm << "\n" << s << '\n';
@@ -136,7 +136,7 @@ bool CReader::Read(CScript* scr) {
 							}
 							vrNms.push_back(vr);
 						}
-						else if (ss[0] == "//var") {
+						else if (ss[0] == "//@var") {
 							std::getline(strm, s);
 							if (scr->isSingleton) ostrm << EXTERN;
 							ostrm << "\n" << s << '\n';
@@ -153,7 +153,7 @@ bool CReader::Read(CScript* scr) {
 							}
 							vrNms.push_back(vr);
 						}
-						else if (ss[0] == "//entry") {
+						else if (ss[0] == "//@entry") {
 							std::getline(strm, s);
 							if (scr->isSingleton) ostrm << EXTERN;
 							ostrm << "\n" << s << '\n';
@@ -165,12 +165,12 @@ bool CReader::Read(CScript* scr) {
 								funcNm = s.substr(4, bo - 4);
 							}
 							else {
-								_ER("//entry must precede a void function with no arguments!");
+								_ER("//@entry must precede a void function with no arguments!");
 								fail = true;
 								break;
 							}
 						}
-						else if (ss[0] == "//progress") {
+						else if (ss[0] == "//@progress") {
 							std::getline(strm, s);
 							if (scr->isSingleton) ostrm << EXTERN;
 							ostrm << "\n" << s << '\n';
@@ -180,7 +180,7 @@ bool CReader::Read(CScript* scr) {
 								progrsNm = s.substr(6, eq - 6);
 							}
 							else {
-								_ER("//progress must precede a variable of type double!");
+								_ER("//@progress must precede a variable of type double!");
 								fail = true;
 								break;
 							}
@@ -320,25 +320,6 @@ bool CReader::Read(CScript* scr) {
 
 			CHKPTR(spawner) CHKPTR(deleter)
 		}
-
-		/*
-#ifdef PLATFORM_WIN
-		if (!useMsvc) {
-			auto fhlc = (emptyFunc*)scr->lib.GetSym("__noterm_cFunc");
-			if (!fhlc) {
-				_ER("Failed to register function pointer! Please tell the monkey!");
-				FAIL0;
-			}
-			*fhlc = scr->funcLoc;
-
-			scr->wFuncLoc = (wrapFunc)scr->lib.GetSym("_Z5ExecCv");
-			if (!scr->funcLoc) {
-				_ER("Failed to register entry function! Please tell the monkey!");
-				FAIL0;
-			}
-		}
-#endif
-		*/
 	}
 	else {
 		scr->chgtime = scr->badtime;
@@ -349,20 +330,23 @@ bool CReader::Read(CScript* scr) {
 	bool fst = true;
 	while (!strm.eof()) {
 		std::getline(strm, ln);
-		while (fst && ln[0] == '/' && ln[1] == '/' && ln[2] == '/') {
-			scr->desc += ln.substr(3) + "\n";
-			scr->descLines++;
+		if (fst && ln == "//@description") {
 			std::getline(strm, ln);
+			while (ln[0] == '/' && ln[1] == '/' && ln[2] == '@') {
+				scr->desc += ln.substr(3) + "\n";
+				scr->descLines++;
+				std::getline(strm, ln);
+			}
+			fst = false;
 		}
-		fst = false;
 
 		auto lns = string_split(string_trim(ln), ' ', true);
 		auto lnsz = lns.size();
 		if (!lnsz) continue;
 		bool ien = (lnsz > 1)? (lns[1] == "enum") : false;
 		bool irg = (lnsz > 1)? (lns[1] == "range") : false;
-		bool iso = (lns[0] == "//out");
-		if (lns[0] == "//in" || iso) {
+		bool iso = (lns[0] == "//@out");
+		if (lns[0] == "//@in" || iso) {
 			const std::string ios = iso ? "output " : "input ";
 			
 			auto& vars = iso? scr->outputs : scr->inputs;
