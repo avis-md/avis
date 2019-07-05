@@ -896,7 +896,7 @@ void* AnNode::GetOutVal(int i, ANVAR_ORDER order) {
 		res = conVAll[i][Particles::anim.currentFrame].pval;
 	else
 		res = script->Resolve(conV[i].offset);
-	return uset ? GetTranspose(i, res) : res;
+	return res;//uset ? GetTranspose(i, res) : res;
 }
 
 int AnNode::GetOutDim(int i, int d) {
@@ -917,6 +917,7 @@ void* AnNode::GetTranspose(int i, void* val) {
 		}
 		cvt.arr.resize(sz * oi.stride);
 
+		const auto tar = &cvt.arr[0];
 		std::vector<int> md(oi.dim);
 		for (int a = 0; a < sz; a++) { //for each element
 			int aa = a;
@@ -927,13 +928,12 @@ void* AnNode::GetTranspose(int i, void* val) {
 			int off = 0;
 			for (int d = 0; d < oi.dim; d++) { //get offset
 				int mul = 1;
-				for (int m = 0; m < d; m++) {
-					mul *= dims[oi.dim - m - 1];
+				for (int m = d + 1; m < oi.dim; m++) {
+					mul *= dims[m];
 				}
 				off += mul * md[d];
 			}
-			const auto tar = &cvt.arr[0];
-			std::memcpy(tar + off * oi.stride, (char*)val + a * oi.stride, oi.stride);
+			std::memcpy(tar + off * oi.stride, *(char**)val + a * oi.stride, oi.stride);
 		}
 		cvt.val.p = cvt.arr.data();
 	}

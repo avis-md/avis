@@ -46,6 +46,7 @@ CS_SET(int)
 CS_SET(double)
 
 void FScript_I::SetInput(int i, void* val, char tp, std::vector<int> szs) {
+	std::cout << *(double*)val << std::endl;
 	auto scr = ((FScript*)parent);
 	auto& iv = ((FScript*)parent)->_inputs[i];
 	*scr->arr_in_shapeloc = szs.data();

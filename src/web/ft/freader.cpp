@@ -229,15 +229,15 @@ bool FReader::Read(FScript* scr) {
 	bool fst = true;
 	while (!strm.eof()) {
 		std::getline(strm, ln);
-		while (fst && ln[0] == '!' && ln[1] == '!' && ln[2] == ' ') {
-			scr->desc += ln.substr(3) + "\n";
+		while (fst && ln[0] == '!' && ln[1] == '@') {
+			scr->desc += ln.substr(2) + "\n";
 			scr->descLines++;
 			std::getline(strm, ln);
 		}
 		fst = false;
 
-		bool iso = ln == "!out";
-		if (iso || ln == "!in") {
+		bool iso = ln == "!@out";
+		if (iso || ln == "!@in") {
 			auto& vr = iso ? scr->outputs : scr->inputs;
 			auto& _vr = iso ? scr->_outputs : scr->_inputs;
 			std::vector<FScript::emptyFunc>& _fc = iso? scr->_outarr_post : scr->_inarr_pre;
