@@ -288,6 +288,7 @@ void PyReader::Refresh(PyScript* scr) {
 		scr->Clear();
 		scr->ok = Read(scr);
 		if (scr->ok) scr->RegInstances();
+		AnBrowse::changed = true;
 	}
 }
 

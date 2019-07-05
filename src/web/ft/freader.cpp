@@ -325,6 +325,7 @@ void FReader::Refresh(FScript* scr) {
 		Debug::Message("FReader", AnBrowse::busyMsg);
 		scr->Clear();
 		scr->ok = Read(scr);
+		AnBrowse::changed = true;
 	}
 }
 

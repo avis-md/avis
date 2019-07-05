@@ -100,7 +100,9 @@ void FNode::RemoveFrames() {
 	
 }
 
-void FNode::Reconn() {}
+void FNode::Reconn() {
+	AnNode::Reconn();
+}
 
 void FNode::CatchExp(char* c) {
 	std::string s = c;
