@@ -137,7 +137,6 @@ bool FReader::Read(FScript* scr) {
 			}
 
 			if (fail) {
-				remove(tmpPath.c_str());
 				return false;
 			}
 
@@ -156,8 +155,6 @@ bool FReader::Read(FScript* scr) {
 			for (auto& m : scr->compileLog) {
 				m.path = fp + EXT_FS;
 			}
-
-			remove(tmpPath.c_str());
 		}
 	}
 #endif
@@ -320,10 +317,11 @@ bool FReader::Read(FScript* scr) {
 
 void FReader::Refresh(FScript* scr) {
 	auto mt = IO::ModTime(AnWeb::nodesPath + scr->path + EXT_FS);
-	if (mt > scr->chgtime || !scr->ok) {
+	if (mt > scr->chgtime || (!scr->ok && mt > scr->badtime)) {
 		AnBrowse::busyMsg = "Reloading " + scr->path + EXT_FS;
 		Debug::Message("FReader", AnBrowse::busyMsg);
 		scr->Clear();
+		scr->badtime = mt;
 		scr->ok = Read(scr);
 		AnBrowse::changed = true;
 	}
@@ -336,7 +334,7 @@ bool FReader::ParseType(std::string& s, AnScript::Var& var) {
 		var.stride = 2;
 		s = "short";
 	}
-	if (s == "integer") {
+	else if (s == "integer") {
 		var.type = AN_VARTYPE::INT;
 		var.stride = 4;
 		s = "int";

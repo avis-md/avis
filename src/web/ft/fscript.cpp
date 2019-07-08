@@ -69,7 +69,7 @@ void FScript_I::GetOutputArrs() {
 			scr->_outarr_post[i]();
 			int sz = vr.stride;
 			for (size_t a = 0; a < vr.dim; ++a) {
-				sz *= (ar.dims[a] = (*scr->arr_out_shapeloc)[a]);
+				sz *= (ar.dims[vr.dim - a - 1] = (*scr->arr_out_shapeloc)[a]);
 			}
 			ar.val.arr.resize(sz);
 			ar.val.val.p = ar.val.arr.data();
