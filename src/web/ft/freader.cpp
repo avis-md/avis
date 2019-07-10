@@ -69,7 +69,7 @@ bool FReader::Read(FScript* scr) {
 				std::ofstream ostrm(tmpPath);
 				std::vector<typestring> arr_i;
 				std::vector<std::string> arr_o;
-				std::string s;
+				std::string s; 
 				int tp = 0;
 				size_t loc = -1;
 				while (!fail && std::getline(strm, s)) {
@@ -99,7 +99,7 @@ bool FReader::Read(FScript* scr) {
 									auto tn = s2.substr(0, s2.find_first_of(','));
 									arr_i.push_back(typestring(tn, nm, s2.substr(l2)));
 								}
-								arr_o.push_back(nm);
+								else arr_o.push_back(nm);
 							}
 							else
 								ostrm << s.substr(0, loc - 1) << ", BIND(C) " << s.substr(loc) << "\n";

@@ -549,15 +549,16 @@ void AnNode::PreExecute() {
 
 bool AnNode::TryExecute() {
 	std::lock_guard<std::mutex> lock(execMutex);
-	if (execd) return false;
+	if (execd) return false; //haven't executed this
 	if (!executing) {
-		for (auto& i : inputR) {
+		for (auto& i : inputR) { //all parents executed
 			if (!i.execd) return false;
 		}
 	}
 	{
 		std::lock_guard<std::mutex> _lock(AnWeb::execNLock);
 		AnWeb::execN++;
+		execd = true;
 	}
 	std::thread(_Execute, this).detach();
 	return true;
@@ -571,7 +572,6 @@ void AnNode::_Execute(AnNode* n) {
 	n->executing = true;
 	n->Execute();
 	n->executing = false;
-	n->execd = true;
 	if (lock) lock->unlock();
 	Debug::Message("AnNode", "Executed " + std::to_string(n->id) + n->title);
 	for (size_t a = 0; a < n->outputR.size(); a++) {
