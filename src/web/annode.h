@@ -41,17 +41,17 @@ public:
 	const ANNODE_FLAGS flags;
 
 	uint id;
-	pAnScript_I script;
-	std::string title;
+	pAnScript_I script = nullptr;
+	std::string title = "";
 	Vec3 titleCol = NODE_COL_USR;
-	bool selected;
+	bool selected = false;
 	Vec2 pos;
 	static float width;
 	float height;
 
 	bool canexec;
 	bool execd;
-	std::vector<AnNode*> parents;
+	std::vector<AnNode*> parents = {};
 	std::mutex execMutex;
 
 	bool expanded = true;

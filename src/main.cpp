@@ -520,6 +520,8 @@ The hash for this program is )" << VisSystem::version_hash
 			Engine::stateLock.unlock();
 			Engine::WaitForLockValue();
 		}
+
+		AnWeb::Clear();
 		glfwDestroyWindow(Display::window);
 #ifndef NOCATCH
 	}
