@@ -9,7 +9,7 @@ Particles::attrdata::attrdata(bool ro) : instanceId(++_ids), readonly(ro), timed
 	SetGLBuf<float>(buf, nullptr, particleSz);
 	glGenTextures(1, &texBuf);
 	glBindTexture(GL_TEXTURE_BUFFER, texBuf);
-	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, buf);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32UI, buf);
 	glBindTexture(GL_TEXTURE_BUFFER, 0);
 	ApplyParCnt();
 	ApplyFrmCnt();
@@ -105,7 +105,13 @@ void Particles::attrdata::Seek(uint frm) {
 	auto& dt = Get(frm);
 	auto sz = dt.size();
 	if (!sz) return;
-	SetGLSubBuf<>(buf, dt.data(), particleSz);
+	std::vector<uint> ubuf(sz);
+#pragma omp parallel for
+	for (uint a = 0; a < sz; a++) {
+		ubuf[a] = (uint)(dt[a] * 65535);
+	}
+	if (std::this_thread::get_id() == Engine::_mainThreadId)
+		SetGLSubBuf<>(buf, ubuf.data(), particleSz);
 	dirty = false;
 }
 
@@ -152,10 +158,6 @@ void Particles::attrdata::Export(std::ostream& strm) {
 		strm.write((char*)&Particles::anim.frameCount, 4);
 		for (int a = 0; a < Particles::anim.frameCount; a++) {
 			auto& d = Get(a);
-			strm << d.size() << " ";
-			for (auto& d2 : d) {
-				strm << d2 << " ";
-			}
 			const auto sz = d.size();
 			strm.write((char*)&sz, 4);
 			strm.write((char*)d.data(), sz * sizeof(double));
