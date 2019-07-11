@@ -24,27 +24,27 @@ Source code (Error checking omitted)::
     #include <cmath>
     #include <vector>
 
-    //in
+    //@in
     double cutoff = 0;
-    //in
+    //@in
     double cutoffMin = 0;
-    //in pcnt 3
+    //@in pcnt 3
     double* positions = 0;
-    //in pcnt
+    //@in pcnt
     short* types = 0;
 
-    //out ccnt 2
+    //@out ccnt 2
     int* bonds = 0;
     std::vector<int> vcons;
 
-    //var
+    //@var
     int pcnt = 2;
-    //var
+    //@var
     int ccnt = 0;
 
     #define ISA(s, c) (s == *((short*)c))
 
-    //entry
+    //@entry
     void Execute() {
         const double cut2 = cutoff*cutoff;
         const double cut2m = cutoffMin*cutoffMin;

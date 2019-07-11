@@ -29,26 +29,26 @@ Source code (Error checking omitted)::
     #include <vector>
     #include <unordered_map>
 
-    //in 6
+    //@in 6
     double* bbox = 0;
-    //in enum X Y Z
+    //@in enum X Y Z
     int axis = 0;
-    //in
+    //@in
     int count = 0;
-    //in parcnt 3
+    //@in parcnt 3
     double* positions = 0;
-    //in parcnt
+    //@in parcnt
     short* types = 0;
 
-    //out count typecnt
+    //@out count typecnt
     double* density = 0;
 
-    //var
+    //@var
     int parcnt = 0;
-    //var
+    //@var
     int typecnt = 0;
 
-    //entry
+    //@entry
     void Do () {
         double zmin = bbox[axis*2];
         double zmax = bbox[axis*2+1];

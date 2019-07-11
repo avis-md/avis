@@ -6,7 +6,7 @@ This section describes the requirements for extending the Analysis framework.
 General
 -------
 
-User-made nodes live in the ``nodes/`` directory. You can create as many subdirectories at any depth.
+User-made nodes live in the ``~/.avis/nodes/`` directory. You can create as many subdirectories at any depth.
 You should not have more than one script with the same filename, regardless of language.
 
 .. Note::
@@ -33,29 +33,28 @@ These few things are parsed by the pre-processor. They are all optional except w
 
 * Input variables
 
-      Global variables that will be parsed as the inputs for the node.
+      Variables that will be parsed as the inputs for the node.
 
 * Output variables
 
-      Global variables that, well, you get the idea.
+      Variables that will be parsed as the inputs for the node.
 
 * Progress variable
 
-      A variable which the script sets to display its progress (duh) on the UI.
+      A variable which the script sets to display a progress bar on the node.
 
 * Entry point*
 
-      The function to be called when the node is executed. It must be a function marked as entry with no arguments and no return value.
+      The function to be called when the node is executed. It must be a function with no arguments and no return value.
 
-``Marks`` are the single API format for an AViS script. Each mark must immediately precede its target, with no extra spaces or newlines in between.
+``Marks`` are the single API format for an AViS script. Each mark is a comment starting with ``@`` that immediately precedes its target, with no extra spaces or newlines in between.
 
 Example::
 
-      `Some Mark`
+      `@Some Mark`
       This line of code is marked!
 
-You are free to use any variable or function name as you like; the names are entirely local to your script.
-However, as the names will be shown on the node UI, names longer than 10 letters are not encouraged. camelCaseNames will be rendered as ``Camel Case Names``.
+You are free to use any variable or function name as you like; the names are entirely local to your script. However, as the names will be shown on the node UI, names longer than 10 letters are not encouraged.
 
 .. Tip::
       You can toggle the behavior of name rendering in the ``Preferences``.
@@ -76,31 +75,33 @@ The general format of a parse-able script is as follows.
 
 - Description::
 
-      ///This must come at the top of the script.
-      ///No new-lines must occur before or between these lines.
-      ///This is another line.
+      //@Description
+      //@This text will appear on the top of the node
+      //@This is another line.
 
 - Input variables::
 
-      //in
+      //@in
       int numberOfFrames = 0;
 
 - Output variables::
 
-      //out
+      //@out
       int numberOfRedAtoms = 0;
 
 - Progress variable::
 
-      //progress
+      //@progress
       double progressOfTheCode = 0;
 
 - Entry point::
 
-      //entry
+      //@entry
       void DoSomething() {
          //do something fancy!
       }
+
+Code can be entirely global, or put into a class with the same name as the script. When the code is classed as such, multiple instances of the script can be used for the same graph, without sharing variables.
 
 Arrays
 ~~~~~~
@@ -159,34 +160,29 @@ Python
 
 .. Note::
 
-      As Python variable declarations are implicit, the type of the variable must be specified beside the ``#in``/``#out`` comment.
+      As Python variable declarations are implicit, the type of the variable must be specified beside the ``#@in``/``#@out`` comment.
 
 The general format of a parse-able script is as follows.
 
 - Description::
 
-      # This must come at the top of the script.
-      # No new-lines must occur before or between these lines.
-      # A space must exist between the ! and the text.
+      #@Description
+      #@This text will appear on the top of the node
+      #@This is another line.
 
 - Input variables::
 
-      #in int
+      #@in int
       myVar = 0
 
 - Output variables::
 
-      #out double
+      #@out double
       outVar = 0.0
-
-- Progress variable::
-
-      #progress
-      progressOfTheCode = 0;
 
 - Entry point::
 
-      #entry
+      #@entry
       def DoSomething:
          #do something fancy!
       
@@ -194,16 +190,17 @@ Arrays
 ~~~~~~
 
 AViS uses the NumPy api for Python arrays. So, please use numpy to declare arrays.
+The type of variable is list(ab), where a = dim and b = first character of the element type.
 
 Example::
 
       using numpy as np
 
-      #in list(1d)
+      #@in list(1d)
       myArray = np.zeros(5)
 
-      #out list(2i)
-      myArray = np.zeros({100, 3}, dtype=int32)
+      #@out list(2i)
+      myArray = np.zeros((100, 3), dtype=int32)
 
 Fortran
 --------
@@ -218,28 +215,28 @@ The general format of a parse-able script is as follows.
 
 - Description::
 
-      ! This must come at the top of the script.
-      ! No new-lines must occur before or between these lines.
-      ! A space must exist between the ! and the text.
+      !@Description
+      !@This text will appear on the top of the node
+      !@This is another line.
 
 - Input variables::
 
-      !in 
+      !@in
       INTEGER :: MYINT
 
 - Output variables::
 
-      !out
+      !@out
       REAL*8 :: DOUBLEVAR
 
 - Progress variable::
 
-      !progress
+      !@progress
       REAL*8 :: PROGRESSMEOW
 
 - Entry point::
 
-      !entry
+      !@entry
       SUBROUTINE HELLO()
          !say hello!
       end subroutine HELLO
@@ -251,4 +248,5 @@ To allow for interoperability with other languages, arrays must be declared as `
 
 Example::
 
+      !@in
       REAL*8, ALLOCATABLE, TARGET :: SOMEARRAY (:,:)
