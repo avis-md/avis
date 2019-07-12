@@ -209,7 +209,7 @@ bool FReader::Read(FScript* scr) {
 			return false;
 		}
 
-		scr->arr_out_shapeloc = (int32_t**)scr->lib.GetSym("__mod_exp_MOD_exp_arr_shp");
+		scr->arr_out_shapeloc = (int32_t**)scr->lib.GetSym("__" + nm + "_mod_exp_MOD_exp_arr_shp");
 		if (!scr->arr_out_shapeloc) {
 			_ER2("output array shape pointer");
 			return false;
@@ -351,7 +351,7 @@ bool FReader::ParseType(std::string& s, AnScript::Var& var) {
 void FReader::GenArrIO(std::string path, std::string name, std::vector<typestring> invars, std::vector<std::string> outvars) {
 	std::ofstream strm(path + name + ".ext.f95");
 
-	strm << R"(module mod_imp
+	strm << "module " + name + R"(_mod_imp
  use iso_c_binding
  use )" << name << R"(
  implicit none
@@ -369,9 +369,9 @@ void FReader::GenArrIO(std::string path, std::string name, std::vector<typestrin
 		" + v.name + " = imp_p_arr_ptr\n\
 	end subroutine imp_set_" + v.name + "\n";
 	}
-	strm << "end module mod_imp\n\n";
+	strm << "end module " + name + "_mod_imp\n\n";
 
-	strm << R"(module mod_exp
+	strm << "module " + name + R"(_mod_exp
  use iso_c_binding
  use )" << name << R"(
  implicit none
@@ -386,5 +386,5 @@ void FReader::GenArrIO(std::string path, std::string name, std::vector<typestrin
 		exp_arr_ptr = c_loc(" + v + ")\n\
 	end subroutine exp_get_" + v + "\n";
 	}
-	strm << "end module mod_exp";
+	strm << "end module " + name + "_mod_exp";
 }

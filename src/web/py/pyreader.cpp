@@ -286,6 +286,7 @@ void PyReader::Refresh(PyScript* scr) {
 		Debug::Message("PyReader", AnBrowse::busyMsg);
 		if (scr->ok) scr->UnregInstances();
 		scr->Clear();
+		scr->badtime = mt;
 		scr->ok = Read(scr);
 		if (scr->ok) scr->RegInstances();
 		AnBrowse::changed = true;
