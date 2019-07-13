@@ -23,4 +23,4 @@ AViS (and ChokoLait) uses the following open-source libraries, in no particular 
 
 
 
-*Pua Kai, 2019*
+*Pua Kai et. al 2019*

@@ -7,7 +7,7 @@ General
 -------
 
 User-made nodes live in the ``~/.avis/nodes/`` directory. You can create as many subdirectories at any depth.
-You should not have more than one script with the same filename, regardless of language.
+You should not have more than one script with the same filename in the same language, to avoid confusion.
 
 .. Note::
       This section describes common properties amongst languages. Please refer to the actual languages for examples.
@@ -189,8 +189,7 @@ The general format of a parse-able script is as follows.
 Arrays
 ~~~~~~
 
-AViS uses the NumPy api for Python arrays. So, please use numpy to declare arrays.
-The type of variable is list(ab), where a = dim and b = first character of the element type.
+AViS uses the NumPy api for Python arrays. The type of variable is ``list(nt)``, where n = dim and t = first character of the element type.
 
 Example::
 

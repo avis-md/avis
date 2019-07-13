@@ -3,45 +3,37 @@ Installation
 
 This section goes through the steps to install on 3 different OSes.
 
-.. Note::
-      The contents for this section will change once the project becomes public.
-      For now, the app will only be available to Yasuoka Lab members.
-
 1. Windows
 2. MacOS
 3. Linux
 
+You can download the binary `here <https://github.com/avis-md/avis/releases/>`_
+
 Windows
 ----------
 
-Open up a command prompt with SSH (you should have it installed, no?) and type the following:
+1. Extract and run the avis installer .exe.
 
-* cd [install path]
-* scp [any tekka gpu]:/nfs/home/share/avis/win/avis.zip avis.zip
-* unzip avis.zip  (by hand if you don't have unzip installed)
+You can start the program by executing avis.exe, or by adding the folder to your PATH and typing ``avis`` in the command prompt.
 
-You can start the program by executing avis.exe, or by adding the folder to your PATH and typing `avis` in the command prompt.
+The user folder will be in the ``C:\Users\[username]\.avis\`` directory.
 
 MacOS
 ----------
 
-Open up a terminal and type the following:
+1. Extract and copy the avis .app into the Applications folder.
 
-* cd [install path]
-* scp [any tekka gpu]:/nfs/home/share/avis/mac/avis.tar.gz avis.tar.gz
-* tar -zxvf avis.tar.gz
-* avis/reg.sh
+You can start the program from the Applications list, or by typing ``avis`` in the Terminal.
 
-You can start the program by typing `avis` in the Terminal.
+The user folder will be in the ``~/.avis/`` directory.
 
 Linux
 -----------
 
-Open up a terminal and type the following:
+1. Extract the avis package .deb
+2. At the parent folder, execute ``sudo dpkg -i [package_name].deb``
+3. If installation fails with dependancy problems, execute ``sudo apt -f install``
 
-* cd [install path]
-* scp [any tekka gpu]:/nfs/home/share/avis/linux/avis.tar.gz avis.tar.gz
-* tar -zxvf avis.tar.gz
-* avis/reg.sh
+You can start the program from the Applications list, or by typing ``avis`` in the Terminal.
 
-You can start the program by typing `avis` in the Terminal.
+The user folder will be in the ``~/.avis/`` directory.
