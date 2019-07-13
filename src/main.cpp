@@ -5,7 +5,7 @@
 #define NOCATCH
 #define DELAYLOAD
 //#define AUTOSAVE
-#define DEBUG_CG
+//#define DEBUG_CG
 
 #include "ui/ui_ext.h"
 #include "ui/browse.h"
