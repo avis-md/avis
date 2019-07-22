@@ -3,8 +3,8 @@ namespace glsl {
 	const char surfDVert[] = R"(
 #pragma option use_clip
 
-layout(location=0) in vec4 pos;
-layout(location=1) in vec4 nrm;
+layout(location=0) in vec3 pos;
+layout(location=1) in vec3 nrm;
 
 uniform mat4 _MV;
 uniform mat4 _MVP;
@@ -38,7 +38,7 @@ void main(){
 	wpos /= wpos.w;
 
 	v2f_pos = wpos.xyz;
-	v2f_nrm = direction * (_MV * nrm).xyz;
+	v2f_nrm = direction * (_MV * vec4(nrm, 0)).xyz;
 }
 )";
 	const char surfDFrag[] = R"(

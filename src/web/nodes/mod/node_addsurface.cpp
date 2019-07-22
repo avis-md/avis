@@ -65,8 +65,8 @@ void Node_AddSurface::Update() {
 		}
 
 		Debug::Message("Node_AddSurface", "Allocating for " + std::to_string(_outSz) + " triangles with tmp buffer of " + std::to_string(_mtmpSz) + " triangles");
-		ResizeOutBuf(_outSz * 3 * sizeof(Vec4));
-		ResizeTmpBuf(_mtmpSz * 3 * sizeof(Vec4));
+		ResizeOutBuf(_outSz * 3 * sizeof(Vec3));
+		ResizeTmpBuf(_mtmpSz * 3 * sizeof(Vec3));
 
 		zo = 0;
 		genSz = 0;
@@ -78,10 +78,10 @@ void Node_AddSurface::Update() {
 			auto sz = ExecMC(glm::ivec3(zo, 0, 0), glm::ivec3(zs, shape[1], shape[2]), glm::ivec3(shape[0], shape[1], shape[2]));
 			glBindBuffer(GL_COPY_READ_BUFFER, tmpPos);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, outPos);
-			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, genSz * 3 * sizeof(Vec4), sz * 3 * sizeof(Vec4));
+			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, genSz * 3 * sizeof(Vec3), sz * 3 * sizeof(Vec3));
 			glBindBuffer(GL_COPY_READ_BUFFER, tmpNrm);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, outNrm);
-			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, genSz * 3 * sizeof(Vec4), sz * 3 * sizeof(Vec4));
+			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, genSz * 3 * sizeof(Vec3), sz * 3 * sizeof(Vec3));
 			glBindBuffer(GL_COPY_READ_BUFFER, 0);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 			zo += zs - 1;
@@ -92,12 +92,12 @@ void Node_AddSurface::Update() {
 		resultNrm.resize(genSz);
 
 		glBindBuffer(GL_ARRAY_BUFFER, outPos);
-		auto pos = (Vec4*)glMapBufferRange(GL_ARRAY_BUFFER, 0, genSz * sizeof(Vec4), GL_MAP_READ_BIT);
-		std::memcpy(resultPos.data(), pos, genSz * sizeof(Vec4));
+		auto pos = (Vec3*)glMapBufferRange(GL_ARRAY_BUFFER, 0, genSz * sizeof(Vec3), GL_MAP_READ_BIT);
+		std::memcpy(resultPos.data(), pos, genSz * sizeof(Vec3));
 		glUnmapBuffer(GL_ARRAY_BUFFER);
 		glBindBuffer(GL_ARRAY_BUFFER, outNrm);
-		auto nrm = (Vec4*)glMapBufferRange(GL_ARRAY_BUFFER, 0, genSz * sizeof(Vec4), GL_MAP_READ_BIT);
-		std::memcpy(resultNrm.data(), nrm, genSz * sizeof(Vec4));
+		auto nrm = (Vec3*)glMapBufferRange(GL_ARRAY_BUFFER, 0, genSz * sizeof(Vec3), GL_MAP_READ_BIT);
+		std::memcpy(resultNrm.data(), nrm, genSz * sizeof(Vec3));
 		glUnmapBuffer(GL_ARRAY_BUFFER);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -110,7 +110,6 @@ void Node_AddSurface::DrawScene(RENDER_PASS pass) {
 	if (!genSz) return;
 
 	if (pass == RENDER_PASS::SOLID) {
-		auto e = glGetError();
 		glUseProgram(drawProg);
 		glUniformMatrix4fv(drawProg.Loc(0), 1, GL_FALSE, glm::value_ptr(MVP::modelview()));
 		glUniformMatrix4fv(drawProg.Loc(1), 1, GL_FALSE, glm::value_ptr(MVP::projection() * MVP::modelview()));
@@ -120,7 +119,6 @@ void Node_AddSurface::DrawScene(RENDER_PASS pass) {
 		glUniform1f(drawProg.Loc(4), invert? -1.f : 1.f);
 		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLES, 0, genSz*3);
-		e = glGetError();
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}
@@ -147,8 +145,7 @@ void Node_AddSurface::Execute() {
 	genSz = 0;
 	auto& ir = inputR[0];
 	if (!ir.first) return;
-	auto& cv = ir.getconv();
-	auto& vl = *(double**)ir.getval(ANVAR_ORDER::C);
+	const auto& vl = *(double**)ir.getval(ANVAR_ORDER::C);
 	if (!vl) return;
 	shape[0] = ir.getdim(0);
 	shape[1] = ir.getdim(1);
@@ -222,7 +219,7 @@ void Node_AddSurface::Init() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triTable), triTable, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindTexture(GL_TEXTURE_BUFFER, triBufT);
-	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, triBuf);
+	glTexBuffer(GL_TEXTURE_BUFFER, GL_R32I, triBuf);
 	glBindTexture(GL_TEXTURE_BUFFER, 0);
 }
 
@@ -237,9 +234,9 @@ void Node_AddSurface::InitBuffers() {
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, outPos);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	glBindBuffer(GL_ARRAY_BUFFER, outNrm);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	glBindVertexArray(0);
 }
 
@@ -308,7 +305,7 @@ int Node_AddSurface::ExecMC(glm::ivec3 offset, glm::ivec3 size, glm::ivec3 rsize
 	return (int)gsz;
 }
 
-const float Node_AddSurface::triTable[] = {
+const int Node_AddSurface::triTable[] = {
 	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 	0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 	0, 1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,

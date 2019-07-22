@@ -22,7 +22,7 @@ protected:
 	float cutoff;
 	bool invert = false;
 
-	std::vector<Vec4> resultPos, resultNrm;
+	std::vector<Vec3> resultPos, resultNrm;
 
 	static size_t bufSz, outSz;
 	static int maxBufSz;
@@ -39,6 +39,6 @@ protected:
 	void SetInBuf(void*, int);
 	int ExecMC(glm::ivec3 offset, glm::ivec3 size, glm::ivec3 rsize);
 
-	static const float triTable[256*15];
+	static const int triTable[256*15];
 	static GLuint triBuf, triBufT;
 };
