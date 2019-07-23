@@ -25,11 +25,25 @@ Node_AddSurface::Node_AddSurface() : INODE_INITF(AN_FLAG_RUNONSEEK | AN_FLAG_RUN
 
 		scr->AddInput(_("density"), AN_VARTYPE::DOUBLE, 3);
 		scr->AddInput(_("value"), AN_VARTYPE::DOUBLE);
+
+		scr->AddOutput(_("vertices"), AN_VARTYPE::DOUBLE, 2);
 	);
+
+	IAddConV(0, { (int*)&genSz, nullptr }, { 3 });
 
 	InitBuffers();
 
 	glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &maxBufSz);
+
+	static std::string ss[] = {
+		"Visualize",
+		"Generate",
+		""
+	};
+
+	mode = Mode::Draw;
+	mode_di.target = (uint*)&mode;
+	mode_di.list = &ss[0];
 }
 
 Node_AddSurface::~Node_AddSurface() {
@@ -106,8 +120,23 @@ void Node_AddSurface::Update() {
 	}
 }
 
+void Node_AddSurface::DrawHeader(float& off) {
+	AnNode::DrawHeader(off);
+
+	UI2::Dropdown(pos.x + 5, off, width - 10, "Mode", mode_di);
+	static auto _mode = mode;
+	if (_mode != mode) {
+		_mode = mode;
+		
+	}
+	off += 17;
+
+	UI2::Toggle(pos.x + 5, off, width - 10, "invert", invert);
+	off += 17;
+}
+
 void Node_AddSurface::DrawScene(RENDER_PASS pass) {
-	if (!genSz) return;
+	if (!genSz || (mode != Mode::Draw)) return;
 
 	if (pass == RENDER_PASS::SOLID) {
 		glUseProgram(drawProg);
@@ -156,19 +185,24 @@ void Node_AddSurface::Execute() {
 		Debug::Warning("AddSurface", "Exceeded maximum allowed texel size! ("
 			+ std::to_string(bufSz) + " required, " + std::to_string(maxBufSz) + " available)");
 	}
-	std::lock_guard<std::mutex> locker(lock);
-	data.resize(bufSz);
-	for (int a = 0; a < bufSz; a++) {
-		data[a] = (float)vl[a];
+	{
+		std::lock_guard<std::mutex> locker(lock);
+		data.resize(bufSz);
+		for (int a = 0; a < bufSz; a++) {
+			data[a] = (float)vl[a];
+		}
+
+		cutoff = getval_d(1);
 	}
-	cutoff = (float)getval_d(1);
-}
 
-void Node_AddSurface::DrawHeader(float& off) {
-	AnNode::DrawHeader(off);
+	if (outputR[0].size() > 0) {
+		while (!!data.size())
+			Engine::Sleep(100);
 
-	UI2::Toggle(pos.x + 5, off, width - 10, "invert", invert);
-	off += 17;
+		auto& ov = ((DmScript_I*)script.get())->outputVs;
+		ov[0].val.p = resultPos.data();
+		ov[0].pval = &ov[0].val.p;
+	}
 }
 
 void Node_AddSurface::Init() {

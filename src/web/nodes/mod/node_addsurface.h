@@ -1,5 +1,6 @@
 #pragma once
 #include "web/annode_internal.h"
+#include "ui/popups.h"
 
 class Node_AddSurface : public AnNode {
 public:
@@ -15,6 +16,12 @@ public:
 	
 	void Execute() override;
 protected:
+	enum class Mode : uint {
+		Draw,
+		Gen
+	} mode;
+	Popups::DropdownItem mode_di;
+
 	static Shader marchProg, drawProg;
 
 	std::vector<float> data;
