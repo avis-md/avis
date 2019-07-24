@@ -9,7 +9,9 @@ Node_AdjList::Node_AdjList() : INODE_INIT {
 	INODE_TITLE(NODE_COL_NRM);
 	INODE_SINIT(
 		scr->desc = R"(Converts a pair list into
-an adjacency list)";
+an adjacency list
+If max id is 0, it is set to
+the maximum ID in the data)";
 		scr->descLines = 2;
 
 		scr->AddInput(_("list"), AN_VARTYPE::INT, 2);
@@ -32,7 +34,12 @@ void Node_AdjList::Execute() {
 	count = getval_i(1);
 	listsize = getval_i(2);
 	if (listsize <= 0) RETERR("list size must be positive!");
-	if (count <= 0) RETERR("max id must be positive!");
+	if (count <= 0) {
+		count = data[0] + 1;
+		for (int a = 1; a < ccnt * 2 - 1; a++) {
+			count = std::max(count, data[a] + 1);
+		}
+	}
 	conns.clear();
 	conns.resize(count*listsize, -1);
 	for (int a = 0; a < ccnt; ++a) {
@@ -40,11 +47,12 @@ void Node_AdjList::Execute() {
 		int i1 = data[a*2+1];
 		int* p0 = &conns[i0*listsize];
 		int* p1 = &conns[i1*listsize];
-		for (int c = 0; c < listsize; ++c) {
+		int c = 0;
+		for (; c < listsize; ++c) {
 			if (*p0 == -1) break;
 			p0++;
 		}
-		if (*p0 != -1)
+		if (c == listsize)
 			RETERR("List size is too short for index " << i0 << "!");
 		for (int c = 0; c < listsize; ++c) {
 			if (*p1 == -1) break;

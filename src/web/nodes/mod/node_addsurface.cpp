@@ -11,7 +11,7 @@ INODE_DEF(__("Draw Surface"), AddSurface, GEN);
 Shader Node_AddSurface::marchProg;
 Shader Node_AddSurface::drawProg;
 
-size_t Node_AddSurface::bufSz = 0, Node_AddSurface::outSz = 0;
+size_t Node_AddSurface::bufSz = 0;
 int Node_AddSurface::maxBufSz = 0;
 uint Node_AddSurface::genSz = 0;
 GLuint Node_AddSurface::inBuf, Node_AddSurface::inBufT, Node_AddSurface::query;
@@ -198,9 +198,14 @@ void Node_AddSurface::Execute() {
 	if (outputR[0].size() > 0) {
 		while (!!data.size())
 			Engine::Sleep(100);
+		
+		resultPosd.resize(genSz);
+		for (int a = 0; a < genSz; a++) {
+			resultPosd[a] = (glm::dvec3)resultPos[a];
+		}
 
 		auto& ov = ((DmScript_I*)script.get())->outputVs;
-		ov[0].val.p = resultPos.data();
+		ov[0].val.p = resultPosd.data();
 		ov[0].pval = &ov[0].val.p;
 	}
 }

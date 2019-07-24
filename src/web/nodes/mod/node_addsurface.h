@@ -30,8 +30,9 @@ protected:
 	bool invert = false;
 
 	std::vector<Vec3> resultPos, resultNrm;
+	std::vector<glm::dvec3> resultPosd;
 
-	static size_t bufSz, outSz;
+	static size_t bufSz;
 	static int maxBufSz;
 	static uint genSz;
 	static GLuint inBuf, inBufT, query;
