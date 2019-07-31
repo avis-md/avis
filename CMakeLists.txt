@@ -1,3 +1,20 @@
+# Copyright (C) 2019 Pua Kai
+# 
+# This file is part of AViS.
+# 
+# AViS is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# AViS is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with AViS.  If not, see <http://www.gnu.org/licenses/>.
+
 cmake_minimum_required(VERSION 3.3)
 project (avis)
 
@@ -268,7 +285,7 @@ elseif (LINUX)
 		COMMAND
 		"${CMAKE_COMMAND}" --build . --target install
 		COMMAND
-		cd "${PROJECT_SOURCE_DIR}/package/deb/" && dpkg -b pkg-debian/ avis_0.11_amd64.deb
+		cd "${PROJECT_SOURCE_DIR}/package/deb/" && dpkg -b pkg-debian/ avis_amd64.deb
 		WORKING_DIRECTORY
 		"${CMAKE_BINARY_DIR}"
 	)

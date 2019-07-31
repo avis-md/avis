@@ -39,7 +39,7 @@
 
 \****************************************************************************/
 
-//Modified for write ability
+//This file is modified for use with AViS
 
 #include "Engine.h"
 #include "hdr.h"

@@ -8,7 +8,7 @@ warranty. In no event will the authors be held liable for any damages
 arising from the use of this software.
 
 Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to Key_LeftAlter it and redistribute it
+including commercial applications, and to alter it and redistribute it
 freely, subject to the following restrictions:
 
     1. The origin of this software must not be misrepresented; you must not
@@ -16,10 +16,10 @@ freely, subject to the following restrictions:
     in a product, an acknowledgment in the product documentation would be
     appreciated but is not required.
 
-    2. Key_LeftAltered source versions must be plainly marked as such, and must not be
+    2. altered source versions must be plainly marked as such, and must not be
     misrepresented as being the original software.
 
-    3. This notice may not be removed or Key_LeftAltered from any source
+    3. This notice may not be removed or altered from any source
     distribution.
 */
 
@@ -1605,7 +1605,7 @@ static unsigned encodeLZ77(uivector* out, Hash* hash,
         {
           length = lazylength;
           offset = lazyoffset;
-          hash->head[hashval] = -1; /*the same hashchain update will be done, this ensures no wrong Key_LeftAlteration*/
+          hash->head[hashval] = -1; /*the same hashchain update will be done, this ensures no wrong alteration*/
           hash->headz[numzeros] = -1; /*idem*/
           --pos;
         }
