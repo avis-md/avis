@@ -19,6 +19,7 @@ This section contains instructions to build AViS from source.
 - vcpkg and Microsoft Visual Studio 2017 for Windows
 - g++, Make for Debian
 - HomeBrew, g++/clang, Make for MacOS
+- Pre-built binaries are generated on Windows 10, Ubuntu 18, and MacOS Mojave.
 
 AViS is written against the C++11 standard.
 
@@ -35,23 +36,26 @@ Please consult their READMEs for build instructions.
 ### Windows
 
 1. `vcpkg install --triplet x64-windows glew glfw3 glm libjpeg-turbo freetype libssh2`
-2. `mkdir build && cd build`
-3. `cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE="(refer to vcpkg integrate install)" ..`
-4. `cmake --build . --config Release`
+2. `./githash.bat`
+3. `mkdir build && cd build`
+4. `cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE="(refer to vcpkg integrate install)" ..`
+5. `cmake --build . --config Release`
 
 ### Debian
 
 1. `sudo apt install libglew-dev libglfw3-dev libglm-dev libjpeg-turbo8-dev libfreetype6-dev libssh2-1-dev`
-2. `mkdir build && cd build`
-3. `cmake -DCMAKE_BUILD_TYPE=Release ..`
-4. `cmake --build .`
+2. `./githash.sh`
+3. `mkdir build && cd build`
+4. `cmake -DCMAKE_BUILD_TYPE=Release ..`
+5. `cmake --build .`
 
 ### MacOS
 
 1. `brew install glew glfw glm jpeg freetype libssh2`
-2. `mkdir build && cd build`
-3. `cmake -DCMAKE_BUILD_TYPE=Release ..`
-4. `cmake --build .`
+2. `./githash.sh`
+3. `mkdir build && cd build`
+4. `cmake -DCMAKE_BUILD_TYPE=Release ..`
+5. `cmake --build .`
 
 ## Building the Documentation
 
