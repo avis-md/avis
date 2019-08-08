@@ -103,6 +103,14 @@ void main(){
     v2f_id2 = int(id2) + 1;
 	vec3 pos1 = texelFetch(posTex, int(id1)).rgb;
 	vec3 pos2 = texelFetch(posTex, int(id2)).rgb;
+
+	int iz = int(mod(gl_InstanceID, imgCnt.z));
+	int gi2 = int(gl_InstanceID / imgCnt.z);
+	int iy = int(mod(gi2, imgCnt.y));
+	int ix = int(gi2 / imgCnt.y);
+	pos1 += bbox * (vec3(ix, iy, iz) - imgOff);
+	pos2 += bbox * (vec3(ix, iy, iz) - imgOff);
+
 	if (len2(pos2 - pos1) > maxDst2) {
 		gl_Position = vec4(-1, -1, -1, 1);
 		return;
