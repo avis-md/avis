@@ -31,7 +31,13 @@ Before building AViS, these dependant submodules must be manually compiled.
 2. radeonrays
 3. oidn
 
-Please consult their READMEs for build instructions.
+Please consult their READMEs for build instructions. It should go something like this:
+
+1. `mkdir build && cd build`
+2. `cmake <platform dependant> ..`
+3. `cmake --build . <platform dependant>`
+
+Note that if `--config Release` is specified for the main build, it should also be specified here.
 
 ### Windows
 
