@@ -346,7 +346,7 @@ void ParGraphics::Init() {
 		"orthoSz", "id2col", "colList",
 		"gradCols", "colUseGrad",
 		"usegrad", "onecol", "spriteScl",
-		"tubesize", "_IP", "bbox", "imgCnt", "imgOff" });
+		"tubesize", "_IP", "bbox", "bboxCenter", "imgCnt", "imgOff" });
 	bid = glGetUniformBlockIndex(parConProg, "clipping");
 	glUniformBlockBinding(parConProg, bid, _clipBindId);
 
@@ -798,7 +798,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 		int pix = periodicImgs[1] + periodicImgs[0] + 1;
 		int piy = periodicImgs[3] + periodicImgs[2] + 1;
 		int piz = periodicImgs[5] + periodicImgs[4] + 1;
-		if (pix + piy + piz == 3) pix = 0;
+		//if (pix + piy + piz == 3) pix = 0;
 
 		bool useorien = (orientType == ORIENT::STRETCH && orientStr > 0.0001f);
 		parProg.SetOption("oriented", useorien);
@@ -948,11 +948,14 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 				glUniform3f(parConProg.Loc(20), Particles::boundingBox[1] - Particles::boundingBox[0]
 					, Particles::boundingBox[3] - Particles::boundingBox[2]
 					, Particles::boundingBox[5] - Particles::boundingBox[4]);
-				glUniform3i(parConProg.Loc(21), pix, piy, piz);
-				glUniform3i(parConProg.Loc(22), periodicImgs[0], periodicImgs[2], periodicImgs[4]);
-				if (!pix)
-					glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
-				else
+				glUniform3f(parConProg.Loc(21), (Particles::boundingBox[1] + Particles::boundingBox[0]) * 0.5f
+					, (Particles::boundingBox[3] + Particles::boundingBox[2]) * 0.5f
+					, (Particles::boundingBox[5] + Particles::boundingBox[4]) * 0.5f);
+				glUniform3i(parConProg.Loc(22), pix, piy, piz);
+				glUniform3i(parConProg.Loc(23), periodicImgs[0], periodicImgs[2], periodicImgs[4]);
+				//if (!pix)
+				//	glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
+				//else
 					glDrawArraysInstanced(GL_TRIANGLES, p.first * 12, p.second.first * 12, pix * piy * piz);
 			}
 		}
