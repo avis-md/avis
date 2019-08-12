@@ -355,7 +355,7 @@ void ParGraphics::Init() {
 		"connTex", "rad", "id2", "radScl",
 		"orthoSz", "id2col", "colList",
 		"gradCols", "colUseGrad",
-		"usegrad", "onecol", "bbox", "imgCnt", "imgOff" });
+		"usegrad", "onecol", "bbox", "bboxCenter", "imgCnt", "imgOff" });
 
 	(selHlProg = Shader::FromF(mv, glsl::selectorFrag)).AddUniforms({
 		"screenSize", "myId", "idTex", "hlCol" });
@@ -901,8 +901,11 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 				glUniform3f(parConLineProg.Loc(14), Particles::boundingBox[1] - Particles::boundingBox[0]
 					, Particles::boundingBox[3] - Particles::boundingBox[2]
 					, Particles::boundingBox[5] - Particles::boundingBox[4]);
-				glUniform3i(parConLineProg.Loc(15), pix, piy, piz);
-				glUniform3i(parConLineProg.Loc(16), periodicImgs[0], periodicImgs[2], periodicImgs[4]);
+				glUniform3f(parConLineProg.Loc(15), (Particles::boundingBox[1] + Particles::boundingBox[0]) * 0.5f
+					, (Particles::boundingBox[3] + Particles::boundingBox[2]) * 0.5f
+					, (Particles::boundingBox[5] + Particles::boundingBox[4]) * 0.5f);
+				glUniform3i(parConLineProg.Loc(16), pix, piy, piz);
+				glUniform3i(parConLineProg.Loc(17), periodicImgs[0], periodicImgs[2], periodicImgs[4]);
 				if (!pix)
 					glDrawArrays(GL_TRIANGLES, p.first * 6, p.second.first * 6);
 				else
@@ -1007,7 +1010,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 				glUniform4f(parConProg.Loc(16), c2.col.r, c2.col.g, c2.col.b, c2.usecol? 1.f : 0.f);
 				glUniform1f(parConProg.Loc(17), spriteScl);
 				glUniform1f(parConProg.Loc(18), TUBESIZE);
-				glDrawArrays(GL_TRIANGLES, 0, c2.cnt*12);
+				glDrawArraysInstanced(GL_TRIANGLES, 0, c2.cnt*12, pix * piy * piz);
 
 			}
 		}

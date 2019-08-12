@@ -93,7 +93,7 @@ float maxrad(float rad, vec3 wpos) {
 }
 
 void main(){
-	float maxDst2 = 0.5 * 0.5;
+	float maxDst2 = 0.25 * 0.25;
 
 	int pid = gl_VertexID / 12;
 	int vid = int(mod(gl_VertexID, 12));

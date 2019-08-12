@@ -24,6 +24,7 @@ uniform usamplerBuffer connTex;
 uniform vec2 rad;
 
 uniform vec3 bbox;
+uniform vec3 bboxCenter;
 uniform ivec3 imgCnt;
 uniform ivec3 imgOff;
 
@@ -36,7 +37,7 @@ float len2(vec3 v) {
 }
 
 void main(){
-	float maxDst2 = 1;
+	float maxDst2 = 0.25 * 0.25;
 
 	int vid = (gl_VertexID / 6) * 2;
     uint id1 = texelFetch(connTex, vid).r;
@@ -50,13 +51,26 @@ void main(){
 	int gi2 = int(gl_InstanceID / imgCnt.z);
 	int iy = int(mod(gi2, imgCnt.y));
 	int ix = int(gi2 / imgCnt.y);
+	
+    if (len2(pos2 - pos1) > maxDst2) {
+		vec3 dp = pos2 - pos1;
+		dp /= bbox;
+		dp = bbox * round(dp);
+		pos2 -= dp;
+	}
+
 	pos1 += bbox * (vec3(ix, iy, iz) - imgOff);
 	pos2 += bbox * (vec3(ix, iy, iz) - imgOff);
-    
-    if (len2(pos2-pos1) > maxDst2) {
-        gl_Position = vec4(-1, -1, -1, 1);
-        return;
-    }
+
+	vec3 bmn = bboxCenter - bbox * imgOff - bbox * 0.5;
+	vec3 bmx = bboxCenter + bbox * (imgCnt - imgOff) - bbox * 0.5f;
+	if (pos2.x < bmn.x || pos2.y < bmn.y || pos2.z < bmn.z
+		|| pos2.x > bmx.x || pos2.y > bmx.y || pos2.z > bmx.z
+		|| len2(pos2 - pos1) > maxDst2) {
+		gl_Position = vec4(-1, -1, -1, 1);
+		return;
+	}
+
     vec4 spos1 = _P*_MV*vec4(pos1, 1);
     spos1 /= spos1.w;
     vec4 spos2 = _P*_MV*vec4(pos2, 1);
