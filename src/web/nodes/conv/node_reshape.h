@@ -18,26 +18,17 @@
 #pragma once
 #include "web/annode_internal.h"
 
-class Node_AddMesh : public AnNode {
+class Node_Reshape : public AnNode {
 public:
 	INODE_DEF_H
-	Node_AddMesh();
-	~Node_AddMesh();
-
-	void Update() override;
-	void DrawHeader(float& off) override;
-	void DrawScene(const RENDER_PASS pass) override;
-	void RayTraceMesh(_Mesh& mesh) override;
+	Node_Reshape();
 
 	void Execute() override;
 
-protected:
-	static Shader shad;
+	void DrawHeader(float& off) override;
+	void OnConn(bool o, int i) override;
 
-	bool useIndices;
-	bool dirty;
-	int tsz, isz;
-	GLuint vao, vbos[2], elo;
-	Vec4 col, _col;
-	std::vector<float> poss, nrms, inds;
+protected:
+	int dim;
+	int lastsz;
 };

@@ -53,14 +53,14 @@
 	ResizeIO(scr.get());\
 	conV.clear();
 
-enum class ANNODE_GROUP {
+enum class ANNODE_GROUP : int {
 	GET,
 	SET,
 	GEN,
 	CONV,
-	MISC
+	MISC,
+	_COUNT
 };
-#define ANNODE_GROUP_COUNT 5
 
 class AnNode_Internal {
 public:
@@ -74,8 +74,8 @@ public:
 		std::string name;
 		const spawnFunc spawner;
 	};
-	static std::array<std::vector<noderef>, ANNODE_GROUP_COUNT> scrs;
-	static std::array<std::string, ANNODE_GROUP_COUNT> groupNms;
+	static std::array<std::vector<noderef>, (int)ANNODE_GROUP::_COUNT> scrs;
+	static std::array<std::string, (int)ANNODE_GROUP::_COUNT> groupNms;
 };
 
 class AnNode_Internal_Reg {

@@ -83,7 +83,7 @@ void Node_Downsample::Execute() {
 
 void Node_Downsample::OnConn(bool o, int i) {
     if (!o && (i == 0)) {
-        const auto dimo = scr->outputs[0].dim;
+        const auto dimo = script->outputs[0].dim;
         IClearConV();
         const auto dim = inputR[0].getconv().szOffsets.size();
         dims.resize(dim);
@@ -92,8 +92,8 @@ void Node_Downsample::OnConn(bool o, int i) {
             pdims.push_back(&d);
         }
         IAddConV(0, pdims);
-        scr->outputs[0].dim = dim;
-        scr->outputs[0].InitName();
+        script->outputs[0].dim = dim;
+        script->outputs[0].InitName();
 
         if (dim != dimo) {
             Disconnect(0, true);

@@ -44,8 +44,10 @@ Node_AddSurface::Node_AddSurface() : INODE_INITF(AN_FLAG_RUNONSEEK | AN_FLAG_RUN
 		scr->AddInput(_("value"), AN_VARTYPE::DOUBLE);
 
 		scr->AddOutput(_("vertices"), AN_VARTYPE::DOUBLE, 2);
+		scr->AddOutput(_("normals"), AN_VARTYPE::DOUBLE, 2);
 	);
 
+	IAddConV(0, { (int*)&genSz, nullptr }, { 3 });
 	IAddConV(0, { (int*)&genSz, nullptr }, { 3 });
 
 	InitBuffers();
@@ -211,20 +213,24 @@ void Node_AddSurface::Execute() {
 
 		cutoff = getval_d(1);
 	}
-
-	if (outputR[0].size() > 0) {
+	
+	//if (outputR[0].size() > 0) {
 		while (!!data.size())
 			Engine::Sleep(100);
 		
 		resultPosd.resize(genSz);
+		resultNrmd.resize(genSz);
 		for (int a = 0; a < genSz; a++) {
 			resultPosd[a] = (glm::dvec3)resultPos[a];
+			resultNrmd[a] = (glm::dvec3)resultNrm[a];
 		}
 
 		auto& ov = ((DmScript_I*)script.get())->outputVs;
 		ov[0].val.p = resultPosd.data();
 		ov[0].pval = &ov[0].val.p;
-	}
+		ov[1].val.p = resultNrmd.data();
+		ov[1].pval = &ov[1].val.p;
+	//}
 }
 
 void Node_AddSurface::Init() {

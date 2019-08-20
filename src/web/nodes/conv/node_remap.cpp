@@ -23,18 +23,13 @@ INODE_DEF(__("Remap"), Remap, CONV)
 
 Node_Remap::Node_Remap() : INODE_INIT {
 	INODE_TITLE(NODE_COL_NRM);
+	INODE_SINIT(
+		scr->AddInput(_("data"), AN_VARTYPE::DOUBLE, -1);
 
-	inputR.resize(1);
-	script->invars.push_back(std::pair<std::string, std::string>("values", "list(1f)"));
+		scr->AddOutput(_("result"), AN_VARTYPE::DOUBLE, 1);
+	);
 
-	outputR.resize(1);
-	script->outvars.resize(1, std::pair<std::string, std::string>("result", "list(1f)"));
-	
-	conV.resize(1);
-	auto& cv = conV[0];
-	cv.type = AN_VARTYPE::LIST;
-	cv.dimVals.resize(1);
-	cv.value = &val0;
+    IAddConV(0, {}, { 0 });
 }
 
 void Node_Remap::Execute() {

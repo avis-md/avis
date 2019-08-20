@@ -187,7 +187,8 @@ protected:
 
 	void IAddConV(void*);
 	void IAddConV(void*, std::initializer_list<int*>, std::initializer_list<int>);
-	void IAddConV(void*, std::vector<int*>);
+	void IAddConV(void*, const std::vector<int*>&);
+	void ISetConDim(int, const std::vector<int*>&, const std::vector<int>&);
 	void IClearConV();
 };
 typedef std::shared_ptr<AnNode> pAnNode;

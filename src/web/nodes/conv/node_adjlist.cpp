@@ -29,7 +29,7 @@ Node_AdjList::Node_AdjList() : INODE_INIT {
 an adjacency list
 If max id is 0, it is set to
 the maximum ID in the data)";
-		scr->descLines = 2;
+		scr->descLines = 4;
 
 		scr->AddInput(_("list"), AN_VARTYPE::INT, 2);
 		scr->AddInput(_("max id"), AN_VARTYPE::INT);

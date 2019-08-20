@@ -47,7 +47,7 @@ protected:
 	bool invert = false;
 
 	std::vector<Vec3> resultPos, resultNrm;
-	std::vector<glm::dvec3> resultPosd;
+	std::vector<glm::dvec3> resultPosd, resultNrmd;
 
 	static size_t bufSz;
 	static int maxBufSz;
