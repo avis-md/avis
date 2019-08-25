@@ -34,7 +34,7 @@ void* AnNode::nodecon::getval(ANVAR_ORDER order) {
 }
 
 AnScript::Var& AnNode::nodecon::getvar() {
-	return first->script->parent->outputs[second];
+	return first->script->outputs[second];
 }
 
 int AnNode::nodecon::getdim(int i) {
@@ -664,6 +664,8 @@ void AnNode::ISetConDim(int i, const std::vector<int*>& d1, const std::vector<in
 			cv.szOffsets.push_back(CVar::szItem(*pd1));
 		pd1++;
 	}
+	script->outputs[i].dim = (int)d1.size();
+	script->outputs[i].InitName();
 }
 
 void AnNode::IClearConV() {
