@@ -111,18 +111,18 @@ void Node_AddSurface::Update() {
 			auto sz = ExecMC(glm::ivec3(zo, 0, 0), glm::ivec3(zs, shape[1], shape[2]), glm::ivec3(shape[0], shape[1], shape[2]));
 			glBindBuffer(GL_COPY_READ_BUFFER, tmpPos);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, outPos);
-			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, genSz * 3 * sizeof(Vec3), sz * 3 * sizeof(Vec3));
+			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, genSz * sizeof(Vec3), sz * 3 * sizeof(Vec3));
 			glBindBuffer(GL_COPY_READ_BUFFER, tmpNrm);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, outNrm);
-			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, genSz * 3 * sizeof(Vec3), sz * 3 * sizeof(Vec3));
+			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, genSz * sizeof(Vec3), sz * 3 * sizeof(Vec3));
 			glBindBuffer(GL_COPY_READ_BUFFER, 0);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 			zo += zs - 1;
-			genSz += sz;
+			genSz += sz * 3;
 		}
 
-		resultPos.resize(genSz);
-		resultNrm.resize(genSz);
+		resultPos.resize(genSz * 3);
+		resultNrm.resize(genSz * 3);
 
 		glBindBuffer(GL_ARRAY_BUFFER, outPos);
 		auto pos = (Vec3*)glMapBufferRange(GL_ARRAY_BUFFER, 0, genSz * sizeof(Vec3), GL_MAP_READ_BIT);
@@ -166,7 +166,7 @@ void Node_AddSurface::DrawScene(RENDER_PASS pass) {
 		glUniform3f(drawProg.Loc(3), bboxs[1], bboxs[3], bboxs[5]);
 		glUniform1f(drawProg.Loc(4), invert? -1.f : 1.f);
 		glBindVertexArray(vao);
-		glDrawArrays(GL_TRIANGLES, 0, genSz*3);
+		glDrawArrays(GL_TRIANGLES, 0, genSz);
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}
@@ -174,7 +174,7 @@ void Node_AddSurface::DrawScene(RENDER_PASS pass) {
 
 void Node_AddSurface::RayTraceMesh(_Mesh& mesh) {
 	if (!genSz) return;
-	mesh.vertCount = (mesh.triCount = genSz) * 3;
+	mesh.triCount = (mesh.vertCount = genSz) / 3;
 	mesh.vertices.resize(mesh.vertCount);
 	mesh.normals.resize(mesh.vertCount);
 	mesh.triangles.resize(mesh.vertCount);
