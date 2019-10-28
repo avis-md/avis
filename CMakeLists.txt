@@ -23,6 +23,7 @@ if (UNIX AND NOT APPLE)
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+set(CMAKE_SKIP_RPATH TRUE)
 
 find_package(PythonLibs 3.7 REQUIRED)
 find_package(NumPy REQUIRED)
@@ -58,7 +59,7 @@ else()
 	SET(CMAKE_CXX_FLAGS "-g -Wall -Wextra -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-ignored-attributes")
 	add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++11> $<$<COMPILE_LANGUAGE:C>:-std=c99>)
 if (LINUX)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-rpath,$$RPATH -static-libstdc++ -fopenmp")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-rpath,$ORIGIN -static-libstdc++ -fopenmp")
 else()
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing")
 endif()
@@ -265,6 +266,8 @@ if (MSVC)
     INCLUDE(CPack)
 elseif (LINUX)
 	SET (CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/package/deb/pkg-debian/usr/bin)
+
+	file(REMOVE_RECURSE ${CMAKE_INSTALL_PREFIX}/avis-md/)
 
 	install(
 		FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/avis

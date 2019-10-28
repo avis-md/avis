@@ -17,6 +17,7 @@
 
 #include "lammps.h"
 #include "importer_info.h"
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -26,6 +27,8 @@ const char* Lammps::ATTRS[] = {
 	"x","y","z","xs","ys","zs",
 	"xu","yu","zu","xsu","ysu","zsu"
 };
+
+#define SCL 0.1
 
 #define LP(a,b,t) ((1-(t))*(a) + (t)*(b))
 
@@ -76,8 +79,10 @@ bool Lammps::Read(ParInfo* info) {
 	
 	strm.getline(buf, 100);
 	SEQ(BOX BOUNDS);
-	for (int a = 0; a < 6; a++)
+	for (int a = 0; a < 6; a++) {
 		strm >> info->bounds[a];
+		info->bounds[a] *= SCL;
+	}
 
 	strm.ignore(100, '\n');
 	strm.getline(buf, 100);
@@ -102,11 +107,11 @@ bool Lammps::Read(ParInfo* info) {
 			float tmp;
 			std::string dummy;
 			switch (t) {
-				CS(id, strm >> x;)
+				CS(id, strm >> x; x--;)
 				CS(type, strm >> info->type[x];)
-				CS(x, strm >> info->pos[x*3];)
-				CS(y, strm >> info->pos[x*3+1];)
-				CS(z, strm >> info->pos[x*3+2];)
+				CS(x, strm >> info->pos[x*3];info->pos[x*3] *= SCL;)
+				CS(y, strm >> info->pos[x*3+1];info->pos[x*3+1] *= SCL;)
+				CS(z, strm >> info->pos[x*3+2];info->pos[x*3+2] *= SCL;)
 				CS(xs, strm >> tmp; info->pos[x*3] = LP(info->bounds[0], info->bounds[1], tmp);)
 				CS(ys, strm >> tmp; info->pos[x*3+1] = LP(info->bounds[2], info->bounds[3], tmp);)
 				CS(zs, strm >> tmp; info->pos[x*3+2] = LP(info->bounds[4], info->bounds[5], tmp);)
@@ -132,8 +137,11 @@ bool Lammps::Read(ParInfo* info) {
 		}
 		SEQ(BOX BOUNDS);
 		bounds.resize((trj->frames+1)*6);
-		for (int a = 0; a < 6; a++)
-			strm >> bounds[trj->frames*6 + a];
+		auto bnds = bounds.data() + trj->frames * 6;
+		for (int a = 0; a < 6; a++) {
+			strm >> bnds[a];
+			bnds[a] *= SCL;
+		}
 
 		strm.ignore(100, '\n');
 		strm.getline(buf, 100);
@@ -148,13 +156,13 @@ bool Lammps::Read(ParInfo* info) {
 				double tmp;
 				std::string dummy;
 				switch (t) {
-					CS(id, strm >> x;)
-					CS(x, strm >> _ps[x*3];)
-					CS(y, strm >> _ps[x*3+1];)
-					CS(z, strm >> _ps[x*3+2];)
-					CS(xs, strm >> tmp; _ps[x*3] = LP(info->bounds[0], info->bounds[1], tmp);)
-					CS(ys, strm >> tmp; _ps[x*3+1] = LP(info->bounds[2], info->bounds[3], tmp);)
-					CS(zs, strm >> tmp; _ps[x*3+2] = LP(info->bounds[4], info->bounds[5], tmp);)
+					CS(id, strm >> x; x--;)
+					CS(x, strm >> _ps[x*3]; _ps[x*3] *= SCL;)
+					CS(y, strm >> _ps[x*3+1]; _ps[x*3+1] *= SCL;)
+					CS(z, strm >> _ps[x*3+2]; _ps[x*3+2] *= SCL;)
+					CS(xs, strm >> tmp; _ps[x*3] = LP(bnds[0], bnds[1], tmp);)
+					CS(ys, strm >> tmp; _ps[x*3+1] = LP(bnds[2], bnds[3], tmp);)
+					CS(zs, strm >> tmp; _ps[x*3+2] = LP(bnds[4], bnds[5], tmp);)
 					default:
 						strm >> dummy;
 						break;
@@ -183,8 +191,11 @@ std::vector<std::string> Lammps::string_split(std::string s, char c) {
 	do {
 		s = s.substr(pos + 1);
 		pos = s.find_first_of(c);
-		if (pos > 0)
-			o.push_back(s.substr(0, pos));
+		if (pos > 0) {
+			const auto s2 = s.substr(0, pos);
+			if (!std::all_of(s2.begin(), s2.end(), isspace))
+				o.push_back(s2);
+		}
 	} while (pos != std::string::npos);
 	return o;
 }
