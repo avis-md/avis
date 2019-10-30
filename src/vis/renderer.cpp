@@ -36,6 +36,8 @@ VisRenderer::STATUS VisRenderer::status = STATUS::READY;
 bool VisRenderer::imgUseAlpha = true;
 uint VisRenderer::imgW = RESO, VisRenderer::imgH = RESO, VisRenderer::vidW = VRESO, VisRenderer::vidH = VRESO;
 uint VisRenderer::imgSlices = 4;
+bool VisRenderer::imgShowAxes = false;
+float VisRenderer::imgAxesScale = 1;
 uint VisRenderer::imgMsaa = 4, VisRenderer::vidMsaa = 1;
 uint VisRenderer::vidMaxFrames = 1000;
 float VisRenderer::resLerp = -1;
@@ -117,7 +119,7 @@ void VisRenderer::DrawMenu() {
 
 	UI::Label(ep - 148, off, 12, _("Image (GLSL)"), white());
 	off += 17;
-	UI::Quad(ep - 149, off - 1, 148, 17 * 6 + 3, white(0.9f, 0.1f));
+	UI::Quad(ep - 149, off - 1, 148, 17 * (imgShowAxes ? 8 : 7) + 3, white(0.9f, 0.1f));
 	if (Engine::Button(ep - 147, off, 145, 16, Vec4(0.2f, 0.4f, 0.2f, 1), _("Render"), 12, white(), true) == MOUSE_RELEASE) {
 		ToImage();
 	}
@@ -133,6 +135,12 @@ void VisRenderer::DrawMenu() {
 	imgMsaa = ms? 4 : 0;
 	off += 17;
 	UI2::Toggle(ep - 147, off, 145, _("Transparency"), imgUseAlpha);
+	off += 17;
+	UI2::Toggle(ep - 147, off, 145, _("Draw Axes"), imgShowAxes);
+	off += 17;
+	if (imgShowAxes) {
+		imgAxesScale = TryParse(UI2::EditText(ep - 147, off, 146, _("Axes Scale"), std::to_string(imgAxesScale)), 1.f);
+	}
 	off += 20;
 
 	UI::Label(ep - 148, off, 12, _("Movie (GLSL)"), white());
@@ -191,9 +199,15 @@ void VisRenderer::ToImage() {
 		cam->target = res_fbo;
 	}
 	
+	const bool sa = ParGraphics::showAxes;
+	const float ss = ParGraphics::axesSize;
+	ParGraphics::axesSize *= imgAxesScale;
+
 	cam->scale = imgSlices;
 	for (int a = 0; a < imgSlices; ++a) {
 		for (int b = 0; b < imgSlices; ++b) {
+			ParGraphics::showAxes = imgShowAxes && (a == 0) && (b == imgSlices - 1);
+			
 			if (imgMsaa > 0) {
 				const float ctw = 0.5f / iw;
 				const float cth = 0.5f / ih;
@@ -203,6 +217,7 @@ void VisRenderer::ToImage() {
 					cam->offset = Vec2(a, b) + Vec2(smps[c]);
 					cam->Render([]() {
 						auto& cam = ChokoLait::mainCameraObj->transform;
+						ParGraphics::axesCenter = Vec2(0, Display::height);
 						ParGraphics::Rerender(cam.position(), cam.forward(), (float)imgW / imgSlices, (float)imgH / imgSlices);
 					});
 					MVP::Switch(false);
@@ -240,6 +255,9 @@ void VisRenderer::ToImage() {
 	}
 	cam->scale = 1;
 	cam->offset = Vec2();
+	
+	ParGraphics::showAxes = sa;
+	ParGraphics::axesSize = ss;
 
 	Display::width = w;
 	Display::height = h;

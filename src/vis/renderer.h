@@ -39,6 +39,8 @@ public:
 	static bool imgUseAlpha;
 	static uint imgW, imgH, vidW, vidH;
 	static uint imgSlices;
+	static bool imgShowAxes;
+	static float imgAxesScale;
 	static uint imgMsaa, vidMsaa;
 	static uint vidMaxFrames;
 	

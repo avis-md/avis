@@ -40,6 +40,7 @@ public:
 	static bool showAxes;
 	static float axesSize;
 	static Vec4 axesCols[3];
+	static Vec2 axesCenter;
 	
 	static int reflId, _reflId;
 	static std::vector<std::string> reflNms;

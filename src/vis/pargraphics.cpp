@@ -73,6 +73,7 @@ int ParGraphics::periodicImgs[] = {};
 bool ParGraphics::showAxes = true;
 float ParGraphics::axesSize = 15;
 Vec4 ParGraphics::axesCols[] = {};
+Vec2 ParGraphics::axesCenter = {};
 
 int ParGraphics::reflId = 0, ParGraphics::_reflId = -1;
 std::vector<std::string> ParGraphics::reflNms;
@@ -1119,7 +1120,9 @@ void ParGraphics::Reblit() {
 			AnWeb::DrawOverlay();
 			if (showAxes) {
 				glEnable(GL_BLEND);
+				glDepthFunc(GL_ALWAYS);
 				DrawAxes();
+				glDepthFunc(GL_LEQUAL);
 				glDisable(GL_BLEND);
 			}
 			UI::Quad(0, 0, Display::width, Display::height, RayTracer::resTex);
@@ -1307,7 +1310,7 @@ void ParGraphics::DrawAxes() {
 		return a.pos.z > b.pos.z;
 	});
 
-	const Vec2 center = Vec2(70.f + ParMenu::expandPos, Display::height - 70.f);
+	const Vec2 center = axesCenter + Vec2(70, -70);
 	const float fsz = axesSize * 12.f / 15;
 	UI::font.Align(ALIGN_MIDCENTER);
 	for (int a = 0; a < 3; a++) {
