@@ -229,6 +229,14 @@ foreach (file_i ${DLLS})
 		"${CMAKE_BINARY_DIR}/bin/"
 	)
 endforeach(file_i)
+if (APPLE)
+	add_custom_command(
+		TARGET avis
+		POST_BUILD
+		COMMAND install_name_tool -add_rpath @executable_path
+		"${CMAKE_BINARY_DIR}/bin/avis"
+	)
+endif()
 
 if (MSVC)
 	set (CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/package/win/)

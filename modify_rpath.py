@@ -31,8 +31,7 @@ def add_from(path, fd, lst):
         if ss[0].startswith("/usr/local/"):
             nm = ss[0][ss[0].rfind('/')+1:]
             if (nm == 'Python'):
-                subprocess.run(['install_name_tool', '-change', ss[0], '@rpath/Python.framework/Versions/3.7/Python', path])
-            
+                subprocess.run(['install_name_tool', '-change', ss[0], '@rpath/Python', path])
             else:
                 subprocess.run(['install_name_tool', '-change', ss[0], '@rpath/' + nm, path])
                 if nm in lst:
@@ -57,7 +56,6 @@ add_from(fd + 'libOpenImageDenoise.0.dylib', fd, copied_libs)
 
 #look for dylibs in own directory
 print('configuring rpath')
-subprocess.run(['install_name_tool', '-add_rpath', '@executable_path', fd + 'avis'])
 
 print('files written to ' + fd)
 
