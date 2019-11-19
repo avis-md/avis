@@ -1080,7 +1080,7 @@ void ParGraphics::Reblit() {
 	if (tfboDirty || Scene::dirty) {
 		if (Particles::empty) {
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[0]);
-			float zero[4] = { 1, 0, 0, 1 };
+			float zero[4] = { 1, 0, 0, 0 };
 			glClearBufferfv(GL_COLOR, 0, zero);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1100,7 +1100,7 @@ void ParGraphics::Reblit() {
 				BlitSky();
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+				
 				auto& cm = ChokoLait::mainCameraObj->transform;
 				if (Scene::dirty) {
 					ParGraphics::RerenderTr(cm.position(), cm.forward(), (float)Display::width, (float)Display::height);
@@ -1109,7 +1109,6 @@ void ParGraphics::Reblit() {
 				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[1]);
 				BlitSkyTr();
 				cam->SwapBlitBuffers();
-				//UI::Quad(0, 0, Display::width, Display::height, cam->trTexs.normTex);
 			}
 			//*
 			//glBlendFunc(GL_ONE, GL_ZERO);

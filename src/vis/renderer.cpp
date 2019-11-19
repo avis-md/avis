@@ -188,7 +188,9 @@ void VisRenderer::ToImage() {
 	Display::width = Display::actualWidth = Display::frameWidth = iw;
 	Display::height = Display::actualHeight = Display::frameHeight = ih;
 	ParGraphics::hlIds.clear();
-	if (imgUseAlpha) ParGraphics::bgCol.a = -1;
+	if (imgUseAlpha) {
+		ParGraphics::bgCol.a = -1;
+	}
 
 	MakeTex(res_fbo, res_img, imgW, imgH);
 	if (imgSlices > 1 || imgMsaa > 0) {
@@ -201,7 +203,11 @@ void VisRenderer::ToImage() {
 	
 	const bool sa = ParGraphics::showAxes;
 	const float ss = ParGraphics::axesSize;
+	auto fxaa = ParGraphics::Eff::useFXAA;
 	ParGraphics::axesSize *= imgAxesScale;
+	if (imgUseAlpha) {
+		ParGraphics::Eff::useFXAA = false;
+	}
 
 	cam->scale = imgSlices;
 	for (int a = 0; a < imgSlices; ++a) {
@@ -258,6 +264,7 @@ void VisRenderer::ToImage() {
 	
 	ParGraphics::showAxes = sa;
 	ParGraphics::axesSize = ss;
+	ParGraphics::Eff::useFXAA = fxaa;
 
 	Display::width = w;
 	Display::height = h;
