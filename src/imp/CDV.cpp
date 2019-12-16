@@ -35,7 +35,7 @@ bool CDV::Read(ParInfo* info) {
 	do {
 		sps = strm.tellg();
 		strm.getline(buf, 500);
-	} while (buf[0] == '\'');
+	} while (buf[0] == '\'' || buf[0] == '#');
 
 	strm.seekg(sps);
 
@@ -73,13 +73,18 @@ bool CDV::Read(ParInfo* info) {
 
 	strm.clear();
 	strm.seekg(0, std::ios::beg);
-	std::getline(strm, s);
-	std::getline(strm, s);
+	do {
+		sps = strm.tellg();
+		strm.getline(buf, 500);
+	} while (buf[0] == '\'' || buf[0] == '#');
+
+	strm.seekg(sps);
 
 	for (uint i = 0; i < sz; ++i) {
 		info->progress = i * 1.f / sz;
 		if (uid) strm >> rd;
 		strm >> id >> rd;
+		std::cout << id << std::endl;
 		info->resId[id] = rd;
 		info->resname[id*info->nameSz] = '-';
 		info->type[id] = *((uint16_t*)"H");
