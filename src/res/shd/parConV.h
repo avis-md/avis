@@ -36,6 +36,7 @@ uniform float spriteScl;
 uniform float tubesize;
 
 uniform vec3 bbox;
+uniform vec3 bboxCenter;
 uniform ivec3 imgCnt;
 uniform ivec3 imgOff;
 
@@ -92,7 +93,7 @@ float maxrad(float rad, vec3 wpos) {
 }
 
 void main(){
-	float maxDst2 = 3;
+	float maxDst2 = 0.25 * 0.25;
 
 	int pid = gl_VertexID / 12;
 	int vid = int(mod(gl_VertexID, 12));
@@ -103,10 +104,31 @@ void main(){
     v2f_id2 = int(id2) + 1;
 	vec3 pos1 = texelFetch(posTex, int(id1)).rgb;
 	vec3 pos2 = texelFetch(posTex, int(id2)).rgb;
+
+	int iz = int(mod(gl_InstanceID, imgCnt.z));
+	int gi2 = int(gl_InstanceID / imgCnt.z);
+	int iy = int(mod(gi2, imgCnt.y));
+	int ix = int(gi2 / imgCnt.y);
+
 	if (len2(pos2 - pos1) > maxDst2) {
+		vec3 dp = pos2 - pos1;
+		dp /= bbox;
+		dp = bbox * round(dp);
+		pos2 -= dp;
+	}
+
+	pos1 += bbox * (vec3(ix, iy, iz) - imgOff);
+	pos2 += bbox * (vec3(ix, iy, iz) - imgOff);
+
+	vec3 bmn = bboxCenter - bbox * imgOff - bbox * 0.5;
+	vec3 bmx = bboxCenter + bbox * (imgCnt - imgOff) - bbox * 0.5f;
+	if (pos2.x < bmn.x || pos2.y < bmn.y || pos2.z < bmn.z
+		|| pos2.x > bmx.x || pos2.y > bmx.y || pos2.z > bmx.z
+		|| len2(pos2 - pos1) > maxDst2) {
 		gl_Position = vec4(-1, -1, -1, 1);
 		return;
 	}
+
 	if (texelFetch(radTex, int(id1)).r < 0 || texelFetch(radTex, int(id2)).r < 0) {
 		gl_Position = vec4(-1, -1, -1, 1);
 		return;

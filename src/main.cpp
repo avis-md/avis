@@ -489,6 +489,8 @@ The hash for this program is )" << VisSystem::version_hash
 		SETFRM(.cdv, CDV::ReadFrame)
 		PUSHIMP
 		NEWIMP("Lammps", lmp, .atom, Lammps::Read)
+		imp.funcs[0].exts.push_back(".lammpstrj");
+		ParLoader::exts.push_back("*.lammpstrj");
 		PUSHIMP
 		NEWIMP("DLPoly", dlp, .000, DLPoly::Read)
 		PUSHIMP

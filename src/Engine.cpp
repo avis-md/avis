@@ -370,7 +370,7 @@ void Engine::DrawCube(Vec3 pos, float dx, float dy, float dz, Vec4 Vec4) {
 }
 
 void Engine::DrawLine(Vec2 v1, Vec2 v2, Vec4 col, float width) {
-	DrawLine(Vec3(v1.x, v1.y, 1), Vec3(v2.x, v2.y, 1), col, width);
+	DrawLine(Vec3(v1.x, v1.y, 0), Vec3(v2.x, v2.y, 0), col, width);
 }
 void Engine::DrawLine(Vec3 v1, Vec3 v2, Vec4 col, float width) {
 	Vec3 quadPoss[2];
@@ -382,7 +382,7 @@ void Engine::DrawLine(Vec3 v1, Vec3 v2, Vec4 col, float width) {
 	UI::SetVao(2, quadPoss);
 
 	defProg.Bind();
-	glUniform4f(defProg.Loc(1), col.r, col.g, col.b, col.a * UI::alpha);
+	glUniform4f(defProg.Loc(0), col.r, col.g, col.b, col.a * UI::alpha);
 	glBindVertexArray(UI::_vao);
 	glDrawArrays(GL_LINES, 0, 2);
 	glBindVertexArray(0);

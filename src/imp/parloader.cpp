@@ -34,7 +34,8 @@ ParImporter* ParLoader::customImp;
 bool ParLoader::loadAsTrj = false, ParLoader::additive = false;
 uint ParLoader::frameskip = 1;
 int ParLoader::maxframes = -1;
-bool ParLoader::useConn = true, ParLoader::useConnCache, ParLoader::hasConnCache, ParLoader::oldConnCache, ParLoader::ovwConnCache;
+bool ParLoader::useConn = true, ParLoader::useConnPeriodic = true;
+bool ParLoader::useConnCache, ParLoader::hasConnCache, ParLoader::oldConnCache, ParLoader::ovwConnCache;
 std::string ParLoader::connCachePath;
 
 bool ParLoader::isSrv = false, ParLoader::srvusepass = false;
@@ -429,10 +430,14 @@ void ParLoader::DoOpen() {
 	}
 	
 	memcpy(Particles::boundingBox, info.bounds, 6 * sizeof(double));
-	if (!VisSystem::currentSavePath.size())
-		ParGraphics::rotCenter = Vec3(info.bounds[0] + info.bounds[1], 
+	const auto bboxCenter = Vec3(info.bounds[0] + info.bounds[1], 
 		info.bounds[2] + info.bounds[3], 
 		info.bounds[4] + info.bounds[5]) * 0.5f;
+	const Vec3 bboxSz (info.bounds[1] - info.bounds[0],
+		info.bounds[3] - info.bounds[2],
+		info.bounds[5] - info.bounds[4]);
+	if (!VisSystem::currentSavePath.size())
+		ParGraphics::rotCenter = bboxCenter;
 
 	if (info.num > 0) {
 		memcpy(&Particles::names[0], info.name, info.num * PAR_MAX_NAME_LEN);
@@ -522,8 +527,15 @@ void ParLoader::DoOpen() {
 			if (useConn && (!useConnCache || !hasConnCache || ovwConnCache)) {
 				for (int j = 0; j < cnt; ++j) {
 					Vec3 dp = Particles::poss[lastOff + j] - vec;
-					if (fabsf(dp.x) < 0.25f && fabsf(dp.y) < 0.25f && fabsf(dp.z) < 0.25f) {
-						auto dst = glm::length2(dp);
+					if (useConnPeriodic) {
+						dp /= bboxSz;
+						dp -= glm::round(dp);
+						dp *= bboxSz;
+					}
+					const Vec3 dp2 = dp * dp;
+					const float cut2 = 0.25f * 0.25f;
+					if (dp2.x < cut2 && dp2.y < cut2 && dp2.z < cut2) {
+						auto dst = dp2.x + dp2.y + dp2.z;
 						uint32_t id2 = info.type[lastOff + j];
 						//float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
 						float bst = Preferences::GetLen(id1, id2);
@@ -939,8 +951,10 @@ void ParLoader::DrawOpenDialog() {
 	useConn = Engine::Toggle(woff + 5, hoff + 17 * 6, 16, Icons::checkbox, useConn, white(), ORIENT_HORIZONTAL);
 	UI::Label(woff + 25, hoff + 17 * 6, 12, "Bonds", white(), 326);
 	if (useConn) {
-		useConnCache = Engine::Toggle(woff + 100, hoff + 17 * 6, 16, Icons::checkbox, useConnCache, white(), ORIENT_HORIZONTAL);
-		UI::Label(woff + 123, hoff + 17 * 6, 12, "Use Bond Cache", white(), 326);
+		useConnPeriodic = Engine::Toggle(woff + 100, hoff + 17 * 6, 16, Icons::checkbox, useConnPeriodic, white(), ORIENT_HORIZONTAL);
+		UI::Label(woff + 123, hoff + 17 * 6, 12, "Find Periodic", white(), 326);
+		useConnCache = Engine::Toggle(woff + 201, hoff + 17 * 6, 16, Icons::checkbox, useConnCache, white(), ORIENT_HORIZONTAL);
+		UI::Label(woff + 230, hoff + 17 * 6, 12, "Use Bond Cache", white(), 326);
 		if (useConnCache) {
 			UI::Label(woff + 5, hoff + 17 * 7, 12, hasConnCache ? "Cache found" + (std::string)(oldConnCache ? "(outdated): " : ": ") + connCachePath : "No cache found", white(), 326);
 			if (hasConnCache) {

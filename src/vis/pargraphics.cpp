@@ -73,6 +73,7 @@ int ParGraphics::periodicImgs[] = {};
 bool ParGraphics::showAxes = true;
 float ParGraphics::axesSize = 15;
 Vec4 ParGraphics::axesCols[] = {};
+Vec2 ParGraphics::axesCenter = {};
 
 int ParGraphics::reflId = 0, ParGraphics::_reflId = -1;
 std::vector<std::string> ParGraphics::reflNms;
@@ -346,7 +347,7 @@ void ParGraphics::Init() {
 		"orthoSz", "id2col", "colList",
 		"gradCols", "colUseGrad",
 		"usegrad", "onecol", "spriteScl",
-		"tubesize", "_IP" });
+		"tubesize", "_IP", "bbox", "bboxCenter", "imgCnt", "imgOff" });
 	bid = glGetUniformBlockIndex(parConProg, "clipping");
 	glUniformBlockBinding(parConProg, bid, _clipBindId);
 
@@ -355,7 +356,7 @@ void ParGraphics::Init() {
 		"connTex", "rad", "id2", "radScl",
 		"orthoSz", "id2col", "colList",
 		"gradCols", "colUseGrad",
-		"usegrad", "onecol" });
+		"usegrad", "onecol", "bbox", "bboxCenter", "imgCnt", "imgOff" });
 
 	(selHlProg = Shader::FromF(mv, glsl::selectorFrag)).AddUniforms({
 		"screenSize", "myId", "idTex", "hlCol" });
@@ -795,6 +796,11 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 	}
 
 	if (!RayTracer::resTex) {
+		int pix = periodicImgs[1] + periodicImgs[0] + 1;
+		int piy = periodicImgs[3] + periodicImgs[2] + 1;
+		int piz = periodicImgs[5] + periodicImgs[4] + 1;
+		//if (pix + piy + piz == 3) pix = 0;
+
 		bool useorien = (orientType == ORIENT::STRETCH && orientStr > 0.0001f);
 		parProg.SetOption("oriented", useorien);
 		glUseProgram(parProg);
@@ -840,10 +846,6 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 			, Particles::boundingBox[3] - Particles::boundingBox[2]
 			, Particles::boundingBox[5] - Particles::boundingBox[4]);
 		
-		int pix = periodicImgs[1] + periodicImgs[0] + 1;
-		int piy = periodicImgs[3] + periodicImgs[2] + 1;
-		int piz = periodicImgs[5] + periodicImgs[4] + 1;
-		if (pix + piy + piz == 3) pix = 0;
 		glUniform3i(parProg.Loc(21), pix, piy, piz);
 		glUniform3i(parProg.Loc(22), periodicImgs[0], periodicImgs[2], periodicImgs[4]);
 		
@@ -897,8 +899,18 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 				glUniform1i(parConLineProg.Loc(11), useGradCol);
 				glUniform1i(parConLineProg.Loc(12), useConGradCol);
 				glUniform4f(parConLineProg.Loc(13), conCol.r, conCol.g, conCol.b, useConCol? 1.f : 0.f);
-				glUniform1f(parConLineProg.Loc(14), spriteScl);
-				glDrawArrays(GL_TRIANGLES, p.first * 6, p.second.first * 6);
+				glUniform3f(parConLineProg.Loc(14), Particles::boundingBox[1] - Particles::boundingBox[0]
+					, Particles::boundingBox[3] - Particles::boundingBox[2]
+					, Particles::boundingBox[5] - Particles::boundingBox[4]);
+				glUniform3f(parConLineProg.Loc(15), (Particles::boundingBox[1] + Particles::boundingBox[0]) * 0.5f
+					, (Particles::boundingBox[3] + Particles::boundingBox[2]) * 0.5f
+					, (Particles::boundingBox[5] + Particles::boundingBox[4]) * 0.5f);
+				glUniform3i(parConLineProg.Loc(16), pix, piy, piz);
+				glUniform3i(parConLineProg.Loc(17), periodicImgs[0], periodicImgs[2], periodicImgs[4]);
+				if (!pix)
+					glDrawArrays(GL_TRIANGLES, p.first * 6, p.second.first * 6);
+				else
+					glDrawArraysInstanced(GL_TRIANGLES, p.first * 6, p.second.first * 6, pix * piy * piz);
 			}
 			else {
 				glUseProgram(parConProg);
@@ -937,7 +949,18 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 				glUniform1f(parConProg.Loc(17), spriteScl);
 				glUniform1f(parConProg.Loc(18), TUBESIZE);
 				glUniformMatrix4fv(parConProg.Loc(19), 1, false, glm::value_ptr(glm::inverse(_p)));
-				glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
+				glUniform3f(parConProg.Loc(20), Particles::boundingBox[1] - Particles::boundingBox[0]
+					, Particles::boundingBox[3] - Particles::boundingBox[2]
+					, Particles::boundingBox[5] - Particles::boundingBox[4]);
+				glUniform3f(parConProg.Loc(21), (Particles::boundingBox[1] + Particles::boundingBox[0]) * 0.5f
+					, (Particles::boundingBox[3] + Particles::boundingBox[2]) * 0.5f
+					, (Particles::boundingBox[5] + Particles::boundingBox[4]) * 0.5f);
+				glUniform3i(parConProg.Loc(22), pix, piy, piz);
+				glUniform3i(parConProg.Loc(23), periodicImgs[0], periodicImgs[2], periodicImgs[4]);
+				//if (!pix)
+				//	glDrawArrays(GL_TRIANGLES, p.first * 12, p.second.first * 12);
+				//else
+					glDrawArraysInstanced(GL_TRIANGLES, p.first * 12, p.second.first * 12, pix * piy * piz);
 			}
 		}
 		uint id2 = 4;
@@ -988,7 +1011,7 @@ void ParGraphics::Rerender(Vec3 _cpos, Vec3 _cfwd, float _w, float _h) {
 				glUniform4f(parConProg.Loc(16), c2.col.r, c2.col.g, c2.col.b, c2.usecol? 1.f : 0.f);
 				glUniform1f(parConProg.Loc(17), spriteScl);
 				glUniform1f(parConProg.Loc(18), TUBESIZE);
-				glDrawArrays(GL_TRIANGLES, 0, c2.cnt*12);
+				glDrawArraysInstanced(GL_TRIANGLES, 0, c2.cnt*12, pix * piy * piz);
 
 			}
 		}
@@ -1057,7 +1080,7 @@ void ParGraphics::Reblit() {
 	if (tfboDirty || Scene::dirty) {
 		if (Particles::empty) {
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[0]);
-			float zero[4] = { 1, 0, 0, 1 };
+			float zero[4] = { 1, 0, 0, 0 };
 			glClearBufferfv(GL_COLOR, 0, zero);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1077,7 +1100,7 @@ void ParGraphics::Reblit() {
 				BlitSky();
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+				
 				auto& cm = ChokoLait::mainCameraObj->transform;
 				if (Scene::dirty) {
 					ParGraphics::RerenderTr(cm.position(), cm.forward(), (float)Display::width, (float)Display::height);
@@ -1086,7 +1109,6 @@ void ParGraphics::Reblit() {
 				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, cam->blitFbos[1]);
 				BlitSkyTr();
 				cam->SwapBlitBuffers();
-				//UI::Quad(0, 0, Display::width, Display::height, cam->trTexs.normTex);
 			}
 			//*
 			//glBlendFunc(GL_ONE, GL_ZERO);
@@ -1097,7 +1119,9 @@ void ParGraphics::Reblit() {
 			AnWeb::DrawOverlay();
 			if (showAxes) {
 				glEnable(GL_BLEND);
+				glDepthFunc(GL_ALWAYS);
 				DrawAxes();
+				glDepthFunc(GL_LEQUAL);
 				glDisable(GL_BLEND);
 			}
 			UI::Quad(0, 0, Display::width, Display::height, RayTracer::resTex);
@@ -1285,7 +1309,7 @@ void ParGraphics::DrawAxes() {
 		return a.pos.z > b.pos.z;
 	});
 
-	const Vec2 center = Vec2(70.f + ParMenu::expandPos, Display::height - 70.f);
+	const Vec2 center = axesCenter + Vec2(70, -70);
 	const float fsz = axesSize * 12.f / 15;
 	UI::font.Align(ALIGN_MIDCENTER);
 	for (int a = 0; a < 3; a++) {

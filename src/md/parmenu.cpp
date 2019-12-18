@@ -142,6 +142,8 @@ void ParMenu::Draw() {
 		UI::Label(expandPos + 18, Display::height - 33.f, 12, _("Toolbar") + " (T)", white());
 		expandPos = Clamp(expandPos - 1500 * Time::delta, 2.f, 150.f);
 	}
+	
+	ParGraphics::axesCenter = Vec2(150, Display::height);
 }
 
 void ParMenu::Draw_List(float off) {

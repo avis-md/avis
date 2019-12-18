@@ -1,10 +1,29 @@
+The Debian package name is changed to avis-md
+to prevent conflicts with an existing package.
+The program name is still avis.
+
 #General
+
+- Fixed LAMMPS import errors
+- Fixed library paths not working for some platforms
+
+#Analysis
+
+- Improved Add Surface node performance
+
+#Visualization
+
+- Fixed bonds not showing for periodic mirrors
+- Fixed bonds not connecting for periodic offsets
+- Fixed axes not showing correctly in renders
+
+#----Previous changes----
+
+#Version 0.12
 
 - The documentation is updated to reflect on changes for 0.1x
 - Fixed importing files with no extension not loading nearby files
 - Windows version now works without Python installation
-
-#Analysis
 
 - Fixed fortran scripts name collisions
 - Fixed fortran arrays being wrongly indexed
@@ -12,12 +31,8 @@
 - Fixed python scripts crashing on app exit
 - Fixed parsers going into infinite loop on compile error
 
-#Visualization
-
 - Rendering is now much faster on older hardware
 - Fixed attributes sometimes not colored correctly
-
-#----Previous changes----
 
 #Version 0.11
 
