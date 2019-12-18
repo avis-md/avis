@@ -34,6 +34,7 @@ ParImporter* ParLoader::customImp;
 bool ParLoader::loadAsTrj = false, ParLoader::additive = false;
 uint ParLoader::frameskip = 1;
 int ParLoader::maxframes = -1;
+float ParLoader::impscale = 1;
 bool ParLoader::useConn = true, ParLoader::useConnPeriodic = true;
 bool ParLoader::useConnCache, ParLoader::hasConnCache, ParLoader::oldConnCache, ParLoader::ovwConnCache;
 std::string ParLoader::connCachePath;
@@ -429,7 +430,9 @@ void ParLoader::DoOpen() {
 		return;
 	}
 	
-	memcpy(Particles::boundingBox, info.bounds, 6 * sizeof(double));
+	for (int a = 0; a < 6; a++) {
+		Particles::boundingBox[a] = info.bounds[a] * impscale;
+	}
 	const auto bboxCenter = Vec3(info.bounds[0] + info.bounds[1], 
 		info.bounds[2] + info.bounds[3], 
 		info.bounds[4] + info.bounds[5]) * 0.5f;
@@ -442,6 +445,10 @@ void ParLoader::DoOpen() {
 	if (info.num > 0) {
 		memcpy(&Particles::names[0], info.name, info.num * PAR_MAX_NAME_LEN);
 		memcpy(&Particles::resNames[0], info.resname, info.num * PAR_MAX_NAME_LEN);
+		for (int a = 0; a < info.num * 3; a++) {
+			info.pos[a] *= impscale;
+			info.vel[a] *= impscale;
+		}
 		Particles::poss = (glm::dvec3*)info.pos;
 		Particles::vels = (glm::dvec3*)info.vel;
 		memcpy(&Particles::types[0], info.type, info.num * sizeof(short));
@@ -598,11 +605,17 @@ void ParLoader::DoOpen() {
 
 			anm.AllocFrames(trj.frames);
 			for (uint16_t i = 0; i < trj.frames; ++i) {
+				for (int a = 0; a < info.num * 3; a++) {
+					trj.poss[i][a] *= impscale;
+				}
 				anm.poss[i].resize(info.num);
 				memcpy(&anm.poss[i][0], trj.poss[i], info.num * sizeof(glm::dvec3));
 				delete[](trj.poss[i]);
 				anm.vels[i].resize(info.num);
 				if (trj.vels) {
+					for (int a = 0; a < info.num * 3; a++) {
+						trj.vels[i][a] *= impscale;
+					}
 					memcpy(&anm.vels[i][0], trj.vels[i], info.num * sizeof(glm::dvec3));
 					delete[](trj.vels[i]);
 				}
@@ -613,7 +626,9 @@ void ParLoader::DoOpen() {
 			if (trj.bounds) {
 				anm.bboxs.resize(trj.frames);
 				for (uint16_t i = 0; i < trj.frames; ++i) {
-					memcpy(&anm.bboxs[i][0], trj.bounds[i], 6*sizeof(double));
+					for (int a = 0; a < 6; a++) {
+						anm.bboxs[i][a] = trj.bounds[i][a];
+					}
 				}
 				anm.bboxState.resize(trj.frames);
 				delete[](trj.bounds);
@@ -702,13 +717,19 @@ void ParLoader::DoOpenAnim() {
 
 	anm.AllocFrames(info.frames);
 	for (uint16_t i = 0; i < info.frames; ++i) {
+		for (int a = 0; a < info.parNum * 3; a++) {
+			info.poss[i][a] *= impscale;
+		}
 		anm.poss[i].resize(info.parNum);
 		memcpy(&anm.poss[i][0], info.poss[i], info.parNum * sizeof(glm::dvec3));
 		delete[](info.poss[i]);
 		anm.vels[i].resize(info.parNum);
 		if (info.vels) {
-			memcpy(&anm.vels[i][0], info.poss[i], info.parNum * sizeof(glm::dvec3));
-			delete[](info.poss[i]);
+			for (int a = 0; a < info.parNum * 3; a++) {
+				info.vels[i][a] *= impscale;
+			}
+			memcpy(&anm.vels[i][0], info.vels[i], info.parNum * sizeof(glm::dvec3));
+			delete[](info.vels[i]);
 		}
 		anm.status[i] = Particles::animdata::FRAME_STATUS::LOADED;
 	}
@@ -965,6 +986,7 @@ void ParLoader::DrawOpenDialog() {
 	}
 	UI2::sepw = 0.4f;
 	maxframes = TryParse(UI2::EditText(woff + 2, hoff + 17 * 8, 200, "Max Frames", std::to_string(maxframes)), 1000);
+	impscale = TryParse(UI2::EditText(woff + 2, hoff + 17 * 9, 200, "Scale", std::to_string(impscale)), 1.f);
 	/*
 	std::string line = "";
 	if (loadAsTrj) line += "-trj ";

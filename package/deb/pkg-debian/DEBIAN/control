@@ -1,5 +1,5 @@
 Package: avis-md
-Version: 0.12
+Version: 0.12.1
 Architecture: amd64
 Essential: no
 Priority: optional
