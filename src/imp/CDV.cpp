@@ -127,16 +127,22 @@ bool CDV::ReadFrame(FrmInfo* info) {
 		SETERR("Cannot open file!");
 		return false;
 	}
-	std::getline(strm, s);
-	std::getline(strm, s);
 
-	auto pos = strm.tellg();
+	std::streampos sps;
+	char buf[500]{};
+	do {
+		sps = strm.tellg();
+		strm.getline(buf, 500);
+	} while (buf[0] == '\'' || buf[0] == '#');
+
+	strm.seekg(sps);
+
 	std::getline(strm, s);
 	while (s.back() == ' ') s.pop_back();
 	auto ssz = SplitString(s, ' ', true).size();
 	auto uid = (ssz == 6) || (ssz == 9);
 	auto hvl = ssz > 7;
-	strm.seekg(pos);
+	strm.seekg(sps);
 
 	size_t id;
 	std::string rd;
