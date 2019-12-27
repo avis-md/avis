@@ -24,6 +24,20 @@
 
 #define SETERR(msg) memcpy(info->error, msg, sizeof(msg))
 
+namespace {
+	std::vector<std::string> SplitString(std::string s, char c, bool rm) {
+		std::vector<std::string> o = std::vector<std::string>();
+		size_t pos = -1;
+		do {
+			s = s.substr(pos + 1);
+			pos = s.find_first_of(c);
+			if (!rm || pos > 0)
+				o.push_back(s.substr(0, pos));
+		} while (pos != std::string::npos);
+		return o;
+	}
+}
+
 bool CDV::Read(ParInfo* info) {
 	char buf[500]{};
 	std::ifstream strm(info->path);
@@ -52,13 +66,18 @@ bool CDV::Read(ParInfo* info) {
 	auto hvl = ssz > 7;
 	strm.seekg(pos);
 
+	uint32_t pi0 = 0xffff;
+
 	while (std::getline(strm, s)) {
 		if (s[0] == ' ') s = s.substr(s.find_first_not_of(' '));
 		auto ps = s.find_first_of(' ');
 		if (uid) ps = s.find_first_of(' ', ps + 1);
 		pi = (uint32_t)std::stoi(s.substr(0, ps));
 		sz = std::max(sz, pi + 1);
+		pi0 = std::min(pi0, pi);
 	}
+
+	sz -= pi0;
 
 	info->resname = new char[sz * info->nameSz]{};
 	info->name = new char[sz * info->nameSz]{};
@@ -72,19 +91,13 @@ bool CDV::Read(ParInfo* info) {
 	double vl;
 
 	strm.clear();
-	strm.seekg(0, std::ios::beg);
-	do {
-		sps = strm.tellg();
-		strm.getline(buf, 500);
-	} while (buf[0] == '\'' || buf[0] == '#');
-
 	strm.seekg(sps);
 
 	for (uint i = 0; i < sz; ++i) {
 		info->progress = i * 1.f / sz;
 		if (uid) strm >> rd;
 		strm >> id >> rd;
-		std::cout << id << std::endl;
+		id -= pi0;
 		info->resId[id] = rd;
 		info->resname[id*info->nameSz] = '-';
 		info->type[id] = *((uint16_t*)"H");
@@ -144,12 +157,26 @@ bool CDV::ReadFrame(FrmInfo* info) {
 	auto hvl = ssz > 7;
 	strm.seekg(sps);
 
+	uint32_t pi0 = 0xffff;
+
+	while (std::getline(strm, s)) {
+		if (s[0] == ' ') s = s.substr(s.find_first_not_of(' '));
+		auto ps = s.find_first_of(' ');
+		if (uid) ps = s.find_first_of(' ', ps + 1);
+		const auto pi = (uint32_t)std::stoi(s.substr(0, ps));
+		pi0 = std::min(pi0, pi);
+	}
+
+	strm.clear();
+	strm.seekg(sps);
+
 	size_t id;
 	std::string rd;
 	double vl;
 	for (uint32_t i = 0; i < info->parNum; ++i) {
 		if (uid) strm >> rd;
 		strm >> id >> rd;
+		id -= pi0;
 		if (id >= info->parNum) {
 			SETERR("Index exceeds particle count!");
 			return false;
@@ -169,17 +196,17 @@ bool CDV::ReadFrame(FrmInfo* info) {
 			info->vel[id * 3 + 2] = vl / 10;
 		}
 	}
+	auto& bnd = *(info->bounds = new double[1][6]);
+	bnd[0] = bnd[1] = (float)info->pos[0];
+	bnd[2] = bnd[3] = (float)info->pos[1];
+	bnd[4] = bnd[5] = (float)info->pos[2];
+	for (uint32_t i = 1; i < info->parNum; ++i) {
+		bnd[0] = std::min(bnd[0], info->pos[i * 3]);
+		bnd[1] = std::max(bnd[1], info->pos[i * 3]);
+		bnd[2] = std::min(bnd[2], info->pos[i * 3 + 1]);
+		bnd[3] = std::max(bnd[3], info->pos[i * 3 + 1]);
+		bnd[4] = std::min(bnd[4], info->pos[i * 3 + 2]);
+		bnd[5] = std::max(bnd[5], info->pos[i * 3 + 2]);
+	}
 	return true;
-}
-
-std::vector<std::string> CDV::SplitString(std::string s, char c, bool rm) {
-	std::vector<std::string> o = std::vector<std::string>();
-	size_t pos = -1;
-	do {
-		s = s.substr(pos + 1);
-		pos = s.find_first_of(c);
-		if (!rm || pos > 0)
-			o.push_back(s.substr(0, pos));
-	} while (pos != std::string::npos);
-	return o;
 }

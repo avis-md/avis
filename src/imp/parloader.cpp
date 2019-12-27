@@ -798,7 +798,11 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 			pos[a] *= impscale;
 			vel[a] *= impscale;
 		}
-		if (!!anm.bboxs.size()) {
+		if (info.bounds) {
+			if (anm.bboxs.empty()) anm.FillBBox();
+			std::memcpy(anm.bboxs[f].data(), *info.bounds, 6 * sizeof(double));
+		}
+		if (!anm.bboxs.empty()) {
 			if (anm.bboxState[f] == Particles::animdata::BBOX_STATE::PERIODIC) {
 				auto per = Particles::boxPeriodic;
 				Particles::boxPeriodic = true;
