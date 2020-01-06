@@ -25,6 +25,12 @@
 #define SETERR(msg) memcpy(info->error, msg, sizeof(msg))
 
 namespace {
+	const char* bnms[] = {
+		"box_sx", "box_ex",
+		"box_sy", "box_ey",
+		"box_sz", "box_ez"
+	};
+
 	std::vector<std::string> SplitString(std::string s, char c, bool rm) {
 		std::vector<std::string> o = std::vector<std::string>();
 		size_t pos = -1;
@@ -46,9 +52,29 @@ bool CDV::Read(ParInfo* info) {
 		return false;
 	}
 	std::streampos sps;
+	bool bfs[6] = {};
+	int bn = 0;
 	do {
 		sps = strm.tellg();
 		strm.getline(buf, 500);
+		auto ss = SplitString(buf + 1, ' ', true);
+		for (auto& s : ss) {
+			auto s2 = SplitString(s, '=', false);
+			if (s2.size() == 2) {
+				for (int a = 0; a < 6; a++) {
+					if (!bfs[a] && !std::strcmp(bnms[a], s2[0].data())) {
+						/* Existing files suggest that bounding information is in a different unit
+						 * Until proven otherwise, the bounding values will be
+						 * scaled down from A to nm
+						 */
+						info->bounds[a] = std::stod(s2[1]) * 0.1;
+						bfs[a] = true;
+						bn++;
+						break;
+					}
+				}
+			}
+		}
 	} while (buf[0] == '\'' || buf[0] == '#');
 
 	strm.seekg(sps);
@@ -103,32 +129,34 @@ bool CDV::Read(ParInfo* info) {
 		info->type[id] = *((uint16_t*)"H");
 		info->name[id*info->nameSz] = 'A' + rd;
 		strm >> vl;
-		info->pos[id * 3] = vl / 10;
+		info->pos[id * 3] = vl;
 		strm >> vl;
-		info->pos[id * 3 + 1] = vl / 10;
+		info->pos[id * 3 + 1] = vl;
 		strm >> vl;
-		info->pos[id * 3 + 2] = vl / 10;
+		info->pos[id * 3 + 2] = vl;
 		if (hvl) {
 			strm >> vl;
-			info->vel[id * 3] = vl / 10;
+			info->vel[id * 3] = vl;
 			strm >> vl;
-			info->vel[id * 3 + 1] = vl / 10;
+			info->vel[id * 3 + 1] = vl;
 			strm >> vl;
-			info->vel[id * 3 + 2] = vl / 10;
+			info->vel[id * 3 + 2] = vl;
 		}
 	}
 
-	auto& bnd = info->bounds;
-	bnd[0] = bnd[1] = (float)info->pos[0];
-	bnd[2] = bnd[3] = (float)info->pos[1];
-	bnd[4] = bnd[5] = (float)info->pos[2];
-	for (uint32_t i = 1; i < sz; ++i) {
-		bnd[0] = std::min(bnd[0], info->pos[i * 3]);
-		bnd[1] = std::max(bnd[1], info->pos[i * 3]);
-		bnd[2] = std::min(bnd[2], info->pos[i * 3 + 1]);
-		bnd[3] = std::max(bnd[3], info->pos[i * 3 + 1]);
-		bnd[4] = std::min(bnd[4], info->pos[i * 3 + 2]);
-		bnd[5] = std::max(bnd[5], info->pos[i * 3 + 2]);
+	if (bn < 6) {
+		auto& bnd = info->bounds;
+		bnd[0] = bnd[1] = (float)info->pos[0];
+		bnd[2] = bnd[3] = (float)info->pos[1];
+		bnd[4] = bnd[5] = (float)info->pos[2];
+		for (uint32_t i = 1; i < sz; ++i) {
+			bnd[0] = std::min(bnd[0], info->pos[i * 3]);
+			bnd[1] = std::max(bnd[1], info->pos[i * 3]);
+			bnd[2] = std::min(bnd[2], info->pos[i * 3 + 1]);
+			bnd[3] = std::max(bnd[3], info->pos[i * 3 + 1]);
+			bnd[4] = std::min(bnd[4], info->pos[i * 3 + 2]);
+			bnd[5] = std::max(bnd[5], info->pos[i * 3 + 2]);
+		}
 	}
 	return true;
 }
@@ -142,10 +170,27 @@ bool CDV::ReadFrame(FrmInfo* info) {
 	}
 
 	std::streampos sps;
+	bool bfs[6] = {};
+	int bn = 0;
 	char buf[500]{};
+	auto& bnd = *(info->bounds = new double[1][6]);
 	do {
 		sps = strm.tellg();
 		strm.getline(buf, 500);
+		auto ss = SplitString(buf + 1, ' ', true);
+		for (auto& s : ss) {
+			auto s2 = SplitString(s, '=', false);
+			if (s2.size() == 2) {
+				for (int a = 0; a < 6; a++) {
+					if (!bfs[a] && !std::strcmp(bnms[a], s2[0].data())) {
+						bnd[a] = std::stod(s2[1]) * 0.1; // see notice above
+						bfs[a] = true;
+						bn++;
+						break;
+					}
+				}
+			}
+		}
 	} while (buf[0] == '\'' || buf[0] == '#');
 
 	strm.seekg(sps);
@@ -182,31 +227,32 @@ bool CDV::ReadFrame(FrmInfo* info) {
 			return false;
 		}
 		strm >> vl;
-		info->pos[id * 3] = vl / 10;
+		info->pos[id * 3] = vl;
 		strm >> vl;
-		info->pos[id * 3 + 1] = vl / 10;
+		info->pos[id * 3 + 1] = vl;
 		strm >> vl;
-		info->pos[id * 3 + 2] = vl / 10;
+		info->pos[id * 3 + 2] = vl;
 		if (hvl) {
 			strm >> vl;
-			info->vel[id * 3] = vl / 10;
+			info->vel[id * 3] = vl;
 			strm >> vl;
-			info->vel[id * 3 + 1] = vl / 10;
+			info->vel[id * 3 + 1] = vl;
 			strm >> vl;
-			info->vel[id * 3 + 2] = vl / 10;
+			info->vel[id * 3 + 2] = vl;
 		}
 	}
-	auto& bnd = *(info->bounds = new double[1][6]);
-	bnd[0] = bnd[1] = (float)info->pos[0];
-	bnd[2] = bnd[3] = (float)info->pos[1];
-	bnd[4] = bnd[5] = (float)info->pos[2];
-	for (uint32_t i = 1; i < info->parNum; ++i) {
-		bnd[0] = std::min(bnd[0], info->pos[i * 3]);
-		bnd[1] = std::max(bnd[1], info->pos[i * 3]);
-		bnd[2] = std::min(bnd[2], info->pos[i * 3 + 1]);
-		bnd[3] = std::max(bnd[3], info->pos[i * 3 + 1]);
-		bnd[4] = std::min(bnd[4], info->pos[i * 3 + 2]);
-		bnd[5] = std::max(bnd[5], info->pos[i * 3 + 2]);
+	if (bn < 6) {
+		bnd[0] = bnd[1] = (float)info->pos[0];
+		bnd[2] = bnd[3] = (float)info->pos[1];
+		bnd[4] = bnd[5] = (float)info->pos[2];
+		for (uint32_t i = 1; i < info->parNum; ++i) {
+			bnd[0] = std::min(bnd[0], info->pos[i * 3]);
+			bnd[1] = std::max(bnd[1], info->pos[i * 3]);
+			bnd[2] = std::min(bnd[2], info->pos[i * 3 + 1]);
+			bnd[3] = std::max(bnd[3], info->pos[i * 3 + 1]);
+			bnd[4] = std::min(bnd[4], info->pos[i * 3 + 2]);
+			bnd[5] = std::max(bnd[5], info->pos[i * 3 + 2]);
+		}
 	}
 	return true;
 }

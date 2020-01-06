@@ -800,7 +800,10 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 		}
 		if (info.bounds) {
 			if (anm.bboxs.empty()) anm.FillBBox();
-			std::memcpy(anm.bboxs[f].data(), *info.bounds, 6 * sizeof(double));
+			for (int a = 0; a < 6; a++) {
+				anm.bboxs[f][a] = (*info.bounds)[a] * impscale;
+			}
+			delete[](info.bounds);
 		}
 		if (!anm.bboxs.empty()) {
 			if (anm.bboxState[f] == Particles::animdata::BBOX_STATE::PERIODIC) {
