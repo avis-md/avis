@@ -63,11 +63,7 @@ bool CDV::Read(ParInfo* info) {
 			if (s2.size() == 2) {
 				for (int a = 0; a < 6; a++) {
 					if (!bfs[a] && !std::strcmp(bnms[a], s2[0].data())) {
-						/* Existing files suggest that bounding information is in a different unit
-						 * Until proven otherwise, the bounding values will be
-						 * scaled down from A to nm
-						 */
-						info->bounds[a] = std::stod(s2[1]) * 0.1;
+						info->bounds[a] = std::stod(s2[1]);
 						bfs[a] = true;
 						bn++;
 						break;
@@ -183,7 +179,7 @@ bool CDV::ReadFrame(FrmInfo* info) {
 			if (s2.size() == 2) {
 				for (int a = 0; a < 6; a++) {
 					if (!bfs[a] && !std::strcmp(bnms[a], s2[0].data())) {
-						bnd[a] = std::stod(s2[1]) * 0.1; // see notice above
+						bnd[a] = std::stod(s2[1]);
 						bfs[a] = true;
 						bn++;
 						break;
