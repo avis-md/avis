@@ -42,6 +42,13 @@
 #define EXPPATH
 #endif
 
+#define LBD_IMPORT\
+	const auto fs = Dialog::OpenFile(ParLoader::exts);\
+	if (!!fs.size()) {\
+		ParLoader::isSrv = false;\
+		ParLoader::OnOpenFile(fs);\
+	}
+
 std::string VisSystem::version_hash =
 #include "../githash.h"
 ;
@@ -104,11 +111,7 @@ void VisSystem::Init() {
 		if (!!path.size()) VisSystem::Save(path.substr(0, path.size() - strlen_c(EXT_SVFL)));
 	});
 	mi[4].Set(Icons::openfile, _("Import"), []() {
-		const auto fs = Dialog::OpenFile(ParLoader::exts);
-		if (!!fs.size()) {
-			ParLoader::isSrv = false;
-			ParLoader::OnOpenFile(fs);
-		}
+		LBD_IMPORT
 	});
 	mi[5].Set(Icons::openfile, _("Import Recent"), 0);
 	mi[6].Set(Icons::openfile, _("Import Remote"), []() {
@@ -304,9 +307,12 @@ void VisSystem::DrawBar() {
 		}
 		UI::Label(w, Display::height - 16.f, 12, "Loading frame " + std::to_string(*ParLoader::loadFrames), white(0.5f));
 	}
-	else
-		UI::Label(172, Display::height - 16.f, 12, _("No Animation Data"), white(0.5f));
-
+	else if (!!Particles::particleSz) {
+		//UI::Label(172, Display::height - 16.f, 12, _("No Animation Data"), white(0.5f));
+		if (Engine::Button(172, Display::height - 16.f, 150, 16, white(0.2f), _("Import Trajectory"), 12, white(1)) == MOUSE_RELEASE) {
+			LBD_IMPORT
+		}
+	}
 	/*
 	byte sel = (byte)mouseMode;
 	for (byte b = 0; b < 3; ++b) {
