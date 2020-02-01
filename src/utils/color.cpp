@@ -34,6 +34,49 @@ Vec4 white(float f, float i) { return Vec4(i, i, i, f); }
 GLuint Color::pickerProgH, Color::pickerProgH2, Color::pickerProgSV;
 GLint Color::pickerProgH2Locs[], Color::pickerProgSVLocs[];
 
+namespace {
+
+	void Hex2Col(const std::string& s, byte* bs) {
+		const char* hx = "0123456789ABCDEF";
+		std::string res = "XXXXXXXX";
+		
+		const auto n = s.size();
+		if (!n || n == 2) return;
+
+		std::vector<byte> bb(std::max<size_t>(n, 4), 255);
+		for (size_t a = 0; a < n; a++) {
+			const auto c = s[a];
+			if (c >= '0' && c <= '9') {
+				bb[a] = (byte)c - (byte)'0';
+			}
+			else if (c >= 'A' && c <= 'F') {
+				bb[a] = (byte)c - (byte)'A' + 10;
+			}
+			else if (c >= 'a' && c <= 'f') {
+				bb[a] = (byte)c - (byte)'a' + 10;
+			}
+			else return;
+		}
+		if (n >= 6) {
+			for (int a = 0; a < n/2; a++) {
+				bb[a] = (bb[a*2] << 4) + bb[a*2+1];
+			}
+		}
+		
+		if (n <= 4) {
+			for (int a = 0; a < n; a++) {
+				bb[a] = (bb[a] << 4) + bb[a];
+			}
+			if (n == 1) {
+				bb[1] = bb[2] = bb[0];
+			}
+		}
+		for (int a = 0; a < 4; a++) {
+			bs[a] = bb[a];
+		}
+	}
+}
+
 void Color::Init() {
 	GLuint vs;
 	Shader::LoadShader(GL_VERTEX_SHADER, glsl::colorPickerVert, vs);
@@ -134,9 +177,13 @@ void Color::DrawPicker(bool hasA) {
 	Hsv2Rgb(hsv.x, hsv.y, hsv.z, bs[0], bs[1], bs[2]);
 	bs[3] = 255;
 
-	std::string hx = Col2Hex(bs);
+	const auto hx = Col2Hex(bs);
 
-	hx = UI::EditText(Popups::pos.x + 5, Popups::pos.y + 130, 120, 16, 12, white(1, 0.5f), hx, true, white());
+	const auto hx2 = UI::EditText(Popups::pos.x + 5, Popups::pos.y + 130, 120, 16, 12, white(1, 0.5f), hx, true, white());
+
+	if (hx2 != hx) {
+		Hex2Col(hx2, bs);
+	}
 
 	cl = Vec4(bs[0] / 255.f, bs[1] / 255.f, bs[2] / 255.f, 1);
 }
