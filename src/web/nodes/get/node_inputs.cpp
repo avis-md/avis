@@ -92,7 +92,7 @@ void Node_Inputs::Execute() {
 		parcount = Particles::particleSz;
 		poss = &pos[0][0];
 		vels = &vel[0][0];
-		typs = Particles::types.data();
+		typs = (short*)Particles::types.data();
 		/*
 		conV[0].data.val.arr.p = pos;
 		conV[0].value = &conV[0].data.val.arr.p;

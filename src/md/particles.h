@@ -154,7 +154,7 @@ public:
 	static std::vector<std::string> reslist;
 
 	static std::vector<char> names, resNames;
-	static std::vector<short> types;
+	static std::vector<uint16_t> types;
 	static std::vector<byte> colors;
 	static std::vector<float> radii;
 	static std::vector<float> radiiscl;

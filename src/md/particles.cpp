@@ -90,7 +90,7 @@ std::vector<ResidueList> Particles::residueLists;
 std::vector<std::string> Particles::reslist;
 
 std::vector<char> Particles::names, Particles::resNames;
-std::vector<short> Particles::types;
+std::vector<uint16_t> Particles::types;
 std::vector<byte> Particles::colors;
 std::vector<float> Particles::radii;
 std::vector<float> Particles::radiiscl;

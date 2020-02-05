@@ -33,7 +33,7 @@
 #include "vis/preferences.h"
 #include "web/anweb.h"
 
-#define HATENA
+//#define HATENA
 
 int ParMenu::activeMenu = 0;
 int ParMenu::activeSubMenu[] = {};
