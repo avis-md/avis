@@ -43,11 +43,18 @@ types: [atomid]
 		
 		scr->AddOutput(_("positions"), AN_VARTYPE::DOUBLE, 2);
 		scr->AddOutput(_("velocities"), AN_VARTYPE::DOUBLE, 2);
+
+		scr->AddOutput(_("positions (all)"), AN_VARTYPE::DOUBLE, 3);
+		scr->AddOutput(_("velocities (all)"), AN_VARTYPE::DOUBLE, 3);
+
 		scr->AddOutput(_("types"), AN_VARTYPE::SHORT, 1);
+
 	);
 
 	IAddConV(0, { (int*)&parcount, 0 }, { 3 });
 	IAddConV(0, { (int*)&parcount, 0 }, { 3 });
+	IAddConV(0, { (int*)&Particles::anim.frameCount, (int*)&parcount, 0 }, { 3 });
+	IAddConV(0, { (int*)&Particles::anim.frameCount, (int*)&parcount, 0 }, { 3 });
 	IAddConV(0, { (int*)&parcount }, {});
 
 	/*
@@ -76,8 +83,11 @@ void Node_Inputs::Execute() {
 #ifndef IS_ANSERVER
 	bool setpos = outputR[0].size() > 0;
 	bool setvel = outputR[1].size() > 0;
-	bool settyp = outputR[2].size() > 0;
+	bool setposa = outputR[2].size() > 0;
+	bool setvela = outputR[3].size() > 0;
+	bool settyp = outputR[4].size() > 0;
 	setpos |= (setvel || settyp) && ((filter & (int)FILTER::CLP) > 0);
+	setposa |= setvela;
 
 	glm::dvec3* pos, *vel;
 	if (!Particles::anim.poss.size()) {

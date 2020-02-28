@@ -9,5 +9,6 @@ AViS Documentation
    
    foreword
    install
+   troubleshoot
    reference/index
    examples/index

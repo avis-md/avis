@@ -1,23 +1,36 @@
+
+
+#General
+
+- Added "Add trajectory" button
+- New import option: sort by residue name
+- Fixed .cdv coordinate scaling
+
+#Analysis
+
+- Fixed crash for non-class python scripts
+
+#Visualization
+
+- Color palette's hex input now work
+- Added option to increase resolution for Retina displays
+
+
+#----Previous changes----
+
+#Version 0.12b
+
 The Debian package name is changed to avis-md
 to prevent conflicts with an existing package.
 The program name is still avis.
 
-#General
-
 - Fixed LAMMPS import errors
 - Fixed library paths not working for some platforms
-
-#Analysis
-
 - Improved Add Surface node performance
-
-#Visualization
 
 - Fixed bonds not showing for periodic mirrors
 - Fixed bonds not connecting for periodic offsets
 - Fixed axes not showing correctly in renders
-
-#----Previous changes----
 
 #Version 0.12
 
