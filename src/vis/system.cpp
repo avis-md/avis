@@ -255,7 +255,9 @@ void VisSystem::DrawBar() {
 						if (!!Particles::anim.currentFrame) Particles::SetFrame(Particles::anim.currentFrame - 1);
 					}
 				}
-				if ((!UI::editingText && Input::KeyDown(KEY::Space)) || Engine::Button(100, Display::height - 17.f, 16, 16, Icons::right, white(0.8f), white(), white(1, 0.5f)) == MOUSE_RELEASE) {
+				if ((!UI::editingText && Input::KeyDown(KEY::Space)) || 
+						UI2::Tooltip(Engine::Button(100, Display::height - 17.f, 16, 16, Icons::right, white(0.8f), white(), white(1, 0.5f))
+						, 100, Display::height - 17.f, "Play/Stop (Space)") == MOUSE_RELEASE) {
 					ParGraphics::animate = !ParGraphics::animate;
 					ParGraphics::animOff = 0;
 				}

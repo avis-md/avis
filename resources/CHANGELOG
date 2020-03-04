@@ -1,20 +1,22 @@
-
-
 #General
 
 - Added "Add trajectory" button
+
+#Importing
+
 - New import option: sort by residue name
 - Fixed .cdv coordinate scaling
+- Additive option now defaults to off for configuration files
 
 #Analysis
 
 - Fixed crash for non-class python scripts
+- Fixed positions(all) missing from particle data node
 
 #Visualization
 
-- Color palette's hex input now work
-- Added option to increase resolution for Retina displays
-
+- Color palette's hex input now works
+- Increased maximum quality scaling to support Retina displays
 
 #----Previous changes----
 

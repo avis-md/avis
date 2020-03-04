@@ -1138,7 +1138,8 @@ void ParLoader::FindImpId(bool force) {
 					if (force || ((pr.type != ParImporter::Func::FUNC_TYPE::CONFIG) == loadAsTrj)) {
 						impId = id;
 						funcId = id2;
-						if (force) loadAsTrj = (pr.type != ParImporter::Func::FUNC_TYPE::CONFIG);
+						//if (force)
+						loadAsTrj = (pr.type == ParImporter::Func::FUNC_TYPE::TRAJ);
 						return;
 					}
 					id2++;
@@ -1158,7 +1159,8 @@ void ParLoader::FindImpId(bool force) {
 					if (EndsWith(droppedFiles[0], s)) {
 						impId = id;
 						funcId = id2;
-						if (force) loadAsTrj = (pr.type != ParImporter::Func::FUNC_TYPE::CONFIG);
+						//if (force)
+						loadAsTrj = (pr.type == ParImporter::Func::FUNC_TYPE::TRAJ);
 						return;
 					}
 				}

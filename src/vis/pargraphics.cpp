@@ -136,7 +136,7 @@ byte ParGraphics::dragMode = 0;
 
 bool ParGraphics::animate = false, ParGraphics::seek = false;
 float ParGraphics::animOff;
-int ParGraphics::animTarFps = 30;
+int ParGraphics::animTarFps = 10;
 bool ParGraphics::tfboDirty = true;
 Mat4x4 ParGraphics::lastMV, ParGraphics::lastP, ParGraphics::lastP1, ParGraphics::lastP2, ParGraphics::lastMVP;
 
@@ -1616,7 +1616,7 @@ void ParGraphics::DrawMenu() {
 
 	auto& cam = ChokoLait::mainCamera;
 	auto ql = cam->quality;
-	ql = UI2::Slider(expandPos - 147, off, 146, _("Quality"), 0.25f, 1.5f, ql, "Resolution of the 3D view", std::to_string(int(ql * 100)) + "%");
+	ql = UI2::Slider(expandPos - 147, off, 146, _("Quality"), 0.25f, 2.f, ql, "Resolution of the 3D view", std::to_string(int(ql * 100)) + "%");
 	if (Engine::Button(expandPos - 91, off, 16, 16, Icons::refresh) == MOUSE_RELEASE)
 		ql = 1;
 	if (ql != cam->quality) {
