@@ -23,6 +23,8 @@
 #include "vis/pargraphics.h"
 #endif
 
+#define RETERR(msg) { std::cerr << msg << std::endl; return; }
+
 INODE_DEF(__("Particle Data"), Inputs, GET)
 
 uint Node_Inputs::parcount = 0;
@@ -53,8 +55,8 @@ types: [atomid]
 
 	IAddConV(0, { (int*)&parcount, 0 }, { 3 });
 	IAddConV(0, { (int*)&parcount, 0 }, { 3 });
-	IAddConV(0, { (int*)&Particles::anim.frameCount, (int*)&parcount, 0 }, { 3 });
-	IAddConV(0, { (int*)&Particles::anim.frameCount, (int*)&parcount, 0 }, { 3 });
+	IAddConV(0, { (int*)&Particles::anim.frameCount, (int*)&Particles::particleSz, 0 }, { 3 });
+	IAddConV(0, { (int*)&Particles::anim.frameCount, (int*)&Particles::particleSz, 0 }, { 3 });
 	IAddConV(0, { (int*)&parcount }, {});
 
 	/*
@@ -88,6 +90,10 @@ void Node_Inputs::Execute() {
 	bool settyp = outputR[4].size() > 0;
 	setpos |= (setvel || settyp) && ((filter & (int)FILTER::CLP) > 0);
 	setposa |= setvela;
+
+	if (setposa && !Particles::anim.contiguous) {
+		RETERR("Cannot read from all frames for incremental trajectories! (wip)")
+	}
 
 	glm::dvec3* pos, *vel;
 	if (!Particles::anim.poss(0)) {
@@ -193,10 +199,13 @@ void Node_Inputs::Execute() {
 		//conV[1].value = &vels;
 		//conV[2].value = &typs;
 	}
+
 	auto& ov = ((DmScript_I*)script.get())->outputVs;
 	ov[0].val.p = poss;
 	ov[1].val.p = vels;
-	ov[2].val.p = typs;
+	ov[2].val.p = Particles::anim.poss(0);
+	ov[3].val.p = Particles::anim.vels(0);
+	ov[4].val.p = typs;
 #endif
 }
 
