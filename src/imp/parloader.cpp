@@ -347,7 +347,7 @@ void ParLoader::ScanFrames(const std::string& first) {
 	return;
 	found:
 
-	Particles::anim.AllocFrames(frms);
+	Particles::anim.AllocFrames(frms, false);
 	for (uint f = 0; f < frms; ++f) {
 		//Particles::anim.status[f] = Particles::animdata::FRAME_STATUS::UNLOADED;
 		Particles::anim.paths[f] = nms[f];
@@ -634,20 +634,22 @@ void ParLoader::DoOpen() {
 			auto& trj = info.trajectory;
 			anm.reading = true;
 
-			anm.AllocFrames(trj.frames);
+			anm.AllocFrames(trj.frames, true);
+			anm.poss_a.resize(trj.frames * info.num);
+			if (trj.vels) {
+				anm.vels_a.resize(trj.frames * info.num);
+			}
 			for (uint16_t i = 0; i < trj.frames; ++i) {
 				for (int a = 0; a < info.num * 3; a++) {
 					trj.poss[i][a] *= impscale;
 				}
-				anm.poss[i].resize(info.num);
-				memcpy(&anm.poss[i][0], trj.poss[i], info.num * sizeof(glm::dvec3));
+				memcpy(&anm.poss_a[i * info.num], trj.poss[i], info.num * sizeof(glm::dvec3));
 				delete[](trj.poss[i]);
-				anm.vels[i].resize(info.num);
 				if (trj.vels) {
 					for (int a = 0; a < info.num * 3; a++) {
 						trj.vels[i][a] *= impscale;
 					}
-					memcpy(&anm.vels[i][0], trj.vels[i], info.num * sizeof(glm::dvec3));
+					memcpy(&anm.vels_a[i * info.num], trj.vels[i], info.num * sizeof(glm::dvec3));
 					delete[](trj.vels[i]);
 				}
 				anm.status[i] = Particles::animdata::FRAME_STATUS::LOADED;
@@ -666,10 +668,11 @@ void ParLoader::DoOpen() {
 			}
 			anm.reading = false;
 
-			anm.maxFramesInMem = 10000000;
+			anm.SetIncremental(false);
 		}
 		else {
 			anm.frameCount = 1;
+			anm.SetIncremental(true);
 		}
 	}
 	else {
@@ -684,16 +687,14 @@ void ParLoader::DoOpen() {
 	frameskip = FindNextOff(droppedFiles[0]);
 	ScanFrames(droppedFiles[0]);
 
-	if (Particles::anim.poss.size()) {
-		Particles::anim.poss[0].resize(info.num);
-		memcpy(&Particles::anim.poss[0][0], Particles::poss, info.num * sizeof(glm::dvec3));
+	if (!Particles::anim.poss_a.empty()) {
+		memcpy(&Particles::anim.poss_a[0], Particles::poss, info.num * sizeof(glm::dvec3));
 		delete[](Particles::poss);
-		Particles::poss = &Particles::anim.poss[0][0];
+		Particles::poss = &Particles::anim.poss_a[0];
 		if (info.vel) {
-			Particles::anim.vels[0].resize(info.num);
-			memcpy(&Particles::anim.vels[0][0], Particles::vels, info.num * sizeof(glm::dvec3));
+			memcpy(&Particles::anim.vels_a[0], Particles::vels, info.num * sizeof(glm::dvec3));
 			delete[](Particles::vels);
-			Particles::vels = &Particles::anim.vels[0][0];
+			Particles::vels = &Particles::anim.vels_a[0];
 		}
 		Particles::anim.status[0] = Particles::animdata::FRAME_STATUS::LOADED;
 		Particles::anim.dirty = true;
@@ -746,20 +747,22 @@ void ParLoader::DoOpenAnim() {
 
 	Engine::AcquireLock(1);
 
-	anm.AllocFrames(info.frames);
+	anm.AllocFrames(info.frames, true);
+	anm.poss_a.resize(info.frames * info.parNum);
+	if (info.vels) {
+		anm.vels_a.resize(info.frames * info.parNum);
+	}
 	for (uint16_t i = 0; i < info.frames; ++i) {
 		for (int a = 0; a < info.parNum * 3; a++) {
 			info.poss[i][a] *= impscale;
 		}
-		anm.poss[i].resize(info.parNum);
-		memcpy(&anm.poss[i][0], info.poss[i], info.parNum * sizeof(glm::dvec3));
+		memcpy(&anm.poss_a[i * info.parNum], info.poss[i], info.parNum * sizeof(glm::dvec3));
 		delete[](info.poss[i]);
-		anm.vels[i].resize(info.parNum);
 		if (info.vels) {
 			for (int a = 0; a < info.parNum * 3; a++) {
 				info.vels[i][a] *= impscale;
 			}
-			memcpy(&anm.vels[i][0], info.vels[i], info.parNum * sizeof(glm::dvec3));
+			memcpy(&anm.vels_a[i * info.parNum], info.vels[i], info.parNum * sizeof(glm::dvec3));
 			delete[](info.vels[i]);
 		}
 		anm.status[i] = Particles::animdata::FRAME_STATUS::LOADED;
@@ -808,8 +811,8 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 		}
 	}
 
-	auto& pos = anm.poss[f];
-	auto& vel = anm.vels[f];
+	auto& pos = anm.poss_s[f];
+	auto& vel = anm.vels_s[f];
 	pos.resize(Particles::particleSz);
 	vel.resize(Particles::particleSz);
 	FrmInfo info(path.c_str(), Particles::particleSz, &pos[0][0], &vel[0][0]);

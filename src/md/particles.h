@@ -115,9 +115,11 @@ public:
 		static uint maxFramesInMem;
 		uint frameMemPos;
 		uint frameCount = 0, currentFrame = 0, retainFrame = ~0U;
+		bool contiguous = false;
 		std::vector<std::string> paths;
 		std::vector<FRAME_STATUS> status;
-		std::vector<std::vector<glm::dvec3>> poss, vels;
+		std::vector<std::vector<glm::dvec3>> poss_s, vels_s;
+		std::vector<glm::dvec3> poss_a, vels_a;
 		std::vector<Particles::conndata> conns;
 		std::vector<std::vector<Particles::conndata>> conns2;
 		std::vector<std::array<double, 6>> bboxs;
@@ -130,12 +132,18 @@ public:
 		
 		int impId, funcId;
 
-		void AllocFrames(uint frames);
+		void AllocFrames(uint frames, bool cont);
 		void FillBBox();
 		void Clear();
 		void Seek(uint f);
 		void Update();
 		void UpdateMemRange();
+
+		glm::dvec3* poss(int f);
+		glm::dvec3* vels(int f);
+
+		bool IsIncremental();
+		void SetIncremental(bool);
 	private:
 		animdata(const animdata&) = delete;
 	};

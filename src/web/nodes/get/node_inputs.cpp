@@ -90,13 +90,13 @@ void Node_Inputs::Execute() {
 	setposa |= setvela;
 
 	glm::dvec3* pos, *vel;
-	if (!Particles::anim.poss.size()) {
+	if (!Particles::anim.poss(0)) {
 		pos = Particles::poss;
 		vel = Particles::vels;
 	}
 	else {
-		pos = &Particles::anim.poss[AnWeb::realExecFrame][0];
-		vel = &Particles::anim.vels[AnWeb::realExecFrame][0];
+		pos = Particles::anim.poss(AnWeb::realExecFrame);
+		vel = Particles::anim.vels(AnWeb::realExecFrame);
 	}
 	if (!filter) {
 		parcount = Particles::particleSz;

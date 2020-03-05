@@ -340,9 +340,9 @@ void Particles::SetFrame(uint frm) {
 		if (anim.currentFrame != ~0U) {
 			anim.Seek(frm);
 			if (anim.status[frm] != animdata::FRAME_STATUS::LOADED) return;
-			auto& aps = anim.poss[anim.currentFrame];
-			particleSz = aps.size();
-			poss = &aps[0];
+			//auto& aps = anim.poss[anim.currentFrame];
+			//particleSz = aps.size();
+			poss = anim.poss(anim.currentFrame);
 			SetGLSubBuf(posBuffer, (double*)&poss[0], particleSz * 3);
 			for (auto& a : attrs) {
 				if (a->timed) {
@@ -460,7 +460,7 @@ void Particles::BoundParticlesF(int f) {
 		(bx[3] + bx[2]),
 		(bx[5] + bx[4])) * 0.5;
 	glm::dvec3 isz = glm::dvec3(1, 1, 1) / sz;
-	auto& ps = anim.poss[f];
+	const auto& ps = anim.poss(f);
 #pragma omp parallel for
 	for (int a = 0; a < (uint)particleSz; ++a) {
 		glm::dvec3 dp = ps[a] - co;

@@ -21,12 +21,17 @@
 
 uint Particles::animdata::maxFramesInMem = 20;
 
-void Particles::animdata::AllocFrames(uint frames) {
+#define MAXFRAMES_INV 1000000
+
+void Particles::animdata::AllocFrames(uint frames, bool c) {
 	frameCount = frames;
+	contiguous = c;
 	status.resize(frames, FRAME_STATUS::UNLOADED);
-	poss.resize(frames);
-	vels.resize(frames);
-	paths.resize(frames);
+	if (!c) {
+		poss_s.resize(frames);
+		vels_s.resize(frames);
+		paths.resize(frames);
+	}
 }
 
 void Particles::animdata::FillBBox() {
@@ -40,8 +45,10 @@ void Particles::animdata::FillBBox() {
 void Particles::animdata::Clear() {
 	frameCount = currentFrame = 0;
 	status.clear();
-	poss.clear();
-	vels.clear();
+	poss_s.clear();
+	vels_s.clear();
+	poss_a.clear();
+	vels_a.clear();
 	conns.clear();
 	conns2.clear();
 	bboxs.clear();
@@ -76,22 +83,22 @@ void Particles::animdata::Update() {
 		}
 	}
 
-	if (maxFramesInMem < 1000000) {
+	if (maxFramesInMem < MAXFRAMES_INV) {
 		if (maxFramesInMem < frameCount) {
 			for (uint a = 0; a < frameMemPos; ++a) {
 				if (a + frameCount - frameMemPos < maxFramesInMem) continue;
 				if (status[a] == FRAME_STATUS::LOADED) {
 					if (a == retainFrame) continue;
-					std::vector<glm::dvec3>().swap(poss[a]);
-					std::vector<glm::dvec3>().swap(vels[a]);
+					std::vector<glm::dvec3>().swap(poss_s[a]);
+					std::vector<glm::dvec3>().swap(vels_s[a]);
 					status[a] = FRAME_STATUS::UNLOADED;
 				}
 			}
 			for (uint a = frameMemPos + maxFramesInMem; a < frameCount; ++a) {
 				if (status[a] == FRAME_STATUS::LOADED) {
 					if (a == retainFrame) continue;
-					std::vector<glm::dvec3>().swap(poss[a]);
-					std::vector<glm::dvec3>().swap(vels[a]);
+					std::vector<glm::dvec3>().swap(poss_s[a]);
+					std::vector<glm::dvec3>().swap(vels_s[a]);
 					status[a] = FRAME_STATUS::UNLOADED;
 				}
 			}
@@ -125,4 +132,24 @@ void Particles::animdata::Update() {
 
 void Particles::animdata::UpdateMemRange() {
 	frameMemPos = (uint)std::max((int)currentFrame - (int)maxFramesInMem/2, 0);
+}
+
+glm::dvec3* Particles::animdata::poss(int f) {
+	if ((contiguous ? poss_a.empty() : poss_s.empty()))
+		return nullptr;
+	return contiguous ? &poss_a[f * particleSz] : &poss_s[f][0];
+}
+
+glm::dvec3* Particles::animdata::vels(int f) {
+	if ((contiguous ? vels_a.empty() : vels_s.empty()))
+		return nullptr;
+	return contiguous ? &vels_a[f * particleSz] : &vels_s[f][0];
+}
+
+bool Particles::animdata::IsIncremental() {
+	return maxFramesInMem < MAXFRAMES_INV;
+}
+
+void Particles::animdata::SetIncremental(bool b) {
+	maxFramesInMem = b ? 20 : MAXFRAMES_INV;
 }
