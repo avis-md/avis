@@ -20,13 +20,13 @@
 # -- Project information -----------------------------------------------------
 
 project = 'AViS'
-copyright = '2018, Pua Kai'
+copyright = '2018~2020, Pua Kai'
 author = 'Pua Kai'
 
 # The short X.Y version
 version = '0.1'
 # The full version, including alpha/beta/rc tags
-release = '0.10'
+release = '0.12c'
 
 
 # -- General configuration ---------------------------------------------------

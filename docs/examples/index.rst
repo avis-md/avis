@@ -9,3 +9,4 @@ All scripts are available in the ``Nodes/samples`` folder.
 
    densprof
    hbond
+   rms
