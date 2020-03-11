@@ -209,7 +209,7 @@ void ChokoLait::Init(int scrW, int scrH) {
 		glfwSetCursorEnterCallback(window, MouseEnterGL);
 		glfwSetDropCallback(window, DropGL);
 		glfwSetWindowFocusCallback(window, FocusGL);
-
+		//glfwSwapInterval(0);
 
 		initd = 2;
 		Time::millis = milliseconds();

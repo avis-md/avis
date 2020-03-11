@@ -34,7 +34,7 @@ void* AnNode::nodecon::getval(ANVAR_ORDER order) {
 }
 
 AnScript::Var& AnNode::nodecon::getvar() {
-	return first->script->parent->outputs[second];
+	return first->script->outputs[second];
 }
 
 int AnNode::nodecon::getdim(int i) {
@@ -88,7 +88,7 @@ Vec2 AnNode::DrawConn() {
 #ifndef IS_ANSERVER
 	if (_script->ok) {
 		const float connrad = 5;
-		auto cnt = (_script->inputs.size() + _script->outputs.size());
+		auto cnt = (_script->inputs.size() + script->outputs.size());
 		float y = pos.y + 18 + hdrSz;
 		for (uint i = 0; i < _script->inputs.size(); i++, y += 17) {
 			auto& ri = inputR[i];
@@ -137,7 +137,7 @@ void AnNode::Draw() {
 #ifndef IS_ANSERVER
 	const float connrad = 5;
 
-	auto cnt = _script->outputs.size();
+	auto cnt = script->outputs.size();
 	for (auto i : useInputs) {
 		if (i) cnt++;
 	}
@@ -163,7 +163,7 @@ void AnNode::Draw() {
 			DrawHeader(y);
 			hdrSz = y - pos.y - 16 - setSz;
 			y += 1;
-			for (uint i = 0; i < _script->inputs.size(); i++, y += 17) {
+			for (uint i = 0; i < _script->inputs.size(); i++) {
 				bool hi = inputR[i].first;
 				if (!useInputs[i]) {
 					if (hi) Disconnect(i, false);
@@ -217,12 +217,13 @@ void AnNode::Draw() {
 						}
 					}
 				}
+				y += 17;
 			}
 			y += 2;
 
-			for (uint i = 0; i < _script->outputs.size(); i++, y += 17) {
+			for (uint i = 0; i < script->outputs.size(); i++, y += 17) {
 				bool ho = HasConnO(i);
-				auto cl0 = ho ? ((_script->outputs[i].dim > 0) ? AnCol::conn_vector : AnCol::conn_scalar) : white();
+				auto cl0 = ho ? ((script->outputs[i].dim > 0) ? AnCol::conn_vector : AnCol::conn_scalar) : white();
 				if (!AnWeb::selConnNode || ((!AnWeb::selConnIdIsOut) && (AnWeb::selConnNode != this))) {
 					const auto cirbt = Engine::Button(pos.x + width - connrad, y + 8 - connrad, connrad * 2, connrad * 2, 
 						Icons::circle, cl0, Vec4(1, 0.8f, 0.8f, 1), white(1, 0.5f));
@@ -298,7 +299,7 @@ void AnNode::Draw() {
 				UI::font.Align(ALIGN_TOPRIGHT);
 				auto bt = ho ? Engine::Button(pos.x + width*0.67f - 5, y, width * 0.33f, 16) : MOUSE_NONE;
 				if (!bt) {
-					UI::Label(pos.x + width - 10, y, 12, _script->outputs[i].name, white(), true);
+					UI::Label(pos.x + width - 10, y, 12, script->outputs[i].name, white(), true);
 				}
 				else {
 					auto& ors = outputR[i];
@@ -309,7 +310,7 @@ void AnNode::Draw() {
 					}
 				}
 				UI::font.Align(ALIGN_TOPLEFT);
-				UI::Label(pos.x + 2, y, 12, _script->outputs[i].typeName, white(0.3f), true);
+				UI::Label(pos.x + 2, y, 12, script->outputs[i].typeName, white(0.3f), true);
 			}
 			auto y1 = y;
 			DrawFooter(y);
@@ -364,7 +365,7 @@ float AnNode::DrawSide() {
 					bool isme = (opt == this && opi == i);
 					std::string tt = isme ?
 						(tmp ? "Select variable" : "Select node") :
-						(rf ? rf->_script->outputs[rs].name : "no input");
+						(rf ? rf->script->outputs[rs].name : "no input");
 					UI2::Dropdown(pos.x + width * 0.33f, y, width * 0.67f - 5, di, [&](){
 						tmp = nullptr; opt = this; opi = i;
 						for (uint a = 0; a < id; a++)
@@ -384,7 +385,7 @@ float AnNode::DrawSide() {
 								ss.resize(1);
 								ssi.clear();
 								int k = 0;
-								for (auto& v : tmp->_script->outputs) {
+								for (auto& v : tmp->script->outputs) {
 									if (CanConn(v.typeName, _script->inputs[i].typeName)) {
 										ss.push_back(v.name);
 										ssi.push_back(k);
@@ -436,7 +437,7 @@ void AnNode::DrawDefVal(int i, float y) {
 		}, vr.enums[dr.i]);
 		break;
 	}
-	case  AnScript::Var::UI_TYPE::RANGE: {
+	case AnScript::Var::UI_TYPE::RANGE: {
 		float res = (isi ? (float)dr.i : (float)dr.d);
 		res = UI2::Slider(pos.x + width*0.33f, y, width*0.67f - 6, vr.range.x, vr.range.y, res);
 		if (isi) dr.i = (int)std::round(res);
@@ -637,7 +638,7 @@ void AnNode::IAddConV(void* p, std::initializer_list<int*> d1, std::initializer_
 	}
 }
 
-void AnNode::IAddConV(void* p, std::vector<int*> d) {
+void AnNode::IAddConV(void* p, const std::vector<int*>& d) {
 	auto _scr = (DmScript_I*)script.get();
 	_scr->outputVs.push_back(VarVal());
 	auto& vr = _scr->outputVs.back();
@@ -649,6 +650,22 @@ void AnNode::IAddConV(void* p, std::vector<int*> d) {
 	for (auto di : d) {
 		cv.szOffsets.push_back(CVar::szItem(di));
 	}
+}
+
+void AnNode::ISetConDim(int i, const std::vector<int*>& d1, const std::vector<int>& d2) {
+	auto& cv = conV[i];
+	cv.szOffsets.clear();
+	auto pd1 = d1.begin();
+	auto pd2 = d2.begin();
+	while (pd1 != d1.end()) {
+		if (!*pd1)
+			cv.szOffsets.push_back(CVar::szItem(*pd2++));
+		else
+			cv.szOffsets.push_back(CVar::szItem(*pd1));
+		pd1++;
+	}
+	script->outputs[i].dim = (int)d1.size();
+	script->outputs[i].InitName();
 }
 
 void AnNode::IClearConV() {
@@ -779,8 +796,8 @@ void AnNode::SaveConn() {
 		auto ra = inputR[a].first;
 		cn.cond = cn.tar = ra;
 		if (cn.cond) {
-			cn.tarnm = ra->_script->outputs[inputR[a].second].name;
-			cn.tartp = ra->_script->outputs[inputR[a].second].typeName;
+			cn.tarnm = ra->script->outputs[inputR[a].second].name;
+			cn.tartp = ra->script->outputs[inputR[a].second].typeName;
 		}
 	}
 }
@@ -795,7 +812,7 @@ void AnNode::ClearConn() {
 		Disconnect((uint)i, true);
 	}
 	outputR.clear();
-	outputR.resize(_script->outputs.size(), std::vector<nodecon>());
+	outputR.resize(script->outputs.size(), std::vector<nodecon>());
 	conV.resize(outputR.size());
 }
 
@@ -807,8 +824,8 @@ void AnNode::Reconn() {
 					if (cn.cond) {
 						auto& ra = cn.tar;
 						for (size_t b = 0, sz2 = ra->outputR.size(); b < sz2; ++b) {
-							if (ra->_script->outputs[b].name == cn.tarnm) {
-								if (ra->_script->outputs[b].typeName == cn.tartp) {
+							if (ra->script->outputs[b].name == cn.tarnm) {
+								if (ra->script->outputs[b].typeName == cn.tartp) {
 									ra->ConnectTo((uint)b, this, (uint)a);
 									goto got;
 								}
@@ -843,7 +860,7 @@ bool AnNode::CanConn(std::string lhs, std::string rhs) {
 
 void AnNode::ConnectTo(uint id, AnNode* tar, uint tarId) {
 	auto& ot = outputR[id];
-	auto& ov = _script->outputs[id];
+	auto& ov = script->outputs[id];
 	auto& it = tar->inputR[tarId];
 	auto& iv = tar->_script->inputs[tarId];
 	if (it.first == this && it.second == id) return;

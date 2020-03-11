@@ -44,8 +44,10 @@ Node_AddSurface::Node_AddSurface() : INODE_INITF(AN_FLAG_RUNONSEEK | AN_FLAG_RUN
 		scr->AddInput(_("value"), AN_VARTYPE::DOUBLE);
 
 		scr->AddOutput(_("vertices"), AN_VARTYPE::DOUBLE, 2);
+		scr->AddOutput(_("normals"), AN_VARTYPE::DOUBLE, 2);
 	);
 
+	IAddConV(0, { (int*)&genSz, nullptr }, { 3 });
 	IAddConV(0, { (int*)&genSz, nullptr }, { 3 });
 
 	InitBuffers();
@@ -109,18 +111,18 @@ void Node_AddSurface::Update() {
 			auto sz = ExecMC(glm::ivec3(zo, 0, 0), glm::ivec3(zs, shape[1], shape[2]), glm::ivec3(shape[0], shape[1], shape[2]));
 			glBindBuffer(GL_COPY_READ_BUFFER, tmpPos);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, outPos);
-			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, genSz * 3 * sizeof(Vec3), sz * 3 * sizeof(Vec3));
+			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, genSz * sizeof(Vec3), sz * 3 * sizeof(Vec3));
 			glBindBuffer(GL_COPY_READ_BUFFER, tmpNrm);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, outNrm);
-			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, genSz * 3 * sizeof(Vec3), sz * 3 * sizeof(Vec3));
+			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, genSz * sizeof(Vec3), sz * 3 * sizeof(Vec3));
 			glBindBuffer(GL_COPY_READ_BUFFER, 0);
 			glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 			zo += zs - 1;
-			genSz += sz;
+			genSz += sz * 3;
 		}
 
-		resultPos.resize(genSz);
-		resultNrm.resize(genSz);
+		resultPos.resize(genSz * 3);
+		resultNrm.resize(genSz * 3);
 
 		glBindBuffer(GL_ARRAY_BUFFER, outPos);
 		auto pos = (Vec3*)glMapBufferRange(GL_ARRAY_BUFFER, 0, genSz * sizeof(Vec3), GL_MAP_READ_BIT);
@@ -164,7 +166,7 @@ void Node_AddSurface::DrawScene(RENDER_PASS pass) {
 		glUniform3f(drawProg.Loc(3), bboxs[1], bboxs[3], bboxs[5]);
 		glUniform1f(drawProg.Loc(4), invert? -1.f : 1.f);
 		glBindVertexArray(vao);
-		glDrawArrays(GL_TRIANGLES, 0, genSz*3);
+		glDrawArrays(GL_TRIANGLES, 0, genSz);
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}
@@ -172,7 +174,7 @@ void Node_AddSurface::DrawScene(RENDER_PASS pass) {
 
 void Node_AddSurface::RayTraceMesh(_Mesh& mesh) {
 	if (!genSz) return;
-	mesh.vertCount = (mesh.triCount = genSz) * 3;
+	mesh.triCount = (mesh.vertCount = genSz) / 3;
 	mesh.vertices.resize(mesh.vertCount);
 	mesh.normals.resize(mesh.vertCount);
 	mesh.triangles.resize(mesh.vertCount);
@@ -211,20 +213,24 @@ void Node_AddSurface::Execute() {
 
 		cutoff = getval_d(1);
 	}
-
-	if (outputR[0].size() > 0) {
+	
+	//if (outputR[0].size() > 0) {
 		while (!!data.size())
 			Engine::Sleep(100);
 		
 		resultPosd.resize(genSz);
+		resultNrmd.resize(genSz);
 		for (int a = 0; a < genSz; a++) {
 			resultPosd[a] = (glm::dvec3)resultPos[a];
+			resultNrmd[a] = (glm::dvec3)resultNrm[a];
 		}
 
 		auto& ov = ((DmScript_I*)script.get())->outputVs;
 		ov[0].val.p = resultPosd.data();
 		ov[0].pval = &ov[0].val.p;
-	}
+		ov[1].val.p = resultNrmd.data();
+		ov[1].pval = &ov[1].val.p;
+	//}
 }
 
 void Node_AddSurface::Init() {

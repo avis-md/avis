@@ -40,6 +40,7 @@ AnScript_I::~AnScript_I() {}
 void AnScript_I::Init(AnScript* pr) {
 	parent = pr;
 	defVals.resize(pr->inputs.size());
+	outputs = pr->outputs;
 }
 
 void AnScript_I::Execute() {

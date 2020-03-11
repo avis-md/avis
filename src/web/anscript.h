@@ -94,6 +94,7 @@ public:
 		uint64_t data;
 	};
 	std::vector<DefVal> defVals;
+	std::vector<AnScript::Var> outputs;
 
 	virtual void Init(AnScript* pr);
 

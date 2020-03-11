@@ -34,6 +34,8 @@ ParImporter* ParLoader::customImp;
 bool ParLoader::loadAsTrj = false, ParLoader::additive = false;
 uint ParLoader::frameskip = 1;
 int ParLoader::maxframes = -1;
+float ParLoader::impscale = 1;
+bool ParLoader::sortRes = false;
 bool ParLoader::useConn = true, ParLoader::useConnPeriodic = true;
 bool ParLoader::useConnCache, ParLoader::hasConnCache, ParLoader::oldConnCache, ParLoader::ovwConnCache;
 std::string ParLoader::connCachePath;
@@ -345,7 +347,7 @@ void ParLoader::ScanFrames(const std::string& first) {
 	return;
 	found:
 
-	Particles::anim.AllocFrames(frms);
+	Particles::anim.AllocFrames(frms, false);
 	for (uint f = 0; f < frms; ++f) {
 		//Particles::anim.status[f] = Particles::animdata::FRAME_STATUS::UNLOADED;
 		Particles::anim.paths[f] = nms[f];
@@ -429,7 +431,9 @@ void ParLoader::DoOpen() {
 		return;
 	}
 	
-	memcpy(Particles::boundingBox, info.bounds, 6 * sizeof(double));
+	for (int a = 0; a < 6; a++) {
+		Particles::boundingBox[a] = info.bounds[a] * impscale;
+	}
 	const auto bboxCenter = Vec3(info.bounds[0] + info.bounds[1], 
 		info.bounds[2] + info.bounds[3], 
 		info.bounds[4] + info.bounds[5]) * 0.5f;
@@ -442,9 +446,13 @@ void ParLoader::DoOpen() {
 	if (info.num > 0) {
 		memcpy(&Particles::names[0], info.name, info.num * PAR_MAX_NAME_LEN);
 		memcpy(&Particles::resNames[0], info.resname, info.num * PAR_MAX_NAME_LEN);
+		for (int a = 0; a < info.num * 3; a++) {
+			info.pos[a] *= impscale;
+			info.vel[a] *= impscale;
+		}
 		Particles::poss = (glm::dvec3*)info.pos;
 		Particles::vels = (glm::dvec3*)info.vel;
-		memcpy(&Particles::types[0], info.type, info.num * sizeof(short));
+		memcpy(&Particles::types[0], info.type, info.num * sizeof(uint16_t));
 
 		auto& conn = Particles::conns;
 
@@ -476,18 +484,48 @@ void ParLoader::DoOpen() {
 			else loadName = "Finding bonds";
 		}
 		else loadName = "Post processing";
+
+		if (sortRes) {
+			typedef std::pair<uint32_t, std::string> _pii;
+			std::vector<_pii> resids(info.num);
+			for (uint32_t a = 0; a < info.num; a++) {
+				resids[a] = std::make_pair(a, std::string(&info.resname[a * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN));
+			}
+			
+			std::sort(resids.begin(), resids.end(), [](const _pii& a, const _pii& b) {
+				return a.second < b.second || (a.second == b.second && a.first < b.first);
+			});
+
+			auto nmcp = Particles::names;
+			auto rscp = Particles::resNames;
+			auto tpcp = Particles::types;
+			std::vector<uint16_t> ridcp(info.num);
+			std::memcpy(ridcp.data(), info.resId, info.num * sizeof(uint16_t));
+			//auto pscp = new glm::dvec3[Particles::particleSz * 3];
+			//auto vlcp = new glm::dvec3[Particles::particleSz * 3];
+			//Particles::poss;
+			for (size_t a = 0; a < info.num; a++) {
+				const auto t = resids[a].first;
+				std::memcpy(&Particles::names[a * PAR_MAX_NAME_LEN], &nmcp[t * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN);
+				std::memcpy(&Particles::resNames[a * PAR_MAX_NAME_LEN], &rscp[t * PAR_MAX_NAME_LEN], PAR_MAX_NAME_LEN);
+				info.resId[a] = ridcp[t];
+				//Particles::types[a] = tpcp[t];
+			}
+		}
+
+		int ridi = 0;
 		std::unordered_map<ushort, int> id2colid;
 		for (uint i = 0; i < info.num; ++i) {
 			info.progress = i * 1.f / info.num;
-			auto id1 = info.type[i];//info.name[i * PAR_MAX_NAME_LEN];
+			auto id1 = Particles::types[i];//info.name[i * PAR_MAX_NAME_LEN];
 			auto& resId = info.resId[i];
-			uint64_t resNm = *((uint64_t*)(&info.resname[i * PAR_MAX_NAME_LEN])) & 0x000000ffffffffff;
+			uint64_t resNm = *((uint64_t*)(&Particles::resNames[i * PAR_MAX_NAME_LEN])) & 0x000000ffffffffff;
 
 			if (currResNm != resNm) {
 				Particles::residueLists.push_back(ResidueList());
 				Particles::residueListSz++;
 				trs = &Particles::residueLists.back();
-				trs->name = std::string(info.resname + i * PAR_MAX_NAME_LEN, 5);
+				trs->name = std::string(&Particles::resNames[i * PAR_MAX_NAME_LEN], 5);
 				currResNm = resNm;
 				if (std::find(Particles::reslist.begin(), Particles::reslist.end(), trs->name) == Particles::reslist.end()) {
 					Particles::reslist.push_back(trs->name);
@@ -509,7 +547,7 @@ void ParLoader::DoOpen() {
 				trs->residueSz++;
 				tr = &trs->residues.back();
 				tr->offset = i;
-				tr->name = std::to_string(resId);
+				tr->name = std::to_string(ridi++);
 				tr->type = AminoAcidType((char*)&resNm);
 				tr->cnt = 0;
 				currResId = resId;
@@ -522,21 +560,21 @@ void ParLoader::DoOpen() {
 					tr->cnt_b = 0;
 				}
 			}
-			auto vec = *((glm::dvec3*)(&info.pos[i * 3]));
+			const auto& vec = Particles::poss[i];
 			int cnt = int(lastCnt + tr->cnt);
 			if (useConn && (!useConnCache || !hasConnCache || ovwConnCache)) {
 				for (int j = 0; j < cnt; ++j) {
-					Vec3 dp = Particles::poss[lastOff + j] - vec;
+					auto dp = Particles::poss[lastOff + j] - vec;
 					if (useConnPeriodic) {
 						dp /= bboxSz;
 						dp -= glm::round(dp);
 						dp *= bboxSz;
 					}
-					const Vec3 dp2 = dp * dp;
+					const auto dp2 = dp * dp;
 					const float cut2 = 0.25f * 0.25f;
 					if (dp2.x < cut2 && dp2.y < cut2 && dp2.z < cut2) {
 						auto dst = dp2.x + dp2.y + dp2.z;
-						uint32_t id2 = info.type[lastOff + j];
+						uint32_t id2 = Particles::types[lastOff + j];
 						//float bst = VisSystem::_bondLengths[id1 + (id2 << 16)];
 						float bst = Preferences::GetLen(id1, id2);
 						if (dst < bst * bst) {
@@ -596,14 +634,22 @@ void ParLoader::DoOpen() {
 			auto& trj = info.trajectory;
 			anm.reading = true;
 
-			anm.AllocFrames(trj.frames);
+			anm.AllocFrames(trj.frames, true);
+			anm.poss_a.resize(trj.frames * info.num);
+			if (trj.vels) {
+				anm.vels_a.resize(trj.frames * info.num);
+			}
 			for (uint16_t i = 0; i < trj.frames; ++i) {
-				anm.poss[i].resize(info.num);
-				memcpy(&anm.poss[i][0], trj.poss[i], info.num * sizeof(glm::dvec3));
+				for (int a = 0; a < info.num * 3; a++) {
+					trj.poss[i][a] *= impscale;
+				}
+				memcpy(&anm.poss_a[i * info.num], trj.poss[i], info.num * sizeof(glm::dvec3));
 				delete[](trj.poss[i]);
-				anm.vels[i].resize(info.num);
 				if (trj.vels) {
-					memcpy(&anm.vels[i][0], trj.vels[i], info.num * sizeof(glm::dvec3));
+					for (int a = 0; a < info.num * 3; a++) {
+						trj.vels[i][a] *= impscale;
+					}
+					memcpy(&anm.vels_a[i * info.num], trj.vels[i], info.num * sizeof(glm::dvec3));
 					delete[](trj.vels[i]);
 				}
 				anm.status[i] = Particles::animdata::FRAME_STATUS::LOADED;
@@ -613,17 +659,20 @@ void ParLoader::DoOpen() {
 			if (trj.bounds) {
 				anm.bboxs.resize(trj.frames);
 				for (uint16_t i = 0; i < trj.frames; ++i) {
-					memcpy(&anm.bboxs[i][0], trj.bounds[i], 6*sizeof(double));
+					for (int a = 0; a < 6; a++) {
+						anm.bboxs[i][a] = trj.bounds[i][a];
+					}
 				}
 				anm.bboxState.resize(trj.frames);
 				delete[](trj.bounds);
 			}
 			anm.reading = false;
 
-			anm.maxFramesInMem = 10000000;
+			anm.SetIncremental(false);
 		}
 		else {
 			anm.frameCount = 1;
+			anm.SetIncremental(true);
 		}
 	}
 	else {
@@ -638,16 +687,14 @@ void ParLoader::DoOpen() {
 	frameskip = FindNextOff(droppedFiles[0]);
 	ScanFrames(droppedFiles[0]);
 
-	if (Particles::anim.poss.size()) {
-		Particles::anim.poss[0].resize(info.num);
-		memcpy(&Particles::anim.poss[0][0], Particles::poss, info.num * sizeof(glm::dvec3));
+	if (!Particles::anim.poss_a.empty()) {
+		memcpy(&Particles::anim.poss_a[0], Particles::poss, info.num * sizeof(glm::dvec3));
 		delete[](Particles::poss);
-		Particles::poss = &Particles::anim.poss[0][0];
+		Particles::poss = &Particles::anim.poss_a[0];
 		if (info.vel) {
-			Particles::anim.vels[0].resize(info.num);
-			memcpy(&Particles::anim.vels[0][0], Particles::vels, info.num * sizeof(glm::dvec3));
+			memcpy(&Particles::anim.vels_a[0], Particles::vels, info.num * sizeof(glm::dvec3));
 			delete[](Particles::vels);
-			Particles::vels = &Particles::anim.vels[0][0];
+			Particles::vels = &Particles::anim.vels_a[0];
 		}
 		Particles::anim.status[0] = Particles::animdata::FRAME_STATUS::LOADED;
 		Particles::anim.dirty = true;
@@ -700,15 +747,23 @@ void ParLoader::DoOpenAnim() {
 
 	Engine::AcquireLock(1);
 
-	anm.AllocFrames(info.frames);
+	anm.AllocFrames(info.frames, true);
+	anm.poss_a.resize(info.frames * info.parNum);
+	if (info.vels) {
+		anm.vels_a.resize(info.frames * info.parNum);
+	}
 	for (uint16_t i = 0; i < info.frames; ++i) {
-		anm.poss[i].resize(info.parNum);
-		memcpy(&anm.poss[i][0], info.poss[i], info.parNum * sizeof(glm::dvec3));
+		for (int a = 0; a < info.parNum * 3; a++) {
+			info.poss[i][a] *= impscale;
+		}
+		memcpy(&anm.poss_a[i * info.parNum], info.poss[i], info.parNum * sizeof(glm::dvec3));
 		delete[](info.poss[i]);
-		anm.vels[i].resize(info.parNum);
 		if (info.vels) {
-			memcpy(&anm.vels[i][0], info.poss[i], info.parNum * sizeof(glm::dvec3));
-			delete[](info.poss[i]);
+			for (int a = 0; a < info.parNum * 3; a++) {
+				info.vels[i][a] *= impscale;
+			}
+			memcpy(&anm.vels_a[i * info.parNum], info.vels[i], info.parNum * sizeof(glm::dvec3));
+			delete[](info.vels[i]);
 		}
 		anm.status[i] = Particles::animdata::FRAME_STATUS::LOADED;
 	}
@@ -756,8 +811,8 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 		}
 	}
 
-	auto& pos = anm.poss[f];
-	auto& vel = anm.vels[f];
+	auto& pos = anm.poss_s[f];
+	auto& vel = anm.vels_s[f];
 	pos.resize(Particles::particleSz);
 	vel.resize(Particles::particleSz);
 	FrmInfo info(path.c_str(), Particles::particleSz, &pos[0][0], &vel[0][0]);
@@ -773,7 +828,18 @@ void ParLoader::OpenFrameNow(uint f, std::string path) {
 	}
 	else {
 		anm.status[f] = FS::LOADED;
-		if (!!anm.bboxs.size()) {
+		for (int a = 0; a < Particles::particleSz; a++) {
+			pos[a] *= impscale;
+			vel[a] *= impscale;
+		}
+		if (info.bounds) {
+			if (anm.bboxs.empty()) anm.FillBBox();
+			for (int a = 0; a < 6; a++) {
+				anm.bboxs[f][a] = (*info.bounds)[a] * impscale;
+			}
+			delete[](info.bounds);
+		}
+		if (!anm.bboxs.empty()) {
 			if (anm.bboxState[f] == Particles::animdata::BBOX_STATE::PERIODIC) {
 				auto per = Particles::boxPeriodic;
 				Particles::boxPeriodic = true;
@@ -909,20 +975,24 @@ void ParLoader::DrawOpenDialog() {
 	
 	Engine::Button(woff + 383, hoff, 16, 16, Icons::browse);
 
-	UI::Label(woff + 2, hoff + 17 * 2, 12, "Importer", white(), 326);
+	float hoff2 = hoff + 17 * 2;
+	#define INCH hoff2 += 17;
+
+	UI::Label(woff + 2, hoff2, 12, "Importer", white(), 326);
 	if (impId > -1)
-		UI::Label(woff + 60, hoff + 34, 12, importers[impId].name + " (" + importers[impId].sig + ")", white(0.5f), 326);
-	if (Engine::Button(woff + 339, hoff + 34, 60, 16, white(1, 0.4f), _showImp ? "<<" : ">>", 12, white(), true) == MOUSE_RELEASE) {
+		UI::Label(woff + 60, hoff2, 12, importers[impId].name + " (" + importers[impId].sig + ")", white(0.5f), 326);
+	if (Engine::Button(woff + 339, hoff2, 60, 16, white(1, 0.4f), _showImp ? "<<" : ">>", 12, white(), true) == MOUSE_RELEASE) {
 		_showImp = !_showImp;
 	}
-	UI::Label(woff + 2, hoff + 17 * 3, 12, "Module", white(), 326);
+	INCH
+	UI::Label(woff + 2, hoff2, 12, "Module", white(), 326);
 	if (impId > -1) {
 		auto& ii = importers[impId];
 		uint i = 0;
 		if (loadAsTrj) {
 			for (auto& f : ii.funcs) {
 				if (f.type == ParImporter::Func::FUNC_TYPE::CONFIG) continue;
-				if (Engine::Button(woff + 60 + 50 * i, hoff + 17 * 3, 45, 16, (funcId == i) ? Vec4(0.5f, 0.4f, 0.2f, 1) : white(0.4f), f.exts[0], 12, white(), true) == MOUSE_RELEASE) {
+				if (Engine::Button(woff + 60 + 50 * i, hoff2, 45, 16, (funcId == i) ? Vec4(0.5f, 0.4f, 0.2f, 1) : white(0.4f), f.exts[0], 12, white(), true) == MOUSE_RELEASE) {
 					funcId = i;
 				}
 				i++;
@@ -931,40 +1001,53 @@ void ParLoader::DrawOpenDialog() {
 		else {
 			for (auto& f : ii.funcs) {
 				if (f.type != ParImporter::Func::FUNC_TYPE::CONFIG) continue;
-				if (Engine::Button(woff + 60 + 50 * i, hoff + 17 * 3, 45, 16, (funcId == i)? Vec4(0.5f, 0.4f, 0.2f, 1) : white(0.4f), f.exts[0], 12, white(), true) == MOUSE_RELEASE) {
+				if (Engine::Button(woff + 60 + 50 * i, hoff2, 45, 16, (funcId == i)? Vec4(0.5f, 0.4f, 0.2f, 1) : white(0.4f), f.exts[0], 12, white(), true) == MOUSE_RELEASE) {
 					funcId = i;
 				}
 				i++;
 			}
 		}
 	}
-	auto l = Engine::Toggle(woff + 5, hoff + 17 * 4, 16, Icons::checkbox, loadAsTrj, white(), ORIENT_HORIZONTAL);
+	INCH
+	auto l = Engine::Toggle(woff + 5, hoff2, 16, Icons::checkbox, loadAsTrj, white(), ORIENT_HORIZONTAL);
 	if (l != loadAsTrj) {
 		loadAsTrj = l;
 		FindImpId(true);
 	}
-	UI::Label(woff + 34, hoff + 17 * 4, 12, "As Trajectory", white(), 326);
-	additive = Engine::Toggle(woff + 201, hoff + 17 * 4, 16, Icons::checkbox, additive, white(), ORIENT_HORIZONTAL);
-	UI::Label(woff + 230, hoff + 17 * 4, 12, "Additive", white(), 326);
+	UI::Label(woff + 34, hoff2, 12, "As Trajectory", white(), 326);
+	additive = Engine::Toggle(woff + 201, hoff2, 16, Icons::checkbox, additive, white(), ORIENT_HORIZONTAL);
+	UI::Label(woff + 230, hoff2, 12, "Additive", white(), 326);
 
-	UI::Label(woff + 2, hoff + 17 * 5, 12, "Options", white(), 326);
-	useConn = Engine::Toggle(woff + 5, hoff + 17 * 6, 16, Icons::checkbox, useConn, white(), ORIENT_HORIZONTAL);
-	UI::Label(woff + 25, hoff + 17 * 6, 12, "Bonds", white(), 326);
+	INCH
+	UI::Label(woff + 2, hoff2, 12, "Options", white(), 326);
+
+	INCH
+	sortRes = Engine::Toggle(woff + 5, hoff2, 16, Icons::checkbox, sortRes, white(), ORIENT_HORIZONTAL);
+	UI::Label(woff + 25, hoff2, 12, "Sort By Residue Name", white(), 326);
+
+	INCH
+	useConn = Engine::Toggle(woff + 5, hoff2, 16, Icons::checkbox, useConn, white(), ORIENT_HORIZONTAL);
+	UI::Label(woff + 25, hoff2, 12, "Bonds", white(), 326);
 	if (useConn) {
-		useConnPeriodic = Engine::Toggle(woff + 100, hoff + 17 * 6, 16, Icons::checkbox, useConnPeriodic, white(), ORIENT_HORIZONTAL);
-		UI::Label(woff + 123, hoff + 17 * 6, 12, "Find Periodic", white(), 326);
-		useConnCache = Engine::Toggle(woff + 201, hoff + 17 * 6, 16, Icons::checkbox, useConnCache, white(), ORIENT_HORIZONTAL);
-		UI::Label(woff + 230, hoff + 17 * 6, 12, "Use Bond Cache", white(), 326);
+		useConnPeriodic = Engine::Toggle(woff + 100, hoff2, 16, Icons::checkbox, useConnPeriodic, white(), ORIENT_HORIZONTAL);
+		UI::Label(woff + 123, hoff2, 12, "Find Periodic", white(), 326);
+		useConnCache = Engine::Toggle(woff + 201, hoff2, 16, Icons::checkbox, useConnCache, white(), ORIENT_HORIZONTAL);
+		UI::Label(woff + 230, hoff2, 12, "Use Bond Cache", white(), 326);
+		INCH
 		if (useConnCache) {
-			UI::Label(woff + 5, hoff + 17 * 7, 12, hasConnCache ? "Cache found" + (std::string)(oldConnCache ? "(outdated): " : ": ") + connCachePath : "No cache found", white(), 326);
+			UI::Label(woff + 5, hoff2, 12, hasConnCache ? "Cache found" + (std::string)(oldConnCache ? "(outdated): " : ": ") + connCachePath : "No cache found", white(), 326);
 			if (hasConnCache) {
-				ovwConnCache = Engine::Toggle(woff + 300, hoff + 17 * 7, 16, Icons::checkbox, ovwConnCache, white(), ORIENT_HORIZONTAL);
-				UI::Label(woff + 320, hoff + 17 * 7, 12, "Overwrite", white(), 326);
+				ovwConnCache = Engine::Toggle(woff + 300, hoff2, 16, Icons::checkbox, ovwConnCache, white(), ORIENT_HORIZONTAL);
+				UI::Label(woff + 320, hoff2, 12, "Overwrite", white(), 326);
 			}
 		}
 	}
+
+	hoff2 = hoff + 17 * 9;
 	UI2::sepw = 0.4f;
-	maxframes = TryParse(UI2::EditText(woff + 2, hoff + 17 * 8, 200, "Max Frames", std::to_string(maxframes)), 1000);
+	maxframes = TryParse(UI2::EditText(woff + 2, hoff2, 200, "Max Frames", std::to_string(maxframes)), 1000);
+	INCH
+	impscale = TryParse(UI2::EditText(woff + 2, hoff2, 200, "Scale", std::to_string(impscale)), 1.f);
 	/*
 	std::string line = "";
 	if (loadAsTrj) line += "-trj ";
@@ -1058,7 +1141,8 @@ void ParLoader::FindImpId(bool force) {
 					if (force || ((pr.type != ParImporter::Func::FUNC_TYPE::CONFIG) == loadAsTrj)) {
 						impId = id;
 						funcId = id2;
-						if (force) loadAsTrj = (pr.type != ParImporter::Func::FUNC_TYPE::CONFIG);
+						//if (force)
+						loadAsTrj = (pr.type == ParImporter::Func::FUNC_TYPE::TRAJ);
 						return;
 					}
 					id2++;
@@ -1078,7 +1162,8 @@ void ParLoader::FindImpId(bool force) {
 					if (EndsWith(droppedFiles[0], s)) {
 						impId = id;
 						funcId = id2;
-						if (force) loadAsTrj = (pr.type != ParImporter::Func::FUNC_TYPE::CONFIG);
+						//if (force)
+						loadAsTrj = (pr.type == ParImporter::Func::FUNC_TYPE::TRAJ);
 						return;
 					}
 				}

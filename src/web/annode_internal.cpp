@@ -18,8 +18,8 @@
 #include "annode_internal.h"
 #include "web/anweb.h"
 
-std::array<std::vector<AnNode_Internal::noderef>, ANNODE_GROUP_COUNT> AnNode_Internal::scrs;
-std::array<std::string, ANNODE_GROUP_COUNT> AnNode_Internal::groupNms;
+std::array<std::vector<AnNode_Internal::noderef>, (int)ANNODE_GROUP::_COUNT> AnNode_Internal::scrs;
+std::array<std::string, (int)ANNODE_GROUP::_COUNT> AnNode_Internal::groupNms;
 
 void AnNode_Internal::Init() {
 	for (auto& ss : scrs) {

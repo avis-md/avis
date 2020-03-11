@@ -33,7 +33,7 @@
 #include "vis/preferences.h"
 #include "web/anweb.h"
 
-#define HATENA
+//#define HATENA
 
 int ParMenu::activeMenu = 0;
 int ParMenu::activeSubMenu[] = {};
@@ -205,7 +205,7 @@ void ParMenu::Draw_List(float off) {
 		DrawConnMenu(Particles::conns, 1, off, 148);
 	}
 	Engine::BeginStencil(0, off, expandPos, hmax);
-	if (Rect(0, off, expandPos, Display::height - 18 - off).Inside(Input::mousePos)) {
+	if (Rect(0, off, expandPos, hmax).Inside(Input::mousePos)) {
 		listHOff -= Input::mouseScroll * 20;
 		listHOff = std::min(listHOff, listH * 17 - hmax);
 		listHOff = std::max(listHOff, 0.f);
@@ -460,7 +460,7 @@ void ParMenu::DrawLoading() {
 		UI::Texture(Display::width * 0.5f - Display::height * 0.2f, Display::height * 0.15f, Display::height * 0.4f, Display::height * 0.4f, pic, DRAWTEX_CROP);
 	} else lt += Time::delta;
 #endif
-	if (ParLoader::loadProgress) {
+	if (!Particles::particleSz && ParLoader::loadProgress) {
 		UI::Quad(Display::width * 0.5f - 50, Display::height * 0.6f, 100, 6, white(0.8f, 0.2f));
 		UI::Quad(Display::width * 0.5f - 50, Display::height * 0.6f, 100 * *ParLoader::loadProgress, 6, Vec4(0.9f, 0.7f, 0.2f, 1));
 		float oy = 10;

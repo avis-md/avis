@@ -16,13 +16,19 @@
 // along with AViS.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
-#include "importer_info.h"
-#include <vector>
-#include <string>
+#include "web/annode_internal.h"
 
-//CDView molecular data file parser
-class CDV {
+class Node_Reshape : public AnNode {
 public:
-	static bool Read(ParInfo* info);
-	static bool ReadFrame(FrmInfo* info);
+	INODE_DEF_H
+	Node_Reshape();
+
+	void Execute() override;
+
+	void DrawHeader(float& off) override;
+	void OnConn(bool o, int i) override;
+
+protected:
+	int dim;
+	int lastsz;
 };

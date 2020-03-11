@@ -30,11 +30,14 @@ public:
 	void RayTraceMesh(_Mesh& mesh) override;
 
 	void Execute() override;
+
 protected:
-	bool dirty;
-	int tsz;
-	GLuint vao, vbos[2];
 	static Shader shad;
+
+	bool useIndices;
+	bool dirty;
+	int tsz, isz;
+	GLuint vao, vbos[2], elo;
 	Vec4 col, _col;
-	std::vector<float> poss, nrms;
+	std::vector<float> poss, nrms, inds;
 };

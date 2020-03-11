@@ -541,18 +541,21 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, bo
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glActiveTexture(GL_TEXTURE0);
 	
 	if (shad) {
+		for (auto& m : mks) {
+			(!m) ? font->sglyph(si, 0) : font2.sglyph(si, m);
+		}
 		Font::prog.Bind();
 		glUniform4f(Font::prog.Loc(0), 0, 0, 0, col.a * alpha);
+		glUniform1i(Font::prog.Loc(1), 0);
 		glUniform2f(Font::prog.Loc(2), 1.f / Display::width, -1.f / Display::height);
+		glBindVertexArray(Font::vao);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Font::idbuf);
 		for (auto& m : mks) {
 			GLuint tex = (!m) ? font->sglyph(si, 0) : font2.sglyph(si, m);
-			Font::prog.Bind();
-			glUniform1i(Font::prog.Loc(1), 0);
-			glBindVertexArray(Font::vao);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Font::idbuf);
-			glActiveTexture(GL_TEXTURE0);
+			//Font::prog.Bind();
 			glBindTexture(GL_TEXTURE_2D, tex);
 			glUniform1i(Font::prog.Loc(3), m);
 
@@ -560,16 +563,18 @@ void UI::Label(float x, float y, float s, const char* str, uint sz, Vec4 col, bo
 		}
 	}
 
+	for (auto& m : mks) {
+		(!m) ? font->glyph(si, 0) : font2.glyph(si, m);
+	}
 	Font::prog.Bind();
 	glUniform4f(Font::prog.Loc(0), col.r, col.g, col.b, col.a * alpha);
 	glUniform2f(Font::prog.Loc(2), 0, 0);
+	glUniform1i(Font::prog.Loc(1), 0);
+	glBindVertexArray(Font::vao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Font::idbuf);
 	for (auto& m : mks) {
 		GLuint tex = (!m) ? font->glyph(si, 0) : font2.glyph(si, m);
-		Font::prog.Bind();
-		glUniform1i(Font::prog.Loc(1), 0);
-		glBindVertexArray(Font::vao);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Font::idbuf);
-		glActiveTexture(GL_TEXTURE0);
+		//Font::prog.Bind();
 		glBindTexture(GL_TEXTURE_2D, tex);
 		glUniform1i(Font::prog.Loc(3), m);
 

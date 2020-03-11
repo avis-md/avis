@@ -12,8 +12,8 @@ You should not have more than one script with the same filename in the same lang
 .. Note::
       This section describes common properties amongst languages. Please refer to the actual languages for examples.
 
-API
-~~~~
+Format
+~~~~~~
 
 AViS Accepts these basic data types. They can be either appear single or as an array.
 
@@ -25,7 +25,7 @@ int         4
 double      8
 ========    ===========
 
-These few things are parsed by the pre-processor. They are all optional except when marked with ``*``.
+These few things are parsed by the pre-processor. They are all optional except when stated.
 
 * Description
 
@@ -43,11 +43,13 @@ These few things are parsed by the pre-processor. They are all optional except w
 
       A variable which the script sets to display a progress bar on the node.
 
-* Entry point*
+* Entry point `(not optional)`
 
       The function to be called when the node is executed. It must be a function with no arguments and no return value.
 
-``Marks`` are the single API format for an AViS script. Each mark is a comment starting with ``@`` that immediately precedes its target, with no extra spaces or newlines in between.
+``Marks`` are the single API requirement for an AViS script.
+Each mark is a comment starting with ``@`` that immediately precedes its target, with no extra spaces or newlines in between.
+AViS does not, and will never require an include library / header, so your code will be entirely portable as the language allows it.
 
 Example::
 
@@ -101,7 +103,8 @@ The general format of a parse-able script is as follows.
          //do something fancy!
       }
 
-Code can be entirely global, or put into a class with the same name as the script. When the code is classed as such, multiple instances of the script can be used for the same graph, without sharing variables.
+The code can be in global scope, or put into a class with the same name as the script.
+When the code is classed as such, multiple instances of the script can be used for the same graph, without sharing variables.
 
 Arrays
 ~~~~~~
@@ -113,23 +116,23 @@ All length variables must be of type ``int``.
 
 Example::
 
-      //in cnt
+      //@in cnt
       short* takeAnArrayOfSizeCnt = 0;
-      //out cnt 3
+      //@out cnt 3
       double* andReturnAnArrayOfSizeCntX3 = 0;
 
-      //in
+      //@in
       int birdCount = 0;
-      //out numberOfBirds numberOfEggs
+      //@out numberOfBirds numberOfEggs
       double* eggSizes = 0;
-      //var
+      //@var
       int numberOfEggs = 4;
 
 For multi-dimensional arrays, the items are arranged row-major. That is, the right-est index advances the fastest.
 
 Example::
 
-      //in a b c
+      //@in a b c
       int* myArray = 0;
 
       //The element at location [x][y][z] can be accessed as below.
@@ -140,12 +143,13 @@ Example::
 
       If you want a "safe" way of handling pointers, you can use vectors::
 
+         //@in 100
          double* array = 0;
          std::vector<double> _array;
 
          void SetArrays() {
             _array.resize(100);
-            array = &_array[0];
+            array = _array.data();
          }
 
 .. Tip::

@@ -57,13 +57,33 @@ void ArrayView::Draw() {
 				UI::Label(5, y, 12, "Array is empty", white(0.8f));
 			}
 			else {
-				Engine::BeginStencil(0, y, (float)Display::width, Display::height - y - 18.f);
+				const auto hmax = Display::height - y - 18.f;
+				Engine::BeginStencil(0, y, (float)Display::width, hmax);
 				int dw = 71;
-				int nw = (int)std::floor((Display::width - 10) / dw);
-				dw = (Display::width - 10) / nw;
+				int nw = (int)std::floor((Display::width - 60) / dw);
+				int nh = (ts + nw - 1) / nw;
+				dw = (Display::width - 60) / nw;
 				int ix = 0;
+				static float y0 = 0;
+				y0 = UI2::Scroll(Display::width - 8.f, y, hmax, y0, nh * 17.f, hmax);
+				if (Rect(0, y, (float)Display::width, hmax).Inside(Input::mousePos)) {
+					y0 -= Input::mouseScroll * 20;
+					y0 = std::min(y0, nh * 17.f - hmax);
+					y0 = std::max(y0, 0.f);
+				}
+				int a = 0;
+				float yp = y - y0;
+				while (yp < y - 18.f) {
+					yp += 17.f;
+					a += nw;
+				}
 				bool sw = false;
-				for (int a = 0; a < ts; a++) {
+				for (; a < ts; a++) {
+					if (dim > 1 && !((a+1) % szs[0]))
+						sw = !sw;
+					if (!ix) {
+						UI::Label(5, yp, 12, std::to_string(a) + ":", white(0.9f));
+					}
 					std::string vl = "";
 					switch (type) {
 					case 's':
@@ -79,16 +99,14 @@ void ArrayView::Draw() {
 						OHNO("ArrayView", "Unexpected type: " + std::string(1, type) + "!");
 						return;
 					}
-					const float x = 5.f + ix * dw;
-					UI::Quad(x, y, dw-1.f, 16, white(0.9f, sw? 0.2f : 0.3f));
-					UI::Label(x + 2, y, 12, vl, white(0.9f));
+					const float x = 55.f + ix * dw;
+					UI::Quad(x, yp, dw-1.f, 16, white(0.9f, sw? 0.2f : 0.3f));
+					UI::Label(x + 2, yp, 12, vl, white(0.9f));
 					if (++ix == nw) {
 						ix = 0;
-						y += 17;
-						if (y > Display::height - 17.f) break;
+						yp += 17;
+						if (yp > Display::height - 17.f) break;
 					}
-					if (dim > 1 && !((a+1) % szs[0]))
-						sw = !sw;
 				}
 				Engine::EndStencil();
 			}

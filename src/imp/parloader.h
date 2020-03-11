@@ -57,6 +57,8 @@ public:
 	static bool loadAsTrj, additive;
 	static uint frameskip;
 	static int maxframes;
+	static float impscale;
+	static bool sortRes;
 	static bool useConn, useConnPeriodic;
 	static bool useConnCache, hasConnCache, oldConnCache, ovwConnCache;
 	static std::string connCachePath;

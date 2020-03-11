@@ -58,13 +58,14 @@ struct FrmInfo {
 	uint32_t const parNum; //IN
 	double* const pos;
 	double* const vel;
+	double (*bounds)[6];
 	char error[100];
 
 	FrmInfo(const char* const path, 
 			const uint32_t parNum, 
 			double* const pos,
 			double* const vel)
-	: path(path), parNum(parNum), pos(pos), vel(vel) {}
+	: path(path), parNum(parNum), pos(pos), vel(vel), bounds(nullptr) {}
 };
 
 /*

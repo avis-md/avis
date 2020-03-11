@@ -21,6 +21,7 @@ set(SOURCES
 	${SOURCES}
 	${DIR}/node_adjlist.cpp
 	${DIR}/node_downsample.cpp
+	${DIR}/node_reshape.cpp
 	PARENT_SCOPE
 )
 set(HEADERS

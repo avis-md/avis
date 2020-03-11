@@ -23,6 +23,8 @@
 #include "vis/pargraphics.h"
 #endif
 
+#define RETERR(msg) { std::cerr << msg << std::endl; return; }
+
 INODE_DEF(__("Particle Data"), Inputs, GET)
 
 uint Node_Inputs::parcount = 0;
@@ -43,11 +45,18 @@ types: [atomid]
 		
 		scr->AddOutput(_("positions"), AN_VARTYPE::DOUBLE, 2);
 		scr->AddOutput(_("velocities"), AN_VARTYPE::DOUBLE, 2);
+
+		scr->AddOutput(_("positions (all)"), AN_VARTYPE::DOUBLE, 3);
+		scr->AddOutput(_("velocities (all)"), AN_VARTYPE::DOUBLE, 3);
+
 		scr->AddOutput(_("types"), AN_VARTYPE::SHORT, 1);
+
 	);
 
 	IAddConV(0, { (int*)&parcount, 0 }, { 3 });
 	IAddConV(0, { (int*)&parcount, 0 }, { 3 });
+	IAddConV(0, { (int*)&Particles::anim.frameCount, (int*)&Particles::particleSz, 0 }, { 3 });
+	IAddConV(0, { (int*)&Particles::anim.frameCount, (int*)&Particles::particleSz, 0 }, { 3 });
 	IAddConV(0, { (int*)&parcount }, {});
 
 	/*
@@ -76,23 +85,30 @@ void Node_Inputs::Execute() {
 #ifndef IS_ANSERVER
 	bool setpos = outputR[0].size() > 0;
 	bool setvel = outputR[1].size() > 0;
-	bool settyp = outputR[2].size() > 0;
+	bool setposa = outputR[2].size() > 0;
+	bool setvela = outputR[3].size() > 0;
+	bool settyp = outputR[4].size() > 0;
 	setpos |= (setvel || settyp) && ((filter & (int)FILTER::CLP) > 0);
+	setposa |= setvela;
+
+	if (setposa && !Particles::anim.contiguous) {
+		RETERR("Cannot read from all frames for incremental trajectories! (wip)")
+	}
 
 	glm::dvec3* pos, *vel;
-	if (!Particles::anim.poss.size()) {
+	if (!Particles::anim.poss(0)) {
 		pos = Particles::poss;
 		vel = Particles::vels;
 	}
 	else {
-		pos = &Particles::anim.poss[AnWeb::realExecFrame][0];
-		vel = &Particles::anim.vels[AnWeb::realExecFrame][0];
+		pos = Particles::anim.poss(AnWeb::realExecFrame);
+		vel = Particles::anim.vels(AnWeb::realExecFrame);
 	}
 	if (!filter) {
 		parcount = Particles::particleSz;
 		poss = &pos[0][0];
 		vels = &vel[0][0];
-		typs = Particles::types.data();
+		typs = (short*)Particles::types.data();
 		/*
 		conV[0].data.val.arr.p = pos;
 		conV[0].value = &conV[0].data.val.arr.p;
@@ -183,10 +199,13 @@ void Node_Inputs::Execute() {
 		//conV[1].value = &vels;
 		//conV[2].value = &typs;
 	}
+
 	auto& ov = ((DmScript_I*)script.get())->outputVs;
 	ov[0].val.p = poss;
 	ov[1].val.p = vels;
-	ov[2].val.p = typs;
+	ov[2].val.p = Particles::anim.poss(0);
+	ov[3].val.p = Particles::anim.vels(0);
+	ov[4].val.p = typs;
 #endif
 }
 

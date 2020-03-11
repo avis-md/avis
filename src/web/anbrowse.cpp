@@ -285,7 +285,7 @@ void AnBrowse::Draw() {
 		HelpMenu::Link(expandPos - 16, 3, "anl/index.html");
 
 		float f = UI::BeginScroll(0, 19, expandPos, Display::height - 38.f);
-		for (int n = 0; n < ANNODE_GROUP_COUNT; ++n) {
+		for (int n = 0; n < (int)ANNODE_GROUP::_COUNT; ++n) {
 			UI::Quad(2, f, 150.f, 16.f, white(1, 0.3f));
 			if (Engine::Button(2, f, 16.f, 16.f, mscFdExpanded[n] ? Icons::expand : Icons::collapse) == MOUSE_RELEASE)
 				mscFdExpanded[n] = !mscFdExpanded[n];

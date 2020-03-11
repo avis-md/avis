@@ -55,7 +55,7 @@ Atoms are grouped into Residues -> Residue ID -> atom name.
    Add the protein section
 
 Attributes Tab
-----------
+--------------
 
 Attributes
 ~~~~~~~~~~
@@ -104,7 +104,7 @@ Periodic                Wrap around atoms outside the bounding box
 =====================   ==============
 
 Orientation
-~~~~~~~~~~
+~~~~~~~~~~~
 
 * Type
 

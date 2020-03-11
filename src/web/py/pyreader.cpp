@@ -280,6 +280,8 @@ int PyReader::ReadStatic(PyScript* scr, const std::string spath) {
 				}
 				if (AnWeb::hasPy) {
 					scr->funcNm = ln.substr(4, c1 - 4);
+					scr->func = PyObject_GetAttrString(scr->lib, scr->funcNm.c_str());
+					assert(PyCallable_Check(scr->func));
 				}
 			}
 			else if (ln.substr(2, 3) == "in ") {

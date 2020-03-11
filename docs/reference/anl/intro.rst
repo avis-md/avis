@@ -40,6 +40,7 @@ Nodes can be removed with the ``X`` button.
 
 Connections between nodes can be made by clicking on both input and output sockets of the connection.
 A connection cannot be recursive (a node can only take data from nodes which execute before it).
+However, you can store temporary output on an ``attribute`` node and read from it in the next execution.
 An output socket can be connected to multiple input sockets. 
 
 .. image:: img/webconn.png
@@ -53,7 +54,8 @@ Execution
 ---------
 
 Nodes are evaluated top-to-bottom, left-to-right. When executed with ``Run``, the graph is evaluated on data from the current visible snapshot frame.
-When executed with ``Run all``, the graph is evaluated ``total frame count`` times, and the data is cached for playback.
+When executed with ``Run all``, the graph is evaluated ``total frame count`` times for the whole trajectory, and the data is cached for playback;
+That is, when the trajectory is played back, the values of all intermediate calculations for each visible frame can be inspected from the UI.
 
 .. Note::
 
